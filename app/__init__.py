@@ -19,8 +19,10 @@ def create_app(db_path=None):
     # register blueprints
     from .auth import bp as auth_bp
     from .users import bp as users_bp
+    from .interchanges import bp as interchanges_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
+    app.register_blueprint(interchanges_bp)
 
     # placeholder imports to ensure modules loaded
     try:
