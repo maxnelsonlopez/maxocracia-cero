@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Registro de Intercambio (Formulario A)",
+  "description": "Define la estructura de un único intercambio en la red de apoyo. Es el átomo del VerityLedger.",
+  "type": "object",
+  "properties": {
+    "interchangeID": { "type": "string", "pattern": "^INT-[0-9]+$" },
+    "date": { "type": "string", "format": "date" },
+    "giverDID": { "type": "string" },
+    "receiverDID": { "type": "string" },
+    "type": { "type": "array", "items": { "type": "string" } },
+    "description": { "type": "string" },
+    "urgency": { "type": "string", "enum": ["Alta", "Media", "Baja"] },
+    "uth_hours": { "type": "number", "minimum": 0 },
+    "urf_description": { "type": "string" },
+    "economic_value_approx": { "type": "string" },
+    "impact_resolution_score": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "reciprocity_status": { "type": "string" },
+    "human_dimension_attended": { "type": "array", "items": { "type": "string" } },
+    "facilitator_notes": { "type": "string" }
+  },
+  "required": ["interchangeID", "date", "giverDID", "receiverDID", "impact_resolution_score"]
+}

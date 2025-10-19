@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Estado del Participante (Formulario B)",
+  "description": "Define la estructura longitudinal de un participante en la red.",
+  "type": "object",
+  "properties": {
+    "participantDID": { "type": "string" },
+    "status_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "report_date": { "type": "string", "format": "date" },
+          "linked_interchangeID": { "type": "string" },
+          "current_need_level": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "emotional_state": { "type": "string" },
+          "community_connection_score": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "notes": { "type": "string" }
+        },
+        "required": ["report_date", "current_need_level"]
+      }
+    }
+  },
+  "required": ["participantDID", "status_history"]
+}
