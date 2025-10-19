@@ -19,6 +19,7 @@ Aquí no encontrarás (aún) contratos inteligentes complejos, sino las herramie
 - [Formularios](formularios/)
 - [Modelo de datos](data-model/)
 - [Especificación del dashboard](dashboard-spec/)
+- [FAQ Extendido](docs/FAQ_EXTENDIDO.md)
 
 ## La Arquitectura en Práctica
 

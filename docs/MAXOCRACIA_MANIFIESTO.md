@@ -1,4 +1,5 @@
 # MAXOCRACIA
+
 ## Un Nuevo Sistema Operativo para la Sociedad
 
 ---
@@ -18,12 +19,15 @@ La Maxocracia no es una ideología política tradicional. Es un **sistema operat
 Nuestra civilización está saboteada por tres mentiras fundamentales que impiden alcanzar el óptimo de bienestar posible:
 
 #### 1️⃣ **La "No Verdad" de la Desigualdad del Tiempo**
+
 La falacia de que el tiempo de algunas personas vale más que el de otras. Esto se manifiesta en barreras artificiales que impiden el desarrollo del potencial de la mayoría.
 
 #### 2️⃣ **La "No Verdad" del Propósito Colectivo**
+
 El hedonismo de una minoría que se impone como propósito social, desviando el tiempo y las acciones de otros en lugar de buscar la prosperidad para todos.
 
 #### 3️⃣ **La "No Verdad" de la Deshumanización**
+
 La mentira que justifica la explotación extrema al considerar a ciertos grupos como "objetos o recursos" en lugar de seres humanos con igual valor.
 
 ---
@@ -94,7 +98,8 @@ Los principios no negocian. Las implementaciones se adaptan.
 
 **Abandonamos:** La democracia masiva indiscriminada donde todos votan sobre todo.
 
-**Adoptamos:** 
+**Adoptamos:**
+
 - **Participación directa limitada** - Solo votas en lo que te afecta directamente
 - **Meritocracia funcional** - Mayor influencia para quien contribuye positivamente
 - **Decisiones informadas** - Participación requiere comprensión del tema
@@ -133,11 +138,13 @@ El sistema está diseñado usando **Teoría de Juegos Evolutivos** para crear un
 ### El Equilibrio Maxocrático
 
 En sistemas tradicionales:
+
 - ❌ Mentir puede ser más rentable que decir la verdad
 - ❌ Explotar puede ser más eficiente que cooperar
 - ❌ Acumular excesivamente beneficia más que distribuir
 
 En Maxocracia:
+
 - ✅ La verdad es el camino más eficiente (menos fricción)
 - ✅ La cooperación genera más valor que la explotación
 - ✅ La distribución proporcional es más estable que la acumulación extrema
@@ -154,12 +161,14 @@ En Maxocracia:
 Una comunidad donde las personas intercambian recursos, conocimientos, tiempo y apoyo basándose en necesidades reales y reciprocidad asimétrica.
 
 **Principios en acción:**
+
 - ✅ Todos pueden dar Y recibir
 - ✅ No hay "deudas", hay reciprocidad orgánica
 - ✅ El valor del tiempo de cada persona es igual
 - ✅ Documentamos y aprendemos de cada intercambio
 
 **Primeros resultados (Octubre 2025):**
+
 - 11 participantes activos
 - Intercambios de alimentación, conocimiento, objetos, tiempo
 - Primeros casos de personas en crisis siendo apoyadas efectivamente
@@ -172,12 +181,14 @@ Una comunidad donde las personas intercambian recursos, conocimientos, tiempo y 
 Cada intercambio alimenta un sistema que aprende y mejora:
 
 **Capturamos:**
+
 - Qué se intercambió (tipo, valor, tiempo invertido)
 - Qué tan bien se resolvió la necesidad
 - Cómo evolucionan las situaciones de las personas
 - Qué patrones funcionan mejor
 
 **Generamos:**
+
 - Matches inteligentes entre necesidades y ofertas
 - Detección temprana de crisis
 - Reconocimiento para quienes más contribuyen
@@ -190,17 +201,20 @@ Cada intercambio alimenta un sistema que aprende y mejora:
 ### 🎯 Objetivos Escalonados
 
 **Corto plazo (2025-2026):**
+
 - Validar principios en comunidades pequeñas
 - Perfeccionar sistemas de registro y matching
 - Documentar qué funciona y qué no
 
 **Mediano plazo (2027-2030):**
+
 - Implementar el Maxo en versión beta
 - Expandir a múltiples ciudades
 - Crear alianzas estratégicas
 - Desarrollar infraestructura tecnológica robusta
 
 **Largo plazo (2030+):**
+
 - Sociedades prósperas organizadas bajo principios maxocráticos
 - Integración de personas humanas, no humanas y digitales
 - Capacidad de enfrentar desafíos existenciales (enfermedades, cambio climático)
@@ -234,9 +248,10 @@ No pedimos que las personas sean "altruistas perfectas". El sistema está diseñ
 
 ### ¿Es esto comunismo/socialismo/capitalismo?
 
-**Ninguno de los anteriores.** La Maxocracia no se define por quién es dueño de los medios de producción, sino por **cómo alineamos incentivos con verdad y bienestar colectivo**. 
+**Ninguno de los anteriores.** La Maxocracia no se define por quién es dueño de los medios de producción, sino por **cómo alineamos incentivos con verdad y bienestar colectivo**.
 
 Toma lo mejor de múltiples sistemas:
+
 - Del capitalismo: Reconocimiento de incentivos individuales
 - Del socialismo: Compromiso con igualdad de oportunidades
 - De sistemas indígenas: Respeto por equilibrios naturales

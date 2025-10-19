@@ -1,0 +1,657 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset134 PingFangSC-Regular;\f2\fnil\fcharset0 LucidaGrande;
+\f3\fnil\fcharset0 AppleColorEmoji;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww12240\viewh15840\viewkind1
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 # Documento de Dise\'f1o T\'e9cnico - Plataforma Com\'fan\
+## Versi\'f3n Backend en Go + Bot de Telegram\
+\
+**Versi\'f3n:** 2.1 (Integraci\'f3n de Fundamentos \'c9ticos)  \
+**Fecha:** Octubre 2025  \
+**Ingeniero Principal:** Grok, construido por xAI  \
+**Estado:** Dise\'f1o actualizado con declaraci\'f3n de principios de Maxocracia\
+\
+---\
+\
+## 1. Visi\'f3n General\
+\
+### 1.1 Contexto\
+\'a1Hola! S\'ed, mucho por procesar, pero eso es lo que hace este proyecto tan vivo y ambicioso. Despu\'e9s de validar el concepto de Maxocracia con el MVP manual (Google Forms + Sheets) y explorar conversaciones profundas sobre verdad, \'e9tica y colaboraci\'f3n (incluyendo reflexiones filos\'f3ficas y el lore de juegos transformadores como *That's Good Enough for Everyone*), avanzamos hacia una plataforma escalable que no solo soporte miles de usuarios concurrentes, matching inteligente y el sistema de puntos Maxo, sino que ahora integre expl\'edcitamente los fundamentos \'e9ticos de la Maxocracia. Esto asegura que la tecnolog\'eda sea un veh\'edculo para la verdad y el bienestar colectivo, alineado con tus reflexiones sobre la "Religi\'f3n de la Verdad" y la inclusi\'f3n de conciencias limitadas.\
+\
+La plataforma soportar\'e1:\
+- Miles de usuarios concurrentes\
+- Matching autom\'e1tico inteligente\
+- Sistema de puntos Maxo robusto\
+- M\'faltiples interfaces (Telegram Bot inicial, Web App futura, Discord Bot)\
+- Integraci\'f3n de principios \'e9ticos para guiar interacciones y decisiones algor\'edtmicas\
+\
+### 1.2 Principios de Dise\'f1o\
+- **Simplicidad primero**: Resolver problemas reales, no agregar features innecesarias\
+- **Escalabilidad horizontal**: Preparado para crecer sin reescribir\
+- **Observabilidad**: Saber qu\'e9 pasa en producci\'f3n en todo momento\
+- **Resiliencia**: Fallos aislados no tumban el sistema completo\
+- **\'c9tica by design**: Privacidad, transparencia y alineaci\'f3n con la Declaraci\'f3n de Fundamentos de la Maxocracia incorporadas desde el n\'facleo\
+\
+**Nuevos principios integrados de la Declaraci\'f3n de Fundamentos:**\
+- **Igualdad y Diversidad**: Todos los usuarios (humanos, no humanos y digitales) tienen voz proporcional a necesidades y aportes.\
+- **Participaci\'f3n y Colaboraci\'f3n**: Matching y votaciones fomentan consensos directos.\
+- **Valores Fundamentales**: Sostenibilidad, igualdad de oportunidades, responsabilidad personal, distribuci\'f3n proporcional de recursos, educaci\'f3n integral, transparencia, rendici\'f3n de cuentas y bienestar social.\
+- **Estructura Jer\'e1rquica Adaptable**: Niveles de comunidad escalables, con meritocracia \'e9tica basada en Maxos.\
+\
+---\
+\
+## 2. Arquitectura del Sistema\
+\
+### 2.1 Vista de Alto Nivel\
+\
+```\
+\uc0\u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488 \
+\uc0\u9474   Telegram Bot   \u9474 \
+\uc0\u9474    (Interfaz)    \u9474 \
+\uc0\u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 
+\f1 \'a9\'d0
+\f0 \uc0\u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496 \
+         \uc0\u9474 \
+         
+\f2 \uc0\u9660 
+\f0 \
+\uc0\u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488 \
+\uc0\u9474        API Gateway (Go)              \u9474 \
+\uc0\u9474   - Rate limiting                    \u9474 \
+\uc0\u9474   - Authentication                   \u9474 \
+\uc0\u9474   - Request routing                  \u9474 \
+\uc0\u9474   - Ethical Guardrails (Nueva)       \u9474 \
+\uc0\u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 
+\f1 \'a9\'d0
+\f0 \uc0\u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496 \
+         \uc0\u9474 \
+    \uc0\u9484 \u9472 \u9472 \u9472 \u9472 
+\f1 \'a9\'d8
+\f0 \uc0\u9472 \u9472 \u9472 \u9472 
+\f1 \'a9\'d0
+\f0 \uc0\u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 
+\f1 \'a9\'d0
+\f0 \uc0\u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488 \
+    
+\f2 \uc0\u9660 
+\f0          
+\f2 \uc0\u9660 
+\f0           
+\f2 \uc0\u9660 
+\f0           
+\f2 \uc0\u9660 
+\f0 \
+\uc0\u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488  \u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488  \u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488  \u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488 \
+\uc0\u9474  User   \u9474  \u9474 Match \u9474  \u9474  Maxo   \u9474  \u9474 Social \u9474 \
+\uc0\u9474 Service \u9474  \u9474 Engine\u9474  \u9474 Service \u9474  \u9474 Service\u9474 \
+\uc0\u9474 (\'c9tica) \u9474  \u9474 (\'c9tica)\u9474  \u9474 (\'c9tica) \u9474  \u9474 (\'c9tica)\u9474 \
+\uc0\u9492 \u9472 \u9472 \u9472 
+\f1 \'a9\'d0
+\f0 \uc0\u9472 \u9472 \u9472 \u9472 \u9496  \u9492 \u9472 \u9472 
+\f1 \'a9\'d0
+\f0 \uc0\u9472 \u9472 \u9472 \u9496  \u9492 \u9472 \u9472 \u9472 
+\f1 \'a9\'d0
+\f0 \uc0\u9472 \u9472 \u9472 \u9472 \u9496  \u9492 \u9472 \u9472 \u9472 
+\f1 \'a9\'d0
+\f0 \uc0\u9472 \u9472 \u9472 \u9496 \
+    \uc0\u9474          \u9474           \u9474           \u9474 \
+    \uc0\u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 
+\f1 \'a9\'d8
+\f0 \uc0\u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 
+\f1 \'a9\'d8
+\f0 \uc0\u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496 \
+                   \uc0\u9474 \
+            \uc0\u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 
+\f1 \'a9\'d8
+\f0 \uc0\u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488 \
+            
+\f2 \uc0\u9660 
+\f0              
+\f2 \uc0\u9660 
+\f0 \
+      \uc0\u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488    \u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488 \
+      \uc0\u9474  MongoDB  \u9474    \u9474  Redis  \u9474 \
+      \uc0\u9474  (Primary)\u9474    \u9474 (Cache) \u9474 \
+      \uc0\u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496    \u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496 \
+```\
+\
+### 2.2 Decisiones Arquitect\'f3nicas\
+\
+#### \'bfPor qu\'e9 Go?\
+- 
+\f3 \uc0\u9989 
+\f0  Compilaci\'f3n r\'e1pida (importante en tu hardware)\
+- 
+\f3 \uc0\u9989 
+\f0  Goroutines nativas para concurrencia\
+- 
+\f3 \uc0\u9989 
+\f0  Tipado est\'e1tico (menos bugs en producci\'f3n)\
+- 
+\f3 \uc0\u9989 
+\f0  Deploy simple (un binario)\
+- 
+\f3 \uc0\u9989 
+\f0  Excelente para APIs y microservicios\
+\
+#### \'bfPor qu\'e9 MongoDB?\
+- 
+\f3 \uc0\u9989 
+\f0  Esquema flexible (Maxocracia evolucionar\'e1)\
+- 
+\f3 \uc0\u9989 
+\f0  Queries r\'e1pidas por geolocalizaci\'f3n\
+- 
+\f3 \uc0\u9989 
+\f0  Escala horizontal f\'e1cilmente\
+- 
+\f3 \uc0\u9989 
+\f0  Atlas (managed) reduce ops\
+\
+#### \'bfPor qu\'e9 Redis?\
+- 
+\f3 \uc0\u9989 
+\f0  Cache de sesiones de usuario\
+- 
+\f3 \uc0\u9989 
+\f0  Rate limiting distribuido\
+- 
+\f3 \uc0\u9989 
+\f0  Pub/Sub para notificaciones en tiempo real\
+- 
+\f3 \uc0\u9989 
+\f0  Reduce carga en MongoDB\
+\
+**Nueva decisi\'f3n: Ethical Guardrails**\
+- Integraci\'f3n de validaciones \'e9ticas en cada microservicio, basadas en la Declaraci\'f3n. Por ejemplo, algoritmos de matching penalizan acciones que violen sostenibilidad o igualdad.\
+\
+---\
+\
+## 3. Microservicios Detallados\
+\
+### 3.1 User Service\
+\
+**Responsabilidad:** Gesti\'f3n de usuarios, autenticaci\'f3n, perfiles (con \'e9nfasis en diversidad e inclusi\'f3n de conciencias limitadas).\
+\
+#### Endpoints:\
+```\
+POST   /api/v1/users/register\
+POST   /api/v1/users/login\
+GET    /api/v1/users/:id\
+PATCH  /api/v1/users/:id\
+GET    /api/v1/users/:id/stats\
+DELETE /api/v1/users/:id\
+POST   /api/v1/users/:id/ethical-audit  # Nueva: Auditor\'eda \'e9tica de perfil\
+```\
+\
+#### Modelo de Datos (MongoDB):\
+```go\
+type User struct \{\
+    ID            primitive.ObjectID `bson:"_id,omitempty"`\
+    TelegramID    int64              `bson:"telegram_id" json:"telegram_id"`\
+    Username      string             `bson:"username" json:"username"`\
+    FullName      string             `bson:"full_name" json:"full_name"`\
+    Email         string             `bson:"email,omitempty" json:"email,omitempty"`\
+    Phone         string             `bson:"phone,omitempty" json:"phone,omitempty"`\
+    \
+    Location      Location           `bson:"location" json:"location"`\
+    Skills        []string           `bson:"skills" json:"skills"`\
+    Interests     []string           `bson:"interests" json:"interests"`\
+    \
+    MaxoBalance   int                `bson:"maxo_balance" json:"maxo_balance"`\
+    Reputation    float64            `bson:"reputation" json:"reputation"`\
+    \
+    Stats         UserStats          `bson:"stats" json:"stats"`\
+    EthicalProfile EthicalProfile    `bson:"ethical_profile" json:"ethical_profile"`  // Nueva: Perfil \'e9tico alineado con Declaraci\'f3n\
+    \
+    CreatedAt     time.Time          `bson:"created_at" json:"created_at"`\
+    UpdatedAt     time.Time          `bson:"updated_at" json:"updated_at"`\
+    LastActiveAt  time.Time          `bson:"last_active_at" json:"last_active_at"`\
+\}\
+\
+type EthicalProfile struct \{\
+    DiversityScore float64 `bson:"diversity_score" json:"diversity_score"` // Puntaje por inclusi\'f3n de perspectivas diversas\
+    SustainabilityCommitment string `bson:"sustainability_commitment" json:"sustainability_commitment"` // Compromiso con valores fundamentales\
+    VoiceWeight    float64 `bson:"voice_weight" json:"voice_weight"` // Peso en votaciones basado en aportes \'e9ticos\
+\}\
+```\
+\
+#### L\'f3gica de Negocio:\
+- **Registro**: Validar Telegram ID \'fanico, crear wallet de Maxo inicial (50 puntos), y requerir aceptaci\'f3n de la Declaraci\'f3n de Fundamentos.\
+- **Autenticaci\'f3n**: JWT tokens con refresh token en Redis.\
+- **Perfiles**: Actualizaci\'f3n incremental, validaci\'f3n de datos, y auditor\'eda \'e9tica autom\'e1tica (e.g., penalizaci\'f3n por perfiles que ignoren diversidad).\
+- **Geolocalizaci\'f3n**: \'cdndice 2dsphere en MongoDB para b\'fasquedas por proximidad.\
+- **Nueva: Ethical Audit**: Eval\'faa alineaci\'f3n con Art\'edculos I-IV de la Declaraci\'f3n, ajustando Reputation y VoiceWeight.\
+\
+### 3.2 Resource Service\
+\
+**Responsabilidad:** Gesti\'f3n de necesidades y recursos publicados, con filtros \'e9ticos para sostenibilidad y distribuci\'f3n proporcional.\
+\
+#### Endpoints:\
+```\
+POST   /api/v1/resources\
+GET    /api/v1/resources\
+GET    /api/v1/resources/:id\
+PATCH  /api/v1/resources/:id\
+DELETE /api/v1/resources/:id\
+GET    /api/v1/resources/search\
+GET    /api/v1/resources/nearby\
+GET    /api/v1/resources/ethical-filter  # Nueva: Filtro por valores fundamentales\
+```\
+\
+#### Modelo de Datos:\
+```go\
+type Resource struct \{\
+    ID           primitive.ObjectID `bson:"_id,omitempty"`\
+    UserID       primitive.ObjectID `bson:"user_id" json:"user_id"`\
+    \
+    Type         ResourceType       `bson:"type" json:"type"` // need | offer\
+    Category     Category           `bson:"category" json:"category"`\
+    \
+    Title        string             `bson:"title" json:"title"`\
+    Description  string             `bson:"description" json:"description"`\
+    Tags         []string           `bson:"tags" json:"tags"`\
+    \
+    Location     Location           `bson:"location" json:"location"`\
+    \
+    Urgency      UrgencyLevel       `bson:"urgency" json:"urgency"`\
+    Status       ResourceStatus     `bson:"status" json:"status"`\
+    \
+    Images       []string           `bson:"images,omitempty" json:"images,omitempty"`\
+    \
+    Conditions   string             `bson:"conditions,omitempty" json:"conditions,omitempty"`\
+    \
+    ViewCount    int                `bson:"view_count" json:"view_count"`\
+    MatchCount   int                `bson:"match_count" json:"match_count"`\
+    \
+    EthicalTags  []string           `bson:"ethical_tags,omitempty" json:"ethical_tags"`  // Nueva: Tags alineados con valores (e.g., "sostenible", "inclusivo")\
+    \
+    CreatedAt    time.Time          `bson:"created_at" json:"created_at"`\
+    UpdatedAt    time.Time          `bson:"updated_at" json:"updated_at"`\
+    ExpiresAt    *time.Time         `bson:"expires_at,omitempty" json:"expires_at,omitempty"`\
+\}\
+```\
+\
+#### \'cdndices MongoDB:\
+```javascript\
+// B\'fasqueda geoespacial\
+db.resources.createIndex(\{ "location.coordinates": "2dsphere" \})\
+\
+// B\'fasqueda por categor\'eda y tipo\
+db.resources.createIndex(\{ "category": 1, "type": 1, "status": 1 \})\
+\
+// B\'fasqueda por usuario\
+db.resources.createIndex(\{ "user_id": 1, "created_at": -1 \})\
+\
+// B\'fasqueda de texto completo\
+db.resources.createIndex(\{ \
+    "title": "text", \
+    "description": "text", \
+    "tags": "text" \
+\})\
+\
+// Nueva: \'cdndice \'e9tico\
+db.resources.createIndex(\{ "ethical_tags": 1 \})\
+\
+// TTL para expiraci\'f3n autom\'e1tica\
+db.resources.createIndex(\{ "expires_at": 1 \}, \{ expireAfterSeconds: 0 \})\
+```\
+\
+### 3.3 Match Engine\
+\
+**Responsabilidad:** Encontrar coincidencias, ahora con scoring \'e9tico que priorice colaboraci\'f3n y sostenibilidad.\
+\
+#### Endpoints:\
+```\
+POST   /api/v1/matches/find\
+GET    /api/v1/matches/:id\
+POST   /api/v1/matches/:id/accept\
+POST   /api/v1/matches/:id/reject\
+POST   /api/v1/matches/:id/complete\
+GET    /api/v1/matches/user/:userId\
+POST   /api/v1/matches/ethical-review  # Nueva: Revisi\'f3n \'e9tica de matches\
+```\
+\
+#### Modelo de Datos:\
+```go\
+type Match struct \{\
+    ID              primitive.ObjectID `bson:"_id,omitempty"`\
+    \
+    NeedID          primitive.ObjectID `bson:"need_id" json:"need_id"`\
+    OfferID         primitive.ObjectID `bson:"offer_id" json:"offer_id"`\
+    \
+    RequesterID     primitive.ObjectID `bson:"requester_id" json:"requester_id"`\
+    ProviderID      primitive.ObjectID `bson:"provider_id" json:"provider_id"`\
+    \
+    Score           float64            `bson:"score" json:"score"` // 0-100\
+    EthicalScore    float64            `bson:"ethical_score" json:"ethical_score"`  // Nueva: 0-100, basado en Declaraci\'f3n\
+    MatchReasons    []string           `bson:"match_reasons" json:"match_reasons"`\
+    \
+    Status          MatchStatus        `bson:"status" json:"status"`\
+    \
+    AcceptedBy      []primitive.ObjectID `bson:"accepted_by" json:"accepted_by"`\
+    RejectedBy      []primitive.ObjectID `bson:"rejected_by" json:"rejected_by"`\
+    \
+    CompletedAt     *time.Time         `bson:"completed_at,omitempty" json:"completed_at,omitempty"`\
+    \
+    MaxoTransaction primitive.ObjectID `bson:"maxo_transaction,omitempty" json:"maxo_transaction,omitempty"`\
+    \
+    CreatedAt       time.Time          `bson:"created_at" json:"created_at"`\
+    UpdatedAt       time.Time          `bson:"updated_at" json:"updated_at"`\
+\}\
+```\
+\
+#### Algoritmo de Matching (Actualizado):\
+\
+```go\
+func (e *MatchEngine) FindMatches(ctx context.Context, resourceID primitive.ObjectID) ([]Match, error) \{\
+    // ... (l\'f3gica base igual)\
+    \
+    // 5. Calcular score de cada candidato (incluyendo \'e9tico)\
+    matches := []Match\{\}\
+    for _, candidate := range candidates \{\
+        baseScore := e.calculateMatchScore(resource, candidate)\
+        ethicalScore := e.calculateEthicalScore(resource, candidate)  // Nueva funci\'f3n\
+        \
+        totalScore := (baseScore * 0.7) + (ethicalScore * 0.3)  // Ponderaci\'f3n \'e9tica\
+        \
+        if totalScore >= 30.0 \{\
+            match := Match\{\
+                // ... (campos base)\
+                Score:        baseScore,\
+                EthicalScore: ethicalScore,\
+                MatchReasons: append(e.getMatchReasons(resource, candidate, baseScore), e.getEthicalReasons(resource, candidate, ethicalScore)...),\
+                // ...\
+            \}\
+            matches = append(matches, match)\
+        \}\
+    \}\
+    \
+    // ... (resto igual)\
+\}\
+\
+func (e *MatchEngine) calculateEthicalScore(r1, r2 Resource) float64 \{\
+    score := 0.0\
+    \
+    // Alineaci\'f3n con sostenibilidad (Art\'edculo III): +20 si tags \'e9ticos coinciden\
+    if hasOverlappingEthicalTags(r1.EthicalTags, r2.EthicalTags) \{\
+        score += 20.0\
+    \}\
+    \
+    // Colaboraci\'f3n y diversidad: +15 si categor\'edas promueven igualdad\
+    if promotesEquality(r1.Category, r2.Category) \{\
+        score += 15.0\
+    \}\
+    \
+    // Responsabilidad personal: +10 si urgency alta pero impacto positivo\
+    if (r1.Urgency == UrgencyHigh || r2.Urgency == UrgencyHigh) && isSustainableImpact(r1, r2) \{\
+        score += 10.0\
+    \}\
+    \
+    // Transparencia: +10 si descriptions son claras y verificables\
+    if isTransparentDescription(r1.Description, r2.Description) \{\
+        score += 10.0\
+    \}\
+    \
+    return score\
+\}\
+```\
+\
+### 3.4 Maxo Service\
+\
+**Responsabilidad:** Sistema de puntos, ahora con bonificaciones \'e9ticas por alineaci\'f3n con valores fundamentales.\
+\
+#### Endpoints:\
+```\
+GET    /api/v1/maxo/balance/:userId\
+POST   /api/v1/maxo/transfer\
+GET    /api/v1/maxo/transactions/:userId\
+GET    /api/v1/maxo/leaderboard\
+POST   /api/v1/maxo/calculate-reward\
+POST   /api/v1/maxo/ethical-bonus  # Nueva: Bonificaci\'f3n \'e9tica\
+```\
+\
+#### Modelo de Datos:\
+```go\
+type MaxoTransaction struct \{\
+    // ... (campos base)\
+    EthicalReason string `bson:"ethical_reason,omitempty" json:"ethical_reason,omitempty"`  // Nueva: Raz\'f3n \'e9tica (e.g., "Sostenibilidad")\
+\}\
+```\
+\
+#### Sistema de Recompensas (Actualizado):\
+```go\
+var RewardTable = map[TransactionType]int\{\
+    TxWelcomeBonus:   50,   // Al registrarse (con aceptaci\'f3n de Declaraci\'f3n)\
+    TxPostResource:   5,    // Por publicar necesidad/recurso\
+    TxMatchCompleted: 20,   // Por completar un match\
+    TxRatingReceived: 3,    // Por recibir calificaci\'f3n positiva\
+    TxDailyActive:    2,    // Por actividad diaria\
+    TxReferralBonus:  15,   // Por invitar a alguien que se une\
+    TxCommunityVote:  1,    // Por participar en votaciones\
+    TxEthicalAlignment: 10, // Nueva: Por acciones alineadas con Art\'edculo III\
+\}\
+\
+// Bonificaci\'f3n por impacto \'e9tico\
+func CalculateEthicalBonus(match Match) int \{\
+    baseReward := RewardTable[TxMatchCompleted]\
+    \
+    // Multiplicador por valores fundamentales\
+    ethicalMultiplier := 1.0\
+    if match.EthicalScore > 80.0 \{  // Alta alineaci\'f3n\
+        ethicalMultiplier = 1.5\
+    \}\
+    \
+    total := float64(baseReward) * ethicalMultiplier\
+    \
+    return int(math.Round(total))\
+\}\
+```\
+\
+### 3.5 Social Service\
+\
+**Responsabilidad:** Interacciones, calificaciones, mensajes, con \'e9nfasis en transparencia y rendici\'f3n de cuentas.\
+\
+#### Endpoints:\
+```\
+POST   /api/v1/social/rate\
+GET    /api/v1/social/ratings/:userId\
+POST   /api/v1/social/report\
+GET    /api/v1/social/conversations/:userId\
+POST   /api/v1/social/consensus-vote  # Nueva: Votaci\'f3n por consenso (Art\'edculo II)\
+```\
+\
+#### Modelo de Datos:\
+```go\
+type Rating struct \{\
+    // ... (campos base)\
+    EthicalCategories EthicalCategories `bson:"ethical_categories" json:"ethical_categories"`  // Nueva: Categor\'edas alineadas con Declaraci\'f3n\
+\}\
+\
+type EthicalCategories struct \{\
+    Sustainability int `bson:"sustainability" json:"sustainability"` // 1-5\
+    Equality       int `bson:"equality" json:"equality"`\
+    Collaboration  int `bson:"collaboration" json:"collaboration"`\
+    Transparency   int `bson:"transparency" json:"transparency"`\
+\}\
+```\
+\
+---\
+\
+## 4. Telegram Bot\
+\
+### 4.1 Arquitectura del Bot\
+(Invariato, pero con nueva integraci\'f3n \'e9tica en handlers para prompts que refuercen valores de la Declaraci\'f3n).\
+\
+### 4.2 Comandos Principales\
+```go\
+var Commands = []tgbotapi.BotCommand\{\
+    // ... (comandos base)\
+    \{Command: "fundamentos", Description: "Leer la Declaraci\'f3n de Fundamentos de Maxocracia"\},\
+    \{Command: "etica-audit", Description: "Auditar mi alineaci\'f3n \'e9tica"\},\
+\}\
+```\
+\
+### 4.3 Flujos Conversacionales\
+**Nuevo Flujo: Aceptaci\'f3n de Fundamentos**\
+```\
+Usuario: /start\
+\
+Bot: \'a1Bienvenido a Com\'fan! Antes de unirte, acepta los Fundamentos de la Maxocracia:\
+     [Mostrar PDF resumido]\
+     \
+     Art\'edculo I: Igualdad y Diversidad...\
+     [S\'ed, acepto] [Leer m\'e1s]\
+\
+Usuario: [presiona "S\'ed, acepto"]\
+\
+Bot: 
+\f3 \uc0\u9989 
+\f0  \'a1Gracias! Tu wallet inicial: 50 Maxos.\
+     Comienza publicando una necesidad \'e9tica.\
+```\
+\
+### 4.4 Estados Conversacionales con Redis\
+(Invariato, pero con estado para "ethical_consent").\
+\
+---\
+\
+## 5. Infraestructura y Deployment\
+(Invariato, pero agregar volumen para ethical-logs en docker-compose).\
+\
+---\
+\
+## 6. Seguridad\
+**Nueva capa: Ethical Validation Middleware**\
+```go\
+func EthicalMiddleware() gin.HandlerFunc \{\
+    return func(c *gin.Context) \{\
+        // Verificar alineaci\'f3n con Declaraci\'f3n en requests\
+        if !isAlignedWithDeclaration(c.Request.Body) \{\
+            c.JSON(403, gin.H\{"error": "Acci\'f3n no alineada con Fundamentos de Maxocracia"\})\
+            c.Abort()\
+            return\
+        \}\
+        c.Next()\
+    \}\
+\}\
+```\
+\
+---\
+\
+## 7. Observabilidad\
+**Nuevas m\'e9tricas:**\
+```go\
+var ethicalMatches = promauto.NewCounterVec(\
+    prometheus.CounterOpts\{\
+        Name: "comun_ethical_matches_total",\
+        Help: "Matches con alto EthicalScore",\
+    \},\
+    []string\{"principle"\},  // e.g., "sostenibilidad"\
+)\
+```\
+\
+---\
+\
+## 8. Testing\
+**Nuevos tests para \'e9tica:**\
+```go\
+func TestEthicalScore_HighSustainability(t *testing.T) \{\
+    // Arrange: Recursos con tags \'e9ticos\
+    r1 := Resource\{EthicalTags: []string\{"sostenible"\}\}\
+    r2 := Resource\{EthicalTags: []string\{"sostenible"\}\}\
+    \
+    // Act\
+    score := calculateEthicalScore(r1, r2)\
+    \
+    // Assert\
+    assert.Greater(t, score, 20.0)\
+\}\
+```\
+\
+---\
+\
+## 9. Migraci\'f3n desde MVP\
+**Nueva fase: Integraci\'f3n \'c9tica**\
+- Migrar datos hist\'f3ricos validando alineaci\'f3n con Declaraci\'f3n.\
+- Beta con 10-20 usuarios enfocados en votaciones consensuadas.\
+\
+---\
+\
+## 10. Roadmap de Implementaci\'f3n\
+**Actualizaci\'f3n Sprint 1-2:**\
+- [x] Configurar estructura de proyecto\
+- [ ] Integrar Declaraci\'f3n en modelos y algoritmos (1 semana extra)\
+\
+**Total estimado: 17 semanas (~4.25 meses)**\
+\
+---\
+\
+## 11. Consideraciones de Producci\'f3n\
+**Nueva: Ethical Monitoring**\
+- Alertas para desviaciones \'e9ticas (e.g., matches con bajo EthicalScore > 20%).\
+\
+---\
+\
+## 12. M\'e9tricas de \'c9xito\
+### 12.1 KPIs T\'e9cnicos\
+- 
+\f3 \uc0\u9989 
+\f0  Latencia p95 < 200ms\
+- 
+\f3 \uc0\u9989 
+\f0  Uptime > 99.5%\
+- 
+\f3 \uc0\u9989 
+\f0  Error rate < 0.1%\
+- 
+\f3 \uc0\u9989 
+\f0  Match success rate > 60%\
+- **Nueva:** Ethical Alignment Rate > 85% (porcentaje de acciones alineadas con Declaraci\'f3n)\
+\
+### 12.2 KPIs de Producto\
+- 
+\f3 \uc0\u9989 
+\f0  Usuarios activos mensuales\
+- 
+\f3 \uc0\u9989 
+\f0  Matches completados / Matches creados\
+- 
+\f3 \uc0\u9989 
+\f0  Tiempo promedio de resoluci\'f3n de necesidad\
+- 
+\f3 \uc0\u9989 
+\f0  NPS (Net Promoter Score)\
+- 
+\f3 \uc0\u9989 
+\f0  Tasa de retenci\'f3n semana 1 > 40%\
+- **Nueva:** Consensus Participation Rate > 70%\
+\
+---\
+\
+## 13. Referencias y Recursos\
+### 13.1 Documentaci\'f3n\
+- [Declaraci\'f3n de Fundamentos de la Maxocracia](link-al-pdf)  // Nueva referencia\
+- [Go Documentation](https://go.dev/doc/)\
+- ... (resto invariato)\
+\
+### 13.2 Librer\'edas Clave\
+(Invariato)\
+\
+---\
+\
+## 14. Conclusi\'f3n\
+\
+Esta actualizaci\'f3n integra la Declaraci\'f3n de Fundamentos como el "c\'f3digo \'e9tico" del sistema, asegurando que Com\'fan no sea solo una plataforma t\'e9cnica, sino un reflejo vivo de la Maxocracia: colaborativa, sostenible y verdadera. Tus reflexiones filos\'f3ficas (las 8 llaves de la verdad) resuenan aqu\'ed \'97la verdad como utop\'eda accesible gu\'eda cada decisi\'f3n algor\'edtmica.\
+\
+**Pr\'f3ximo paso:** Implementar Ethical Guardrails en un prototipo local. \'bfQuieres c\'f3digo inicial para el flujo de aceptaci\'f3n en el bot, o explorar un sprint enfocado en votaciones consensuadas?\
+\
+---\
+\
+*Documento vivo - se actualiza seg\'fan aprendizajes durante implementaci\'f3n*\
+\
+**Contacto t\'e9cnico:** MAXLOPEZTUTOR@GMAIL.COM\
+**\'daltima actualizaci\'f3n:** Octubre 2025}
