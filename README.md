@@ -13,9 +13,16 @@ Aquí no encontrarás (aún) contratos inteligentes complejos, sino las herramie
 - **El Alma del Proyecto (El Porqué):** [Lee el Brochure de la Maxocracia aquí](URL_A_TU_BROCHURE_CUANDO_LO_SUBAS)
 - **El Esqueleto del Proyecto (El Cómo):** Los archivos en este repositorio.
 
+## Índice rápido
+
+- [Manifiesto: MAXOCRACIA](docs/MAXOCRACIA_MANIFIESTO.md)
+- [Formularios](formularios/)
+- [Modelo de datos](data-model/)
+- [Especificación del dashboard](dashboard-spec/)
+
 ## La Arquitectura en Práctica
 
-Nuestra visión a largo plazo se basa en una arquitectura de tres capas (Verdad, Acción, Valor). En esta fase inicial, la implementamos de forma pragmática a través de dos formularios simples que alimentan un modelo de datos en evolución.
+Nuestra visión a largo plazo se basa en una arquitectura de tres capas (Verdad, Acción, Valor). En esta fase inicial, la implementamos de forma pragmática a través de formularios y esquemas que alimentan un modelo de datos en evolución.
 
 - **El VerityLedger (Capa de Verdad):** Se implementa a través del `Formulario A`, donde cada intercambio se registra como un hecho verificable.
 - **El Ciclo de Mejora Continua (Capa de Acción):** Se implementa a través del `Formulario B`, que da seguimiento a la evolución de los participantes y permite al sistema aprender y adaptarse.
