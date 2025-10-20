@@ -21,16 +21,16 @@ def create_app(db_path=None):
     from .users import bp as users_bp
     from .interchanges import bp as interchanges_bp
     from .maxo_bp import bp as maxo_bp
+    from .reputation_bp import bp as reputation_bp
+    from .resources_bp import bp as resources_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(interchanges_bp)
     app.register_blueprint(maxo_bp)
+    app.register_blueprint(reputation_bp)
+    app.register_blueprint(resources_bp)
 
     # placeholder imports to ensure modules loaded
-    try:
-        from .resources import bp as resources_bp
-        app.register_blueprint(resources_bp)
-    except Exception:
-        pass
+    # other optional blueprints can be imported here
 
     return app
