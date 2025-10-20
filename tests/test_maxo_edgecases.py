@@ -99,11 +99,23 @@ def test_overdraft_allowed(client):
 
     payload = {'from_user_id': a, 'to_user_id': b, 'amount': 10.0, 'reason': 'overdraft test'}
     resp = client.post('/maxo/transfer', json=payload, headers={'Authorization': f'Bearer {token}'})
-    assert resp.status_code == 200
+    # now we enforce balance checks
+    assert resp.status_code == 400
 
+
+def test_credit_and_transfer_after_balance(client):
+    db_path = client.application.config['DATABASE']
+    a = seed_user(db_path, 'a7@example.test', 'A7')
+    b = seed_user(db_path, 'b7@example.test', 'B7')
+    token = login_and_token(client, 'a7@example.test')
+
+    # credit A with 20.0 directly into ledger
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    cur.execute('SELECT SUM(change_amount) FROM maxo_ledger WHERE user_id = ?', (a,))
-    row = cur.fetchone()
-    assert row[0] == -10.0
+    cur.execute('INSERT INTO maxo_ledger (user_id, change_amount, reason) VALUES (?, ?, ?)', (a, 20.0, 'seed credit'))
+    conn.commit()
     conn.close()
+
+    payload = {'from_user_id': a, 'to_user_id': b, 'amount': 10.0, 'reason': 'sufficient balance'}
+    resp = client.post('/maxo/transfer', json=payload, headers={'Authorization': f'Bearer {token}'})
+    assert resp.status_code == 200

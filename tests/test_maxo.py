@@ -59,6 +59,13 @@ def test_balance_and_transfer(client):
     token = resp.get_json().get('token')
     assert token
 
+    # credit A with 10 to allow the transfer
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    cur.execute('INSERT INTO maxo_ledger (user_id, change_amount, reason) VALUES (?, ?, ?)', (a, 10.0, 'seed credit'))
+    conn.commit()
+    conn.close()
+
     # transfer 5 from A to B
     payload = {'from_user_id': a, 'to_user_id': b, 'amount': 5.0, 'reason': 'test transfer'}
     resp = client.post('/maxo/transfer', json=payload, headers={'Authorization': f'Bearer {token}'})
@@ -69,7 +76,7 @@ def test_balance_and_transfer(client):
     cur = conn.cursor()
     cur.execute('SELECT SUM(change_amount) FROM maxo_ledger WHERE user_id = ?', (a,))
     row = cur.fetchone()
-    assert row[0] == -5.0
+    assert row[0] == 5.0
     cur.execute('SELECT SUM(change_amount) FROM maxo_ledger WHERE user_id = ?', (b,))
     row = cur.fetchone()
     assert row[0] == 5.0

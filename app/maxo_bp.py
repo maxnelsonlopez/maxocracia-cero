@@ -34,6 +34,13 @@ def _transfer_impl():
         return jsonify({'error': 'amount must be positive'}), 400
 
     db = get_db()
+    # normalize ids
+    try:
+        from_id = int(from_id)
+        to_id = int(to_id)
+    except Exception:
+        return jsonify({'error': 'invalid user ids'}), 400
+
     # check users exist
     cur = db.execute('SELECT id FROM users WHERE id = ?', (from_id,))
     if cur.fetchone() is None:
@@ -41,6 +48,11 @@ def _transfer_impl():
     cur = db.execute('SELECT id FROM users WHERE id = ?', (to_id,))
     if cur.fetchone() is None:
         return jsonify({'error': 'to_user not found'}), 404
+
+    # ensure sender has sufficient balance
+    sender_balance = get_balance(from_id)
+    if sender_balance < amount:
+        return jsonify({'error': 'insufficient balance'}), 400
 
     # debit from sender (negative change) and credit receiver
     credit_user(from_id, -amount, f'Transfer to {to_id}: {reason}')
