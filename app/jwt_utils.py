@@ -32,8 +32,8 @@ def create_token(payload, expires_in: int = None):
     """Create a JWT with an `exp` claim. expires_in in seconds (default ACCESS_TOKEN_EXPIRES).
     The `exp` claim is stored as an integer UTC epoch (seconds).
     """
-    # Asegurar que SECRET esté inicializado
     global SECRET
+    # Asegurar que SECRET esté inicializado
     if SECRET is None:
         # Inicializar SECRET si aún no se ha hecho
         SECRET = get_secure_key()
