@@ -21,6 +21,7 @@ function getAuthHeaders(headers={}){
   return headers
 }
 
+// keep decode helper for edge-cases, but prefer /auth/me
 function decodeJwtPayload(token){
   try{
     const parts = token.split('.')
@@ -35,29 +36,21 @@ function showProfileFromToken(){
   const token = loadToken()
   if (!token) { el('profile').textContent = '(not logged in)'; return }
   // prefer to fetch /auth/me for authoritative profile
-  try{
-    fetch(`${base}/auth/me`, {headers: getAuthHeaders({})}).then(async res => {
-      if (!res.ok) {
-        // fallback to decode if /me fails
-        const decoded = decodeJwtPayload(token)
-        if (!decoded) el('profile').textContent = '(invalid token)'
-        else el('profile').textContent = `ID: ${decoded.user_id} | Email: ${decoded.email || ''}`
-        return
-      }
-      const j = await res.json()
-      const parts = []
-      if (j.name) parts.push(`Name: ${j.name}`)
-      if (j.id) parts.push(`ID: ${j.id}`)
-      if (j.email) parts.push(`Email: ${j.email}`)
-      el('profile').textContent = parts.join(' | ')
-    }).catch(e => {
-      const decoded = decodeJwtPayload(token)
-      if (!decoded) el('profile').textContent = '(invalid token)'
-      else el('profile').textContent = `ID: ${decoded.user_id} | Email: ${decoded.email || ''}`
-    })
-  }catch(e){
+  // prefer authoritative profile via /auth/me
+  fetch(`${base}/auth/me`, {headers: getAuthHeaders({})}).then(async res => {
+    if (!res.ok) {
+      el('profile').textContent = '(unauthenticated)'
+      return
+    }
+    const j = await res.json()
+    const parts = []
+    if (j.name) parts.push(`Name: ${j.name}`)
+    if (j.id) parts.push(`ID: ${j.id}`)
+    if (j.email) parts.push(`Email: ${j.email}`)
+    el('profile').textContent = parts.join(' | ')
+  }).catch(e => {
     el('profile').textContent = '(error fetching profile)'
-  }
+  })
 }
 
 el('btnLogout').onclick = () => { saveToken(null); showProfileFromToken() }
