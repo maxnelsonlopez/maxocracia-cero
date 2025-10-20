@@ -11,6 +11,10 @@ from werkzeug.security import generate_password_hash
 def client():
     db_fd, db_path = tempfile.mkstemp(prefix='test_comun_', suffix='.db')
     os.close(db_fd)
+    
+    # Configurar SECRET_KEY para pruebas
+    os.environ['SECRET_KEY'] = 'clave_secreta_para_pruebas'
+    
     app = create_app(db_path)
     app.config['TESTING'] = True
     with app.app_context():
@@ -26,7 +30,7 @@ def client():
 def seed_user(db_path, email, name='Tester'):
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    cur.execute('INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)', (email, name, generate_password_hash('pw')))
+    cur.execute('INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)', (email, name, generate_password_hash('Password1')))
     uid = cur.lastrowid
     conn.commit()
     conn.close()
@@ -34,7 +38,7 @@ def seed_user(db_path, email, name='Tester'):
 
 
 def login_and_token(client, email):
-    resp = client.post('/auth/login', json={'email': email, 'password': 'pw'})
+    resp = client.post('/auth/login', json={'email': email, 'password': 'Password1'})
     assert resp.status_code == 200
     return resp.get_json().get('token')
 

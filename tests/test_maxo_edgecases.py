@@ -30,10 +30,10 @@ def client():
         pass
 
 
-def seed_user(db_path, email, name='Test User'):
+def seed_user(db_path, email, name='Tester'):
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    cur.execute('INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)', (email, name, generate_password_hash('pw')))
+    cur.execute('INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)', (email, name, generate_password_hash('Password1')))
     uid = cur.lastrowid
     conn.commit()
     conn.close()
@@ -41,7 +41,7 @@ def seed_user(db_path, email, name='Test User'):
 
 
 def login_and_token(client, email):
-    resp = client.post('/auth/login', json={'email': email, 'password': 'pw'})
+    resp = client.post('/auth/login', json={'email': email, 'password': 'Password1'})
     assert resp.status_code == 200
     return resp.get_json().get('token')
 

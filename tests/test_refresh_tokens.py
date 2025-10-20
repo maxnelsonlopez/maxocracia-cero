@@ -86,7 +86,7 @@ def test_expired_refresh_token_rejected(client):
         db = get_db()
         db.execute('DELETE FROM users WHERE email=?', ('exp@test.local',))
         db.execute('INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)',
-                   ('exp@test.local', 'Exp Test', generate_password_hash('pw')))
+                   ('exp@test.local', 'Exp Test', generate_password_hash('Password1')))
         db.commit()
         user = db.execute('SELECT * FROM users WHERE email=?', ('exp@test.local',)).fetchone()
         jti = 'expired-jti'

@@ -1,10 +1,10 @@
-import os
-import tempfile
 import sqlite3
-
+import tempfile
+import os
 import pytest
 from app import create_app
 from app.utils import init_db
+from werkzeug.security import generate_password_hash
 
 
 @pytest.fixture
@@ -32,7 +32,7 @@ def client():
 def seed_user(db_path, email, name='Test User'):
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    cur.execute('INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)', (email, name, 'pw'))
+    cur.execute('INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)', (email, name, generate_password_hash('Password1')))
     uid = cur.lastrowid
     conn.commit()
     conn.close()

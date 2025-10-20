@@ -43,7 +43,7 @@ def seed_user(db_path, email, name='Tester'):
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
     cur.execute('INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)', 
-                (email, name, generate_password_hash('pw')))
+                (email, name, generate_password_hash('Password1')))
     uid = cur.lastrowid
     conn.commit()
     conn.close()
@@ -57,7 +57,7 @@ def test_login_rate_limit(client):
     
     # Las primeras 3 solicitudes deberían tener éxito (según la configuración de prueba)
     for i in range(3):
-        resp = client.post('/auth/login', json={'email': 'rate_test@example.com', 'password': 'pw'})
+        resp = client.post('/auth/login', json={'email': 'rate_test@example.com', 'password': 'Password1'})
         assert resp.status_code == 200, f"Solicitud {i+1} debería tener éxito"
     
     # La cuarta solicitud debería ser limitada
@@ -96,7 +96,7 @@ def test_refresh_rate_limit(client):
     seed_user(db_path, 'refresh_test@example.com', 'Refresh Test')
     
     # Obtener token
-    login_resp = client.post('/auth/login', json={'email': 'refresh_test@example.com', 'password': 'pw'})
+    login_resp = client.post('/auth/login', json={'email': 'refresh_test@example.com', 'password': 'Password1'})
     token = login_resp.get_json().get('token')
     
     # Las primeras 3 solicitudes deberían tener éxito
