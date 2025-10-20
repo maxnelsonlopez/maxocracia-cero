@@ -36,11 +36,12 @@ def test_login_returns_refresh_token(client):
                    ('rt@test.local', 'RT Test', generate_password_hash('secret')))
         db.commit()
 
-    r = client.post('/auth/login', json={'email': 'rt@test.local', 'password': 'secret'})
+    r = client.post('/auth/login', json={'email': 'rt@test.local', 'password': 'secret'}, environ_base={'REMOTE_ADDR': '127.0.0.1'})
     assert r.status_code == 200
-    data = r.get_json()
-    assert 'refresh_token' in data
-    rt = data['refresh_token']
+    # cookie should be set in Set-Cookie header
+    setc = r.headers.get('Set-Cookie', '')
+    assert 'mc_refresh=' in setc
+    rt = setc.split('mc_refresh=')[1].split(';', 1)[0]
     assert '.' in rt
 
 
@@ -56,19 +57,24 @@ def test_refresh_rotates_and_rejects_old(client):
 
     r = client.post('/auth/login', json={'email': 'rot@test.local', 'password': 's3cret'})
     assert r.status_code == 200
-    data = r.get_json()
-    old_rt = data['refresh_token']
+    # extract cookie from response header
+    setc = r.headers.get('Set-Cookie', '')
+    assert 'mc_refresh=' in setc
+    old_cookie = setc.split('mc_refresh=')[1].split(';', 1)[0]
 
-    # call refresh with old token -> should return new refresh token
-    r2 = client.post('/auth/refresh', json={'refresh_token': old_rt})
+    # call refresh with cookie provided explicitly
+    r2 = client.post('/auth/refresh', headers={'Cookie': f'mc_refresh={old_cookie}'})
     assert r2.status_code == 200
-    d2 = r2.get_json()
-    new_rt = d2['refresh_token']
-    assert new_rt != old_rt
+    # server should set a new cookie in response
+    setc2 = r2.headers.get('Set-Cookie', '')
+    assert 'mc_refresh=' in setc2
+    new_cookie = setc2.split('mc_refresh=')[1].split(';', 1)[0]
+    assert new_cookie != old_cookie
 
-    # reuse old token -> should be rejected
-    r3 = client.post('/auth/refresh', json={'refresh_token': old_rt})
-    assert r3.status_code == 401
+    # reuse old cookie value -> rejected (use a fresh client without the new cookie stored)
+    with client.application.test_client() as c2:
+        r3 = c2.post('/auth/refresh', headers={'Cookie': f'mc_refresh={old_cookie}'})
+        assert r3.status_code == 401
 
 
 def test_expired_refresh_token_rejected(client):
@@ -91,5 +97,6 @@ def test_expired_refresh_token_rejected(client):
                    (user['id'], jti, token_hash, past, past))
         db.commit()
 
-    r = client.post('/auth/refresh', json={'refresh_token': f'{jti}.{raw}'})
+    # call refresh sending expired cookie
+    r = client.post('/auth/refresh', headers={'Cookie': f'mc_refresh={jti}.{raw}'})
     assert r.status_code == 401

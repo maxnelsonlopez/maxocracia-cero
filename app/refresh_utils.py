@@ -1,10 +1,14 @@
 import secrets
 import hashlib
 import hmac
+import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from .utils import get_db
+
+# use SECRET_KEY for HMAC if available
+SECRET = os.environ.get('SECRET_KEY', 'dev-secret')
 
 # Length of raw refresh token in bytes (will be hex-encoded)
 RAW_TOKEN_BYTES = 32
@@ -13,10 +17,8 @@ def generate_refresh_token_raw() -> str:
     return secrets.token_hex(RAW_TOKEN_BYTES)
 
 def hash_refresh_token(token: str) -> str:
-    # Use HMAC-SHA256 with a server-side secret if available (fallback to simple hash)
-    # We'll use a SHA256 hex digest for storage. Using HMAC allows easier rotation if secret changes.
-    # Keep this simple for local prototype.
-    return hashlib.sha256(token.encode('utf-8')).hexdigest()
+    # HMAC-SHA256 using SECRET to derive token hash for storage
+    return hmac.new(SECRET.encode('utf-8'), token.encode('utf-8'), hashlib.sha256).hexdigest()
 
 def store_refresh_token(user_id: int, jti: str, raw_token: str, expires_in: Optional[int] = None):
     db = get_db()
@@ -33,12 +35,12 @@ def store_refresh_token(user_id: int, jti: str, raw_token: str, expires_in: Opti
 
 def revoke_refresh_token_by_jti(jti: str):
     db = get_db()
-    db.execute("UPDATE refresh_tokens SET revoked=1 WHERE jti=?", (jti,))
+    db.execute("DELETE FROM refresh_tokens WHERE jti=?", (jti,))
     db.commit()
 
 def revoke_user_tokens(user_id: int):
     db = get_db()
-    db.execute("UPDATE refresh_tokens SET revoked=1 WHERE user_id=?", (user_id,))
+    db.execute("DELETE FROM refresh_tokens WHERE user_id=?", (user_id,))
     db.commit()
 
 def find_refresh_token_record(jti: str):

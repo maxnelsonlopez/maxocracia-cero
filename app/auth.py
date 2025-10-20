@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, make_response, current_app
 from .utils import get_db
 from werkzeug.security import generate_password_hash, check_password_hash
 from .jwt_utils import create_token
@@ -56,8 +56,12 @@ def login():
     # expires refresh token in 30 days (seconds)
     refresh_expires = 30 * 24 * 3600
     store_refresh_token(user['id'], jti, raw_refresh, expires_in=refresh_expires)
+    # Set refresh token as HttpOnly cookie (format: jti.raw)
     refresh_token_combined = f"{jti}.{raw_refresh}"
-    return jsonify({'message': 'logged in', 'user_id': user['id'], 'token': token, 'refresh_token': refresh_token_combined})
+    resp = make_response(jsonify({'message': 'logged in', 'user_id': user['id'], 'token': token}))
+    secure = not current_app.config.get('TESTING', False) and current_app.config.get('ENV') != 'development'
+    resp.set_cookie('mc_refresh', refresh_token_combined, httponly=True, samesite='Lax', secure=secure, max_age=refresh_expires)
+    return resp
 
 
 @bp.route('/logout', methods=['POST'])
@@ -67,7 +71,10 @@ def logout():
     session.clear()
     if uid:
         revoke_user_tokens(uid)
-    return jsonify({'message': 'logged out'})
+    resp = make_response(jsonify({'message': 'logged out'}))
+    # clear cookie
+    resp.set_cookie('mc_refresh', '', httponly=True, samesite='Lax', secure=False, expires=0)
+    return resp
 
 
 @bp.route('/me', methods=['GET'])
@@ -101,9 +108,11 @@ def refresh():
         new_token = create_token(payload)
         return jsonify({'token': new_token})
 
-    # Rotation flow: accept refresh token in JSON body as {"refresh_token": "<jti>.<raw>"}
+    # Rotation flow: accept refresh token from JSON body OR HttpOnly cookie
     data = request.get_json(silent=True) or {}
     rt = data.get('refresh_token')
+    if not rt:
+        rt = request.cookies.get('mc_refresh')
     if not rt or '.' not in rt:
         return jsonify({'error': 'refresh_token required'}), 401
     jti, raw = rt.split('.', 1)
@@ -131,4 +140,7 @@ def refresh():
     payload = {'user_id': user['id'], 'email': user['email']}
     new_access = create_token(payload)
     new_refresh_combined = f"{new_jti}.{new_raw}"
-    return jsonify({'token': new_access, 'refresh_token': new_refresh_combined})
+    resp = make_response(jsonify({'token': new_access}))
+    secure = not current_app.config.get('TESTING', False) and current_app.config.get('ENV') != 'development'
+    resp.set_cookie('mc_refresh', new_refresh_combined, httponly=True, samesite='Lax', secure=secure, max_age=refresh_expires)
+    return resp

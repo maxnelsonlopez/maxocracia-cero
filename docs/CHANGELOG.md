@@ -63,13 +63,13 @@ Credits: generated during interactive development session between developer and 
   - `app/schema.sql` — added `refresh_tokens` table (user_id, jti, token_hash, issued_at, expires_at, revoked).
   - `app/refresh_utils.py` — new helper module: generates secure refresh tokens, hashes them, stores and verifies tokens, rotates (revoke old + create new) and revokes user tokens.
   - `app/auth.py` — updated flows:
-    - `POST /auth/login` now returns `refresh_token` (format `<jti>.<raw>`) in addition to the access token.
-    - `POST /auth/refresh` supports two modes:
-      - Legacy: send `Authorization: Bearer <access_token>` and the server will verify the signature even if expired and re-issue a new access token.
-      - Rotation: send JSON `{ "refresh_token": "<jti>.<raw>" }` and the server will validate the refresh token, rotate it (revoke old, store new hash) and return both a new access token and a new refresh token.
+    - `POST /auth/login` now sets a HttpOnly cookie `mc_refresh` containing the refresh token (format `<jti>.<raw>`) and returns the access token in the JSON body. This prevents client-side JavaScript from reading the refresh token.
+      - `POST /auth/refresh` supports two modes:
+        - Legacy: send `Authorization: Bearer <access_token>` and the server will verify the signature even if expired and re-issue a new access token.
+        - Rotation (preferred): send the request with the HttpOnly cookie `mc_refresh` (browser sends cookie automatically). The server validates the token from the cookie, rotates it (revoke old, set new cookie) and returns a new access token in the response body.
     - `POST /auth/logout` revokes refresh tokens for the user to fully logout sessions.
   - `app/jwt_utils.py` — switched to timezone-aware datetime usage and store `exp` as epoch seconds to avoid timezone ambiguities and DeprecationWarnings.
-  - `app/static/app.js` — UI now persists `refresh_token` (localStorage for prototype), attempts refresh automatically on 401 via `/auth/refresh`, and updates stored tokens after rotation. Added `authFetch()` helper which transparently retries after refresh.
+  - `app/static/app.js` — UI no longer stores refresh tokens in localStorage. Instead the server sets a HttpOnly cookie `mc_refresh` on login and rotates it on refresh. The client uses `authFetch()` which transparently retries after calling `/auth/refresh` (cookies are sent automatically).
   - `tests/test_refresh_tokens.py` — new tests covering login/refresh rotation, reuse rejection, and expired-refresh rejection.
 
 Notes & follow-ups:
@@ -77,5 +77,3 @@ Notes & follow-ups:
 - Current storage for `refresh_token` in the UI is `localStorage` (acceptable for local prototypes). For production, prefer HttpOnly secure cookies and CSRF protections.
 - Consider hardening the refresh token hashing (HMAC using `SECRET_KEY`, or Argon2/bcrypt) and limiting the number of active refresh tokens per user.
 - The rotation pattern prevents reuse of old refresh tokens; tests ensure attempted reuse is rejected.
-
-

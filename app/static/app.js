@@ -11,19 +11,10 @@ function saveToken(t){
   el('token').textContent = t
 }
 
-function saveRefreshToken(rt){
-  if (!rt) { localStorage.removeItem('mc_refresh'); return }
-  localStorage.setItem('mc_refresh', rt)
-}
-
 function loadToken(){
   const t = localStorage.getItem('mc_token')
   if (t) el('token').textContent = t
   return t
-}
-
-function loadRefreshToken(){
-  return localStorage.getItem('mc_refresh')
 }
 
 function getAuthHeaders(headers={}){
@@ -57,8 +48,6 @@ function showProfileFromToken(){
 }
 
 el('btnLogout').onclick = () => { saveToken(null); showProfileFromToken() }
-// also remove refresh token on logout
-el('btnLogout').onclick = () => { saveToken(null); saveRefreshToken(null); showProfileFromToken() }
 
 el('btnRegister').onclick = async () => {
   const email = el('email').value
@@ -74,23 +63,19 @@ el('btnRegister').onclick = async () => {
 el('btnLogin').onclick = async () => {
   const email = el('email').value
   const password = el('password').value
-  const res = await fetch(`${base}/auth/login`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email,password})})
+  const res = await fetch(`${base}/auth/login`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email,password}), credentials: 'include'})
   const data = await res.json()
   const token = data.token || null
   saveToken(token)
-  if (data.refresh_token) saveRefreshToken(data.refresh_token)
   showProfileFromToken()
 }
 
 async function attemptRefresh(){
-  const rt = loadRefreshToken()
-  if (!rt) return false
   try{
-    const res = await fetch(`${base}/auth/refresh`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({refresh_token: rt})})
+    const res = await fetch(`${base}/auth/refresh`, {method:'POST', credentials: 'include'})
     if (!res.ok) return false
     const j = await res.json()
     if (j.token) saveToken(j.token)
-    if (j.refresh_token) saveRefreshToken(j.refresh_token)
     return true
   }catch(e){
     return false
@@ -101,6 +86,7 @@ async function attemptRefresh(){
 async function authFetch(url, opts={}){
   opts.headers = opts.headers || {}
   opts.headers = getAuthHeaders(opts.headers)
+  opts.credentials = 'include'
   let res = await fetch(url, opts)
   if (res.status === 401){
     const refreshed = await attemptRefresh()
