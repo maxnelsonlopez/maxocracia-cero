@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2025-10-21 — Mejoras de seguridad prioritarias
+
+- Implementadas mejoras críticas de seguridad:
+
+  - `app/jwt_utils.py` — Mejorada la gestión de claves secretas para JWT:
+    - Eliminado el uso de 'dev-secret' como valor predeterminado
+    - Implementada función `get_secure_key()` que genera claves aleatorias en desarrollo
+    - Añadidos claims de seguridad estándar (iat, nbf, jti) a los tokens
+    - Mejorado el manejo de errores en la verificación de tokens
+
+  - `app/limiter.py` — Implementado rate limiting para prevenir ataques de fuerza bruta:
+    - Añadido Flask-Limiter para controlar frecuencia de peticiones
+    - Configurados límites específicos para rutas sensibles de autenticación (5 por minuto, 20 por hora)
+    - Implementado manejo de errores para respuestas 429 (Too Many Requests)
+
+  - `app/refresh_utils.py` — Fortalecido el hashing de tokens de refresco:
+    - Reemplazado HMAC-SHA256 simple por PBKDF2-HMAC-SHA256 con salt único
+    - Implementadas 100,000 iteraciones para resistencia a ataques
+    - Añadida comparación en tiempo constante para prevenir timing attacks
+
+  - `app/validators.py` — Añadida validación robusta de datos de entrada:
+    - Implementados validadores para email, contraseña, nombre y alias
+    - Creado decorador para validar solicitudes JSON según esquemas definidos
+    - Aplicada validación en rutas de registro y login
+
+- Notas de verificación:
+  - Las claves JWT ahora son seguras incluso en entorno de desarrollo
+  - Las rutas de autenticación están protegidas contra ataques de fuerza bruta
+  - Los tokens de refresco utilizan algoritmos de hashing más seguros
+  - La validación de datos previene entradas maliciosas o incorrectas
+
+- Dependencias añadidas:
+  - Flask-Limiter>=3.3.0
+  - redis>=4.5.0 (opcional, para almacenamiento de rate limiting)
+
 ## 2025-10-19 — Core API and interchanges
 
 - Added `feature/core-api` branch and pushed to origin. PR URL suggested by remote:
@@ -77,3 +112,5 @@ Notes & follow-ups:
 - Current storage for `refresh_token` in the UI is `localStorage` (acceptable for local prototypes). For production, prefer HttpOnly secure cookies and CSRF protections.
 - Consider hardening the refresh token hashing (HMAC using `SECRET_KEY`, or Argon2/bcrypt) and limiting the number of active refresh tokens per user.
 - The rotation pattern prevents reuse of old refresh tokens; tests ensure attempted reuse is rejected.
+
+

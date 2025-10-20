@@ -2,23 +2,56 @@ import secrets
 import hashlib
 import hmac
 import os
+import base64
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from .utils import get_db
-
-# use SECRET_KEY for HMAC if available
-SECRET = os.environ.get('SECRET_KEY', 'dev-secret')
+from .jwt_utils import get_secure_key
 
 # Length of raw refresh token in bytes (will be hex-encoded)
 RAW_TOKEN_BYTES = 32
+# Número de iteraciones para PBKDF2
+PBKDF2_ITERATIONS = 100000
 
 def generate_refresh_token_raw() -> str:
     return secrets.token_hex(RAW_TOKEN_BYTES)
 
 def hash_refresh_token(token: str) -> str:
-    # HMAC-SHA256 using SECRET to derive token hash for storage
-    return hmac.new(SECRET.encode('utf-8'), token.encode('utf-8'), hashlib.sha256).hexdigest()
+    # Usar PBKDF2-HMAC-SHA256 con salt único para cada token
+    # Esto es mucho más seguro que un simple HMAC
+    salt = os.urandom(16)
+    key = hashlib.pbkdf2_hmac(
+        'sha256', 
+        token.encode('utf-8'), 
+        salt, 
+        PBKDF2_ITERATIONS
+    )
+    # Almacenar salt y hash juntos
+    storage = base64.b64encode(salt + key).decode('utf-8')
+    return storage
+
+def verify_refresh_token_hash(token: str, stored_hash: str) -> bool:
+    try:
+        # Decodificar el hash almacenado
+        decoded = base64.b64decode(stored_hash.encode('utf-8'))
+        # Extraer salt (primeros 16 bytes)
+        salt = decoded[:16]
+        # Extraer hash almacenado
+        stored_key = decoded[16:]
+        
+        # Calcular hash con el mismo salt
+        key = hashlib.pbkdf2_hmac(
+            'sha256', 
+            token.encode('utf-8'), 
+            salt, 
+            PBKDF2_ITERATIONS
+        )
+        
+        # Comparar en tiempo constante para prevenir timing attacks
+        return hmac.compare_digest(key, stored_key)
+    except Exception:
+        return False
 
 def store_refresh_token(user_id: int, jti: str, raw_token: str, expires_in: Optional[int] = None):
     db = get_db()
@@ -63,7 +96,7 @@ def verify_refresh_token_raw(jti: str, raw_token: str) -> bool:
         except Exception:
             pass
     stored_hash = rec['token_hash']
-    return hmac.compare_digest(stored_hash, hash_refresh_token(raw_token))
+    return verify_refresh_token_hash(raw_token, stored_hash)
 
 def rotate_refresh_token(old_jti: str, new_jti: str, new_raw_token: str, expires_in: Optional[int] = None):
     # Revoke old token and store new rotated token

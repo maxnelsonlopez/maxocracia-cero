@@ -1,13 +1,17 @@
 import os
 from flask import Flask
 from .utils import init_db, close_db
+from .limiter import init_limiter
 
 
 def create_app(db_path=None):
     app = Flask(__name__)
     app.config['DATABASE'] = db_path or os.path.join(os.path.dirname(__file__), '..', 'comun.db')
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret')
-
+    
+    # Inicializar rate limiter
+    limiter = init_limiter(app)
+    
     # register teardown
     app.teardown_appcontext(close_db)
 

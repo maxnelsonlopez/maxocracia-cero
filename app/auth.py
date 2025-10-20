@@ -12,6 +12,8 @@ from .refresh_utils import (
     rotate_refresh_token,
     revoke_user_tokens,
 )
+from .limiter import limiter, AUTH_LIMITS
+from .validators import validate_json_request, validate_email, validate_password, validate_name, validate_alias
 from uuid import uuid4
 from datetime import timedelta
 
@@ -19,14 +21,15 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
 @bp.route('/register', methods=['POST'])
+@limiter.limit(AUTH_LIMITS)
+@validate_json_request({
+    'email': validate_email,
+    'password': validate_password,
+    'name': validate_name,
+    'alias?': validate_alias  # Campo opcional
+})
 def register():
     data = request.get_json() or {}
-    email = data.get('email')
-    password = data.get('password')
-    name = data.get('name')
-    alias = data.get('alias')
-    if not email or not password:
-        return jsonify({'error': 'email and password required'}), 400
     db = get_db()
     try:
         db.execute('INSERT INTO users (email, name, alias, password_hash) VALUES (?, ?, ?, ?)',
@@ -38,6 +41,11 @@ def register():
 
 
 @bp.route('/login', methods=['POST'])
+@limiter.limit(AUTH_LIMITS)
+@validate_json_request({
+    'email': validate_email,
+    'password': validate_password
+})
 def login():
     data = request.get_json() or {}
     email = data.get('email')
@@ -94,6 +102,7 @@ def me():
 
 
 @bp.route('/refresh', methods=['POST'])
+@limiter.limit(AUTH_LIMITS)
 def refresh():
     # Support two modes:
     # 1) Legacy: Authorization: Bearer <access_token> -> verify signature allowing expired and return new access token
