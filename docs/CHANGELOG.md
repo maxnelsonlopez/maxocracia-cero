@@ -7,9 +7,11 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
 ## 2025-10-19 — Core API and interchanges
 
 - Added `feature/core-api` branch and pushed to origin. PR URL suggested by remote:
+
   - https://github.com/maxnelsonlopez/maxocracia-cero/pull/new/feature/core-api
 
 - Files added/changed (high level):
+
   - `app/interchanges.py` — new Flask blueprint implementing `/interchanges` POST and GET endpoints.
   - `app/maxo.py` — crediting helper used by the interchanges flow (`credit_user` and `get_balance`).
   - `app/__init__.py` — registered `interchanges` blueprint in the app factory.
@@ -19,6 +21,7 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
   - `.gitignore` — ensured `comun.db` is ignored to keep DB out of the repo.
 
 - Behavior and verification notes:
+
   - POSTing a test interchange (e.g. `interchange_id: INT-TEST-002`) creates an `interchanges` row and automatically inserts a `maxo_ledger` credit for the receiver.
   - Example verification query (performed during development):
 
@@ -37,11 +40,9 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
   - The Maxo crediting logic is minimal/heuristic. A formal Maxo specification and business rules should be implemented and documented.
   - No unit or integration tests yet — see TODO for adding pytest tests and CI.
 
-
 ## How this changelog is generated
 
 This file is hand-maintained. For each feature/bugfix, add a short entry with files changed, a brief verification note, and any follow-ups.
-
 
 ---
 
