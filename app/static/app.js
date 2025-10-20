@@ -2,6 +2,8 @@ const base = `${location.protocol}//${location.host}`
 
 const el = id => document.getElementById(id)
 
+let currentUser = null
+
 // Token helpers: persist token in localStorage so UI actions reuse it
 function saveToken(t){
   if (!t) { localStorage.removeItem('mc_token'); el('token').textContent = '(no token)'; return }
@@ -21,17 +23,6 @@ function getAuthHeaders(headers={}){
   return headers
 }
 
-// keep decode helper for edge-cases, but prefer /auth/me
-function decodeJwtPayload(token){
-  try{
-    const parts = token.split('.')
-    if (parts.length !== 3) return null
-    const payload = parts[1]
-    const json = atob(payload.replace(/-/g,'+').replace(/_/g,'/'))
-    return JSON.parse(decodeURIComponent(escape(json)))
-  }catch(e){ return null }
-}
-
 function showProfileFromToken(){
   const token = loadToken()
   if (!token) { el('profile').textContent = '(not logged in)'; return }
@@ -39,16 +30,19 @@ function showProfileFromToken(){
   // prefer authoritative profile via /auth/me
   fetch(`${base}/auth/me`, {headers: getAuthHeaders({})}).then(async res => {
     if (!res.ok) {
+      currentUser = null
       el('profile').textContent = '(unauthenticated)'
       return
     }
     const j = await res.json()
+    currentUser = j
     const parts = []
     if (j.name) parts.push(`Name: ${j.name}`)
     if (j.id) parts.push(`ID: ${j.id}`)
     if (j.email) parts.push(`Email: ${j.email}`)
     el('profile').textContent = parts.join(' | ')
   }).catch(e => {
+    currentUser = null
     el('profile').textContent = '(error fetching profile)'
   })
 }
@@ -92,9 +86,8 @@ el('btnBalance').onclick = async () => {
   let uid = el('balance_user').value
   const token = loadToken()
   if (!uid) {
-    // if logged in, prefer authenticated user id
-    const dec = token ? decodeJwtPayload(token) : null
-    if (dec && dec.user_id) uid = dec.user_id
+    // if logged in, prefer authenticated user id from profile
+    if (currentUser && currentUser.id) uid = currentUser.id
   }
   if (!uid) { alert('user id required'); return }
   const headers = getAuthHeaders({})
@@ -103,10 +96,8 @@ el('btnBalance').onclick = async () => {
 }
 
 el('btnTransfer').onclick = async () => {
-  // If a token is present, prefer using the authenticated user as the sender
-  const token = loadToken()
-  const decoded = token ? decodeJwtPayload(token) : null
-  const from_user = decoded && decoded.user_id ? parseInt(decoded.user_id) : parseInt(el('from_user').value||0)
+  // If logged in, prefer using the authenticated user as the sender
+  const from_user = currentUser && currentUser.id ? parseInt(currentUser.id) : parseInt(el('from_user').value||0)
   const to_user = parseInt(el('to_user').value||0)
   const amount = parseFloat(el('amount').value||0)
   const headers = getAuthHeaders({'Content-Type':'application/json'})
@@ -127,9 +118,7 @@ el('btnCreateRes').onclick = async () => {
   const title = el('res_title').value
   const category = el('res_cat').value
   const description = el('res_desc').value
-  const token = loadToken()
-  const decoded = token ? decodeJwtPayload(token) : null
-  const user_id = decoded && decoded.user_id ? decoded.user_id : 1
+  const user_id = currentUser && currentUser.id ? currentUser.id : 1
   const headers = getAuthHeaders({'Content-Type':'application/json'})
   const body = JSON.stringify({user_id,title,category,description})
   const res = await fetch(`${base}/resources`, {method:'POST', headers, body})
@@ -151,9 +140,7 @@ el('btnListRes').onclick = async () => {
   })
   Array.from(document.querySelectorAll('.claim-btn')).forEach(b => b.onclick = async (e)=>{
     const id = e.target.dataset.id
-    const token = loadToken()
-    const decoded = token ? decodeJwtPayload(token) : null
-    const user_id = decoded && decoded.user_id ? decoded.user_id : 1
+    const user_id = currentUser && currentUser.id ? currentUser.id : 1
     const resp = await fetch(`${base}/resources/${id}/claim`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({user_id})})
     const json = await resp.json()
     alert(json.message || JSON.stringify(json))
@@ -187,9 +174,7 @@ async function refreshResources(){
   })
   Array.from(document.querySelectorAll('.claim-btn')).forEach(b => b.onclick = async (e)=>{
     const id = e.target.dataset.id
-    const token = loadToken()
-    const decoded = token ? decodeJwtPayload(token) : null
-    const user_id = decoded && decoded.user_id ? decoded.user_id : 1
+    const user_id = currentUser && currentUser.id ? currentUser.id : 1
     const resp = await fetch(`${base}/resources/${id}/claim`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({user_id})})
     const json = await resp.json()
     alert(json.message || JSON.stringify(json))
