@@ -33,9 +33,9 @@ def create_token(payload, expires_in: int = None):
     The `exp` claim is stored as an integer UTC epoch (seconds).
     """
     # Asegurar que SECRET esté inicializado
+    global SECRET
     if SECRET is None:
         # Inicializar SECRET si aún no se ha hecho
-        global SECRET
         SECRET = get_secure_key()
         
     now = datetime.now(timezone.utc)
@@ -66,9 +66,9 @@ def verify_token(token, allow_expired: bool = False):
     Returns payload dict or None on failure.
     """
     # Asegurar que SECRET esté inicializado
+    global SECRET
     if SECRET is None:
         # Inicializar SECRET si aún no se ha hecho
-        global SECRET
         SECRET = get_secure_key()
         
     try:

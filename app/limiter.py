@@ -12,8 +12,8 @@ limiter = Limiter(
 )
 
 # Límites específicos para rutas sensibles
-AUTH_LIMITS = ["5 per minute", "20 per hour"]
-API_GENERAL_LIMITS = ["60 per minute", "1000 per hour"]
+AUTH_LIMITS = "5 per minute"
+API_GENERAL_LIMITS = "60 per minute"
 
 # Función para manejar excesos de límite
 def ratelimit_handler(e):
