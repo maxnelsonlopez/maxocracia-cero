@@ -4,9 +4,13 @@ const el = id => document.getElementById(id)
 
 el('btnRegister').onclick = async () => {
   const email = el('email').value
+  const name = el('name').value
   const password = el('password').value
-  const res = await fetch(`${base}/auth/register`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email,password})})
-  el('interchange_res').textContent = await res.text()
+  if (!email || !password || !name) { alert('email, name and password required'); return }
+  const res = await fetch(`${base}/auth/register`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email,password,name})})
+  const text = await res.text()
+  if (!res.ok) alert('Register failed: '+text)
+  el('interchange_res').textContent = text
 }
 
 el('btnLogin').onclick = async () => {
@@ -31,6 +35,7 @@ el('btnInterchange').onclick = async () => {
 el('btnBalance').onclick = async () => {
   const uid = el('balance_user').value
   const token = el('token').textContent
+  if (!uid) { alert('user id required'); return }
   const headers = token && token !== '(no token)' ? {'Authorization': `Bearer ${token}`} : {}
   const res = await fetch(`${base}/maxo/${uid}/balance`, {headers})
   el('balance_res').textContent = JSON.stringify(await res.json(), null, 2)

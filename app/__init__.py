@@ -39,4 +39,9 @@ def create_app(db_path=None):
         from flask import send_from_directory
         return send_from_directory(os.path.join(os.path.dirname(__file__), 'static'), 'index.html')
 
+    @app.route('/favicon.ico')
+    def favicon():
+        from flask import Response
+        return Response(status=204)
+
     return app
