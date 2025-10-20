@@ -4,12 +4,16 @@
   <meta charset="utf-8" />
   <title>Maxocracia-Cero API Playground</title>
   <style>
-    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; padding: 24px; }
-    input, select, button, textarea { font: inherit; padding: 8px; margin: 4px 0; width: 100%; box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; padding: 16px; background:#f7f9fb; color:#0b1320 }
+    .card { background:white; padding:12px; border-radius:8px; box-shadow: 0 1px 4px rgba(11,19,32,0.06); margin-bottom:12px }
+    input, select, button, textarea { font: inherit; padding: 8px; margin: 4px 0; width: 100%; box-sizing: border-box; border:1px solid #e3e8ee; border-radius:6px }
     .row { display:flex; gap:8px; }
     .col { flex:1 }
     .small { width: 120px }
     pre { background:#f6f8fa; padding:12px; border-radius:6px }
+    table { width:100%; border-collapse:collapse; margin-top:8px }
+    table th, table td { text-align:left; padding:8px; border-bottom:1px solid #eef2f6 }
+    h2 { margin-top: 18px }
   </style>
 </head>
 <body>
@@ -27,6 +31,11 @@
     </div>
     <p>Token:</p>
     <pre id="token">(no token)</pre>
+    <div style="margin-top:8px">
+      <strong>Profile</strong>
+      <div id="profile">(not logged in)</div>
+      <button id="btnLogout" style="margin-top:6px">Logout</button>
+    </div>
   </div>
 
   <h2>Create Interchange</h2>
@@ -39,6 +48,8 @@
     <textarea id="description" placeholder="description"></textarea>
     <button id="btnInterchange">Create Interchange</button>
     <pre id="interchange_res"></pre>
+    <h4>Recent interchanges</h4>
+    <table id="interchanges_table"><thead><tr><th>ID</th><th>Giver</th><th>Receiver</th><th>UTH</th><th>Impact</th><th>Created</th></tr></thead><tbody></tbody></table>
   </div>
 
   <h2>Maxo</h2>
@@ -63,6 +74,8 @@
     <button id="btnCreateRes">Create Resource</button>
     <button id="btnListRes">List Resources</button>
     <pre id="res_list"></pre>
+    <h4>Available resources</h4>
+    <table id="resources_table"><thead><tr><th>ID</th><th>Title</th><th>Category</th><th>Owner</th><th>Created</th><th>Action</th></tr></thead><tbody></tbody></table>
   </div>
 
   <script src="/static/app.js"></script>

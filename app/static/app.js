@@ -31,6 +31,20 @@ function decodeJwtPayload(token){
   }catch(e){ return null }
 }
 
+function showProfileFromToken(){
+  const token = loadToken()
+  if (!token) { el('profile').textContent = '(not logged in)'; return }
+  const decoded = decodeJwtPayload(token)
+  if (!decoded) { el('profile').textContent = '(invalid token)'; return }
+  const parts = []
+  if (decoded.name) parts.push(`Name: ${decoded.name}`)
+  if (decoded.user_id) parts.push(`ID: ${decoded.user_id}`)
+  if (decoded.email) parts.push(`Email: ${decoded.email}`)
+  el('profile').textContent = parts.join(' | ')
+}
+
+el('btnLogout').onclick = () => { saveToken(null); showProfileFromToken() }
+
 el('btnRegister').onclick = async () => {
   const email = el('email').value
   const name = el('name').value
@@ -64,10 +78,15 @@ el('btnInterchange').onclick = async () => {
 }
 
 el('btnBalance').onclick = async () => {
-  const uid = el('balance_user').value
-  const token = el('token').textContent
+  let uid = el('balance_user').value
+  const token = loadToken()
+  if (!uid) {
+    // if logged in, prefer authenticated user id
+    const dec = token ? decodeJwtPayload(token) : null
+    if (dec && dec.user_id) uid = dec.user_id
+  }
   if (!uid) { alert('user id required'); return }
-  const headers = token && token !== '(no token)' ? {'Authorization': `Bearer ${token}`} : {}
+  const headers = getAuthHeaders({})
   const res = await fetch(`${base}/maxo/${uid}/balance`, {headers})
   el('balance_res').textContent = JSON.stringify(await res.json(), null, 2)
 }
@@ -161,3 +180,4 @@ async function refreshResources(){
 // initial load
 refreshInterchanges()
 refreshResources()
+showProfileFromToken()
