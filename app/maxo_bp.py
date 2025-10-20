@@ -10,11 +10,16 @@ bp = Blueprint('maxo', __name__, url_prefix='/maxo')
 def balance(user_id):
     bal = get_balance(user_id)
     return jsonify({'user_id': user_id, 'balance': bal})
-
-
 @bp.route('/transfer', methods=['POST'])
+@token_required
 def transfer():
-    # token check not enforced here yet
+    # ensure authenticated user is the sender
+    user = getattr(request, 'user', {})
+    auth_user_id = user.get('user_id')
+    data = request.get_json() or {}
+    from_id = data.get('from_user_id')
+    if auth_user_id is None or int(auth_user_id) != int(from_id):
+        return jsonify({'error': 'forbidden: token user mismatch'}), 403
     return _transfer_impl()
 
 
