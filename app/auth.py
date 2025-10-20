@@ -3,6 +3,7 @@ from .utils import get_db
 from werkzeug.security import generate_password_hash, check_password_hash
 from .jwt_utils import create_token
 from .jwt_utils import token_required
+from .jwt_utils import verify_token
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -60,3 +61,20 @@ def me():
     if row is None:
         return jsonify({'error': 'user not found'}), 404
     return jsonify(dict(row))
+
+
+
+@bp.route('/refresh', methods=['POST'])
+def refresh():
+    # Accepts Authorization: Bearer <token> and returns a new token with same payload
+    auth = request.headers.get('Authorization', '')
+    if not auth.startswith('Bearer '):
+        return jsonify({'error': 'authorization required'}), 401
+    token = auth.split(' ', 1)[1]
+    data = verify_token(token)
+    if data is None:
+        return jsonify({'error': 'invalid token'}), 401
+    # optionally, we can strip any fields and re-issue minimal payload
+    payload = {'user_id': data.get('user_id'), 'email': data.get('email')}
+    new_token = create_token(payload)
+    return jsonify({'token': new_token})
