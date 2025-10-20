@@ -67,8 +67,12 @@ def me():
 @bp.route('/refresh', methods=['POST'])
 @token_required
 def refresh():
-    # Protected: request.user is already populated by token_required
-    user = getattr(request, 'user', {}) or {}
-    payload = {'user_id': user.get('user_id'), 'email': user.get('email')}
+    # Protected: allow expired tokens to be refreshed by verifying signature only
+    auth = request.headers.get('Authorization', '')
+    token = auth.split(' ', 1)[1]
+    data = verify_token(token, allow_expired=True)
+    if data is None:
+        return jsonify({'error': 'invalid token'}), 401
+    payload = {'user_id': data.get('user_id'), 'email': data.get('email')}
     new_token = create_token(payload)
     return jsonify({'token': new_token})
