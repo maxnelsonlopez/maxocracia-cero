@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Maxocracia-Cero API Playground</title>
+  <style>
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; padding: 24px; }
+    input, select, button, textarea { font: inherit; padding: 8px; margin: 4px 0; width: 100%; box-sizing: border-box; }
+    .row { display:flex; gap:8px; }
+    .col { flex:1 }
+    .small { width: 120px }
+    pre { background:#f6f8fa; padding:12px; border-radius:6px }
+  </style>
+</head>
+<body>
+  <h1>Maxocracia-Cero — API Playground</h1>
+  <p>Run the Flask app and open this page (e.g. <code>http://127.0.0.1:5001/</code>) to interact with the API.</p>
+
+  <h2>Register / Login</h2>
+  <div>
+    <input id="email" placeholder="email" />
+    <input id="password" placeholder="password" />
+    <div class="row">
+      <button id="btnRegister">Register</button>
+      <button id="btnLogin">Login</button>
+    </div>
+    <p>Token:</p>
+    <pre id="token">(no token)</pre>
+  </div>
+
+  <h2>Create Interchange</h2>
+  <div>
+    <input id="int_id" placeholder="interchange id" />
+    <input id="giver_id" placeholder="giver id (number)" />
+    <input id="receiver_id" placeholder="receiver id (number)" />
+    <input id="uth" placeholder="uth hours" />
+    <input id="impact" placeholder="impact score" />
+    <textarea id="description" placeholder="description"></textarea>
+    <button id="btnInterchange">Create Interchange</button>
+    <pre id="interchange_res"></pre>
+  </div>
+
+  <h2>Maxo</h2>
+  <div>
+    <input id="balance_user" placeholder="user id for balance" />
+    <button id="btnBalance">Get Balance</button>
+    <pre id="balance_res"></pre>
+
+    <h3>Transfer</h3>
+    <input id="from_user" placeholder="from user id" />
+    <input id="to_user" placeholder="to user id" />
+    <input id="amount" placeholder="amount" />
+    <button id="btnTransfer">Transfer</button>
+    <pre id="transfer_res"></pre>
+  </div>
+
+  <h2>Resources</h2>
+  <div>
+    <input id="res_title" placeholder="title" />
+    <input id="res_cat" placeholder="category" />
+    <input id="res_desc" placeholder="description" />
+    <button id="btnCreateRes">Create Resource</button>
+    <button id="btnListRes">List Resources</button>
+    <pre id="res_list"></pre>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

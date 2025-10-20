@@ -33,4 +33,10 @@ def create_app(db_path=None):
     # placeholder imports to ensure modules loaded
     # other optional blueprints can be imported here
 
+    # serve a small static UI at /
+    @app.route('/')
+    def root_index():
+        from flask import send_from_directory
+        return send_from_directory(os.path.join(os.path.dirname(__file__), 'static'), 'index.html')
+
     return app
