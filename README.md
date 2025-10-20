@@ -20,6 +20,7 @@ Aquí no encontrarás (aún) contratos inteligentes complejos, sino las herramie
 - [Modelo de datos](data-model/)
 - [Especificación del dashboard](dashboard-spec/)
 - [FAQ Extendido](docs/FAQ_EXTENDIDO.md)
+ - [API & Usage (Flask)](docs/API.md)
 
 ## La Arquitectura en Práctica
 
