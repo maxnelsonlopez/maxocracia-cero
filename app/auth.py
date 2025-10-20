@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, session
 from .utils import get_db
 from werkzeug.security import generate_password_hash, check_password_hash
 from .jwt_utils import create_token
+from .jwt_utils import token_required
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -44,3 +45,18 @@ def login():
 def logout():
     session.clear()
     return jsonify({'message': 'logged out'})
+
+
+@bp.route('/me', methods=['GET'])
+@token_required
+def me():
+    # request.user is set by token_required
+    user_info = getattr(request, 'user', {})
+    user_id = user_info.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'invalid token'}), 401
+    db = get_db()
+    row = db.execute('SELECT id, email, name, alias, phone, city, neighborhood, created_at FROM users WHERE id = ?', (user_id,)).fetchone()
+    if row is None:
+        return jsonify({'error': 'user not found'}), 404
+    return jsonify(dict(row))

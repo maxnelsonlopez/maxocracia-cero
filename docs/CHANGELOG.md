@@ -47,3 +47,12 @@ This file is hand-maintained. For each feature/bugfix, add a short entry with fi
 ---
 
 Credits: generated during interactive development session between developer and assistant on 2025-10-19.
+
+## 2025-10-20 — UI polish and security fixes
+
+- Persist JWT in the browser UI and show user profile; use authenticated user ID for balance, transfers and claims.
+- Add `/auth/me` endpoint to return profile information derived from the JWT.
+- Harden `/maxo/transfer`: validate inputs, return helpful errors including current balance when funds are insufficient, perform ledger writes atomically.
+- Improve client-side error handling to avoid uncaught exceptions in handlers that made UI buttons appear unresponsive.
+- Seeded demo DB passwords updated to hashed values where plaintext remained.
+

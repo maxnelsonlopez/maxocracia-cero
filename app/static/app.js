@@ -34,13 +34,30 @@ function decodeJwtPayload(token){
 function showProfileFromToken(){
   const token = loadToken()
   if (!token) { el('profile').textContent = '(not logged in)'; return }
-  const decoded = decodeJwtPayload(token)
-  if (!decoded) { el('profile').textContent = '(invalid token)'; return }
-  const parts = []
-  if (decoded.name) parts.push(`Name: ${decoded.name}`)
-  if (decoded.user_id) parts.push(`ID: ${decoded.user_id}`)
-  if (decoded.email) parts.push(`Email: ${decoded.email}`)
-  el('profile').textContent = parts.join(' | ')
+  // prefer to fetch /auth/me for authoritative profile
+  try{
+    fetch(`${base}/auth/me`, {headers: getAuthHeaders({})}).then(async res => {
+      if (!res.ok) {
+        // fallback to decode if /me fails
+        const decoded = decodeJwtPayload(token)
+        if (!decoded) el('profile').textContent = '(invalid token)'
+        else el('profile').textContent = `ID: ${decoded.user_id} | Email: ${decoded.email || ''}`
+        return
+      }
+      const j = await res.json()
+      const parts = []
+      if (j.name) parts.push(`Name: ${j.name}`)
+      if (j.id) parts.push(`ID: ${j.id}`)
+      if (j.email) parts.push(`Email: ${j.email}`)
+      el('profile').textContent = parts.join(' | ')
+    }).catch(e => {
+      const decoded = decodeJwtPayload(token)
+      if (!decoded) el('profile').textContent = '(invalid token)'
+      else el('profile').textContent = `ID: ${decoded.user_id} | Email: ${decoded.email || ''}`
+    })
+  }catch(e){
+    el('profile').textContent = '(error fetching profile)'
+  }
 }
 
 el('btnLogout').onclick = () => { saveToken(null); showProfileFromToken() }
