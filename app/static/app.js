@@ -63,6 +63,7 @@ el('btnLogin').onclick = async () => {
   const data = await res.json()
   const token = data.token || null
   saveToken(token)
+  showProfileFromToken()
 }
 
 el('btnInterchange').onclick = async () => {
@@ -99,8 +100,17 @@ el('btnTransfer').onclick = async () => {
   const to_user = parseInt(el('to_user').value||0)
   const amount = parseFloat(el('amount').value||0)
   const headers = getAuthHeaders({'Content-Type':'application/json'})
-  const res = await fetch(`${base}/maxo/transfer`, {method:'POST', headers, body: JSON.stringify({from_user_id:from_user,to_user_id:to_user,amount,reason:'from UI'})})
-  el('transfer_res').textContent = JSON.stringify(await res.json(), null, 2)
+  try{
+    const res = await fetch(`${base}/maxo/transfer`, {method:'POST', headers, body: JSON.stringify({from_user_id:from_user,to_user_id:to_user,amount,reason:'from UI'})})
+    let json
+    try{ json = await res.json() } catch(e){
+      el('transfer_res').textContent = `Invalid response (status ${res.status})`
+      return
+    }
+    el('transfer_res').textContent = JSON.stringify(json, null, 2)
+  }catch(e){
+    el('transfer_res').textContent = `Network error: ${e.message}`
+  }
 }
 
 el('btnCreateRes').onclick = async () => {
