@@ -41,6 +41,7 @@ Actualmente, el proyecto se centra en apoyar y aprender de la red de apoyo de Bo
 Mientras la aplicación Flask esté corriendo (por defecto en `http://127.0.0.1:5001/` si usas `PORT=5001`), abre la raíz `/` en tu navegador para acceder a un pequeño "API Playground" estático en `app/static/index.html`.
 
 Pasos rápidos:
+
 - Ejecuta el servidor: `python run.py` o activa tu entorno virtual y ejecuta `./run.py` si lo configuras así.
 - Abre `http://127.0.0.1:5001/`.
 - Regístrate (Register), haz Login y copia el token que aparece en la caja "Token".

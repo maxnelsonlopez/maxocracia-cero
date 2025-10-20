@@ -2,7 +2,7 @@ import os
 import jwt
 from functools import wraps
 from flask import request, jsonify, current_app
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 SECRET = os.environ.get('SECRET_KEY', 'dev-secret')
 ALGORITHM = 'HS256'
@@ -10,9 +10,12 @@ ACCESS_TOKEN_EXPIRES = int(os.environ.get('ACCESS_TOKEN_EXPIRES', 15 * 60))  # s
 
 
 def create_token(payload, expires_in: int = None):
-    """Create a JWT with an `exp` claim. expires_in in seconds (default ACCESS_TOKEN_EXPIRES)."""
-    now = datetime.utcnow()
-    exp = now + timedelta(seconds=(expires_in if expires_in is not None else ACCESS_TOKEN_EXPIRES))
+    """Create a JWT with an `exp` claim. expires_in in seconds (default ACCESS_TOKEN_EXPIRES).
+    The `exp` claim is stored as an integer UTC epoch (seconds).
+    """
+    now = datetime.now(timezone.utc)
+    exp_dt = now + timedelta(seconds=(expires_in if expires_in is not None else ACCESS_TOKEN_EXPIRES))
+    exp = int(exp_dt.timestamp())
     to_encode = payload.copy()
     # only set exp if not present to allow tests to override
     if 'exp' not in to_encode:

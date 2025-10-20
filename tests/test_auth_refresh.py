@@ -52,3 +52,17 @@ def test_refresh_returns_new_token(client):
 def test_refresh_requires_token(client):
     resp = client.post('/auth/refresh')
     assert resp.status_code == 401
+
+
+def test_refresh_allows_expired_token(client):
+    db_path = client.application.config['DATABASE']
+    uid = seed_user(db_path, 'r2@example.test', 'R2')
+    # create a token that expires immediately using jwt_utils.create_token
+    from app.jwt_utils import create_token
+    tok = create_token({'user_id': uid, 'email': 'r2@example.test'}, expires_in=1)
+    import time
+    time.sleep(2)
+    resp = client.post('/auth/refresh', headers={'Authorization': f'Bearer {tok}'})
+    assert resp.status_code == 200
+    j = resp.get_json()
+    assert 'token' in j

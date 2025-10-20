@@ -67,20 +67,25 @@ curl -H "Authorization: Bearer <TOKEN>" http://127.0.0.1:5001/maxo/1/balance
   - on success returns { message, credit }
 
 - POST /reputation/review
+
   - body: { user_id, score }
   - adds/updates reputation average for the user
 
 - GET /reputation/<user_id>
+
   - returns { user_id, score, reviews_count }
 
 - POST /resources
+
   - body: { user_id, title, description, category }
   - creates a resource and returns 201
 
 - GET /resources
+
   - returns list of available resources
 
 - POST /resources/<id>/claim
+
   - body: { user_id }
   - claims a resource (marks unavailable)
 
