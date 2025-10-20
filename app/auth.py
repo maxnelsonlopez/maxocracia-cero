@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from .utils import get_db
 from werkzeug.security import generate_password_hash, check_password_hash
+from .jwt_utils import create_token
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -35,7 +36,8 @@ def login():
         return jsonify({'error': 'invalid credentials'}), 401
     session.clear()
     session['user_id'] = user['id']
-    return jsonify({'message': 'logged in', 'user_id': user['id']})
+    token = create_token({'user_id': user['id'], 'email': user['email']})
+    return jsonify({'message': 'logged in', 'user_id': user['id'], 'token': token})
 
 
 @bp.route('/logout', methods=['POST'])

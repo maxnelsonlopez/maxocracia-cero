@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from .maxo import get_balance, credit_user
 from .utils import get_db
+from .jwt_utils import token_required
 
 bp = Blueprint('maxo', __name__, url_prefix='/maxo')
 
@@ -13,6 +14,11 @@ def balance(user_id):
 
 @bp.route('/transfer', methods=['POST'])
 def transfer():
+    # token check not enforced here yet
+    return _transfer_impl()
+
+
+def _transfer_impl():
     data = request.get_json() or {}
     from_id = data.get('from_user_id')
     to_id = data.get('to_user_id')

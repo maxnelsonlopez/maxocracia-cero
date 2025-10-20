@@ -29,10 +29,13 @@ def client():
         pass
 
 
+from werkzeug.security import generate_password_hash
+
+
 def seed_user(db_path, email, name='Test User'):
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    cur.execute('INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)', (email, name, 'pw'))
+    cur.execute('INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)', (email, name, generate_password_hash('pw')))
     uid = cur.lastrowid
     conn.commit()
     conn.close()
@@ -50,9 +53,15 @@ def test_balance_and_transfer(client):
     data = resp.get_json()
     assert data['balance'] == 0
 
-    # transfer 5 from A to B (should fail, but our system allows negative balances)
+    # login as A to get token
+    resp = client.post('/auth/login', json={'email': 'a@example.test', 'password': 'pw'})
+    assert resp.status_code == 200
+    token = resp.get_json().get('token')
+    assert token
+
+    # transfer 5 from A to B
     payload = {'from_user_id': a, 'to_user_id': b, 'amount': 5.0, 'reason': 'test transfer'}
-    resp = client.post('/maxo/transfer', json=payload)
+    resp = client.post('/maxo/transfer', json=payload, headers={'Authorization': f'Bearer {token}'})
     assert resp.status_code == 200
 
     # check ledger sums

@@ -30,10 +30,13 @@ def client():
         pass
 
 
+from werkzeug.security import generate_password_hash
+
+
 def seed_user(db_path, email, name='Test User'):
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    cur.execute('INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)', (email, name, 'pw'))
+    cur.execute('INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)', (email, name, generate_password_hash('pw')))
     uid = cur.lastrowid
     conn.commit()
     conn.close()
