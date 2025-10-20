@@ -20,7 +20,7 @@ Aquí no encontrarás (aún) contratos inteligentes complejos, sino las herramie
 - [Modelo de datos](data-model/)
 - [Especificación del dashboard](dashboard-spec/)
 - [FAQ Extendido](docs/FAQ_EXTENDIDO.md)
- - [API & Usage (Flask)](docs/API.md)
+- [API & Usage (Flask)](docs/API.md)
 
 ## La Arquitectura en Práctica
 
@@ -35,3 +35,15 @@ Nuestra visión a largo plazo se basa en una arquitectura de tres capas (Verdad,
 Actualmente, el proyecto se centra en apoyar y aprender de la red de apoyo de Bogotá. Si quieres contribuir, revisa las especificaciones en este repositorio y contacta a los facilitadores del proyecto.
 
 ---
+
+## Interfaz web (API Playground)
+
+Mientras la aplicación Flask esté corriendo (por defecto en `http://127.0.0.1:5001/` si usas `PORT=5001`), abre la raíz `/` en tu navegador para acceder a un pequeño "API Playground" estático en `app/static/index.html`.
+
+Pasos rápidos:
+- Ejecuta el servidor: `python run.py` o activa tu entorno virtual y ejecuta `./run.py` si lo configuras así.
+- Abre `http://127.0.0.1:5001/`.
+- Regístrate (Register), haz Login y copia el token que aparece en la caja "Token".
+- Usa las secciones para crear interchanges, ver balances, transferir Maxo y crear/claim recursos.
+
+La UI es para pruebas locales y demo; no es una interfaz de producción.
