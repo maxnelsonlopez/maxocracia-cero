@@ -65,16 +65,10 @@ def me():
 
 
 @bp.route('/refresh', methods=['POST'])
+@token_required
 def refresh():
-    # Accepts Authorization: Bearer <token> and returns a new token with same payload
-    auth = request.headers.get('Authorization', '')
-    if not auth.startswith('Bearer '):
-        return jsonify({'error': 'authorization required'}), 401
-    token = auth.split(' ', 1)[1]
-    data = verify_token(token)
-    if data is None:
-        return jsonify({'error': 'invalid token'}), 401
-    # optionally, we can strip any fields and re-issue minimal payload
-    payload = {'user_id': data.get('user_id'), 'email': data.get('email')}
+    # Protected: request.user is already populated by token_required
+    user = getattr(request, 'user', {}) or {}
+    payload = {'user_id': user.get('user_id'), 'email': user.get('email')}
     new_token = create_token(payload)
     return jsonify({'token': new_token})
