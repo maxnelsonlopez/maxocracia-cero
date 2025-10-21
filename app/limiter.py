@@ -12,7 +12,8 @@ limiter = Limiter(
 )
 
 # Límites específicos para rutas sensibles
-AUTH_LIMITS = "5 per minute"
+# Nota: Los tests esperan 3 peticiones por minuto
+AUTH_LIMITS = "3 per minute"
 API_GENERAL_LIMITS = "60 per minute"
 
 # Función para manejar excesos de límite

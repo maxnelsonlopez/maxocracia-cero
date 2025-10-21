@@ -63,7 +63,7 @@ def test_login_rate_limit(client):
     # La cuarta solicitud debería ser limitada
     resp = client.post('/auth/login', json={'email': 'rate_test@example.com', 'password': 'pw'})
     assert resp.status_code == 429, "La solicitud debería ser limitada por rate limiting"
-    assert b"Too Many Requests" in resp.data
+    assert b"Demasiadas peticiones" in resp.data
 
 
 def test_register_rate_limit(client):
@@ -87,7 +87,7 @@ def test_register_rate_limit(client):
         'alias': 'another_user'
     })
     assert resp.status_code == 429, "La solicitud debería ser limitada por rate limiting"
-    assert b"Too Many Requests" in resp.data
+    assert b"Demasiadas peticiones" in resp.data
 
 
 def test_refresh_rate_limit(client):
@@ -109,4 +109,4 @@ def test_refresh_rate_limit(client):
     # La cuarta solicitud debería ser limitada
     resp = client.post('/auth/refresh', headers={'Authorization': f'Bearer {token}'})
     assert resp.status_code == 429, "La solicitud debería ser limitada por rate limiting"
-    assert b"Too Many Requests" in resp.data
+    assert b"Demasiadas peticiones" in resp.data
