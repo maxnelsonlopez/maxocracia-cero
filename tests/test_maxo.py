@@ -9,22 +9,35 @@ from app.utils import init_db
 
 @pytest.fixture
 def client():
+    # Configurar variables de entorno para pruebas
+    os.environ['SECRET_KEY'] = 'test-secret-key-123'
+    os.environ['FLASK_ENV'] = 'testing'
+    
+    # Crear base de datos temporal
     db_fd, db_path = tempfile.mkstemp(prefix='test_comun_', suffix='.db')
     os.close(db_fd)
 
+    # Crear y configurar la aplicación
     app = create_app(db_path)
-    app.config['TESTING'] = True
+    app.config.update({
+        'TESTING': True,
+        'SECRET_KEY': 'test-secret-key-123',
+        'WTF_CSRF_ENABLED': False
+    })
 
-    # initialize db
+    # Inicializar la base de datos
     with app.app_context():
-        init_db(app)
+        init_db()
 
+    # Crear un cliente de prueba
     with app.test_client() as client:
+        # Pasar la ruta de la base de datos al cliente para usarla en las pruebas
+        client.application.config['DATABASE'] = db_path
         yield client
 
-    # cleanup
+    # Limpieza: eliminar el archivo de la base de datos después de la prueba
     try:
-        os.remove(db_path)
+        os.unlink(db_path)
     except OSError:
         pass
 
@@ -56,8 +69,9 @@ def test_balance_and_transfer(client):
     # login as A to get token
     resp = client.post('/auth/login', json={'email': 'a@example.test', 'password': 'Password1'})
     assert resp.status_code == 200
-    token = resp.get_json().get('token')
-    assert token
+    data = resp.get_json()
+    token = data.get('access_token')
+    assert token is not None, f"No se recibió access_token en la respuesta: {data}"
 
     # credit A with 10 to allow the transfer
     conn = sqlite3.connect(db_path)

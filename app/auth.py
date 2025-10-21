@@ -1,3 +1,4 @@
+import sqlite3
 from flask import Blueprint, request, jsonify, session, make_response, current_app
 from .utils import get_db
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -30,14 +31,40 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 })
 def register():
     data = request.get_json() or {}
+    email = data.get('email')
+    password = data.get('password')
+    name = data.get('name')
+    alias = data.get('alias')
+    
     db = get_db()
     try:
-        db.execute('INSERT INTO users (email, name, alias, password_hash) VALUES (?, ?, ?, ?)',
-                   (email, name, alias, generate_password_hash(password)))
+        cursor = db.cursor()
+        cursor.execute(
+            'INSERT INTO users (email, name, alias, password_hash) VALUES (?, ?, ?, ?)',
+            (email, name, alias, generate_password_hash(password))
+        )
+        user_id = cursor.lastrowid
         db.commit()
+        
+        # Crear tokens para el nuevo usuario
+        access_token = create_token({'user_id': user_id, 'email': email})
+        
+        # Generar refresh token
+        jti = str(uuid4())
+        raw_refresh = generate_refresh_token_raw()
+        refresh_expires = 30 * 24 * 3600  # 30 días
+        store_refresh_token(user_id, jti, raw_refresh, expires_in=refresh_expires)
+        
+        return jsonify({
+            'access_token': access_token,
+            'refresh_token': f"{jti}.{raw_refresh}",
+            'expires_in': 3600  # 1 hora
+        }), 201
+        
+    except sqlite3.IntegrityError as e:
+        return jsonify({'error': 'Email already registered'}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 400
-    return jsonify({'message': 'user created'}), 201
 
 
 @bp.route('/login', methods=['POST'])
@@ -50,25 +77,52 @@ def login():
     data = request.get_json() or {}
     email = data.get('email')
     password = data.get('password')
+    
     db = get_db()
     user = db.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+    
     if user is None or not check_password_hash(user['password_hash'], password):
         return jsonify({'error': 'invalid credentials'}), 401
+    
+    # Clear any existing session
     session.clear()
     session['user_id'] = user['id']
-    # Access token
-    token = create_token({'user_id': user['id'], 'email': user['email']})
-    # Refresh token (rotate-on-use pattern): generate raw token and store its hash
+    
+    # Create access token (expires in 1 hour)
+    access_token = create_token({'user_id': user['id'], 'email': user['email']})
+    
+    # Generate refresh token (expires in 30 days)
     jti = str(uuid4())
     raw_refresh = generate_refresh_token_raw()
-    # expires refresh token in 30 days (seconds)
-    refresh_expires = 30 * 24 * 3600
+    refresh_expires = 30 * 24 * 3600  # 30 days in seconds
     store_refresh_token(user['id'], jti, raw_refresh, expires_in=refresh_expires)
-    # Set refresh token as HttpOnly cookie (format: jti.raw)
-    refresh_token_combined = f"{jti}.{raw_refresh}"
-    resp = make_response(jsonify({'message': 'logged in', 'user_id': user['id'], 'token': token}))
-    secure = not current_app.config.get('TESTING', False) and current_app.config.get('ENV') != 'development'
-    resp.set_cookie('mc_refresh', refresh_token_combined, httponly=True, samesite='Lax', secure=secure, max_age=refresh_expires)
+    
+    # Combine jti and raw token for the client
+    refresh_token = f"{jti}.{raw_refresh}"
+    
+    # Prepare response
+    response_data = {
+        'access_token': access_token,
+        'refresh_token': refresh_token,
+        'expires_in': 3600  # 1 hour in seconds
+    }
+    
+    # In testing mode, return the tokens in the response body
+    if current_app.config.get('TESTING', False):
+        return jsonify(response_data), 200
+    
+    # In production/development, set the refresh token as an HttpOnly cookie
+    resp = make_response(jsonify(response_data))
+    secure = current_app.config.get('ENV') != 'development'
+    resp.set_cookie(
+        'mc_refresh', 
+        refresh_token,
+        httponly=True, 
+        samesite='Lax', 
+        secure=secure, 
+        max_age=refresh_expires
+    )
+    
     return resp
 
 
@@ -146,10 +200,31 @@ def refresh():
     user = db.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
     if not user:
         return jsonify({'error': 'user not found'}), 404
-    payload = {'user_id': user['id'], 'email': user['email']}
-    new_access = create_token(payload)
-    new_refresh_combined = f"{new_jti}.{new_raw}"
-    resp = make_response(jsonify({'token': new_access}))
-    secure = not current_app.config.get('TESTING', False) and current_app.config.get('ENV') != 'development'
-    resp.set_cookie('mc_refresh', new_refresh_combined, httponly=True, samesite='Lax', secure=secure, max_age=refresh_expires)
+    
+    # Create new access token
+    access_token = create_token({'user_id': user['id'], 'email': user['email']})
+    
+    # Prepare response data
+    response_data = {
+        'access_token': access_token,
+        'refresh_token': f"{new_jti}.{new_raw}",
+        'expires_in': 3600  # 1 hour in seconds
+    }
+    
+    # In testing mode, return the tokens in the response body
+    if current_app.config.get('TESTING', False):
+        return jsonify(response_data), 200
+    
+    # In production/development, set the refresh token as an HttpOnly cookie
+    resp = make_response(jsonify(response_data))
+    secure = current_app.config.get('ENV') != 'development'
+    resp.set_cookie(
+        'mc_refresh', 
+        response_data['refresh_token'],
+        httponly=True, 
+        samesite='Lax', 
+        secure=secure, 
+        max_age=refresh_expires
+    )
+    
     return resp

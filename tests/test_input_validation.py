@@ -28,19 +28,22 @@ def test_email_validation():
 
 def test_password_validation():
     """Prueba la validación de contraseñas."""
-    # Contraseñas válidas
+    # Contraseñas válidas (mínimo 8 caracteres, al menos una mayúscula, una minúscula y un número)
     assert validate_password("Password123") is True
     assert validate_password("Segura2023!") is True
     assert validate_password("aB1!cD2@eF3#") is True
     
     # Contraseñas inválidas
-    assert validate_password("") is False
-    assert validate_password(None) is False
-    assert validate_password("corta1A") is False  # Muy corta
+    assert validate_password("") is False  # Vacía
+    assert validate_password(None) is False  # None
+    assert validate_password("corta1A") is False  # Muy corta (menos de 8 caracteres)
     assert validate_password("sinmayuscula123") is False  # Sin mayúscula
     assert validate_password("SINMINUSCULA123") is False  # Sin minúscula
     assert validate_password("SinNumeros") is False  # Sin números
     assert validate_password(12345678) is False  # No es string
+    assert validate_password("password123") is False  # Sin mayúscula
+    assert validate_password("PASSWORD123") is False  # Sin minúscula
+    assert validate_password("Password") is False  # Sin números
 
 
 def test_name_validation():

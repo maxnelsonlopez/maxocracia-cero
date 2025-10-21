@@ -18,14 +18,28 @@ def transfer():
     auth_user_id = user.get('user_id')
     data = request.get_json() or {}
     from_id = data.get('from_user_id')
-    # Validate presence
-    if auth_user_id is None:
-        return jsonify({'error': 'authorization required'}), 401
+    
+    # Validar que el token de autenticación sea válido
+    if not user or not auth_user_id:
+        return jsonify({'error': 'invalid or missing authentication token'}), 401
+        
+    # Validar que se proporcione un from_user_id
+    if from_id is None:
+        return jsonify({'error': 'from_user_id is required'}), 400
+        
     try:
-        if int(auth_user_id) != int(from_id):
-            return jsonify({'error': 'forbidden: token user mismatch', 'auth_user_id': auth_user_id, 'from_user_id': from_id}), 403
-    except Exception:
-        return jsonify({'error': 'invalid from_user_id'}), 400
+        # Convertir a entero para asegurar que sea un ID válido
+        from_id = int(from_id)
+        auth_user_id = int(auth_user_id)
+        
+        # Verificar que el usuario autenticado sea el mismo que el remitente
+        if auth_user_id != from_id:
+            return jsonify({'error': 'forbidden: token user mismatch'}), 403
+            
+    except (ValueError, TypeError):
+        return jsonify({'error': 'invalid user id format'}), 400
+        
+    # Si todo está bien, proceder con la transferencia
     return _transfer_impl()
 
 
@@ -33,15 +47,21 @@ def _transfer_impl():
     data = request.get_json() or {}
     from_id = data.get('from_user_id')
     to_id = data.get('to_user_id')
+    
+    # Validar que se proporcione un destinatario
+    if to_id is None:
+        return jsonify({'error': 'to_user_id is required'}), 400
+        
+    # Validar el monto
     try:
         amount = float(data.get('amount') or 0)
-    except Exception:
-        return jsonify({'error': 'invalid amount'}), 400
-    reason = data.get('reason')
-
-    if amount <= 0:
-        return jsonify({'error': 'amount must be positive'}), 400
-
+        if amount <= 0:
+            return jsonify({'error': 'amount must be positive'}), 400
+    except (ValueError, TypeError):
+        return jsonify({'error': 'invalid amount format'}), 400
+        
+    reason = data.get('reason', '')
+    
     db = get_db()
     # normalize ids
     try:

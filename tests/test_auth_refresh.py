@@ -44,13 +44,28 @@ def login_and_token(client, email):
 
 
 def test_refresh_returns_new_token(client):
+    # Primero creamos un usuario de prueba
     db_path = client.application.config['DATABASE']
-    seed_user(db_path, 'r1@example.test', 'R1')
-    token = login_and_token(client, 'r1@example.test')
-    resp = client.post('/auth/refresh', headers={'Authorization': f'Bearer {token}'})
-    assert resp.status_code == 200
-    j = resp.get_json()
-    assert 'token' in j and isinstance(j['token'], str) and len(j['token']) > 10
+    seed_user(db_path, 'test@example.com', 'Test User')
+    
+    # Luego hacemos login para obtener un token de refresco
+    login_resp = client.post('/auth/login', json={
+        'email': 'test@example.com',
+        'password': 'Password1'  # Usamos la contraseña por defecto de seed_user
+    })
+    assert login_resp.status_code == 200
+    login_data = login_resp.get_json()
+    refresh_token = login_data.get('refresh_token')
+    assert refresh_token, "No se recibió token de refresco"
+    
+    # Ahora intentamos refrescar el token
+    resp = client.post('/auth/refresh', json={
+        'refresh_token': refresh_token
+    })
+    assert resp.status_code == 200, f"Error al refrescar el token: {resp.data}"
+    data = resp.get_json()
+    assert 'access_token' in data, "No se recibió un nuevo token de acceso"
+    assert 'refresh_token' in data, "No se recibió un nuevo token de refresco"
 
 
 def test_refresh_requires_token(client):

@@ -13,8 +13,16 @@ def client():
     db_fd, db_path = tempfile.mkstemp(prefix='test_comun_', suffix='.db')
     os.close(db_fd)
 
+    # Configurar la aplicación para pruebas
+    os.environ['SECRET_KEY'] = 'test-secret-key-123'
+    os.environ['FLASK_ENV'] = 'testing'
+    
     app = create_app(db_path)
-    app.config['TESTING'] = True
+    app.config.update({
+        'TESTING': True,
+        'SECRET_KEY': 'test-secret-key-123',
+        'WTF_CSRF_ENABLED': False
+    })
 
     # initialize db
     with app.app_context():
@@ -43,7 +51,10 @@ def seed_user(db_path, email, name='Tester'):
 def login_and_token(client, email):
     resp = client.post('/auth/login', json={'email': email, 'password': 'Password1'})
     assert resp.status_code == 200
-    return resp.get_json().get('token')
+    data = resp.get_json()
+    # Asegurarse de que la respuesta tenga el formato esperado
+    assert 'access_token' in data, f"La respuesta no contiene access_token: {data}"
+    return data['access_token']
 
 
 def test_transfer_no_token(client):

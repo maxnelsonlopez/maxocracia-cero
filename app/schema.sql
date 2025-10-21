@@ -44,6 +44,20 @@ CREATE TABLE IF NOT EXISTS interchange (
   FOREIGN KEY (receiver_id) REFERENCES users(id)
 );
 
+-- Refresh tokens table for rotating refresh token support
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  jti TEXT NOT NULL UNIQUE,
+  token_hash TEXT NOT NULL,
+  issued_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expires_at TEXT,
+  revoked INTEGER DEFAULT 0,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE(token_hash)
+);
+
 CREATE TABLE IF NOT EXISTS resources (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER,
@@ -73,14 +87,3 @@ CREATE TABLE IF NOT EXISTS maxo_ledger (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Refresh tokens table for rotating refresh token support
-CREATE TABLE IF NOT EXISTS refresh_tokens (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER NOT NULL,
-  jti TEXT NOT NULL UNIQUE,
-  token_hash TEXT NOT NULL,
-  issued_at TEXT DEFAULT CURRENT_TIMESTAMP,
-  expires_at TEXT,
-  revoked INTEGER DEFAULT 0,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);

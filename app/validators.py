@@ -16,20 +16,24 @@ def validate_email(email):
     return bool(EMAIL_PATTERN.match(email))
 
 def validate_password(password):
-    """Valida que la contraseña cumpla con requisitos mínimos de seguridad"""
+    """Valida que la contraseña cumpla con requisitos mínimos de seguridad
+    
+    La contraseña debe tener al menos 8 caracteres, incluyendo al menos
+    una letra mayúscula, una minúscula y un número.
+    """
     if not password or not isinstance(password, str):
         return False
-    # En modo de prueba, ser más permisivo con las contraseñas
-    if os.environ.get('FLASK_ENV') == 'testing':
-        return len(password) >= 1
-    # Requisitos normales en producción
+        
+    # Verificar longitud mínima
     if len(password) < PASSWORD_MIN_LENGTH:
         return False
-    # Al menos una letra minúscula, una mayúscula y un número
-    has_lower = any(c.islower() for c in password)
+        
+    # Verificar que tenga al menos una mayúscula, una minúscula y un número
     has_upper = any(c.isupper() for c in password)
+    has_lower = any(c.islower() for c in password)
     has_digit = any(c.isdigit() for c in password)
-    return has_lower and has_upper and has_digit
+    
+    return has_upper and has_lower and has_digit
 
 def validate_name(name):
     """Valida que el nombre no exceda la longitud máxima"""
