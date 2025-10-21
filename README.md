@@ -40,11 +40,63 @@ Actualmente, el proyecto se centra en apoyar y aprender de la red de apoyo de Bo
 
 Mientras la aplicación Flask esté corriendo (por defecto en `http://127.0.0.1:5001/` si usas `PORT=5001`), abre la raíz `/` en tu navegador para acceder a un pequeño "API Playground" estático en `app/static/index.html`.
 
-Pasos rápidos:
+### Características de seguridad implementadas:
+- Autenticación basada en JWT (JSON Web Tokens)
+- Tokens de actualización con rotación automática
+- Validación robusta de entradas en todos los endpoints
+- Rate limiting para prevenir abusos (3 peticiones por minuto en endpoints sensibles)
+- Validación estricta de contraseñas (mínimo 8 caracteres, mayúsculas, minúsculas y números)
 
-- Ejecuta el servidor: `python run.py` o activa tu entorno virtual y ejecuta `./run.py` si lo configuras así.
-- Abre `http://127.0.0.1:5001/`.
-- Regístrate (Register), haz Login y copia el token que aparece en la caja "Token".
-- Usa las secciones para crear interchanges, ver balances, transferir Maxo y crear/claim recursos.
+### Pasos rápidos:
 
-La UI es para pruebas locales y demo; no es una interfaz de producción.
+1. **Configuración inicial**:
+   ```bash
+   # Clona el repositorio
+   git clone https://github.com/tu-usuario/maxocracia-cero.git
+   cd maxocracia-cero
+   
+   # Crea y activa un entorno virtual (recomendado)
+   python -m venv venv
+   source venv/bin/activate  # En Windows: venv\Scripts\activate
+   
+   # Instala dependencias
+   pip install -r requirements.txt
+   ```
+
+2. **Ejecuta el servidor**:
+   ```bash
+   # Configura las variables de entorno (opcional, usa valores seguros en producción)
+   export FLASK_APP=app
+   export FLASK_ENV=development
+   export SECRET_KEY='tu-clave-secreta-segura'
+   
+   # Inicia la aplicación
+   python run.py
+   ```
+
+3. **Accede al API Playground**:
+   - Abre `http://127.0.0.1:5001/` en tu navegador.
+   - Regístrate (Register) con un correo y contraseña segura.
+   - Haz Login y copia el token JWT que aparece en la caja "Token".
+   - Usa las secciones para crear interchanges, ver balances, transferir Maxo y crear/claim recursos.
+
+> **Nota**: La interfaz de usuario está diseñada para pruebas locales y demostración; no es una interfaz de producción. Para entornos de producción, se recomienda implementar una interfaz de usuario completa y medidas de seguridad adicionales.
+
+### Ejecutando las pruebas
+
+Para ejecutar las pruebas unitarias y de integración:
+
+```bash
+# Instala dependencias de desarrollo
+pip install -r requirements-dev.txt
+
+# Ejecuta todas las pruebas
+pytest -v
+
+# Ejecuta pruebas específicas (ejemplo)
+pytest tests/test_auth.py -v
+```
+
+## Contribuyendo
+
+Las contribuciones son bienvenidas. Por favor, lee nuestras pautas de contribución antes de enviar pull requests.

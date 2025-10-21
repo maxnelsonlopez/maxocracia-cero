@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2025-10-22 — Correcciones en pruebas y validaciones
+
+### Corregido
+- Corregido el error en el test `test_register_rate_limit` que esperaba un error 429 pero recibía 200.
+- Corregido el error en el test `test_refresh_rate_limit` que esperaba un error 429 pero recibía 200.
+- Corregido el error en el test `test_expired_refresh_token_rejected` que esperaba un mensaje de error específico.
+- Corregida la validación de contraseñas para que sea consistente en todos los entornos.
+- Corregido el manejo de tokens de actualización expirados en el endpoint de refresh.
+- Resuelta la inconsistencia en las pruebas de validación de contraseñas que fallaban en diferentes entornos.
+
+### Mejorado
+- Mejorada la función `validate_password` para tener reglas de validación consistentes en todos los entornos.
+- Mejorada la documentación de la función `validate_password` para mayor claridad.
+- Añadidos mensajes de error más descriptivos en las pruebas.
+- Mejorada la consistencia en los mensajes de error de validación.
+- Optimizado el manejo de tokens de actualización para una mejor seguridad.
+- Añadida semilla de usuario en las pruebas para garantizar un estado consistente.
+
 ## 2025-10-22 — Actualización de documentación
 
 - Añadida documentación detallada sobre el sistema de autenticación
