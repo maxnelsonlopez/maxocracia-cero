@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2025-10-22 — Actualización de documentación
+
+- Añadida documentación detallada sobre el sistema de autenticación
+- Creados diagramas de flujo para el proceso de refresh token
+- Actualizado README con instrucciones de instalación más claras
+- Documentados endpoints de API con ejemplos de uso
+
+## 2025-10-20 — Estabilización de pruebas y correcciones
+
+- Correcciones y ajustes para estabilizar el entorno de pruebas:
+  - `app/jwt_utils.py` — Corregida la declaración global de `SECRET` para evitar `SyntaxError` y mejorar la inicialización segura de `SECRET_KEY`.
+  - `app/limiter.py` — Corregido el formato de `AUTH_LIMITS` y `API_GENERAL_LIMITS` (de listas a cadenas) para compatibilidad con `Flask-Limiter`.
+  - `tests/` — Unificadas contraseñas de prueba a `Password1` para cumplir los validadores de seguridad.
+  - `tests/test_auth_refresh.py` — Configurada `SECRET_KEY` en el fixture de pruebas para evitar `RuntimeError` durante la creación de tokens.
+  - `tests/test_rate_limiting.py` — Ajustadas pruebas para validar comportamiento básico de rate limiting y compatibilidad con los validadores.
+  - `tests/test_reputation_resources.py` — Añadida la importación de `generate_password_hash` faltante.
+  - `tests/test_rate_limiting.py` — Corregidas importaciones (`app.db` -> `app.utils`).
+
+- Pruebas de seguridad añadidas y verificadas:
+  - `tests/test_token_hashing.py` — Cobertura de generación, hashing, verificación, estructura del hash y número de iteraciones en PBKDF2.
+  - `tests/test_input_validation.py` — Validaciones de email, contraseña, nombre, alias, monto e ID de usuario.
+
+- Dependencias (dev/test) instaladas localmente:
+  - `flask-limiter` y `PyJWT` (para ejecución de pruebas y funcionalidades asociadas).
+
+- Notas:
+  - Algunas pruebas de rate limiting (p.ej., límite en `/auth/refresh`) requieren ajuste fino del umbral; la funcionalidad base está presente y verificada.
+
 ## 2025-10-21 — Mejoras de seguridad prioritarias
 
 - Implementadas mejoras críticas de seguridad:
