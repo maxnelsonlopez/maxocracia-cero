@@ -64,7 +64,8 @@ def register():
     except sqlite3.IntegrityError as e:
         return jsonify({'error': 'Email already registered'}), 400
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        # Don't expose internal error details to prevent information leakage
+        return jsonify({'error': 'Internal server error'}), 500
 
 
 @bp.route('/login', methods=['POST'])
@@ -128,11 +129,52 @@ def login():
 
 @bp.route('/logout', methods=['POST'])
 def logout():
-    # Revoke all refresh tokens for this user to fully logout
-    uid = session.get('user_id')
+    # Support multiple logout methods for JWT systems:
+    # 1. Via refresh token (most secure)
+    # 2. Via access token (fallback)
+    # 3. Via session (legacy compatibility)
+
+    # Try to get refresh token from request (JSON body or cookie)
+    data = request.get_json(silent=True) or {}
+    refresh_token = data.get('refresh_token') or request.cookies.get('mc_refresh')
+
+    # Clear session regardless
     session.clear()
+
+    # If we have a refresh token, revoke it specifically
+    if refresh_token and '.' in refresh_token:
+        try:
+            jti, raw = refresh_token.split('.', 1)
+            # Find the token record to get user_id
+            from .refresh_utils import find_refresh_token_record
+            rec = find_refresh_token_record(jti)
+            if rec:
+                # Revoke all tokens for this user
+                revoke_user_tokens(rec['user_id'])
+        except Exception as e:
+            # Log error but don't expose it - logout should still succeed
+            print(f'Warning: Failed to revoke refresh token: {e}')
+
+    # Fallback: try to get user_id from access token in Authorization header
+    auth = request.headers.get('Authorization', '')
+    if auth.startswith('Bearer '):
+        try:
+            token = auth.split(' ', 1)[1]
+            from .jwt_utils import verify_token
+            data = verify_token(token)
+            if data and 'user_id' in data:
+                revoke_user_tokens(data['user_id'])
+        except Exception as e:
+            print(f'Warning: Failed to revoke via access token: {e}')
+
+    # Final fallback: try to revoke based on session (for backward compatibility)
+    uid = session.get('user_id')
     if uid:
-        revoke_user_tokens(uid)
+        try:
+            revoke_user_tokens(uid)
+        except Exception as e:
+            print(f'Warning: Failed to revoke tokens for user {uid}: {e}')
+
     resp = make_response(jsonify({'message': 'logged out'}))
     # clear cookie
     resp.set_cookie('mc_refresh', '', httponly=True, samesite='Lax', secure=False, expires=0)

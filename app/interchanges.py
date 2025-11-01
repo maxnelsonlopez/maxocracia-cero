@@ -28,7 +28,8 @@ def create_interchange():
                    (interchange_id, giver_id, receiver_id, description, uth_hours, impact_score))
         db.commit()
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        # Don't expose internal error details to prevent information leakage
+        return jsonify({'error': 'Failed to create interchange'}), 500
 
     # calculate simple Maxo credit and credit the giver (or receiver depending on rules)
     factor_uth = 1.0

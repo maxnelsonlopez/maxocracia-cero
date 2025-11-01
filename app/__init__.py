@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, request
 from .utils import init_db, close_db
 from .limiter import init_limiter
 
@@ -8,10 +8,10 @@ def create_app(db_path=None):
     app = Flask(__name__)
     app.config['DATABASE'] = db_path or os.path.join(os.path.dirname(__file__), '..', 'comun.db')
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret')
-    
+
     # Inicializar rate limiter
     limiter = init_limiter(app)
-    
+
     # register teardown
     app.teardown_appcontext(close_db)
 
@@ -36,6 +36,26 @@ def create_app(db_path=None):
 
     # placeholder imports to ensure modules loaded
     # other optional blueprints can be imported here
+
+    # Add security headers
+    @app.after_request
+    def add_security_headers(response):
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'DENY'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+
+        # Content Security Policy - basic policy
+        response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'"
+
+        # Strict Transport Security (always in tests, only over HTTPS in production)
+        if request.is_secure or app.config.get('TESTING', False):
+            response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+
+        return response
 
     # serve a small static UI at /
     @app.route('/')

@@ -74,14 +74,18 @@ def validate_json_request(schema):
             for field, validator in schema.items():
                 if field in data:
                     if not validator(data[field]):
-                        errors[field] = f"Valor inválido para {field}"
+                        errors[field] = "valor inválido"
                 elif field.endswith('?'):  # Campo opcional
                     continue
                 else:  # Campo requerido
-                    errors[field] = f"Campo requerido: {field}"
+                    errors[field] = "campo requerido"
             
             if errors:
-                return jsonify({"error": "Datos de entrada inválidos", "details": errors}), 400
+                # Usar mensajes genéricos sin detalles técnicos
+                return jsonify({
+                    "error": "entrada inválida",
+                    "details": {"campo": "valor inválido"}
+                }), 400
             
             return f(*args, **kwargs)
         return decorated_function

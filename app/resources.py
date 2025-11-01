@@ -25,7 +25,8 @@ def create_resource():
                    (user_id, title, description, category, 1))
         db.commit()
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        # Don't expose internal error details to prevent information leakage
+        return jsonify({'error': 'Failed to create resource'}), 500
     return jsonify({'message': 'resource created'}), 201
 
 

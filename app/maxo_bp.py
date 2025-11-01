@@ -91,6 +91,7 @@ def _transfer_impl():
         db.commit()
     except Exception as e:
         db.rollback()
-        return jsonify({'error': 'transfer failed', 'details': str(e)}), 500
+        # Don't expose internal error details to prevent information leakage
+        return jsonify({'error': 'Transfer failed'}), 500
 
     return jsonify({'success': True}), 200

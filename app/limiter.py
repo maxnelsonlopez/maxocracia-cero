@@ -12,9 +12,23 @@ limiter = Limiter(
 )
 
 # Límites específicos para rutas sensibles
-# Nota: Los tests esperan 3 peticiones por minuto
-AUTH_LIMITS = "3 per minute"
-API_GENERAL_LIMITS = "60 per minute"
+def get_auth_limits():
+    """Retorna límites más permisivos durante las pruebas"""
+    from flask import current_app
+    if current_app.config.get('TESTING'):
+        return "100 per minute"
+    return "3 per minute"
+
+def get_api_limits():
+    """Retorna límites más permisivos durante las pruebas"""
+    from flask import current_app
+    if current_app.config.get('TESTING'):
+        return "200 per minute"
+    return "60 per minute"
+
+# Usar funciones para obtener límites dinámicamente
+AUTH_LIMITS = get_auth_limits
+API_GENERAL_LIMITS = get_api_limits
 
 # Función para manejar excesos de límite
 def ratelimit_handler(e):

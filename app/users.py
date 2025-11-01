@@ -37,5 +37,6 @@ def create_user():
                    (email, name, alias, generate_password_hash(password)))
         db.commit()
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        # Don't expose internal error details to prevent information leakage
+        return jsonify({'error': 'Failed to create user'}), 500
     return jsonify({'message': 'user created'}), 201
