@@ -177,4 +177,18 @@ Notes & follow-ups:
 ### Notes
 - For production deployments, prefer `REDIS_URL` storage for limiter; defaults remain `memory://` for local/testing.
 
+## 2025-11-13 — VHV integration (Vector de Huella Vital)
+
+### Added
+- `interchange` almacena VHV: `vhv_time_seconds`, `vhv_lives`, `vhv_resources_json`.
+- `POST /interchanges` acepta `vhv_time_seconds`, `vhv_lives`, `vhv_resources` opcionales.
+- `app/maxo.py` incorpora `calculate_credit` con pesos configurables, separado del VHV.
+- Documentación en `docs/API.md` de la sección VHV y fórmula de crédito.
+
+### Verified
+- Suite de pruebas pasa (`45 passed`), incluyendo test de persistencia VHV.
+
+### Notes
+- VHV almacena datos objetivos; la interpretación/ponderación ocurre en la conversión a crédito mediante pesos configurables.
+
 

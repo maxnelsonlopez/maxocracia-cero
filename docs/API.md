@@ -72,7 +72,22 @@ curl -H "Authorization: Bearer <TOKEN>" http://127.0.0.1:5001/maxo/1/balance
   - credit formula (configurable):
     - `credit = uth_hours*MAXO_WEIGHT_UTH + impact_resolution_score*MAXO_WEIGHT_IMPACT + uvc_score*MAXO_WEIGHT_UVC + urf_units*MAXO_WEIGHT_URF`
     - defaults: `MAXO_WEIGHT_UTH=1.0`, `MAXO_WEIGHT_IMPACT=0.5`, `MAXO_WEIGHT_UVC=0.0`, `MAXO_WEIGHT_URF=0.0`
-    - implementation: `app/maxo.py:12–26` y uso en `app/interchanges.py:35–44,27–33`
+  - implementation: `app/maxo.py:12–26` y uso en `app/interchanges.py:35–44,27–33`
+
+### VHV (Vector de Huella Vital)
+
+- Definición: `VHV = (tiempo_total_consumido, seres_vivos_consumidos, recursos_consumidos)`.
+- En `interchange` se almacena como:
+  - `vhv_time_seconds` (número): segundos totales consumidos (por defecto `uth_hours*3600`).
+  - `vhv_lives` (número): fracciones o enteros de vidas consumidas (por defecto `uvc_score` si se provee, o `0`).
+  - `vhv_resources_json` (JSON texto): desglose de recursos (energía, agua, CO2, etc.).
+- Body opcional en `POST /interchanges`:
+  - `vhv_time_seconds`: número.
+  - `vhv_lives`: número.
+  - `vhv_resources`: objeto JSON.
+- Notas:
+  - VHV registra datos objetivos; la conversión a crédito usa pesos separados (ver fórmula de crédito).
+  - Los campos VHV son opcionales; si no se envían, se derivan valores básicos para mantener compatibilidad.
 
 - POST /reputation/review
 

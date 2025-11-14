@@ -37,6 +37,9 @@ CREATE TABLE IF NOT EXISTS interchange (
   urf_units REAL,
   urf_description TEXT,
   economic_value_approx TEXT,
+  vhv_time_seconds REAL,
+  vhv_lives REAL,
+  vhv_resources_json TEXT,
   impact_resolution_score INTEGER,
   reciprocity_status TEXT,
   human_dimension_attended TEXT,
@@ -88,4 +91,3 @@ CREATE TABLE IF NOT EXISTS maxo_ledger (
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
-

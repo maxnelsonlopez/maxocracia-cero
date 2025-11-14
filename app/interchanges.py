@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from .utils import get_db
 from .maxo import credit_user, calculate_credit
+import json
 
 bp = Blueprint('interchanges', __name__, url_prefix='/interchanges')
 
@@ -24,6 +25,9 @@ def create_interchange():
     impact_score = int(data.get('impact_resolution_score') or 0)
     uvc_score = data.get('uvc_score')
     urf_units = data.get('urf_units')
+    vhv_time_seconds = data.get('vhv_time_seconds')
+    vhv_lives = data.get('vhv_lives')
+    vhv_resources = data.get('vhv_resources')  # expect dict
     try:
         uvc_score = float(uvc_score) if uvc_score is not None else None
     except Exception:
@@ -32,10 +36,31 @@ def create_interchange():
         urf_units = float(urf_units) if urf_units is not None else None
     except Exception:
         urf_units = None
+    try:
+        vhv_time_seconds = float(vhv_time_seconds) if vhv_time_seconds is not None else None
+    except Exception:
+        vhv_time_seconds = None
+    try:
+        vhv_lives = float(vhv_lives) if vhv_lives is not None else None
+    except Exception:
+        vhv_lives = None
+    if isinstance(vhv_resources, dict):
+        try:
+            vhv_resources_json = json.dumps(vhv_resources, ensure_ascii=False)
+        except Exception:
+            vhv_resources_json = None
+    else:
+        vhv_resources_json = None
     db = get_db()
     try:
-        db.execute('INSERT INTO interchange (interchange_id, date, giver_id, receiver_id, description, uth_hours, uvc_score, urf_units, impact_resolution_score) VALUES (?, DATE("now"), ?, ?, ?, ?, ?, ?, ?)',
-                   (interchange_id, giver_id, receiver_id, description, uth_hours, uvc_score, urf_units, impact_score))
+        # derive defaults for VHV if not provided
+        if vhv_time_seconds is None:
+            vhv_time_seconds = uth_hours * 3600.0
+        if vhv_lives is None:
+            # map UVC directly to lives consumed when present
+            vhv_lives = uvc_score if uvc_score is not None else 0.0
+        db.execute('INSERT INTO interchange (interchange_id, date, giver_id, receiver_id, description, uth_hours, uvc_score, urf_units, vhv_time_seconds, vhv_lives, vhv_resources_json, impact_resolution_score) VALUES (?, DATE("now"), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                   (interchange_id, giver_id, receiver_id, description, uth_hours, uvc_score, urf_units, vhv_time_seconds, vhv_lives, vhv_resources_json, impact_score))
         db.commit()
     except Exception as e:
         # Don't expose internal error details to prevent information leakage
