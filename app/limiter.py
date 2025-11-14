@@ -13,15 +13,19 @@ limiter = Limiter(
 
 # Límites específicos para rutas sensibles
 def get_auth_limits():
-    """Retorna límites más permisivos durante las pruebas"""
     from flask import current_app
+    override = current_app.config.get('RATELIMIT_AUTH_LIMIT')
+    if override:
+        return override
     if current_app.config.get('TESTING'):
         return "100 per minute"
     return "3 per minute"
 
 def get_api_limits():
-    """Retorna límites más permisivos durante las pruebas"""
     from flask import current_app
+    override = current_app.config.get('RATELIMIT_API_LIMIT')
+    if override:
+        return override
     if current_app.config.get('TESTING'):
         return "200 per minute"
     return "60 per minute"

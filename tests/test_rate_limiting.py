@@ -23,6 +23,7 @@ def client():
     app.config['RATELIMIT_ENABLED'] = True
     app.config['RATELIMIT_STORAGE_URL'] = 'memory://'
     app.config['RATELIMIT_STRATEGY'] = 'fixed-window'
+    app.config['RATELIMIT_AUTH_LIMIT'] = '10 per day'
     
     with app.app_context():
         init_db(app)
