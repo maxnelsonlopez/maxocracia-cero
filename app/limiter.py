@@ -30,9 +30,49 @@ def get_api_limits():
         return "200 per minute"
     return "60 per minute"
 
+# Límites por endpoint con compatibilidad hacia atrás
+def get_login_limits():
+    from flask import current_app
+    override = (
+        current_app.config.get('RATELIMIT_LOGIN_LIMIT')
+        or current_app.config.get('RATELIMIT_AUTH_LIMIT')
+    )
+    if override:
+        return override
+    if current_app.config.get('TESTING'):
+        return "100 per minute"
+    return "3 per minute"
+
+def get_register_limits():
+    from flask import current_app
+    override = (
+        current_app.config.get('RATELIMIT_REGISTER_LIMIT')
+        or current_app.config.get('RATELIMIT_AUTH_LIMIT')
+    )
+    if override:
+        return override
+    if current_app.config.get('TESTING'):
+        return "100 per minute"
+    return "10 per hour"
+
+def get_refresh_limits():
+    from flask import current_app
+    override = (
+        current_app.config.get('RATELIMIT_REFRESH_LIMIT')
+        or current_app.config.get('RATELIMIT_AUTH_LIMIT')
+    )
+    if override:
+        return override
+    if current_app.config.get('TESTING'):
+        return "200 per minute"
+    return "20 per hour"
+
 # Usar funciones para obtener límites dinámicamente
 AUTH_LIMITS = get_auth_limits
 API_GENERAL_LIMITS = get_api_limits
+LOGIN_LIMITS = get_login_limits
+REGISTER_LIMITS = get_register_limits
+REFRESH_LIMITS = get_refresh_limits
 
 # Función para manejar excesos de límite
 def ratelimit_handler(e):
