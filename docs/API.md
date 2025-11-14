@@ -150,6 +150,30 @@ Notes:
 - For production, prefer Redis storage (`REDIS_URL`) for accurate distributed rate limiting.
 - The limiter key function is the remote address (client IP).
 
+### Recommended production configuration
+
+- Copy `config.example.env` to `.env` and set values:
+
+```
+SECRET_KEY=change_me_in_production
+FLASK_ENV=production
+PORT=5001
+REDIS_URL=redis://localhost:6379/0
+RATELIMIT_LOGIN_LIMIT="5 per minute"
+RATELIMIT_REGISTER_LIMIT="10 per hour"
+RATELIMIT_REFRESH_LIMIT="20 per hour"
+RATELIMIT_API_LIMIT="50 per hour"
+```
+
+- Load the `.env` before running locally:
+
+```bash
+set -a
+source .env
+set +a
+PORT=${PORT:-5001} python3 run.py
+```
+
 ## Tests
 
 Run the test suite locally:

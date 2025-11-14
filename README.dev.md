@@ -51,6 +51,18 @@ RATELIMIT_LOGIN_LIMIT="3 per minute" \
 PORT=5001 python run.py
 ```
 
+## Uso de archivo .env
+
+- Crea un `.env` basado en `config.example.env` y ajusta valores.
+- Carga las variables antes de arrancar:
+
+```bash
+set -a
+source .env
+set +a
+python run.py
+```
+
 Notas:
 
 - Para prototipado rápido las contraseñas en `seeds/seed_demo.py` están en claro; en producción usar hashing y no poner contraseñas reales en seeds.
