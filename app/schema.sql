@@ -33,6 +33,8 @@ CREATE TABLE IF NOT EXISTS interchange (
   description TEXT,
   urgency TEXT,
   uth_hours REAL,
+  uvc_score REAL,
+  urf_units REAL,
   urf_description TEXT,
   economic_value_approx TEXT,
   impact_resolution_score INTEGER,

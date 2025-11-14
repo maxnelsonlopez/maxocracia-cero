@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from .utils import get_db
-from .maxo import credit_user
+from .maxo import credit_user, calculate_credit
 
 bp = Blueprint('interchanges', __name__, url_prefix='/interchanges')
 
@@ -22,19 +22,27 @@ def create_interchange():
     description = data.get('description')
     uth_hours = float(data.get('uth_hours') or 0)
     impact_score = int(data.get('impact_resolution_score') or 0)
+    uvc_score = data.get('uvc_score')
+    urf_units = data.get('urf_units')
+    try:
+        uvc_score = float(uvc_score) if uvc_score is not None else None
+    except Exception:
+        uvc_score = None
+    try:
+        urf_units = float(urf_units) if urf_units is not None else None
+    except Exception:
+        urf_units = None
     db = get_db()
     try:
-        db.execute('INSERT INTO interchange (interchange_id, date, giver_id, receiver_id, description, uth_hours, impact_resolution_score) VALUES (?, DATE("now"), ?, ?, ?, ?, ?)',
-                   (interchange_id, giver_id, receiver_id, description, uth_hours, impact_score))
+        db.execute('INSERT INTO interchange (interchange_id, date, giver_id, receiver_id, description, uth_hours, uvc_score, urf_units, impact_resolution_score) VALUES (?, DATE("now"), ?, ?, ?, ?, ?, ?, ?)',
+                   (interchange_id, giver_id, receiver_id, description, uth_hours, uvc_score, urf_units, impact_score))
         db.commit()
     except Exception as e:
         # Don't expose internal error details to prevent information leakage
         return jsonify({'error': 'Failed to create interchange'}), 500
 
     # calculate simple Maxo credit and credit the giver (or receiver depending on rules)
-    factor_uth = 1.0
-    factor_impact = 0.5
-    credit = uth_hours * factor_uth + impact_score * factor_impact
+    credit = calculate_credit(uth_hours=uth_hours, impact_score=impact_score, uvc_score=uvc_score, urf_units=urf_units)
     try:
         credit_user(giver_id, credit, f'Credit for interchange {interchange_id}')
     except Exception as e:

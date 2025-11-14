@@ -66,6 +66,14 @@ curl -H "Authorization: Bearer <TOKEN>" http://127.0.0.1:5001/maxo/1/balance
   - body: { interchange_id, giver_id, receiver_id, uth_hours, impact_resolution_score, description }
   - on success returns { message, credit }
 
+  - optional fields:
+    - `uvc_score` (number): componente de Unidades de Vida Consumidas
+    - `urf_units` (number): componente de Unidades de Recursos Finitos
+  - credit formula (configurable):
+    - `credit = uth_hours*MAXO_WEIGHT_UTH + impact_resolution_score*MAXO_WEIGHT_IMPACT + uvc_score*MAXO_WEIGHT_UVC + urf_units*MAXO_WEIGHT_URF`
+    - defaults: `MAXO_WEIGHT_UTH=1.0`, `MAXO_WEIGHT_IMPACT=0.5`, `MAXO_WEIGHT_UVC=0.0`, `MAXO_WEIGHT_URF=0.0`
+    - implementation: `app/maxo.py:12–26` y uso en `app/interchanges.py:35–44,27–33`
+
 - POST /reputation/review
 
   - body: { user_id, score }
