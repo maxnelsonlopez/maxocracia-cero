@@ -1,6 +1,620 @@
-# API & Usage (Flask + SQLite)
+# Documentación de la API de Maxocracia
 
-This document summarizes the API endpoints, data contracts, example curl commands including JWT authentication, how to run the app locally, and how to run tests.
+Bienvenido a la documentación de la API de Maxocracia. Este documento proporciona una guía completa para interactuar con los servicios de Maxocracia, incluyendo autenticación, gestión de intercambios, reputación y más.
+
+## Tabla de Contenidos
+
+- [Introducción](#introducción)
+- [Autenticación](#autenticación)
+- [Endpoints](#endpoints)
+  - [Autenticación](#autenticación-1)
+  - [Intercambios](#intercambios)
+  - [Reputación](#reputación)
+  - [Recursos](#recursos)
+  - [Maxo (Moneda)](#maxo-moneda)
+- [Rate Limiting](#rate-limiting)
+- [Seguridad](#seguridad)
+- [Ejecución Local](#ejecución-local)
+- [Pruebas](#pruebas)
+- [Notas de Seguridad](#notas-de-seguridad)
+
+## Introducción
+
+La API de Maxocracia está construida con Flask y utiliza SQLite como base de datos. Sigue los principios RESTful y utiliza JSON para el intercambio de datos.
+
+### Convenciones
+
+- **URL Base**: `http://localhost:5001` (para desarrollo)
+- **Formato de Fechas**: ISO 8601 (`YYYY-MM-DDTHH:MM:SSZ`)
+- **Autenticación**: JWT (JSON Web Tokens)
+- **Tasa de Límite**: Aplicada según el endpoint
+- **Formato de Respuesta**: JSON
+
+### Códigos de Estado HTTP
+
+| Código | Descripción |
+|--------|-------------|
+| 200 | OK - La solicitud fue exitosa |
+| 201 | Creado - Recurso creado exitosamente |
+| 400 | Solicitud incorrecta - Verifica los parámetros |
+| 401 | No autorizado - Se requiere autenticación |
+| 403 | Prohibido - No tienes permiso |
+| 404 | No encontrado - El recurso no existe |
+| 429 | Demasiadas solicitudes - Límite de tasa excedido |
+| 500 | Error del servidor - Algo salió mal |
+
+## Autenticación
+
+La autenticación se realiza mediante JWT (JSON Web Tokens). Debes incluir el token en el encabezado `Authorization: Bearer <token>` para acceder a los endpoints protegidos.
+
+### Flujo de Autenticación
+
+1. **Registro**: Crea una nueva cuenta de usuario
+2. **Inicio de Sesión**: Obtén un token de acceso y un token de actualización
+3. **Uso**: Incluye el token de acceso en las solicitudes
+4. **Renovación**: Usa el token de actualización para obtener un nuevo token de acceso
+
+### Tokens
+
+- **Token de Acceso**: Válido por 15 minutos
+- **Token de Actualización**: Válido por 7 días, se usa para obtener nuevos tokens de acceso
+
+## Ejecución Local
+
+### Requisitos
+
+- Python 3.8+
+- pip
+- SQLite3
+
+### Configuración Inicial
+
+1. Clona el repositorio
+2. Crea un entorno virtual:
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate  # En Windows: .venv\Scripts\activate
+   ```
+3. Instala las dependencias:
+   ```bash
+   pip install -r requirements.txt
+   pip install -r requirements-dev.txt
+   ```
+4. Inicializa la base de datos:
+   ```bash
+   python3 seeds/seed_demo.py
+   ```
+5. Inicia el servidor:
+   ```bash
+   PORT=5001 python3 run.py
+   ```
+
+## Endpoints
+
+### Autenticación
+
+#### Registrar Usuario
+
+```http
+POST /auth/register
+```
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "email": "usuario@ejemplo.com",
+  "password": "contraseñaSegura123",
+  "name": "Nombre del Usuario",
+  "alias": "alias_usuario"
+}
+```
+
+**Parámetros:**
+- `email` (string, requerido): Correo electrónico del usuario
+- `password` (string, requerido): Contraseña (mínimo 8 caracteres)
+- `name` (string, requerido): Nombre completo del usuario
+- `alias` (string, opcional): Alias del usuario
+
+**Respuesta Exitosa (201):**
+```json
+{
+  "message": "Usuario registrado exitosamente",
+  "user_id": 1,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Errores:**
+- 400: Datos inválidos o faltantes
+- 409: El correo electrónico ya está registrado
+- 429: Demasiadas solicitudes
+
+#### Iniciar Sesión
+
+```http
+POST /auth/login
+```
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "email": "usuario@ejemplo.com",
+  "password": "contraseñaSegura123"
+}
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user_id": 1,
+  "email": "usuario@ejemplo.com"
+}
+```
+
+**Errores:**
+- 400: Credenciales faltantes
+- 401: Credenciales inválidas
+- 429: Demasiados intentos de inicio de sesión
+
+#### Cerrar Sesión
+
+```http
+POST /auth/logout
+```
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "message": "Sesión cerrada exitosamente"
+}
+```
+
+**Errores:**
+- 401: No autorizado
+
+#### Obtener Perfil de Usuario
+
+```http
+GET /auth/me
+```
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "user_id": 1,
+  "email": "usuario@ejemplo.com",
+  "name": "Nombre del Usuario",
+  "alias": "alias_usuario",
+  "created_at": "2025-11-13T18:00:00Z"
+}
+```
+
+**Errores:**
+- 401: No autorizado
+
+#### Renovar Token de Acceso
+
+```http
+POST /auth/refresh
+```
+
+**Encabezados:**
+```
+Authorization: Bearer <refresh_token>
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "token": "nuevo_token_de_acceso",
+  "refresh_token": "nuevo_refresh_token"
+}
+```
+
+**Errores:**
+- 400: Token de actualización inválido o faltante
+- 401: Token de actualización inválido o expirado
+
+### Intercambios
+
+#### Listar Intercambios
+
+```http
+GET /interchanges
+```
+
+**Parámetros de Consulta:**
+- `limit` (opcional, default=200): Número máximo de intercambios a devolver
+- `offset` (opcional, default=0): Número de intercambios a omitir
+
+**Respuesta Exitosa (200):**
+```json
+[
+  {
+    "interchange_id": "550e8400-e29b-41d4-a716-446655440000",
+    "giver_id": 1,
+    "receiver_id": 2,
+    "description": "Intercambio de servicios",
+    "uth_hours": 2.5,
+    "uvc_score": 0.5,
+    "urf_units": 1.2,
+    "vhv_time_seconds": 9000,
+    "vhv_lives": 0.5,
+    "vhv_resources_json": "{\"agua\": 10, \"energia\": 5}",
+    "impact_resolution_score": 8,
+    "created_at": "2025-11-13T18:00:00Z"
+  }
+]
+```
+
+#### Crear Intercambio
+
+```http
+POST /interchanges
+```
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "interchange_id": "550e8400-e29b-41d4-a716-446655440000",
+  "giver_id": 1,
+  "receiver_id": 2,
+  "description": "Intercambio de servicios",
+  "uth_hours": 2.5,
+  "impact_resolution_score": 8,
+  "uvc_score": 0.5,
+  "urf_units": 1.2,
+  "vhv_time_seconds": 9000,
+  "vhv_lives": 0.5,
+  "vhv_resources": {
+    "agua": 10,
+    "energia": 5
+  }
+}
+```
+
+**Respuesta Exitosa (201):**
+```json
+{
+  "message": "Intercambio creado exitosamente",
+  "credit": 3.1,
+  "interchange_id": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+**Fórmula de Cálculo de Crédito:**
+```
+credit = (uth_hours * MAXO_WEIGHT_UTH) + 
+         (impact_resolution_score * MAXO_WEIGHT_IMPACT) + 
+         (uvc_score * MAXO_WEIGHT_UVC) + 
+         (urf_units * MAXO_WEIGHT_URF)
+```
+
+**Valores por Defecto:**
+- `MAXO_WEIGHT_UTH = 1.0`
+- `MAXO_WEIGHT_IMPACT = 0.5`
+- `MAXO_WEIGHT_UVC = 0.0`
+- `MAXO_WEIGHT_URF = 0.0`
+
+**Errores:**
+- 400: Datos inválidos o faltantes
+- 401: No autorizado
+- 500: Error al crear el intercambio
+
+### Reputación
+
+#### Crear o Actualizar Revisión
+
+```http
+POST /reputation/review
+```
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "user_id": 2,
+  "score": 5
+}
+```
+
+**Respuesta Exitosa (201):**
+```json
+{
+  "message": "Revisión guardada exitosamente",
+  "review_id": 1,
+  "average_score": 4.8,
+  "total_reviews": 1
+}
+```
+
+**Errores:**
+- 400: Puntuación inválida (debe estar entre 1 y 5)
+- 401: No autorizado
+- 404: Usuario no encontrado
+
+#### Obtener Reputación de Usuario
+
+```http
+GET /reputation/<int:user_id>
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "user_id": 2,
+  "score": 4.8,
+  "reviews_count": 15
+}
+```
+
+**Errores:**
+- 404: Usuario no encontrado
+
+### Recursos
+
+#### Listar Recursos Disponibles
+
+```http
+GET /resources
+```
+
+**Respuesta Exitosa (200):**
+```json
+[
+  {
+    "id": 1,
+    "user_id": 1,
+    "title": "Herramientas de jardinería",
+    "description": "Juego completo de herramientas para jardinería",
+    "category": "herramientas",
+    "status": "available",
+    "created_at": "2025-11-10T10:00:00Z"
+  }
+]
+```
+
+#### Crear Recurso
+
+```http
+POST /resources
+```
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "user_id": 1,
+  "title": "Bicicleta de montaña",
+  "description": "Bicicleta en buen estado para uso urbano",
+  "category": "transporte"
+}
+```
+
+**Respuesta Exitosa (201):**
+```json
+{
+  "id": 2,
+  "user_id": 1,
+  "title": "Bicicleta de montaña",
+  "description": "Bicicleta en buen estado para uso urbano",
+  "category": "transporte",
+  "status": "available",
+  "created_at": "2025-11-13T18:00:00Z"
+}
+```
+
+**Errores:**
+- 400: Datos inválidos o faltantes
+- 401: No autorizado
+
+#### Reclamar Recurso
+
+```http
+POST /resources/<int:resource_id>/claim
+```
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "user_id": 2
+}
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "message": "Recurso reclamado exitosamente",
+  "resource_id": 2,
+  "status": "claimed"
+}
+```
+
+**Errores:**
+- 400: El recurso no está disponible
+- 401: No autorizado
+- 404: Recurso no encontrado
+
+### Maxo (Moneda)
+
+#### Obtener Saldo
+
+```http
+GET /maxo/<int:user_id>/balance
+```
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "user_id": 1,
+  "balance": 150.75,
+  "updated_at": "2025-11-13T18:00:00Z"
+}
+```
+
+**Errores:**
+- 401: No autorizado
+- 403: No tienes permiso para ver este saldo
+- 404: Usuario no encontrado
+
+#### Transferir Maxo
+
+```http
+POST /maxo/transfer
+```
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "from_user_id": 1,
+  "to_user_id": 2,
+  "amount": 50.25,
+  "reason": "Pago por servicios"
+}
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "message": "Transferencia exitosa",
+  "transaction_id": "tx_1234567890",
+  "from_balance": 100.50,
+  "to_balance": 75.25
+}
+```
+
+**Errores:**
+- 400: Fondos insuficientes o monto inválido
+- 401: No autorizado
+- 403: No tienes permiso para realizar esta transferencia
+- 404: Usuario no encontrado
+
+## Rate Limiting
+
+La API implementa límites de tasa para prevenir abusos. Los límites varían según el endpoint:
+
+- `POST /auth/login`: 5 solicitudes por minuto
+- `POST /auth/register`: 10 solicitudes por hora
+- `POST /auth/refresh`: 20 solicitudes por hora
+- Resto de la API: 200 solicitudes por día, 50 por hora
+
+### Respuesta de Error (429):
+```json
+{
+  "error": "Demasiadas peticiones",
+  "message": "5 per 1 minute",
+  "retry_after": 60
+}
+```
+
+## Seguridad
+
+### Configuración Recomendada para Producción
+
+Copia el archivo `config.example.env` a `.env` y configura los siguientes valores:
+
+```env
+SECRET_KEY=tu_clave_secreta_muy_larga_y_segura
+FLASK_ENV=production
+PORT=5001
+REDIS_URL=redis://localhost:6379/0
+RATELIMIT_LOGIN_LIMIT="5 per minute"
+RATELIMIT_REGISTER_LIMIT="10 per hour"
+RATELIMIT_REFRESH_LIMIT="20 per hour"
+RATELIMIT_API_LIMIT="50 per hour"
+```
+
+### Mejores Prácticas
+
+1. **Tokens JWT**:
+   - Nunca compartas tus tokens
+   - Almacénalos de forma segura
+   - Usa HTTPS para todas las comunicaciones
+
+2. **Contraseñas**:
+   - Usa contraseñas fuertes y únicas
+   - No las reutilices en otros servicios
+
+3. **Rate Limiting**:
+   - Implementa retroalimentación al usuario cuando se acerque al límite
+   - Considera implementar un sistema de cola para solicitudes frecuentes
+
+## Pruebas
+
+Ejecuta las pruebas con:
+
+```bash
+python3 -m pytest -v
+```
+
+## Notas de Seguridad
+
+1. **Contraseñas**:
+   - Las contraseñas se almacenan con hash seguro (Werkzeug)
+   - Las contraseñas de demostración están en texto plano solo para pruebas locales
+
+2. **Tokens JWT**:
+   - La clave secreta se configura mediante la variable de entorno `SECRET_KEY`
+   - Los tokens tienen una vida útil limitada
+   - Los tokens de actualización se rotan automáticamente
+
+3. **Base de Datos**:
+   - SQLite se usa para desarrollo
+   - Considera usar PostgreSQL para producción
+
+4. **Monitoreo**:
+   - Implementa monitoreo de seguridad
+   - Revisa regularmente los logs de acceso
+
+## Soporte
+
+Para problemas o preguntas, por favor abre un issue en el repositorio del proyecto.
 
 ## Getting started (local)
 
