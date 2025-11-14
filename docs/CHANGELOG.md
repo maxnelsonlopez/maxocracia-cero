@@ -159,4 +159,22 @@ Notes & follow-ups:
 - Consider hardening the refresh token hashing (HMAC using `SECRET_KEY`, or Argon2/bcrypt) and limiting the number of active refresh tokens per user.
 - The rotation pattern prevents reuse of old refresh tokens; tests ensure attempted reuse is rejected.
 
+## 2025-11-13 — Endpoint-specific rate limits and docs
+
+### Added
+- Implemented per-endpoint rate limits for auth routes:
+  - `login` (`LOGIN_LIMITS`), `register` (`REGISTER_LIMITS`), `refresh` (`REFRESH_LIMITS`) with dynamic overrides via app config.
+  - Backward-compatible fallback to `RATELIMIT_AUTH_LIMIT` if endpoint-specific keys are not set.
+- Documentation: `docs/API.md` updated with a dedicated Rate Limiting section (defaults, config keys, error shape, examples).
+
+### Changed
+- `app/auth.py` — route decorators use endpoint-specific limits.
+- `app/limiter.py` — new helpers for endpoint limits; maintained existing general `AUTH_LIMITS` and `API_GENERAL_LIMITS`.
+
+### Verified
+- Test suite passes locally (`44 passed`); rate-limiting tests use explicit overrides in fixtures to be deterministic.
+
+### Notes
+- For production deployments, prefer `REDIS_URL` storage for limiter; defaults remain `memory://` for local/testing.
+
 

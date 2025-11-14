@@ -97,7 +97,58 @@ curl -H "Authorization: Bearer <TOKEN>" http://127.0.0.1:5001/maxo/1/balance
   - protected (Authorization: Bearer <token>)
   - body: { from_user_id, to_user_id, amount, reason }
   - requires token user_id == from_user_id
-  - enforces sufficient balance (no overdraft)
+ - enforces sufficient balance (no overdraft)
+
+## Rate limiting
+
+The API enforces per-endpoint rate limits using Flask-Limiter.
+
+- Defaults (production):
+  - `POST /auth/login`: `5 per minute`
+  - `POST /auth/register`: `10 per hour`
+  - `POST /auth/refresh`: `20 per hour`
+  - General API: `200 per day`, `50 per hour`
+
+- Testing behavior:
+  - In testing (`app.config['TESTING']=True`) the defaults are permissive to avoid interfering with the suite.
+  - Individual tests can override limits via `app.config`.
+
+- Configuration keys (can be provided via app config or environment variables loaded at startup):
+  - `RATELIMIT_LOGIN_LIMIT`: overrides login limit (e.g. `"5 per minute"`).
+  - `RATELIMIT_REGISTER_LIMIT`: overrides register limit.
+  - `RATELIMIT_REFRESH_LIMIT`: overrides refresh limit.
+  - `RATELIMIT_AUTH_LIMIT`: legacy/fallback override used when endpoint-specific keys are not set.
+  - `RATELIMIT_API_LIMIT`: override for general API limits.
+  - `REDIS_URL`: storage backend for limiter (default `memory://` for local/testing). Example: `redis://localhost:6379/0`.
+
+- Implementation details:
+  - Limiter setup: `app/limiter.py:7–12`.
+  - Dynamic endpoint limits: `app/limiter.py:33–72` (`LOGIN_LIMITS`, `REGISTER_LIMITS`, `REFRESH_LIMITS`).
+  - Decorators applied in auth routes: `app/auth.py:24–26`, `app/auth.py:71–73`, `app/auth.py:200–202`.
+
+- Error response example (HTTP 429):
+
+```json
+{
+  "error": "Demasiadas peticiones",
+  "message": "5 per 1 minute",
+  "retry_after": 60
+}
+```
+
+- Example: quickly hitting login limit
+
+```bash
+for i in $(seq 1 10); do
+  curl -s -X POST http://127.0.0.1:5001/auth/login \
+    -H 'Content-Type: application/json' \
+    -d '{"email":"alice@example.com","password":"password1"}' | jq -r '.error';
+done
+```
+
+Notes:
+- For production, prefer Redis storage (`REDIS_URL`) for accurate distributed rate limiting.
+- The limiter key function is the remote address (client IP).
 
 ## Tests
 
