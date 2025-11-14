@@ -16,11 +16,12 @@ Aquí no encontrarás (aún) contratos inteligentes complejos, sino las herramie
 ## Índice rápido
 
 - [Manifiesto: MAXOCRACIA](docs/MAXOCRACIA_MANIFIESTO.md)
-- [Formularios](formularios/)
-- [Modelo de datos](data-model/)
-- [Especificación del dashboard](dashboard-spec/)
+- [Documentación de la API](docs/API.md)
+- [Modelo de Datos](docs/MODELO_DE_DATOS.md)
+- [Guía de Estilo](docs/GUIA_DE_ESTILO.md)
+- [Código de Conducta](CODE_OF_CONDUCT.md)
+- [Guía de Contribución](CONTRIBUTING.md)
 - [FAQ Extendido](docs/FAQ_EXTENDIDO.md)
-- [API & Usage (Flask)](docs/API.md)
 
 ## La Arquitectura en Práctica
 
