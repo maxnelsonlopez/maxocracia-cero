@@ -1,9 +1,9 @@
 import os
-import tempfile
-import json
 import sqlite3
+import tempfile
 
 import pytest
+
 from app import create_app
 from app.utils import init_db
 

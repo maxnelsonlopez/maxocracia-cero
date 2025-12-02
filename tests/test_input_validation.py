@@ -1,10 +1,10 @@
-import pytest
+
 from app.validators import (
-    validate_email,
-    validate_password,
-    validate_name,
     validate_alias,
     validate_amount,
+    validate_email,
+    validate_name,
+    validate_password,
     validate_user_id,
 )
 

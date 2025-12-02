@@ -1,13 +1,12 @@
-import secrets
+import base64
 import hashlib
 import hmac
 import os
-import base64
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from .utils import get_db
-from .jwt_utils import get_secure_key
 
 # Length of raw refresh token in bytes (will be hex-encoded)
 RAW_TOKEN_BYTES = 32

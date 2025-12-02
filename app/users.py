@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+
 from .utils import get_db
 
 bp = Blueprint("users", __name__, url_prefix="/users")
@@ -44,7 +45,7 @@ def create_user():
             (email, name, alias, generate_password_hash(password)),
         )
         db.commit()
-    except Exception as e:
+    except Exception:
         # Don't expose internal error details to prevent information leakage
         return jsonify({"error": "Failed to create user"}), 500
     return jsonify({"message": "user created"}), 201

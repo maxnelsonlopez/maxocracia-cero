@@ -1,7 +1,7 @@
-import os
 import re
 from functools import wraps
-from flask import request, jsonify
+
+from flask import jsonify, request
 
 # Patrones de validación
 EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")

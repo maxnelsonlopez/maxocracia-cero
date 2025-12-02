@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+
 from .utils import get_db
 
 bp = Blueprint("resources", __name__, url_prefix="/resources")
@@ -32,7 +33,7 @@ def list_resources():
 @bp.route("/<int:res_id>/claim", methods=["POST"])
 def claim_resource(res_id):
     data = request.get_json() or {}
-    user_id = data.get("user_id")
+    data.get("user_id")
     db = get_db()
     cur = db.execute(
         "SELECT available FROM resources WHERE id = ?", (res_id,)

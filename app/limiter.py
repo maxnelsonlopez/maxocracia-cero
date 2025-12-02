@@ -1,7 +1,8 @@
-from flask import request, jsonify
+import os
+
+from flask import jsonify
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-import os
 
 # Configuración del limiter
 limiter = Limiter(

@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+
 from .utils import get_db
 
 bp = Blueprint("resources", __name__, url_prefix="/resources")
@@ -28,7 +29,7 @@ def create_resource():
             (user_id, title, description, category, 1),
         )
         db.commit()
-    except Exception as e:
+    except Exception:
         # Don't expose internal error details to prevent information leakage
         return jsonify({"error": "Failed to create resource"}), 500
     return jsonify({"message": "resource created"}), 201

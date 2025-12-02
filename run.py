@@ -1,5 +1,6 @@
-from app import create_app
 import os
+
+from app import create_app
 
 
 def _load_env(path=".env"):

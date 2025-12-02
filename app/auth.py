@@ -1,26 +1,26 @@
 import sqlite3
-from flask import Blueprint, request, jsonify, session, make_response, current_app
-from .utils import get_db
-from werkzeug.security import generate_password_hash, check_password_hash
-from .jwt_utils import create_token
-from .jwt_utils import token_required
-from .jwt_utils import verify_token
+from uuid import uuid4
+
+from flask import Blueprint, current_app, jsonify, make_response, request, session
+from werkzeug.security import check_password_hash, generate_password_hash
+
+from .jwt_utils import create_token, token_required, verify_token
+from .limiter import LOGIN_LIMITS, REFRESH_LIMITS, REGISTER_LIMITS, limiter
 from .refresh_utils import (
     generate_refresh_token_raw,
+    revoke_user_tokens,
+    rotate_refresh_token,
     store_refresh_token,
     verify_refresh_token_raw,
-    rotate_refresh_token,
-    revoke_user_tokens,
 )
-from .limiter import limiter, LOGIN_LIMITS, REGISTER_LIMITS, REFRESH_LIMITS
+from .utils import get_db
 from .validators import (
-    validate_json_request,
-    validate_email,
-    validate_password,
-    validate_name,
     validate_alias,
+    validate_email,
+    validate_json_request,
+    validate_name,
+    validate_password,
 )
-from uuid import uuid4
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -74,7 +74,7 @@ def register():
 
     except sqlite3.IntegrityError as e:
         return jsonify({"error": "Email already registered"}), 400
-    except Exception as e:
+    except Exception:
         # Don't expose internal error details to prevent information leakage
         return jsonify({"error": "Internal server error"}), 500
 

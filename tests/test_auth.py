@@ -1,8 +1,5 @@
 import json
-import time
-import jwt
-from datetime import datetime, timedelta
-from werkzeug.security import generate_password_hash
+
 
 
 def test_register_user(client):

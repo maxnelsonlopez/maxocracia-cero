@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+
 from .utils import get_db
 
 bp = Blueprint("reputation", __name__, url_prefix="/reputation")

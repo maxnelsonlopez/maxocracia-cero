@@ -1,8 +1,10 @@
-import os
-import tempfile
-import sqlite3
 import json
+import os
+import sqlite3
+import tempfile
+
 import pytest
+
 from app import create_app
 from app.utils import init_db
 
@@ -25,6 +27,7 @@ def client():
 
 def seed_user(db_path, email, name="Tester"):
     import sqlite3
+
     from werkzeug.security import generate_password_hash
 
     conn = sqlite3.connect(db_path)

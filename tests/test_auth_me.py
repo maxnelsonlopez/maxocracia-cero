@@ -1,5 +1,3 @@
-import pytest
-from werkzeug.security import generate_password_hash
 
 
 def test_auth_me_returns_profile(auth_client):

@@ -1,11 +1,12 @@
 import os
-import tempfile
 import sqlite3
+import tempfile
 
 import pytest
+from werkzeug.security import generate_password_hash
+
 from app import create_app
 from app.utils import init_db
-from werkzeug.security import generate_password_hash
 
 
 @pytest.fixture
@@ -76,7 +77,7 @@ def test_transfer_token_mismatch(client):
     db_path = client.application.config["DATABASE"]
     a = seed_user(db_path, "a3@example.test", "A3")
     b = seed_user(db_path, "b3@example.test", "B3")
-    c = seed_user(db_path, "c3@example.test", "C3")
+    seed_user(db_path, "c3@example.test", "C3")
 
     # login as C but try to transfer from A
     token = login_and_token(client, "c3@example.test")

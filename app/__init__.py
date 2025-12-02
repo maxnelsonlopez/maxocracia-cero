@@ -1,7 +1,9 @@
 import os
+
 from flask import Flask, request
-from .utils import init_db, close_db
+
 from .limiter import init_limiter
+from .utils import close_db, init_db
 
 
 def create_app(db_path=None):
@@ -24,11 +26,11 @@ def create_app(db_path=None):
 
     # register blueprints
     from .auth import bp as auth_bp
-    from .users import bp as users_bp
     from .interchanges import bp as interchanges_bp
     from .maxo_bp import bp as maxo_bp
     from .reputation_bp import bp as reputation_bp
     from .resources_bp import bp as resources_bp
+    from .users import bp as users_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)

@@ -1,7 +1,9 @@
-from flask import Blueprint, request, jsonify
-from .utils import get_db
-from .maxo import credit_user, calculate_credit
 import json
+
+from flask import Blueprint, jsonify, request
+
+from .maxo import calculate_credit, credit_user
+from .utils import get_db
 
 bp = Blueprint("interchanges", __name__, url_prefix="/interchanges")
 
@@ -78,7 +80,7 @@ def create_interchange():
             ),
         )
         db.commit()
-    except Exception as e:
+    except Exception:
         # Don't expose internal error details to prevent information leakage
         return jsonify({"error": "Failed to create interchange"}), 500
 

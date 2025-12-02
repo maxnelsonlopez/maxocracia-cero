@@ -1,9 +1,10 @@
 import os
 import secrets
-import jwt
-from functools import wraps
-from flask import request, jsonify, current_app
 from datetime import datetime, timedelta, timezone
+from functools import wraps
+
+import jwt
+from flask import current_app, jsonify, request
 
 
 # Generar una clave secreta fuerte si no está definida en el entorno

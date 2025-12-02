@@ -1,7 +1,4 @@
-import time
-import pytest
-from datetime import datetime, timedelta, timezone
-from werkzeug.security import generate_password_hash
+
 
 
 def test_login_returns_refresh_token(auth_client, client):
@@ -72,10 +69,11 @@ def test_refresh_rotates_and_rejects_old(client):
 
 def test_expired_refresh_token_rejected(client):
     """Prueba que un token de refresco expirado sea rechazado."""
-    from app.refresh_utils import hash_refresh_token, generate_refresh_token_raw
-    from app.utils import get_db
-    from datetime import datetime, timedelta, timezone
     import uuid
+    from datetime import datetime, timedelta, timezone
+
+    from app.refresh_utils import hash_refresh_token
+    from app.utils import get_db
 
     # 1. Iniciar sesión para obtener un token de refresco
     login_response = client.post(

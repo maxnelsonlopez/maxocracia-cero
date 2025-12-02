@@ -1,11 +1,13 @@
 import base64
 import hashlib
+
 import pytest
+
 from app.refresh_utils import (
+    PBKDF2_ITERATIONS,
     generate_refresh_token_raw,
     hash_refresh_token,
     verify_refresh_token_hash,
-    PBKDF2_ITERATIONS,
 )
 
 

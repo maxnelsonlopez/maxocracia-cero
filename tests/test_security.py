@@ -6,11 +6,12 @@ incluyendo protección contra fuerza bruta, inyección SQL, manejo seguro de ses
 y otros aspectos de seguridad importantes.
 """
 
-import time
-import pytest
 import sqlite3
-from werkzeug.security import generate_password_hash
+import time
 import unittest
+
+import pytest
+from werkzeug.security import generate_password_hash
 
 
 class TestSecurity(unittest.TestCase):

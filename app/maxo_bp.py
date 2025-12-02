@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, request
-from .maxo import get_balance, credit_user
-from .utils import get_db
+
 from .jwt_utils import token_required
+from .maxo import get_balance
+from .utils import get_db
 
 bp = Blueprint("maxo", __name__, url_prefix="/maxo")
 
@@ -106,7 +107,7 @@ def _transfer_impl():
             (to_id, amount, f"Transfer from {from_id}: {reason}"),
         )
         db.commit()
-    except Exception as e:
+    except Exception:
         db.rollback()
         # Don't expose internal error details to prevent information leakage
         return jsonify({"error": "Transfer failed"}), 500
