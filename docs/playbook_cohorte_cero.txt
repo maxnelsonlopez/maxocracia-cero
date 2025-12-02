@@ -1,0 +1,114 @@
+Playbook de la Cohorte Cero: Del Axioma a la Acción
+(Versión 1.0 - "El Experimento Bogotá")
+
+Principio Rector: No buscamos la perfección, buscamos la verdad de la experiencia. Somos científicos de nuestra propia existencia. Documentamos nuestros éxitos, pero celebramos nuestros fracasos, porque son los datos más valiosos. El objetivo de este Playbook no es "implementar la Maxocracia", es descubrirla en la práctica.
+
+---
+
+FASE 1: El Despertar Ontológico (Mes 1 - Observación y Conciencia)
+
+El objetivo de esta fase no es medir, es ver. Es desarrollar la capacidad de observar la vida a través de los lentes de la Maxocracia sin la presión de la cuantificación perfecta.
+
+Play 1.1: El Pacto de la Cohorte.
+Acción: Una reunión ceremonial de inicio. Cada uno de los 11 miembros lee en voz alta un Axioma del Código de Coherencia (se reparten los 8 principales) y se compromete verbalmente a:
+    1. La Honestidad Radical: Ser brutalmente honesto consigo mismo sobre su uso del tiempo.
+    2. La No-Penalización: No juzgar los registros de los demás. Esto es un laboratorio, no un tribunal.
+    3. La Confidencialidad: Lo que se comparte en la cohorte, se queda en la cohorte.
+
+Play 1.2: El Diario de Tiempo Vital (TVI Log).
+Herramienta: Una simple hoja de cálculo compartida (Google Sheets) o un canal de Discord/Telegram. Cada miembro tiene su propia pestaña o hilo.
+Acción: Al final de cada día, durante 30 días, cada miembro rellena, de la forma más honesta posible, sus 16-18 horas de vigilia en tres categorías simples:
+    - T_mantenimiento: Horas dedicadas a lo básico para funcionar (comer, aseo, transporte esencial, sueño).
+    - T_inversión: Horas dedicadas a construir capitales (trabajo enfocado, estudio, ejercicio, cuidado de relaciones, crianza de hijos, mantenimiento del hogar). Incluye tanto SDV como EIR.
+    - T_fuga: Horas que, en retrospectiva honesta, no se alinearon con ninguna intención. Tiempo que simplemente "se fue" (scrolling sin propósito, procrastinación, distracciones no deseadas).
+Resultado: Al final del mes, cada miembro tendrá su primer Coeficiente de Coherencia Personal (CCP) aproximado.
+
+Play 1.3: La Auditoría del Nido (SDV Checklist Semanal).
+Acción: Una vez por semana, cada miembro completa una checklist simple sobre su propio Suelo de Dignidad Vital. ¿Esta semana tuve acceso constante a buena nutrición? ¿Mi vivienda es segura y tranquila? ¿Tuve tiempo para la conexión social?
+Objetivo: Hacer tangible el concepto de SDV y detectar carencias dentro de la propia cohorte que el grupo podría ayudar a resolver.
+
+Ritual Semanal de Fase 1: La Puesta en Común.
+Una reunión de 60 minutos donde cada persona comparte brevemente: "¿Qué fue lo que más me sorprendió de a dónde se fue mi tiempo esta semana?". Es un espacio para la vulnerabilidad y el aprendizaje colectivo.
+
+---
+
+FASE 2: La Contabilidad de la Existencia (Mes 2 - Cuantificación y Simulación)
+
+Ahora que hemos aprendido a ver, empezamos a medir. Introducimos el VHV y el Maxo Beta de forma gamificada y de bajo riesgo.
+
+Play 2.1: El VHV de mi Almuerzo.
+Acción: La primera semana, la tarea colectiva es que cada miembro calcule el VHV de una de sus comidas diarias. Se proporciona una "calculadora VHV de alimentos" simplificada en una hoja de cálculo.
+    - T (Tiempo): ¿Cuántos minutos tardé en prepararlo? (Si lo compré, ¿cuál es el T estimado?).
+    - V (Vidas): ¿Qué ingredientes animales/vegetales usé? (Se usan F_consciencia y F_sufrimiento aproximados y consensuados por la cohorte).
+    - R (Recursos): ¿Cuántos empaques deseché? ¿Cuánta energía (gas/electricidad) usé?
+Objetivo: Desmitificar el VHV y convertirlo en un ejercicio práctico y tangible. Demostrar cómo una ensalada casera tiene un VHV radicalmente diferente a una hamburguesa de comida rápida.
+
+Play 2.2: La Génesis del Maxo Beta.
+Herramienta: Se añade una nueva columna a la hoja de cálculo general: "Billetera Maxo Beta (Mβ)".
+Acción: Cada miembro de la cohorte recibe una "asignación inicial" de 1.000 Mβ. Se deja claro que estos tokens no tienen valor real; son puntos para nuestro experimento.
+
+Play 2.3: El Primer Mercado de Favores.
+Acción: Se anima a los miembros a empezar a ponerle "precio" en Maxo Beta a pequeños intercambios de tiempo y habilidades dentro de la cohorte.
+    - "¿Alguien me ayuda a mover un mueble? Ofrezco 20 Mβ."
+    - "Soy bueno corrigiendo textos. Reviso un documento de 2 páginas por 15 Mβ."
+    - "Hice café de más. Vendo una taza por 3 Mβ."
+Objetivo: Empezar a pensar en el tiempo y el valor en términos de la nueva moneda, en un entorno seguro y de bajo riesgo.
+
+Ritual Semanal de Fase 2: La Calibración del Valor (Proto-Oráculo Dinámico).
+La reunión semanal ahora se centra en la función Maxo = f(T, V, R). El grupo debate: "Vimos el VHV promedio de nuestros almuerzos. ¿Cuántos Maxos Beta debería costar? ¿Qué valoramos más como grupo esta semana: el bajo sufrimiento (V), el ahorro de tiempo (T) o el uso de menos recursos (R)?". Se vota y se establecen los "parámetros" α, β, y δ para la semana siguiente.
+
+---
+
+FASE 3: La Gobernanza Coherente (Mes 3 - Integración y Decisión Colectiva)
+
+Pasamos de la simulación individual a la acción colectiva. La cohorte empieza a operar como una micro-economía real.
+
+Play 3.1: El Fondo Común.
+Acción: La cohorte decide de forma unánime destinar un porcentaje de sus Maxos Beta (ej. el 10% de lo que cada uno tiene) a un "Fondo Común de la Cohorte". Este fondo ahora puede usarse para objetivos colectivos.
+
+Play 3.2: La Propuesta Ponderada (Meritocracia Funcional en Acción).
+Acción: Cualquier miembro puede hacer una propuesta para usar el Fondo Común. Por ejemplo: "Propongo que usemos 200 Mβ para comprar una herramienta de alta calidad (un taladro, una licuadora industrial) que todos podamos compartir, reduciendo nuestro VHV colectivo".
+Gobernanza: La decisión se toma siguiendo el principio de Participación Inteligente. No es un voto de "sí/no". Se abre un debate donde los que más han investigado la propuesta (comparando VHVs de diferentes herramientas, por ejemplo) tienen una voz naturalmente más ponderada. La decisión final busca el consenso basado en la coherencia con los axiomas.
+
+Play 3.3: Cierre del Primer Ciclo y Retrospectiva.
+Acción: Al final de los 90 días, se realiza una reunión extendida para evaluar todo el experimento.
+    - ¿Qué aprendimos sobre nosotros mismos y nuestro uso del tiempo? (Resultados del TVI Log).
+    - ¿Qué fue lo más difícil de medir o registrar? (Feedback para mejorar la metodología VHV).
+    - ¿Cómo funcionó nuestra micro-economía? (Análisis de los flujos de Maxo Beta).
+    - ¿Qué reglas o plays no funcionaron y por qué?
+Resultado: Se genera el "Informe de Hallazgos de la Cohorte Cero v1.0". Este documento es la primera pieza de evidencia empírica del sistema Maxocracia. Es el primer dato real, la primera verdad que emerge de la experiencia.
+
+---
+
+MÉTRICAS DE ÉXITO DE LA COHORTE CERO:
+
+1. **Participación Sostenida**: El 80% de los miembros completa los 90 días
+2. **Insights Reveladores**: Se documentan al menos 5 descubrimientos inesperados sobre uso del tiempo o medición de valor
+3. **Innovaciones Metodológicas**: La cohorte propone mejoras concretas a la metodología VHV
+4. **Cohesión Grupal**: El grupo mantiene niveles altos de confianza y vulnerabilidad
+5. **Viabilidad Práctica**: Se demuestra que es factible operar una micro-economía basada en VHV sin tecnología compleja
+
+RECURSOS NECESARIOS:
+
+- 11 personas comprometidas (Cohorte Cero)
+- Herramientas de comunicación digital (Discord/Telegram)
+- Hojas de cálculo colaborativas (Google Sheets)
+- Tiempo semanal: 2 horas (1h reunión + 1h documentación)
+- Espacio físico mensual para encuentro presencial
+- Presupuesto inicial: $50 USD para herramientas compartidas
+
+PRINCIPIOS OPERATIVOS:
+
+1. **Gradualidad**: Cada fase construye sobre la anterior sin avanzar antes de dominar
+2. **Transparencia**: Todo se documenta, todo se comparte con el grupo
+3. **Flexibilidad**: El protocolo se ajusta basado en feedback real
+4. **Humildad**: Reconocemos que estamos explorando territorio desconocido
+5. **Ciencia de Nosotros Mismos**: Nos treated como sujetos de investigación rigurosa
+
+---
+
+El Playbook de la Cohorte Cero es el laboratorio donde la teoría se encuentra con la experiencia humana real. Es donde los axiomas abstractos se convierten en decisiones cotidianas, donde las ecuaciones se vuelven conversación, donde la Maxocracia deja de ser una idea y se convierte en una forma de vivir.
+
+La primera cohorte no busca la perfección. Busca la verdad de la experiencia. Busca descubrir qué funciona, qué no funciona, y por qué. Los datos que generen serán el foundation para todas las futuras implementaciones de Maxocracia.
+
+Porque la teoría es hermosa, pero la práctica es donde reside la sabiduría.

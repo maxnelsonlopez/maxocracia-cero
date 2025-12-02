@@ -33,8 +33,13 @@ CREATE TABLE IF NOT EXISTS interchange (
   description TEXT,
   urgency TEXT,
   uth_hours REAL,
+  uvc_score REAL,
+  urf_units REAL,
   urf_description TEXT,
   economic_value_approx TEXT,
+  vhv_time_seconds REAL,
+  vhv_lives REAL,
+  vhv_resources_json TEXT,
   impact_resolution_score INTEGER,
   reciprocity_status TEXT,
   human_dimension_attended TEXT,
@@ -42,6 +47,20 @@ CREATE TABLE IF NOT EXISTS interchange (
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (giver_id) REFERENCES users(id),
   FOREIGN KEY (receiver_id) REFERENCES users(id)
+);
+
+-- Refresh tokens table for rotating refresh token support
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  jti TEXT NOT NULL UNIQUE,
+  token_hash TEXT NOT NULL,
+  issued_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expires_at TEXT,
+  revoked INTEGER DEFAULT 0,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE(token_hash)
 );
 
 CREATE TABLE IF NOT EXISTS resources (

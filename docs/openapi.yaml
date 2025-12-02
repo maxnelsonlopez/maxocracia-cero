@@ -1,0 +1,317 @@
+openapi: 3.0.3
+info:
+  title: API de Maxocracia Cero
+  description: |
+    API para el sistema de economía colaborativa Maxocracia Cero.
+    Permite la gestión de usuarios, autenticación, intercambios y sistema de créditos.
+  version: 1.0.0
+  contact:
+    name: Soporte Maxocracia Cero
+    email: soporte@maxocracia.com
+
+servers:
+  - url: http://localhost:5000/api
+    description: Servidor de desarrollo
+  - url: https://api.maxocracia.com/v1
+    description: Servidor de producción
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        alias:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+    
+    Token:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          type: integer
+          description: Tiempo de expiración en segundos
+    
+    Interchange:
+      type: object
+      required:
+        - interchange_id
+        - giver_id
+        - receiver_id
+        - description
+      properties:
+        interchange_id:
+          type: string
+          description: Identificador único del intercambio
+        giver_id:
+          type: integer
+          description: ID del usuario que realiza el intercambio
+        receiver_id:
+          type: integer
+          description: ID del usuario que recibe el intercambio
+        description:
+          type: string
+          description: Descripción del intercambio
+        uth_hours:
+          type: number
+          format: float
+          default: 0
+          description: Horas de trabajo en Unidades de Tiempo Hombre (UTH)
+        impact_resolution_score:
+          type: integer
+          default: 0
+          description: Puntuación de impacto/resolución
+    
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Descripción del error
+    
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+paths:
+  /auth/register:
+    post:
+      tags: [Autenticación]
+      summary: Registrar un nuevo usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - name
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: usuario@ejemplo.com
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: Password1
+                name:
+                  type: string
+                  minLength: 2
+                  example: Juan Pérez
+                alias:
+                  type: string
+                  nullable: true
+                  example: juanp
+      responses:
+        '201':
+          description: Usuario creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '400':
+          description: Error en la solicitud
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  
+  /auth/login:
+    post:
+      tags: [Autenticación]
+      summary: Iniciar sesión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: usuario@ejemplo.com
+                password:
+                  type: string
+                  format: password
+                  example: Password1
+      responses:
+        '200':
+          description: Inicio de sesión exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '401':
+          description: Credenciales inválidas
+  
+  /auth/refresh:
+    post:
+      tags: [Autenticación]
+      summary: Refrescar token de acceso
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refresh_token
+              properties:
+                refresh_token:
+                  type: string
+                  description: Token de refresco
+      responses:
+        '200':
+          description: Token refrescado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '401':
+          description: Token de refresco inválido o expirado
+  
+  /auth/me:
+    get:
+      tags: [Usuarios]
+      summary: Obtener información del usuario actual
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Información del usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: No autorizado
+  
+  /interchanges:
+    get:
+      tags: [Intercambios]
+      summary: Listar intercambios recientes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          description: Número máximo de intercambios a devolver
+          schema:
+            type: integer
+            default: 20
+            maximum: 200
+      responses:
+        '200':
+          description: Lista de intercambios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Interchange'
+    
+    post:
+      tags: [Intercambios]
+      summary: Crear un nuevo intercambio
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Interchange'
+      responses:
+        '201':
+          description: Intercambio creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  credit:
+                    type: number
+                    description: Créditos otorgados
+        '400':
+          description: Error en la solicitud
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /maxo/balance:
+    get:
+      tags: [Créditos]
+      summary: Obtener saldo actual
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Saldo actual
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance:
+                    type: number
+                    description: Saldo actual en Maxos
+  
+  /reputation:
+    get:
+      tags: [Reputación]
+      summary: Obtener reputación del usuario actual
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Puntuación de reputación
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  score:
+                    type: number
+                    description: Puntuación de reputación
+
+security:
+  - bearerAuth: []
