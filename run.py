@@ -1,6 +1,7 @@
 from app import create_app
 import os
 
+
 def _load_env(path=".env"):
     if not os.path.exists(path):
         return
@@ -20,9 +21,10 @@ def _load_env(path=".env"):
     except Exception:
         pass
 
+
 _load_env()
 app = create_app()
 
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', '5001'))
-    app.run(host='127.0.0.1', port=port)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", "5001"))
+    app.run(host="127.0.0.1", port=port)

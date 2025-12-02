@@ -16,7 +16,7 @@ def generate_secure_password(length=12):
     while True:
         password = ''.join(secrets.choice(characters) for _ in range(length))
         # Asegurar que la contraseña cumple con los requisitos
-        if (any(c.islower() for c in password and 
+        if (any(c.islower() for c in password) and 
                 any(c.isupper() for c in password) and 
                 any(c.isdigit() for c in password)):
             return password
@@ -94,7 +94,4 @@ def init_db():
 if __name__ == '__main__':
     print("Inicializando base de datos de prueba...")
     init_db()
-
-conn.commit()
-conn.close()
-print('Seeded demo DB at', DB)
+    print('Seeded demo DB at', DB)
