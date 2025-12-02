@@ -72,7 +72,7 @@ def register():
             201,
         )
 
-    except sqlite3.IntegrityError as e:
+    except sqlite3.IntegrityError:
         return jsonify({"error": "Email already registered"}), 400
     except Exception:
         # Don't expose internal error details to prevent information leakage

@@ -64,7 +64,10 @@ def create_interchange():
             # map UVC directly to lives consumed when present
             vhv_lives = uvc_score if uvc_score is not None else 0.0
         db.execute(
-            'INSERT INTO interchange (interchange_id, date, giver_id, receiver_id, description, uth_hours, uvc_score, urf_units, vhv_time_seconds, vhv_lives, vhv_resources_json, impact_resolution_score) VALUES (?, DATE("now"), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            "INSERT INTO interchange (interchange_id, date, giver_id, receiver_id, "
+            "description, uth_hours, uvc_score, urf_units, vhv_time_seconds, "
+            "vhv_lives, vhv_resources_json, impact_resolution_score) "
+            'VALUES (?, DATE("now"), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             (
                 interchange_id,
                 giver_id,

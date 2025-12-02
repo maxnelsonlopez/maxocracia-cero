@@ -3,6 +3,7 @@ import sqlite3
 import tempfile
 
 import pytest
+from werkzeug.security import generate_password_hash
 
 from app import create_app
 from app.utils import init_db
@@ -28,9 +29,6 @@ def client():
         os.remove(db_path)
     except OSError:
         pass
-
-
-from werkzeug.security import generate_password_hash
 
 
 def seed_user(db_path, email, name="Test User"):

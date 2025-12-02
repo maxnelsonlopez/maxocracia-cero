@@ -84,7 +84,7 @@ def init_db():
                     f"Usuario creado: {user['email']} - Contraseña: {user['password']}"
                 )
 
-            except sqlite3.IntegrityError as e:
+            except sqlite3.IntegrityError:
                 print(f"Advertencia: {user['email']} ya existe en la base de datos")
                 conn.rollback()
             except Exception as e:
