@@ -20,9 +20,28 @@
 
 ## Código de Conducta
 
-Al participar en este proyecto, aceptas cumplir con nuestro [Código de Conducta](CODE_OF_CONDUCT.md). Por favor, repórtalo a [tu-correo@ejemplo.com] si presencias algún comportamiento inaceptable.
+Al participar en este proyecto, aceptas cumplir con nuestro [Código de Conducta](CODE_OF_CONDUCT.md). Por favor, repórtalo a [maxlopeztutor@gmail.com] si presencias algún comportamiento inaceptable.
 
 ## ¿Cómo puedo contribuir?
+
+### Leer la documentación
+
+Hay bastante escrito, y algunos documentos son cada uno una tesis con bastante información.
+Bastantes de los posibles caminos para desarrollar el proyecto se han explorado en los documentos.
+Con cada progreso se abren preguntas y misiones de ampliación del sistema. 
+Si quieres contribuir tus propios textos envíamelos a maxlopeztutor@gmail.com
+
+
+
+### Mejorar la documentación
+
+La documentación es clave para el proyecto. Puedes ayudar a mejorarla de varias formas:
+
+1. Corregir errores ortográficos o gramaticales
+2. Mejorar la claridad de la documentación existente
+3. Agregar ejemplos de código
+4. Crear guías paso a paso
+5. Traducir la documentación a otros idiomas
 
 ### Reportar errores
 
@@ -61,15 +80,6 @@ Al participar en este proyecto, aceptas cumplir con nuestro [Código de Conducta
    ```
 5. Abre un Pull Request (PR) a la rama `develop`.
 
-### Mejorar la documentación
-
-La documentación es clave para el proyecto. Puedes ayudar a mejorarla de varias formas:
-
-1. Corregir errores ortográficos o gramaticales
-2. Mejorar la claridad de la documentación existente
-3. Agregar ejemplos de código
-4. Crear guías paso a paso
-5. Traducir la documentación a otros idiomas
 
 ## Proceso de Desarrollo
 
