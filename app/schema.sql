@@ -91,3 +91,84 @@ CREATE TABLE IF NOT EXISTS maxo_ledger (
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+-- VHV Calculator Tables
+
+-- Stores the global parameters for VHV valuation function
+-- Precio_Maxos = α·T + β·V^γ + δ·R·(FRG × CS)
+CREATE TABLE IF NOT EXISTS vhv_parameters (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  alpha REAL NOT NULL DEFAULT 100.0,  -- Weight of time component
+  beta REAL NOT NULL DEFAULT 2000.0,  -- Weight of life component
+  gamma REAL NOT NULL DEFAULT 1.0,    -- Suffering aversion exponent (axiom: γ ≥ 1)
+  delta REAL NOT NULL DEFAULT 100.0,  -- Weight of resources component
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_by INTEGER,  -- user_id who updated
+  notes TEXT,  -- Documentation of why parameters were changed
+  FOREIGN KEY (updated_by) REFERENCES users(id),
+  CHECK (alpha > 0),   -- Axiom: cannot ignore time
+  CHECK (beta > 0),    -- Axiom: cannot ignore life
+  CHECK (gamma >= 1),  -- Axiom: cannot reward suffering
+  CHECK (delta >= 0)   -- Axiom: cannot ignore finite resources
+);
+
+-- Catalog of products with their VHV breakdown
+CREATE TABLE IF NOT EXISTS vhv_products (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  category TEXT,  -- e.g., 'food', 'electronics', 'housing', 'transport'
+  description TEXT,
+  
+  -- Componente T (Tiempo Vital Indexado)
+  t_direct_hours REAL DEFAULT 0,    -- Direct labor hours
+  t_inherited_hours REAL DEFAULT 0, -- Amortized tool/infrastructure time
+  t_future_hours REAL DEFAULT 0,    -- Projected maintenance/recycling time
+  
+  -- Componente V (Unidades de Vida Consumidas)
+  v_organisms_affected REAL DEFAULT 0,  -- Number of organisms (UVC_base)
+  v_consciousness_factor REAL DEFAULT 0,  -- F_consciencia (0-1)
+  v_suffering_factor REAL DEFAULT 1,     -- F_sufrimiento (≥1)
+  v_abundance_factor REAL DEFAULT 1,     -- F_abundancia
+  v_rarity_factor REAL DEFAULT 1,        -- F_rareza_genética
+  
+  -- Componente R (Recursos Finitos)
+  r_minerals_kg REAL DEFAULT 0,
+  r_water_m3 REAL DEFAULT 0,
+  r_petroleum_l REAL DEFAULT 0,
+  r_land_hectares REAL DEFAULT 0,
+  r_frg_factor REAL DEFAULT 1,  -- Factor de Rareza Geológica
+  r_cs_factor REAL DEFAULT 1,   -- Criticidad Sistémica
+  
+  -- Calculated results
+  vhv_json TEXT,  -- Complete VHV vector as JSON: {"T": x, "V": y, "R": z}
+  maxo_price REAL,  -- Final price in Maxos
+  
+  -- Metadata
+  created_by INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (created_by) REFERENCES users(id)
+);
+
+-- Audit trail of all VHV calculations
+CREATE TABLE IF NOT EXISTS vhv_calculations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER,
+  user_id INTEGER,
+  
+  -- Snapshot of parameters used for this calculation
+  parameters_snapshot TEXT,  -- JSON: {"alpha": x, "beta": y, "gamma": z, "delta": w}
+  
+  -- Snapshot of VHV at time of calculation
+  vhv_snapshot TEXT,  -- JSON: complete VHV breakdown
+  
+  -- Result
+  maxo_price REAL,
+  
+  calculation_date TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES vhv_products(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- Insert default VHV parameters (only if table is empty)
+INSERT OR IGNORE INTO vhv_parameters (id, alpha, beta, gamma, delta, notes)
+VALUES (1, 100.0, 2000.0, 1.0, 100.0, 'Initial parameters based on paper_formalizacion_matematica_maxo.txt');
