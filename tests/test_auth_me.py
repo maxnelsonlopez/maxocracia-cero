@@ -1,5 +1,3 @@
-
-
 def test_auth_me_returns_profile(auth_client):
     """Test that the /auth/me endpoint returns the user's profile."""
     # Usar el cliente autenticado del fixture auth_client

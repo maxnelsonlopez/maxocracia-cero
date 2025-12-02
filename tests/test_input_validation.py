@@ -1,4 +1,3 @@
-
 from app.validators import (
     validate_alias,
     validate_amount,

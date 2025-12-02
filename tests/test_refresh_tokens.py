@@ -1,6 +1,3 @@
-
-
-
 def test_login_returns_refresh_token(auth_client, client):
     """Prueba que el login devuelve un token de acceso y un token de refresco."""
     # Usar el cliente no autenticado para el login
