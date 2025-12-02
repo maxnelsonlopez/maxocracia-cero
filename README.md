@@ -10,14 +10,15 @@ Este repositorio contiene los artefactos digitales y la hoja de ruta para la Fas
 
 Aquí no encontrarás (aún) contratos inteligentes complejos, sino las herramientas prácticas y los datos que emergen de nuestra red de apoyo en el mundo real. Este es el lugar donde el "alma" de la Maxocracia (su filosofía y su gente) se encuentra con su "esqueleto" (su arquitectura de datos y sistemas).
 
-- **El Alma del Proyecto (El Porqué):** [Lee el Brochure de la Maxocracia aquí](URL_A_TU_BROCHURE_CUANDO_LO_SUBAS)
+maxlopeztutor@gmail.com
+
+- **El Alma del Proyecto (El Porqué):** [Lee el Brochure de la Maxocracia aquí](docs/Paper Maxocracia ChatGPT Scholar AI.txt)
 - **El Esqueleto del Proyecto (El Cómo):** Los archivos en este repositorio.
 
 ## Índice rápido
 
 - [Manifiesto: MAXOCRACIA](docs/MAXOCRACIA_MANIFIESTO.md)
 - [Documentación de la API](docs/API.md)
-- [Modelo de Datos](docs/MODELO_DE_DATOS.md)
 - [Guía de Estilo](docs/GUIA_DE_ESTILO.md)
 - [Código de Conducta](CODE_OF_CONDUCT.md)
 - [Guía de Contribución](CONTRIBUTING.md)
