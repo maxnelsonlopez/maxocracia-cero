@@ -13,7 +13,7 @@ Where:
 - R = Resources component (Recursos Finitos)
 - α, β, γ, δ = Governance parameters with axiomatic constraints
 """
-
+from typing import Dict
 
 class VHVCalculator:
     """Calculator for Vector de Huella Vital (VHV) and Maxo pricing."""
