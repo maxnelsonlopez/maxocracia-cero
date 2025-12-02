@@ -151,6 +151,26 @@ maxocracia-cero/
    pytest tests/test_auth.py -v
    ```
 
+### Calidad de Código
+
+Para asegurar la calidad del código, utilizamos varias herramientas de análisis estático. Por favor, ejecútalas antes de enviar tu PR:
+
+1. **Formato de código** (black e isort):
+   ```bash
+   black .
+   isort .
+   ```
+
+2. **Linting** (flake8):
+   ```bash
+   flake8 .
+   ```
+
+3. **Tipado estático** (mypy):
+   ```bash
+   mypy .
+   ```
+
 ## Preguntas Frecuentes
 
 ### ¿Cómo empiezo a contribuir?
