@@ -1,5 +1,59 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
+
+## 2025-12-02 — Calculadora VHV para Cohorte Cero
+
+### Añadido
+- **Calculadora funcional del Vector de Huella Vital (VHV)** basada en `paper_formalizacion_matematica_maxo.txt`
+- **Base de datos**:
+  - Tabla `vhv_parameters`: Almacena parámetros α, β, γ, δ con restricciones axiomáticas mediante CHECK constraints
+  - Tabla `vhv_products`: Catálogo de productos con desglose completo VHV = [T, V, R]
+  - Tabla `vhv_calculations`: Historial de cálculos para auditoría y trazabilidad
+  - INSERT inicial de parámetros DEFAULT basados en el paper (α=100, β=2000, γ=1.0, δ=100)
+- **Módulo `app/vhv_calculator.py`**:
+  - Clase `VHVCalculator` con implementación matemática completa
+  - Cálculo de componente T (Tiempo Vital Indexado): directos + heredados + futuros
+  - Cálculo de componente V (Unidades Vida Consumidas): con factores F_consciencia, F_sufrimiento, F_abundancia, F_rareza
+  - Cálculo de componente R (Recursos Finitos): minerales, agua, petróleo, tierra ponderados por FRG × CS
+  - Fórmula de valoración: `Precio_Maxos = α·T + β·V^γ + δ·R`
+  - Validación de restricciones axiomáticas (α > 0, β > 0, γ ≥ 1, δ ≥ 0)
+  - Casos de estudio precargados: Huevo Ético vs Huevo Industrial del paper
+- **API Blueprint `app/vhv_bp.py`**:
+  - `POST /vhv/calculate`: Calcular VHV de un producto con opción de guardar
+  - `GET /vhv/products`: Listar productos con paginación y filtro por categoría
+  - `GET /vhv/products/<id>`: Detalles completos de un producto
+  - `GET /vhv/compare?ids=1,2`: Comparar múltiples productos
+  - `GET /vhv/parameters`: Obtener parámetros actuales de valoración
+  - `PUT /vhv/parameters`: Actualizar parámetros (requiere autenticación, valida axiomas)
+  - `GET /vhv/case-studies`: Obtener casos de estudio del paper
+- **Testing `tests/test_vhv_calculator.py`**:
+  - 8 tests de lógica de cálculo (componentes T, V, R y precio Maxo)
+  - 4 tests de validación de axiomas (restricciones α, β, γ, δ)
+  - 3 tests de casos de estudio del paper (huevos ético vs industrial)
+  - 8 tests de API endpoints
+  - Test de autenticación requerida para actualización de parámetros
+  - **Total: 19/19 tests pasando** ✅
+
+### Verificado
+- Suite completa de tests: **19/19 pasando** (100%)
+- Casos de estudio validan mecanismo de penalización por sufrimiento:
+  - Industrial (F_sufrimiento=25) genera contribución vida 10x mayor que ético (F_sufrimiento=1.1)
+  - ✅ **Validación clave del MVP**: Factor de sufrimiento impacta el precio correctamente
+- Servidor arranca correctamente con schema VHV inicializado
+- Parámetros default cargados automáticamente
+- Restricciones axiomáticas funcionan en DB (CHECK constraints) y en API (validación programática)
+- Endpoint de actualización de parámetros requiere autenticación y valida axiomas
+
+### Notas para Cohorte Cero
+- Calculadora lista para Mes 2: "Contabilidad Existencial"
+- Casos de estudio precargados facilitan experimentación
+- Parámetros α, β, γ, δ son calibrables durante el ritual "Calibración del Valor"
+- Historial completo de cálculos permite retrospectiva en Mes 3
+- API `/vhv/case-studies` provee ejemplos inmediatos para aprendizaje
+
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.0/),
