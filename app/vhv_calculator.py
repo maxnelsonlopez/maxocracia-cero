@@ -14,10 +14,6 @@ Where:
 - α, β, γ, δ = Governance parameters with axiomatic constraints
 """
 
-import json
-import math
-from typing import Dict, Tuple
-
 
 class VHVCalculator:
     """Calculator for Vector de Huella Vital (VHV) and Maxo pricing."""
