@@ -152,7 +152,7 @@ class VHVCalculator:
 
         total_price = time_price + life_price + resource_price
 
-        return round(total_price, 2)
+        return float(round(total_price, 2))
 
     def calculate_vhv(
         self,
