@@ -64,11 +64,7 @@ class VHVCalculator:
             Weighted life units consumed
         """
         return (
-            organisms_affected
-            * f_consciousness
-            * f_suffering
-            * f_abundance
-            * f_rarity
+            organisms_affected * f_consciousness * f_suffering * f_abundance * f_rarity
         )
 
     def calculate_r_component(
@@ -145,9 +141,7 @@ class VHVCalculator:
         if beta <= 0:
             raise ValueError("Axiom violation: β must be > 0 (cannot ignore life)")
         if gamma < 1:
-            raise ValueError(
-                "Axiom violation: γ must be ≥ 1 (cannot reward suffering)"
-            )
+            raise ValueError("Axiom violation: γ must be ≥ 1 (cannot reward suffering)")
         if delta < 0:
             raise ValueError(
                 "Axiom violation: δ must be ≥ 0 (cannot ignore finite resources)"
@@ -197,7 +191,9 @@ class VHVCalculator:
                 - breakdown: detailed calculation breakdown
         """
         # Calculate components
-        t = self.calculate_t_component(t_direct_hours, t_inherited_hours, t_future_hours)
+        t = self.calculate_t_component(
+            t_direct_hours, t_inherited_hours, t_future_hours
+        )
         v = self.calculate_v_component(
             v_organisms_affected,
             v_consciousness_factor,

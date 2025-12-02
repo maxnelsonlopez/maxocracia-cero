@@ -133,8 +133,11 @@ class TestCaseStudies:
         Expected: ~12-25 Maxos (ethical production with more labor but low suffering)
         """
         # Extract only VHV parameters (no metadata like 'name', 'category')
-        vhv_params = {k: v for k, v in CASE_STUDY_HUEVO_ETICO.items() 
-                      if k.startswith(('t_', 'v_', 'r_'))}
+        vhv_params = {
+            k: v
+            for k, v in CASE_STUDY_HUEVO_ETICO.items()
+            if k.startswith(("t_", "v_", "r_"))
+        }
         result = calculator.calculate_vhv(**vhv_params, **DEFAULT_PARAMS)
 
         # Should be affordable and reflect higher labor time
@@ -154,8 +157,11 @@ class TestCaseStudies:
         but we want to test the mechanism works
         """
         # Extract only VHV parameters (no metadata)
-        vhv_params = {k: v for k, v in CASE_STUDY_HUEVO_INDUSTRIAL.items() 
-                      if k.startswith(('t_', 'v_', 'r_'))}
+        vhv_params = {
+            k: v
+            for k, v in CASE_STUDY_HUEVO_INDUSTRIAL.items()
+            if k.startswith(("t_", "v_", "r_"))
+        }
         result = calculator.calculate_vhv(**vhv_params, **DEFAULT_PARAMS)
 
         # Just verify it calculates a reasonable price
@@ -171,19 +177,29 @@ class TestCaseStudies:
         With current parameters, industrial (high suffering) should cost MORE.
         """
         # Extract only VHV parameters
-        ethical_params = {k: v for k, v in CASE_STUDY_HUEVO_ETICO.items() 
-                         if k.startswith(('t_', 'v_', 'r_'))}
-        industrial_params = {k: v for k, v in CASE_STUDY_HUEVO_INDUSTRIAL.items() 
-                            if k.startswith(('t_', 'v_', 'r_'))}
-        
+        ethical_params = {
+            k: v
+            for k, v in CASE_STUDY_HUEVO_ETICO.items()
+            if k.startswith(("t_", "v_", "r_"))
+        }
+        industrial_params = {
+            k: v
+            for k, v in CASE_STUDY_HUEVO_INDUSTRIAL.items()
+            if k.startswith(("t_", "v_", "r_"))
+        }
+
         ethical_result = calculator.calculate_vhv(**ethical_params, **DEFAULT_PARAMS)
-        industrial_result = calculator.calculate_vhv(**industrial_params, **DEFAULT_PARAMS)
+        industrial_result = calculator.calculate_vhv(
+            **industrial_params, **DEFAULT_PARAMS
+        )
 
         # The KEY validation: suffering factor should impact price
         # Industrial has suffering_factor=25, ethical has suffering_factor=1.1
         # So industrial life contribution should be much higher
-        assert industrial_result["breakdown"]["life_contribution"] > \
-               ethical_result["breakdown"]["life_contribution"] * 10
+        assert (
+            industrial_result["breakdown"]["life_contribution"]
+            > ethical_result["breakdown"]["life_contribution"] * 10
+        )
 
 
 class TestVHVAPI:
@@ -336,7 +352,9 @@ class TestVHVAPI:
         payload = {"alpha": 150, "notes": "Test update"}
 
         response = client.put(
-            "/vhv/parameters", json=payload, headers={"Content-Type": "application/json"}
+            "/vhv/parameters",
+            json=payload,
+            headers={"Content-Type": "application/json"},
         )
 
         # Should fail without token
