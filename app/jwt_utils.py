@@ -2,6 +2,7 @@ import os
 import secrets
 from datetime import datetime, timedelta, timezone
 from functools import wraps
+from typing import Optional
 
 import jwt
 from flask import current_app, jsonify, request
@@ -33,7 +34,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRES = int(os.environ.get("ACCESS_TOKEN_EXPIRES", 15 * 60))  # seconds
 
 
-def create_token(payload, expires_in: int = None):
+def create_token(payload, expires_in: Optional[int] = None):
     """Create a JWT with an `exp` claim. expires_in in seconds (default ACCESS_TOKEN_EXPIRES).
     The `exp` claim is stored as an integer UTC epoch (seconds).
     """
