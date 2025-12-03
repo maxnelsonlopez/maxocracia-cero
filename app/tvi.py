@@ -1,6 +1,6 @@
 import sqlite3
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from datetime import datetime
+from typing import Dict, List
 
 
 class TVIManager:
@@ -22,8 +22,8 @@ class TVIManager:
         cursor = conn.cursor()
 
         query = """
-            SELECT 1 FROM tvi_entries 
-            WHERE user_id = ? 
+            SELECT 1 FROM tvi_entries
+            WHERE user_id = ?
             AND (
                 (start_time < ? AND end_time > ?) OR  -- Overlaps start
                 (start_time < ? AND end_time > ?) OR  -- Overlaps end
