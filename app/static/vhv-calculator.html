@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora VHV - Maxocracia</title>
+  <link rel="stylesheet" href="/static/css/vhv.css">
+</head>
+<body>
+  <!-- Hero Section -->
+  <div class="vhv-hero">
+    <h1 class="vhv-hero-title">Calculadora VHV</h1>
+    <p class="vhv-hero-subtitle">
+      Vector de Huella Vital: La verdadera contabilidad del costo existencial
+    </p>
+    <div class="vhv-formula">
+      Precio_Maxos = α·T + β·V<sup>γ</sup> + δ·R
+    </div>
+  </div>
+
+  <div class="vhv-container">
+    <!-- Navigation Tabs -->
+    <div class="vhv-tabs">
+      <button class="vhv-tab active" data-tab="calculator">Calculadora</button>
+      <button class="vhv-tab" data-tab="comparison">Comparar Productos</button>
+      <button class="vhv-tab" data-tab="case-studies">Casos de Estudio</button>
+      <button class="vhv-tab" data-tab="parameters">Parámetros</button>
+    </div>
+
+    <!-- Calculator Tab -->
+    <div class="vhv-tab-content active" id="calculator-tab">
+      <div class="vhv-grid">
+        <!-- Input Form -->
+        <div class="vhv-card">
+          <div class="vhv-card-header">
+            <h2 class="vhv-card-title">Datos del Producto</h2>
+            <p class="vhv-card-subtitle">Ingresa los valores para calcular el VHV</p>
+          </div>
+
+          <form id="vhv-form">
+            <!-- Product Name -->
+            <div class="vhv-form-group">
+              <label class="vhv-label">Nombre del Producto</label>
+              <input type="text" class="vhv-input" id="product-name" placeholder="ej: Huevo Ético" required>
+            </div>
+
+            <!-- Component T (Time) -->
+            <div class="vhv-card-header">
+              <h3 class="vhv-card-title">
+                <span class="vhv-component-badge time">T</span> Componente Temporal
+              </h3>
+            </div>
+
+            <div class="vhv-form-group">
+              <label class="vhv-label">
+                Horas Directas
+                <span class="vhv-tooltip">
+                  <span class="vhv-tooltip-icon">?</span>
+                  <span class="vhv-tooltip-content">Tiempo de trabajo directo invertido en producir este bien</span>
+                </span>
+              </label>
+              <div class="vhv-input-group">
+                <input type="number" class="vhv-input" id="t-direct" step="0.01" value="0" required>
+                <span class="vhv-input-addon">horas</span>
+              </div>
+            </div>
+
+            <div class="vhv-form-group">
+              <label class="vhv-label">
+                Horas Heredadas
+                <span class="vhv-tooltip">
+                  <span class="vhv-tooltip-icon">?</span>
+                  <span class="vhv-tooltip-content">Tiempo amortizado de herramientas e infraestructura utilizadas</span>
+                </span>
+              </label>
+              <div class="vhv-input-group">
+                <input type="number" class="vhv-input" id="t-inherited" step="0.01" value="0" required>
+                <span class="vhv-input-addon">horas</span>
+              </div>
+            </div>
+
+            <div class="vhv-form-group">
+              <label class="vhv-label">
+                Horas Futuras
+                <span class="vhv-tooltip">
+                  <span class="vhv-tooltip-icon">?</span>
+                  <span class="vhv-tooltip-content">Tiempo proyectado para mantenimiento y disposición final</span>
+                </span>
+              </label>
+              <div class="vhv-input-group">
+                <input type="number" class="vhv-input" id="t-future" step="0.01" value="0" required>
+                <span class="vhv-input-addon">horas</span>
+              </div>
+            </div>
+
+            <!-- Component V (Life) -->
+            <div class="vhv-card-header">
+              <h3 class="vhv-card-title">
+                <span class="vhv-component-badge life">V</span> Componente Vital
+              </h3>
+            </div>
+
+            <div class="vhv-form-group">
+              <label class="vhv-label">Organismos Afectados (UVC base)</label>
+              <input type="number" class="vhv-input" id="v-organisms" step="0.0001" value="0" required>
+            </div>
+
+            <div class="vhv-form-group">
+              <label class="vhv-label">Factor de Consciencia (0-1)</label>
+              <input type="number" class="vhv-input" id="v-consciousness" step="0.01" min="0" max="1" value="0" required>
+            </div>
+
+            <div class="vhv-form-group">
+              <label class="vhv-label">
+                Factor de Sufrimiento (≥1)
+                <span class="vhv-tooltip">
+                  <span class="vhv-tooltip-icon">?</span>
+                  <span class="vhv-tooltip-content">Penaliza el sufrimiento innecesario. Valores altos = más sufrimiento</span>
+                </span>
+              </label>
+              <input type="number" class="vhv-input" id="v-suffering" step="0.1" min="1" value="1" required>
+            </div>
+
+            <div class="vhv-form-group">
+              <label class="vhv-label">Factor de Abundancia</label>
+              <input type="number" class="vhv-input" id="v-abundance" step="0.0001" value="1" required>
+            </div>
+
+            <div class="vhv-form-group">
+              <label class="vhv-label">Factor de Rareza Genética</label>
+              <input type="number" class="vhv-input" id="v-rarity" step="0.1" value="1" required>
+            </div>
+
+            <!-- Component R (Resources) -->
+            <div class="vhv-card-header">
+              <h3 class="vhv-card-title">
+                <span class="vhv-component-badge resource">R</span> Componente de Recursos
+              </h3>
+            </div>
+
+            <div class="vhv-form-group">
+              <label class="vhv-label">Minerales (kg)</label>
+              <input type="number" class="vhv-input" id="r-minerals" step="0.01" value="0" required>
+            </div>
+
+            <div class="vhv-form-group">
+              <label class="vhv-label">Agua (m³)</label>
+              <input type="number" class="vhv-input" id="r-water" step="0.01" value="0" required>
+            </div>
+
+            <div class="vhv-form-group">
+              <label class="vhv-label">Petróleo (litros)</label>
+              <input type="number" class="vhv-input" id="r-petroleum" step="0.01" value="0" required>
+            </div>
+
+            <div class="vhv-form-group">
+              <label class="vhv-label">Tierra (hectáreas)</label>
+              <input type="number" class="vhv-input" id="r-land" step="0.0001" value="0" required>
+            </div>
+
+            <div class="vhv-form-group">
+              <label class="vhv-label">Factor de Rareza Geológica (FRG)</label>
+              <input type="number" class="vhv-input" id="r-frg" step="0.1" value="1" required>
+            </div>
+
+            <div class="vhv-form-group">
+              <label class="vhv-label">Criticidad Sistémica (CS)</label>
+              <input type="number" class="vhv-input" id="r-cs" step="0.1" value="1" required>
+            </div>
+
+            <!-- Actions -->
+            <div style="display: flex; gap: var(--space-sm); margin-top: var(--space-lg);">
+              <button type="submit" class="vhv-btn vhv-btn-primary" style="flex: 1;">
+                Calcular VHV
+              </button>
+              <button type="button" class="vhv-btn vhv-btn-secondary" id="load-example">
+                Cargar Ejemplo
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Results -->
+        <div class="vhv-card">
+          <div class="vhv-card-header">
+            <h2 class="vhv-card-title">Resultados</h2>
+          </div>
+
+          <div id="results-container" style="display: none;">
+            <!-- Maxo Price -->
+            <div class="vhv-result">
+              <div class="vhv-result-label">Precio en Maxos</div>
+              <div class="vhv-result-value">
+                <span id="maxo-price">0</span>
+                <span style="font-size: var(--font-size-xl);">Ⓜ</span>
+              </div>
+            </div>
+
+            <!-- VHV Breakdown -->
+            <div class="vhv-result-breakdown">
+              <div class="vhv-breakdown-item">
+                <div class="vhv-breakdown-label">
+                  <span class="vhv-component-badge time">T</span> Tiempo
+                </div>
+                <div class="vhv-breakdown-value" id="vhv-t">0</div>
+              </div>
+              <div class="vhv-breakdown-item">
+                <div class="vhv-breakdown-label">
+                  <span class="vhv-component-badge life">V</span> Vida
+                </div>
+                <div class="vhv-breakdown-value" id="vhv-v">0</div>
+              </div>
+              <div class="vhv-breakdown-item">
+                <div class="vhv-breakdown-label">
+                  <span class="vhv-component-badge resource">R</span> Recursos
+                </div>
+                <div class="vhv-breakdown-value" id="vhv-r">0</div>
+              </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="vhv-chart-container">
+              <canvas id="vhv-chart"></canvas>
+            </div>
+
+            <!-- Contribution Breakdown -->
+            <div class="vhv-card-header">
+              <h3 class="vhv-card-title">Contribución al Precio</h3>
+            </div>
+            <div class="vhv-result-breakdown">
+              <div class="vhv-breakdown-item">
+                <div class="vhv-breakdown-label">Tiempo</div>
+                <div class="vhv-breakdown-value" id="contrib-t">0 Ⓜ</div>
+              </div>
+              <div class="vhv-breakdown-item">
+                <div class="vhv-breakdown-label">Vida</div>
+                <div class="vhv-breakdown-value" id="contrib-v">0 Ⓜ</div>
+              </div>
+              <div class="vhv-breakdown-item">
+                <div class="vhv-breakdown-label">Recursos</div>
+                <div class="vhv-breakdown-value" id="contrib-r">0 Ⓜ</div>
+              </div>
+            </div>
+
+            <!-- Save Button -->
+            <button class="vhv-btn vhv-btn-primary" id="save-product" style="width: 100%; margin-top: var(--space-lg);">
+              Guardar Producto
+            </button>
+          </div>
+
+          <div id="results-placeholder" style="text-align: center; padding: var(--space-2xl); color: var(--color-text-secondary);">
+            <p>Los resultados aparecerán aquí después de calcular</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Tab -->
+    <div class="vhv-tab-content" id="comparison-tab">
+      <div class="vhv-card">
+        <div class="vhv-card-header">
+          <h2 class="vhv-card-title">Comparar Productos</h2>
+          <p class="vhv-card-subtitle">Selecciona productos guardados para comparar</p>
+        </div>
+        <div id="comparison-container">
+          <p style="text-align: center; color: var(--color-text-secondary);">Cargando productos...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Case Studies Tab -->
+    <div class="vhv-tab-content" id="case-studies-tab">
+      <div class="vhv-card">
+        <div class="vhv-card-header">
+          <h2 class="vhv-card-title">Casos de Estudio</h2>
+          <p class="vhv-card-subtitle">Ejemplos del paper de formalización matemática</p>
+        </div>
+        <div id="case-studies-container">
+          <p style="text-align: center; color: var(--color-text-secondary);">Cargando casos de estudio...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parameters Tab -->
+    <div class="vhv-tab-content" id="parameters-tab">
+      <div class="vhv-card">
+        <div class="vhv-card-header">
+          <h2 class="vhv-card-title">Parámetros de Valoración</h2>
+          <p class="vhv-card-subtitle">Ajusta los parámetros α, β, γ, δ (requiere autenticación)</p>
+        </div>
+        <div id="parameters-container">
+          <p style="text-align: center; color: var(--color-text-secondary);">Cargando parámetros...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Back to Home -->
+  <div style="text-align: center; padding: var(--space-xl);">
+    <a href="/" style="color: var(--color-text-secondary); text-decoration: none;">← Volver al API Playground</a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="/static/js/vhv-calculator.js"></script>
+</body>
+</html>

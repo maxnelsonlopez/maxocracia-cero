@@ -33,6 +33,41 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
 - Based on `docs/arquitectura_temporal_coherencia_vital.md`
 - Implements mathematical formalization from the Temporal Architecture paper
 
+### Added - VHV Calculator Frontend (2025-12-02)
+
+**User Interface:**
+- Complete web-based calculator at `/static/vhv-calculator.html`
+- Nature-inspired design system with color-coded components (T=gradient, V=green, R=brown)
+- Responsive layout for mobile, tablet, and desktop
+
+**Features:**
+- **Calculator Tab**: Interactive form with 15+ inputs for all VHV components
+- **Comparison Tab**: Side-by-side product comparison, auto-sorted by Maxo price
+- **Case Studies Tab**: Pre-loaded examples (Huevo Ético vs Industrial)
+- **Parameters Tab**: Display of current α, β, γ, δ with axiom validation
+- **Chart.js Integration**: Visual doughnut chart showing price breakdown
+- **Educational Tooltips**: Contextual help throughout the interface
+- **"Cargar Ejemplo" Button**: Quick-start with Huevo Ético case study
+- **Save Product**: Persist calculations to database
+
+**Technical Stack:**
+- Vanilla JavaScript (no framework dependencies)
+- Chart.js 4.4.0 for data visualization
+- CSS Grid/Flexbox for responsive layout
+- Full API integration with VHV backend
+
+**Files:**
+- `app/static/css/vhv.css` (470 lines) - Complete design system
+- `app/static/vhv-calculator.html` (300+ lines) - Main interface
+- `app/static/js/vhv-calculator.js` (500+ lines) - Logic and API integration
+- `app/static/index.html` (modified) - Added navigation link
+
+**For Cohorte Cero:**
+- Ready for Mes 2: "Contabilidad Existencial"
+- Enables experimentation with ethical product pricing
+- Visual comparison of ethical vs conventional options
+- Parameter calibration interface for "Calibración del Valor" ritual
+
 ---
 
 ## 2025-12-02 — Calculadora VHV para Cohorte Cero
