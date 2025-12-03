@@ -1,8 +1,10 @@
-import pytest
 import sqlite3
 from datetime import datetime, timedelta
-from app.tvi import TVIManager
+
+import pytest
+
 from app import create_app
+from app.tvi import TVIManager
 
 
 @pytest.fixture

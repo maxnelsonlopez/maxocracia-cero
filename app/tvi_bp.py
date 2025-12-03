@@ -1,4 +1,5 @@
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, g, jsonify, request
+
 from .jwt_utils import token_required
 from .tvi import TVIManager
 
