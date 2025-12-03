@@ -32,14 +32,16 @@ def create_app(db_path=None):
     from .resources_bp import bp as resources_bp
     from .users import bp as users_bp
     from .vhv_bp import vhv_bp
+    from .tvi_bp import tvi_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(interchanges_bp)
-    app.register_blueprint(maxo_bp)
     app.register_blueprint(reputation_bp)
     app.register_blueprint(resources_bp)
+    app.register_blueprint(maxo_bp)
     app.register_blueprint(vhv_bp)
+    app.register_blueprint(tvi_bp)
 
     # placeholder imports to ensure modules loaded
     # other optional blueprints can be imported here

@@ -169,6 +169,28 @@ CREATE TABLE IF NOT EXISTS vhv_calculations (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- TVI (Tiempo Vital Indexado) Tables
+
+-- Stores unique time blocks for users
+CREATE TABLE IF NOT EXISTS tvi_entries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  start_time TEXT NOT NULL, -- ISO8601
+  end_time TEXT NOT NULL,   -- ISO8601
+  duration_seconds INTEGER NOT NULL,
+  category TEXT NOT NULL CHECK(category IN ('MAINTENANCE', 'INVESTMENT', 'WASTE', 'WORK', 'LEISURE')),
+  description TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  CHECK (end_time > start_time)
+);
+
+-- Index to enforce uniqueness and optimize overlap checks
+-- Note: SQLite doesn't support partial indexes or complex constraints easily for overlaps in CREATE TABLE,
+-- so application logic must enforce no-overlap. However, a unique index on start_time per user helps.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_tvi_user_start ON tvi_entries(user_id, start_time);
+
+
 -- Insert default VHV parameters (only if table is empty)
 INSERT OR IGNORE INTO vhv_parameters (id, alpha, beta, gamma, delta, notes)
 VALUES (1, 100.0, 2000.0, 1.0, 100.0, 'Initial parameters based on paper_formalizacion_matematica_maxo.txt');
