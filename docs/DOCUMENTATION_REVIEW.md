@@ -1,56 +1,165 @@
 # Resumen de Revisión de Documentación
 
-## Documentos Revisados
+**Última actualización:** 2025-12-03
+
+---
+
+## 🆕 Documentos Nuevos (Diciembre 2025)
+
+### ✅ Documentación Teórica Compilada
+
+11. **[maxocracia_brochure.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/maxocracia_brochure.md)**
+    - **Nuevo**: Introducción accesible al sistema (376 líneas)
+    - Explica los 8 Axiomas de la Verdad
+    - Detalla el Maxo y las 3 unidades (UVC, UTH, URF)
+    - Teoría de juegos y equilibrio maxocrático
+    - Estado actual de la Red de Apoyo (11 personas, Bogotá)
+    - FAQ: ¿Es comunismo/socialismo/capitalismo?
+    - Propósito: Onboarding de nuevos participantes
+
+12. **[matematicas_maxocracia_compiladas.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/matematicas_maxocracia_compiladas.md)**
+    - **Nuevo**: Compilación completa de formalización matemática (982 líneas)
+    - Los 8 Axiomas de la Verdad (Código de Coherencia)
+    - Los 13 Axiomas Temporales (T0-T13)
+    - Axiomas Vitales (V0-V8)
+    - Principios de Recursos Finitos (R1-R3)
+    - Ecuaciones: TVI, TTVI, CCP, Trascendencia, VHV
+    - Casos de aplicación (accidente de puente, reunión inútil, protesta)
+    - Sistema de Coherencia Armónica (SCA)
+    - Propósito: Referencia rápida para implementadores
+
+### ✅ Formularios Operativos
+
+13. **[formulario_CERO_inscripcion.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/formularios/formulario_CERO_inscripcion.md)**
+    - **Nuevo**: Especificación completa para Google Forms (17 preguntas)
+    - Registro inicial de participantes
+    - Captura de ofertas, necesidades, valores
+    - Listo para implementación
+
+14. **[formulario_A_registro_intercambio.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/formularios/formulario_A_registro_intercambio.md)**
+    - **Nuevo**: Registro de intercambios completados (16 preguntas)
+    - Métricas Maxocráticas: UTH, URF, valor económico
+    - Sistema de urgencias y reciprocidad
+    - Análisis automático incluido
+
+15. **[formulario_B_reporte_seguimiento.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/formularios/formulario_B_reporte_seguimiento.md)**
+    - **Nuevo**: Seguimiento de evolución (18 preguntas)
+    - Detección de nuevas necesidades
+    - Evaluación de salud emocional
+    - Sistema de priorización (🔴🟡🟢)
+
+---
+
+## 📋 Documentos Revisados
 
 ### ✅ Documentación Técnica Actualizada
 
 1. **[CHANGELOG.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/CHANGELOG.md)**
-   - Actualizado con correcciones de auditoría
-   - Incluye error crítico corregido en `seeds/seed_demo.py`
+   - **Actualizado**: 2025-12-03
+   - Añadidas entradas para VHV Frontend, TVI, formularios, documentación teórica
+   - Refleja estado completo del proyecto
 
-2. **[CONTRIBUTING.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/CONTRIBUTING.md)**
+2. **[README.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/README.md)**
+   - **Actualizado**: 2025-12-03
+   - Versión 2.0 completa
+   - Incluye secciones de VHV Calculator, TVI, formularios
+   - Arquitectura actualizada
+   - Estado de Cohorte Cero
+
+3. **[TODO.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/TODO.md)**
+   - **Actualizado**: 2025-12-03
+   - Prioridades reorganizadas
+   - Tareas completadas documentadas
+   - Roadmap general añadido
+
+4. **[docs/README.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/README.md)**
+   - **Actualizado**: 2025-12-03
+   - Índice completo de documentación
+   - Incluye nuevos documentos
+   - Organización mejorada
+
+5. **[CONTRIBUTING.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/CONTRIBUTING.md)**
    - Añadidas instrucciones para herramientas de calidad de código
    - Incluye comandos para black, isort, flake8, mypy
 
-3. **[IMPLEMENTACION_FLASK_PLAN.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/IMPLEMENTACION_FLASK_PLAN.md)**
+6. **[IMPLEMENTACION_FLASK_PLAN.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/IMPLEMENTACION_FLASK_PLAN.md)**
    - **Actualizado completamente** con estado actual del proyecto
    - Refleja MVP completado y auditado
    - Incluye próximos pasos post-MVP
 
 ### ✅ Documentación Técnica Precisa (Sin Cambios Necesarios)
 
-4. **[MODELO_DE_DATOS.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/MODELO_DE_DATOS.md)**
+7. **[MODELO_DE_DATOS.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/MODELO_DE_DATOS.md)**
    - Describe correctamente el esquema actual
    - Incluye diagrama ER y consideraciones de rendimiento
 
-5. **[GUIA_DE_ESTILO.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/GUIA_DE_ESTILO.md)**
+8. **[GUIA_DE_ESTILO.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/GUIA_DE_ESTILO.md)**
    - Alineada con configuración actual (black, flake8, etc.)
    - Convenciones de código correctas
 
-6. **[API.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/API.md)**
-   - Documentación completa de endpoints
+9. **[API.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/API.md)**
+   - **Actualizado**: 2025-12-02
+   - Documentación completa de endpoints VHV y TVI
    - Incluye ejemplos de uso y rate limiting
 
 ### ✅ Documentación Conceptual y Filosófica
 
-7. **[MAXOCRACIA_MANIFIESTO.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/MAXOCRACIA_MANIFIESTO.md)**
-   - Documento fundacional del proyecto
-   - Describe los 8 Axiomas de la Verdad
-   - Estado actual: Red de Apoyo en Bogotá (11 participantes)
+10. **[MAXOCRACIA_MANIFIESTO.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/MAXOCRACIA_MANIFIESTO.md)**
+    - Documento fundacional del proyecto
+    - Describe los 8 Axiomas de la Verdad
+    - Estado actual: Red de Apoyo en Bogotá (11 participantes)
 
-8. **[FAQ_EXTENDIDO.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/FAQ_EXTENDIDO.md)**
-   - Aborda objeciones difíciles con honestidad
-   - Alineado con Axioma 6 (Verbo Justo)
+11. **[FAQ_EXTENDIDO.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/FAQ_EXTENDIDO.md)**
+    - Aborda objeciones difíciles con honestidad
+    - Alineado con Axioma 6 (Verbo Justo)
 
-### 📋 Diseños Técnicos Futuros
+---
 
-9. **[diseno-tecnico-comun-go.md](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/diseno-tecnico-comun-go.md)**
-   - Versión 2.0: Arquitectura de microservicios en Go
-   - Plan para escalabilidad futura
+## 📊 Estado del Proyecto (Diciembre 2025)
 
-10. **[COMUN.rtf](file:///Users/Max/Otros%20documentos/maxocracia-cero/docs/COMUN.rtf)**
-    - Versión 2.1: Integración de Fundamentos Éticos
-    - Incluye "Ethical Guardrails" y scoring ético
+### Implementación Técnica
+
+**Backend:**
+- ✅ Flask MVP completamente funcional
+- ✅ VHV Calculator (backend + frontend)
+- ✅ TVI Data Model con Axioma T0
+- ✅ Autenticación JWT
+- ✅ Rate limiting
+- ✅ 67 tests pasando
+- ✅ CI/CD configurado
+
+**Frontend:**
+- ✅ Calculadora VHV con 4 pestañas
+- ✅ Chart.js integration
+- ✅ Design system completo
+- ✅ Responsive layout
+
+**Formularios:**
+- ✅ 3 formularios especificados
+- ⏳ Pendiente: Implementación en Google Forms
+
+**Documentación:**
+- ✅ README.md v2.0
+- ✅ CHANGELOG.md actualizado
+- ✅ TODO.md reorganizado
+- ✅ Brochure de Maxocracia
+- ✅ Matemáticas compiladas
+- ✅ API.md completo
+
+### Red de Apoyo (Cohorte Cero)
+
+**Estado actual:**
+- 📍 Ubicación: Bogotá, Colombia
+- 👥 Participantes: 11+ personas activas
+- 🔄 Intercambios: Alimentación, conocimiento, objetos, tiempo
+- 📈 Resultados: Personas en crisis siendo apoyadas efectivamente
+
+**Próximos pasos:**
+- Mes 2: "Contabilidad Existencial" con Calculadora VHV
+- Mes 3: Calibración de parámetros α, β, γ, δ
+- Mes 6: Evaluación y decisión de escalar
+
+---
 
 ## Observaciones Clave
 

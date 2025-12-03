@@ -68,6 +68,74 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
 - Visual comparison of ethical vs conventional options
 - Parameter calibration interface for "Calibración del Valor" ritual
 
+### Added - Formularios Operativos para Red de Apoyo (2025-12-03)
+
+**Sistema Completo de Gestión de Intercambios:**
+- 3 formularios diseñados y documentados para Google Forms
+- Especificaciones completas listas para implementación
+
+**Formulario CERO: Inscripción** (`formularios/formulario_CERO_inscripcion.md`)
+- 17 preguntas estructuradas
+- Captura de ofertas y necesidades
+- Valores personales y dimensiones humanas
+- Información de contacto multi-canal
+
+**Formulario A: Registro de Intercambio** (`formularios/formulario_A_registro_intercambio.md`)
+- 16 preguntas + análisis automático
+- Métricas Maxocráticas: UTH, URF, valor económico
+- Sistema de urgencias (Alta/Media/Baja)
+- Tracking de reciprocidad y resolución
+- Dimensiones humanas atendidas
+
+**Formulario B: Reporte de Seguimiento** (`formularios/formulario_B_reporte_seguimiento.md`)
+- 18 preguntas + sistema de priorización
+- Detección de nuevas necesidades y ofertas
+- Evaluación de salud emocional
+- Sistema de alertas (🔴 Alta, 🟡 Media, 🟢 Baja)
+- Programación de seguimientos
+
+**Métricas que Generan:**
+- UTH total movilizado en la red
+- Tasa de resolución de necesidades
+- Flujo de red (nodos hub, clusters)
+- Detección temprana de crisis
+- Evolución de situaciones personales
+
+**Diseño:**
+- Campos obligatorios mínimos (no abrumadores)
+- Métricas opcionales (recoger lo que se pueda)
+- Lenguaje accesible con emojis
+- Compatible con futuro sistema Maxo
+- Escalable (de facilitador único a auto-reporte)
+
+### Added - Documentación Teórica Compilada (2025-12-03)
+
+**Brochure de Maxocracia** (`docs/maxocracia_brochure.md`)
+- 376 líneas de introducción accesible al sistema
+- Explica los 8 Axiomas de la Verdad
+- Detalla el Maxo y las 3 unidades (UVC, UTH, URF)
+- Teoría de juegos y equilibrio maxocrático
+- Estado actual de la Red de Apoyo (11 personas, Bogotá)
+- FAQ: ¿Es comunismo/socialismo/capitalismo?
+- Cómo participar y contribuir
+
+**Matemáticas de Maxocracia Compiladas** (`docs/matematicas_maxocracia_compiladas.md`)
+- 982 líneas de formalización matemática completa
+- Los 8 Axiomas de la Verdad (Código de Coherencia)
+- Los 13 Axiomas Temporales (T0-T13)
+- Axiomas Vitales (V0-V8)
+- Principios de Recursos Finitos (R1-R3)
+- Ecuaciones: TVI, TTVI, CCP, Trascendencia, VHV
+- Casos de aplicación (accidente de puente, reunión inútil, protesta)
+- Sistema de Coherencia Armónica (SCA)
+- Mecanismos anti-acaparamiento
+
+**Propósito:**
+- Centralizar toda la base matemática del proyecto
+- Facilitar onboarding de nuevos colaboradores
+- Referencia rápida para implementadores
+- Base para papers académicos futuros
+
 ---
 
 ## 2025-12-02 — Calculadora VHV para Cohorte Cero
