@@ -13,7 +13,11 @@ class TVIManager:
         return conn
 
     def _check_overlap(
-        self, user_id: int, start_dt: datetime, end_dt: datetime, exclude_id: Optional[int] = None
+        self,
+        user_id: int,
+        start_dt: datetime,
+        end_dt: datetime,
+        exclude_id: Optional[int] = None,
     ) -> bool:
         """
         Checks if the given time range overlaps with any existing TVI entry for the user.
@@ -126,7 +130,10 @@ class TVIManager:
         return [dict(row) for row in rows]
 
     def calculate_ccp(
-        self, user_id: int, start_date: Optional[str] = None, end_date: Optional[str] = None
+        self,
+        user_id: int,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
     ) -> Dict:
         """
         Calculates the Coeficiente de Coherencia Personal (CCP).
