@@ -13,6 +13,7 @@ Bienvenido a la documentación de la API de Maxocracia. Este documento proporcio
   - [Recursos](#recursos)
   - [Maxo (Moneda)](#maxo-moneda)
 - [Rate Limiting](#rate-limiting)
+- [Calculadora VHV](#calculadora-vhv)
 - [Seguridad](#seguridad)
 - [Ejecución Local](#ejecución-local)
 - [Pruebas](#pruebas)
@@ -534,6 +535,108 @@ Content-Type: application/json
 - 401: No autorizado
 - 403: No tienes permiso para realizar esta transferencia
 - 404: Usuario no encontrado
+
+### Calculadora VHV
+
+#### Calcular VHV y Precio
+
+```http
+POST /vhv/calculate
+```
+
+Calcula el Vector de Huella Vital y el precio en Maxos para un producto dado.
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "name": "Producto Ejemplo",
+  "t_direct_hours": 1.5,
+  "t_inherited_hours": 0.5,
+  "t_future_hours": 0.1,
+  "v_organisms_affected": 0.001,
+  "v_consciousness_factor": 0.9,
+  "v_suffering_factor": 1.1,
+  "v_abundance_factor": 0.0006,
+  "v_rarity_factor": 1.0,
+  "r_minerals_kg": 0.1,
+  "r_water_m3": 0.05,
+  "r_petroleum_l": 0.0,
+  "r_land_hectares": 0.0,
+  "r_frg_factor": 1.0,
+  "r_cs_factor": 1.0,
+  "save": true
+}
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "vhv": {
+    "T": 2.1,
+    "V": 0.000594,
+    "R": 0.105
+  },
+  "maxo_price": 220.55,
+  "breakdown": {
+    "time_contribution": 210.0,
+    "life_contribution": 0.05,
+    "resource_contribution": 10.5
+  },
+  "product_id": 1
+}
+```
+
+#### Listar Productos
+
+```http
+GET /vhv/products
+```
+
+**Parámetros:**
+- `category`: Filtrar por categoría
+- `limit`: Límite de resultados (default 50)
+- `offset`: Paginación
+
+#### Comparar Productos
+
+```http
+GET /vhv/compare?ids=1,2
+```
+
+Compara dos o más productos y determina cuál es el más económico en términos de Maxos (costo vital).
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "products": [...],
+  "comparison": {
+    "cheapest": {...},
+    "most_expensive": {...}
+  }
+}
+```
+
+#### Obtener Parámetros de Valoración
+
+```http
+GET /vhv/parameters
+```
+
+Devuelve los valores actuales de α, β, γ, δ utilizados en la fórmula de precio.
+
+#### Actualizar Parámetros (Requiere Auth)
+
+```http
+PUT /vhv/parameters
+```
+
+**Cuerpo:**
+```json
+{
+  "alpha": 100.0,
+  "notes": "Ajuste trimestral"
+}
+```
 
 ## Rate Limiting
 
