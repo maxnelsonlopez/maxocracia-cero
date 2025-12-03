@@ -48,6 +48,7 @@ Mientras la aplicación Flask esté corriendo (por defecto en `http://127.0.0.1:
 - Validación robusta de entradas en todos los endpoints
 - Rate limiting para prevenir abusos (3 peticiones por minuto en endpoints sensibles)
 - Validación estricta de contraseñas (mínimo 8 caracteres, mayúsculas, minúsculas y números)
+- **Calculadora VHV**: Implementación completa del Vector de Huella Vital (T, V, R) y precio Maxo.
 
 ### Pasos rápidos:
 

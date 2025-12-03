@@ -11,6 +11,7 @@ Aviso: hay varios archivos grandes (videos, manuales). Para mantener el reposito
 - DECLARACIÓN DE FUNDAMENTOS DE LA MAXOCRACIA.pdf — Versión formal en PDF.
 - Sistema_Coherencia_Armonica_Manifiesto.pdf — Manifiesto relacionado.
 - diseno-tecnico-comun-go.md — Diseño técnico común.
+- API.md — Documentación completa de la API (Incluye Calculadora VHV).
 
 ## Medios y archivos grandes (movidos a `docs/media/`)
 

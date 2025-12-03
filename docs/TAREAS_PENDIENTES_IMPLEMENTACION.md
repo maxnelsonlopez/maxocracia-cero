@@ -43,16 +43,16 @@
 
 ### Objetivo: Implementar la función de valoración Maxo completa
 
-- [ ] **Implementar Fórmula Central**
-  - [ ] Codificar: `Precio_Maxos = α·T + β·V^γ + δ·R·(FRG × CS)`
-  - [ ] Implementar gestión de parámetros (α, β, γ, δ)
-  - [ ] Crear restricciones axiomáticas (β > 0, γ ≥ 1, α > 0, δ ≥ 0)
+- [x] **Implementar Fórmula Central**
+  - [x] Codificar: `Precio_Maxos = α·T + β·V^γ + δ·R·(FRG × CS)`
+  - [x] Implementar gestión de parámetros (α, β, γ, δ)
+  - [x] Crear restricciones axiomáticas (β > 0, γ ≥ 1, α > 0, δ ≥ 0)
 
-- [ ] **Factores de Ponderación Medibles**
-  - [ ] Implementar F_consciencia (5 criterios objetivos)
-  - [ ] Implementar F_sufrimiento con penalización exponencial
-  - [ ] Implementar F_abundancia (protección de especies)
-  - [ ] Implementar F_rareza_genética
+- [x] **Factores de Ponderación Medibles**
+  - [x] Implementar F_consciencia (5 criterios objetivos)
+  - [x] Implementar F_sufrimiento con penalización exponencial
+  - [x] Implementar F_abundancia (protección de especies)
+  - [x] Implementar F_rareza_genética
 
 - [ ] **Componente T (Temporal)**
   - [ ] Modelo de datos TVI (ID_ser, timestamp, intervalo)
@@ -69,8 +69,8 @@
   - [ ] Factor de Rareza Geológica (FRG)
   - [ ] Criticidad Sistémica (CS)
 
-- [ ] **Casos de Estudio Implementados**
-  - [ ] Calculadora VHV para huevos (industrial vs ético)
+- [x] **Casos de Estudio Implementados**
+  - [x] Calculadora VHV para huevos (industrial vs ético)
   - [ ] Calculadora VHV para smartphones (obsolescencia vs modular)
   - [ ] Calculadora VHV para transporte (avión vs tren)
 

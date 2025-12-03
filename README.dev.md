@@ -26,6 +26,8 @@ Endpoints iniciales:
 - POST /auth/login
 - GET /users
 - GET /resources
+- POST /vhv/calculate
+- GET /vhv/products
 
 ## Configuración de rate limiting
 
