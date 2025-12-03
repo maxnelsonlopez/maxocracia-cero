@@ -14,6 +14,7 @@ Bienvenido a la documentación de la API de Maxocracia. Este documento proporcio
   - [Maxo (Moneda)](#maxo-moneda)
 - [Rate Limiting](#rate-limiting)
 - [Calculadora VHV](#calculadora-vhv)
+- [TVI (Tiempo Vital Indexado)](#tvi-tiempo-vital-indexado)
 - [Seguridad](#seguridad)
 - [Ejecución Local](#ejecución-local)
 - [Pruebas](#pruebas)
@@ -637,6 +638,117 @@ PUT /vhv/parameters
   "notes": "Ajuste trimestral"
 }
 ```
+
+### TVI (Tiempo Vital Indexado)
+
+#### Registrar Bloque de Tiempo
+
+```http
+POST /tvi
+```
+
+**Requiere Autenticación:** Sí
+
+Registra un bloque de tiempo vital único para el usuario autenticado. Implementa el Axioma T0 (Unicidad Existencial) rechazando bloques que se superpongan.
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "start_time": "2025-01-01T10:00:00",
+  "end_time": "2025-01-01T11:30:00",
+  "category": "INVESTMENT",
+  "description": "Estudio de arquitectura temporal"
+}
+```
+
+**Categorías Válidas:**
+- `MAINTENANCE`: Tiempo de mantenimiento vital (sueño, alimentación, higiene)
+- `INVESTMENT`: Inversión en capitales vitales (aprendizaje, desarrollo)
+- `LEISURE`: Tiempo de disfrute consciente
+- `WORK`: Trabajo remunerado o productivo
+- `WASTE`: Tiempo desperdiciado o no intencional
+
+**Respuesta Exitosa (201):**
+```json
+{
+  "id": 1,
+  "user_id": 1,
+  "start_time": "2025-01-01T10:00:00",
+  "end_time": "2025-01-01T11:30:00",
+  "duration_seconds": 5400,
+  "category": "INVESTMENT",
+  "description": "Estudio de arquitectura temporal"
+}
+```
+
+**Errores:**
+- 400: Datos inválidos, categoría incorrecta, o violación del Axioma T0 (superposición detectada)
+- 401: No autorizado
+
+#### Listar Bloques de Tiempo
+
+```http
+GET /tvi
+```
+
+**Requiere Autenticación:** Sí
+
+**Parámetros:**
+- `limit`: Límite de resultados (default 50)
+- `offset`: Paginación
+
+**Respuesta Exitosa (200):**
+```json
+[
+  {
+    "id": 1,
+    "user_id": 1,
+    "start_time": "2025-01-01T10:00:00",
+    "end_time": "2025-01-01T11:30:00",
+    "duration_seconds": 5400,
+    "category": "INVESTMENT",
+    "description": "Estudio de arquitectura temporal",
+    "created_at": "2025-01-01T10:00:00"
+  }
+]
+```
+
+#### Obtener Estadísticas y CCP
+
+```http
+GET /tvi/stats
+```
+
+**Requiere Autenticación:** Sí
+
+Calcula el **Coeficiente de Coherencia Personal (CCP)**, una métrica que mide la soberanía del usuario sobre su tiempo vital.
+
+**Parámetros Opcionales:**
+- `start_date`: Fecha de inicio (ISO8601)
+- `end_date`: Fecha de fin (ISO8601)
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "ccp": 0.8571,
+  "stats": {
+    "MAINTENANCE": 28800,
+    "INVESTMENT": 28800,
+    "LEISURE": 14400,
+    "WASTE": 7200,
+    "WORK": 0
+  },
+  "total_seconds": 79200,
+  "discretionary_seconds": 50400
+}
+```
+
+**Fórmula CCP:**
+```
+CCP = (Investment + Leisure) / (Total Time - Maintenance)
+```
+
+Un CCP cercano a 1.0 indica alta intencionalidad y soberanía temporal.
 
 ## Rate Limiting
 

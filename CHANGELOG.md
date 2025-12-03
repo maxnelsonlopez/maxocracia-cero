@@ -4,6 +4,37 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## [Unreleased]
+
+### Added - TVI (Tiempo Vital Indexado) Data Model (2025-12-02)
+
+**Core Implementation:**
+- Implemented TVI database schema (`tvi_entries` table) with strict uniqueness constraints
+- Created `TVIManager` class for TVI logging and analysis (`app/tvi.py`)
+- Enforced Axiom T0 (Uniqueness) with overlap detection algorithm
+- Implemented 5 TVI categories: MAINTENANCE, INVESTMENT, WASTE, WORK, LEISURE
+
+**API Endpoints:**
+- `POST /tvi`: Log a time block with category and description
+- `GET /tvi`: List user's time blocks with pagination
+- `GET /tvi/stats`: Calculate Coeficiente de Coherencia Personal (CCP)
+
+**CCP Calculation:**
+- Formula: `CCP = (Investment + Leisure) / (Total Time - Maintenance)`
+- Provides breakdown by category and discretionary time analysis
+
+**Testing:**
+- Added comprehensive test suite (`tests/test_tvi.py`)
+- Tests for overlap detection (Axiom T0 enforcement)
+- Tests for CCP calculation accuracy
+- API integration tests with authentication
+
+**Documentation:**
+- Based on `docs/arquitectura_temporal_coherencia_vital.md`
+- Implements mathematical formalization from the Temporal Architecture paper
+
+---
+
 ## 2025-12-02 — Calculadora VHV para Cohorte Cero
 
 ### Añadido

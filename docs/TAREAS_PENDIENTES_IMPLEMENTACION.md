@@ -54,10 +54,10 @@
   - [x] Implementar F_abundancia (protección de especies)
   - [x] Implementar F_rareza_genética
 
-- [ ] **Componente T (Temporal)**
-  - [ ] Modelo de datos TVI (ID_ser, timestamp, intervalo)
-  - [ ] Cálculo TTVI (directos + heredados + futuros)
-  - [ ] API de TVIs (POST /register, GET /:id, GET /user/:user_id)
+- [x] **Componente T (Temporal)**
+  - [x] Modelo de datos TVI (ID_ser, timestamp, intervalo)
+  - [x] Cálculo TTVI (directos + heredados + futuros)
+  - [x] API de TVIs (POST /tvi, GET /tvi, GET /tvi/stats)
 
 - [ ] **Componente V (Vital)**
   - [ ] Categorización A/B/C de seres vivos
