@@ -1,4 +1,4 @@
-from flask import Blueprint, g, jsonify, request
+from flask import Blueprint, jsonify, request
 
 from .jwt_utils import token_required
 from .tvi import TVIManager
@@ -37,7 +37,7 @@ def log_tvi():
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
     except Exception as e:
-        return jsonify({"error": "Internal Server Error"}), 500
+        return jsonify({"error": "Internal Server Error " + str(e)}), 500
 
 
 @tvi_bp.route("", methods=["GET"])
