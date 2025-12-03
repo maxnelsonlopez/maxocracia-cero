@@ -1,6 +1,6 @@
 import sqlite3
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 class TVIManager:
@@ -13,7 +13,7 @@ class TVIManager:
         return conn
 
     def _check_overlap(
-        self, user_id: int, start_dt: datetime, end_dt: datetime, exclude_id: int = None
+        self, user_id: int, start_dt: datetime, end_dt: datetime, exclude_id: Optional[int] = None
     ) -> bool:
         """
         Checks if the given time range overlaps with any existing TVI entry for the user.
@@ -55,7 +55,7 @@ class TVIManager:
         start_time: str,
         end_time: str,
         category: str,
-        description: str = None,
+        description: Optional[str] = None,
     ) -> Dict:
         """
         Logs a new TVI entry. Enforces T0 (Uniqueness/No Overlap).
@@ -126,7 +126,7 @@ class TVIManager:
         return [dict(row) for row in rows]
 
     def calculate_ccp(
-        self, user_id: int, start_date: str = None, end_date: str = None
+        self, user_id: int, start_date: Optional[str] = None, end_date: Optional[str] = None
     ) -> Dict:
         """
         Calculates the Coeficiente de Coherencia Personal (CCP).
@@ -136,7 +136,7 @@ class TVIManager:
         cursor = conn.cursor()
 
         query = "SELECT category, SUM(duration_seconds) as total_seconds FROM tvi_entries WHERE user_id = ?"
-        params = [user_id]
+        params: List[object] = [user_id]
 
         if start_date:
             query += " AND start_time >= ?"
