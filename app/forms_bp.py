@@ -292,7 +292,7 @@ def get_followups(current_user):
                 try:
                     followup[field] = json.loads(followup[field])
                 except Exception as e:
-    print(f"An unexpected error occurred: {e}")
+                    print(f"An unexpected error occurred: {e}")
         followups.append(followup)
 
     return (
@@ -335,7 +335,7 @@ def get_participant_followups(current_user, participant_id):
                 try:
                     followup[field] = json.loads(followup[field])
                 except Exception as e:
-    print(f"An unexpected error occurred: {e}")
+                    print(f"An unexpected error occurred: {e}")
         followups.append(followup)
 
     return (
