@@ -7,6 +7,7 @@ Tests the new temporal trends, category breakdown, and resolution metrics endpoi
 import json
 
 import pytest
+
 from app import create_app
 from app.utils import get_db
 
@@ -85,9 +86,7 @@ class TestDashboardAnalytics:
         if len(data["exchanges_per_week"]) > 0:
             assert len(data["exchanges_per_week"][0]) == 2
             assert isinstance(data["exchanges_per_week"][0][0], str)  # week label
-            assert isinstance(
-                data["exchanges_per_week"][0][1], (int, float)
-            )  # count
+            assert isinstance(data["exchanges_per_week"][0][1], (int, float))  # count
 
         if len(data["uth_per_week"]) > 0:
             assert len(data["uth_per_week"][0]) == 2

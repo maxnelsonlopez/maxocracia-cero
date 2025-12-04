@@ -643,9 +643,7 @@ class FormsManager:
 
         # Calculate match rate (how many needs have corresponding offers)
         matched = sum(1 for need in all_needs if need in all_offers)
-        match_rate = (
-            round((matched / len(all_needs)) * 100, 1) if all_needs else 0
-        )
+        match_rate = round((matched / len(all_needs)) * 100, 1) if all_needs else 0
 
         return {
             "exchange_types": exchange_types,
@@ -683,9 +681,7 @@ class FormsManager:
             GROUP BY urgency
         """
         )
-        resolution_by_urgency = {
-            row[0]: round(row[1], 2) for row in cursor.fetchall()
-        }
+        resolution_by_urgency = {row[0]: round(row[1], 2) for row in cursor.fetchall()}
 
         # Average days to resolve (from exchange to follow-up)
         cursor.execute(
@@ -725,4 +721,3 @@ class FormsManager:
             "avg_days_to_resolve": avg_days_to_resolve,
             "success_rate_by_category": success_by_category,
         }
-
