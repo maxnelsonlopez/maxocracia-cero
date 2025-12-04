@@ -207,8 +207,86 @@
 
 .stat-icon.exchanges {
     background: #dcfce7;
-    color: #16a34a;
+    color: #94a3b8;
 }
+
+/* ==================== TEMPORAL TRENDS SECTION ==================== */
+
+.trends-section {
+    margin: 2rem 0;
+}
+
+.period-selector {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.period-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #cbd5e1;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #475569;
+}
+
+.period-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+.period-btn.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+.charts-row-trends {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.chart-container-trend {
+    height: 300px;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.chart-container-trend h4 {
+    margin: 0 0 1rem 0;
+    color: #475569;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.chart-container-trend canvas {
+    max-height: 250px;
+}
+
+/* Responsive adjustments for trends */
+@media (max-width: 768px) {
+    .charts-row-trends {
+        grid-template-columns: 1fr;
+    }
+    
+    .period-selector {
+        flex-wrap: wrap;
+    }
+    
+    .period-btn {
+        flex: 1;
+        min-width: 80px;
+    }
+}
+
 
 .stat-icon.uth {
     background: #fef9c3;

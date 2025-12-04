@@ -498,3 +498,231 @@ class FormsManager:
             "top_receivers": top_receivers,
             "hub_nodes": hubs,
         }
+
+    def get_temporal_trends(self, period_days: int = 30) -> Dict:
+        """
+        Get temporal trends for dashboard visualizations.
+
+        Args:
+            period_days: Number of days to analyze (default 30)
+
+        Returns:
+            Dictionary with time-series data for exchanges, UTH, and participants
+        """
+        cursor = self.conn.cursor()
+
+        # Calculate start date
+        cursor.execute(
+            """
+            SELECT date('now', '-' || ? || ' days')
+        """,
+            (period_days,),
+        )
+        start_date = cursor.fetchone()[0]
+
+        # Exchanges per week
+        cursor.execute(
+            """
+            SELECT
+                strftime('%Y-%W', date) as week,
+                COUNT(*) as count
+            FROM interchange
+            WHERE date >= ?
+            GROUP BY week
+            ORDER BY week
+        """,
+            (start_date,),
+        )
+        exchanges_per_week = [[row[0], row[1]] for row in cursor.fetchall()]
+
+        # UTH per week
+        cursor.execute(
+            """
+            SELECT
+                strftime('%Y-%W', date) as week,
+                COALESCE(SUM(uth_hours), 0) as total_uth
+            FROM interchange
+            WHERE date >= ?
+            GROUP BY week
+            ORDER BY week
+        """,
+            (start_date,),
+        )
+        uth_per_week = [[row[0], row[1]] for row in cursor.fetchall()]
+
+        # Participants growth (cumulative)
+        cursor.execute(
+            """
+            SELECT
+                strftime('%Y-%W', created_at) as week,
+                COUNT(*) as count
+            FROM participants
+            WHERE created_at >= ?
+            GROUP BY week
+            ORDER BY week
+        """,
+            (start_date,),
+        )
+        participants_per_week = cursor.fetchall()
+
+        # Calculate cumulative
+        cumulative = 0
+        participants_growth = []
+        for week, count in participants_per_week:
+            cumulative += count
+            participants_growth.append([week, cumulative])
+
+        return {
+            "exchanges_per_week": exchanges_per_week,
+            "uth_per_week": uth_per_week,
+            "participants_growth": participants_growth,
+        }
+
+    def get_category_breakdown(self) -> Dict:
+        """
+        Analyze distribution of categories in exchanges and participant needs/offers.
+
+        Returns:
+            Dictionary with category analysis
+        """
+        cursor = self.conn.cursor()
+
+        # Exchange types distribution
+        cursor.execute(
+            """
+            SELECT type, COUNT(*) as count
+            FROM interchange
+            GROUP BY type
+            ORDER BY count DESC
+        """
+        )
+        exchange_types = dict(cursor.fetchall())
+
+        # Top offered categories (from participants)
+        cursor.execute(
+            """
+            SELECT offer_categories
+            FROM participants
+            WHERE offer_categories IS NOT NULL
+            AND offer_categories != '[]'
+        """
+        )
+        all_offers = []
+        for row in cursor.fetchall():
+            try:
+                categories = json.loads(row[0])
+                all_offers.extend(categories)
+            except (json.JSONDecodeError, TypeError):
+                continue
+
+        # Count occurrences
+        from collections import Counter
+
+        offer_counts = Counter(all_offers)
+        top_offered_categories = dict(offer_counts.most_common(5))
+
+        # Top needed categories (from participants)
+        cursor.execute(
+            """
+            SELECT need_categories
+            FROM participants
+            WHERE need_categories IS NOT NULL
+            AND need_categories != '[]'
+        """
+        )
+        all_needs = []
+        for row in cursor.fetchall():
+            try:
+                categories = json.loads(row[0])
+                all_needs.extend(categories)
+            except (json.JSONDecodeError, TypeError):
+                continue
+
+        need_counts = Counter(all_needs)
+        top_needed_categories = dict(need_counts.most_common(5))
+
+        # Calculate match rate (how many needs have corresponding offers)
+        matched = sum(1 for need in all_needs if need in all_offers)
+        match_rate = (
+            round((matched / len(all_needs)) * 100, 1) if all_needs else 0
+        )
+
+        return {
+            "exchange_types": exchange_types,
+            "top_offered_categories": top_offered_categories,
+            "top_needed_categories": top_needed_categories,
+            "match_rate": match_rate,
+        }
+
+    def get_resolution_metrics(self) -> Dict:
+        """
+        Analyze effectiveness of need resolution.
+
+        Returns:
+            Dictionary with resolution metrics
+        """
+        cursor = self.conn.cursor()
+
+        # Average resolution score
+        cursor.execute(
+            """
+            SELECT AVG(impact_resolution_score)
+            FROM interchange
+            WHERE impact_resolution_score IS NOT NULL
+        """
+        )
+        avg_score = cursor.fetchone()[0]
+        avg_resolution_score = round(avg_score, 2) if avg_score else 0
+
+        # Resolution by urgency
+        cursor.execute(
+            """
+            SELECT urgency, AVG(impact_resolution_score) as avg_score
+            FROM interchange
+            WHERE impact_resolution_score IS NOT NULL
+            GROUP BY urgency
+        """
+        )
+        resolution_by_urgency = {
+            row[0]: round(row[1], 2) for row in cursor.fetchall()
+        }
+
+        # Average days to resolve (from exchange to follow-up)
+        cursor.execute(
+            """
+            SELECT AVG(
+                julianday(f.follow_up_date) - julianday(i.date)
+            ) as avg_days
+            FROM follow_ups f
+            JOIN interchange i ON f.related_interchange_id = i.id
+            WHERE f.related_interchange_id IS NOT NULL
+        """
+        )
+        avg_days = cursor.fetchone()[0]
+        avg_days_to_resolve = round(avg_days, 1) if avg_days else 0
+
+        # Success rate by category (based on resolution score >= 7)
+        cursor.execute(
+            """
+            SELECT
+                type,
+                COUNT(*) as total,
+                SUM(CASE WHEN impact_resolution_score >= 7 THEN 1 ELSE 0 END) as successful
+            FROM interchange
+            WHERE impact_resolution_score IS NOT NULL
+            GROUP BY type
+        """
+        )
+        success_by_category = {}
+        for row in cursor.fetchall():
+            type_name, total, successful = row
+            success_rate = round((successful / total) * 100, 1) if total > 0 else 0
+            success_by_category[type_name] = success_rate
+
+        return {
+            "avg_resolution_score": avg_resolution_score,
+            "resolution_by_urgency": resolution_by_urgency,
+            "avg_days_to_resolve": avg_days_to_resolve,
+            "success_rate_by_category": success_by_category,
+        }
+

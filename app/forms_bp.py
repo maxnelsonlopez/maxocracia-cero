@@ -401,3 +401,39 @@ def get_network_flow(current_user):
     network = manager.get_network_flow()
 
     return jsonify(network), 200
+
+
+@forms_bp.route("/dashboard/trends", methods=["GET"])
+@token_required
+def get_trends(current_user):
+    """
+    Get temporal trends for dashboard visualizations.
+
+    Query params:
+    - period: Number of days to analyze (default 30)
+    """
+    period = request.args.get("period", 30, type=int)
+    db = get_db()
+    manager = FormsManager(db)
+    trends = manager.get_temporal_trends(period)
+    return jsonify(trends), 200
+
+
+@forms_bp.route("/dashboard/categories", methods=["GET"])
+@token_required
+def get_categories(current_user):
+    """Get category breakdown analysis."""
+    db = get_db()
+    manager = FormsManager(db)
+    categories = manager.get_category_breakdown()
+    return jsonify(categories), 200
+
+
+@forms_bp.route("/dashboard/resolution", methods=["GET"])
+@token_required
+def get_resolution(current_user):
+    """Get resolution metrics and effectiveness analysis."""
+    db = get_db()
+    manager = FormsManager(db)
+    resolution = manager.get_resolution_metrics()
+    return jsonify(resolution), 200

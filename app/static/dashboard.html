@@ -102,6 +102,30 @@
                 </div>
             </section>
 
+            <!-- Temporal Trends Section -->
+            <section class="trends-section">
+                <div class="vhv-card">
+                    <div class="vhv-card-header">
+                        <h3 class="vhv-card-title">📈 Tendencias Temporales</h3>
+                        <div class="period-selector">
+                            <button class="period-btn active" data-period="7">7 días</button>
+                            <button class="period-btn" data-period="30">30 días</button>
+                            <button class="period-btn" data-period="90">90 días</button>
+                        </div>
+                    </div>
+                    <div class="charts-row-trends">
+                        <div class="chart-container-trend">
+                            <h4>UTH Movilizado</h4>
+                            <canvas id="uthTrendChart"></canvas>
+                        </div>
+                        <div class="chart-container-trend">
+                            <h4>Intercambios por Semana</h4>
+                            <canvas id="exchangesTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <div class="dashboard-grid-layout">
                 <!-- Left Column: Charts & Network -->
                 <div class="main-column">

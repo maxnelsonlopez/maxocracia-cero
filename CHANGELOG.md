@@ -6,6 +6,80 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
 
 ## [Unreleased]
 
+### Added - Dashboard Analytics Enhancements (2025-12-04)
+
+**Temporal Trends Visualization:**
+- Implemented `get_temporal_trends(period_days)` method in `FormsManager` for time-series analysis
+- Added temporal trends section to dashboard with Chart.js line charts
+- UTH mobilized over time visualization
+- Exchanges per week trend chart
+- Period selector buttons (7/30/90 days) for dynamic filtering
+
+**Category Breakdown Analysis:**
+- Implemented `get_category_breakdown()` method for analyzing offer/need distribution
+- Tracks top offered and needed categories from participants
+- Calculates match rate between available offers and existing needs
+- Provides exchange types distribution
+
+**Resolution Metrics:**
+- Implemented `get_resolution_metrics()` method for effectiveness tracking
+- Average resolution score calculation
+- Resolution scores grouped by urgency level
+- Average days to resolve (from exchange to follow-up)
+- Success rate by category (resolution score >= 7)
+
+**API Endpoints:**
+- `GET /forms/dashboard/trends?period=30` - Temporal trends data
+- `GET /forms/dashboard/categories` - Category breakdown analysis
+- `GET /forms/dashboard/resolution` - Resolution effectiveness metrics
+
+**Frontend Enhancements:**
+- Added temporal trends section to `dashboard.html`
+- Implemented Chart.js visualizations for UTH and exchanges trends
+- Created period selector UI component with active state management
+- Added responsive CSS styling in `dashboard.css`
+- Updated `api.js` with new dashboard API methods
+- Enhanced `dashboard.js` with chart rendering functions
+
+**Testing:**
+- Created comprehensive test suite (`test_dashboard_analytics.py`)
+- 10 new tests covering authentication, data structure, and value ranges
+- All tests passing (77/77 total project tests) ✅
+
+### Fixed - Authentication and Schema Issues (2025-12-04)
+
+**JWT Decorator Fix:**
+- Fixed `token_required` decorator to properly pass `current_user` to decorated endpoints
+- Resolved `TypeError` in forms endpoints that were missing the user parameter
+- Updated all affected blueprints: `forms_bp.py`, `maxo_bp.py`, `tvi_bp.py`, `auth.py`
+
+**Database Schema Updates:**
+- Extended `interchange` table with coordination and follow-up fields:
+  - `coordination_method` (TEXT): How the exchange was coordinated
+  - `requires_followup` (BOOLEAN): Whether follow-up is needed
+  - `followup_scheduled_date` (TIMESTAMP): When follow-up is scheduled
+- Added migration script: `scripts/migrate_interchange_table.py`
+
+**Security Test Refinements:**
+- Updated security test assertions for better error message validation
+- Improved password strength enforcement tests
+- Enhanced sensitive information leakage detection
+
+**Frontend Refactoring:**
+- Implemented dark mode for VHV Calculator (Claude Opus)
+- Centralized API calls and token management in `api.js` module
+- Refactored `app.js`, `dashboard.js`, and `vhv-calculator.js` for consistency
+- Improved code maintainability and reduced redundancy
+
+**Code Quality:**
+- Fixed all flake8 linting errors
+- Standardized import ordering with isort
+- Improved type hints and error handling
+
+**Testing:**
+- All 67 tests passing ✅
+- CI/CD pipeline green 🟢
+
 ### Added - TVI (Tiempo Vital Indexado) Data Model (2025-12-02)
 
 **Core Implementation:**

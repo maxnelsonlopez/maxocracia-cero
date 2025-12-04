@@ -126,6 +126,21 @@ class ApiService {
         return await res.json();
     }
 
+    async getDashboardTrends(period = 30) {
+        const res = await this.request(`/forms/dashboard/trends?period=${period}`);
+        return res;
+    }
+
+    async getDashboardCategories() {
+        const res = await this.request('/forms/dashboard/categories');
+        return res;
+    }
+
+    async getDashboardResolution() {
+        const res = await this.request('/forms/dashboard/resolution');
+        return res;
+    }
+
     // VHV Services
     async calculateVHV(data) {
         const res = await this.request('/vhv/calculate', {

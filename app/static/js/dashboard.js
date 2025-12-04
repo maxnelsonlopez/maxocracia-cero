@@ -10,6 +10,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event Listeners
     document.getElementById('refreshBtn').addEventListener('click', loadDashboardData);
     document.getElementById('btnLogout').addEventListener('click', handleLogout);
+
+    // Period selector for trends
+    document.querySelectorAll('.period-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Update active state
+            document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+
+            // Fetch new data
+            const period = parseInt(e.target.dataset.period);
+            fetchTrends(period);
+        });
+    });
 });
 
 async function loadDashboardData() {
@@ -24,7 +37,8 @@ async function loadDashboardData() {
         await Promise.all([
             fetchStats(),
             fetchAlerts(),
-            fetchNetwork()
+            fetchNetwork(),
+            fetchTrends(30) // Default to 30 days
         ]);
     } catch (error) {
         console.error('Error loading dashboard data:', error);
@@ -231,4 +245,111 @@ function handleLogout() {
 function viewParticipant(id) {
     // In a real app, this would navigate to a detail view
     alert(`Ver detalles del participante ID: ${id}`);
+}
+
+// ==================== TEMPORAL TRENDS ====================
+
+let uthTrendChartInstance = null;
+let exchangesTrendChartInstance = null;
+
+async function fetchTrends(period = 30) {
+    try {
+        const response = await api.getDashboardTrends(period);
+        const data = await response.json();
+
+        renderUthTrendChart(data.uth_per_week);
+        renderExchangesTrendChart(data.exchanges_per_week);
+    } catch (error) {
+        console.error('Error fetching trends:', error);
+    }
+}
+
+function renderUthTrendChart(data) {
+    const ctx = document.getElementById('uthTrendChart').getContext('2d');
+
+    if (uthTrendChartInstance) uthTrendChartInstance.destroy();
+
+    const labels = data.map(d => d[0]); // week labels
+    const values = data.map(d => d[1]); // UTH values
+
+    uthTrendChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'UTH',
+                data: values,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return `UTH: ${context.parsed.y.toFixed(1)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            }
+        }
+    });
+}
+
+function renderExchangesTrendChart(data) {
+    const ctx = document.getElementById('exchangesTrendChart').getContext('2d');
+
+    if (exchangesTrendChartInstance) exchangesTrendChartInstance.destroy();
+
+    const labels = data.map(d => d[0]); // week labels
+    const values = data.map(d => d[1]); // exchange counts
+
+    exchangesTrendChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Intercambios',
+                data: values,
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return `Intercambios: ${context.parsed.y}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            }
+        }
+    });
 }

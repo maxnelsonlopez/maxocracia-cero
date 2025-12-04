@@ -17,11 +17,13 @@
   - Compartir links con participantes actuales
   - Impacto: Operacional - crítico para Cohorte Cero
 
-- [ ] **Crear dashboard de análisis de intercambios**
-  - Herramienta: Google Sheets con fórmulas automáticas
-  - Métricas: UTH movilizado, tasa de resolución, flujo de red
-  - Visualizaciones: Gráficos de actividad, alertas de urgencias
-  - Impacto: Seguimiento y aprendizaje
+- [x] **Crear dashboard de análisis de intercambios**
+  - Completado: 2025-12-04
+  - Implementado como dashboard web con Chart.js
+  - Métricas: UTH movilizado, tasa de resolución, flujo de red, tendencias temporales
+  - Visualizaciones: Gráficos de línea, donas, barras, tablas de red
+  - Nuevos endpoints: /trends, /categories, /resolution
+  - Impacto: Seguimiento en tiempo real y análisis de tendencias
 
 ### Seguridad y Calidad
 
@@ -29,8 +31,14 @@
   - Completado: 2025-12-02
   - Archivo: `scripts/seed_data.py`
 
+- [x] **Corregir bugs críticos en autenticación y esquema**
+  - Completado: 2025-12-04
+  - JWT decorator ahora pasa correctamente `current_user`
+  - Tabla `interchange` extendida con campos de coordinación y seguimiento
+  - Todos los tests pasando (67/67) ✅
+
 - [ ] **Aumentar cobertura de tests**
-  - Estado actual: 67 tests pasando
+  - **Estado actual:** ✅ 77/77 tests pasando
   - Objetivo: 80%+ cobertura
   - Áreas prioritarias:
     - Tests de integración para formularios
@@ -81,10 +89,14 @@
 
 ### UI/UX
 
+- [x] **Añadir modo oscuro a Calculadora VHV**
+  - Completado: 2025-12-04
+  - Archivo: `app/static/css/vhv.css`
+  - Implementado por Claude Opus
+
 - [ ] **Mejorar diseño responsive de Calculadora VHV**
   - Archivo: `app/static/css/vhv.css`
   - Optimizar para móviles
-  - Añadir modo oscuro
   - Mejorar accesibilidad (ARIA labels)
 
 - [ ] **Añadir animaciones a resultados VHV**
@@ -135,6 +147,17 @@
 ## ✅ Completadas Recientemente
 
 ### Diciembre 2025
+
+- [x] **Refactorizar Frontend API** (2025-12-04)
+  - Centralización de API calls en módulo `api.js`
+  - Gestión consistente de tokens
+  - Refactorización de `app.js`, `dashboard.js`, `vhv-calculator.js`
+  - Implementación de dark mode
+
+- [x] **Corregir bugs críticos** (2025-12-04)
+  - JWT decorator fix para pasar `current_user`
+  - Extensión de tabla `interchange` con campos de seguimiento
+  - 67/67 tests pasando, CI/CD en verde
 
 - [x] **Implementar VHV Calculator Frontend** (2025-12-02)
   - 4 pestañas funcionales
