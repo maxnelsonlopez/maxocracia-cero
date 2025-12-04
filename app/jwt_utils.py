@@ -108,6 +108,7 @@ def token_required(f):
             return jsonify({"error": "invalid token"}), 401
         # attach user info to request
         request.user = data
-        return f(*args, **kwargs)
+        # pass current_user as first argument to the decorated function
+        return f(data, *args, **kwargs)
 
     return decorated

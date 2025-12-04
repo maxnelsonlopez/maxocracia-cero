@@ -195,10 +195,9 @@ def logout():
 
 @bp.route("/me", methods=["GET"])
 @token_required
-def me():
-    # request.user is set by token_required
-    user_info = getattr(request, "user", {})
-    user_id = user_info.get("user_id")
+def me(current_user):
+    # current_user is passed by token_required, request.user is also set
+    user_id = current_user.get("user_id")
     if not user_id:
         return jsonify({"error": "invalid token"}), 401
     db = get_db()

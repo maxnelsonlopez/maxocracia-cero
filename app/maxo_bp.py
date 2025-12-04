@@ -15,15 +15,14 @@ def balance(user_id):
 
 @bp.route("/transfer", methods=["POST"])
 @token_required
-def transfer():
+def transfer(current_user):
     # ensure authenticated user is the sender
-    user = getattr(request, "user", {})
-    auth_user_id = user.get("user_id")
+    auth_user_id = current_user.get("user_id")
     data = request.get_json() or {}
     from_id = data.get("from_user_id")
 
     # Validar que el token de autenticación sea válido
-    if not user or not auth_user_id:
+    if not current_user or not auth_user_id:
         return jsonify({"error": "invalid or missing authentication token"}), 401
 
     # Validar que se proporcione un from_user_id

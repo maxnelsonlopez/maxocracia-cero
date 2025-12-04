@@ -9,7 +9,7 @@ tvi_manager = TVIManager()
 
 @tvi_bp.route("", methods=["POST"])
 @token_required
-def log_tvi():
+def log_tvi(current_user):
     data = request.get_json()
 
     required_fields = ["start_time", "end_time", "category"]
@@ -42,7 +42,7 @@ def log_tvi():
 
 @tvi_bp.route("", methods=["GET"])
 @token_required
-def get_tvis():
+def get_tvis(current_user):
     limit = request.args.get("limit", 50, type=int)
     offset = request.args.get("offset", 0, type=int)
 
@@ -53,7 +53,7 @@ def get_tvis():
 
 @tvi_bp.route("/stats", methods=["GET"])
 @token_required
-def get_stats():
+def get_stats(current_user):
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
 

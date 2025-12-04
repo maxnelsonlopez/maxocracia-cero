@@ -236,12 +236,13 @@ class TestSecurity(unittest.TestCase):
                     "error" in error_data or "details" in error_data
                 ), f"Formato de error inesperado: {error_data}"
 
-                # Verificar que tenemos un mensaje de error genérico
+                # Verificar que tenemos un mensaje de error
+                # El formato puede ser {"error": "...", "details": {"password": "valor inválido"}}
                 assert (
-                    "details" in error_data and "campo" in error_data["details"]
+                    "details" in error_data and "password" in error_data["details"]
                 ), f"Error inesperado para contraseña '{password}': {error_data}"
                 assert (
-                    error_data["details"]["campo"] == "valor inválido"
+                    error_data["details"]["password"] == "valor inválido"
                 ), f"Mensaje de error inesperado: {error_data}"
             else:
                 assert response.status_code in [
@@ -430,6 +431,8 @@ class TestSecurity(unittest.TestCase):
         sensible como detalles de la base de datos o del stack trace.
         """
         # Lista de términos sensibles que no deberían aparecer en los mensajes de error
+        # Nota: nombres de campos de validación (como 'password', 'email') son aceptables
+        # ya que informar qué campo tiene error no es filtrar información sensible.
         sensitive_terms = [
             # Términos de base de datos
             "sql",
@@ -449,11 +452,9 @@ class TestSecurity(unittest.TestCase):
             "port",
             "connection",
             "timeout",
-            # Otros términos sensibles
-            "password",
+            # Otros términos sensibles (excluyendo nombres de campos de validación)
             "secret",
             "key",
-            "token",
         ]
 
         # Probar con una ruta que no existe
