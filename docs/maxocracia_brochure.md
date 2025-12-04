@@ -92,7 +92,7 @@ Los principios no negocian. Las implementaciones se adaptan.
 
 ### 🗳️ Participación Inteligente
 
-**Abandonamos:** La democracia masiva indiscriminada donde todos votan sobre todo.
+**Abandonamos:** La democracia masiva indiscriminada donde todos votan por un puñado, y un puñado decide por todos.
 
 **Adoptamos:** 
 - **Participación directa limitada** - Solo votas en lo que te afecta directamente
