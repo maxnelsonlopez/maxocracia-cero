@@ -1,102 +1,57 @@
-const base = `${location.protocol}//${location.host}`
-
 const el = id => document.getElementById(id)
 
 let currentUser = null
 
-// Token helpers: persist token in localStorage so UI actions reuse it
-function saveToken(t) {
-  if (!t) { localStorage.removeItem('mc_token'); el('token').textContent = '(no token)'; return }
-  localStorage.setItem('mc_token', t)
-  el('token').textContent = t
+async function showProfileFromToken() {
+  const profile = await api.getProfile();
+  if (!profile) {
+    currentUser = null;
+    el('profile').textContent = '(not logged in)';
+    el('token').textContent = '(no token)';
+    return;
+  }
+
+  currentUser = profile;
+  el('token').textContent = api.getToken();
+
+  const parts = []
+  if (profile.name) parts.push(`Name: ${profile.name}`)
+  if (profile.id) parts.push(`ID: ${profile.id}`)
+  if (profile.email) parts.push(`Email: ${profile.email}`)
+  el('profile').textContent = parts.join(' | ')
 }
 
-function loadToken() {
-  const t = localStorage.getItem('mc_token')
-  if (t) el('token').textContent = t
-  return t
+el('btnLogout').onclick = () => {
+  api.logout();
+  showProfileFromToken();
 }
-
-function getAuthHeaders(headers = {}) {
-  const t = loadToken()
-  if (t && t !== '(no token)') headers['Authorization'] = `Bearer ${t}`
-  return headers
-}
-
-function showProfileFromToken() {
-  const token = loadToken()
-  if (!token) { el('profile').textContent = '(not logged in)'; return }
-  // prefer to fetch /auth/me for authoritative profile
-  // prefer authoritative profile via /auth/me
-  fetch(`${base}/auth/me`, { headers: getAuthHeaders({}) }).then(async res => {
-    if (!res.ok) {
-      currentUser = null
-      el('profile').textContent = '(unauthenticated)'
-      return
-    }
-    const j = await res.json()
-    currentUser = j
-    const parts = []
-    if (j.name) parts.push(`Name: ${j.name}`)
-    if (j.id) parts.push(`ID: ${j.id}`)
-    if (j.email) parts.push(`Email: ${j.email}`)
-    el('profile').textContent = parts.join(' | ')
-  }).catch(e => {
-    currentUser = null
-    el('profile').textContent = '(error fetching profile)'
-  })
-}
-
-el('btnLogout').onclick = () => { saveToken(null); showProfileFromToken() }
 
 el('btnRegister').onclick = async () => {
   const email = el('email').value
   const name = el('name').value
   const password = el('password').value
   if (!email || !password || !name) { alert('email, name and password required'); return }
-  const res = await fetch(`${base}/auth/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, name }) })
-  const text = await res.text()
-  if (!res.ok) alert('Register failed: ' + text)
-  el('interchange_res').textContent = text
+
+  const { ok, data } = await api.register(name, email, password);
+  if (!ok) {
+    alert('Register failed: ' + (data.error || 'Unknown error'));
+    el('interchange_res').textContent = JSON.stringify(data);
+  } else {
+    showProfileFromToken();
+    el('interchange_res').textContent = 'Registered successfully';
+  }
 }
 
 el('btnLogin').onclick = async () => {
   const email = el('email').value
   const password = el('password').value
-  const res = await fetch(`${base}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }), credentials: 'include' })
-  const data = await res.json()
-  const token = data.access_token || null
-  saveToken(token)
-  showProfileFromToken()
-}
 
-async function attemptRefresh() {
-  try {
-    const res = await fetch(`${base}/auth/refresh`, { method: 'POST', credentials: 'include' })
-    if (!res.ok) return false
-    const j = await res.json()
-    if (j.access_token) saveToken(j.access_token)
-    return true
-  } catch (e) {
-    return false
+  const { ok, data } = await api.login(email, password);
+  if (!ok) {
+    alert('Login failed: ' + (data.error || 'Unknown error'));
+  } else {
+    showProfileFromToken();
   }
-}
-
-// helper to perform an authenticated fetch with automatic refresh-on-401 once
-async function authFetch(url, opts = {}) {
-  opts.headers = opts.headers || {}
-  opts.headers = getAuthHeaders(opts.headers)
-  opts.credentials = 'include'
-  let res = await fetch(url, opts)
-  if (res.status === 401) {
-    const refreshed = await attemptRefresh()
-    if (refreshed) {
-      // retry with new token
-      opts.headers = getAuthHeaders(opts.headers)
-      res = await fetch(url, opts)
-    }
-  }
-  return res
 }
 
 el('btnInterchange').onclick = async () => {
@@ -106,31 +61,38 @@ el('btnInterchange').onclick = async () => {
   const uth = parseFloat(el('uth').value || 0)
   const impact = parseInt(el('impact').value || 0)
   const description = el('description').value
-  const res = await fetch(`${base}/interchanges`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ interchange_id, giver_id, receiver_id, uth_hours: uth, impact_resolution_score: impact, description }) })
+
+  const res = await api.request('/interchanges', {
+    method: 'POST',
+    body: JSON.stringify({ interchange_id, giver_id, receiver_id, uth_hours: uth, impact_resolution_score: impact, description })
+  });
+
   el('interchange_res').textContent = JSON.stringify(await res.json(), null, 2)
   await refreshInterchanges()
 }
 
 el('btnBalance').onclick = async () => {
   let uid = el('balance_user').value
-  const token = loadToken()
   if (!uid) {
-    // if logged in, prefer authenticated user id from profile
     if (currentUser && currentUser.id) uid = currentUser.id
   }
   if (!uid) { alert('user id required'); return }
-  const res = await authFetch(`${base}/maxo/${uid}/balance`, {})
+
+  const res = await api.request(`/maxo/${uid}/balance`);
   el('balance_res').textContent = JSON.stringify(await res.json(), null, 2)
 }
 
 el('btnTransfer').onclick = async () => {
-  // If logged in, prefer using the authenticated user as the sender
   const from_user = currentUser && currentUser.id ? parseInt(currentUser.id) : parseInt(el('from_user').value || 0)
   const to_user = parseInt(el('to_user').value || 0)
   const amount = parseFloat(el('amount').value || 0)
-  const headers = { 'Content-Type': 'application/json' }
+
   try {
-    const res = await authFetch(`${base}/maxo/transfer`, { method: 'POST', headers, body: JSON.stringify({ from_user_id: from_user, to_user_id: to_user, amount, reason: 'from UI' }) })
+    const res = await api.request('/maxo/transfer', {
+      method: 'POST',
+      body: JSON.stringify({ from_user_id: from_user, to_user_id: to_user, amount, reason: 'from UI' })
+    });
+
     let json
     try { json = await res.json() } catch (e) {
       el('transfer_res').textContent = `Invalid response (status ${res.status})`
@@ -147,37 +109,25 @@ el('btnCreateRes').onclick = async () => {
   const category = el('res_cat').value
   const description = el('res_desc').value
   const user_id = currentUser && currentUser.id ? currentUser.id : 1
-  const headers = { 'Content-Type': 'application/json' }
-  const body = JSON.stringify({ user_id, title, category, description })
-  const res = await authFetch(`${base}/resources`, { method: 'POST', headers, body })
+
+  const res = await api.request('/resources', {
+    method: 'POST',
+    body: JSON.stringify({ user_id, title, category, description })
+  });
+
   el('res_list').textContent = JSON.stringify(await res.json(), null, 2)
   await refreshResources()
 }
 
 el('btnListRes').onclick = async () => {
-  const res = await fetch(`${base}/resources`)
+  const res = await api.request('/resources');
   const data = await res.json()
   el('res_list').textContent = JSON.stringify(data, null, 2)
-  const tbody = document.querySelector('#resources_table tbody')
-  if (!tbody) return
-  tbody.innerHTML = ''
-  data.forEach(it => {
-    const tr = document.createElement('tr')
-    tr.innerHTML = `<td>${it.id}</td><td>${it.title}</td><td>${it.category || ''}</td><td>${it.user_id || ''}</td><td>${it.created_at || ''}</td><td><button data-id='${it.id}' class='claim-btn'>Claim</button></td>`
-    tbody.appendChild(tr)
-  })
-  Array.from(document.querySelectorAll('.claim-btn')).forEach(b => b.onclick = async (e) => {
-    const id = e.target.dataset.id
-    const user_id = currentUser && currentUser.id ? currentUser.id : 1
-    const resp = await authFetch(`${base}/resources/${id}/claim`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id }) })
-    const json = await resp.json()
-    alert(json.message || JSON.stringify(json))
-    await refreshResources()
-  })
+  renderResourcesTable(data);
 }
 
 async function refreshInterchanges() {
-  const res = await fetch(`${base}/interchanges`)
+  const res = await api.request('/interchanges');
   const data = await res.json()
   const tbody = document.querySelector('#interchanges_table tbody')
   if (!tbody) return
@@ -190,8 +140,12 @@ async function refreshInterchanges() {
 }
 
 async function refreshResources() {
-  const res = await fetch(`${base}/resources`)
+  const res = await api.request('/resources');
   const data = await res.json()
+  renderResourcesTable(data);
+}
+
+function renderResourcesTable(data) {
   const tbody = document.querySelector('#resources_table tbody')
   if (!tbody) return
   tbody.innerHTML = ''
@@ -200,10 +154,16 @@ async function refreshResources() {
     tr.innerHTML = `<td>${it.id}</td><td>${it.title}</td><td>${it.category || ''}</td><td>${it.user_id || ''}</td><td>${it.created_at || ''}</td><td><button data-id='${it.id}' class='claim-btn'>Claim</button></td>`
     tbody.appendChild(tr)
   })
+
   Array.from(document.querySelectorAll('.claim-btn')).forEach(b => b.onclick = async (e) => {
     const id = e.target.dataset.id
     const user_id = currentUser && currentUser.id ? currentUser.id : 1
-    const resp = await fetch(`${base}/resources/${id}/claim`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id }) })
+
+    const resp = await api.request(`/resources/${id}/claim`, {
+      method: 'POST',
+      body: JSON.stringify({ user_id })
+    });
+
     const json = await resp.json()
     alert(json.message || JSON.stringify(json))
     await refreshResources()

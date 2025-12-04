@@ -13,8 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function loadDashboardData() {
-    const token = localStorage.getItem('mc_token');
-    if (!token) {
+    if (!api.isAuthenticated()) {
         window.location.href = 'index.html';
         return;
     }
@@ -23,9 +22,9 @@ async function loadDashboardData() {
 
     try {
         await Promise.all([
-            fetchStats(token),
-            fetchAlerts(token),
-            fetchNetwork(token)
+            fetchStats(),
+            fetchAlerts(),
+            fetchNetwork()
         ]);
     } catch (error) {
         console.error('Error loading dashboard data:', error);
@@ -38,15 +37,9 @@ function updateLastUpdate() {
     document.getElementById('lastUpdate').textContent = now.toLocaleTimeString();
 }
 
-async function fetchStats(token) {
+async function fetchStats() {
     try {
-        const response = await fetch('/forms/dashboard/stats', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch stats');
-
-        const data = await response.json();
+        const data = await api.getDashboardStats();
 
         // Update Overview Cards
         document.getElementById('totalParticipants').textContent = data.total_participants || 0;
@@ -63,15 +56,9 @@ async function fetchStats(token) {
     }
 }
 
-async function fetchAlerts(token) {
+async function fetchAlerts() {
     try {
-        const response = await fetch('/forms/dashboard/alerts', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch alerts');
-
-        const data = await response.json();
+        const data = await api.getDashboardAlerts();
         const alertsList = document.getElementById('alertsList');
         const alertCount = document.getElementById('alertCount');
 
@@ -110,15 +97,9 @@ async function fetchAlerts(token) {
     }
 }
 
-async function fetchNetwork(token) {
+async function fetchNetwork() {
     try {
-        const response = await fetch('/forms/dashboard/network', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch network data');
-
-        const data = await response.json();
+        const data = await api.getNetworkFlow();
 
         renderTable('topGiversTable', data.top_givers, ['user_id', 'count']);
         renderTable('topReceiversTable', data.top_receivers, ['user_id', 'count']);
@@ -243,7 +224,7 @@ function renderTable(tableId, data, columns) {
 }
 
 function handleLogout() {
-    localStorage.removeItem('mc_token');
+    api.logout();
     window.location.href = 'index.html';
 }
 
