@@ -9,7 +9,7 @@ Handles validation, storage, and analysis for:
 
 import json
 import sqlite3
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class FormsManager:
@@ -135,7 +135,7 @@ class FormsManager:
         cursor = self.conn.cursor()
 
         query = "SELECT * FROM participants"
-        params = []
+        params: List[Any] = []
 
         if status:
             query += " WHERE status = ?"
