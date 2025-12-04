@@ -94,7 +94,7 @@ def validate_json_request(schema):
                     jsonify(
                         {
                             "error": "entrada inválida",
-                            "details": {"campo": "valor inválido"},
+                            "details": errors,
                         }
                     ),
                     400,

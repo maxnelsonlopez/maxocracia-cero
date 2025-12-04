@@ -191,6 +191,142 @@ CREATE TABLE IF NOT EXISTS tvi_entries (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_tvi_user_start ON tvi_entries(user_id, start_time);
 
 
+-- Forms System Tables
+
+-- Participants table (Formulario CERO - Inscripción)
+CREATE TABLE IF NOT EXISTS participants (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  
+  -- Personal Information
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  referred_by TEXT,
+  phone_call TEXT,
+  phone_whatsapp TEXT,
+  telegram_handle TEXT,
+  city TEXT NOT NULL,
+  neighborhood TEXT NOT NULL,
+  personal_values TEXT,  -- Long text field
+  
+  -- Offers (What they can provide)
+  offer_categories TEXT,  -- JSON array of selected categories
+  offer_description TEXT NOT NULL,
+  offer_human_dimensions TEXT,  -- JSON array of dimensions their offer addresses
+  
+  -- Needs (What they require)
+  need_categories TEXT,  -- JSON array of selected categories
+  need_description TEXT NOT NULL,
+  need_urgency TEXT CHECK(need_urgency IN ('Alta', 'Media', 'Baja')),
+  need_human_dimensions TEXT,  -- JSON array of dimensions their need addresses
+  
+  -- Consent and metadata
+  consent_given INTEGER DEFAULT 1,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'paused'))
+);
+
+-- Follow-ups table (Formulario B - Reporte de Seguimiento)
+CREATE TABLE IF NOT EXISTS follow_ups (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  
+  -- Identification
+  follow_up_date TEXT NOT NULL,
+  participant_id INTEGER NOT NULL,
+  related_interchange_id INTEGER,  -- Optional reference to interchange
+  
+  -- Type of follow-up
+  follow_up_type TEXT NOT NULL CHECK(follow_up_type IN (
+    'verification_completed',
+    'update_in_progress', 
+    'situation_evolution',
+    'new_urgent_need',
+    'need_resolved',
+    'spontaneous_feedback',
+    'routine_check'
+  )),
+  
+  -- Current Status
+  current_situation TEXT NOT NULL,  -- Long text description
+  need_level INTEGER CHECK(need_level BETWEEN 1 AND 5),  -- 1=resolved, 5=critical
+  situation_change TEXT CHECK(situation_change IN (
+    'improved_significantly',
+    'improved_slightly',
+    'same',
+    'worsened_slightly',
+    'worsened_significantly',
+    'first_evaluation'
+  )),
+  
+  -- Active Interchanges
+  active_interchanges_status TEXT CHECK(active_interchanges_status IN (
+    'receiving_help',
+    'giving_help',
+    'both',
+    'none',
+    'paused'
+  )),
+  interchanges_working_well TEXT CHECK(interchanges_working_well IN (
+    'very_well',
+    'minor_difficulties',
+    'significant_problems',
+    'needs_adjustment',
+    NULL
+  )),
+  
+  -- New Opportunities
+  new_needs_detected TEXT,  -- JSON array of categories
+  new_offers_detected TEXT,  -- JSON array of categories
+  
+  -- Emotional Health
+  emotional_state TEXT CHECK(emotional_state IN (
+    'very_good',
+    'good',
+    'neutral',
+    'worried',
+    'bad',
+    'alert_signs',
+    'could_not_evaluate',
+    NULL
+  )),
+  community_connection INTEGER CHECK(community_connection BETWEEN 1 AND 5 OR community_connection IS NULL),
+  
+  -- Required Actions
+  actions_required TEXT,  -- JSON array of actions
+  follow_up_priority TEXT NOT NULL CHECK(follow_up_priority IN (
+    'high',      -- 🔴 24-48 hours
+    'medium',    -- 🟡 next week
+    'low',       -- 🟢 monthly
+    'closed'     -- ✅ no more follow-up needed
+  )),
+  next_follow_up_date TEXT,
+  
+  -- Facilitator Notes
+  facilitator_notes TEXT,
+  learnings TEXT,
+  
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE CASCADE,
+  FOREIGN KEY (related_interchange_id) REFERENCES interchange(id) ON DELETE SET NULL
+);
+
+-- Extend interchange table with additional fields for Formulario A
+-- Note: We cannot use ALTER TABLE to add CHECK constraints in SQLite easily,
+-- so we document the expected values here for application-level validation
+
+-- Expected new columns to be added via migration:
+-- coordination_method TEXT CHECK(coordination_method IN ('max_direct', 'participants_alone', 'intermediary', 'other'))
+-- requires_followup INTEGER DEFAULT 0
+-- followup_scheduled_date TEXT
+
+-- Create indexes for better query performance
+CREATE INDEX IF NOT EXISTS idx_participants_email ON participants(email);
+CREATE INDEX IF NOT EXISTS idx_participants_city ON participants(city);
+CREATE INDEX IF NOT EXISTS idx_participants_status ON participants(status);
+CREATE INDEX IF NOT EXISTS idx_follow_ups_participant ON follow_ups(participant_id);
+CREATE INDEX IF NOT EXISTS idx_follow_ups_priority ON follow_ups(follow_up_priority);
+CREATE INDEX IF NOT EXISTS idx_follow_ups_date ON follow_ups(follow_up_date);
+
 -- Insert default VHV parameters (only if table is empty)
 INSERT OR IGNORE INTO vhv_parameters (id, alpha, beta, gamma, delta, notes)
 VALUES (1, 100.0, 2000.0, 1.0, 100.0, 'Initial parameters based on paper_formalizacion_matematica_maxo.txt');

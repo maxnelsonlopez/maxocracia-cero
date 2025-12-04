@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Inscripción - Red de Apoyo Maxocracia</title>
+    <link rel="stylesheet" href="/static/css/vhv.css">
+    <link rel="stylesheet" href="/static/css/forms.css">
+</head>
+
+<body>
+    <div class="forms-container">
+        <!-- Hero Section -->
+        <div class="forms-hero">
+            <h1 class="forms-hero-title">🤝 Únete a la Red de Apoyo</h1>
+            <p class="forms-hero-subtitle">
+                Este es el primer paso para crear una comunidad donde podamos ayudarnos unos a otros.
+                Toda la información es voluntaria y se manejará con total confidencialidad.
+            </p>
+        </div>
+
+        <!-- Success Message (hidden by default) -->
+        <div id="successMessage" class="forms-success" style="display: none;">
+            <div class="forms-success-icon">✅</div>
+            <h2 class="forms-success-title">¡Registro Exitoso!</h2>
+            <p class="forms-success-message">
+                Gracias por unirte a la Red de Apoyo. Pronto nos pondremos en contacto contigo.
+            </p>
+            <button class="forms-btn forms-btn-primary" onclick="resetForm()" style="margin-top: 1rem;">
+                Registrar Otro Participante
+            </button>
+        </div>
+
+        <!-- Error Message (hidden by default) -->
+        <div id="errorMessage" class="forms-error" style="display: none;">
+            <span class="forms-error-icon">⚠️</span>
+            <span id="errorText"></span>
+        </div>
+
+        <!-- Form -->
+        <form id="participantForm" class="forms-card">
+            <!-- SECCIÓN 1: ¿Quién Eres? -->
+            <div class="forms-section">
+                <h2 class="forms-section-title">
+                    <span class="forms-emoji">👤</span>
+                    SECCIÓN 1: ¿Quién Eres?
+                </h2>
+
+                <div class="forms-group">
+                    <label class="forms-label forms-label-required" for="name">Tu nombre o Alias</label>
+                    <input type="text" id="name" name="name" class="forms-input" required>
+                </div>
+
+                <div class="forms-group">
+                    <label class="forms-label forms-label-required" for="email">Tu correo electrónico</label>
+                    <input type="email" id="email" name="email" class="forms-input" required>
+                </div>
+
+                <div class="forms-group">
+                    <label class="forms-label forms-label-required" for="referred_by">¿Quién te mostró este
+                        formulario?</label>
+                    <input type="text" id="referred_by" name="referred_by" class="forms-input" required>
+                </div>
+
+                <div class="forms-group">
+                    <label class="forms-label forms-label-required" for="phone_call">Tu número de contacto
+                        (llamada)</label>
+                    <input type="tel" id="phone_call" name="phone_call" class="forms-input"
+                        placeholder="+57 123 456 7890" required>
+                </div>
+
+                <div class="forms-group">
+                    <label class="forms-label forms-label-required" for="phone_whatsapp">Tu número de contacto
+                        (WhatsApp)</label>
+                    <input type="tel" id="phone_whatsapp" name="phone_whatsapp" class="forms-input"
+                        placeholder="+57 123 456 7890" required>
+                </div>
+
+                <div class="forms-group">
+                    <label class="forms-label forms-label-required" for="telegram_handle">¿Tienes Telegram? Si sí, deja
+                        tu @</label>
+                    <input type="text" id="telegram_handle" name="telegram_handle" class="forms-input"
+                        placeholder="@usuario" required>
+                </div>
+
+                <div class="forms-group">
+                    <label class="forms-label forms-label-required" for="city">Ciudad</label>
+                    <input type="text" id="city" name="city" class="forms-input" required>
+                </div>
+
+                <div class="forms-group">
+                    <label class="forms-label forms-label-required" for="neighborhood">Barrio o localidad</label>
+                    <input type="text" id="neighborhood" name="neighborhood" class="forms-input" required>
+                </div>
+
+                <div class="forms-group">
+                    <label class="forms-label forms-label-required" for="personal_values">¿Qué valores crees que te
+                        representan?</label>
+                    <textarea id="personal_values" name="personal_values" class="forms-textarea" required></textarea>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 2: ¿Cómo Podrías Ayudar? -->
+            <div class="forms-section">
+                <h2 class="forms-section-title">
+                    <span class="forms-emoji">🎁</span>
+                    SECCIÓN 2: ¿Cómo Podrías Ayudar? (Tus Ofertas)
+                </h2>
+                <p class="forms-section-description">Selecciona todos los que correspondan</p>
+
+                <div class="forms-group">
+                    <label class="forms-label">Categorías de Ayuda Disponibles</label>
+                    <div class="forms-checkbox-group">
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="offer_objeto" name="offer_categories" value="objeto">
+                            <label for="offer_objeto">📦 Objeto: Cosas que ya no usas (ropa, muebles, herramientas,
+                                etc.)</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="offer_alimentacion" name="offer_categories" value="alimentacion">
+                            <label for="offer_alimentacion">🍽 Alimentación o Cocina: Comida preparada, ingredientes,
+                                enseñar una receta</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="offer_habilidad" name="offer_categories" value="habilidad">
+                            <label for="offer_habilidad">🛠 Habilidad o Servicio: Ayuda práctica (reparaciones, diseño,
+                                clases, etc.)</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="offer_conocimiento" name="offer_categories" value="conocimiento">
+                            <label for="offer_conocimiento">📚 Conocimiento o Consejo: Asesoría en un tema que
+                                dominas</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="offer_transporte" name="offer_categories" value="transporte">
+                            <label for="offer_transporte">🚗 Transporte o Acompañamiento: Ayuda para moverse o estar
+                                presente</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="offer_tiempo" name="offer_categories" value="tiempo">
+                            <label for="offer_tiempo">⏰ Tiempo y Compañía: Escuchar, voluntariado, compartir un
+                                pasatiempo</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="offer_espacio" name="offer_categories" value="espacio">
+                            <label for="offer_espacio">🏠 Espacio: Un lugar para una reunión, almacenamiento temporal,
+                                etc.</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="offer_apoyo_economico" name="offer_categories"
+                                value="apoyo_economico">
+                            <label for="offer_apoyo_economico">💰 Apoyo Económico: Pequeños aportes o recursos</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="forms-group">
+                    <label class="forms-label forms-label-required" for="offer_description">Describe brevemente lo que
+                        ofreces y las limitaciones de tu ofrecimiento</label>
+                    <textarea id="offer_description" name="offer_description" class="forms-textarea"
+                        placeholder='Ejemplo: "Ofrezco mi taladro usado que está en buen estado (Objeto)" o "Puedo ayudar a revisar hojas de vida los fines de semana (Conocimiento)"'
+                        required></textarea>
+                </div>
+
+                <div class="forms-group">
+                    <label class="forms-label">Pensando más a fondo, tu oferta podría ayudar a otra persona en
+                        su...</label>
+                    <div class="forms-checkbox-group">
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="offer_dim_crecimiento" name="offer_human_dimensions"
+                                value="crecimiento_aprendizaje">
+                            <label for="offer_dim_crecimiento">Crecimiento y Aprendizaje (Educación, nuevas habilidades,
+                                espiritualidad)</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="offer_dim_bienestar" name="offer_human_dimensions"
+                                value="bienestar_descanso">
+                            <label for="offer_dim_bienestar">Bienestar y Descanso (Ocio, salud, tranquilidad, aliviar el
+                                estrés)</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="offer_dim_seguridad" name="offer_human_dimensions"
+                                value="seguridad_estabilidad">
+                            <label for="offer_dim_seguridad">Seguridad y Estabilidad (Protección, defensa, tener un
+                                lugar seguro)</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="offer_dim_autoestima" name="offer_human_dimensions"
+                                value="autoestima_autonomia">
+                            <label for="offer_dim_autoestima">Autoestima y Autonomía (Sentirse capaz, independiente,
+                                orgulloso de sí mismo)</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="offer_dim_conexion" name="offer_human_dimensions"
+                                value="conexion_social">
+                            <label for="offer_dim_conexion">Conexión Social y Pertenencia (Sentirse valorado, parte de
+                                un grupo, amistad)</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="offer_dim_prosperidad" name="offer_human_dimensions"
+                                value="prosperidad_recursos">
+                            <label for="offer_dim_prosperidad">Prosperidad y Recursos (Manejo de finanzas, obtener lo
+                                necesario para vivir)</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="offer_dim_placer" name="offer_human_dimensions"
+                                value="placer_goce">
+                            <label for="offer_dim_placer">Placer y Goce de la Vida (Alimentación, hobbies, disfrute
+                                gastronómico)</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="offer_dim_intimidad" name="offer_human_dimensions"
+                                value="intimidad_vinculos">
+                            <label for="offer_dim_intimidad">Intimidad y Vínculos Afectivos (Relaciones de pareja,
+                                conexión emocional profunda)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 3: ¿Qué Necesitas? -->
+            <div class="forms-section">
+                <h2 class="forms-section-title">
+                    <span class="forms-emoji">🙏</span>
+                    SECCIÓN 3: ¿Qué Necesitas Ahora o Podrías Necesitar?
+                </h2>
+
+                <div class="forms-group">
+                    <label class="forms-label">Si tuvieras una necesidad, ¿en qué categoría estaría?</label>
+                    <div class="forms-checkbox-group">
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="need_objeto" name="need_categories" value="objeto">
+                            <label for="need_objeto">📦 Objeto</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="need_alimentacion" name="need_categories" value="alimentacion">
+                            <label for="need_alimentacion">🍽 Alimentación o Cocina</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="need_habilidad" name="need_categories" value="habilidad">
+                            <label for="need_habilidad">🛠 Habilidad o Servicio</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="need_conocimiento" name="need_categories" value="conocimiento">
+                            <label for="need_conocimiento">📚 Conocimiento o Consejo</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="need_transporte" name="need_categories" value="transporte">
+                            <label for="need_transporte">🚗 Transporte o Acompañamiento</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="need_tiempo" name="need_categories" value="tiempo">
+                            <label for="need_tiempo">⏰ Tiempo y Compañía</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="need_espacio" name="need_categories" value="espacio">
+                            <label for="need_espacio">🏠 Espacio</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="need_apoyo_economico" name="need_categories"
+                                value="apoyo_economico">
+                            <label for="need_apoyo_economico">💰 Apoyo Económico</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="forms-group">
+                    <label class="forms-label forms-label-required" for="need_description">Describe brevemente tu
+                        necesidad</label>
+                    <textarea id="need_description" name="need_description" class="forms-textarea"
+                        placeholder='Ejemplo: "Necesito una silla de escritorio económica (Objeto)" o "Necesito a alguien que me explique cómo hacer la declaración de renta (Conocimiento)"'
+                        required></textarea>
+                </div>
+
+                <div class="forms-group">
+                    <label class="forms-label forms-label-required">¿Qué tan urgente es tu necesidad?</label>
+                    <div class="forms-radio-group">
+                        <div class="forms-radio-item">
+                            <input type="radio" id="urgency_alta" name="need_urgency" value="Alta" required>
+                            <label for="urgency_alta">🔴 Alta Urgencia</label>
+                        </div>
+                        <div class="forms-radio-item">
+                            <input type="radio" id="urgency_media" name="need_urgency" value="Media">
+                            <label for="urgency_media">🟡 Media Urgencia</label>
+                        </div>
+                        <div class="forms-radio-item">
+                            <input type="radio" id="urgency_baja" name="need_urgency" value="Baja">
+                            <label for="urgency_baja">🟢 Baja Urgencia</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="forms-group">
+                    <label class="forms-label">Pensando más a fondo, mi necesidad tiene que ver con...</label>
+                    <div class="forms-checkbox-group">
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="need_dim_crecimiento" name="need_human_dimensions"
+                                value="crecimiento_aprendizaje">
+                            <label for="need_dim_crecimiento">Crecimiento y Aprendizaje</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="need_dim_bienestar" name="need_human_dimensions"
+                                value="bienestar_descanso">
+                            <label for="need_dim_bienestar">Bienestar y Descanso</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="need_dim_seguridad" name="need_human_dimensions"
+                                value="seguridad_estabilidad">
+                            <label for="need_dim_seguridad">Seguridad y Estabilidad</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="need_dim_autoestima" name="need_human_dimensions"
+                                value="autoestima_autonomia">
+                            <label for="need_dim_autoestima">Autoestima y Autonomía</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="need_dim_conexion" name="need_human_dimensions"
+                                value="conexion_social">
+                            <label for="need_dim_conexion">Conexión Social y Pertenencia</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="need_dim_prosperidad" name="need_human_dimensions"
+                                value="prosperidad_recursos">
+                            <label for="need_dim_prosperidad">Prosperidad y Recursos</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="need_dim_placer" name="need_human_dimensions"
+                                value="placer_goce">
+                            <label for="need_dim_placer">Placer y Goce de la Vida</label>
+                        </div>
+                        <div class="forms-checkbox-item">
+                            <input type="checkbox" id="need_dim_intimidad" name="need_human_dimensions"
+                                value="intimidad_vinculos">
+                            <label for="need_dim_intimidad">Intimidad y Vínculos Afectivos</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Consent -->
+            <div class="forms-section">
+                <h2 class="forms-section-title">
+                    <span class="forms-emoji">✅</span>
+                    Para Finalizar
+                </h2>
+
+                <div class="forms-group">
+                    <div class="forms-checkbox-item">
+                        <input type="checkbox" id="consent_given" name="consent_given" value="1" required>
+                        <label for="consent_given">
+                            Entiendo que este es un proyecto voluntario y que Max (o el sistema) actuará como un
+                            conector.
+                            Doy mi consentimiento para que mi información de contacto sea compartida con una persona con
+                            la
+                            que se encuentre una coincidencia compatible.
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="forms-btn forms-btn-primary forms-btn-full" id="submitBtn">
+                <span id="submitText">Enviar Inscripción</span>
+                <span id="submitLoading" class="forms-loading" style="display: none;"></span>
+            </button>
+        </form>
+    </div>
+
+    <script src="/static/js/forms.js"></script>
+    <script>
+        // Initialize form submission
+        document.getElementById('participantForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            // Collect form data
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                referred_by: document.getElementById('referred_by').value,
+                phone_call: document.getElementById('phone_call').value,
+                phone_whatsapp: document.getElementById('phone_whatsapp').value,
+                telegram_handle: document.getElementById('telegram_handle').value,
+                city: document.getElementById('city').value,
+                neighborhood: document.getElementById('neighborhood').value,
+                personal_values: document.getElementById('personal_values').value,
+                offer_categories: getCheckedValues('offer_categories'),
+                offer_description: document.getElementById('offer_description').value,
+                offer_human_dimensions: getCheckedValues('offer_human_dimensions'),
+                need_categories: getCheckedValues('need_categories'),
+                need_description: document.getElementById('need_description').value,
+                need_urgency: document.querySelector('input[name="need_urgency"]:checked').value,
+                need_human_dimensions: getCheckedValues('need_human_dimensions'),
+                consent_given: document.getElementById('consent_given').checked ? 1 : 0
+            };
+
+            // Submit form
+            await submitParticipantForm(formData);
+        });
+
+        function getCheckedValues(name) {
+            return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`))
+                .map(cb => cb.value);
+        }
+
+        async function submitParticipantForm(data) {
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const submitLoading = document.getElementById('submitLoading');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitText.style.display = 'none';
+            submitLoading.style.display = 'inline-block';
+            errorMessage.style.display = 'none';
+
+            try {
+                const response = await fetch('/forms/participant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // Show success message
+                    document.getElementById('participantForm').style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'block';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    // Show error message
+                    errorText.textContent = result.error || 'Ocurrió un error al enviar el formulario';
+                    errorMessage.style.display = 'flex';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            } catch (error) {
+                errorText.textContent = 'Error de conexión. Por favor intenta de nuevo.';
+                errorMessage.style.display = 'flex';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitText.style.display = 'inline';
+                submitLoading.style.display = 'none';
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('participantForm').reset();
+            document.getElementById('participantForm').style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+
+</html>
