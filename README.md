@@ -3,6 +3,7 @@
 **Estado del Proyecto:** Fase Cero - Prototipo Funcional Activo (Bogotá, Colombia)  
 **Última actualización:** Diciembre 2025
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 ---
 
 ## 🌟 ¿Qué es esto?
