@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function loadDashboardData() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('mc_token');
     if (!token) {
         window.location.href = 'index.html';
         return;
@@ -243,7 +243,7 @@ function renderTable(tableId, data, columns) {
 }
 
 function handleLogout() {
-    localStorage.removeItem('token');
+    localStorage.removeItem('mc_token');
     window.location.href = 'index.html';
 }
 
