@@ -23,12 +23,21 @@
     --color-maxo: #FFD700;
     --color-maxo-dark: #DAA520;
 
-    /* Neutrals */
+    /* Light Theme (default) */
     --color-bg: #F7F9FB;
     --color-surface: #FFFFFF;
+    --color-surface-elevated: #FFFFFF;
     --color-text: #0B1320;
     --color-text-secondary: #6B7280;
+    --color-text-muted: #9CA3AF;
     --color-border: #E3E8EE;
+    --color-border-light: #F1F5F9;
+
+    /* Shadows - Light Theme */
+    --shadow-sm: 0 1px 3px rgba(11, 19, 32, 0.08);
+    --shadow-md: 0 4px 6px rgba(11, 19, 32, 0.1);
+    --shadow-lg: 0 10px 15px rgba(11, 19, 32, 0.12);
+    --shadow-glow: 0 0 20px rgba(255, 215, 0, 0.3);
 
     /* Spacing */
     --space-xs: 4px;
@@ -47,11 +56,6 @@
     --font-size-2xl: 32px;
     --font-size-3xl: 48px;
 
-    /* Shadows */
-    --shadow-sm: 0 1px 3px rgba(11, 19, 32, 0.08);
-    --shadow-md: 0 4px 6px rgba(11, 19, 32, 0.1);
-    --shadow-lg: 0 10px 15px rgba(11, 19, 32, 0.12);
-
     /* Border Radius */
     --radius-sm: 6px;
     --radius-md: 8px;
@@ -62,6 +66,29 @@
     --transition-fast: 150ms ease;
     --transition-base: 250ms ease;
     --transition-slow: 350ms ease;
+    --transition-theme: 400ms ease;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --color-bg: #0f172a;
+    --color-surface: #1e293b;
+    --color-surface-elevated: #334155;
+    --color-text: #f8fafc;
+    --color-text-secondary: #94a3b8;
+    --color-text-muted: #64748b;
+    --color-border: #334155;
+    --color-border-light: #1e293b;
+
+    /* Shadows - Dark Theme (subtle glows) */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 30px rgba(255, 215, 0, 0.4);
+
+    /* Adjust accent colors for dark mode */
+    --color-maxo: #FBBF24;
+    --color-maxo-dark: #F59E0B;
 }
 
 /* Base Styles */
@@ -448,18 +475,174 @@ body {
     animation: fadeIn var(--transition-base) ease-out;
 }
 
-/* Responsive */
+/* Theme Toggle Button */
+.theme-toggle {
+    position: fixed;
+    top: var(--space-md);
+    right: var(--space-md);
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-base);
+    z-index: 1000;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-lg);
+}
+
+.theme-toggle:focus-visible {
+    outline: 3px solid var(--color-maxo);
+    outline-offset: 2px;
+}
+
+.theme-toggle svg {
+    width: 24px;
+    height: 24px;
+    transition: transform var(--transition-base);
+}
+
+.theme-toggle:hover svg {
+    transform: rotate(15deg);
+}
+
+.theme-toggle .icon-sun,
+.theme-toggle .icon-moon {
+    position: absolute;
+    transition: opacity var(--transition-base), transform var(--transition-base);
+}
+
+[data-theme="light"] .theme-toggle .icon-moon,
+:root:not([data-theme]) .theme-toggle .icon-moon {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0);
+}
+
+[data-theme="dark"] .theme-toggle .icon-sun {
+    opacity: 0;
+    transform: rotate(90deg) scale(0);
+}
+
+/* Theme transition for smooth switching */
+body,
+.vhv-card,
+.vhv-hero,
+.vhv-input,
+.vhv-btn,
+.vhv-tab {
+    transition: background-color var(--transition-theme),
+        color var(--transition-theme),
+        border-color var(--transition-theme),
+        box-shadow var(--transition-theme);
+}
+
+/* Responsive - Large Tablets */
+@media (max-width: 1024px) {
+    .vhv-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vhv-container {
+        padding: var(--space-md);
+    }
+}
+
+/* Responsive - Tablets */
 @media (max-width: 768px) {
     .vhv-hero-title {
         font-size: var(--font-size-2xl);
     }
 
+    .vhv-hero-subtitle {
+        font-size: var(--font-size-base);
+    }
+
+    .vhv-formula {
+        font-size: var(--font-size-lg);
+        padding: var(--space-sm);
+    }
+
     .vhv-result-breakdown {
         grid-template-columns: 1fr;
+        gap: var(--space-sm);
     }
 
     .vhv-comparison {
         grid-template-columns: 1fr;
+    }
+
+    .vhv-tabs {
+        gap: var(--space-xs);
+        padding-bottom: var(--space-xs);
+    }
+
+    .vhv-tab {
+        padding: var(--space-sm) var(--space-md);
+        font-size: var(--font-size-sm);
+    }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 480px) {
+    :root {
+        --font-size-3xl: 32px;
+        --font-size-2xl: 24px;
+        --font-size-xl: 20px;
+    }
+
+    .vhv-container {
+        padding: var(--space-sm);
+    }
+
+    .vhv-hero {
+        padding: var(--space-lg) var(--space-md);
+        margin-bottom: var(--space-md);
+        border-radius: var(--radius-md);
+    }
+
+    .vhv-card {
+        padding: var(--space-md);
+        border-radius: var(--radius-md);
+    }
+
+    .vhv-result {
+        padding: var(--space-md);
+    }
+
+    .vhv-result-value {
+        font-size: var(--font-size-2xl);
+    }
+
+    /* Ensure touch targets are minimum 44px */
+    .vhv-btn,
+    .vhv-tab,
+    .vhv-input {
+        min-height: 44px;
+    }
+
+    .theme-toggle {
+        top: var(--space-sm);
+        right: var(--space-sm);
+        width: 44px;
+        height: 44px;
+    }
+
+    /* Stack action buttons on mobile */
+    .vhv-form-group+div[style*="display: flex"] {
+        flex-direction: column;
+    }
+
+    .vhv-form-group+div[style*="display: flex"] .vhv-btn {
+        width: 100%;
     }
 }
 
@@ -476,8 +659,52 @@ body {
     }
 }
 
-.vhv-fade-in {
-    animation: fadeIn var(--transition-base) ease-out;
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes glow {
+
+    0%,
+    100% {
+        box-shadow: var(--shadow-md);
+    }
+
+    50% {
+        box-shadow: var(--shadow-glow);
+    }
+}
+
+@keyframes countUp {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes pulse {
@@ -492,6 +719,107 @@ body {
     }
 }
 
+.vhv-fade-in {
+    animation: fadeIn var(--transition-base) ease-out;
+}
+
+.vhv-slide-up {
+    animation: slideUp var(--transition-slow) ease-out;
+}
+
+.vhv-scale-in {
+    animation: scaleIn var(--transition-base) ease-out;
+}
+
+.vhv-glow {
+    animation: glow 2s ease-in-out infinite;
+}
+
 .vhv-pulse {
     animation: pulse 2s ease-in-out infinite;
+}
+
+/* Result animation when showing */
+.vhv-result.animate {
+    animation: scaleIn var(--transition-slow) ease-out, glow 2s ease-in-out 0.5s;
+}
+
+.vhv-result-value.animate {
+    animation: countUp var(--transition-slow) ease-out;
+}
+
+/* Accessibility - Focus States */
+.vhv-input:focus-visible,
+.vhv-btn:focus-visible,
+.vhv-tab:focus-visible {
+    outline: 3px solid var(--color-maxo);
+    outline-offset: 2px;
+}
+
+/* High contrast focus for dark mode */
+[data-theme="dark"] .vhv-input:focus-visible,
+[data-theme="dark"] .vhv-btn:focus-visible,
+[data-theme="dark"] .vhv-tab:focus-visible {
+    outline-color: var(--color-maxo);
+}
+
+/* Skip link for screen readers */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-maxo);
+    color: var(--color-text);
+    border-radius: var(--radius-sm);
+    z-index: 10000;
+    transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+    top: var(--space-md);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Screen reader only text */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Print styles */
+@media print {
+
+    .theme-toggle,
+    .vhv-tabs,
+    .vhv-btn {
+        display: none !important;
+    }
+
+    .vhv-tab-content {
+        display: block !important;
+    }
+
+    body {
+        background: white;
+        color: black;
+    }
 }

@@ -4,33 +4,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Calculadora del Vector de Huella Vital (VHV) - Maxocracia. Calcula el verdadero costo existencial de productos y servicios.">
+  <meta name="color-scheme" content="light dark">
   <title>Calculadora VHV - Maxocracia</title>
   <link rel="stylesheet" href="/static/css/vhv.css">
 </head>
 
 <body>
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+  <!-- Theme Toggle Button -->
+  <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema" title="Cambiar entre modo claro y oscuro">
+    <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+    <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  </button>
+
   <!-- Hero Section -->
-  <div class="vhv-hero">
+  <header class="vhv-hero">
     <h1 class="vhv-hero-title">Calculadora VHV</h1>
     <p class="vhv-hero-subtitle">
       Vector de Huella Vital: La verdadera contabilidad del costo existencial
     </p>
-    <div class="vhv-formula">
+    <div class="vhv-formula"
+      aria-label="Fórmula: Precio en Maxos igual a alfa por T más beta por V elevado a gamma más delta por R">
       Precio_Maxos = α·T + β·V<sup>γ</sup> + δ·R
     </div>
-  </div>
+  </header>
 
-  <div class="vhv-container">
+  <main id="main-content" class="vhv-container">
     <!-- Navigation Tabs -->
-    <div class="vhv-tabs">
-      <button class="vhv-tab active" data-tab="calculator">Calculadora</button>
-      <button class="vhv-tab" data-tab="comparison">Comparar Productos</button>
-      <button class="vhv-tab" data-tab="case-studies">Casos de Estudio</button>
-      <button class="vhv-tab" data-tab="parameters">Parámetros</button>
-    </div>
+    <nav class="vhv-tabs" role="tablist" aria-label="Secciones de la calculadora">
+      <button class="vhv-tab active" data-tab="calculator" role="tab" aria-selected="true"
+        aria-controls="calculator-tab" id="tab-calculator">Calculadora</button>
+      <button class="vhv-tab" data-tab="comparison" role="tab" aria-selected="false" aria-controls="comparison-tab"
+        id="tab-comparison">Comparar Productos</button>
+      <button class="vhv-tab" data-tab="case-studies" role="tab" aria-selected="false" aria-controls="case-studies-tab"
+        id="tab-case-studies">Casos de Estudio</button>
+      <button class="vhv-tab" data-tab="parameters" role="tab" aria-selected="false" aria-controls="parameters-tab"
+        id="tab-parameters">Parámetros</button>
+    </nav>
 
     <!-- Calculator Tab -->
-    <div class="vhv-tab-content active" id="calculator-tab">
+    <div class="vhv-tab-content active" id="calculator-tab" role="tabpanel" aria-labelledby="tab-calculator">
       <div class="vhv-grid">
         <!-- Input Form -->
         <div class="vhv-card">
@@ -262,7 +293,7 @@
     </div>
 
     <!-- Comparison Tab -->
-    <div class="vhv-tab-content" id="comparison-tab">
+    <div class="vhv-tab-content" id="comparison-tab" role="tabpanel" aria-labelledby="tab-comparison">
       <div class="vhv-card">
         <div class="vhv-card-header">
           <h2 class="vhv-card-title">Comparar Productos</h2>
@@ -275,7 +306,7 @@
     </div>
 
     <!-- Case Studies Tab -->
-    <div class="vhv-tab-content" id="case-studies-tab">
+    <div class="vhv-tab-content" id="case-studies-tab" role="tabpanel" aria-labelledby="tab-case-studies">
       <div class="vhv-card">
         <div class="vhv-card-header">
           <h2 class="vhv-card-title">Casos de Estudio</h2>
@@ -288,7 +319,7 @@
     </div>
 
     <!-- Parameters Tab -->
-    <div class="vhv-tab-content" id="parameters-tab">
+    <div class="vhv-tab-content" id="parameters-tab" role="tabpanel" aria-labelledby="tab-parameters">
       <div class="vhv-card">
         <div class="vhv-card-header">
           <h2 class="vhv-card-title">Parámetros de Valoración</h2>
@@ -299,7 +330,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <!-- Back to Home -->
   <div style="text-align: center; padding: var(--space-xl);">

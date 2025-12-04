@@ -1,7 +1,74 @@
 // VHV Calculator JavaScript
-// Handles form submission, API calls, and visualization
+// Handles form submission, API calls, visualization, and theming
 
+// ============================================
+// Theme Manager - Dark Mode Support
+// ============================================
+const ThemeManager = {
+  STORAGE_KEY: 'vhv-theme',
+
+  init() {
+    // Check for saved theme or system preference
+    const savedTheme = localStorage.getItem(this.STORAGE_KEY);
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+    this.apply(theme);
+
+    // Listen for system preference changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (!localStorage.getItem(this.STORAGE_KEY)) {
+        this.apply(e.matches ? 'dark' : 'light');
+      }
+    });
+
+    // Set up toggle button
+    const toggleBtn = document.getElementById('theme-toggle');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => this.toggle());
+    }
+  },
+
+  toggle() {
+    const currentTheme = document.documentElement.dataset.theme || 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    this.apply(newTheme);
+    localStorage.setItem(this.STORAGE_KEY, newTheme);
+
+    // Announce theme change for screen readers
+    this.announceThemeChange(newTheme);
+  },
+
+  apply(theme) {
+    document.documentElement.dataset.theme = theme;
+
+    // Update toggle button aria-label
+    const toggleBtn = document.getElementById('theme-toggle');
+    if (toggleBtn) {
+      toggleBtn.setAttribute('aria-label',
+        theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'
+      );
+    }
+  },
+
+  announceThemeChange(theme) {
+    // Create a live region for screen reader announcement
+    let announcer = document.getElementById('theme-announcer');
+    if (!announcer) {
+      announcer = document.createElement('div');
+      announcer.id = 'theme-announcer';
+      announcer.setAttribute('aria-live', 'polite');
+      announcer.setAttribute('aria-atomic', 'true');
+      announcer.className = 'sr-only';
+      document.body.appendChild(announcer);
+    }
+    announcer.textContent = theme === 'dark' ? 'Modo oscuro activado' : 'Modo claro activado';
+  }
+};
+
+// ============================================
 // State
+// ============================================
 let currentParameters = null;
 let savedProducts = [];
 let caseStudies = [];
@@ -10,8 +77,11 @@ let vhvChart = null;
 // API Base URL
 const API_BASE = '';
 
+// ============================================
 // Initialize on page load
+// ============================================
 document.addEventListener('DOMContentLoaded', () => {
+  ThemeManager.init();
   initializeTabs();
   initializeForm();
   loadParameters();
@@ -19,7 +89,9 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSavedProducts();
 });
 
-// Tab Navigation
+// ============================================
+// Tab Navigation with ARIA Support
+// ============================================
 function initializeTabs() {
   const tabs = document.querySelectorAll('.vhv-tab');
   const tabContents = document.querySelectorAll('.vhv-tab-content');
@@ -28,17 +100,50 @@ function initializeTabs() {
     tab.addEventListener('click', () => {
       const targetTab = tab.dataset.tab;
 
-      // Update active tab
-      tabs.forEach(t => t.classList.remove('active'));
+      // Update ARIA states
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
       tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
 
-      // Update active content
+      // Update active content with animation
       tabContents.forEach(content => {
         content.classList.remove('active');
         if (content.id === `${targetTab}-tab`) {
           content.classList.add('active');
+          content.classList.add('vhv-fade-in');
+          // Remove animation class after it completes
+          setTimeout(() => content.classList.remove('vhv-fade-in'), 250);
         }
       });
+    });
+
+    // Keyboard navigation for tabs
+    tab.addEventListener('keydown', (e) => {
+      const tabsArray = Array.from(tabs);
+      const currentIndex = tabsArray.indexOf(tab);
+      let newIndex;
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        newIndex = (currentIndex + 1) % tabsArray.length;
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        newIndex = (currentIndex - 1 + tabsArray.length) % tabsArray.length;
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        newIndex = 0;
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        newIndex = tabsArray.length - 1;
+      }
+
+      if (newIndex !== undefined) {
+        tabsArray[newIndex].focus();
+        tabsArray[newIndex].click();
+      }
     });
   });
 }
@@ -105,7 +210,185 @@ async function handleFormSubmit(e) {
   }
 }
 
-// ... (displayResults and updateChart remain unchanged) ...
+// ============================================
+// Display Results with Animations
+// ============================================
+function displayResults(result) {
+  // Store for save functionality
+  window.lastCalculation = result;
+
+  // Get elements
+  const resultsContainer = document.getElementById('results-container');
+  const placeholder = document.getElementById('results-placeholder');
+  const resultBox = document.querySelector('.vhv-result');
+  const resultValue = document.querySelector('.vhv-result-value');
+
+  // Show results, hide placeholder
+  resultsContainer.style.display = 'block';
+  placeholder.style.display = 'none';
+
+  // Add animation classes
+  if (resultBox) {
+    resultBox.classList.remove('animate');
+    void resultBox.offsetWidth; // Trigger reflow
+    resultBox.classList.add('animate');
+  }
+
+  // Animate the price counter
+  const finalPrice = result.maxo_price;
+  animateCounter('maxo-price', 0, finalPrice, 800);
+
+  // Update VHV components
+  document.getElementById('vhv-t').textContent = result.vhv.T.toFixed(4);
+  document.getElementById('vhv-v').textContent = result.vhv.V.toFixed(4);
+  document.getElementById('vhv-r').textContent = result.vhv.R.toFixed(4);
+
+  // Update contributions with animation
+  const contributions = [
+    { id: 'contrib-t', value: result.breakdown.time_contribution },
+    { id: 'contrib-v', value: result.breakdown.life_contribution },
+    { id: 'contrib-r', value: result.breakdown.resource_contribution }
+  ];
+
+  contributions.forEach((contrib, index) => {
+    setTimeout(() => {
+      const el = document.getElementById(contrib.id);
+      el.textContent = `${contrib.value.toFixed(2)} Ⓜ`;
+      el.classList.add('vhv-scale-in');
+      setTimeout(() => el.classList.remove('vhv-scale-in'), 250);
+    }, index * 100);
+  });
+
+  // Update chart
+  updateChart(result);
+
+  // Announce for screen readers
+  announceResult(result.maxo_price);
+}
+
+// Animated counter effect
+function animateCounter(elementId, start, end, duration) {
+  const element = document.getElementById(elementId);
+  const startTime = performance.now();
+  const diff = end - start;
+
+  function update(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // Easing function (ease-out cubic)
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = start + diff * eased;
+
+    element.textContent = current.toFixed(2);
+
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    }
+  }
+
+  requestAnimationFrame(update);
+}
+
+// Announce result for screen readers
+function announceResult(price) {
+  let announcer = document.getElementById('result-announcer');
+  if (!announcer) {
+    announcer = document.createElement('div');
+    announcer.id = 'result-announcer';
+    announcer.setAttribute('aria-live', 'assertive');
+    announcer.setAttribute('aria-atomic', 'true');
+    announcer.className = 'sr-only';
+    document.body.appendChild(announcer);
+  }
+  announcer.textContent = `Cálculo completado. Precio en Maxos: ${price.toFixed(2)}`;
+}
+
+// ============================================
+// Chart Update
+// ============================================
+function updateChart(result) {
+  const ctx = document.getElementById('vhv-chart');
+  if (!ctx) return;
+
+  const chartData = {
+    labels: ['Tiempo (T)', 'Vida (V)', 'Recursos (R)'],
+    datasets: [{
+      label: 'Contribución al Precio (Maxos)',
+      data: [
+        result.breakdown.time_contribution,
+        result.breakdown.life_contribution,
+        result.breakdown.resource_contribution
+      ],
+      backgroundColor: [
+        'rgba(255, 107, 107, 0.8)',  // Time - coral
+        'rgba(46, 204, 113, 0.8)',   // Life - green
+        'rgba(139, 69, 19, 0.8)'     // Resources - brown
+      ],
+      borderColor: [
+        'rgba(255, 107, 107, 1)',
+        'rgba(46, 204, 113, 1)',
+        'rgba(139, 69, 19, 1)'
+      ],
+      borderWidth: 2,
+      borderRadius: 8
+    }]
+  };
+
+  // Destroy existing chart if it exists
+  if (vhvChart) {
+    vhvChart.destroy();
+  }
+
+  // Create new chart with animation
+  vhvChart = new Chart(ctx, {
+    type: 'bar',
+    data: chartData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 800,
+        easing: 'easeOutQuart'
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          titleFont: { size: 14 },
+          bodyFont: { size: 13 },
+          padding: 12,
+          cornerRadius: 8,
+          callbacks: {
+            label: function (context) {
+              return `${context.parsed.y.toFixed(2)} Maxos`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(0, 0, 0, 0.05)'
+          },
+          ticks: {
+            callback: function (value) {
+              return value + ' Ⓜ';
+            }
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          }
+        }
+      }
+    }
+  });
+}
 
 // Save Product
 async function saveProduct() {
