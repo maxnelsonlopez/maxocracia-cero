@@ -8,8 +8,9 @@ Tests for:
 """
 
 import json
-import pytest
 from datetime import datetime
+
+import pytest
 
 
 class TestFormsManager:
