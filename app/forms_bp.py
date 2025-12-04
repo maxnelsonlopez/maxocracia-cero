@@ -291,8 +291,8 @@ def get_followups(current_user):
             if followup.get(field):
                 try:
                     followup[field] = json.loads(followup[field])
-                except:
-                    pass
+                except Exception as e:
+    print(f"An unexpected error occurred: {e}")
         followups.append(followup)
 
     return (
@@ -317,8 +317,8 @@ def get_participant_followups(current_user, participant_id):
 
     cursor.execute(
         """
-        SELECT * FROM follow_ups 
-        WHERE participant_id = ? 
+        SELECT * FROM follow_ups
+        WHERE participant_id = ?
         ORDER BY follow_up_date DESC
     """,
         (participant_id,),
@@ -334,8 +334,8 @@ def get_participant_followups(current_user, participant_id):
             if followup.get(field):
                 try:
                     followup[field] = json.loads(followup[field])
-                except:
-                    pass
+                except Exception as e:
+    print(f"An unexpected error occurred: {e}")
         followups.append(followup)
 
     return (

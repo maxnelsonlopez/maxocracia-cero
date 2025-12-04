@@ -31,8 +31,8 @@ def migrate_interchange_table(db_path):
         if "coordination_method" not in columns:
             cursor.execute(
                 """
-                ALTER TABLE interchange 
-                ADD COLUMN coordination_method TEXT 
+                ALTER TABLE interchange
+                ADD COLUMN coordination_method TEXT
                 CHECK(coordination_method IN ('max_direct', 'participants_alone', 'intermediary', 'other'))
             """
             )
@@ -42,7 +42,7 @@ def migrate_interchange_table(db_path):
         if "requires_followup" not in columns:
             cursor.execute(
                 """
-                ALTER TABLE interchange 
+                ALTER TABLE interchange
                 ADD COLUMN requires_followup INTEGER DEFAULT 0
             """
             )
@@ -52,7 +52,7 @@ def migrate_interchange_table(db_path):
         if "followup_scheduled_date" not in columns:
             cursor.execute(
                 """
-                ALTER TABLE interchange 
+                ALTER TABLE interchange
                 ADD COLUMN followup_scheduled_date TEXT
             """
             )

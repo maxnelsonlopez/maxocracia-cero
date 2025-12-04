@@ -9,7 +9,6 @@ Handles validation, storage, and analysis for:
 
 import json
 import sqlite3
-from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
 
@@ -357,8 +356,8 @@ class FormsManager:
         # Urgency distribution
         cursor.execute(
             """
-            SELECT urgency, COUNT(*) 
-            FROM interchange 
+            SELECT urgency, COUNT(*)
+            FROM interchange
             GROUP BY urgency
         """
         )
@@ -367,8 +366,8 @@ class FormsManager:
         # Resolution rate (average impact_resolution_score)
         cursor.execute(
             """
-            SELECT AVG(impact_resolution_score) 
-            FROM interchange 
+            SELECT AVG(impact_resolution_score)
+            FROM interchange
             WHERE impact_resolution_score IS NOT NULL
         """
         )
@@ -378,8 +377,8 @@ class FormsManager:
         # Follow-up priority distribution
         cursor.execute(
             """
-            SELECT follow_up_priority, COUNT(*) 
-            FROM follow_ups 
+            SELECT follow_up_priority, COUNT(*)
+            FROM follow_ups
             GROUP BY follow_up_priority
         """
         )
@@ -388,8 +387,8 @@ class FormsManager:
         # Active alerts (high priority follow-ups)
         cursor.execute(
             """
-            SELECT COUNT(*) 
-            FROM follow_ups 
+            SELECT COUNT(*)
+            FROM follow_ups
             WHERE follow_up_priority = 'high'
         """
         )
@@ -398,9 +397,9 @@ class FormsManager:
         # Network health (average need_level from recent follow-ups)
         cursor.execute(
             """
-            SELECT AVG(need_level) 
-            FROM follow_ups 
-            WHERE need_level IS NOT NULL 
+            SELECT AVG(need_level)
+            FROM follow_ups
+            WHERE need_level IS NOT NULL
             AND follow_up_date >= date('now', '-30 days')
         """
         )
@@ -415,7 +414,7 @@ class FormsManager:
 
         cursor.execute(
             """
-            SELECT f.*, p.name, p.email 
+            SELECT f.*, p.name, p.email
             FROM follow_ups f
             JOIN participants p ON f.participant_id = p.id
             WHERE f.follow_up_priority = 'high'
@@ -476,11 +475,11 @@ class FormsManager:
         # Hub nodes (both give and receive a lot)
         cursor.execute(
             """
-            SELECT 
+            SELECT
                 COALESCE(g.giver_id, r.receiver_id) as user_id,
                 COALESCE(g.give_count, 0) as gives,
                 COALESCE(r.receive_count, 0) as receives
-            FROM 
+            FROM
                 (SELECT giver_id, COUNT(*) as give_count FROM interchange GROUP BY giver_id) g
             FULL OUTER JOIN
                 (SELECT receiver_id, COUNT(*) as receive_count FROM interchange GROUP BY receiver_id) r

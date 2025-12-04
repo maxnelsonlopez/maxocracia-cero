@@ -8,7 +8,6 @@ Tests for:
 """
 
 import json
-from datetime import datetime
 
 import pytest
 
@@ -259,7 +258,7 @@ class TestDatabaseSchema:
             # Check table exists
             cursor.execute(
                 """
-                SELECT name FROM sqlite_master 
+                SELECT name FROM sqlite_master
                 WHERE type='table' AND name='participants'
             """
             )
@@ -294,7 +293,7 @@ class TestDatabaseSchema:
             # Check table exists
             cursor.execute(
                 """
-                SELECT name FROM sqlite_master 
+                SELECT name FROM sqlite_master
                 WHERE type='table' AND name='follow_ups'
             """
             )
