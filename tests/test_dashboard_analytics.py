@@ -4,14 +4,6 @@ Tests for Dashboard Analytics Endpoints.
 Tests the new temporal trends, category breakdown, and resolution metrics endpoints.
 """
 
-import json
-
-import pytest
-
-from app import create_app
-from app.utils import get_db
-
-
 class TestDashboardAnalytics:
     """Tests for enhanced dashboard analytics endpoints."""
 
