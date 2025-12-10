@@ -4,6 +4,7 @@ Tests for Dashboard Analytics Endpoints.
 Tests the new temporal trends, category breakdown, and resolution metrics endpoints.
 """
 
+
 class TestDashboardAnalytics:
     """Tests for enhanced dashboard analytics endpoints."""
 

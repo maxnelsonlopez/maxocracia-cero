@@ -23,26 +23,29 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "..", "comun.db")
 
 def migrate():
     """Add missing forms tables to database."""
-    
+
     if not os.path.exists(DB_PATH):
         print(f"❌ Database not found at {DB_PATH}")
         print("   Run 'python run.py' first to create the database.")
         return False
-    
+
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    
+
     # Check which tables already exist
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
     existing_tables = {row[0] for row in cursor.fetchall()}
-    
+
     print(f"📊 Existing tables: {existing_tables}")
-    
+
     tables_to_create = []
-    
+
     # Participants table (Formulario CERO)
     if "participants" not in existing_tables:
-        tables_to_create.append(("participants", """
+        tables_to_create.append(
+            (
+                "participants",
+                """
             CREATE TABLE IF NOT EXISTS participants (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 
@@ -74,11 +77,16 @@ def migrate():
                 updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
                 status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'paused'))
             )
-        """))
-    
+        """,
+            )
+        )
+
     # Follow-ups table (Formulario B)
     if "follow_ups" not in existing_tables:
-        tables_to_create.append(("follow_ups", """
+        tables_to_create.append(
+            (
+                "follow_ups",
+                """
             CREATE TABLE IF NOT EXISTS follow_ups (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 
@@ -161,41 +169,61 @@ def migrate():
                 FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE CASCADE,
                 FOREIGN KEY (related_interchange_id) REFERENCES interchange(id) ON DELETE SET NULL
             )
-        """))
-    
+        """,
+            )
+        )
+
     if not tables_to_create:
         print("✅ All forms tables already exist!")
         conn.close()
         return True
-    
+
     # Create missing tables
     for table_name, create_sql in tables_to_create:
         print(f"📝 Creating table: {table_name}")
         cursor.execute(create_sql)
-    
+
     # Create indexes
     indexes = [
-        ("idx_participants_email", "CREATE INDEX IF NOT EXISTS idx_participants_email ON participants(email)"),
-        ("idx_participants_city", "CREATE INDEX IF NOT EXISTS idx_participants_city ON participants(city)"),
-        ("idx_participants_status", "CREATE INDEX IF NOT EXISTS idx_participants_status ON participants(status)"),
-        ("idx_follow_ups_participant", "CREATE INDEX IF NOT EXISTS idx_follow_ups_participant ON follow_ups(participant_id)"),
-        ("idx_follow_ups_priority", "CREATE INDEX IF NOT EXISTS idx_follow_ups_priority ON follow_ups(follow_up_priority)"),
-        ("idx_follow_ups_date", "CREATE INDEX IF NOT EXISTS idx_follow_ups_date ON follow_ups(follow_up_date)"),
+        (
+            "idx_participants_email",
+            "CREATE INDEX IF NOT EXISTS idx_participants_email ON participants(email)",
+        ),
+        (
+            "idx_participants_city",
+            "CREATE INDEX IF NOT EXISTS idx_participants_city ON participants(city)",
+        ),
+        (
+            "idx_participants_status",
+            "CREATE INDEX IF NOT EXISTS idx_participants_status ON participants(status)",
+        ),
+        (
+            "idx_follow_ups_participant",
+            "CREATE INDEX IF NOT EXISTS idx_follow_ups_participant ON follow_ups(participant_id)",
+        ),
+        (
+            "idx_follow_ups_priority",
+            "CREATE INDEX IF NOT EXISTS idx_follow_ups_priority ON follow_ups(follow_up_priority)",
+        ),
+        (
+            "idx_follow_ups_date",
+            "CREATE INDEX IF NOT EXISTS idx_follow_ups_date ON follow_ups(follow_up_date)",
+        ),
     ]
-    
+
     for idx_name, idx_sql in indexes:
         try:
             cursor.execute(idx_sql)
             print(f"   ✓ Index: {idx_name}")
         except sqlite3.OperationalError:
             pass  # Index might already exist
-    
+
     conn.commit()
     conn.close()
-    
+
     print(f"\n✅ Migration complete! Created {len(tables_to_create)} table(s).")
     print("   You can now use the forms system.")
-    
+
     return True
 
 

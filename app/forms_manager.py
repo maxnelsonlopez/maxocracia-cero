@@ -46,11 +46,11 @@ class FormsManager:
     def _parse_json_fields(record: Dict, fields: List[str]) -> Dict:
         """
         Parse JSON fields in a database record.
-        
+
         Args:
             record: Dictionary containing database row data
             fields: List of field names to parse as JSON
-            
+
         Returns:
             The same record with specified fields parsed from JSON strings to Python objects
         """
@@ -64,7 +64,7 @@ class FormsManager:
         return record
 
     @staticmethod
-    def _row_to_dict(cursor, row) -> Dict:
+    def _row_to_dict(cursor, row) -> Optional[Dict]:
         """Convert a database row to a dictionary using cursor description."""
         if row is None:
             return None
