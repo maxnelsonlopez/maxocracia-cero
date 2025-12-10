@@ -1,4 +1,4 @@
-# Minimal Maxo logic utilities
+from typing import Tuple
 from .utils import get_db
 
 
@@ -21,8 +21,7 @@ def credit_user(user_id, amount, reason=None):
     db.commit()
 
 
-
-def get_vhv_parameters():
+def get_vhv_parameters() -> Tuple[float, float, float, float]:
     """
     Fetch the latest VHV valuation parameters from the Oracles (DB).
     Returns (alpha, beta, gamma, delta).
@@ -34,7 +33,12 @@ def get_vhv_parameters():
         )
         row = cur.fetchone()
         if row:
-            return row["alpha"], row["beta"], row["gamma"], row["delta"]
+            return (
+                float(row["alpha"]),
+                float(row["beta"]),
+                float(row["gamma"]),
+                float(row["delta"]),
+            )
         # Fallbacks based on theoretical axioms if DB is empty
         return 100.0, 2000.0, 1.0, 100.0  # Base values from schema
     except Exception:
@@ -42,7 +46,11 @@ def get_vhv_parameters():
 
 
 def calculate_maxo_price(
-    t_seconds: float, v_lives: float, r_resources: float = 0.0, frg: float = 1.0, cs: float = 1.0
+    t_seconds: float,
+    v_lives: float,
+    r_resources: float = 0.0,
+    frg: float = 1.0,
+    cs: float = 1.0,
 ) -> float:
     """
     Calculate the Maxo Price based on the VHV Vector and Valuation Axioms.
@@ -71,10 +79,10 @@ def calculate_maxo_price(
     # Paper says: V measures "Unidades de Vida Consumidas".
     v_component = 0.0
     if v_lives > 0:
-        v_component = v_lives ** gamma
+        v_component = v_lives**gamma
     else:
-        # Negative lives consumed (saving lives) could be negative impact, 
-        # but the formula typically measures COST. 
+        # Negative lives consumed (saving lives) could be negative impact,
+        # but the formula typically measures COST.
         # For simplicity, we keep V^gamma magnitude.
         v_component = -((-v_lives) ** gamma)
 
@@ -84,7 +92,7 @@ def calculate_maxo_price(
     # Final Polynomial Calculation
     price = (alpha * t_hours) + (beta * v_component) + (delta * r_component)
 
-    return max(0.0, round(price, 4))
+    return float(max(0.0, round(price, 4)))
 
 
 # Legacy wrapper for backward compatibility
@@ -99,6 +107,5 @@ def calculate_credit(uth_hours=0.0, impact_score=0, uvc_score=None, urf_units=No
     t_seconds = uth_hours * 3600.0
     v_lives = float(uvc_score or 0.0)
     r_resources = float(urf_units or 0.0)
-    
-    return calculate_maxo_price(t_seconds, v_lives, r_resources)
 
+    return calculate_maxo_price(t_seconds, v_lives, r_resources)
