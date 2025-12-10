@@ -7,6 +7,8 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
 ## 2025-12-10 — Corrección de Formularios, Seguridad y Refactorización Maxo
  
  ### Añadido
+ - **Consola de Administración**: Implementada interfaz robusta usando `Flask-Admin` y `SQLAlchemy` en `/admin`.
+ - **Gestión de Datos**: CRUD completo para Usuarios, Participantes, Intercambios, Seguimientos y Productos VHV.
  - **Refactorización Lógica de Valoración Maxo**: Implementación de la fórmula polinómica `Precio = α·T + β·V^γ + δ·R·(FRG × CS)` en `app/maxo.py`.
  - **Parámetros Dinámicos**: El sistema ahora lee `α`, `β`, `γ`, `δ` desde la tabla `vhv_parameters` de la base de datos.
  - **Nuevas Pruebas**: Suite `tests/test_maxo_valuation.py` para validar la penalización exponencial del sufrimiento (V) y multiplicadores de recursos (R).
@@ -16,6 +18,8 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
 - Solucionado bloqueo por Content Security Policy (CSP) en formularios operativos.
 - Refactorización de JavaScript: extraídos scripts en línea a archivos externos (`form-exchange.js`, `form-followup.js`) para cumplir con políticas de seguridad.
 - Corregido el flujo de envío de datos en `form-exchange.html` y `form-followup.html`.
+- **Seguridad Backend**: Implementada validación segura de JSON (`_safe_json_dump`) en `FormsManager` para prevenir errores de parsing.
+- **Base de Datos**: Corregida desincronización de esquema en tabla `interchange` (añadidas columnas `requires_followup`, `followup_scheduled_date`, `coordination_method`) que causaba errores 500.
 
 ## 2025-12-04 — Dashboard de Análisis y Mejoras UI
 

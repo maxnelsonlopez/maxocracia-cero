@@ -70,6 +70,16 @@ class FormsManager:
             return None
         return dict(zip([d[0] for d in cursor.description], row))
 
+    @staticmethod
+    def _safe_json_dump(data: Any, default: str = '[]') -> str:
+        """Safely dump data to JSON string."""
+        if data is None:
+            return default
+        try:
+            return json.dumps(data, ensure_ascii=False)
+        except (TypeError, ValueError):
+            return default
+
     # ==================== FORMULARIO CERO ====================
 
     def register_participant(self, data: Dict) -> Tuple[bool, str, Optional[int]]:
@@ -106,10 +116,10 @@ class FormsManager:
             return False, "Urgencia debe ser Alta, Media o Baja", None
 
         # Validate and serialize JSON fields
-        offer_categories = json.dumps(data.get("offer_categories", []))
-        offer_dimensions = json.dumps(data.get("offer_human_dimensions", []))
-        need_categories = json.dumps(data.get("need_categories", []))
-        need_dimensions = json.dumps(data.get("need_human_dimensions", []))
+        offer_categories = self._safe_json_dump(data.get("offer_categories", []))
+        offer_dimensions = self._safe_json_dump(data.get("offer_human_dimensions", []))
+        need_categories = self._safe_json_dump(data.get("need_categories", []))
+        need_dimensions = self._safe_json_dump(data.get("need_human_dimensions", []))
 
         try:
             cursor = self.conn.cursor()
@@ -313,9 +323,9 @@ class FormsManager:
                 return False, f"Campo requerido faltante: {field}", None
 
         # Serialize JSON fields
-        new_needs = json.dumps(data.get("new_needs_detected", []))
-        new_offers = json.dumps(data.get("new_offers_detected", []))
-        actions = json.dumps(data.get("actions_required", []))
+        new_needs = self._safe_json_dump(data.get("new_needs_detected", []))
+        new_offers = self._safe_json_dump(data.get("new_offers_detected", []))
+        actions = self._safe_json_dump(data.get("actions_required", []))
 
         try:
             cursor = self.conn.cursor()

@@ -1,4 +1,6 @@
-Flask==3.1.2
-Flask-Limiter==4.0.0
-redis==6.4.0
-PyJWT==2.10.1
+Flask
+Flask-Limiter
+redis
+PyJWT
+Flask-Admin
+Flask-SQLAlchemy

@@ -16,6 +16,17 @@ def create_app(db_path=None):
     # Inicializar rate limiter
     init_limiter(app)
 
+    # Inicializar SQLAlchemy y Admin
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + app.config["DATABASE"]
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    
+    from .extensions import db
+    db.init_app(app)
+    
+    from .admin import init_admin
+    init_admin(app)
+
+
     # register teardown
     app.teardown_appcontext(close_db)
 

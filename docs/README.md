@@ -127,5 +127,5 @@ docs/
 
 ---
 
-*Fecha de última organización: 2025-12-03*  
-*Mantenido por: Max Nelson López + Claude (Anthropic)*
+*Fecha de última organización: 2025-12-10*  
+*Mantenido por: Max Nelson López + Gemini (Google DeepMind)*

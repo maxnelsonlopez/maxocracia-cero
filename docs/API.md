@@ -31,6 +31,7 @@ La API de Maxocracia está construida con Flask y utiliza SQLite como base de da
 - **Autenticación**: JWT (JSON Web Tokens)
 - **Tasa de Límite**: Aplicada según el endpoint
 - **Formato de Respuesta**: JSON
+- **Interfaz Administrativa**: `/admin` (HTML)
 
 ### Códigos de Estado HTTP
 

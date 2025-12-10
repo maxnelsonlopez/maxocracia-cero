@@ -16,6 +16,7 @@ Este repositorio contiene la implementación funcional de **Maxocracia**, un nue
 - ✅ **Sistema TVI** (Tiempo Vital Indexado) implementado
 - ✅ **Red de Apoyo activa** en Bogotá con 11+ participantes
 - ✅ **Formularios operativos** para gestión de intercambios
+- ✅ **Consola de Administración** (/admin) para gestión de datos
 - ✅ **67 tests pasando** con CI/CD configurado
 
 ---
@@ -76,6 +77,7 @@ python run.py
 ### 4. Explorar
 
 - **API Playground**: http://127.0.0.1:5001/
+- **Consola Admin**: http://127.0.0.1:5001/admin/
 - **Calculadora VHV**: http://127.0.0.1:5001/static/vhv-calculator.html
 
 ---
