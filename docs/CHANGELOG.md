@@ -4,6 +4,37 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2025-12-10 — Corrección de Formularios y Seguridad
+
+### Corregido
+- Solucionado bloqueo por Content Security Policy (CSP) en formularios operativos.
+- Refactorización de JavaScript: extraídos scripts en línea a archivos externos (`form-exchange.js`, `form-followup.js`) para cumplir con políticas de seguridad.
+- Corregido el flujo de envío de datos en `form-exchange.html` y `form-followup.html`.
+
+## 2025-12-04 — Dashboard de Análisis y Mejoras UI
+
+### Añadido
+- **Dashboard de Análisis**: Nueva interfaz (`dashboard.html`) con visualizaciones interactivas usando Chart.js.
+- Nuevos endpoints de API para métricas: `/api/trends`, `/api/categories`, `/api/resolution`.
+- **Mejoras VHV**: Modo oscuro, animaciones y diseño responsive optimizado en la Calculadora VHV.
+
+### Mejorado
+- **API Frontend**: Centralización de llamadas API y gestión de tokens en `static/js/api.js`.
+- Refactorización de `app.js`, `dashboard.js` y `vhv-calculator.js` para usar la nueva arquitectura de API unificada.
+- Cobertura de tests: Solucionados fallos en `test_forms.py` y `test_security.py`.
+
+## 2025-12-02 — Implementación Core: VHV y TVI
+
+### Añadido
+- **TVI (Tiempo Vital Invertido)**:
+  - Implementación completa del modelo de datos y endpoints API (`/tvi`).
+  - Lógica de detección de superposición temporal (overlap detection).
+  - Cálculo de CCP (Coeficiente de Coherencia Personal).
+- **CI/CD**: Configuración y corrección de pipeline de integración continua (linting, tests).
+
+### Corregido
+- Estandarización de formato de código (`black`, `isort`) y corrección de errores de linter (`flake8`).
+
 ## 2025-10-22 — Correcciones en pruebas y validaciones
 
 ### Corregido

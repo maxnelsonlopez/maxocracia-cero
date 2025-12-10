@@ -2,7 +2,7 @@
 
 Este directorio contiene la documentación completa del proyecto Maxocracia: teoría, implementación, API, formularios y recursos multimedia.
 
-**Última actualización:** 2025-12-03
+**Última actualización:** 2025-12-10
 
 ---
 

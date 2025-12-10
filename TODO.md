@@ -1,6 +1,6 @@
 # Tareas Pendientes - Maxocracia-Cero
 
-**Última actualización:** 2025-12-03
+**Última actualización:** 2025-12-10
 
 ---
 
@@ -147,6 +147,11 @@
 ## ✅ Completadas Recientemente
 
 ### Diciembre 2025
+
+- [x] **Corrección de Formularios y CSP** (2025-12-10)
+  - Solución a bloqueo de scripts inline por Content Security Policy
+  - Extracción de lógica a archivos JS externos para `form-exchange` y `form-followup`
+  - Verificación de flujo de envío de datos
 
 - [x] **Refactorizar Frontend API** (2025-12-04)
   - Centralización de API calls en módulo `api.js`
