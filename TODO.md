@@ -77,8 +77,8 @@
   - Implementar caching para parámetros VHV
   - Impacto: Performance
 
-- [ ] **Refactorizar lógica de crédito de Maxo**
-  - Archivos: `app/services/maxo_service.py`
+- [x] **Refactorizar lógica de crédito de Maxo**
+  - Archivos: `app/maxo.py`
   - Alinear con fórmulas del paper
   - Documentar reglas de negocio
   - Impacto: Mantenibilidad
@@ -147,6 +147,12 @@
 ## ✅ Completadas Recientemente
 
 ### Diciembre 2025
+
+- [x] **Refactorización Lógica Maxo (Fórmula VHV Polinómica)** (2025-12-10)
+  - Implementación de fórmula rigurosa: `Precio = α·T + β·V^γ + δ·R·(FRG × CS)`
+  - Lectura dinámica de parámetros desde BD
+  - Nuevos tests de valoración exponencial
+  - Actualización de `app/maxo.py` y `docs/API.md`
 
 - [x] **Corrección de Formularios y CSP** (2025-12-10)
   - Solución a bloqueo de scripts inline por Content Security Policy

@@ -4,9 +4,15 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
-## 2025-12-10 — Corrección de Formularios y Seguridad
+## 2025-12-10 — Corrección de Formularios, Seguridad y Refactorización Maxo
+ 
+ ### Añadido
+ - **Refactorización Lógica de Valoración Maxo**: Implementación de la fórmula polinómica `Precio = α·T + β·V^γ + δ·R·(FRG × CS)` en `app/maxo.py`.
+ - **Parámetros Dinámicos**: El sistema ahora lee `α`, `β`, `γ`, `δ` desde la tabla `vhv_parameters` de la base de datos.
+ - **Nuevas Pruebas**: Suite `tests/test_maxo_valuation.py` para validar la penalización exponencial del sufrimiento (V) y multiplicadores de recursos (R).
+ - **Documentación**: Actualizada `docs/API.md` con la nueva fórmula de valoración.
 
-### Corregido
+ ### Corregido
 - Solucionado bloqueo por Content Security Policy (CSP) en formularios operativos.
 - Refactorización de JavaScript: extraídos scripts en línea a archivos externos (`form-exchange.js`, `form-followup.js`) para cumplir con políticas de seguridad.
 - Corregido el flujo de envío de datos en `form-exchange.html` y `form-followup.html`.

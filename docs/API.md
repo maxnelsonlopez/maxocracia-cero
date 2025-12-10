@@ -303,19 +303,23 @@ Content-Type: application/json
 }
 ```
 
-**Fórmula de Cálculo de Crédito:**
+**Fórmula de Valoración Maxo (Polinómica):**
 ```
-credit = (uth_hours * MAXO_WEIGHT_UTH) + 
-         (impact_resolution_score * MAXO_WEIGHT_IMPACT) + 
-         (uvc_score * MAXO_WEIGHT_UVC) + 
-         (urf_units * MAXO_WEIGHT_URF)
+Precio = α·T + β·V^γ + δ·R·(FRG × CS)
 ```
 
-**Valores por Defecto:**
-- `MAXO_WEIGHT_UTH = 1.0`
-- `MAXO_WEIGHT_IMPACT = 0.5`
-- `MAXO_WEIGHT_UVC = 0.0`
-- `MAXO_WEIGHT_URF = 0.0`
+Donde:
+- `T` (Tiempo): Horas de Tiempo Vital indexado.
+- `V` (Vida): Unidades de Vida Consumidas (UVC).
+- `R` (Recursos): Unidades de recursos finitos.
+- `α` (Alpha): Peso del tiempo (Default: 100.0).
+- `β` (Beta): Peso de la vida (Default: 2000.0).
+- `γ` (Gamma): Exponente de aversión al sufrimiento (Default: 1.0, debe ser ≥ 1).
+- `δ` (Delta): Peso de recursos (Default: 100.0).
+- `FRG`: Factor de Rareza Geológica.
+- `CS`: Criticidad Sistémica.
+
+**Nota:** Los parámetros se obtienen dinámicamente de la base de datos (Tabla `vhv_parameters`).
 
 **Errores:**
 - 400: Datos inválidos o faltantes
