@@ -13,6 +13,12 @@ Este directorio contiene la documentación completa del proyecto Maxocracia: teo
 - **[MAXOCRACIA_MANIFIESTO.md](MAXOCRACIA_MANIFIESTO.md)** — Manifiesto fundacional con los 8 Axiomas
 - **[FAQ_EXTENDIDO.md](FAQ_EXTENDIDO.md)** — Preguntas difíciles, respuestas honestas
 
+### Guías para Facilitadores y Usuarios
+- **[GUIA_FACILITADOR.md](GUIA_FACILITADOR.md)** — Cómo iniciar una Cohorte en tu ciudad (NUEVO)
+- **[tutoriales/README.md](tutoriales/README.md)** — Índice de tutoriales de usuario (NUEVO)
+- **[tutoriales/tutorial_calculadora_vhv.md](tutoriales/tutorial_calculadora_vhv.md)** — Tutorial VHV (NUEVO)
+- **[tutoriales/tutorial_tvi.md](tutoriales/tutorial_tvi.md)** — Tutorial TVI (NUEVO)
+
 ### Fundamentos Matemáticos
 - **[matematicas_maxocracia_compiladas.md](matematicas_maxocracia_compiladas.md)** — Todas las fórmulas y axiomas (982 líneas)
 - **[arquitectura_temporal_coherencia_vital.md](arquitectura_temporal_coherencia_vital.md)** — TVI, TTVI, CCP, Cascadas
@@ -42,6 +48,7 @@ Ubicación: `../formularios/`
 - **[formulario_CERO_inscripcion.md](../formularios/formulario_CERO_inscripcion.md)** — Registro inicial (17 preguntas)
 - **[formulario_A_registro_intercambio.md](../formularios/formulario_A_registro_intercambio.md)** — Intercambios completados (16 preguntas)
 - **[formulario_B_reporte_seguimiento.md](../formularios/formulario_B_reporte_seguimiento.md)** — Seguimiento de evolución (18 preguntas)
+- **[INSTRUCCIONES_GOOGLE_FORMS.md](../formularios/INSTRUCCIONES_GOOGLE_FORMS.md)** — Cómo crear los Google Forms (NUEVO)
 
 ---
 
