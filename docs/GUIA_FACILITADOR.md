@@ -106,15 +106,32 @@ Ver: **[INSTRUCCIONES_GOOGLE_FORMS.md](../formularios/INSTRUCCIONES_GOOGLE_FORMS
 
 ## Paso 3: Configurar Herramientas (Semana 2)
 
-### 3.1 Google Forms (3 formularios)
+### 3.1 Formularios Web Integrados (RECOMENDADO)
 
-Crea los formularios siguiendo las instrucciones en `formularios/INSTRUCCIONES_GOOGLE_FORMS.md`:
+El repositorio incluye formularios web listos para usar que se conectan directamente a la base de datos:
 
-1. **Formulario CERO** — Inscripción inicial
-2. **Formulario A** — Registro de cada intercambio
-3. **Formulario B** — Seguimiento mensual
+| Formulario | URL | Propósito |
+|------------|-----|-----------|
+| **Form CERO** | `/static/form-cero.html` | Inscripción de participantes |
+| **Form A** | `/static/form-exchange.html` | Registro de intercambios |
+| **Form B** | `/static/form-followup.html` | Seguimiento y evaluación |
 
-### 3.2 Google Sheets (Hoja de cálculo maestra)
+**Ventajas sobre Google Forms:**
+- ✅ Datos directos en la base de datos (no requiere exportar)
+- ✅ Matching automático de ofertas/necesidades
+- ✅ Dashboard de analytics integrado
+- ✅ No dependes de servicios externos
+
+**Para usarlos:**
+1. Inicia el servidor: `python run.py`
+2. Comparte el link: `http://tu-servidor:5001/static/form-cero.html`
+
+### 3.2 Alternativa: Google Forms
+
+Si prefieres Google Forms (p.ej. sin servidor propio), sigue las instrucciones en:
+- **[INSTRUCCIONES_GOOGLE_FORMS.md](../formularios/INSTRUCCIONES_GOOGLE_FORMS.md)**
+
+### 3.3 Google Sheets (Hoja de cálculo maestra)
 
 Crea una hoja con las siguientes pestañas:
 

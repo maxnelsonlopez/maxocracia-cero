@@ -281,18 +281,14 @@ def get_followups(current_user):
 
     cursor.execute(query, params)
 
+    # JSON fields to parse in follow-up records
+    json_fields = ["new_needs_detected", "new_offers_detected", "actions_required"]
+
     followups = []
     for row in cursor.fetchall():
         followup = dict(zip([d[0] for d in cursor.description], row))
-        # Parse JSON fields
-        import json
-
-        for field in ["new_needs_detected", "new_offers_detected", "actions_required"]:
-            if followup.get(field):
-                try:
-                    followup[field] = json.loads(followup[field])
-                except Exception as e:
-                    print(f"An unexpected error occurred: {e}")
+        # Use FormsManager helper to parse JSON fields
+        FormsManager._parse_json_fields(followup, json_fields)
         followups.append(followup)
 
     return (
@@ -324,18 +320,14 @@ def get_participant_followups(current_user, participant_id):
         (participant_id,),
     )
 
+    # JSON fields to parse in follow-up records
+    json_fields = ["new_needs_detected", "new_offers_detected", "actions_required"]
+
     followups = []
     for row in cursor.fetchall():
         followup = dict(zip([d[0] for d in cursor.description], row))
-        # Parse JSON fields
-        import json
-
-        for field in ["new_needs_detected", "new_offers_detected", "actions_required"]:
-            if followup.get(field):
-                try:
-                    followup[field] = json.loads(followup[field])
-                except Exception as e:
-                    print(f"An unexpected error occurred: {e}")
+        # Use FormsManager helper to parse JSON fields
+        FormsManager._parse_json_fields(followup, json_fields)
         followups.append(followup)
 
     return (

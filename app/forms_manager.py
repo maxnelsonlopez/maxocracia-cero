@@ -42,6 +42,34 @@ class FormsManager:
         """Initialize with database connection."""
         self.conn = db_connection
 
+    @staticmethod
+    def _parse_json_fields(record: Dict, fields: List[str]) -> Dict:
+        """
+        Parse JSON fields in a database record.
+        
+        Args:
+            record: Dictionary containing database row data
+            fields: List of field names to parse as JSON
+            
+        Returns:
+            The same record with specified fields parsed from JSON strings to Python objects
+        """
+        for field in fields:
+            if record.get(field):
+                try:
+                    record[field] = json.loads(record[field])
+                except (json.JSONDecodeError, TypeError) as e:
+                    # Log the error but don't crash - return raw value
+                    print(f"Warning: Failed to parse JSON field '{field}': {e}")
+        return record
+
+    @staticmethod
+    def _row_to_dict(cursor, row) -> Dict:
+        """Convert a database row to a dictionary using cursor description."""
+        if row is None:
+            return None
+        return dict(zip([d[0] for d in cursor.description], row))
+
     # ==================== FORMULARIO CERO ====================
 
     def register_participant(self, data: Dict) -> Tuple[bool, str, Optional[int]]:
@@ -473,19 +501,42 @@ class FormsManager:
         ]
 
         # Hub nodes (both give and receive a lot)
+        # Note: SQLite doesn't support FULL OUTER JOIN, so we simulate it with
+        # LEFT JOIN + UNION to get all users who participate in exchanges
         cursor.execute(
             """
-            SELECT
-                COALESCE(g.giver_id, r.receiver_id) as user_id,
-                COALESCE(g.give_count, 0) as gives,
-                COALESCE(r.receive_count, 0) as receives
-            FROM
-                (SELECT giver_id, COUNT(*) as give_count FROM interchange GROUP BY giver_id) g
-            FULL OUTER JOIN
-                (SELECT receiver_id, COUNT(*) as receive_count FROM interchange GROUP BY receiver_id) r
-            ON g.giver_id = r.receiver_id
-            WHERE COALESCE(g.give_count, 0) > 2 AND COALESCE(r.receive_count, 0) > 2
-            ORDER BY (COALESCE(g.give_count, 0) + COALESCE(r.receive_count, 0)) DESC
+            WITH givers AS (
+                SELECT giver_id as user_id, COUNT(*) as give_count
+                FROM interchange
+                WHERE giver_id IS NOT NULL
+                GROUP BY giver_id
+            ),
+            receivers AS (
+                SELECT receiver_id as user_id, COUNT(*) as receive_count
+                FROM interchange
+                WHERE receiver_id IS NOT NULL
+                GROUP BY receiver_id
+            ),
+            combined AS (
+                SELECT
+                    COALESCE(g.user_id, r.user_id) as user_id,
+                    COALESCE(g.give_count, 0) as gives,
+                    COALESCE(r.receive_count, 0) as receives
+                FROM givers g
+                LEFT JOIN receivers r ON g.user_id = r.user_id
+                UNION
+                SELECT
+                    r.user_id,
+                    COALESCE(g.give_count, 0) as gives,
+                    r.receive_count as receives
+                FROM receivers r
+                LEFT JOIN givers g ON r.user_id = g.user_id
+                WHERE g.user_id IS NULL
+            )
+            SELECT user_id, gives, receives
+            FROM combined
+            WHERE gives > 2 AND receives > 2
+            ORDER BY (gives + receives) DESC
         """
         )
         hubs = [
