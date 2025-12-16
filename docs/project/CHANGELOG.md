@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2025-12-16 — Reorganización de Documentación y Fixes
+
+ ### Añadido
+ - **Docs**: Reorganización completa de `docs/` en `api`, `architecture`, `theory`, `guides`, `project`, `legacy`.
+ - **Fix Web/Admin**: Solucionado error en `debug_admin.py` y `app/models.py` (Mypy type checking).
+ - **Tests**: Corregido test `test_ccp_calculation` en `tests/test_tvi.py`.
+
 ## 2025-12-10 — Corrección de Formularios, Seguridad y Refactorización Maxo
  
  ### Añadido

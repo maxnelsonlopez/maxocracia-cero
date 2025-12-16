@@ -198,9 +198,9 @@ Para asegurar la calidad del código, utilizamos varias herramientas de análisi
 
 ## Recursos Adicionales
 
-- [Documentación de la API](docs/API.md)
-- [Guía de Estilo de Código](docs/CODING_STANDARDS.md)
-- [Hoja de Ruta del Proyecto](docs/ROADMAP.md)
+- [Documentación de la API](docs/api/API.md)
+- [Guía de Estilo de Código](docs/guides/GUIA_DE_ESTILO.md)
+- [Hoja de Ruta del Proyecto](docs/architecture/DISENO_IMPLEMENTACION_FUTURA.md)
 
 ---
 

@@ -2,120 +2,63 @@
 
 Este directorio contiene la documentación completa del proyecto Maxocracia: teoría, implementación, API, formularios y recursos multimedia.
 
-**Última actualización:** 2025-12-10
+**Última actualización:** 2025-12-16
 
 ---
 
 ## 📚 Documentos Principales
 
-### Introducción y Visión
-- **[maxocracia_brochure.md](maxocracia_brochure.md)** — Introducción accesible al sistema (376 líneas)
-- **[MAXOCRACIA_MANIFIESTO.md](MAXOCRACIA_MANIFIESTO.md)** — Manifiesto fundacional con los 8 Axiomas
-- **[FAQ_EXTENDIDO.md](FAQ_EXTENDIDO.md)** — Preguntas difíciles, respuestas honestas
+### 🧠 Teoría y Fundamentos (`docs/theory/`)
+- **[brochure](theory/maxocracia_brochure.md)** — Introducción accesible al sistema.
+- **[Manifiesto Maxocracia](theory/MAXOCRACIA_MANIFIESTO.md)** — Axiomas y principios fundamentales.
+- **[Matemáticas Maxocracia](theory/matematicas_maxocracia_compiladas.md)** — Compendio de fórmulas y modelos.
+- **[Ontometría Vital](theory/tercer_paper_ontometria_vital_huevo.md)** — Tercer paper sobre la métrica de la vida.
+- **[Suelo de Dignidad Vital](theory/SDV-H_Suelo_Dignidad_Vital_Humanos.txt)** — Definición del mínimo vital garantizado.
 
-### Guías para Facilitadores y Usuarios
-- **[GUIA_FACILITADOR.md](GUIA_FACILITADOR.md)** — Cómo iniciar una Cohorte en tu ciudad (NUEVO)
-- **[tutoriales/README.md](tutoriales/README.md)** — Índice de tutoriales de usuario (NUEVO)
-- **[tutoriales/tutorial_calculadora_vhv.md](tutoriales/tutorial_calculadora_vhv.md)** — Tutorial VHV (NUEVO)
-- **[tutoriales/tutorial_tvi.md](tutoriales/tutorial_tvi.md)** — Tutorial TVI (NUEVO)
+### 🏗️ Arquitectura y Diseño (`docs/architecture/`)
+- **[Arquitectura Temporal](architecture/arquitectura_temporal_coherencia_vital.md)** — TVI, CCP y Coherencia Vital.
+- **[Oráculos Dinámicos (Humanos)](architecture/oraculos_dinamicos_humanos_arquitectura.md)** — Diseño de sistemas de validación humana.
+- **[Oráculos Dinámicos (Sintéticos)](architecture/oraculos_dinamicos_reino_sintetico_arquitectura.md)** — Diseño de sistemas de validación algorítmica.
+- **[Roadmap Futuro](architecture/DISENO_IMPLEMENTACION_FUTURA.md)** — Plan de implementación a largo plazo.
 
-### Fundamentos Matemáticos
-- **[matematicas_maxocracia_compiladas.md](matematicas_maxocracia_compiladas.md)** — Todas las fórmulas y axiomas (982 líneas)
-- **[arquitectura_temporal_coherencia_vital.md](arquitectura_temporal_coherencia_vital.md)** — TVI, TTVI, CCP, Cascadas
-- **[Paper Maxocracia ChatGPT Scholar AI.txt](Paper%20Maxocracia%20ChatGPT%20Scholar%20AI.txt)** — Documento fundacional v1.3
+### 🔌 API y Datos (`docs/api/`)
+- **[Documentación API](api/API.md)** — Especificación completa de los endpoints REST (incluye VHV y TVI).
+- **[Modelo de Datos](api/MODELO_DE_DATOS.md)** — Esquema detallado de la base de datos SQLite.
+- **[OpenAPI Spec](api/openapi.yaml)** — Especificación OpenAPI/Swagger.
 
-### Documentación Técnica
-- **[API.md](API.md)** — Documentación completa de la API (incluye VHV y TVI)
-- **[MODELO_DE_DATOS.md](MODELO_DE_DATOS.md)** — Esquema de base de datos
-- **[GUIA_DE_ESTILO.md](GUIA_DE_ESTILO.md)** — Convenciones de código
-- **[IMPLEMENTACION_FLASK_PLAN.md](IMPLEMENTACION_FLASK_PLAN.md)** — Plan de implementación del MVP
+### 📖 Guías y Manuales (`docs/guides/`)
+- **[Guía del Facilitador](guides/GUIA_FACILITADOR.md)** — Cómo iniciar una Cohorte Cero.
+- **[Guía de Estilo](guides/GUIA_DE_ESTILO.md)** — Convenciones de código y documentación.
+- **[Playbook Cohorte Cero](guides/playbook_cohorte_cero.txt)** — Guía operativa paso a paso.
+- **[Tutoriales](guides/tutoriales/README.md)** — Guías de uso para usuarios finales.
 
-### Diseño Futuro
-- **[diseno-tecnico-comun-go.md](diseno-tecnico-comun-go.md)** — Arquitectura de microservicios en Go (v2.0)
-- **[DISENO_IMPLEMENTACION_FUTURA.md](DISENO_IMPLEMENTACION_FUTURA.md)** — Roadmap de implementación
-- **[TAREAS_PENDIENTES_IMPLEMENTACION.md](TAREAS_PENDIENTES_IMPLEMENTACION.md)** — Tareas por fase
-
-### Revisiones y Auditorías
-- **[DOCUMENTATION_REVIEW.md](DOCUMENTATION_REVIEW.md)** — Resumen de revisión de documentación
-- **[AUDITORIA_2025-12-02.md](AUDITORIA_2025-12-02.md)** — Auditoría completa del proyecto
-
----
-
-## 📋 Formularios (Red de Apoyo)
-
-Ubicación: `../formularios/`
-
-- **[formulario_CERO_inscripcion.md](../formularios/formulario_CERO_inscripcion.md)** — Registro inicial (17 preguntas)
-- **[formulario_A_registro_intercambio.md](../formularios/formulario_A_registro_intercambio.md)** — Intercambios completados (16 preguntas)
-- **[formulario_B_reporte_seguimiento.md](../formularios/formulario_B_reporte_seguimiento.md)** — Seguimiento de evolución (18 preguntas)
-- **[INSTRUCCIONES_GOOGLE_FORMS.md](../formularios/INSTRUCCIONES_GOOGLE_FORMS.md)** — Cómo crear los Google Forms (NUEVO)
+### 🛠️ Gestión del Proyecto (`docs/project/`)
+- **[CHANGELOG](project/CHANGELOG.md)** — Historial de cambios y versiones.
+- **[Tareas Pendientes](project/TAREAS_PENDIENTES_IMPLEMENTACION.md)** — Backlog y próximas funcionalidades.
+- **[Auditoría](project/AUDITORIA_2025-12-02.md)** — Informe de revisión de código y docs.
+- **[FAQ Extendido](project/FAQ_EXTENDIDO.md)** — Preguntas frecuentes y respuestas profundas.
 
 ---
 
-## 🎥 Medios y Archivos Grandes
-
-Ubicación: `media/`
-
-### Videos
-- `Maxocracia__Diseñando_un_Juego_Social_Más_Justo.mp4`
-- `Maxocracia__El_plano_de_una_nueva_sociedad.mp4`
-
-### Imágenes
-- `NotebookLM Mind Map.png`
-- `logo maxo.png`
-
-### Hojas de Cálculo
-- `outline maxo.xlsx`
-
-### Manuales
-- `Manual _That's Good Enough for Everyone_.rtf`
-
----
-
-## 📄 Otros Documentos
-
-### Papers y Especificaciones
-- **[EVV_estandar_final_v1.txt](EVV_estandar_final_v1.txt)** — Estándar EVV-1:2025 (Sistema de Valoración Tridimensional)
-- **[SDV-H_Suelo_Dignidad_Vital_Humanos.txt](SDV-H_Suelo_Dignidad_Vital_Humanos.txt)** — Suelo de Dignidad Vital para Humanos
-- **[paper_formalizacion_matematica_maxo.txt](paper_formalizacion_matematica_maxo.txt)** — Formalización matemática del Maxo
-- **[oraculos_dinamicos_reino_sintetico_arquitectura.md](oraculos_dinamicos_reino_sintetico_arquitectura.md)** — Oráculos Dinámicos
-
-### Notas y Apuntes
-- `Apuntes Thats good enough for everyone.txt`
-- `COMUN.rtf`
-- `That's Good Enough for Everyone.rtf`
-
----
-
-## 🗂️ Organización
+## 🗂️ Estructura de Carpetas
 
 ```
 docs/
-├── README.md (este archivo)
-├── maxocracia_brochure.md (NUEVO)
-├── matematicas_maxocracia_compiladas.md (NUEVO)
-├── MAXOCRACIA_MANIFIESTO.md
-├── FAQ_EXTENDIDO.md
-├── API.md
-├── MODELO_DE_DATOS.md
-├── arquitectura_temporal_coherencia_vital.md
-├── Paper Maxocracia ChatGPT Scholar AI.txt
-├── TAREAS_PENDIENTES_IMPLEMENTACION.md
-├── DOCUMENTATION_REVIEW.md
-└── media/
-    ├── videos/
-    ├── images/
-    └── spreadsheets/
+├── api/             # Especificaciones de API y Modelos de Datos
+├── architecture/    # Documentos de arquitectura técnica y diseño
+├── guides/          # Guías operativas, manuales y estilo
+├── legacy/          # Archivos antiguos o de referencia histórica
+├── media/           # Imágenes, videos y recursos multimedia
+├── project/         # Gestión del proyecto (changelog, tareas, auditorías)
+└── theory/          # Papers, manifiestos y fundamentos teóricos
 ```
 
 ---
 
 ## 💡 Notas
 
-- **Videos grandes**: Considerar subir a YouTube/Drive para reducir tamaño del repo
-- **Front-matter YAML**: Puede añadirse a los .md para generadores estáticos
-- **Versionado**: Documentos teóricos usan versionado semántico (v1.0, v1.3, etc.)
-- **Licencia**: Creative Commons BY-SA 4.0 para documentos teóricos
+- **Formularios**: Las plantillas de formularios operativos se encuentran en `../formularios/`.
+- **Legacy**: La carpeta `legacy/` contiene documentos históricos (`.rtf`, `.txt` antiguos) que se conservan por referencia pero pueden estar desactualizados.
 
 ---
 
@@ -123,9 +66,7 @@ docs/
 
 - **Repositorio principal**: https://github.com/maxnelsonlopez/maxocracia-cero
 - **Contacto**: maxlopeztutor@gmail.com
-- **Ubicación**: Bogotá, Colombia
 
 ---
 
-*Fecha de última organización: 2025-12-10*  
 *Mantenido por: Max Nelson López + Gemini (Google DeepMind)*

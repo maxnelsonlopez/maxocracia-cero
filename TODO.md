@@ -137,7 +137,7 @@
 ### Escalabilidad
 
 - [ ] **Migración a arquitectura de microservicios**
-  - Referencia: `docs/diseno-tecnico-comun-go.md`
+  - Referencia: `docs/legacy/diseno-tecnico-comun-go.md`
   - Separar VHV, TVI, Auth en servicios independientes
   - Implementar en Go para performance
   - Timeframe: 24+ meses
@@ -242,4 +242,4 @@
 
 ---
 
-*Para más detalles sobre la visión a largo plazo, ver [docs/TAREAS_PENDIENTES_IMPLEMENTACION.md](docs/TAREAS_PENDIENTES_IMPLEMENTACION.md)*
+*Para más detalles sobre la visión a largo plazo, ver [docs/project/TAREAS_PENDIENTES_IMPLEMENTACION.md](docs/project/TAREAS_PENDIENTES_IMPLEMENTACION.md)*

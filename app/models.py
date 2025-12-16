@@ -5,7 +5,6 @@ from sqlalchemy.dialects.sqlite import JSON
 from .extensions import db
 
 
-
 class User(db.Model):  # type: ignore
     __tablename__ = "users"
 

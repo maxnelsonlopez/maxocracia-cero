@@ -24,19 +24,19 @@ Este repositorio contiene la implementación funcional de **Maxocracia**, un nue
 ## 📚 Documentación Esencial
 
 ### Para Entender la Visión
-- **[Brochure de Maxocracia](docs/maxocracia_brochure.md)** - Introducción accesible al sistema
-- **[Manifiesto Maxocracia](docs/MAXOCRACIA_MANIFIESTO.md)** - Los 8 Axiomas de la Verdad
-- **[FAQ Extendido](docs/FAQ_EXTENDIDO.md)** - Preguntas difíciles, respuestas honestas
+- **[Brochure de Maxocracia](docs/theory/maxocracia_brochure.md)** - Introducción accesible al sistema
+- **[Manifiesto Maxocracia](docs/theory/MAXOCRACIA_MANIFIESTO.md)** - Los 8 Axiomas de la Verdad
+- **[FAQ Extendido](docs/project/FAQ_EXTENDIDO.md)** - Preguntas difíciles, respuestas honestas
 
 ### Para Entender las Matemáticas
-- **[Matemáticas Compiladas](docs/matematicas_maxocracia_compiladas.md)** - Todas las fórmulas y axiomas
-- **[Arquitectura Temporal](docs/arquitectura_temporal_coherencia_vital.md)** - TVI, TTVI, CCP
-- **[Paper Fundacional](docs/Paper%20Maxocracia%20ChatGPT%20Scholar%20AI.txt)** - Base teórica completa
+- **[Matemáticas Compiladas](docs/theory/matematicas_maxocracia_compiladas.md)** - Todas las fórmulas y axiomas
+- **[Arquitectura Temporal](docs/architecture/arquitectura_temporal_coherencia_vital.md)** - TVI, TTVI, CCP
+- **[Paper Fundacional](docs/theory/Paper%20Maxocracia%20ChatGPT%20Scholar%20AI.txt)** - Base teórica completa
 
 ### Para Desarrolladores
-- **[Documentación de la API](docs/API.md)** - Todos los endpoints con ejemplos
+- **[Documentación de la API](docs/api/API.md)** - Todos los endpoints con ejemplos
 - **[Guía de Contribución](CONTRIBUTING.md)** - Cómo colaborar
-- **[Modelo de Datos](docs/MODELO_DE_DATOS.md)** - Esquema de base de datos
+- **[Modelo de Datos](docs/api/MODELO_DE_DATOS.md)** - Esquema de base de datos
 
 ---
 
@@ -251,7 +251,9 @@ maxocracia-cero/
 1. **Lee la [Guía de Contribución](CONTRIBUTING.md)**
 2. **Revisa [TODO.md](TODO.md)** para tareas pendientes
 3. **Ejecuta los tests** antes de hacer PR
-4. **Sigue la [Guía de Estilo](docs/GUIA_DE_ESTILO.md)**
+*Para más detalles sobre la visión a largo plazo, ver [docs/project/TAREAS_PENDIENTES_IMPLEMENTACION.md](docs/project/TAREAS_PENDIENTES_IMPLEMENTACION.md)*
+
+4. **Sigue la [Guía de Estilo](docs/guides/GUIA_DE_ESTILO.md)**
 
 ### Áreas donde necesitamos ayuda:
 - 🔧 **Backend**: Optimización de consultas, nuevos endpoints
