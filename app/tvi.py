@@ -178,6 +178,7 @@ class TVIManager:
         return {
             "ccp": round(ccp, 4),
             "stats": stats,
+            "total_seconds": total_seconds,
             "discretionary_seconds": discretionary_time,
         }
 
