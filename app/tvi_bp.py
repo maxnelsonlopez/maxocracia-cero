@@ -60,3 +60,10 @@ def get_stats(current_user):
     user_id = request.user["user_id"]
     stats = tvi_manager.calculate_ccp(user_id, start_date, end_date)
     return jsonify(stats), 200
+
+
+@tvi_bp.route("/community-stats", methods=["GET"])
+def get_community_stats():
+    # Public endpoint (no token required) as per transparency incentive
+    stats = tvi_manager.get_community_stats()
+    return jsonify(stats), 200

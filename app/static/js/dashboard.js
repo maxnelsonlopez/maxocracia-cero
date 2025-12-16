@@ -38,7 +38,8 @@ async function loadDashboardData() {
             fetchStats(),
             fetchAlerts(),
             fetchNetwork(),
-            fetchTrends(30) // Default to 30 days
+            fetchTrends(30), // Default to 30 days
+            fetchCommunityTvi()
         ]);
     } catch (error) {
         console.error('Error loading dashboard data:', error);
@@ -310,6 +311,7 @@ function renderUthTrendChart(data) {
 }
 
 function renderExchangesTrendChart(data) {
+    // ... (existing code for exchanges chart if needed, otherwise this is just context)
     const ctx = document.getElementById('exchangesTrendChart').getContext('2d');
 
     if (exchangesTrendChartInstance) exchangesTrendChartInstance.destroy();
@@ -349,6 +351,64 @@ function renderExchangesTrendChart(data) {
                     beginAtZero: true,
                     ticks: { precision: 0 }
                 }
+            }
+        }
+    });
+}
+
+// ==================== TVI METRICS ====================
+
+let tviDistributionChartInstance = null;
+
+async function fetchCommunityTvi() {
+    try {
+        const data = await api.getCommunityStats();
+
+        document.getElementById('communityCcp').textContent = data.average_ccp.toFixed(2);
+        document.getElementById('communityTotalHours').textContent = Math.round(data.total_hours_logged).toLocaleString();
+
+        renderTviDistribution(data.distribution);
+    } catch (error) {
+        console.error('Error fetching TVI stats:', error);
+    }
+}
+
+function renderTviDistribution(distribution) {
+    const ctx = document.getElementById('tviDistributionChart').getContext('2d');
+
+    if (tviDistributionChartInstance) tviDistributionChartInstance.destroy();
+
+    // Mapping keys to friendly names and colors
+    // MAINTENANCE, INVESTMENT, LEISURE, WASTE, WORK
+    const config = {
+        'MAINTENANCE': { label: 'Mantenimiento', color: '#94a3b8' }, // Slate
+        'INVESTMENT': { label: 'Inversión', color: '#10b981' },   // Green
+        'LEISURE': { label: 'Ocio', color: '#f59e0b' },       // Amber
+        'WORK': { label: 'Trabajo', color: '#3b82f6' },       // Blue
+        'WASTE': { label: 'Fuga', color: '#ef4444' }          // Red
+    };
+
+    const keys = Object.keys(distribution);
+    const labels = keys.map(k => config[k] ? config[k].label : k);
+    const data = Object.values(distribution).map(seconds => (seconds / 3600).toFixed(1)); // Convert to hours
+    const bgColors = keys.map(k => config[k] ? config[k].color : '#cbd5e1');
+
+    tviDistributionChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: bgColors,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right' },
+                title: { display: true, text: 'Horas por Categoría' }
             }
         }
     });

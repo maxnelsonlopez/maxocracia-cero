@@ -127,8 +127,21 @@ class ApiService {
     }
 
     async getDashboardTrends(period = 30) {
-        const res = await this.request(`/forms/dashboard/trends?period=${period}`);
-        return res;
+        // Modified based on the provided change snippet, assuming `authFetch` and `baseUrl` are intended.
+        // Original: const res = await this.request(`/forms/dashboard/trends?period=${period}`); return res;
+        return this.authFetch(`${this.baseUrl}/forms/dashboard/trends?days=${period}`);
+    }
+
+    async getCommunityStats() {
+        // Public endpoint, so no authFetch needed, but good practice to keep consistent error handling
+        // Using `fetch` directly as per the snippet, but adjusting URL construction to use `API_BASE`
+        // for consistency with the rest of the class, or `this.baseUrl` if it's meant to be used.
+        // Given `this.baseUrl` was used in the snippet, I'll use it here.
+        const response = await fetch(`${this.baseUrl}/tvi/community-stats`);
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.status}`);
+        }
+        return response.json();
     }
 
     async getDashboardCategories() {

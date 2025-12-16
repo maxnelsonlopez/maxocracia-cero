@@ -755,6 +755,32 @@ CCP = (Investment + Leisure) / (Total Time - Maintenance)
 
 Un CCP cercano a 1.0 indica alta intencionalidad y soberanía temporal.
 
+#### Obtener Estadísticas Comunitarias
+
+```http
+GET /tvi/community-stats
+```
+
+**Requiere Autenticación:** No (Público para transparencia)
+
+Devuelve estadísticas agregadas de toda la comunidad (CCP promedio y distribución total de tiempo).
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "active_users_count": 15,
+  "average_ccp": 0.725,
+  "distribution": {
+    "INVESTMENT": 45000,
+    "LEISURE": 20000,
+    "MAINTENANCE": 50000,
+    "WASTE": 5000,
+    "WORK": 40000
+  },
+  "total_hours_logged": 44.4
+}
+```
+
 ## Rate Limiting
 
 La API implementa límites de tasa para prevenir abusos. Los límites varían según el endpoint:

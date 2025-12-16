@@ -178,6 +178,50 @@ class TVIManager:
         return {
             "ccp": round(ccp, 4),
             "stats": stats,
-            "total_seconds": total_seconds,
             "discretionary_seconds": discretionary_time,
+        }
+
+    def get_community_stats(self) -> Dict:
+        """
+        Calculates aggregate TVI metrics for the entire community.
+        Returns total time distribution and average CCP.
+        """
+        conn = self._get_db_connection()
+        cursor = conn.cursor()
+
+        # 1. Total time distribution by category
+        cursor.execute(
+            """
+            SELECT category, SUM(duration_seconds) as total_seconds
+            FROM tvi_entries
+            GROUP BY category
+            """
+        )
+        rows = cursor.fetchall()
+        distribution = {row["category"]: row["total_seconds"] for row in rows}
+
+        # 2. Average CCP
+        # Calculate CCP for each user, then average
+        cursor.execute("SELECT DISTINCT user_id FROM tvi_entries")
+        users = [row["user_id"] for row in cursor.fetchall()]
+
+        total_ccp = 0.0
+        ccp_count = 0
+
+        for uid in users:
+            stats = self.calculate_ccp(uid)
+            # Only count users with valid discretionary time to avoid skew users with 0 data
+            if stats["discretionary_seconds"] > 0:
+                total_ccp += stats["ccp"]
+                ccp_count += 1
+        
+        avg_ccp = round(total_ccp / ccp_count, 4) if ccp_count > 0 else 0.0
+
+        conn.close()
+
+        return {
+            "distribution": distribution,
+            "average_ccp": avg_ccp,
+            "active_users_count": ccp_count,
+            "total_hours_logged": sum(distribution.values()) / 3600.0
         }

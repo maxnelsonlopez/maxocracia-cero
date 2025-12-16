@@ -13,6 +13,7 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
  - **Parámetros Dinámicos**: El sistema ahora lee `α`, `β`, `γ`, `δ` desde la tabla `vhv_parameters` de la base de datos.
  - **Nuevas Pruebas**: Suite `tests/test_maxo_valuation.py` para validar la penalización exponencial del sufrimiento (V) y multiplicadores de recursos (R).
  - **Documentación**: Actualizada `docs/API.md` con la nueva fórmula de valoración.
+ - **Métricas Comunitarias (TVI)**: Nuevo endpoint `/tvi/community-stats` y visualización en el Dashboard (`dashboard.html`) para mostrar el Coeficiente de Coherencia Personal (CCP) promedio de la cohorte y la distribución del tiempo vital.
 
  ### Corregido
 - Solucionado bloqueo por Content Security Policy (CSP) en formularios operativos.

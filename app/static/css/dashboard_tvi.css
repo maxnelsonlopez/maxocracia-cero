@@ -1,0 +1,57 @@
+
+/* TVI Section Styles */
+.tvi-section {
+    margin-bottom: 2rem;
+}
+
+.tvi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.5fr;
+    gap: 1.5rem;
+    padding: 1rem;
+    align-items: center;
+}
+
+.tvi-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+}
+
+.tvi-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+
+.tvi-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1;
+}
+
+.tvi-sublabel {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 0.25rem;
+}
+
+.tvi-chart-container {
+    height: 160px;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .tvi-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tvi-chart-container {
+        height: 200px;
+    }
+}
