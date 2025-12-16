@@ -1,7 +1,5 @@
 from datetime import datetime
 
-from sqlalchemy.dialects.sqlite import JSON
-
 from .extensions import db
 
 

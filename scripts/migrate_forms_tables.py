@@ -48,7 +48,7 @@ def migrate():
                 """
             CREATE TABLE IF NOT EXISTS participants (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                
+
                 -- Personal Information
                 name TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
@@ -89,23 +89,23 @@ def migrate():
                 """
             CREATE TABLE IF NOT EXISTS follow_ups (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-         
+
                 -- Identification
                 follow_up_date TEXT NOT NULL,
                 participant_id INTEGER NOT NULL,
                 related_interchange_id INTEGER,
-       
+
                 -- Type of follow-up
                 follow_up_type TEXT NOT NULL CHECK(follow_up_type IN (
                     'verification_completed',
-                    'update_in_progress', 
+                    'update_in_progress',
                     'situation_evolution',
                     'new_urgent_need',
                     'need_resolved',
                     'spontaneous_feedback',
                     'routine_check'
                 )),
-                
+
                 -- Current Status
                 current_situation TEXT NOT NULL,
                 need_level INTEGER CHECK(need_level BETWEEN 1 AND 5),

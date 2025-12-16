@@ -1,6 +1,5 @@
 from app import create_app
-from app.extensions import db
-from app.models import FollowUp, Interchange, Participant, User
+from app.models import FollowUp, Interchange
 
 app = create_app()
 
