@@ -1,6 +1,6 @@
 from app import create_app
 from app.extensions import db
-from app.models import Interchange, FollowUp, User, Participant
+from app.models import FollowUp, Interchange, Participant, User
 
 app = create_app()
 
@@ -14,6 +14,7 @@ with app.app_context():
     except Exception as e:
         print(f"Error querying Interchange: {e}")
         import traceback
+
         traceback.print_exc()
 
     print("\nTesting FollowUp query...")
@@ -25,4 +26,5 @@ with app.app_context():
     except Exception as e:
         print(f"Error querying FollowUp: {e}")
         import traceback
+
         traceback.print_exc()

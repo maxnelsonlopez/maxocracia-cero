@@ -214,7 +214,7 @@ class TVIManager:
             if stats["discretionary_seconds"] > 0:
                 total_ccp += stats["ccp"]
                 ccp_count += 1
-        
+
         avg_ccp = round(total_ccp / ccp_count, 4) if ccp_count > 0 else 0.0
 
         conn.close()
@@ -223,5 +223,5 @@ class TVIManager:
             "distribution": distribution,
             "average_ccp": avg_ccp,
             "active_users_count": ccp_count,
-            "total_hours_logged": sum(distribution.values()) / 3600.0
+            "total_hours_logged": sum(distribution.values()) / 3600.0,
         }

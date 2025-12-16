@@ -71,7 +71,7 @@ class FormsManager:
         return dict(zip([d[0] for d in cursor.description], row))
 
     @staticmethod
-    def _safe_json_dump(data: Any, default: str = '[]') -> str:
+    def _safe_json_dump(data: Any, default: str = "[]") -> str:
         """Safely dump data to JSON string."""
         if data is None:
             return default
