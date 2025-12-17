@@ -131,10 +131,10 @@ def test_calculate_ttvi_from_tvis_with_investment(db_path):
 def test_calculate_ttvi_from_tvis_with_date_filter(db_path):
     """Test calculating TTVI with date range filter."""
     manager = TVIManager(db_path=db_path)
-    
+
     now = datetime.now()
     yesterday = now - timedelta(days=1)
-    
+
     # Add entry from yesterday
     manager.log_tvi(
         user_id=1,
@@ -143,7 +143,7 @@ def test_calculate_ttvi_from_tvis_with_date_filter(db_path):
         category="WORK",
         description="Old work",
     )
-    
+
     # Add entry from today
     manager.log_tvi(
         user_id=1,
@@ -152,12 +152,12 @@ def test_calculate_ttvi_from_tvis_with_date_filter(db_path):
         category="WORK",
         description="Today work",
     )
-    
+
     # Filter only today
     result = manager.calculate_ttvi_from_tvis(
         user_id=1, start_date=now.date().isoformat()
     )
-    
+
     assert result["direct_hours"] == 1.0  # Only today's entry
 
 

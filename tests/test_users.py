@@ -33,11 +33,23 @@ def client():
         db = sqlite3.connect(db_path)
         db.execute(
             "INSERT INTO users (id, email, name, alias, password_hash) VALUES (?, ?, ?, ?, ?)",
-            (1, "user1@example.com", "User One", "user1", generate_password_hash("Password1")),
+            (
+                1,
+                "user1@example.com",
+                "User One",
+                "user1",
+                generate_password_hash("Password1"),
+            ),
         )
         db.execute(
             "INSERT INTO users (id, email, name, alias, password_hash) VALUES (?, ?, ?, ?, ?)",
-            (2, "user2@example.com", "User Two", "user2", generate_password_hash("Password1")),
+            (
+                2,
+                "user2@example.com",
+                "User Two",
+                "user2",
+                generate_password_hash("Password1"),
+            ),
         )
         db.commit()
         db.close()
@@ -79,7 +91,11 @@ class TestListUsers:
         for i in range(3, 105):
             db.execute(
                 "INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)",
-                (f"user{i}@example.com", f"User {i}", generate_password_hash("Password1")),
+                (
+                    f"user{i}@example.com",
+                    f"User {i}",
+                    generate_password_hash("Password1"),
+                ),
             )
         db.commit()
         db.close()
@@ -159,7 +175,9 @@ class TestCreateUser:
         # Verify user was created
         db_path = client.application.config["DATABASE"]
         db = sqlite3.connect(db_path)
-        cursor = db.execute("SELECT * FROM users WHERE email = ?", ("newuser@example.com",))
+        cursor = db.execute(
+            "SELECT * FROM users WHERE email = ?", ("newuser@example.com",)
+        )
         user = cursor.fetchone()
         assert user is not None
         db.close()
@@ -231,7 +249,9 @@ class TestCreateUser:
 
     def test_create_user_no_json(self, client):
         """Test creating user without JSON returns 400."""
-        response = client.post("/users", data="not json", content_type="application/json")
+        response = client.post(
+            "/users", data="not json", content_type="application/json"
+        )
 
         assert response.status_code == 400
 
@@ -255,7 +275,9 @@ class TestCreateUser:
         # Verify alias was saved
         db_path = client.application.config["DATABASE"]
         db = sqlite3.connect(db_path)
-        cursor = db.execute("SELECT alias FROM users WHERE email = ?", ("optional@example.com",))
+        cursor = db.execute(
+            "SELECT alias FROM users WHERE email = ?", ("optional@example.com",)
+        )
         row = cursor.fetchone()
         assert row[0] == "optional_alias"
         db.close()

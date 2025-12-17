@@ -102,7 +102,10 @@ class TestGetParticipants:
 
         # Update status manually
         cursor = manager.conn.cursor()
-        cursor.execute("UPDATE participants SET status = 'inactive' WHERE email = ?", ("active@example.com",))
+        cursor.execute(
+            "UPDATE participants SET status = 'inactive' WHERE email = ?",
+            ("active@example.com",),
+        )
         manager.conn.commit()
 
         active = manager.get_participants(status="active")
@@ -196,7 +199,9 @@ class TestRegisterExchange:
             # Duplicate registration
             success2, message2, _ = manager.register_exchange(data)
             assert success2 is False
-            assert "código de intercambio ya existe" in message2 or "ya existe" in message2
+            assert (
+                "código de intercambio ya existe" in message2 or "ya existe" in message2
+            )
 
 
 class TestRegisterFollowup:
@@ -337,7 +342,7 @@ class TestNetworkFlow:
         # Create participants first
         success1, _, p1_id = manager.register_participant(sample_participant)
         assert success1 is True
-        
+
         data2 = sample_participant.copy()
         data2["email"] = "participant2@example.com"
         success2, _, p2_id = manager.register_participant(data2)
@@ -434,7 +439,7 @@ class TestResolutionMetrics:
         # Create participants first
         success1, _, p1_id = manager.register_participant(sample_participant)
         assert success1 is True
-        
+
         data2 = sample_participant.copy()
         data2["email"] = "participant2@example.com"
         success2, _, p2_id = manager.register_participant(data2)
@@ -453,7 +458,7 @@ class TestResolutionMetrics:
             "reciprocity_status": "unidirectional",
         }
         success, msg, _ = manager.register_exchange(exchange_data)
-        
+
         metrics = manager.get_resolution_metrics()
 
         if success:
