@@ -15,7 +15,7 @@ class User(db.Model):  # type: ignore
     city = db.Column(db.String(50))
     neighborhood = db.Column(db.String(50))
     values_json = db.Column(db.Text)  # JSON stored as text in SQLite
-    created_at = db.Column(db.String(30), default=datetime.utcnow().isoformat)
+    created_at = db.Column(db.String(30), default=lambda: datetime.now(datetime.UTC).isoformat())
 
     def __repr__(self):
         return f"<User {self.email}>"
@@ -49,7 +49,7 @@ class Participant(db.Model):  # type: ignore
 
     consent_given = db.Column(db.Integer, default=1)
     status = db.Column(db.String(20), default="active")
-    created_at = db.Column(db.String(30), default=datetime.utcnow().isoformat)
+    created_at = db.Column(db.String(30), default=lambda: datetime.now(datetime.UTC).isoformat())
 
     def __repr__(self):
         return f"<Participant {self.name}>"
@@ -92,7 +92,7 @@ class Interchange(db.Model):  # type: ignore
     requires_followup = db.Column(db.Integer, default=0)
     followup_scheduled_date = db.Column(db.String(30))
 
-    created_at = db.Column(db.String(30), default=datetime.utcnow().isoformat)
+    created_at = db.Column(db.String(30), default=lambda: datetime.now(datetime.UTC).isoformat())
 
     def __repr__(self):
         return f"<Interchange {self.interchange_id}>"
@@ -117,7 +117,7 @@ class FollowUp(db.Model):  # type: ignore
     situation_change = db.Column(db.String(50))
     follow_up_priority = db.Column(db.String(20))
 
-    created_at = db.Column(db.String(30), default=datetime.utcnow().isoformat)
+    created_at = db.Column(db.String(30), default=lambda: datetime.now(datetime.UTC).isoformat())
 
     def __repr__(self):
         return f"<FollowUp {self.id} - {self.follow_up_priority}>"

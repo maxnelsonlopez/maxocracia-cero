@@ -64,7 +64,7 @@ def auth_token(client):
     )
     assert response.status_code == 200
     data = response.get_json()
-    return data["token"]
+    return data["access_token"]  # Use 'access_token' not 'token'
 
 
 def test_calculate_ttvi_from_tvis_empty(db_path):

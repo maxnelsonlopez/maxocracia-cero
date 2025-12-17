@@ -9,6 +9,26 @@ import json
 import pytest
 
 
+@pytest.fixture
+def auth_headers(client):
+    """Create authentication headers for testing."""
+    # Register test user
+    register_data = {
+        "email": "testauth_forms@example.com",
+        "password": "TestPassword123!",
+        "name": "Test Forms User",
+    }
+    client.post("/auth/register", json=register_data)
+    
+    # Login and get token
+    login_data = {"email": "testauth_forms@example.com", "password": "TestPassword123!"}
+    response = client.post("/auth/login", json=login_data)
+    token = response.get_json()["access_token"]
+    
+    return {"Authorization": f"Bearer {token}"}
+
+
+
 class TestFormsBPEndpoints:
     """Tests para endpoints de forms_bp.py con casos edge."""
 

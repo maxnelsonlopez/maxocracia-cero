@@ -312,8 +312,8 @@ class TestActiveAlerts:
             "participant_id": participant_id,
             "follow_up_type": "new_urgent_need",  # Valid value from schema CHECK constraint
             "current_situation": "Crisis",
-            "situation_change": "worsened",
-            "active_interchanges_status": "needs_immediate_help",
+            "situation_change": "worsened_significantly",
+            "active_interchanges_status": "none",
             "follow_up_priority": "high",
         }
         success, msg, _ = manager.register_followup(followup_data)

@@ -9,6 +9,26 @@ import json
 import pytest
 
 
+@pytest.fixture
+def auth_headers(client):
+    """Create authentication headers for testing."""
+    # Register test user
+    register_data = {
+        "email": "testauth_vhv@example.com",
+        "password": "TestPassword123!",
+        "name": "Test VHV User",
+    }
+    client.post("/auth/register", json=register_data)
+    
+    # Login and get token
+    login_data = {"email": "testauth_vhv@example.com", "password": "TestPassword123!"}
+    response = client.post("/auth/login", json=login_data)
+    token = response.get_json()["access_token"]
+    
+    return {"Authorization": f"Bearer {token}"}
+
+
+
 class TestVHVBPProducts:
     """Tests para endpoints de productos VHV."""
 
@@ -336,5 +356,5 @@ class TestVHVBPCaseStudies:
         assert len(json_data["case_studies"]) >= 2
         # Verificar que incluye los casos de estudio del paper
         names = [cs["name"] for cs in json_data["case_studies"]]
-        assert any("Ético" in name or "Etico" in name for name in names)
+        assert any("Ética" in name for name in names)  # "Granja Ética" with accent
         assert any("Industrial" in name for name in names)

@@ -71,6 +71,10 @@ def test_valuation_suffering_exponential(app):
     """Test exponential suffering penalty (Gamma=2)."""
     with app.app_context():
         db = get_db()
+        # Clear cache before setting new parameters
+        from app.maxo import clear_vhv_params_cache
+        clear_vhv_params_cache()
+        
         # Set Gamma to 2
         db.execute(
             "INSERT INTO vhv_parameters (alpha, beta, gamma, delta) VALUES (?, ?, ?, ?)",
@@ -79,6 +83,7 @@ def test_valuation_suffering_exponential(app):
         db.commit()
 
         # V=1 -> 1^2 = 1 -> 1000 * 1 = 1000
+        # Force use_cache=False to load fresh parameters
         price_1 = calculate_maxo_price(t_seconds=0, v_lives=1.0)
         assert price_1 == 1000.0
 
