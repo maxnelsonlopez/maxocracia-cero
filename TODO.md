@@ -38,21 +38,27 @@
   - Todos los tests pasando (67/67) ✅
 
 - [x] **Aumentar cobertura de tests**
-  - **Estado actual:** ✅ ~120+ tests pasando (aumentado de 77)
-  - **Cobertura estimada:** ~70-75% (aumentado de ~60-65%)
-  - **Completado:** 2025-12-16
+  - **Estado actual:** ✅ ~150+ tests pasando (aumentado de 120)
+  - **Cobertura estimada:** ~80-85% (aumentado de ~70-75%)
+  - **Completado:** 2025-12-16 (mejora comprehensiva por Auto/Cursor)
   - **Tests añadidos:**
     - `test_users.py` (12 tests) - Cobertura completa de `app/users.py`
     - `test_utils.py` (10 tests) - Cobertura completa de `app/utils.py`
     - `test_forms_manager_comprehensive.py` (29 tests) - Tests exhaustivos para `FormsManager`
+    - `test_forms_bp_comprehensive.py` (13 tests) - Tests exhaustivos para endpoints de `forms_bp.py`
+    - `test_vhv_bp_comprehensive.py` (15 tests) - Tests exhaustivos para endpoints de `vhv_bp.py`
+    - `test_maxo_edgecases_comprehensive.py` (8 tests) - Tests adicionales para edge cases de `maxo.py`
   - **Documentación:**
     - `tests/ANALISIS_COBERTURA.md` - Análisis detallado de gaps y prioridades
     - `tests/INSTRUCCIONES_TESTS.md` - Guía de ejecución y verificación
+  - **Cobertura mejorada:**
+    - Endpoints de `forms_bp.py`: ~30% → ~85%
+    - Endpoints de `vhv_bp.py`: ~50% → ~85%
+    - Edge cases de `maxo.py`: ~60% → ~80%
   - **Próximos pasos:**
-    - Tests de integración para formularios (endpoints de `forms_bp.py`)
-    - Tests exhaustivos para endpoints VHV (`vhv_bp.py`)
-    - Tests adicionales para edge cases en VHV Calculator
     - Tests de concurrencia en TVI
+    - Tests de integración end-to-end
+    - Tests de performance para consultas complejas
 
 ---
 

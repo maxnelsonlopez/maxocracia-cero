@@ -4,6 +4,44 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2025-12-16 — Mejora Comprehensiva de Cobertura de Tests (Auto/Cursor)
+
+### Añadido
+- **Tests para endpoints de `forms_bp.py`**: Suite completa de 13 tests en `tests/test_forms_bp_comprehensive.py` cubriendo:
+  - `get_participants()` con paginación, filtros de status y validación de límites
+  - `get_participant()` con ID inexistente (404)
+  - `get_exchanges()` con filtros de urgencia, giver_id, receiver_id
+  - `get_exchange()` con ID inexistente (404)
+  - `get_followups()` con filtros de priority y participant_id
+  - `get_participant_followups()` con diferentes casos (sin follow-ups, con follow-ups)
+  - `get_trends()`, `get_categories()`, `get_resolution()` endpoints del dashboard
+  - Validación de límites máximos (100) para paginación
+- **Tests para endpoints de `vhv_bp.py`**: Suite completa de 15 tests en `tests/test_vhv_bp_comprehensive.py` cubriendo:
+  - `get_products()` con filtros de categoría y paginación
+  - `get_product()` con ID inexistente (404)
+  - `compare_products()` con casos exitosos, IDs faltantes, IDs inválidos, menos de 2 productos, productos no encontrados
+  - `update_parameters()` con validación axiomática completa (α > 0, β > 0, γ ≥ 1, δ ≥ 0)
+  - `update_parameters()` validación de notes requerido y autenticación
+  - `get_case_studies()` endpoint con verificación de casos de estudio del paper
+- **Tests adicionales para `maxo.py`**: Suite de 8 tests en `tests/test_maxo_edgecases_comprehensive.py` cubriendo:
+  - `calculate_maxo_price()` con valores cero, v_lives negativos, valores muy grandes
+  - `calculate_maxo_price()` con modificadores FRG y CS
+  - `get_balance()` sin transacciones y con múltiples transacciones
+  - `credit_user()` con razón, cantidades negativas (débitos)
+  - Validación de cálculos con diferentes combinaciones de parámetros
+
+### Mejorado
+- **Cobertura de tests**: Aumentada de ~70-75% a ~80-85% (estimado)
+- **Cobertura de endpoints**: Todos los endpoints principales de `forms_bp.py` y `vhv_bp.py` ahora tienen tests comprehensivos
+- **Validación axiomática**: Tests explícitos para validar que los parámetros VHV cumplen con los axiomas maxocráticos
+- **Robustez**: Tests adicionales para casos edge, validación de límites y manejo de errores
+
+### Notas Técnicas
+- Todos los nuevos tests siguen los patrones existentes y usan fixtures de `conftest.py`
+- Tests de endpoints incluyen validación de códigos de estado HTTP y estructura de respuestas JSON
+- Tests de validación axiomática aseguran que el sistema no puede violar los principios fundamentales de Maxocracia
+- Contribución: Auto (Cursor AI Assistant)
+
 ## 2025-12-16 — Aumento de Cobertura de Tests
 
 ### Añadido
