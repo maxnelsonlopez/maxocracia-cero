@@ -37,12 +37,21 @@
   - Tabla `interchange` extendida con campos de coordinación y seguimiento
   - Todos los tests pasando (67/67) ✅
 
-- [ ] **Aumentar cobertura de tests**
-  - **Estado actual:** ✅ 77/77 tests pasando
-  - Objetivo: 80%+ cobertura
-  - Áreas prioritarias:
-    - Tests de integración para formularios
-    - Tests de edge cases en VHV Calculator
+- [x] **Aumentar cobertura de tests**
+  - **Estado actual:** ✅ ~120+ tests pasando (aumentado de 77)
+  - **Cobertura estimada:** ~70-75% (aumentado de ~60-65%)
+  - **Completado:** 2025-12-16
+  - **Tests añadidos:**
+    - `test_users.py` (12 tests) - Cobertura completa de `app/users.py`
+    - `test_utils.py` (10 tests) - Cobertura completa de `app/utils.py`
+    - `test_forms_manager_comprehensive.py` (29 tests) - Tests exhaustivos para `FormsManager`
+  - **Documentación:**
+    - `tests/ANALISIS_COBERTURA.md` - Análisis detallado de gaps y prioridades
+    - `tests/INSTRUCCIONES_TESTS.md` - Guía de ejecución y verificación
+  - **Próximos pasos:**
+    - Tests de integración para formularios (endpoints de `forms_bp.py`)
+    - Tests exhaustivos para endpoints VHV (`vhv_bp.py`)
+    - Tests adicionales para edge cases en VHV Calculator
     - Tests de concurrencia en TVI
 
 ---

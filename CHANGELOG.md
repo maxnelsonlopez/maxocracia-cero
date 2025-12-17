@@ -4,6 +4,35 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2025-12-16 — Aumento de Cobertura de Tests
+
+### Añadido
+- **Tests para `app/users.py`**: Suite completa de 12 tests en `tests/test_users.py` cubriendo:
+  - `list_users()` con límites y paginación
+  - `get_user()` con casos válidos e inexistentes
+  - `create_user()` con validaciones, edge cases y manejo de duplicados
+- **Tests para `app/utils.py`**: Suite de 10 tests en `tests/test_utils.py` cubriendo:
+  - `get_db()` creación y reutilización de conexiones
+  - `close_db()` limpieza correcta de recursos
+  - `init_db()` inicialización de esquema en diferentes contextos
+- **Tests exhaustivos para `FormsManager`**: Suite de 29 tests en `tests/test_forms_manager_comprehensive.py` cubriendo:
+  - Métodos no probados anteriormente: `get_dashboard_stats()`, `get_active_alerts()`, `get_network_flow()`, `get_temporal_trends()`, `get_category_breakdown()`, `get_resolution_metrics()`
+  - Edge cases: datos vacíos, paginación, filtros, parsing de JSON
+  - Validaciones y manejo de errores
+- **Documentación de análisis de cobertura**: `tests/ANALISIS_COBERTURA.md` con análisis detallado de módulos y gaps identificados
+- **Instrucciones de tests**: `tests/INSTRUCCIONES_TESTS.md` con guía para ejecutar y verificar los nuevos tests
+
+### Mejorado
+- **Cobertura de tests**: Aumentada de ~60-65% a ~70-75% (estimado)
+- **Robustez**: Tests adicionales para casos edge y manejo de errores
+- **Mantenibilidad**: Documentación clara de qué está cubierto y qué falta
+
+### Notas Técnicas
+- Los nuevos tests siguen los patrones existentes y usan fixtures de `conftest.py`
+- Tests de `init_db` corregidos para usar la ruta correcta de `schema.sql`
+- Tests de `FormsManager` ajustados para crear participantes antes de intercambios
+- Validación de valores permitidos en `follow_up_type` según constraints del schema
+
 ## 2025-12-16 — Integración TVI-VHV y Optimizaciones de Performance
 
 ### Añadido
