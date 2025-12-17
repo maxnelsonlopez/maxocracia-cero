@@ -15,7 +15,9 @@ import json
 from flask import Blueprint, g, jsonify, request
 
 from .jwt_utils import token_required
+from .maxo import clear_vhv_params_cache
 from .utils import get_db
+from .tvi import TVIManager
 from .vhv_calculator import (
     CASE_STUDY_HUEVO_ETICO,
     CASE_STUDY_HUEVO_INDUSTRIAL,
@@ -24,6 +26,7 @@ from .vhv_calculator import (
 
 vhv_bp = Blueprint("vhv", __name__, url_prefix="/vhv")
 calculator = VHVCalculator()
+tvi_manager = TVIManager()
 
 
 @vhv_bp.route("/calculate", methods=["POST"])
@@ -507,6 +510,9 @@ def update_parameters(current_user):
             (alpha, beta, gamma, delta, current_user["id"], data["notes"]),
         )
         db.commit()
+        
+        # Clear cache to force refresh on next request
+        clear_vhv_params_cache()
 
         return (
             jsonify(
@@ -565,3 +571,197 @@ def get_case_studies():
         ),
         200,
     )
+
+
+@vhv_bp.route("/calculate-from-tvi", methods=["POST"])
+@token_required
+def calculate_from_tvi(current_user):
+    """
+    Calculate VHV using registered TVI entries for the T component.
+    
+    This endpoint integrates TVI (Tiempo Vital Indexado) with VHV calculations,
+    allowing users to calculate the VHV of products/services using their
+    actual time investment tracked in TVI entries.
+    
+    Request JSON:
+        {
+            "start_date": str (optional, ISO8601),
+            "end_date": str (optional, ISO8601),
+            "category_filter": str (optional, WORK/INVESTMENT/etc),
+            "v_organisms_affected": float,
+            "v_consciousness_factor": float,
+            "v_suffering_factor": float,
+            "v_abundance_factor": float,
+            "v_rarity_factor": float,
+            "r_minerals_kg": float,
+            "r_water_m3": float,
+            "r_petroleum_l": float,
+            "r_land_hectares": float,
+            "r_frg_factor": float,
+            "r_cs_factor": float,
+            "inherited_hours_override": float (optional),
+            "future_hours_override": float (optional),
+            "save": bool (optional, default False)
+        }
+    
+    Response:
+        {
+            "vhv": {"T": float, "V": float, "R": float},
+            "maxo_price": float,
+            "breakdown": {...},
+            "ttvi_breakdown": {
+                "direct_hours": float,
+                "inherited_hours": float,
+                "future_hours": float,
+                "breakdown_by_category": {...}
+            }
+        }
+    """
+    data = request.get_json()
+    user_id = current_user["user_id"]
+    
+    # Validate required V and R fields
+    required_fields = [
+        "v_organisms_affected",
+        "v_consciousness_factor",
+        "v_suffering_factor",
+        "v_abundance_factor",
+        "v_rarity_factor",
+        "r_minerals_kg",
+        "r_water_m3",
+        "r_petroleum_l",
+        "r_land_hectares",
+        "r_frg_factor",
+        "r_cs_factor",
+    ]
+    
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+    
+    # Calculate TTVI from TVI entries
+    try:
+        ttvi_data = tvi_manager.calculate_ttvi_from_tvis(
+            user_id=user_id,
+            start_date=data.get("start_date"),
+            end_date=data.get("end_date"),
+            category_filter=data.get("category_filter"),
+        )
+    except Exception as e:
+        return jsonify({"error": f"Failed to calculate TTVI: {str(e)}"}), 500
+    
+    # Use overrides if provided, otherwise use calculated values
+    direct_hours = ttvi_data["direct_hours"]
+    inherited_hours = data.get("inherited_hours_override", ttvi_data["inherited_hours"])
+    future_hours = data.get("future_hours_override", ttvi_data["future_hours"])
+    
+    # Get current parameters
+    db = get_db()
+    params_row = db.execute(
+        "SELECT alpha, beta, gamma, delta FROM vhv_parameters ORDER BY id DESC LIMIT 1"
+    ).fetchone()
+    
+    if not params_row:
+        return jsonify({"error": "No VHV parameters configured"}), 500
+    
+    alpha, beta, gamma, delta = params_row
+    
+    try:
+        # Calculate VHV using TVI-derived T component
+        result = calculator.calculate_vhv(
+            t_direct_hours=direct_hours,
+            t_inherited_hours=inherited_hours,
+            t_future_hours=future_hours,
+            v_organisms_affected=float(data["v_organisms_affected"]),
+            v_consciousness_factor=float(data["v_consciousness_factor"]),
+            v_suffering_factor=float(data["v_suffering_factor"]),
+            v_abundance_factor=float(data["v_abundance_factor"]),
+            v_rarity_factor=float(data["v_rarity_factor"]),
+            r_minerals_kg=float(data["r_minerals_kg"]),
+            r_water_m3=float(data["r_water_m3"]),
+            r_petroleum_l=float(data["r_petroleum_l"]),
+            r_land_hectares=float(data["r_land_hectares"]),
+            r_frg_factor=float(data["r_frg_factor"]),
+            r_cs_factor=float(data["r_cs_factor"]),
+            alpha=alpha,
+            beta=beta,
+            gamma=gamma,
+            delta=delta,
+        )
+        
+        # Save product if requested
+        product_id = None
+        if data.get("save", False):
+            cursor = db.execute(
+                """
+                INSERT INTO vhv_products (
+                    name, category, description,
+                    t_direct_hours, t_inherited_hours, t_future_hours,
+                    v_organisms_affected, v_consciousness_factor, v_suffering_factor,
+                    v_abundance_factor, v_rarity_factor,
+                    r_minerals_kg, r_water_m3, r_petroleum_l, r_land_hectares,
+                    r_frg_factor, r_cs_factor,
+                    vhv_json, maxo_price,
+                    created_by
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    data.get("name", "Product from TVI"),
+                    data.get("category", ""),
+                    data.get("description", "Calculated from TVI entries"),
+                    direct_hours,
+                    inherited_hours,
+                    future_hours,
+                    data["v_organisms_affected"],
+                    data["v_consciousness_factor"],
+                    data["v_suffering_factor"],
+                    data["v_abundance_factor"],
+                    data["v_rarity_factor"],
+                    data["r_minerals_kg"],
+                    data["r_water_m3"],
+                    data["r_petroleum_l"],
+                    data["r_land_hectares"],
+                    data["r_frg_factor"],
+                    data["r_cs_factor"],
+                    json.dumps(result["vhv"]),
+                    result["maxo_price"],
+                    user_id,
+                ),
+            )
+            db.commit()
+            product_id = cursor.lastrowid
+            
+            # Save calculation record
+            db.execute(
+                """
+                INSERT INTO vhv_calculations (
+                    product_id, user_id, parameters_snapshot, vhv_snapshot, maxo_price
+                ) VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    product_id,
+                    user_id,
+                    json.dumps(result["parameters_used"]),
+                    json.dumps(result),
+                    result["maxo_price"],
+                ),
+            )
+            db.commit()
+        
+        response = {
+            "vhv": result["vhv"],
+            "maxo_price": result["maxo_price"],
+            "breakdown": result["breakdown"],
+            "parameters_used": result["parameters_used"],
+            "ttvi_breakdown": ttvi_data,
+        }
+        
+        if product_id:
+            response["product_id"] = product_id
+        
+        return jsonify(response), 200
+    
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": f"Calculation error: {str(e)}"}), 500

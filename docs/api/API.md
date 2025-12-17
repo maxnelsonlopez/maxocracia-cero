@@ -781,6 +781,86 @@ Devuelve estadísticas agregadas de toda la comunidad (CCP promedio y distribuci
 }
 ```
 
+#### Calcular VHV desde TVIs Registrados
+
+```http
+POST /vhv/calculate-from-tvi
+```
+
+**Requiere Autenticación:** Sí
+
+Calcula el VHV usando entradas TVI registradas del usuario para el componente T (Tiempo). Esta integración permite usar el tiempo vital real registrado en lugar de valores manuales.
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "start_date": "2025-01-01T00:00:00",
+  "end_date": "2025-01-31T23:59:59",
+  "category_filter": "WORK",
+  "v_organisms_affected": 0.001,
+  "v_consciousness_factor": 0.9,
+  "v_suffering_factor": 1.1,
+  "v_abundance_factor": 0.0006,
+  "v_rarity_factor": 1.0,
+  "r_minerals_kg": 0.1,
+  "r_water_m3": 0.05,
+  "r_petroleum_l": 0.0,
+  "r_land_hectares": 0.0,
+  "r_frg_factor": 1.0,
+  "r_cs_factor": 1.0,
+  "inherited_hours_override": 0.5,
+  "future_hours_override": 0.2,
+  "save": false
+}
+```
+
+**Parámetros Opcionales:**
+- `start_date`: Filtrar TVIs desde esta fecha (ISO8601)
+- `end_date`: Filtrar TVIs hasta esta fecha (ISO8601)
+- `category_filter`: Filtrar por categoría (MAINTENANCE, INVESTMENT, WASTE, WORK, LEISURE)
+- `inherited_hours_override`: Sobrescribir horas heredadas calculadas (default: 0)
+- `future_hours_override`: Sobrescribir horas futuras calculadas (default: 0)
+- `save`: Guardar producto en base de datos (default: false)
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "vhv": {
+    "T": 2.1,
+    "V": 0.000594,
+    "R": 0.105
+  },
+  "maxo_price": 220.55,
+  "breakdown": {
+    "time_contribution": 210.0,
+    "life_contribution": 0.05,
+    "resource_contribution": 10.5
+  },
+  "parameters_used": {
+    "alpha": 100.0,
+    "beta": 2000.0,
+    "gamma": 1.0,
+    "delta": 100.0
+  },
+  "ttvi_breakdown": {
+    "direct_hours": 1.5,
+    "inherited_hours": 0.0,
+    "future_hours": 0.0,
+    "total_hours": 1.5,
+    "breakdown_by_category": {
+      "WORK": 1.5
+    }
+  },
+  "product_id": 1
+}
+```
+
+**Notas:**
+- El componente T se calcula automáticamente desde las entradas TVI del usuario autenticado
+- Las categorías WORK e INVESTMENT se consideran "direct_hours" (tiempo directamente invertido)
+- Las horas heredadas y futuras pueden sobrescribirse si se conocen valores más precisos
+- Este endpoint implementa el Axioma T8 (Encadenamiento Temporal) integrando TVI con VHV
+
 ## Rate Limiting
 
 La API implementa límites de tasa para prevenir abusos. Los límites varían según el endpoint:

@@ -4,6 +4,39 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2025-12-16 — Integración TVI-VHV y Optimizaciones de Performance
+
+### Añadido
+- **Integración TVI-VHV**: Nuevo método `calculate_ttvi_from_tvis()` en `TVIManager` que calcula TTVI (Tiempo Total Vital Indexado) desde entradas TVI registradas, permitiendo usar tiempo real en cálculos VHV.
+- **Nuevo endpoint `/vhv/calculate-from-tvi`**: Permite calcular VHV usando entradas TVI del usuario para el componente T, integrando el sistema de tiempo vital con la calculadora de huella vital.
+- **Caching de parámetros VHV**: Implementado cache en memoria (60 segundos) para parámetros VHV en `get_vhv_parameters()` para reducir consultas a base de datos.
+- **Índices de performance**: Añadidos índices en `schema.sql` para optimizar consultas:
+  - `idx_tvi_user_category`: Consultas por usuario y categoría
+  - `idx_tvi_user_date_range`: Consultas por rango de fechas
+  - `idx_vhv_products_category`: Filtrado por categoría de productos
+  - `idx_vhv_products_created_by`: Búsqueda por creador
+  - `idx_vhv_parameters_updated_at`: Ordenamiento de parámetros
+- **Tests de integración TVI-VHV**: Suite completa de tests en `tests/test_tvi_vhv_integration.py` (10 tests) cubriendo:
+  - Cálculo TTVI desde TVIs vacíos
+  - Cálculo con diferentes categorías (WORK, INVESTMENT)
+  - Filtros por fecha y categoría
+  - Endpoint `/vhv/calculate-from-tvi` con autenticación
+  - Overrides de horas heredadas/futuras
+  - Validación de campos requeridos
+
+### Corregido
+- **Bug en `tvi_bp.py`**: Corregido uso de `request.user` (inexistente) por `current_user` en endpoints `/tvi` (POST, GET, /stats).
+- **Invalidación de cache**: Añadida función `clear_vhv_params_cache()` que se llama automáticamente al actualizar parámetros VHV para mantener consistencia.
+
+### Mejorado
+- **Documentación de métodos**: Mejorada documentación de `calculate_ttvi_from_tvis()` con ejemplos de uso y explicación de componentes TTVI.
+- **Manejo de errores**: Mejorado manejo de errores en endpoint `/vhv/calculate-from-tvi` con mensajes más descriptivos.
+
+### Notas Técnicas
+- El componente T de VHV ahora puede calcularse automáticamente desde TVIs registrados, implementando el Axioma T8 (Encadenamiento Temporal).
+- El cache de parámetros VHV reduce significativamente las consultas a BD en endpoints de cálculo frecuentes.
+- Los índices mejoran el rendimiento de consultas de TVI por usuario/categoría/fecha, crítico para escalabilidad.
+
 ## 2025-12-16 — Reorganización de Documentación y Fixes
 
  ### Añadido

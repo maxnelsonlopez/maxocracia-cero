@@ -1,6 +1,10 @@
-from typing import Tuple
+from typing import Optional, Tuple
 
 from .utils import get_db
+
+# Simple in-memory cache for VHV parameters (can be upgraded to Redis later)
+_vhv_params_cache: Optional[Tuple[float, float, float, float]] = None
+_vhv_params_cache_timestamp: Optional[float] = None
 
 
 def get_balance(user_id):
@@ -22,11 +26,26 @@ def credit_user(user_id, amount, reason=None):
     db.commit()
 
 
-def get_vhv_parameters() -> Tuple[float, float, float, float]:
+def get_vhv_parameters(use_cache: bool = True) -> Tuple[float, float, float, float]:
     """
     Fetch the latest VHV valuation parameters from the Oracles (DB).
-    Returns (alpha, beta, gamma, delta).
+    Uses in-memory cache to reduce database queries.
+    
+    Args:
+        use_cache: If True, use cached values (default True). Set to False to force refresh.
+    
+    Returns:
+        Tuple of (alpha, beta, gamma, delta)
     """
+    global _vhv_params_cache, _vhv_params_cache_timestamp
+    
+    import time
+    
+    # Return cached value if available and less than 60 seconds old
+    if use_cache and _vhv_params_cache is not None and _vhv_params_cache_timestamp is not None:
+        if time.time() - _vhv_params_cache_timestamp < 60:
+            return _vhv_params_cache
+    
     db = get_db()
     try:
         cur = db.execute(
@@ -34,16 +53,33 @@ def get_vhv_parameters() -> Tuple[float, float, float, float]:
         )
         row = cur.fetchone()
         if row:
-            return (
+            params = (
                 float(row["alpha"]),
                 float(row["beta"]),
                 float(row["gamma"]),
                 float(row["delta"]),
             )
+            # Update cache
+            _vhv_params_cache = params
+            _vhv_params_cache_timestamp = time.time()
+            return params
         # Fallbacks based on theoretical axioms if DB is empty
-        return 100.0, 2000.0, 1.0, 100.0  # Base values from schema
+        fallback = (100.0, 2000.0, 1.0, 100.0)  # Base values from schema
+        _vhv_params_cache = fallback
+        _vhv_params_cache_timestamp = time.time()
+        return fallback
     except Exception:
-        return 100.0, 2000.0, 1.0, 100.0
+        fallback = (100.0, 2000.0, 1.0, 100.0)
+        _vhv_params_cache = fallback
+        _vhv_params_cache_timestamp = time.time()
+        return fallback
+
+
+def clear_vhv_params_cache():
+    """Clear the VHV parameters cache. Useful after parameter updates."""
+    global _vhv_params_cache, _vhv_params_cache_timestamp
+    _vhv_params_cache = None
+    _vhv_params_cache_timestamp = None
 
 
 def calculate_maxo_price(

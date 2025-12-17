@@ -193,6 +193,13 @@ CREATE TABLE IF NOT EXISTS tvi_entries (
 -- so application logic must enforce no-overlap. However, a unique index on start_time per user helps.
 CREATE UNIQUE INDEX IF NOT EXISTS idx_tvi_user_start ON tvi_entries(user_id, start_time);
 
+-- Additional indexes for performance optimization
+CREATE INDEX IF NOT EXISTS idx_tvi_user_category ON tvi_entries(user_id, category);
+CREATE INDEX IF NOT EXISTS idx_tvi_user_date_range ON tvi_entries(user_id, start_time, end_time);
+CREATE INDEX IF NOT EXISTS idx_vhv_products_category ON vhv_products(category);
+CREATE INDEX IF NOT EXISTS idx_vhv_products_created_by ON vhv_products(created_by);
+CREATE INDEX IF NOT EXISTS idx_vhv_parameters_updated_at ON vhv_parameters(updated_at DESC);
+
 
 -- Forms System Tables
 

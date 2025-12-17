@@ -226,3 +226,98 @@ class TVIManager:
             "active_users_count": ccp_count,
             "total_hours_logged": sum(distribution.values()) / 3600.0,
         }
+
+    def calculate_ttvi_from_tvis(
+        self,
+        user_id: int,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        category_filter: Optional[str] = None,
+    ) -> Dict:
+        """
+        Calculate TTVI (Tiempo Total Vital Indexado) from registered TVI entries.
+        
+        This method integrates TVI data with VHV calculations by providing:
+        - Direct hours (WORK, INVESTMENT categories)
+        - Inherited hours (can be calculated from tools/infrastructure TVIs)
+        - Future hours (estimated from patterns or explicit FUTURE category)
+        
+        Args:
+            user_id: User ID to calculate TTVI for
+            start_date: Optional start date filter (ISO8601)
+            end_date: Optional end date filter (ISO8601)
+            category_filter: Optional category filter (MAINTENANCE, INVESTMENT, WASTE, WORK, LEISURE)
+            
+        Returns:
+            Dictionary with:
+                - direct_hours: Hours from WORK and INVESTMENT categories
+                - inherited_hours: Hours from infrastructure/tools (default 0, can be extended)
+                - future_hours: Estimated future hours (default 0, can be extended)
+                - total_hours: Sum of all components
+                - breakdown_by_category: Hours per category
+        """
+        conn = self._get_db_connection()
+        cursor = conn.cursor()
+
+        query = """
+            SELECT category, SUM(duration_seconds) as total_seconds
+            FROM tvi_entries
+            WHERE user_id = ?
+        """
+        params: List[object] = [user_id]
+
+        if start_date:
+            query += " AND start_time >= ?"
+            params.append(start_date)
+        if end_date:
+            query += " AND end_time <= ?"
+            params.append(end_date)
+        if category_filter:
+            query += " AND category = ?"
+            params.append(category_filter)
+
+        query += " GROUP BY category"
+
+        cursor.execute(query, tuple(params))
+        rows = cursor.fetchall()
+        conn.close()
+
+        breakdown_by_category = {}
+        for row in rows:
+            category = row["category"]
+            seconds = row["total_seconds"]
+            hours = seconds / 3600.0
+            breakdown_by_category[category] = round(hours, 4)
+
+        # Map categories to TTVI components according to Axiom T8
+        # Direct hours: WORK and INVESTMENT (time directly invested)
+        direct_seconds = (
+            breakdown_by_category.get("WORK", 0) * 3600
+            + breakdown_by_category.get("INVESTMENT", 0) * 3600
+        )
+        direct_hours = direct_seconds / 3600.0
+
+        # Inherited hours: Can be calculated from infrastructure/tools TVIs
+        # For now, default to 0 (can be extended to track tool usage)
+        inherited_hours = 0.0
+
+        # Future hours: Estimated maintenance/disposal time
+        # For now, default to 0 (can be extended with predictive models)
+        future_hours = 0.0
+
+        # Total hours
+        total_hours = (
+            breakdown_by_category.get("MAINTENANCE", 0)
+            + breakdown_by_category.get("INVESTMENT", 0)
+            + breakdown_by_category.get("WASTE", 0)
+            + breakdown_by_category.get("WORK", 0)
+            + breakdown_by_category.get("LEISURE", 0)
+        )
+
+        return {
+            "direct_hours": round(direct_hours, 4),
+            "inherited_hours": round(inherited_hours, 4),
+            "future_hours": round(future_hours, 4),
+            "total_hours": round(total_hours, 4),
+            "breakdown_by_category": breakdown_by_category,
+        }

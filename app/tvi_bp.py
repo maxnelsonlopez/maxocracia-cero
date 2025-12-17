@@ -25,7 +25,7 @@ def log_tvi(current_user):
         )
 
     try:
-        user_id = request.user["user_id"]
+        user_id = current_user["user_id"]
         entry = tvi_manager.log_tvi(
             user_id=user_id,
             start_time=data["start_time"],
@@ -46,7 +46,7 @@ def get_tvis(current_user):
     limit = request.args.get("limit", 50, type=int)
     offset = request.args.get("offset", 0, type=int)
 
-    user_id = request.user["user_id"]
+    user_id = current_user["user_id"]
     entries = tvi_manager.get_user_tvis(user_id, limit, offset)
     return jsonify(entries), 200
 
@@ -57,7 +57,7 @@ def get_stats(current_user):
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
 
-    user_id = request.user["user_id"]
+    user_id = current_user["user_id"]
     stats = tvi_manager.calculate_ccp(user_id, start_date, end_date)
     return jsonify(stats), 200
 
