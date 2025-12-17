@@ -16,8 +16,8 @@ from flask import Blueprint, g, jsonify, request
 
 from .jwt_utils import token_required
 from .maxo import clear_vhv_params_cache
-from .utils import get_db
 from .tvi import TVIManager
+from .utils import get_db
 from .vhv_calculator import (
     CASE_STUDY_HUEVO_ETICO,
     CASE_STUDY_HUEVO_INDUSTRIAL,
@@ -510,7 +510,7 @@ def update_parameters(current_user):
             (alpha, beta, gamma, delta, current_user["id"], data["notes"]),
         )
         db.commit()
-        
+
         # Clear cache to force refresh on next request
         clear_vhv_params_cache()
 
@@ -578,11 +578,11 @@ def get_case_studies():
 def calculate_from_tvi(current_user):
     """
     Calculate VHV using registered TVI entries for the T component.
-    
+
     This endpoint integrates TVI (Tiempo Vital Indexado) with VHV calculations,
     allowing users to calculate the VHV of products/services using their
     actual time investment tracked in TVI entries.
-    
+
     Request JSON:
         {
             "start_date": str (optional, ISO8601),
@@ -603,7 +603,7 @@ def calculate_from_tvi(current_user):
             "future_hours_override": float (optional),
             "save": bool (optional, default False)
         }
-    
+
     Response:
         {
             "vhv": {"T": float, "V": float, "R": float},
@@ -619,7 +619,7 @@ def calculate_from_tvi(current_user):
     """
     data = request.get_json()
     user_id = current_user["user_id"]
-    
+
     # Validate required V and R fields
     required_fields = [
         "v_organisms_affected",
@@ -634,11 +634,11 @@ def calculate_from_tvi(current_user):
         "r_frg_factor",
         "r_cs_factor",
     ]
-    
+
     for field in required_fields:
         if field not in data:
             return jsonify({"error": f"Missing required field: {field}"}), 400
-    
+
     # Calculate TTVI from TVI entries
     try:
         ttvi_data = tvi_manager.calculate_ttvi_from_tvis(
@@ -649,23 +649,23 @@ def calculate_from_tvi(current_user):
         )
     except Exception as e:
         return jsonify({"error": f"Failed to calculate TTVI: {str(e)}"}), 500
-    
+
     # Use overrides if provided, otherwise use calculated values
     direct_hours = ttvi_data["direct_hours"]
     inherited_hours = data.get("inherited_hours_override", ttvi_data["inherited_hours"])
     future_hours = data.get("future_hours_override", ttvi_data["future_hours"])
-    
+
     # Get current parameters
     db = get_db()
     params_row = db.execute(
         "SELECT alpha, beta, gamma, delta FROM vhv_parameters ORDER BY id DESC LIMIT 1"
     ).fetchone()
-    
+
     if not params_row:
         return jsonify({"error": "No VHV parameters configured"}), 500
-    
+
     alpha, beta, gamma, delta = params_row
-    
+
     try:
         # Calculate VHV using TVI-derived T component
         result = calculator.calculate_vhv(
@@ -688,7 +688,7 @@ def calculate_from_tvi(current_user):
             gamma=gamma,
             delta=delta,
         )
-        
+
         # Save product if requested
         product_id = None
         if data.get("save", False):
@@ -730,7 +730,7 @@ def calculate_from_tvi(current_user):
             )
             db.commit()
             product_id = cursor.lastrowid
-            
+
             # Save calculation record
             db.execute(
                 """
@@ -747,7 +747,7 @@ def calculate_from_tvi(current_user):
                 ),
             )
             db.commit()
-        
+
         response = {
             "vhv": result["vhv"],
             "maxo_price": result["maxo_price"],
@@ -755,12 +755,12 @@ def calculate_from_tvi(current_user):
             "parameters_used": result["parameters_used"],
             "ttvi_breakdown": ttvi_data,
         }
-        
+
         if product_id:
             response["product_id"] = product_id
-        
+
         return jsonify(response), 200
-    
+
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
     except Exception as e:

@@ -236,18 +236,18 @@ class TVIManager:
     ) -> Dict:
         """
         Calculate TTVI (Tiempo Total Vital Indexado) from registered TVI entries.
-        
+
         This method integrates TVI data with VHV calculations by providing:
         - Direct hours (WORK, INVESTMENT categories)
         - Inherited hours (can be calculated from tools/infrastructure TVIs)
         - Future hours (estimated from patterns or explicit FUTURE category)
-        
+
         Args:
             user_id: User ID to calculate TTVI for
             start_date: Optional start date filter (ISO8601)
             end_date: Optional end date filter (ISO8601)
             category_filter: Optional category filter (MAINTENANCE, INVESTMENT, WASTE, WORK, LEISURE)
-            
+
         Returns:
             Dictionary with:
                 - direct_hours: Hours from WORK and INVESTMENT categories

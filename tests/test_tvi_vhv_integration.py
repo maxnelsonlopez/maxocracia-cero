@@ -5,7 +5,6 @@ Tests the integration between Tiempo Vital Indexado (TVI) and
 Vector de Huella Vital (VHV) calculations.
 """
 
-import json
 import sqlite3
 from datetime import datetime, timedelta
 
@@ -33,15 +32,15 @@ def db_path(tmp_path):
     conn = sqlite3.connect(str(d))
     with open("app/schema.sql") as f:
         conn.executescript(f.read())
-    
+
     # Create a user
     from werkzeug.security import generate_password_hash
-    
+
     conn.execute(
         "INSERT INTO users (id, email, name, password_hash) VALUES (?, ?, ?, ?)",
         (1, "test@example.com", "Test User", generate_password_hash("Password1")),
     )
-    
+
     # Create VHV parameters
     conn.execute(
         """
@@ -50,7 +49,7 @@ def db_path(tmp_path):
         """,
         (100.0, 2000.0, 1.0, 100.0, "Test parameters"),
     )
-    
+
     conn.commit()
     conn.close()
     return str(d)
@@ -72,7 +71,7 @@ def test_calculate_ttvi_from_tvis_empty(db_path):
     """Test calculating TTVI when user has no TVI entries."""
     manager = TVIManager(db_path=db_path)
     result = manager.calculate_ttvi_from_tvis(user_id=1)
-    
+
     assert result["direct_hours"] == 0.0
     assert result["inherited_hours"] == 0.0
     assert result["future_hours"] == 0.0
@@ -83,7 +82,7 @@ def test_calculate_ttvi_from_tvis_empty(db_path):
 def test_calculate_ttvi_from_tvis_with_work(db_path):
     """Test calculating TTVI with WORK category entries."""
     manager = TVIManager(db_path=db_path)
-    
+
     # Add WORK entries
     now = datetime.now()
     manager.log_tvi(
@@ -100,9 +99,9 @@ def test_calculate_ttvi_from_tvis_with_work(db_path):
         category="WORK",
         description="More work",
     )
-    
+
     result = manager.calculate_ttvi_from_tvis(user_id=1)
-    
+
     assert result["direct_hours"] == 2.0  # 2 hours of WORK
     assert result["inherited_hours"] == 0.0
     assert result["future_hours"] == 0.0
@@ -113,7 +112,7 @@ def test_calculate_ttvi_from_tvis_with_work(db_path):
 def test_calculate_ttvi_from_tvis_with_investment(db_path):
     """Test calculating TTVI with INVESTMENT category entries."""
     manager = TVIManager(db_path=db_path)
-    
+
     now = datetime.now()
     manager.log_tvi(
         user_id=1,
@@ -122,9 +121,9 @@ def test_calculate_ttvi_from_tvis_with_investment(db_path):
         category="INVESTMENT",
         description="Learning",
     )
-    
+
     result = manager.calculate_ttvi_from_tvis(user_id=1)
-    
+
     assert result["direct_hours"] == 2.0  # INVESTMENT counts as direct
     assert result["breakdown_by_category"]["INVESTMENT"] == 2.0
 
@@ -135,7 +134,6 @@ def test_calculate_ttvi_from_tvis_with_date_filter(db_path):
     
     now = datetime.now()
     yesterday = now - timedelta(days=1)
-    tomorrow = now + timedelta(days=1)
     
     # Add entry from yesterday
     manager.log_tvi(
@@ -166,7 +164,7 @@ def test_calculate_ttvi_from_tvis_with_date_filter(db_path):
 def test_calculate_ttvi_from_tvis_with_category_filter(db_path):
     """Test calculating TTVI with category filter."""
     manager = TVIManager(db_path=db_path)
-    
+
     now = datetime.now()
     manager.log_tvi(
         user_id=1,
@@ -182,10 +180,10 @@ def test_calculate_ttvi_from_tvis_with_category_filter(db_path):
         category="LEISURE",
         description="Leisure",
     )
-    
+
     # Filter only WORK
     result = manager.calculate_ttvi_from_tvis(user_id=1, category_filter="WORK")
-    
+
     assert result["direct_hours"] == 1.0  # Only WORK counts as direct
     assert "LEISURE" not in result["breakdown_by_category"]
 
@@ -200,14 +198,14 @@ def test_vhv_calculate_from_tvi_endpoint(client, auth_token, db_path):
         "category": "WORK",
         "description": "Test work for VHV",
     }
-    
+
     response = client.post(
         "/tvi",
         json=tvi_data,
         headers={"Authorization": f"Bearer {auth_token}"},
     )
     assert response.status_code == 201
-    
+
     # Now calculate VHV from TVI
     vhv_data = {
         "v_organisms_affected": 0.001,
@@ -222,21 +220,21 @@ def test_vhv_calculate_from_tvi_endpoint(client, auth_token, db_path):
         "r_frg_factor": 1.0,
         "r_cs_factor": 1.0,
     }
-    
+
     response = client.post(
         "/vhv/calculate-from-tvi",
         json=vhv_data,
         headers={"Authorization": f"Bearer {auth_token}"},
     )
-    
+
     assert response.status_code == 200
     data = response.get_json()
-    
+
     assert "vhv" in data
     assert "maxo_price" in data
     assert "breakdown" in data
     assert "ttvi_breakdown" in data
-    
+
     # Check TTVI breakdown
     ttvi = data["ttvi_breakdown"]
     assert ttvi["direct_hours"] == 1.0  # 1 hour of WORK
@@ -253,13 +251,13 @@ def test_vhv_calculate_from_tvi_with_overrides(client, auth_token, db_path):
         "end_time": now.isoformat(),
         "category": "WORK",
     }
-    
+
     client.post(
         "/tvi",
         json=tvi_data,
         headers={"Authorization": f"Bearer {auth_token}"},
     )
-    
+
     # Calculate with overrides
     vhv_data = {
         "v_organisms_affected": 0.001,
@@ -276,16 +274,16 @@ def test_vhv_calculate_from_tvi_with_overrides(client, auth_token, db_path):
         "inherited_hours_override": 0.5,
         "future_hours_override": 0.2,
     }
-    
+
     response = client.post(
         "/vhv/calculate-from-tvi",
         json=vhv_data,
         headers={"Authorization": f"Bearer {auth_token}"},
     )
-    
+
     assert response.status_code == 200
     data = response.get_json()
-    
+
     # Check that overrides were used
     ttvi = data["ttvi_breakdown"]
     assert ttvi["inherited_hours"] == 0.5
@@ -307,7 +305,7 @@ def test_vhv_calculate_from_tvi_requires_auth(client, db_path):
         "r_frg_factor": 1.0,
         "r_cs_factor": 1.0,
     }
-    
+
     response = client.post("/vhv/calculate-from-tvi", json=vhv_data)
     assert response.status_code == 401
 
@@ -319,9 +317,8 @@ def test_vhv_calculate_from_tvi_missing_fields(client, auth_token, db_path):
         json={"v_organisms_affected": 0.001},  # Missing other fields
         headers={"Authorization": f"Bearer {auth_token}"},
     )
-    
+
     assert response.status_code == 400
     data = response.get_json()
     assert "error" in data
     assert "Missing required field" in data["error"]
-

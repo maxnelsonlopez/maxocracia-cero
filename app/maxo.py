@@ -30,22 +30,26 @@ def get_vhv_parameters(use_cache: bool = True) -> Tuple[float, float, float, flo
     """
     Fetch the latest VHV valuation parameters from the Oracles (DB).
     Uses in-memory cache to reduce database queries.
-    
+
     Args:
         use_cache: If True, use cached values (default True). Set to False to force refresh.
-    
+
     Returns:
         Tuple of (alpha, beta, gamma, delta)
     """
     global _vhv_params_cache, _vhv_params_cache_timestamp
-    
+
     import time
-    
+
     # Return cached value if available and less than 60 seconds old
-    if use_cache and _vhv_params_cache is not None and _vhv_params_cache_timestamp is not None:
+    if (
+        use_cache
+        and _vhv_params_cache is not None
+        and _vhv_params_cache_timestamp is not None
+    ):
         if time.time() - _vhv_params_cache_timestamp < 60:
             return _vhv_params_cache
-    
+
     db = get_db()
     try:
         cur = db.execute(
