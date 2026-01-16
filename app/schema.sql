@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
   city TEXT,
   neighborhood TEXT,
   values_json TEXT,
+  is_admin INTEGER DEFAULT 0,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 

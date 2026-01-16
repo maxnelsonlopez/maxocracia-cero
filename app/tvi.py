@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
 
@@ -77,7 +77,16 @@ class TVIManager:
         if end_dt <= start_dt:
             raise ValueError("End time must be after start time.")
 
+        # Protection against future time logging
+        now = datetime.now(timezone.utc)
+        if end_dt > now:
+            raise ValueError("TVI Violation: You cannot log time in the future.")
+
         duration_seconds = int((end_dt - start_dt).total_seconds())
+        
+        # Sanity check: duration cannot exceed 24 hours
+        if duration_seconds > 86400:
+            raise ValueError("TVI Violation: A single time block cannot exceed 24 hours.")
 
         if self._check_overlap(user_id, start_dt, end_dt):
             raise ValueError(

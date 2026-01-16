@@ -106,9 +106,30 @@ def token_required(f):
         data = verify_token(token)
         if data is None:
             return jsonify({"error": "invalid token"}), 401
-        # attach user info to request
+        
+        # Attach user info to request
         request.user = data
-        # pass current_user as first argument to the decorated function
+        return f(data, *args, **kwargs)
+
+    return decorated
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.headers.get("Authorization", "")
+        if not auth.startswith("Bearer "):
+            return jsonify({"error": "authorization required"}), 401
+        token = auth.split(" ", 1)[1]
+        data = verify_token(token)
+        if data is None:
+            return jsonify({"error": "invalid token"}), 401
+        
+        # Check for admin flag in JWT payload
+        if not data.get("is_admin"):
+            return jsonify({"error": "admin privileges required"}), 403
+            
+        request.user = data
         return f(data, *args, **kwargs)
 
     return decorated

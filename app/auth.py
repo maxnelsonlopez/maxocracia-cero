@@ -52,8 +52,8 @@ def register():
         user_id = cursor.lastrowid
         db.commit()
 
-        # Crear tokens para el nuevo usuario
-        access_token = create_token({"user_id": user_id, "email": email})
+        # Crear tokens para el nuevo usuario (predeterminado no admin)
+        access_token = create_token({"user_id": user_id, "email": email, "is_admin": 0})
 
         # Generar refresh token
         jti = str(uuid4())
@@ -98,7 +98,11 @@ def login():
     session["user_id"] = user["id"]
 
     # Create access token (expires in 1 hour)
-    access_token = create_token({"user_id": user["id"], "email": user["email"]})
+    access_token = create_token({
+        "user_id": user["id"], 
+        "email": user["email"],
+        "is_admin": user["is_admin"]
+    })
 
     # Generate refresh token (expires in 30 days)
     jti = str(uuid4())
@@ -222,7 +226,11 @@ def refresh():
         data = verify_token(token, allow_expired=True)
         if data is None:
             return jsonify({"error": "invalid token"}), 401
-        payload = {"user_id": data.get("user_id"), "email": data.get("email")}
+        payload = {
+            "user_id": data.get("user_id"), 
+            "email": data.get("email"),
+            "is_admin": data.get("is_admin", 0)
+        }
         new_token = create_token(payload)
         return jsonify({"token": new_token})
 
@@ -260,7 +268,11 @@ def refresh():
         return jsonify({"error": "user not found"}), 404
 
     # Create new access token
-    access_token = create_token({"user_id": user["id"], "email": user["email"]})
+    access_token = create_token({
+        "user_id": user["id"], 
+        "email": user["email"],
+        "is_admin": user["is_admin"]
+    })
 
     # Prepare response data
     response_data = {

@@ -8,7 +8,12 @@ bp = Blueprint("maxo", __name__, url_prefix="/maxo")
 
 
 @bp.route("/<int:user_id>/balance", methods=["GET"])
-def balance(user_id):
+@token_required
+def balance(current_user, user_id):
+    # Only allow users to see their own balance, unless they are admin
+    if current_user.get("user_id") != user_id and not current_user.get("is_admin"):
+        return jsonify({"error": "forbidden: cannot view other user's balance"}), 403
+        
     bal = get_balance(user_id)
     return jsonify({"user_id": user_id, "balance": bal})
 
@@ -72,31 +77,40 @@ def _transfer_impl():
     except Exception:
         return jsonify({"error": "invalid user ids"}), 400
 
-    # check users exist
-    cur = db.execute("SELECT id FROM users WHERE id = ?", (from_id,))
-    if cur.fetchone() is None:
-        return jsonify({"error": "from_user not found"}), 404
-    cur = db.execute("SELECT id FROM users WHERE id = ?", (to_id,))
-    if cur.fetchone() is None:
-        return jsonify({"error": "to_user not found"}), 404
+    if from_id == to_id:
+        return jsonify({"error": "cannot transfer to self"}), 400
 
-    # ensure sender has sufficient balance
-    sender_balance = get_balance(from_id)
-    if sender_balance < amount:
-        return (
-            jsonify(
-                {
-                    "error": "insufficient balance",
-                    "balance": sender_balance,
-                    "required": amount,
-                }
-            ),
-            400,
-        )
-
-    db = get_db()
+    # Start transaction (beginning immediate for better protection against race conditions)
     try:
-        # perform both ledger writes within the same DB connection/transaction
+        db.execute("BEGIN IMMEDIATE")
+        
+        # Check users exist
+        cur = db.execute("SELECT id FROM users WHERE id = ?", (from_id,))
+        if cur.fetchone() is None:
+            db.rollback()
+            return jsonify({"error": "from_user not found"}), 404
+            
+        cur = db.execute("SELECT id FROM users WHERE id = ?", (to_id,))
+        if cur.fetchone() is None:
+            db.rollback()
+            return jsonify({"error": "to_user not found"}), 404
+
+        # ensure sender has sufficient balance (inside transaction)
+        sender_balance = get_balance(from_id)
+        if sender_balance < amount:
+            db.rollback()
+            return (
+                jsonify(
+                    {
+                        "error": "insufficient balance",
+                        "balance": sender_balance,
+                        "required": amount,
+                    }
+                ),
+                400,
+            )
+
+        # perform both ledger writes within the same transaction
         db.execute(
             "INSERT INTO maxo_ledger (user_id, change_amount, reason) VALUES (?, ?, ?)",
             (from_id, -amount, f"Transfer to {to_id}: {reason}"),
@@ -106,9 +120,10 @@ def _transfer_impl():
             (to_id, amount, f"Transfer from {from_id}: {reason}"),
         )
         db.commit()
-    except Exception:
+    except Exception as e:
         db.rollback()
-        # Don't expose internal error details to prevent information leakage
-        return jsonify({"error": "Transfer failed"}), 500
+        # Log error for internal tracking
+        print(f"Transfer error: {e}")
+        return jsonify({"error": "Transfer failed due to an internal error"}), 500
 
-    return jsonify({"success": True}), 200
+    return jsonify({"success": True, "new_balance": get_balance(from_id)}), 200

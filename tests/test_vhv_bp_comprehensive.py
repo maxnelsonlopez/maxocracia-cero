@@ -12,16 +12,27 @@ import pytest
 @pytest.fixture
 def auth_headers(client):
     """Create authentication headers for testing."""
-    # Register test user
+    # Login and get token (use pre-existing test user from conftest if available, 
+    # but here we follow the pattern of creating one specifically for this test file)
     register_data = {
         "email": "testauth_vhv@example.com",
-        "password": "TestPassword123!",
+        "password": "ValidPass123!",
         "name": "Test VHV User",
     }
     client.post("/auth/register", json=register_data)
     
-    # Login and get token
-    login_data = {"email": "testauth_vhv@example.com", "password": "TestPassword123!"}
+    login_data = {"email": "testauth_vhv@example.com", "password": "ValidPass123!"}
+    response = client.post("/auth/login", json=login_data)
+    token = response.get_json()["access_token"]
+    
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def admin_headers(client):
+    """Create admin authentication headers for testing."""
+    # Use the admin@example.com user from conftest.py
+    login_data = {"email": "admin@example.com", "password": "ValidPass123!"}
     response = client.post("/auth/login", json=login_data)
     token = response.get_json()["access_token"]
     
@@ -230,8 +241,8 @@ class TestVHVBPCompare:
 class TestVHVBParameters:
     """Tests para endpoints de parámetros VHV."""
 
-    def test_update_parameters_success(self, app, client, auth_headers):
-        """Test update_parameters con valores válidos."""
+    def test_update_parameters_success(self, app, client, admin_headers):
+        """Test update_parameters con valores válidos (Admin)."""
         data = {
             "alpha": 150.0,
             "beta": 2500.0,
@@ -243,14 +254,14 @@ class TestVHVBParameters:
             "/vhv/parameters",
             data=json.dumps(data),
             content_type="application/json",
-            headers=auth_headers,
+            headers=admin_headers,
         )
         assert response.status_code == 200
         json_data = response.get_json()
         assert "message" in json_data
         assert "parameters" in json_data
 
-    def test_update_parameters_axiom_violation_alpha(self, app, client, auth_headers):
+    def test_update_parameters_axiom_violation_alpha(self, app, client, admin_headers):
         """Test update_parameters violando axioma α > 0."""
         data = {
             "alpha": 0.0,  # Violación: debe ser > 0
@@ -263,14 +274,14 @@ class TestVHVBParameters:
             "/vhv/parameters",
             data=json.dumps(data),
             content_type="application/json",
-            headers=auth_headers,
+            headers=admin_headers,
         )
         assert response.status_code == 400
         json_data = response.get_json()
         assert "error" in json_data
         assert "axiom" in json_data["error"].lower() or "α" in json_data["error"]
 
-    def test_update_parameters_axiom_violation_beta(self, app, client, auth_headers):
+    def test_update_parameters_axiom_violation_beta(self, app, client, admin_headers):
         """Test update_parameters violando axioma β > 0."""
         data = {
             "alpha": 100.0,
@@ -283,13 +294,13 @@ class TestVHVBParameters:
             "/vhv/parameters",
             data=json.dumps(data),
             content_type="application/json",
-            headers=auth_headers,
+            headers=admin_headers,
         )
         assert response.status_code == 400
         json_data = response.get_json()
         assert "error" in json_data
 
-    def test_update_parameters_axiom_violation_gamma(self, app, client, auth_headers):
+    def test_update_parameters_axiom_violation_gamma(self, app, client, admin_headers):
         """Test update_parameters violando axioma γ ≥ 1."""
         data = {
             "alpha": 100.0,
@@ -302,13 +313,13 @@ class TestVHVBParameters:
             "/vhv/parameters",
             data=json.dumps(data),
             content_type="application/json",
-            headers=auth_headers,
+            headers=admin_headers,
         )
         assert response.status_code == 400
         json_data = response.get_json()
         assert "error" in json_data
 
-    def test_update_parameters_missing_notes(self, app, client, auth_headers):
+    def test_update_parameters_missing_notes(self, app, client, admin_headers):
         """Test update_parameters sin notes requerido."""
         data = {
             "alpha": 150.0,
@@ -321,7 +332,7 @@ class TestVHVBParameters:
             "/vhv/parameters",
             data=json.dumps(data),
             content_type="application/json",
-            headers=auth_headers,
+            headers=admin_headers,
         )
         assert response.status_code == 400
         json_data = response.get_json()
@@ -342,6 +353,24 @@ class TestVHVBParameters:
             content_type="application/json",
         )
         assert response.status_code == 401
+
+    def test_update_parameters_requires_admin(self, app, client, auth_headers):
+        """Test que update_parameters requiere privilegios de admin (RBAC)."""
+        data = {
+            "alpha": 150.0,
+            "beta": 2500.0,
+            "gamma": 1.5,
+            "delta": 150.0,
+            "notes": "Hacker notes",
+        }
+        response = client.put(
+            "/vhv/parameters",
+            data=json.dumps(data),
+            content_type="application/json",
+            headers=auth_headers,
+        )
+        assert response.status_code == 403
+        assert "admin privileges required" in response.get_json()["error"]
 
 
 class TestVHVBPCaseStudies:

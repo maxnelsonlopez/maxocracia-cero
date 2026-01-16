@@ -33,13 +33,18 @@ def app():
         db = sqlite3.connect(db_path)
         test_password = "ValidPass123!"
         db.execute(
-            "INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)",
-            ("test@example.com", "Test User", generate_password_hash(test_password)),
+            "INSERT INTO users (email, name, is_admin, password_hash) VALUES (?, ?, ?, ?)",
+            ("test@example.com", "Test User", 0, generate_password_hash(test_password)),
         )
         # Add a second test user for specific tests
         db.execute(
-            "INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)",
-            ("test2@example.com", "Test User 2", generate_password_hash(test_password)),
+            "INSERT INTO users (email, name, is_admin, password_hash) VALUES (?, ?, ?, ?)",
+            ("test2@example.com", "Test User 2", 0, generate_password_hash(test_password)),
+        )
+        # Add an admin user
+        db.execute(
+            "INSERT INTO users (email, name, is_admin, password_hash) VALUES (?, ?, ?, ?)",
+            ("admin@example.com", "Admin User", 1, generate_password_hash(test_password)),
         )
         db.commit()
         db.close()
@@ -86,6 +91,19 @@ def auth_client(client, auth):
     """A test client with authentication."""
     # Login first
     response = auth.login()
+    assert response.status_code == 200
+    token = response.get_json().get("access_token")
+
+    # Set the token in the client
+    client.environ_base["HTTP_AUTHORIZATION"] = f"Bearer {token}"
+    return client
+
+
+@pytest.fixture
+def admin_client(client, auth):
+    """A test client with admin authentication."""
+    # Login as admin
+    response = auth.login(email="admin@example.com", password="ValidPass123!")
     assert response.status_code == 200
     token = response.get_json().get("access_token")
 

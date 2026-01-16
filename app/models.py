@@ -15,6 +15,7 @@ class User(db.Model):  # type: ignore
     city = db.Column(db.String(50))
     neighborhood = db.Column(db.String(50))
     values_json = db.Column(db.Text)  # JSON stored as text in SQLite
+    is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.String(30), default=lambda: datetime.now(datetime.UTC).isoformat())
 
     def __repr__(self):

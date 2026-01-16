@@ -14,7 +14,7 @@ import json
 
 from flask import Blueprint, g, jsonify, request
 
-from .jwt_utils import token_required
+from .jwt_utils import admin_required, token_required
 from .maxo import clear_vhv_params_cache
 from .tvi import TVIManager
 from .utils import get_db
@@ -99,6 +99,38 @@ def calculate():
         return jsonify({"error": "No VHV parameters configured"}), 500
 
     alpha, beta, gamma, delta = params_row
+
+    # Range Validation
+    try:
+        # T components (Hours must be non-negative)
+        for h_field in ["t_direct_hours", "t_inherited_hours", "t_future_hours"]:
+            if float(data[h_field]) < 0:
+                return jsonify({"error": f"{h_field} cannot be negative"}), 400
+
+        # V components
+        if float(data["v_organisms_affected"]) < 0:
+            return jsonify({"error": "v_organisms_affected cannot be negative"}), 400
+        
+        cv = float(data["v_consciousness_factor"])
+        if cv < 0 or cv > 1:
+            return jsonify({"error": "v_consciousness_factor must be between 0 and 1"}), 400
+        
+        if float(data["v_suffering_factor"]) < 1:
+            return jsonify({"error": "v_suffering_factor must be >= 1 (Axiom: cannot reward suffering)"}), 400
+            
+        if float(data["v_abundance_factor"]) <= 0:
+            return jsonify({"error": "v_abundance_factor must be greater than 0"}), 400
+            
+        # R components
+        for r_field in ["r_minerals_kg", "r_water_m3", "r_petroleum_l", "r_land_hectares"]:
+            if float(data[r_field]) < 0:
+                return jsonify({"error": f"{r_field} cannot be negative"}), 400
+        
+        if float(data["r_frg_factor"]) <= 0 or float(data["r_cs_factor"]) <= 0:
+            return jsonify({"error": "Resource factors (FRG, CS) must be greater than 0"}), 400
+
+    except (ValueError, TypeError):
+        return jsonify({"error": "Invalid numeric values provided"}), 400
 
     try:
         # Calculate VHV
@@ -449,7 +481,7 @@ def get_parameters():
 
 
 @vhv_bp.route("/parameters", methods=["PUT"])
-@token_required
+@admin_required
 def update_parameters(current_user):
     """
     Update VHV valuation parameters (requires authentication).
@@ -666,6 +698,39 @@ def calculate_from_tvi(current_user):
         return jsonify({"error": "No VHV parameters configured"}), 500
 
     alpha, beta, gamma, delta = params_row
+
+    # Range Validation
+    try:
+        # T overrides (if any)
+        if float(inherited_hours) < 0:
+            return jsonify({"error": "inherited_hours_override cannot be negative"}), 400
+        if float(future_hours) < 0:
+            return jsonify({"error": "future_hours_override cannot be negative"}), 400
+
+        # V components
+        if float(data["v_organisms_affected"]) < 0:
+            return jsonify({"error": "v_organisms_affected cannot be negative"}), 400
+        
+        cv = float(data["v_consciousness_factor"])
+        if cv < 0 or cv > 1:
+            return jsonify({"error": "v_consciousness_factor must be between 0 and 1"}), 400
+        
+        if float(data["v_suffering_factor"]) < 1:
+            return jsonify({"error": "v_suffering_factor must be >= 1 (Axiom: cannot reward suffering)"}), 400
+            
+        if float(data["v_abundance_factor"]) <= 0:
+            return jsonify({"error": "v_abundance_factor must be greater than 0"}), 400
+            
+        # R components
+        for r_field in ["r_minerals_kg", "r_water_m3", "r_petroleum_l", "r_land_hectares"]:
+            if float(data[r_field]) < 0:
+                return jsonify({"error": f"{r_field} cannot be negative"}), 400
+        
+        if float(data["r_frg_factor"]) <= 0 or float(data["r_cs_factor"]) <= 0:
+            return jsonify({"error": "Resource factors (FRG, CS) must be greater than 0"}), 400
+
+    except (ValueError, TypeError):
+        return jsonify({"error": "Invalid numeric values provided"}), 400
 
     try:
         # Calculate VHV using TVI-derived T component
