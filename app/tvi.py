@@ -4,13 +4,17 @@ from typing import Dict, List, Optional
 
 
 class TVIManager:
-    def __init__(self, db_path: str = "comun.db"):
-        self.db_path = db_path
+    """
+    TVI (Tiempo Vital Indexado) Manager.
+    
+    Uses Flask's get_db() utility to ensure proper database access
+    within application context.
+    """
 
     def _get_db_connection(self):
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        return conn
+        """Get database connection from Flask app context."""
+        from .utils import get_db
+        return get_db()
 
     def _check_overlap(
         self,
@@ -50,7 +54,7 @@ class TVIManager:
 
         cursor.execute(query, tuple(params))
         result = cursor.fetchone()
-        conn.close()
+        # Flask manages connection lifecycle, don't close here
         return result is not None
 
     def log_tvi(
@@ -101,10 +105,8 @@ class TVIManager:
             tvi_id = cursor.lastrowid
             conn.commit()
         except sqlite3.IntegrityError as e:
-            conn.close()
+            # Flask manages connection lifecycle
             raise ValueError(f"Database Integrity Error: {str(e)}")
-
-        conn.close()
 
         return {
             "id": tvi_id,
@@ -126,7 +128,7 @@ class TVIManager:
             (user_id, limit, offset),
         )
         rows = cursor.fetchall()
-        conn.close()
+        # Flask manages connection lifecycle
         return [dict(row) for row in rows]
 
     def calculate_ccp(
@@ -156,7 +158,7 @@ class TVIManager:
 
         cursor.execute(query, tuple(params))
         rows = cursor.fetchall()
-        conn.close()
+        # Flask manages connection lifecycle
 
         stats = {row["category"]: row["total_seconds"] for row in rows}
 
@@ -218,7 +220,7 @@ class TVIManager:
 
         avg_ccp = round(total_ccp / ccp_count, 4) if ccp_count > 0 else 0.0
 
-        conn.close()
+        # Flask manages connection lifecycle
 
         return {
             "distribution": distribution,
@@ -280,7 +282,7 @@ class TVIManager:
 
         cursor.execute(query, tuple(params))
         rows = cursor.fetchall()
-        conn.close()
+        # Flask manages connection lifecycle
 
         breakdown_by_category = {}
         for row in rows:

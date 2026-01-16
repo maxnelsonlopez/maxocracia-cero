@@ -507,7 +507,7 @@ def update_parameters(current_user):
             INSERT INTO vhv_parameters (alpha, beta, gamma, delta, updated_by, notes)
             VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (alpha, beta, gamma, delta, current_user["id"], data["notes"]),
+            (alpha, beta, gamma, delta, current_user["user_id"], data["notes"]),
         )
         db.commit()
 
@@ -640,6 +640,7 @@ def calculate_from_tvi(current_user):
             return jsonify({"error": f"Missing required field: {field}"}), 400
 
     # Calculate TTVI from TVI entries
+    tvi_manager = TVIManager()  # Instantiate per request
     try:
         ttvi_data = tvi_manager.calculate_ttvi_from_tvis(
             user_id=user_id,
@@ -747,6 +748,11 @@ def calculate_from_tvi(current_user):
                 ),
             )
             db.commit()
+
+        # Update ttvi_data with final values (including overrides)
+        ttvi_data["inherited_hours"] = inherited_hours
+        ttvi_data["future_hours"] = future_hours
+        ttvi_data["total_hours"] = direct_hours + inherited_hours + future_hours
 
         response = {
             "vhv": result["vhv"],

@@ -26,7 +26,7 @@ def client(app):
     return app.test_client()
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")  # Create fresh DB for each test
 def db_path(tmp_path):
     d = tmp_path / "test_tvi_vhv.db"
     conn = sqlite3.connect(str(d))
@@ -67,10 +67,11 @@ def auth_token(client):
     return data["access_token"]  # Use 'access_token' not 'token'
 
 
-def test_calculate_ttvi_from_tvis_empty(db_path):
+def test_calculate_ttvi_from_tvis_empty(app, db_path):
     """Test calculating TTVI when user has no TVI entries."""
-    manager = TVIManager(db_path=db_path)
-    result = manager.calculate_ttvi_from_tvis(user_id=1)
+    with app.app_context():
+        manager = TVIManager()
+        result = manager.calculate_ttvi_from_tvis(user_id=1)
 
     assert result["direct_hours"] == 0.0
     assert result["inherited_hours"] == 0.0
@@ -79,28 +80,29 @@ def test_calculate_ttvi_from_tvis_empty(db_path):
     assert result["breakdown_by_category"] == {}
 
 
-def test_calculate_ttvi_from_tvis_with_work(db_path):
+def test_calculate_ttvi_from_tvis_with_work(app, db_path):
     """Test calculating TTVI with WORK category entries."""
-    manager = TVIManager(db_path=db_path)
+    with app.app_context():
+        manager = TVIManager()
 
-    # Add WORK entries
-    now = datetime.now()
-    manager.log_tvi(
-        user_id=1,
-        start_time=(now - timedelta(hours=2)).isoformat(),
-        end_time=(now - timedelta(hours=1)).isoformat(),
-        category="WORK",
-        description="Test work",
-    )
-    manager.log_tvi(
-        user_id=1,
-        start_time=(now - timedelta(hours=1)).isoformat(),
-        end_time=now.isoformat(),
-        category="WORK",
-        description="More work",
-    )
+        # Add WORK entries
+        now = datetime.now()
+        manager.log_tvi(
+            user_id=1,
+            start_time=(now - timedelta(hours=2)).isoformat(),
+            end_time=(now - timedelta(hours=1)).isoformat(),
+            category="WORK",
+            description="Test work",
+        )
+        manager.log_tvi(
+            user_id=1,
+            start_time=(now - timedelta(hours=1)).isoformat(),
+            end_time=now.isoformat(),
+            category="WORK",
+            description="More work",
+        )
 
-    result = manager.calculate_ttvi_from_tvis(user_id=1)
+        result = manager.calculate_ttvi_from_tvis(user_id=1)
 
     assert result["direct_hours"] == 2.0  # 2 hours of WORK
     assert result["inherited_hours"] == 0.0
@@ -109,80 +111,83 @@ def test_calculate_ttvi_from_tvis_with_work(db_path):
     assert result["breakdown_by_category"]["WORK"] == 2.0
 
 
-def test_calculate_ttvi_from_tvis_with_investment(db_path):
+def test_calculate_ttvi_from_tvis_with_investment(app, db_path):
     """Test calculating TTVI with INVESTMENT category entries."""
-    manager = TVIManager(db_path=db_path)
+    with app.app_context():
+        manager = TVIManager()
 
-    now = datetime.now()
-    manager.log_tvi(
-        user_id=1,
-        start_time=(now - timedelta(hours=3)).isoformat(),
-        end_time=(now - timedelta(hours=1)).isoformat(),
-        category="INVESTMENT",
-        description="Learning",
-    )
+        now = datetime.now()
+        manager.log_tvi(
+            user_id=1,
+            start_time=(now - timedelta(hours=3)).isoformat(),
+            end_time=(now - timedelta(hours=1)).isoformat(),
+            category="INVESTMENT",
+            description="Learning",
+        )
 
-    result = manager.calculate_ttvi_from_tvis(user_id=1)
+        result = manager.calculate_ttvi_from_tvis(user_id=1)
 
     assert result["direct_hours"] == 2.0  # INVESTMENT counts as direct
     assert result["breakdown_by_category"]["INVESTMENT"] == 2.0
 
 
-def test_calculate_ttvi_from_tvis_with_date_filter(db_path):
+def test_calculate_ttvi_from_tvis_with_date_filter(app, db_path):
     """Test calculating TTVI with date range filter."""
-    manager = TVIManager(db_path=db_path)
+    with app.app_context():
+        manager = TVIManager()
 
-    now = datetime.now()
-    yesterday = now - timedelta(days=1)
+        now = datetime.now()
+        yesterday = now - timedelta(days=1)
 
-    # Add entry from yesterday
-    manager.log_tvi(
-        user_id=1,
-        start_time=(yesterday - timedelta(hours=1)).isoformat(),
-        end_time=yesterday.isoformat(),
-        category="WORK",
-        description="Old work",
-    )
+        # Add entry from yesterday
+        manager.log_tvi(
+            user_id=1,
+            start_time=(yesterday - timedelta(hours=1)).isoformat(),
+            end_time=yesterday.isoformat(),
+            category="WORK",
+            description="Old work",
+        )
 
-    # Add entry from today
-    manager.log_tvi(
-        user_id=1,
-        start_time=(now - timedelta(hours=1)).isoformat(),
-        end_time=now.isoformat(),
-        category="WORK",
-        description="Today work",
-    )
+        # Add entry from today
+        manager.log_tvi(
+            user_id=1,
+            start_time=(now - timedelta(hours=1)).isoformat(),
+            end_time=now.isoformat(),
+            category="WORK",
+            description="Today work",
+        )
 
-    # Filter only today
-    result = manager.calculate_ttvi_from_tvis(
-        user_id=1, start_date=now.date().isoformat()
-    )
+        # Filter only today
+        result = manager.calculate_ttvi_from_tvis(
+            user_id=1, start_date=now.date().isoformat()
+        )
 
     assert result["direct_hours"] == 1.0  # Only today's entry
 
 
-def test_calculate_ttvi_from_tvis_with_category_filter(db_path):
+def test_calculate_ttvi_from_tvis_with_category_filter(app, db_path):
     """Test calculating TTVI with category filter."""
-    manager = TVIManager(db_path=db_path)
+    with app.app_context():
+        manager = TVIManager()
 
-    now = datetime.now()
-    manager.log_tvi(
-        user_id=1,
-        start_time=(now - timedelta(hours=2)).isoformat(),
-        end_time=(now - timedelta(hours=1)).isoformat(),
-        category="WORK",
-        description="Work",
-    )
-    manager.log_tvi(
-        user_id=1,
-        start_time=(now - timedelta(hours=1)).isoformat(),
-        end_time=now.isoformat(),
-        category="LEISURE",
-        description="Leisure",
-    )
+        now = datetime.now()
+        manager.log_tvi(
+            user_id=1,
+            start_time=(now - timedelta(hours=2)).isoformat(),
+            end_time=(now - timedelta(hours=1)).isoformat(),
+            category="WORK",
+            description="Work",
+        )
+        manager.log_tvi(
+            user_id=1,
+            start_time=(now - timedelta(hours=1)).isoformat(),
+            end_time=now.isoformat(),
+            category="LEISURE",
+            description="Leisure",
+        )
 
-    # Filter only WORK
-    result = manager.calculate_ttvi_from_tvis(user_id=1, category_filter="WORK")
+        # Filter only WORK
+        result = manager.calculate_ttvi_from_tvis(user_id=1, category_filter="WORK")
 
     assert result["direct_hours"] == 1.0  # Only WORK counts as direct
     assert "LEISURE" not in result["breakdown_by_category"]
