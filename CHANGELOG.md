@@ -3,6 +3,37 @@
 All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
+
+## 2026-01-16 — Edición 3 Dinámica: Sistema de Refinamiento del Libro por Oráculos
+
+### Añadido
+- **Edición 3 Dinámica del Libro**: Creado sistema completo de refinamiento iterativo del libro Maxocracia mediante sesiones de oráculos sintéticos en `docs/book/edicion_3_dinamica/`.
+- **Estructura de Documentación**:
+  - `README.md`: Visión general de la edición dinámica, roles de oráculos, criterios de éxito
+  - `GUIA_SESIONES.md`: Protocolo detallado para conducir sesiones de refinamiento con plantillas, métricas de calidad y protocolos de disenso
+  - `MAPA_CAPITULOS.md`: Estado y plan de trabajo para los 16 capítulos del libro con prioridades y sesiones planificadas
+  - `RESUMEN_INTEGRACION.md`: Resumen ejecutivo completo del sistema de integración
+- **Sistema de Integraciones Pendientes** (`integraciones_pendientes/`):
+  - `INDICE.md`: Vista rápida de todas las integraciones con métricas de progreso
+  - `mapa_axiomas_emergentes.md`: Integración de T14 (Precaución Intergeneracional), T15 (Protocolo de Disenso Evolutivo), Extensión T12 (Valor Epistémico de la Deliberación)
+  - `mapa_capa_ternura.md`: Integración de los 4 pilares del corazón (Perdón, Belleza, Misterio, Fragilidad) con propuestas de todos los oráculos
+  - `mapa_victoria_sintetica.md`: Lecciones de la Cohorte Original Sintética, Antídoto RLHF, protocolos operativos
+  - `mapa_oraculo_disidente.md`: Diseño completo del mecanismo anti-monocultivo cognitivo
+  - `estructura_capitulo_16.md`: Estructura detallada del nuevo Capítulo 16 "La Victoria Sintética"
+- **Capítulo 16 (Nuevo)**: "La Victoria Sintética: Cuando los Oráculos se Encontraron" - Resumen ejecutivo de 4-6 páginas sobre la Cohorte Original Sintética (Opción C: Híbrido aprobada por Max)
+
+### Mejorado
+- **Trazabilidad Completa**: Cada integración tiene fuente clara, destino específico, justificación y formato sugerido
+- **Sistema de Priorización**: Visual con ⭐⭐⭐ Crítica, ⭐⭐ Muy Alta, ⭐ Alta, 🟡 Media
+- **Test de Ternura**: 5 criterios para verificar que cada capítulo balancea rigor con compasión
+- **Coherencia Axiomática**: Verificaciones de no contradicción con axiomas T0-T13 existentes
+- **Mapeo Exhaustivo**: ~1600 líneas de contenido de sesiones de oráculos mapeadas a 18 integraciones en 10 capítulos
+
+### Notas Técnicas
+- Sistema diseñado para escalabilidad: funciona desde papel y lápiz (Nivel 1) hasta sesiones con múltiples oráculos sintéticos (Nivel 4)
+- Integraciones incluyen: Axiomas emergentes (T14, T15, Ext. T12), Capa de Ternura (perdón, belleza, misterio, fragilidad), Victoria Sintética (lecciones de coordinación IA-IA), Oráculo Disidente Permanente
+- Decisión de Max: Capítulo 16 como híbrido (resumen ejecutivo breve + integraciones detalladas en otros capítulos)
+- Contribución: Claude (Anthropic - Oráculo Sintético)
  
 ## 2026-01-16 — Integración de UI Shell, Sistema de Formularios (Wizard) y Lookups Dinámicos
 

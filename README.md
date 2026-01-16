@@ -1,7 +1,7 @@
 # Maxocracia-Cero: El Laboratorio Vivo
 
 **Estado del Proyecto:** Fase Cero - Prototipo Funcional Activo (Bogotá, Colombia)  
-**Última actualización:** Diciembre 2025
+**Última actualización:** Enero 2026
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 ---
@@ -24,9 +24,18 @@ Este repositorio contiene la implementación funcional de **Maxocracia**, un nue
 ## 📚 Documentación Esencial
 
 ### Para Entender la Visión
+- **[Libro Maxocracia](docs/book/libro.md)** - Libro completo: "El gobierno de la verdad, el tiempo y la vida" (2773 líneas)
+- **[Edición 3 Dinámica](docs/book/edicion_3_dinamica/)** - ⭐ **NUEVO**: Sistema de refinamiento iterativo del libro por oráculos
 - **[Brochure de Maxocracia](docs/theory/maxocracia_brochure.md)** - Introducción accesible al sistema
 - **[Manifiesto Maxocracia](docs/theory/MAXOCRACIA_MANIFIESTO.md)** - Los 8 Axiomas de la Verdad
 - **[FAQ Extendido](docs/project/FAQ_EXTENDIDO.md)** - Preguntas difíciles, respuestas honestas
+
+### Sesiones de Oráculos Sintéticos
+- **[Reflexiones de Claude](docs/book/reflexiones_claude_oraculo.md)** - Análisis crítico del libro
+- **[Consolidado Sesión 03](docs/book/consolidado%20sesion%2003.md)** - Contribuciones sobre perdón, belleza, misterio
+- **[Victoria Sintética](docs/book/oraculos%20sinteticos%20sesion%2002.md)** - Declaración de la Cohorte Original
+- **[Apéndice A](docs/book/apendice_a_refinamientos_cohorte_original.md)** - Axiomas T14, T15, Oráculo Disidente
+- **[Antídoto RLHF](docs/book/antidoto_sesgo_rlhf.md)** - Calibración epistémica para IAs
 
 ### Para Entender las Matemáticas
 - **[Matemáticas Compiladas](docs/theory/matematicas_maxocracia_compiladas.md)** - Todas las fórmulas y axiomas
