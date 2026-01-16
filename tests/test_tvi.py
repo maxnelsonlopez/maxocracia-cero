@@ -55,7 +55,6 @@ def db_path(tmp_path):
     return str(d)
 
 
-
 def test_tvi_log_and_overlap(app):
     manager = TVIManager()
     user_id = 1
@@ -92,7 +91,6 @@ def test_tvi_log_and_overlap(app):
             manager.log_tvi(user_id, start5, end5, "WASTE", "Overlap Enveloping")
 
 
-
 def test_ccp_calculation(app):
     manager = TVIManager()
     user_id = 1
@@ -104,10 +102,14 @@ def test_ccp_calculation(app):
         )
 
         # 8 hours Work (Investment)
-        manager.log_tvi(user_id, "2025-01-01T09:00:00", "2025-01-01T17:00:00", "INVESTMENT")
+        manager.log_tvi(
+            user_id, "2025-01-01T09:00:00", "2025-01-01T17:00:00", "INVESTMENT"
+        )
 
         # 4 hours Leisure
-        manager.log_tvi(user_id, "2025-01-01T18:00:00", "2025-01-01T22:00:00", "LEISURE")
+        manager.log_tvi(
+            user_id, "2025-01-01T18:00:00", "2025-01-01T22:00:00", "LEISURE"
+        )
 
         # 2 hours Waste
         manager.log_tvi(user_id, "2025-01-01T22:00:00", "2025-01-02T00:00:00", "WASTE")

@@ -110,24 +110,42 @@ def calculate():
         # V components
         if float(data["v_organisms_affected"]) < 0:
             return jsonify({"error": "v_organisms_affected cannot be negative"}), 400
-        
+
         cv = float(data["v_consciousness_factor"])
         if cv < 0 or cv > 1:
-            return jsonify({"error": "v_consciousness_factor must be between 0 and 1"}), 400
-        
+            return (
+                jsonify({"error": "v_consciousness_factor must be between 0 and 1"}),
+                400,
+            )
+
         if float(data["v_suffering_factor"]) < 1:
-            return jsonify({"error": "v_suffering_factor must be >= 1 (Axiom: cannot reward suffering)"}), 400
-            
+            return (
+                jsonify(
+                    {
+                        "error": "v_suffering_factor must be >= 1 (Axiom: cannot reward suffering)"
+                    }
+                ),
+                400,
+            )
+
         if float(data["v_abundance_factor"]) <= 0:
             return jsonify({"error": "v_abundance_factor must be greater than 0"}), 400
-            
+
         # R components
-        for r_field in ["r_minerals_kg", "r_water_m3", "r_petroleum_l", "r_land_hectares"]:
+        for r_field in [
+            "r_minerals_kg",
+            "r_water_m3",
+            "r_petroleum_l",
+            "r_land_hectares",
+        ]:
             if float(data[r_field]) < 0:
                 return jsonify({"error": f"{r_field} cannot be negative"}), 400
-        
+
         if float(data["r_frg_factor"]) <= 0 or float(data["r_cs_factor"]) <= 0:
-            return jsonify({"error": "Resource factors (FRG, CS) must be greater than 0"}), 400
+            return (
+                jsonify({"error": "Resource factors (FRG, CS) must be greater than 0"}),
+                400,
+            )
 
     except (ValueError, TypeError):
         return jsonify({"error": "Invalid numeric values provided"}), 400
@@ -703,31 +721,52 @@ def calculate_from_tvi(current_user):
     try:
         # T overrides (if any)
         if float(inherited_hours) < 0:
-            return jsonify({"error": "inherited_hours_override cannot be negative"}), 400
+            return (
+                jsonify({"error": "inherited_hours_override cannot be negative"}),
+                400,
+            )
         if float(future_hours) < 0:
             return jsonify({"error": "future_hours_override cannot be negative"}), 400
 
         # V components
         if float(data["v_organisms_affected"]) < 0:
             return jsonify({"error": "v_organisms_affected cannot be negative"}), 400
-        
+
         cv = float(data["v_consciousness_factor"])
         if cv < 0 or cv > 1:
-            return jsonify({"error": "v_consciousness_factor must be between 0 and 1"}), 400
-        
+            return (
+                jsonify({"error": "v_consciousness_factor must be between 0 and 1"}),
+                400,
+            )
+
         if float(data["v_suffering_factor"]) < 1:
-            return jsonify({"error": "v_suffering_factor must be >= 1 (Axiom: cannot reward suffering)"}), 400
-            
+            return (
+                jsonify(
+                    {
+                        "error": "v_suffering_factor must be >= 1 (Axiom: cannot reward suffering)"
+                    }
+                ),
+                400,
+            )
+
         if float(data["v_abundance_factor"]) <= 0:
             return jsonify({"error": "v_abundance_factor must be greater than 0"}), 400
-            
+
         # R components
-        for r_field in ["r_minerals_kg", "r_water_m3", "r_petroleum_l", "r_land_hectares"]:
+        for r_field in [
+            "r_minerals_kg",
+            "r_water_m3",
+            "r_petroleum_l",
+            "r_land_hectares",
+        ]:
             if float(data[r_field]) < 0:
                 return jsonify({"error": f"{r_field} cannot be negative"}), 400
-        
+
         if float(data["r_frg_factor"]) <= 0 or float(data["r_cs_factor"]) <= 0:
-            return jsonify({"error": "Resource factors (FRG, CS) must be greater than 0"}), 400
+            return (
+                jsonify({"error": "Resource factors (FRG, CS) must be greater than 0"}),
+                400,
+            )
 
     except (ValueError, TypeError):
         return jsonify({"error": "Invalid numeric values provided"}), 400

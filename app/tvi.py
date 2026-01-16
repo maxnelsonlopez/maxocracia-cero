@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 class TVIManager:
     """
     TVI (Tiempo Vital Indexado) Manager.
-    
+
     Uses Flask's get_db() utility to ensure proper database access
     within application context.
     """
@@ -14,6 +14,7 @@ class TVIManager:
     def _get_db_connection(self):
         """Get database connection from Flask app context."""
         from .utils import get_db
+
         return get_db()
 
     def _check_overlap(
@@ -83,10 +84,12 @@ class TVIManager:
             raise ValueError("TVI Violation: You cannot log time in the future.")
 
         duration_seconds = int((end_dt - start_dt).total_seconds())
-        
+
         # Sanity check: duration cannot exceed 24 hours
         if duration_seconds > 86400:
-            raise ValueError("TVI Violation: A single time block cannot exceed 24 hours.")
+            raise ValueError(
+                "TVI Violation: A single time block cannot exceed 24 hours."
+            )
 
         if self._check_overlap(user_id, start_dt, end_dt):
             raise ValueError(

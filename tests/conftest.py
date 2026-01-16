@@ -39,12 +39,22 @@ def app():
         # Add a second test user for specific tests
         db.execute(
             "INSERT INTO users (email, name, is_admin, password_hash) VALUES (?, ?, ?, ?)",
-            ("test2@example.com", "Test User 2", 0, generate_password_hash(test_password)),
+            (
+                "test2@example.com",
+                "Test User 2",
+                0,
+                generate_password_hash(test_password),
+            ),
         )
         # Add an admin user
         db.execute(
             "INSERT INTO users (email, name, is_admin, password_hash) VALUES (?, ?, ?, ?)",
-            ("admin@example.com", "Admin User", 1, generate_password_hash(test_password)),
+            (
+                "admin@example.com",
+                "Admin User",
+                1,
+                generate_password_hash(test_password),
+            ),
         )
         db.commit()
         db.close()

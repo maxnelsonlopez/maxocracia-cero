@@ -13,7 +13,7 @@ def balance(current_user, user_id):
     # Only allow users to see their own balance, unless they are admin
     if current_user.get("user_id") != user_id and not current_user.get("is_admin"):
         return jsonify({"error": "forbidden: cannot view other user's balance"}), 403
-        
+
     bal = get_balance(user_id)
     return jsonify({"user_id": user_id, "balance": bal})
 
@@ -83,13 +83,13 @@ def _transfer_impl():
     # Start transaction (beginning immediate for better protection against race conditions)
     try:
         db.execute("BEGIN IMMEDIATE")
-        
+
         # Check users exist
         cur = db.execute("SELECT id FROM users WHERE id = ?", (from_id,))
         if cur.fetchone() is None:
             db.rollback()
             return jsonify({"error": "from_user not found"}), 404
-            
+
         cur = db.execute("SELECT id FROM users WHERE id = ?", (to_id,))
         if cur.fetchone() is None:
             db.rollback()

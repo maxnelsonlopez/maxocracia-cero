@@ -106,7 +106,7 @@ def token_required(f):
         data = verify_token(token)
         if data is None:
             return jsonify({"error": "invalid token"}), 401
-        
+
         # Attach user info to request
         request.user = data
         return f(data, *args, **kwargs)
@@ -124,11 +124,11 @@ def admin_required(f):
         data = verify_token(token)
         if data is None:
             return jsonify({"error": "invalid token"}), 401
-        
+
         # Check for admin flag in JWT payload
         if not data.get("is_admin"):
             return jsonify({"error": "admin privileges required"}), 403
-            
+
         request.user = data
         return f(data, *args, **kwargs)
 

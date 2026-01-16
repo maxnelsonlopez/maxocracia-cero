@@ -98,11 +98,9 @@ def login():
     session["user_id"] = user["id"]
 
     # Create access token (expires in 1 hour)
-    access_token = create_token({
-        "user_id": user["id"], 
-        "email": user["email"],
-        "is_admin": user["is_admin"]
-    })
+    access_token = create_token(
+        {"user_id": user["id"], "email": user["email"], "is_admin": user["is_admin"]}
+    )
 
     # Generate refresh token (expires in 30 days)
     jti = str(uuid4())
@@ -227,9 +225,9 @@ def refresh():
         if data is None:
             return jsonify({"error": "invalid token"}), 401
         payload = {
-            "user_id": data.get("user_id"), 
+            "user_id": data.get("user_id"),
             "email": data.get("email"),
-            "is_admin": data.get("is_admin", 0)
+            "is_admin": data.get("is_admin", 0),
         }
         new_token = create_token(payload)
         return jsonify({"token": new_token})
@@ -268,11 +266,9 @@ def refresh():
         return jsonify({"error": "user not found"}), 404
 
     # Create new access token
-    access_token = create_token({
-        "user_id": user["id"], 
-        "email": user["email"],
-        "is_admin": user["is_admin"]
-    })
+    access_token = create_token(
+        {"user_id": user["id"], "email": user["email"], "is_admin": user["is_admin"]}
+    )
 
     # Prepare response data
     response_data = {

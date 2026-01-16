@@ -11,7 +11,7 @@ class SecureModelView(ModelView):
         user_id = session.get("user_id")
         if not user_id:
             return False
-        
+
         # Check if user is admin in DB
         user = db.session.get(User, user_id)
         return user is not None and user.is_admin
@@ -31,7 +31,7 @@ class SecureAdminIndexView(AdminIndexView):
         user_id = session.get("user_id")
         if not user_id:
             return False
-        
+
         user = db.session.get(User, user_id)
         return user is not None and user.is_admin
 
@@ -40,11 +40,7 @@ class SecureAdminIndexView(AdminIndexView):
 
 
 def init_admin(app):
-    admin = Admin(
-        app, 
-        name="Maxocracia Admin", 
-        index_view=SecureAdminIndexView()
-    )
+    admin = Admin(app, name="Maxocracia Admin", index_view=SecureAdminIndexView())
 
     admin.add_view(UserAdminView(User, db.session))
     admin.add_view(SecureModelView(Participant, db.session))

@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
  
+## 2026-01-16 — Integración de UI Shell y Sistema de Formularios (Wizard)
+
+### Añadido
+- **UI Shell Unificado (`ui-shell.js`)**: Implementado un sidebar persistente y dinámico en todas las vistas principales (Dashboard, Calculadora VHV, Formularios).
+- **Sistema de Temas (Dark/Light)**: Añadido un toggle de tema global en el sidebar con persistencia en `localStorage` y detección de preferencia del sistema.
+- **FormWizard (`ui-wizard.js`)**: Creado un componente reutilizable para transformar formularios complejos en procesos multi-paso con barra de progreso, validación por etapa y navegación fluida.
+- **Restauración de Contenido Operativo**:
+  - `form-exchange.html`: Restauradas todas las métricas Maxocráticas (UTH, URF) y campos de impacto.
+  - `form-followup.html`: Restaurados campos de estados emocionales, nuevos hallazgos y gestión de recursos.
+  - `vhv-calculator.html`: Restauradas todas las variables (15+) para cálculo preciso del Vector de Huella Vital.
+- **Estética Glassmorphism**: Aplicado un sistema de diseño premium basado en transparencia, desenfoque y micro-animaciones en toda la interfaz.
+
+### Mejorado
+- **Navegación**: Los ítems del menú reflejan automáticamente el estado activo según la URL actual.
+- **UX de Formularios**: Los formularios extensos ahora son menos abrumadores y guían al usuario paso a paso.
+- **Integración API**: Consolidado el uso de `ApiService` para envíos autenticados en todos los nuevos wizard.
+
+### Notas Técnicas
+- Se eliminaron scripts inline redundantes para cumplir con CSP.
+- Los IDs de participantes en los formularios siguen siendo temporales (TODO: Implementar búsqueda real).
+- Contribución: Gemini (Antigravity AI Assistant).
+
 ## 2026-01-16 — Corrección de Tests y Estabilización de Integración TVI-VHV
  
 ### Corregido

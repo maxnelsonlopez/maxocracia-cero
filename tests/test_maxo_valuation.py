@@ -73,8 +73,9 @@ def test_valuation_suffering_exponential(app):
         db = get_db()
         # Clear cache before setting new parameters
         from app.maxo import clear_vhv_params_cache
+
         clear_vhv_params_cache()
-        
+
         # Set Gamma to 2
         db.execute(
             "INSERT INTO vhv_parameters (alpha, beta, gamma, delta) VALUES (?, ?, ?, ?)",

@@ -19,14 +19,13 @@ def auth_headers(client):
         "name": "Test Forms User",
     }
     client.post("/auth/register", json=register_data)
-    
+
     # Login and get token
     login_data = {"email": "testauth_forms@example.com", "password": "TestPassword123!"}
     response = client.post("/auth/login", json=login_data)
     token = response.get_json()["access_token"]
-    
-    return {"Authorization": f"Bearer {token}"}
 
+    return {"Authorization": f"Bearer {token}"}
 
 
 class TestFormsBPEndpoints:
@@ -80,18 +79,14 @@ class TestFormsBPEndpoints:
 
     def test_get_participants_with_status_filter(self, app, client, auth_headers):
         """Test get_participants con filtro de status."""
-        response = client.get(
-            "/forms/participants?status=active", headers=auth_headers
-        )
+        response = client.get("/forms/participants?status=active", headers=auth_headers)
         assert response.status_code == 200
         json_data = response.get_json()
         assert "participants" in json_data
 
     def test_get_participants_limit_validation(self, app, client, auth_headers):
         """Test que el límite máximo es 100."""
-        response = client.get(
-            "/forms/participants?limit=200", headers=auth_headers
-        )
+        response = client.get("/forms/participants?limit=200", headers=auth_headers)
         assert response.status_code == 200
         json_data = response.get_json()
         assert json_data["limit"] == 100  # Debe limitarse a 100
@@ -162,9 +157,7 @@ class TestFormsBPEndpoints:
         )
 
         # Test con filtro de urgencia
-        response = client.get(
-            "/forms/exchanges?urgency=Alta", headers=auth_headers
-        )
+        response = client.get("/forms/exchanges?urgency=Alta", headers=auth_headers)
         assert response.status_code == 200
         json_data = response.get_json()
         assert "exchanges" in json_data
@@ -231,9 +224,7 @@ class TestFormsBPEndpoints:
         )
 
         # Test con filtro de priority
-        response = client.get(
-            "/forms/follow-ups?priority=high", headers=auth_headers
-        )
+        response = client.get("/forms/follow-ups?priority=high", headers=auth_headers)
         assert response.status_code == 200
         json_data = response.get_json()
         assert "follow_ups" in json_data
@@ -320,9 +311,7 @@ class TestFormsBPEndpoints:
         assert isinstance(json_data, dict)
 
         # Test con periodo personalizado
-        response = client.get(
-            "/forms/dashboard/trends?period=60", headers=auth_headers
-        )
+        response = client.get("/forms/dashboard/trends?period=60", headers=auth_headers)
         assert response.status_code == 200
 
     def test_get_categories_endpoint(self, app, client, auth_headers):
@@ -341,18 +330,14 @@ class TestFormsBPEndpoints:
 
     def test_get_exchanges_limit_validation(self, app, client, auth_headers):
         """Test que el límite máximo es 100 para exchanges."""
-        response = client.get(
-            "/forms/exchanges?limit=200", headers=auth_headers
-        )
+        response = client.get("/forms/exchanges?limit=200", headers=auth_headers)
         assert response.status_code == 200
         json_data = response.get_json()
         assert json_data["limit"] == 100
 
     def test_get_followups_limit_validation(self, app, client, auth_headers):
         """Test que el límite máximo es 100 para follow-ups."""
-        response = client.get(
-            "/forms/follow-ups?limit=200", headers=auth_headers
-        )
+        response = client.get("/forms/follow-ups?limit=200", headers=auth_headers)
         assert response.status_code == 200
         json_data = response.get_json()
         assert json_data["limit"] == 100

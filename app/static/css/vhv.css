@@ -33,10 +33,16 @@
     --color-border: #E3E8EE;
     --color-border-light: #F1F5F9;
 
+    /* Glassmorphism Classes */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-blur: blur(12px);
+
     /* Shadows - Light Theme */
     --shadow-sm: 0 1px 3px rgba(11, 19, 32, 0.08);
     --shadow-md: 0 4px 6px rgba(11, 19, 32, 0.1);
     --shadow-lg: 0 10px 15px rgba(11, 19, 32, 0.12);
+    --shadow-xl: 0 20px 25px -5px rgba(11, 19, 32, 0.1), 0 10px 10px -5px rgba(11, 19, 32, 0.04);
     --shadow-glow: 0 0 20px rgba(255, 215, 0, 0.3);
 
     /* Spacing */
@@ -48,7 +54,7 @@
     --space-2xl: 48px;
 
     /* Typography */
-    --font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-family: 'Inter', system-ui, -apple-system, sans-serif;
     --font-size-sm: 14px;
     --font-size-base: 16px;
     --font-size-lg: 18px;
@@ -58,14 +64,14 @@
 
     /* Border Radius */
     --radius-sm: 6px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
-    --radius-xl: 16px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
 
     /* Transitions */
-    --transition-fast: 150ms ease;
-    --transition-base: 250ms ease;
-    --transition-slow: 350ms ease;
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-theme: 400ms ease;
 }
 
@@ -80,11 +86,10 @@
     --color-border: #334155;
     --color-border-light: #1e293b;
 
-    /* Shadows - Dark Theme (subtle glows) */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
-    --shadow-glow: 0 0 30px rgba(255, 215, 0, 0.4);
+    /* Dark Theme Glassmorphism */
+    --glass-bg: rgba(15, 23, 42, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-blur: blur(12px);
 
     /* Adjust accent colors for dark mode */
     --color-maxo: #FBBF24;

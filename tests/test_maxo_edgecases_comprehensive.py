@@ -15,9 +15,7 @@ class TestMaxoEdgeCases:
     def test_calculate_maxo_price_zero_values(self, app):
         """Test cálculo con valores cero."""
         with app.app_context():
-            price = calculate_maxo_price(
-                t_seconds=0.0, v_lives=0.0, r_resources=0.0
-            )
+            price = calculate_maxo_price(t_seconds=0.0, v_lives=0.0, r_resources=0.0)
             assert price == 0.0
 
     def test_calculate_maxo_price_negative_v_lives(self, app):
@@ -34,9 +32,7 @@ class TestMaxoEdgeCases:
     def test_calculate_maxo_price_very_large_values(self, app):
         """Test cálculo con valores muy grandes."""
         with app.app_context():
-            price = calculate_maxo_price(
-                t_seconds=1e6, v_lives=1000.0, r_resources=1e6
-            )
+            price = calculate_maxo_price(t_seconds=1e6, v_lives=1000.0, r_resources=1e6)
             assert isinstance(price, float)
             assert price >= 0.0
 
@@ -65,7 +61,11 @@ class TestMaxoEdgeCases:
             db = get_db()
             db.execute(
                 "INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)",
-                ("balance_test@example.com", "Balance Test", generate_password_hash("Pass123!")),
+                (
+                    "balance_test@example.com",
+                    "Balance Test",
+                    generate_password_hash("Pass123!"),
+                ),
             )
             db.commit()
             user_id = db.execute(
@@ -84,7 +84,11 @@ class TestMaxoEdgeCases:
             db = get_db()
             db.execute(
                 "INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)",
-                ("balance_test2@example.com", "Balance Test 2", generate_password_hash("Pass123!")),
+                (
+                    "balance_test2@example.com",
+                    "Balance Test 2",
+                    generate_password_hash("Pass123!"),
+                ),
             )
             db.commit()
             user_id = db.execute(
@@ -108,7 +112,11 @@ class TestMaxoEdgeCases:
             db = get_db()
             db.execute(
                 "INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)",
-                ("credit_test@example.com", "Credit Test", generate_password_hash("Pass123!")),
+                (
+                    "credit_test@example.com",
+                    "Credit Test",
+                    generate_password_hash("Pass123!"),
+                ),
             )
             db.commit()
             user_id = db.execute(
@@ -134,7 +142,11 @@ class TestMaxoEdgeCases:
             db = get_db()
             db.execute(
                 "INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)",
-                ("debit_test@example.com", "Debit Test", generate_password_hash("Pass123!")),
+                (
+                    "debit_test@example.com",
+                    "Debit Test",
+                    generate_password_hash("Pass123!"),
+                ),
             )
             db.commit()
             user_id = db.execute(

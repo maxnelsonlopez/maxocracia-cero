@@ -13,244 +13,195 @@
 </head>
 
 <body>
-    <div class="dashboard-container">
-        <!-- Sidebar Navigation -->
-        <aside class="dashboard-sidebar">
-            <div class="sidebar-header">
-                <h2>Maxocracia</h2>
-                <span class="badge-beta">BETA</span>
+    <div class="dashboard-main">
+        <header class="dashboard-header">
+            <h1>Panel de Control - Red de Apoyo</h1>
+            <div class="header-actions">
+                <span class="last-update">Actualizado: <span id="lastUpdate">Justo ahora</span></span>
+                <button id="refreshBtn" class="vhv-btn vhv-btn-secondary">🔄 Actualizar</button>
+            </div>
+        </header>
+
+        <!-- Overview Cards -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon participants">👥</div>
+                <div class="stat-content">
+                    <h3>Participantes</h3>
+                    <p class="stat-value" id="totalParticipants">-</p>
+                    <span class="stat-label">Activos en la red</span>
+                </div>
             </div>
 
-            <nav class="sidebar-nav">
-                <a href="index.html" class="nav-item">
-                    <span class="icon">🏠</span> Inicio
-                </a>
-                <a href="#" class="nav-item active">
-                    <span class="icon">📊</span> Dashboard
-                </a>
-                <a href="form-cero.html" class="nav-item">
-                    <span class="icon">📝</span> Inscripción
-                </a>
-                <a href="form-exchange.html" class="nav-item">
-                    <span class="icon">🤝</span> Intercambios
-                </a>
-                <a href="form-followup.html" class="nav-item">
-                    <span class="icon">📋</span> Seguimiento
-                </a>
-                <a href="vhv-calculator.html" class="nav-item">
-                    <span class="icon">🧮</span> Calculadora VHV
-                </a>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="user-info" id="userInfo">
-                    <div class="avatar">👤</div>
-                    <div class="details">
-                        <span class="name">Usuario</span>
-                        <span class="role">Facilitador</span>
-                    </div>
+            <div class="stat-card">
+                <div class="stat-icon exchanges">🤝</div>
+                <div class="stat-content">
+                    <h3>Intercambios</h3>
+                    <p class="stat-value" id="totalExchanges">-</p>
+                    <span class="stat-label">Total registrados</span>
                 </div>
-                <button id="btnLogout" class="btn-logout">Cerrar Sesión</button>
             </div>
-        </aside>
 
-        <!-- Main Content -->
-        <main class="dashboard-main">
-            <header class="dashboard-header">
-                <h1>Panel de Control - Red de Apoyo</h1>
-                <div class="header-actions">
-                    <span class="last-update">Actualizado: <span id="lastUpdate">Justo ahora</span></span>
-                    <button id="refreshBtn" class="vhv-btn vhv-btn-secondary">🔄 Actualizar</button>
+            <div class="stat-card">
+                <div class="stat-icon uth">⏳</div>
+                <div class="stat-content">
+                    <h3>UTH Movilizadas</h3>
+                    <p class="stat-value" id="totalUth">-</p>
+                    <span class="stat-label">Horas de talento</span>
                 </div>
-            </header>
+            </div>
 
-            <!-- Overview Cards -->
-            <section class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon participants">👥</div>
-                    <div class="stat-content">
-                        <h3>Participantes</h3>
-                        <p class="stat-value" id="totalParticipants">-</p>
-                        <span class="stat-label">Activos en la red</span>
+            <div class="stat-card">
+                <div class="stat-icon health">❤️</div>
+                <div class="stat-content">
+                    <h3>Salud de Red</h3>
+                    <p class="stat-value" id="networkHealth">-</p>
+                    <span class="stat-label">Nivel de necesidad (1-5)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- TVI Community Section -->
+        <section class="tvi-section">
+            <div class="vhv-card">
+                <div class="vhv-card-header">
+                    <h3 class="vhv-card-title">🧠 Consciencia Vital de la Cohorte (TVI)</h3>
+                </div>
+                <div class="tvi-grid">
+                    <div class="tvi-stat">
+                        <span class="tvi-label">CCP Promedio</span>
+                        <span class="tvi-value" id="communityCcp">-</span>
+                        <span class="tvi-sublabel">Coeficiente de Coherencia</span>
+                    </div>
+                    <div class="tvi-stat">
+                        <span class="tvi-label">Tiempo Total Invertido</span>
+                        <span class="tvi-value" id="communityTotalHours">-</span>
+                        <span class="tvi-sublabel">Horas Registradas</span>
+                    </div>
+                    <div class="tvi-chart-container">
+                        <canvas id="tviDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Temporal Trends Section -->
+        <section class="trends-section">
+            <div class="vhv-card">
+                <div class="vhv-card-header">
+                    <h3 class="vhv-card-title">📈 Tendencias Temporales</h3>
+                    <div class="period-selector">
+                        <button class="period-btn active" data-period="7">7 días</button>
+                        <button class="period-btn" data-period="30">30 días</button>
+                        <button class="period-btn" data-period="90">90 días</button>
+                    </div>
+                </div>
+                <div class="charts-row-trends">
+                    <div class="chart-container-trend">
+                        <h4>UTH Movilizado</h4>
+                        <canvas id="uthTrendChart"></canvas>
+                    </div>
+                    <div class="chart-container-trend">
+                        <h4>Intercambios por Semana</h4>
+                        <canvas id="exchangesTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="dashboard-grid-layout">
+            <!-- Left Column: Charts & Network -->
+            <div class="main-column">
+                <!-- Charts Row -->
+                <div class="charts-row">
+                    <div class="vhv-card chart-card">
+                        <div class="vhv-card-header">
+                            <h3 class="vhv-card-title">Distribución de Urgencia</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="urgencyChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="vhv-card chart-card">
+                        <div class="vhv-card-header">
+                            <h3 class="vhv-card-title">Prioridad de Seguimientos</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="priorityChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon exchanges">🤝</div>
-                    <div class="stat-content">
-                        <h3>Intercambios</h3>
-                        <p class="stat-value" id="totalExchanges">-</p>
-                        <span class="stat-label">Total registrados</span>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon uth">⏳</div>
-                    <div class="stat-content">
-                        <h3>UTH Movilizadas</h3>
-                        <p class="stat-value" id="totalUth">-</p>
-                        <span class="stat-label">Horas de talento</span>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon health">❤️</div>
-                    <div class="stat-content">
-                        <h3>Salud de Red</h3>
-                        <p class="stat-value" id="networkHealth">-</p>
-                        <span class="stat-label">Nivel de necesidad (1-5)</span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TVI Community Section -->
-            <section class="tvi-section">
+                <!-- Network Flow -->
                 <div class="vhv-card">
                     <div class="vhv-card-header">
-                        <h3 class="vhv-card-title">🧠 Consciencia Vital de la Cohorte (TVI)</h3>
+                        <h3 class="vhv-card-title">Flujo de la Red</h3>
+                        <p class="vhv-card-subtitle">Top contribuidores y receptores</p>
                     </div>
-                    <div class="tvi-grid">
-                        <div class="tvi-stat">
-                            <span class="tvi-label">CCP Promedio</span>
-                            <span class="tvi-value" id="communityCcp">-</span>
-                            <span class="tvi-sublabel">Coeficiente de Coherencia</span>
-                        </div>
-                        <div class="tvi-stat">
-                            <span class="tvi-label">Tiempo Total Invertido</span>
-                            <span class="tvi-value" id="communityTotalHours">-</span>
-                            <span class="tvi-sublabel">Horas Registradas</span>
-                        </div>
-                        <div class="tvi-chart-container">
-                            <canvas id="tviDistributionChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Temporal Trends Section -->
-            <section class="trends-section">
-                <div class="vhv-card">
-                    <div class="vhv-card-header">
-                        <h3 class="vhv-card-title">📈 Tendencias Temporales</h3>
-                        <div class="period-selector">
-                            <button class="period-btn active" data-period="7">7 días</button>
-                            <button class="period-btn" data-period="30">30 días</button>
-                            <button class="period-btn" data-period="90">90 días</button>
-                        </div>
-                    </div>
-                    <div class="charts-row-trends">
-                        <div class="chart-container-trend">
-                            <h4>UTH Movilizado</h4>
-                            <canvas id="uthTrendChart"></canvas>
-                        </div>
-                        <div class="chart-container-trend">
-                            <h4>Intercambios por Semana</h4>
-                            <canvas id="exchangesTrendChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <div class="dashboard-grid-layout">
-                <!-- Left Column: Charts & Network -->
-                <div class="main-column">
-                    <!-- Charts Row -->
-                    <div class="charts-row">
-                        <div class="vhv-card chart-card">
-                            <div class="vhv-card-header">
-                                <h3 class="vhv-card-title">Distribución de Urgencia</h3>
-                            </div>
-                            <div class="chart-container">
-                                <canvas id="urgencyChart"></canvas>
-                            </div>
+                    <div class="network-tables">
+                        <div class="network-column">
+                            <h4>🏆 Top Givers</h4>
+                            <table class="simple-table" id="topGiversTable">
+                                <thead>
+                                    <tr>
+                                        <th>Usuario ID</th>
+                                        <th>Intercambios</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
                         </div>
 
-                        <div class="vhv-card chart-card">
-                            <div class="vhv-card-header">
-                                <h3 class="vhv-card-title">Prioridad de Seguimientos</h3>
-                            </div>
-                            <div class="chart-container">
-                                <canvas id="priorityChart"></canvas>
-                            </div>
+                        <div class="network-column">
+                            <h4>📥 Top Receivers</h4>
+                            <table class="simple-table" id="topReceiversTable">
+                                <thead>
+                                    <tr>
+                                        <th>Usuario ID</th>
+                                        <th>Intercambios</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
                         </div>
-                    </div>
 
-                    <!-- Network Flow -->
-                    <div class="vhv-card">
-                        <div class="vhv-card-header">
-                            <h3 class="vhv-card-title">Flujo de la Red</h3>
-                            <p class="vhv-card-subtitle">Top contribuidores y receptores</p>
-                        </div>
-                        <div class="network-tables">
-                            <div class="network-column">
-                                <h4>🏆 Top Givers</h4>
-                                <table class="simple-table" id="topGiversTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Usuario ID</th>
-                                            <th>Intercambios</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Populated by JS -->
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="network-column">
-                                <h4>📥 Top Receivers</h4>
-                                <table class="simple-table" id="topReceiversTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Usuario ID</th>
-                                            <th>Intercambios</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Populated by JS -->
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="network-column">
-                                <h4>🌟 Hub Nodes</h4>
-                                <table class="simple-table" id="hubNodesTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Usuario ID</th>
-                                            <th>Dar/Recibir</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Populated by JS -->
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="network-column">
+                            <h4>🌟 Hub Nodes</h4>
+                            <table class="simple-table" id="hubNodesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Usuario ID</th>
+                                        <th>Dar/Recibir</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-
-                <!-- Right Column: Alerts -->
-                <aside class="alerts-column">
-                    <div class="vhv-card alerts-card">
-                        <div class="vhv-card-header">
-                            <h3 class="vhv-card-title">🚨 Alertas Activas</h3>
-                            <span class="badge-count" id="alertCount">0</span>
-                        </div>
-                        <div class="alerts-list" id="alertsList">
-                            <!-- Populated by JS -->
-                            <div class="empty-state">
-                                <p>No hay alertas activas</p>
-                            </div>
-                        </div>
-                    </div>
-                </aside>
             </div>
-        </main>
+
+            <!-- Right Column: Alerts -->
+            <aside class="alerts-column">
+                <div class="vhv-card alerts-card">
+                    <div class="vhv-card-header">
+                        <h3 class="vhv-card-title">🚨 Alertas Activas</h3>
+                        <span class="badge-count" id="alertCount">0</span>
+                    </div>
+                    <div class="alerts-list" id="alertsList">
+                        <div class="empty-state">
+                            <p>No hay alertas activas</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
     </div>
 
-    <script src="js/api.js"></script>
-    <script src="js/dashboard.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/ui-shell.js"></script>
+    <script src="/static/js/dashboard.js"></script>
 </body>
 
 </html>

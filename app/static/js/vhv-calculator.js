@@ -1,71 +1,3 @@
-// VHV Calculator JavaScript
-// Handles form submission, API calls, visualization, and theming
-
-// ============================================
-// Theme Manager - Dark Mode Support
-// ============================================
-const ThemeManager = {
-  STORAGE_KEY: 'vhv-theme',
-
-  init() {
-    // Check for saved theme or system preference
-    const savedTheme = localStorage.getItem(this.STORAGE_KEY);
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
-    this.apply(theme);
-
-    // Listen for system preference changes
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      if (!localStorage.getItem(this.STORAGE_KEY)) {
-        this.apply(e.matches ? 'dark' : 'light');
-      }
-    });
-
-    // Set up toggle button
-    const toggleBtn = document.getElementById('theme-toggle');
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => this.toggle());
-    }
-  },
-
-  toggle() {
-    const currentTheme = document.documentElement.dataset.theme || 'light';
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    this.apply(newTheme);
-    localStorage.setItem(this.STORAGE_KEY, newTheme);
-
-    // Announce theme change for screen readers
-    this.announceThemeChange(newTheme);
-  },
-
-  apply(theme) {
-    document.documentElement.dataset.theme = theme;
-
-    // Update toggle button aria-label
-    const toggleBtn = document.getElementById('theme-toggle');
-    if (toggleBtn) {
-      toggleBtn.setAttribute('aria-label',
-        theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'
-      );
-    }
-  },
-
-  announceThemeChange(theme) {
-    // Create a live region for screen reader announcement
-    let announcer = document.getElementById('theme-announcer');
-    if (!announcer) {
-      announcer = document.createElement('div');
-      announcer.id = 'theme-announcer';
-      announcer.setAttribute('aria-live', 'polite');
-      announcer.setAttribute('aria-atomic', 'true');
-      announcer.className = 'sr-only';
-      document.body.appendChild(announcer);
-    }
-    announcer.textContent = theme === 'dark' ? 'Modo oscuro activado' : 'Modo claro activado';
-  }
-};
-
 // ============================================
 // State
 // ============================================
@@ -74,14 +6,10 @@ let savedProducts = [];
 let caseStudies = [];
 let vhvChart = null;
 
-// API Base URL
-const API_BASE = '';
-
 // ============================================
 // Initialize on page load
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
-  ThemeManager.init();
   initializeTabs();
   initializeForm();
   loadParameters();

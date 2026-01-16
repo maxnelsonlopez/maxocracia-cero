@@ -8,14 +8,14 @@
 
 ### Cohorte Cero - Red de Apoyo
 
-- [ ] **Implementar formularios en Google Forms**
-  - Archivos de referencia: `formularios/*.md`
-  - Crear 3 formularios:
+- [x] **Implementar formularios interactivos (Wizard)**
+  - Completado: 2026-01-16
+  - Implementados como formularios multi-paso con validación:
     - Formulario CERO (Inscripción)
     - Formulario A (Registro de Intercambio)
     - Formulario B (Reporte de Seguimiento)
-  - Compartir links con participantes actuales
-  - Impacto: Operacional - crítico para Cohorte Cero
+  - Integrados en el Dashboard web (no solo Google Forms)
+  - Impacto: Operacional - mejora drástica en UX para Cohorte Cero
 
 - [x] **Crear dashboard de análisis de intercambios**
   - Completado: 2025-12-04
@@ -104,19 +104,20 @@
 
 ### UI/UX
 
-- [x] **Añadir modo oscuro a Calculadora VHV**
-  - Completado: 2025-12-04
-  - Archivo: `app/static/css/vhv.css`
-  - Implementado por Claude Opus
+- [x] **Añadir modo oscuro y UI Shell unificado**
+  - Completado: 2026-01-16
+  - Implementado `ui-shell.js` con sidebar dinámico y toggle de tema
+  - Aplicado glassmorphism moderno en todas las páginas
+  - Implementado por Antigravity (Gemini)
 
 - [ ] **Mejorar diseño responsive de Calculadora VHV**
   - Archivo: `app/static/css/vhv.css`
   - Optimizar para móviles
   - Mejorar accesibilidad (ARIA labels)
 
-- [ ] **Añadir animaciones a resultados VHV**
-  - Transiciones suaves al mostrar resultados
-  - Animación del gráfico Chart.js
+- [x] **Añadir animaciones y feedback visual**
+  - Completado: 2026-01-16
+  - Animaciones en resultados VHV y transiciones de wizard
   - Feedback visual al guardar productos
 
 ### Optimización

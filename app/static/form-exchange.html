@@ -10,363 +10,273 @@
 </head>
 
 <body>
-    <div class="forms-container">
-        <!-- Hero Section -->
-        <div class="forms-hero">
-            <h1 class="forms-hero-title">🔄 Registro de Intercambio Completado</h1>
-            <p class="forms-hero-subtitle">
-                Este formulario registra intercambios ya realizados en la Red de Apoyo.
-                Completa esto después de coordinar o verificar que un intercambio sucedió.
-                Toma menos de 2 minutos. ¡Gracias por documentar!
-            </p>
-        </div>
-
-        <!-- Success Message (hidden by default) -->
-        <div id="successMessage" class="forms-success" style="display: none;">
-            <div class="forms-success-icon">✅</div>
-            <h2 class="forms-success-title">¡Intercambio Registrado!</h2>
-            <p class="forms-success-message" id="successDetails"></p>
-            <button class="forms-btn forms-btn-primary" onclick="resetForm()" style="margin-top: 1rem;">
-                Registrar Otro Intercambio
-            </button>
-        </div>
-
-        <!-- Error Message (hidden by default) -->
-        <div id="errorMessage" class="forms-error" style="display: none;">
-            <span class="forms-error-icon">⚠️</span>
-            <span id="errorText"></span>
-        </div>
-
-        <!-- Form -->
-        <form id="exchangeForm" class="forms-card">
-            <!-- SECCIÓN 1: Identificación del Intercambio -->
-            <div class="forms-section">
-                <h2 class="forms-section-title">
-                    <span class="forms-emoji">🔖</span>
-                    SECCIÓN 1: Identificación del Intercambio
-                </h2>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required" for="date">Fecha del intercambio</label>
-                    <input type="date" id="date" name="date" class="forms-input" required>
-                    <span class="forms-help-text">¿Cuándo ocurrió o se coordinó este intercambio?</span>
-                </div>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required" for="interchange_id">Código de Intercambio</label>
-                    <input type="text" id="interchange_id" name="interchange_id" class="forms-input"
-                        placeholder="INT-001" maxlength="20" required>
-                    <span class="forms-help-text">Genera un código único. Formato sugerido: INT-001, INT-002,
-                        etc.</span>
-                </div>
-            </div>
-
-            <!-- SECCIÓN 2: Participantes -->
-            <div class="forms-section">
-                <h2 class="forms-section-title">
-                    <span class="forms-emoji">👥</span>
-                    SECCIÓN 2: Participantes
-                </h2>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required" for="giver_name">¿Quién DIO en este
-                        intercambio?</label>
-                    <input type="text" id="giver_name" name="giver_name" class="forms-input" required>
-                    <span class="forms-help-text">Nombre o alias de la persona que ofreció ayuda/recurso</span>
-                </div>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required" for="receiver_name">¿Quién RECIBIÓ en este
-                        intercambio?</label>
-                    <input type="text" id="receiver_name" name="receiver_name" class="forms-input" required>
-                    <span class="forms-help-text">Nombre o alias de la persona que recibió ayuda/recurso</span>
-                </div>
-            </div>
-
-            <!-- SECCIÓN 3: Detalles del Intercambio -->
-            <div class="forms-section">
-                <h2 class="forms-section-title">
-                    <span class="forms-emoji">📋</span>
-                    SECCIÓN 3: Detalles del Intercambio
-                </h2>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required">Tipo de intercambio</label>
-                    <p class="forms-help-text">Selecciona todos los que correspondan</p>
-                    <div class="forms-checkbox-group">
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="type_objeto" name="type" value="objeto">
-                            <label for="type_objeto">📦 Objeto (cosas materiales)</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="type_alimentacion" name="type" value="alimentacion">
-                            <label for="type_alimentacion">🍽 Alimentación o Cocina</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="type_habilidad" name="type" value="habilidad">
-                            <label for="type_habilidad">🛠 Habilidad o Servicio</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="type_conocimiento" name="type" value="conocimiento">
-                            <label for="type_conocimiento">📚 Conocimiento o Consejo</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="type_transporte" name="type" value="transporte">
-                            <label for="type_transporte">🚗 Transporte o Acompañamiento</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="type_tiempo" name="type" value="tiempo">
-                            <label for="type_tiempo">⏰ Tiempo y Compañía</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="type_espacio" name="type" value="espacio">
-                            <label for="type_espacio">🏠 Espacio</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="type_apoyo_economico" name="type" value="apoyo_economico">
-                            <label for="type_apoyo_economico">💰 Apoyo Económico</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="type_otro" name="type" value="otro">
-                            <label for="type_otro">🔄 Otro (especificar abajo)</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required" for="description">Descripción breve del
-                        intercambio</label>
-                    <textarea id="description" name="description" class="forms-textarea" required
-                        placeholder="Ejemplo: 'Leonidas compartió ingredientes para preparar comida de una semana' o 'Max dio mentoría sobre estrategia laboral por videollamada'"></textarea>
-                </div>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required">Urgencia de la necesidad que se atendió</label>
-                    <div class="forms-radio-group">
-                        <div class="forms-radio-item">
-                            <input type="radio" id="urgency_alta" name="urgency" value="Alta" required>
-                            <label for="urgency_alta">🔴 Alta Urgencia</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="urgency_media" name="urgency" value="Media">
-                            <label for="urgency_media">🟡 Media Urgencia</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="urgency_baja" name="urgency" value="Baja">
-                            <label for="urgency_baja">🟢 Baja Urgencia</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECCIÓN 4: Métricas Maxocráticas -->
-            <div class="forms-section">
-                <h2 class="forms-section-title">
-                    <span class="forms-emoji">📊</span>
-                    SECCIÓN 4: Métricas Maxocráticas (Opcional pero recomendado)
-                </h2>
-                <p class="forms-section-description">
-                    Las siguientes preguntas nos ayudan a entender el "costo real" del intercambio.
-                    No te preocupes si no sabes responder con exactitud, son estimaciones.
+    <div class="dashboard-main">
+        <div class="forms-container">
+            <!-- Hero Section -->
+            <div class="forms-hero">
+                <h1 class="forms-hero-title">🤝 Registro de Intercambio</h1>
+                <p class="forms-hero-subtitle">
+                    Este formulario registra intercambios ya realizados para medir el flujo de la Red.
                 </p>
-
-                <div class="forms-group">
-                    <label class="forms-label" for="uth_hours">Tiempo humano invertido (UTH - Unidades de Tiempo
-                        Humano)</label>
-                    <div class="forms-input-group">
-                        <input type="number" id="uth_hours" name="uth_hours" class="forms-input" step="0.5" min="0"
-                            placeholder="2.5">
-                        <span class="forms-input-addon">horas</span>
-                    </div>
-                    <span class="forms-help-text">¿Cuántas horas dedicó la persona que DIO? Ejemplo: '2 horas' o '0.5'
-                        (30 minutos)</span>
-                </div>
-
-                <div class="forms-group">
-                    <label class="forms-label" for="economic_value">Valor económico aproximado (si aplica)</label>
-                    <div class="forms-input-group">
-                        <span class="forms-input-addon">$</span>
-                        <input type="text" id="economic_value" name="economic_value" class="forms-input"
-                            placeholder="20000">
-                    </div>
-                    <span class="forms-help-text">Si hubo costo monetario (ingredientes, transporte, materiales).
-                        Ejemplo: '$20,000' o 'N/A'</span>
-                </div>
-
-                <div class="forms-group">
-                    <label class="forms-label" for="urf_description">Recursos físicos consumidos (si aplica)</label>
-                    <textarea id="urf_description" name="urf_description" class="forms-textarea"
-                        placeholder="Ejemplo: '2kg arroz, 1kg pollo' o 'Silla de escritorio'"></textarea>
-                    <span class="forms-help-text">Objetos entregados, ingredientes usados, materiales</span>
-                </div>
             </div>
 
-            <!-- SECCIÓN 5: Impacto y Seguimiento -->
-            <div class="forms-section">
-                <h2 class="forms-section-title">
-                    <span class="forms-emoji">🎯</span>
-                    SECCIÓN 5: Impacto y Seguimiento
-                </h2>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required">¿Se resolvió la necesidad?</label>
-                    <p class="forms-help-text">Según tu evaluación, ¿qué tan bien se atendió la necesidad?</p>
-                    <div class="forms-radio-group">
-                        <div class="forms-radio-item">
-                            <input type="radio" id="resolution_1" name="impact_resolution_score" value="1" required>
-                            <label for="resolution_1">1 - No se resolvió</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="resolution_2" name="impact_resolution_score" value="2">
-                            <label for="resolution_2">2 - Parcialmente</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="resolution_3" name="impact_resolution_score" value="3">
-                            <label for="resolution_3">3 - Moderadamente</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="resolution_4" name="impact_resolution_score" value="4">
-                            <label for="resolution_4">4 - Bien resuelto</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="resolution_5" name="impact_resolution_score" value="5">
-                            <label for="resolution_5">5 - Completamente resuelta</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required">¿Hubo reciprocidad inmediata?</label>
-                    <div class="forms-radio-group">
-                        <div class="forms-radio-item">
-                            <input type="radio" id="reciprocity_mutual" name="reciprocity_status" value="mutual"
-                                required>
-                            <label for="reciprocity_mutual">Sí - Hubo intercambio mutuo en el mismo encuentro</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="reciprocity_unidirectional" name="reciprocity_status"
-                                value="unidirectional">
-                            <label for="reciprocity_unidirectional">No - Fue ayuda unidireccional (por ahora)</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="reciprocity_future" name="reciprocity_status" value="future">
-                            <label for="reciprocity_future">Reciprocidad futura acordada</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="forms-group">
-                    <label class="forms-label">Dimensión humana atendida</label>
-                    <p class="forms-help-text">¿Qué aspecto de la vida de la persona se benefició?</p>
-                    <div class="forms-checkbox-group">
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="dim_crecimiento" name="human_dimension"
-                                value="crecimiento_aprendizaje">
-                            <label for="dim_crecimiento">Crecimiento y Aprendizaje</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="dim_bienestar" name="human_dimension" value="bienestar_descanso">
-                            <label for="dim_bienestar">Bienestar y Descanso</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="dim_seguridad" name="human_dimension"
-                                value="seguridad_estabilidad">
-                            <label for="dim_seguridad">Seguridad y Estabilidad</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="dim_autoestima" name="human_dimension"
-                                value="autoestima_autonomia">
-                            <label for="dim_autoestima">Autoestima y Autonomía</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="dim_conexion" name="human_dimension" value="conexion_social">
-                            <label for="dim_conexion">Conexión Social y Pertenencia</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="dim_prosperidad" name="human_dimension"
-                                value="prosperidad_recursos">
-                            <label for="dim_prosperidad">Prosperidad y Recursos</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="dim_placer" name="human_dimension" value="placer_goce">
-                            <label for="dim_placer">Placer y Goce de la Vida</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="dim_intimidad" name="human_dimension" value="intimidad_vinculos">
-                            <label for="dim_intimidad">Intimidad y Vínculos Afectivos</label>
-                        </div>
-                    </div>
-                </div>
+            <!-- Success Message -->
+            <div id="successMessage" class="forms-success" style="display: none;">
+                <div class="forms-success-icon">✅</div>
+                <h2 class="forms-success-title">¡Intercambio Registrado!</h2>
+                <p class="forms-success-message" id="successDetails"></p>
+                <button class="forms-btn forms-btn-primary" onclick="resetForm()" style="margin-top: 1rem;">
+                    Registrar Otro Intercambio
+                </button>
             </div>
 
-            <!-- SECCIÓN 6: Notas del Facilitador -->
-            <div class="forms-section">
-                <h2 class="forms-section-title">
-                    <span class="forms-emoji">📝</span>
-                    SECCIÓN 6: Notas del Facilitador
-                </h2>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required">¿Cómo se coordinó este intercambio?</label>
-                    <div class="forms-radio-group">
-                        <div class="forms-radio-item">
-                            <input type="radio" id="coord_max" name="coordination_method" value="max_direct" required>
-                            <label for="coord_max">Coordinación directa por Max</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="coord_alone" name="coordination_method" value="participants_alone">
-                            <label for="coord_alone">Los participantes se conectaron solos después del match</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="coord_intermediary" name="coordination_method" value="intermediary">
-                            <label for="coord_intermediary">A través de intermediario (especificar en notas)</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="coord_other" name="coordination_method" value="other">
-                            <label for="coord_other">Otro</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="forms-group">
-                    <label class="forms-label" for="facilitator_notes">Observaciones y aprendizajes</label>
-                    <textarea id="facilitator_notes" name="facilitator_notes" class="forms-textarea"
-                        placeholder="¿Algo importante que notar? ¿Desafíos? ¿Sorpresas positivas? Esto ayuda a mejorar el sistema"></textarea>
-                </div>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required">¿Requiere seguimiento?</label>
-                    <div class="forms-radio-group">
-                        <div class="forms-radio-item">
-                            <input type="radio" id="followup_yes" name="requires_followup" value="1" required>
-                            <label for="followup_yes">✅ Sí - Necesita seguimiento</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="followup_no" name="requires_followup" value="0">
-                            <label for="followup_no">❌ No - Intercambio completado</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="followup_ongoing" name="requires_followup" value="1">
-                            <label for="followup_ongoing">⏸ En proceso - Intercambio de largo plazo</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="forms-group" id="followupDateGroup" style="display: none;">
-                    <label class="forms-label" for="followup_date">Fecha de seguimiento programado</label>
-                    <input type="date" id="followup_date" name="followup_scheduled_date" class="forms-input">
-                    <span class="forms-help-text">¿Cuándo hacer el próximo seguimiento?</span>
-                </div>
+            <!-- Error Message -->
+            <div id="errorMessage" class="forms-error" style="display: none;">
+                <span class="forms-error-icon">⚠️</span>
+                <span id="errorText"></span>
             </div>
 
-            <!-- Submit Button -->
-            <button type="submit" class="forms-btn forms-btn-primary forms-btn-full" id="submitBtn">
-                <span id="submitText">Registrar Intercambio</span>
-                <span id="submitLoading" class="forms-loading" style="display: none;"></span>
-            </button>
-        </form>
+            <!-- Form -->
+            <form id="exchangeForm" class="forms-card">
+                <!-- SECCIÓN 1: Identificación -->
+                <div class="forms-section">
+                    <h2 class="forms-section-title">
+                        <span class="forms-emoji">🔖</span>
+                        SECCIÓN 1: Identificación
+                    </h2>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required" for="date">Fecha del Intercambio</label>
+                        <input type="date" id="date" name="date" class="forms-input" required>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required" for="interchange_id">Código / ID de
+                            Intercambio</label>
+                        <input type="text" id="interchange_id" name="interchange_id" class="forms-input"
+                            placeholder="Ej: INT-001" maxlength="20" required>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required" for="giver_name">¿Quién DIO la ayuda?</label>
+                        <input type="text" id="giver_name" name="giver_name" class="forms-input"
+                            placeholder="Nombre del aportante" required>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required" for="receiver_name">¿Quién RECIBIÓ la
+                            ayuda?</label>
+                        <input type="text" id="receiver_name" name="receiver_name" class="forms-input"
+                            placeholder="Nombre del beneficiario" required>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: Descripción -->
+                <div class="forms-section">
+                    <h2 class="forms-section-title">
+                        <span class="forms-emoji">📦</span>
+                        SECCIÓN 2: ¿Qué se intercambió?
+                    </h2>
+
+                    <div class="forms-group">
+                        <label class="forms-label">Tipo de Intercambio</label>
+                        <div class="forms-checkbox-group">
+                            <div class="forms-checkbox-item">
+                                <input type="checkbox" id="type_obj" name="type" value="objeto">
+                                <label for="type_obj">📦 Objeto</label>
+                            </div>
+                            <div class="forms-checkbox-item">
+                                <input type="checkbox" id="type_skill" name="type" value="habilidad">
+                                <label for="type_skill">🛠 Habilidad / Servicio</label>
+                            </div>
+                            <div class="forms-checkbox-item">
+                                <input type="checkbox" id="type_food" name="type" value="alimentacion">
+                                <label for="type_food">🍽 Alimentación</label>
+                            </div>
+                            <div class="forms-checkbox-item">
+                                <input type="checkbox" id="type_info" name="type" value="conocimiento">
+                                <label for="type_info">📚 Conocimiento</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required" for="description">Descripción del
+                            intercambio</label>
+                        <textarea id="description" name="description" class="forms-textarea"
+                            placeholder="Ej: Préstamo de escalera por 3 días" required></textarea>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required">Urgencia de la necesidad atendida</label>
+                        <div class="forms-radio-group">
+                            <div class="forms-radio-item">
+                                <input type="radio" id="urg_high" name="urgency" value="Alta" required>
+                                <label for="urg_high">🔴 Alta</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="urg_med" name="urgency" value="Media">
+                                <label for="urg_med">🟡 Media</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="urg_low" name="urgency" value="Baja">
+                                <label for="urg_low">🟢 Baja</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 3: Métricas Maxocráticas -->
+                <div class="forms-section">
+                    <h2 class="forms-section-title">
+                        <span class="forms-emoji">⏱️</span>
+                        SECCIÓN 3: Métricas Maxocráticas
+                    </h2>
+
+                    <div class="forms-group">
+                        <label class="forms-label" for="uth_hours">Unidades de Talento Humano (Horas estimadas)</label>
+                        <div class="vhv-input-group">
+                            <input type="number" id="uth_hours" name="uth_hours" class="forms-input" step="0.5"
+                                placeholder="0.0">
+                            <span class="vhv-input-addon">h</span>
+                        </div>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label" for="economic_value">Valor Económico Aproximado (Referencia en
+                            Pesos)</label>
+                        <input type="number" id="economic_value" name="economic_value" class="forms-input"
+                            placeholder="$ 0">
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label" for="urf_description">Unidad de Recursos Físicos (URF)</label>
+                        <textarea id="urf_description" name="urf_description" class="forms-textarea"
+                            placeholder="¿Qué recursos físicos se usaron? (gasolina, materiales, etc.)"></textarea>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 4: Impacto y Seguimiento -->
+                <div class="forms-section">
+                    <h2 class="forms-section-title">
+                        <span class="forms-emoji">✨</span>
+                        SECCIÓN 4: Impacto y Seguimiento
+                    </h2>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required">Grado de resolución de la necesidad</label>
+                        <div class="forms-radio-group">
+                            <div class="forms-radio-item">
+                                <input type="radio" id="res_5" name="impact_resolution_score" value="5" required>
+                                <label for="res_5">5 - Completamente</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="res_3" name="impact_resolution_score" value="3">
+                                <label for="res_3">3 - Parcialmente</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="res_1" name="impact_resolution_score" value="1">
+                                <label for="res_1">1 - Poco o Nada</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required">Estado de Reciprocidad</label>
+                        <div class="forms-radio-group">
+                            <div class="forms-radio-item">
+                                <input type="radio" id="rec_done" name="reciprocity_status" value="Completada" required>
+                                <label for="rec_done">🔄 Completada (I-A)</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="rec_pend" name="reciprocity_status" value="Pendiente">
+                                <label for="rec_pend">⏳ Pendiente</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="rec_none" name="reciprocity_status" value="Dato Puro">
+                                <label for="rec_none">🎁 Donativo / Gesto puro</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label">Dimensión Humana Atendida</label>
+                        <div class="forms-checkbox-group">
+                            <div class="forms-checkbox-item">
+                                <input type="checkbox" id="dim_food" name="human_dimension" value="alimentacion">
+                                <label for="dim_food">Subsistencia</label>
+                            </div>
+                            <div class="forms-checkbox-item">
+                                <input type="checkbox" id="dim_health" name="human_dimension" value="salud">
+                                <label for="dim_health">Salud / Protección</label>
+                            </div>
+                            <div class="forms-checkbox-item">
+                                <input type="checkbox" id="dim_social" name="human_dimension" value="social">
+                                <label for="dim_social">Conexión Social</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 5: Logística y Notas -->
+                <div class="forms-section">
+                    <h2 class="forms-section-title">
+                        <span class="forms-emoji">📝</span>
+                        SECCIÓN 5: Logística y Notas
+                    </h2>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required">¿Cómo se coordinó?</label>
+                        <div class="forms-radio-group">
+                            <div class="forms-radio-item">
+                                <input type="radio" id="coord_wap" name="coordination_method" value="WhatsApp" required>
+                                <label for="coord_wap">📱 WhatsApp</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="coord_tel" name="coordination_method" value="Telegram">
+                                <label for="coord_tel">✈️ Telegram</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="coord_per" name="coordination_method" value="Presencial">
+                                <label for="coord_per">👤 Presencial</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required">¿Requiere seguimiento?</label>
+                        <div class="forms-radio-group">
+                            <div class="forms-radio-item">
+                                <input type="radio" id="follow_yes" name="requires_followup" value="1" required>
+                                <label for="follow_yes">Sí</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="follow_no" name="requires_followup" value="0">
+                                <label for="follow_no">No</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label" for="followup_date">Fecha sugerida de seguimiento</label>
+                        <input type="date" id="followup_date" name="followup_scheduled_date" class="forms-input">
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label" for="facilitator_notes">Notas del Facilitador / Observaciones</label>
+                        <textarea id="facilitator_notes" name="facilitator_notes" class="forms-textarea"></textarea>
+                    </div>
+                </div>
+
+                <!-- Hidden Submit (Handled by Wizard) -->
+                <button type="submit" id="submitBtn" style="display:none">Registrar Intercambio</button>
+            </form>
+        </div>
     </div>
 
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/ui-shell.js"></script>
+    <script src="/static/js/ui-wizard.js"></script>
     <script src="/static/js/forms.js"></script>
     <script src="/static/js/form-exchange.js"></script>
 </body>

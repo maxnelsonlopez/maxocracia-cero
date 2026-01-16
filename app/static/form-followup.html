@@ -10,524 +10,306 @@
 </head>
 
 <body>
-    <div class="forms-container">
-        <!-- Hero Section -->
-        <div class="forms-hero">
-            <h1 class="forms-hero-title">📊 Reporte de Seguimiento</h1>
-            <p class="forms-hero-subtitle">
-                Este formulario sirve para hacer seguimiento a intercambios en curso o verificar
-                cómo evolucionan las situaciones de los participantes después de recibir ayuda.
-                Toma menos de 2 minutos. ¡Gracias!
-            </p>
-        </div>
-
-        <!-- Success Message -->
-        <div id="successMessage" class="forms-success" style="display: none;">
-            <div class="forms-success-icon">✅</div>
-            <h2 class="forms-success-title">¡Seguimiento Registrado!</h2>
-            <p class="forms-success-message" id="successDetails"></p>
-            <button class="forms-btn forms-btn-primary" onclick="resetForm()" style="margin-top: 1rem;">
-                Registrar Otro Seguimiento
-            </button>
-        </div>
-
-        <!-- Error Message -->
-        <div id="errorMessage" class="forms-error" style="display: none;">
-            <span class="forms-error-icon">⚠️</span>
-            <span id="errorText"></span>
-        </div>
-
-        <!-- Form -->
-        <form id="followupForm" class="forms-card">
-            <!-- SECCIÓN 1: Identificación -->
-            <div class="forms-section">
-                <h2 class="forms-section-title">
-                    <span class="forms-emoji">🔖</span>
-                    SECCIÓN 1: Identificación
-                </h2>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required" for="follow_up_date">Fecha de este
-                        seguimiento</label>
-                    <input type="date" id="follow_up_date" name="follow_up_date" class="forms-input" required>
-                    <span class="forms-help-text">¿Cuándo estás haciendo este chequeo?</span>
-                </div>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required" for="participant_name">¿A quién le estás haciendo
-                        seguimiento?</label>
-                    <input type="text" id="participant_name" name="participant_name" class="forms-input" required>
-                    <span class="forms-help-text">Nombre o alias de la persona</span>
-                </div>
-
-                <div class="forms-group">
-                    <label class="forms-label" for="related_interchange_code">Código de Intercambio Original (si
-                        aplica)</label>
-                    <input type="text" id="related_interchange_code" name="related_interchange_code" class="forms-input"
-                        placeholder="INT-001">
-                    <span class="forms-help-text">Si este seguimiento está relacionado con un intercambio registrado,
-                        pon su código. Si no, deja en blanco.</span>
-                </div>
-            </div>
-
-            <!-- SECCIÓN 2: Tipo de Seguimiento -->
-            <div class="forms-section">
-                <h2 class="forms-section-title">
-                    <span class="forms-emoji">📝</span>
-                    SECCIÓN 2: Tipo de Seguimiento
-                </h2>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required">¿Qué tipo de seguimiento es este?</label>
-                    <div class="forms-radio-group">
-                        <div class="forms-radio-item">
-                            <input type="radio" id="type_verification" name="follow_up_type"
-                                value="verification_completed" required>
-                            <label for="type_verification">📊 Verificación de intercambio completado</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="type_update" name="follow_up_type" value="update_in_progress">
-                            <label for="type_update">🔄 Actualización de intercambio en curso</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="type_evolution" name="follow_up_type" value="situation_evolution">
-                            <label for="type_evolution">📈 Evolución de situación después de recibir ayuda</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="type_urgent" name="follow_up_type" value="new_urgent_need">
-                            <label for="type_urgent">🆘 Nueva necesidad urgente detectada</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="type_resolved" name="follow_up_type" value="need_resolved">
-                            <label for="type_resolved">✅ Necesidad completamente resuelta (cerrar caso)</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="type_feedback" name="follow_up_type" value="spontaneous_feedback">
-                            <label for="type_feedback">💬 Feedback espontáneo del participante</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="type_routine" name="follow_up_type" value="routine_check">
-                            <label for="type_routine">🔍 Chequeo rutinario</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECCIÓN 3: Estado Actual -->
-            <div class="forms-section">
-                <h2 class="forms-section-title">
-                    <span class="forms-emoji">📊</span>
-                    SECCIÓN 3: Estado Actual
-                </h2>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required" for="current_situation">¿Cómo está la situación
-                        ahora?</label>
-                    <textarea id="current_situation" name="current_situation" class="forms-textarea" required
-                        placeholder="Describe brevemente la situación actual de la persona. ¿Mejoró? ¿Sigue igual? ¿Empeoró? ¿Surgieron nuevas necesidades?"></textarea>
-                </div>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required">Nivel de necesidad actual</label>
-                    <p class="forms-help-text">Evaluación general de qué tan apremiante es su situación ahora</p>
-                    <div class="forms-radio-group">
-                        <div class="forms-radio-item">
-                            <input type="radio" id="need_1" name="need_level" value="1" required>
-                            <label for="need_1">1 - Necesidad resuelta / Situación estable</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="need_2" name="need_level" value="2">
-                            <label for="need_2">2 - Necesidad baja</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="need_3" name="need_level" value="3">
-                            <label for="need_3">3 - Necesidad moderada</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="need_4" name="need_level" value="4">
-                            <label for="need_4">4 - Necesidad alta</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="need_5" name="need_level" value="5">
-                            <label for="need_5">5 - Necesidad crítica / Situación urgente</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required">Comparado con el último reporte, la
-                        situación:</label>
-                    <div class="forms-radio-group">
-                        <div class="forms-radio-item">
-                            <input type="radio" id="change_improved_sig" name="situation_change"
-                                value="improved_significantly" required>
-                            <label for="change_improved_sig">📈 Mejoró significativamente</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="change_improved" name="situation_change" value="improved_slightly">
-                            <label for="change_improved">🔼 Mejoró un poco</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="change_same" name="situation_change" value="same">
-                            <label for="change_same">➡️ Está igual</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="change_worsened" name="situation_change" value="worsened_slightly">
-                            <label for="change_worsened">🔽 Empeoró un poco</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="change_worsened_sig" name="situation_change"
-                                value="worsened_significantly">
-                            <label for="change_worsened_sig">📉 Empeoró significativamente</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="change_first" name="situation_change" value="first_evaluation">
-                            <label for="change_first">🆕 Primera evaluación (no hay comparación)</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECCIÓN 4: Intercambios Activos -->
-            <div class="forms-section">
-                <h2 class="forms-section-title">
-                    <span class="forms-emoji">🔄</span>
-                    SECCIÓN 4: Intercambios Activos
-                </h2>
-
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required">¿Hay intercambios activos con esta persona?</label>
-                    <div class="forms-radio-group">
-                        <div class="forms-radio-item">
-                            <input type="radio" id="active_receiving" name="active_interchanges_status"
-                                value="receiving_help" required>
-                            <label for="active_receiving">✅ Sí - Recibiendo ayuda actualmente</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="active_giving" name="active_interchanges_status"
-                                value="giving_help">
-                            <label for="active_giving">✅ Sí - Dando ayuda actualmente</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="active_both" name="active_interchanges_status" value="both">
-                            <label for="active_both">✅ Sí - Ambos (dando y recibiendo)</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="active_none" name="active_interchanges_status" value="none">
-                            <label for="active_none">❌ No - No hay intercambios activos ahora</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="active_paused" name="active_interchanges_status" value="paused">
-                            <label for="active_paused">⏸ Pausado temporalmente</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="forms-group" id="interchangesWorkingGroup" style="display: none;">
-                    <label class="forms-label">Si hay intercambios activos, ¿están funcionando bien?</label>
-                    <div class="forms-radio-group">
-                        <div class="forms-radio-item">
-                            <input type="radio" id="working_very_well" name="interchanges_working_well"
-                                value="very_well">
-                            <label for="working_very_well">✅ Funcionan muy bien</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="working_minor" name="interchanges_working_well"
-                                value="minor_difficulties">
-                            <label for="working_minor">🟡 Funcionan pero con dificultades menores</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="working_problems" name="interchanges_working_well"
-                                value="significant_problems">
-                            <label for="working_problems">⚠️ Hay problemas significativos</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="working_adjustment" name="interchanges_working_well"
-                                value="needs_adjustment">
-                            <label for="working_adjustment">🔍 Necesitan ajustes o rediseño</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECCIÓN 5: Detección de Nuevas Oportunidades -->
-            <div class="forms-section">
-                <h2 class="forms-section-title">
-                    <span class="forms-emoji">🔍</span>
-                    SECCIÓN 5: Detección de Nuevas Oportunidades
-                </h2>
-
-                <div class="forms-group">
-                    <label class="forms-label">¿Se identificaron nuevas necesidades?</label>
-                    <div class="forms-checkbox-group">
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_need_objeto" name="new_needs_detected" value="objeto">
-                            <label for="new_need_objeto">📦 Objetos</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_need_alimentacion" name="new_needs_detected"
-                                value="alimentacion">
-                            <label for="new_need_alimentacion">🍽 Alimentación o Cocina</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_need_habilidad" name="new_needs_detected" value="habilidad">
-                            <label for="new_need_habilidad">🛠 Habilidades o Servicios</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_need_conocimiento" name="new_needs_detected"
-                                value="conocimiento">
-                            <label for="new_need_conocimiento">📚 Conocimiento o Consejo</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_need_transporte" name="new_needs_detected"
-                                value="transporte">
-                            <label for="new_need_transporte">🚗 Transporte</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_need_tiempo" name="new_needs_detected" value="tiempo">
-                            <label for="new_need_tiempo">⏰ Tiempo y Compañía</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_need_espacio" name="new_needs_detected" value="espacio">
-                            <label for="new_need_espacio">🏠 Espacio</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_need_apoyo" name="new_needs_detected"
-                                value="apoyo_economico">
-                            <label for="new_need_apoyo">💰 Apoyo Económico</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_need_none" name="new_needs_detected" value="none">
-                            <label for="new_need_none">❌ No, ninguna nueva necesidad</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="forms-group">
-                    <label class="forms-label">¿Se identificaron nuevas ofertas que puede hacer?</label>
-                    <div class="forms-checkbox-group">
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_offer_objeto" name="new_offers_detected" value="objeto">
-                            <label for="new_offer_objeto">📦 Objetos</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_offer_alimentacion" name="new_offers_detected"
-                                value="alimentacion">
-                            <label for="new_offer_alimentacion">🍽 Alimentación o Cocina</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_offer_habilidad" name="new_offers_detected"
-                                value="habilidad">
-                            <label for="new_offer_habilidad">🛠 Habilidades o Servicios</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_offer_conocimiento" name="new_offers_detected"
-                                value="conocimiento">
-                            <label for="new_offer_conocimiento">📚 Conocimiento o Consejo</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_offer_transporte" name="new_offers_detected"
-                                value="transporte">
-                            <label for="new_offer_transporte">🚗 Transporte</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_offer_tiempo" name="new_offers_detected" value="tiempo">
-                            <label for="new_offer_tiempo">⏰ Tiempo y Compañía</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_offer_espacio" name="new_offers_detected" value="espacio">
-                            <label for="new_offer_espacio">🏠 Espacio</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_offer_apoyo" name="new_offers_detected"
-                                value="apoyo_economico">
-                            <label for="new_offer_apoyo">💰 Apoyo Económico</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="new_offer_none" name="new_offers_detected" value="none">
-                            <label for="new_offer_none">❌ No, nada nuevo que ofrecer por ahora</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECCIÓN 6: Salud Emocional y Conexión -->
-            <div class="forms-section">
-                <h2 class="forms-section-title">
-                    <span class="forms-emoji">💚</span>
-                    SECCIÓN 6: Salud Emocional y Conexión
-                </h2>
-                <p class="forms-section-description">
-                    Estas preguntas ayudan a entender el bienestar general de las personas en la red,
-                    más allá de las necesidades materiales específicas.
+    <div class="dashboard-main">
+        <div class="forms-container">
+            <!-- Hero Section -->
+            <div class="forms-hero">
+                <h1 class="forms-hero-title">📊 Reporte de Seguimiento</h1>
+                <p class="forms-hero-subtitle">
+                    Registro de evolución, nuevas necesidades y efectividad de los intercambios.
                 </p>
-
-                <div class="forms-group">
-                    <label class="forms-label">Estado emocional/anímico percibido</label>
-                    <div class="forms-radio-group">
-                        <div class="forms-radio-item">
-                            <input type="radio" id="emotion_very_good" name="emotional_state" value="very_good">
-                            <label for="emotion_very_good">😊 Muy bien - Optimista, energizado</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="emotion_good" name="emotional_state" value="good">
-                            <label for="emotion_good">🙂 Bien - Estable, tranquilo</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="emotion_neutral" name="emotional_state" value="neutral">
-                            <label for="emotion_neutral">😐 Neutro - Ni bien ni mal</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="emotion_worried" name="emotional_state" value="worried">
-                            <label for="emotion_worried">😟 Preocupado - Con estrés o ansiedad</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="emotion_bad" name="emotional_state" value="bad">
-                            <label for="emotion_bad">😢 Mal - Desanimado, desesperanzado</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="emotion_alert" name="emotional_state" value="alert_signs">
-                            <label for="emotion_alert">🚨 Señales de alerta - Posible crisis emocional</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="emotion_unknown" name="emotional_state" value="could_not_evaluate">
-                            <label for="emotion_unknown">❓ No pude evaluar</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="forms-group">
-                    <label class="forms-label">¿La persona siente conexión con la comunidad?</label>
-                    <p class="forms-help-text">¿Qué tan integrada siente esta persona en la red de apoyo?</p>
-                    <div class="forms-radio-group">
-                        <div class="forms-radio-item">
-                            <input type="radio" id="connection_1" name="community_connection" value="1">
-                            <label for="connection_1">1 - Se siente aislada/desconectada</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="connection_2" name="community_connection" value="2">
-                            <label for="connection_2">2 - Conexión baja</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="connection_3" name="community_connection" value="3">
-                            <label for="connection_3">3 - Conexión moderada</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="connection_4" name="community_connection" value="4">
-                            <label for="connection_4">4 - Buena conexión</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="connection_5" name="community_connection" value="5">
-                            <label for="connection_5">5 - Se siente parte integral de la red</label>
-                        </div>
-                    </div>
-                </div>
             </div>
 
-            <!-- SECCIÓN 7: Acciones Necesarias -->
-            <div class="forms-section">
-                <h2 class="forms-section-title">
-                    <span class="forms-emoji">🎯</span>
-                    SECCIÓN 7: Acciones Necesarias
-                </h2>
+            <!-- Success Message -->
+            <div id="successMessage" class="forms-success" style="display: none;">
+                <div class="forms-success-icon">✅</div>
+                <h2 class="forms-success-title">¡Seguimiento Registrado!</h2>
+                <p class="forms-success-message" id="successDetails"></p>
+                <button class="forms-btn forms-btn-primary" onclick="resetForm()" style="margin-top: 1rem;">
+                    Registrar Otro Seguimiento
+                </button>
+            </div>
 
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required">¿Qué acciones se requieren?</label>
-                    <div class="forms-checkbox-group">
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="action_match" name="actions_required" value="find_match">
-                            <label for="action_match">🔍 Buscar nuevo match para necesidad urgente</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="action_call" name="actions_required" value="deep_check">
-                            <label for="action_call">📞 Hacer llamada de chequeo más profunda</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="action_connect" name="actions_required"
-                                value="facilitate_connection">
-                            <label for="action_connect">🤝 Facilitar conexión con alguien específico de la red</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="action_update" name="actions_required" value="update_info">
-                            <label for="action_update">📋 Actualizar su información en el sistema</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="action_plan" name="actions_required" value="create_plan">
-                            <label for="action_plan">🎯 Crear plan de acción específico</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="action_urgent" name="actions_required"
-                                value="urgent_intervention">
-                            <label for="action_urgent">🔴 Intervención urgente necesaria</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="action_celebrate" name="actions_required" value="celebrate">
-                            <label for="action_celebrate">🎉 Celebrar logro/progreso con la red</label>
-                        </div>
-                        <div class="forms-checkbox-item">
-                            <input type="checkbox" id="action_none" name="actions_required" value="none">
-                            <label for="action_none">✅ Ninguna - Todo bien por ahora</label>
+            <!-- Error Message -->
+            <div id="errorMessage" class="forms-error" style="display: none;">
+                <span class="forms-error-icon">⚠️</span>
+                <span id="errorText"></span>
+            </div>
+
+            <!-- Form -->
+            <form id="followupForm" class="forms-card">
+                <!-- SECCIÓN 1: Identificación -->
+                <div class="forms-section">
+                    <h2 class="forms-section-title">
+                        <span class="forms-emoji">🔖</span>
+                        SECCIÓN 1: Identificación
+                    </h2>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required" for="follow_up_date">Fecha del
+                            Seguimiento</label>
+                        <input type="date" id="follow_up_date" name="follow_up_date" class="forms-input" required>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required" for="participant_name">Nombre del
+                            Participante</label>
+                        <input type="text" id="participant_name" name="participant_name" class="forms-input"
+                            placeholder="Buscar participante..." required>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label" for="related_interchange">Intercambio Relacionado (ID)</label>
+                        <input type="text" id="related_interchange" name="related_interchange_id" class="forms-input"
+                            placeholder="Opcional">
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required">Tipo de Seguimiento</label>
+                        <div class="forms-radio-group">
+                            <div class="forms-radio-item">
+                                <input type="radio" id="type_routine" name="follow_up_type" value="Rutina" required>
+                                <label for="type_routine">🔄 Rutina</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="type_urgent" name="follow_up_type" value="Urgente">
+                                <label for="type_urgent">🚨 Urgente</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="type_closure" name="follow_up_type" value="Cierre">
+                                <label for="type_closure">🏁 Cierre de Caso</label>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="forms-group">
-                    <label class="forms-label forms-label-required">Prioridad de seguimiento</label>
-                    <div class="forms-radio-group">
-                        <div class="forms-radio-item">
-                            <input type="radio" id="priority_high" name="follow_up_priority" value="high" required>
-                            <label for="priority_high">🔴 Alta - Requiere atención en 24-48 horas</label>
+                <!-- SECCIÓN 2: Estado Actual -->
+                <div class="forms-section">
+                    <h2 class="forms-section-title">
+                        <span class="forms-emoji">📊</span>
+                        SECCIÓN 2: Estado Actual
+                    </h2>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required" for="current_situation">Situación Actual del
+                            Participante</label>
+                        <textarea id="current_situation" name="current_situation" class="forms-textarea"
+                            placeholder="¿Cómo está la persona hoy?" required></textarea>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required">Nivel de Necesidad Actual</label>
+                        <div class="forms-radio-group">
+                            <div class="forms-radio-item">
+                                <input type="radio" id="need_1" name="need_level" value="1" required>
+                                <label for="need_1">1 - Estable</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="need_2" name="need_level" value="2">
+                                <label for="need_2">2 - Leve</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="need_3" name="need_level" value="3">
+                                <label for="need_3">3 - Moderada</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="need_4" name="need_level" value="4">
+                                <label for="need_4">4 - Alta</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="need_5" name="need_level" value="5">
+                                <label for="need_5">5 - Crítica</label>
+                            </div>
                         </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="priority_medium" name="follow_up_priority" value="medium">
-                            <label for="priority_medium">🟡 Media - Revisar en la próxima semana</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="priority_low" name="follow_up_priority" value="low">
-                            <label for="priority_low">🟢 Baja - Seguimiento rutinario mensual</label>
-                        </div>
-                        <div class="forms-radio-item">
-                            <input type="radio" id="priority_closed" name="follow_up_priority" value="closed">
-                            <label for="priority_closed">✅ Cerrado - No requiere más seguimiento</label>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required">Cambio desde el último contacto</label>
+                        <div class="forms-radio-group">
+                            <div class="forms-radio-item">
+                                <input type="radio" id="change_better" name="situation_change" value="Mejoró" required>
+                                <label for="change_better">📈 Mejoró</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="change_same" name="situation_change" value="Igual">
+                                <label for="change_same">➖ Igual</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="change_worse" name="situation_change" value="Empeoró">
+                                <label for="change_worse">📉 Empeoró</label>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="forms-group" id="nextFollowupGroup" style="display: none;">
-                    <label class="forms-label" for="next_follow_up_date">¿Cuándo hacer el próximo seguimiento?</label>
-                    <input type="date" id="next_follow_up_date" name="next_follow_up_date" class="forms-input">
-                    <span class="forms-help-text">Si marcaste que requiere seguimiento, ¿para cuándo programarlo?</span>
+                <!-- SECCIÓN 3: Intercambios Activos -->
+                <div class="forms-section">
+                    <h2 class="forms-section-title">
+                        <span class="forms-emoji">🤝</span>
+                        SECCIÓN 3: Intercambios Activos
+                    </h2>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required">Estado de Intercambios en curso</label>
+                        <div class="forms-radio-group">
+                            <div class="forms-radio-item">
+                                <input type="radio" id="status_none" name="active_interchanges_status" value="none"
+                                    required>
+                                <label for="status_none">Ninguno activo</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="status_ok" name="active_interchanges_status" value="fluyendo">
+                                <label for="status_ok">Fluyendo bien</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="status_stuck" name="active_interchanges_status"
+                                    value="estancado">
+                                <label for="status_stuck">Estancado / Problemas</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label">Cosas que están funcionando bien</label>
+                        <div class="forms-checkbox-group">
+                            <div class="forms-checkbox-item">
+                                <input type="checkbox" id="well_comm" name="interchanges_working_well"
+                                    value="comunicacion">
+                                <label for="well_comm">Comunicación</label>
+                            </div>
+                            <div class="forms-checkbox-item">
+                                <input type="checkbox" id="well_time" name="interchanges_working_well" value="tiempos">
+                                <label for="well_time">Tiempos de entrega</label>
+                            </div>
+                            <div class="forms-checkbox-item">
+                                <input type="checkbox" id="well_quality" name="interchanges_working_well"
+                                    value="calidad">
+                                <label for="well_quality">Calidad de la ayuda</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- SECCIÓN 8: Observaciones del Facilitador -->
-            <div class="forms-section">
-                <h2 class="forms-section-title">
-                    <span class="forms-emoji">📝</span>
-                    SECCIÓN 8: Observaciones del Facilitador
-                </h2>
+                <!-- SECCIÓN 4: Nuevos Hallazgos -->
+                <div class="forms-section">
+                    <h2 class="forms-section-title">
+                        <span class="forms-emoji">🔍</span>
+                        SECCIÓN 4: Nuevos Hallazgos
+                    </h2>
 
-                <div class="forms-group">
-                    <label class="forms-label" for="facilitator_notes">Notas y observaciones</label>
-                    <textarea id="facilitator_notes" name="facilitator_notes" class="forms-textarea"
-                        placeholder="Cualquier cosa importante que notar: conversaciones relevantes, cambios en circunstancias, intuiciones sobre qué podría ayudar, etc."></textarea>
+                    <div class="forms-group">
+                        <label class="forms-label">Nuevas Necesidades Detectadas</label>
+                        <div class="forms-checkbox-group">
+                            <div class="forms-checkbox-item">
+                                <input type="checkbox" id="need_new_food" name="new_needs_detected"
+                                    value="alimentacion">
+                                <label for="need_new_food">Alimentación</label>
+                            </div>
+                            <div class="forms-checkbox-item">
+                                <input type="checkbox" id="need_new_health" name="new_needs_detected" value="salud">
+                                <label for="need_new_health">Salud / Bienestar</label>
+                            </div>
+                            <div class="forms-checkbox-item">
+                                <input type="checkbox" id="need_new_tools" name="new_needs_detected"
+                                    value="herramientas">
+                                <label for="need_new_tools">Herramientas / Objetos</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label">Nuevas Ofertas / Talentos Detectados</label>
+                        <textarea id="new_offers" name="new_offers_detected" class="forms-textarea"
+                            placeholder="¿Algo nuevo que pueda ofrecer?"></textarea>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label">Estado Emocional Observado</label>
+                        <div class="forms-radio-group">
+                            <div class="forms-radio-item">
+                                <input type="radio" id="emo_pos" name="emotional_state" value="positivo">
+                                <label for="emo_pos">😊 Positivo</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="emo_neu" name="emotional_state" value="neutral">
+                                <label for="emo_neu">😐 Neutral</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="emo_neg" name="emotional_state" value="negativo">
+                                <label for="emo_neg">😔 Negativo / Estresado</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="forms-group">
-                    <label class="forms-label" for="learnings">¿Algo que aprendiste de este seguimiento?</label>
-                    <textarea id="learnings" name="learnings" class="forms-textarea"
-                        placeholder="¿Qué insights emergieron? ¿Qué funcionó bien? ¿Qué cambiarías? Esto ayuda a mejorar el sistema."></textarea>
-                </div>
-            </div>
+                <!-- SECCIÓN 5: Acciones y Cierre -->
+                <div class="forms-section">
+                    <h2 class="forms-section-title">
+                        <span class="forms-emoji">🎯</span>
+                        SECCIÓN 5: Acciones y Cierre
+                    </h2>
 
-            <!-- Submit Button -->
-            <button type="submit" class="forms-btn forms-btn-primary forms-btn-full" id="submitBtn">
-                <span id="submitText">Registrar Seguimiento</span>
-                <span id="submitLoading" class="forms-loading" style="display: none;"></span>
-            </button>
-        </form>
+                    <div class="forms-group">
+                        <label class="forms-label">Acciones Requeridas</label>
+                        <div class="forms-checkbox-group">
+                            <div class="forms-checkbox-item">
+                                <input type="checkbox" id="act_new_match" name="actions_required" value="nuevo_match">
+                                <label for="act_new_match">Buscar nuevo match</label>
+                            </div>
+                            <div class="forms-checkbox-item">
+                                <input type="checkbox" id="act_mediate" name="actions_required" value="mediacion">
+                                <label for="act_mediate">Mediación en conflicto</label>
+                            </div>
+                            <div class="forms-checkbox-item">
+                                <input type="checkbox" id="act_resource" name="actions_required"
+                                    value="gestionar_recurso">
+                                <label for="act_resource">Gestionar recurso externo</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label forms-label-required">Prioridad de Próximo Seguimiento</label>
+                        <div class="forms-radio-group">
+                            <div class="forms-radio-item">
+                                <input type="radio" id="p_high" name="follow_up_priority" value="high" required>
+                                <label for="p_high">🔴 Alta (Inmediata)</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="p_medium" name="follow_up_priority" value="medium">
+                                <label for="p_medium">🟡 Media (Próxima semana)</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="p_low" name="follow_up_priority" value="low">
+                                <label for="p_low">🟢 Baja (Próximo mes)</label>
+                            </div>
+                            <div class="forms-radio-item">
+                                <input type="radio" id="p_closed" name="follow_up_priority" value="closed">
+                                <label for="p_closed">✅ Cerrado</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label" for="next_follow_up_date">Fecha Programada Siguiente contacto</label>
+                        <input type="date" id="next_follow_up_date" name="next_follow_up_date" class="forms-input">
+                    </div>
+
+                    <div class="forms-group">
+                        <label class="forms-label" for="learnings">Lecciones aprendidas o Notas del facilitador</label>
+                        <textarea id="learnings" name="learnings" class="forms-textarea"></textarea>
+                    </div>
+                </div>
+
+                <!-- Hidden Submit (Handled by Wizard) -->
+                <button type="submit" id="submitBtn" style="display:none">Registrar Seguimiento</button>
+            </form>
+        </div>
     </div>
 
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/ui-shell.js"></script>
+    <script src="/static/js/ui-wizard.js"></script>
     <script src="/static/js/forms.js"></script>
     <script src="/static/js/form-followup.js"></script>
 </body>

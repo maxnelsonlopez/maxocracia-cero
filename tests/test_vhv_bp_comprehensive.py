@@ -12,7 +12,7 @@ import pytest
 @pytest.fixture
 def auth_headers(client):
     """Create authentication headers for testing."""
-    # Login and get token (use pre-existing test user from conftest if available, 
+    # Login and get token (use pre-existing test user from conftest if available,
     # but here we follow the pattern of creating one specifically for this test file)
     register_data = {
         "email": "testauth_vhv@example.com",
@@ -20,11 +20,11 @@ def auth_headers(client):
         "name": "Test VHV User",
     }
     client.post("/auth/register", json=register_data)
-    
+
     login_data = {"email": "testauth_vhv@example.com", "password": "ValidPass123!"}
     response = client.post("/auth/login", json=login_data)
     token = response.get_json()["access_token"]
-    
+
     return {"Authorization": f"Bearer {token}"}
 
 
@@ -35,9 +35,8 @@ def admin_headers(client):
     login_data = {"email": "admin@example.com", "password": "ValidPass123!"}
     response = client.post("/auth/login", json=login_data)
     token = response.get_json()["access_token"]
-    
-    return {"Authorization": f"Bearer {token}"}
 
+    return {"Authorization": f"Bearer {token}"}
 
 
 class TestVHVBPProducts:
