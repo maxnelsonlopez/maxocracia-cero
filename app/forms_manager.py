@@ -167,17 +167,34 @@ class FormsManager:
             return False, f"Error de base de datos: {e}", None
 
     def get_participants(
-        self, limit: int = 50, offset: int = 0, status: Optional[str] = None
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        status: Optional[str] = None,
+        search: Optional[str] = None,
     ) -> List[Dict]:
-        """Get list of participants with pagination."""
+        """
+        Get list of participants with pagination and optional search.
+
+        Args:
+            limit: Number of results
+            offset: Offset for pagination
+            status: Optional status filter
+            search: Optional name/email search string
+        """
         cursor = self.conn.cursor()
 
-        query = "SELECT * FROM participants"
+        query = "SELECT * FROM participants WHERE 1=1"
         params: List[Any] = []
 
         if status:
-            query += " WHERE status = ?"
+            query += " AND status = ?"
             params.append(status)
+
+        if search:
+            query += " AND (name LIKE ? OR email LIKE ?)"
+            search_param = f"%{search}%"
+            params.extend([search_param, search_param])
 
         query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
         params.extend([limit, offset])

@@ -58,16 +58,32 @@
                     </div>
 
                     <div class="forms-group">
-                        <label class="forms-label forms-label-required" for="giver_name">¿Quién DIO la ayuda?</label>
-                        <input type="text" id="giver_name" name="giver_name" class="forms-input"
-                            placeholder="Nombre del aportante" required>
+                        <label class="forms-label forms-label-required" for="giver_search">¿Quién DIO la ayuda?</label>
+                        <div class="searchable-select">
+                            <input type="text" id="giver_search" class="forms-input"
+                                placeholder="Buscar participante..." autocomplete="off">
+                            <input type="hidden" id="giver_id" name="giver_id" required>
+                            <div id="giver_results" class="search-results-dropdown" style="display: none;"></div>
+                            <div id="giver_badge" class="selected-badge" style="display: none;">
+                                <span class="selected-badge-name"></span>
+                                <span class="selected-badge-remove" onclick="clearSelection('giver')">×</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="forms-group">
-                        <label class="forms-label forms-label-required" for="receiver_name">¿Quién RECIBIÓ la
+                        <label class="forms-label forms-label-required" for="receiver_search">¿Quién RECIBIÓ la
                             ayuda?</label>
-                        <input type="text" id="receiver_name" name="receiver_name" class="forms-input"
-                            placeholder="Nombre del beneficiario" required>
+                        <div class="searchable-select">
+                            <input type="text" id="receiver_search" class="forms-input"
+                                placeholder="Buscar participante..." autocomplete="off">
+                            <input type="hidden" id="receiver_id" name="receiver_id" required>
+                            <div id="receiver_results" class="search-results-dropdown" style="display: none;"></div>
+                            <div id="receiver_badge" class="selected-badge" style="display: none;">
+                                <span class="selected-badge-name"></span>
+                                <span class="selected-badge-remove" onclick="clearSelection('receiver')">×</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

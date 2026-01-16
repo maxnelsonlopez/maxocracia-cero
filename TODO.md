@@ -8,14 +8,15 @@
 
 ### Cohorte Cero - Red de Apoyo
 
-- [x] **Implementar formularios interactivos (Wizard)**
+- [x] **Implementar formularios interactivos (Wizard) y Lookups**
   - Completado: 2026-01-16
   - Implementados como formularios multi-paso con validación:
     - Formulario CERO (Inscripción)
     - Formulario A (Registro de Intercambio)
     - Formulario B (Reporte de Seguimiento)
-  - Integrados en el Dashboard web (no solo Google Forms)
-  - Impacto: Operacional - mejora drástica en UX para Cohorte Cero
+  - **Búsqueda Dinámica**: Reemplazados IDs estáticos por lookup en tiempo real de participantes e intercambios.
+  - Integrados en el Dashboard web con estética glassmorphism.
+  - Impacto: Operacional - mejora drástica en UX y precisión de datos para Cohorte Cero.
 
 - [x] **Crear dashboard de análisis de intercambios**
   - Completado: 2025-12-04

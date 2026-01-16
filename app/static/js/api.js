@@ -157,6 +157,13 @@ class ApiService {
         return res;
     }
 
+    async getParticipants(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        const res = await this.request(`/forms/participants?${query}`);
+        if (!res.ok) throw new Error('Failed to fetch participants');
+        return await res.json();
+    }
+
     // Participant Services (Form Cero)
     async registerParticipant(data) {
         const res = await this.request('/forms/participant', {
@@ -199,6 +206,19 @@ class ApiService {
             const err = await res.json();
             throw new Error(err.error || 'Interchange registration failed');
         }
+        return await res.json();
+    }
+
+    async getExchanges(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        const res = await this.request(`/forms/exchanges?${query}`);
+        if (!res.ok) throw new Error('Failed to fetch exchanges');
+        return await res.json();
+    }
+
+    async getActiveExchanges(participantId) {
+        const res = await this.request(`/forms/follow-ups/participant/${participantId}`);
+        if (!res.ok) throw new Error('Failed to fetch active exchanges');
         return await res.json();
     }
 

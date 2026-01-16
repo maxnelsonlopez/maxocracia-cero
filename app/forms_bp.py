@@ -62,6 +62,7 @@ def get_participants(current_user):
     limit = request.args.get("limit", 50, type=int)
     offset = request.args.get("offset", 0, type=int)
     status = request.args.get("status")
+    search = request.args.get("search")
 
     # Validate limit
     if limit > 100:
@@ -70,7 +71,9 @@ def get_participants(current_user):
     db = get_db()
     manager = FormsManager(db)
 
-    participants = manager.get_participants(limit=limit, offset=offset, status=status)
+    participants = manager.get_participants(
+        limit=limit, offset=offset, status=status, search=search
+    )
 
     return (
         jsonify(

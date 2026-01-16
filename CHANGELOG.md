@@ -4,27 +4,34 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
  
-## 2026-01-16 — Integración de UI Shell y Sistema de Formularios (Wizard)
+## 2026-01-16 — Integración de UI Shell, Sistema de Formularios (Wizard) y Lookups Dinámicos
 
 ### Añadido
 - **UI Shell Unificado (`ui-shell.js`)**: Implementado un sidebar persistente y dinámico en todas las vistas principales (Dashboard, Calculadora VHV, Formularios).
 - **Sistema de Temas (Dark/Light)**: Añadido un toggle de tema global en el sidebar con persistencia en `localStorage` y detección de preferencia del sistema.
 - **FormWizard (`ui-wizard.js`)**: Creado un componente reutilizable para transformar formularios complejos en procesos multi-paso con barra de progreso, validación por etapa y navegación fluida.
+- **Lookups Dinámicos de Participantes**:
+  - Implementada búsqueda en tiempo real (nombre/email) para campos de "Giver" y "Receiver" en `form-exchange.js`.
+  - Integrado mecanismo de "Selected Badges" con estética glassmorphism para confirmar selecciones.
+- **Lookups de Intercambios Relacionados**:
+  - Implementada carga automática de intercambios activos cuando se selecciona un participante en `form-followup.js`.
+  - Filtrado inteligente basado en roles (Giver o Receiver) del participante seleccionado.
 - **Restauración de Contenido Operativo**:
   - `form-exchange.html`: Restauradas todas las métricas Maxocráticas (UTH, URF) y campos de impacto.
-  - `form-followup.html`: Restaurados campos de estados emocionales, nuevos hallazgos y gestión de recursos.
+  - `form-followup.html`: Restaurados campos de estados emocionales, nuevos hallazgos y gestión de recursos (T, V, R).
   - `vhv-calculator.html`: Restauradas todas las variables (15+) para cálculo preciso del Vector de Huella Vital.
 - **Estética Glassmorphism**: Aplicado un sistema de diseño premium basado en transparencia, desenfoque y micro-animaciones en toda la interfaz.
 
 ### Mejorado
+- **Backend API**: Añadido soporte de búsqueda en `get_participants` (FormsManager) y expuesto parámetro `search` en `/forms/participants`.
 - **Navegación**: Los ítems del menú reflejan automáticamente el estado activo según la URL actual.
-- **UX de Formularios**: Los formularios extensos ahora son menos abrumadores y guían al usuario paso a paso.
+- **UX de Formularios**: Los formularios extensos ahora son menos abrumadores y guían al usuario paso a paso con feedback visual inmediato.
 - **Integración API**: Consolidado el uso de `ApiService` para envíos autenticados en todos los nuevos wizard.
 
 ### Notas Técnicas
 - Se eliminaron scripts inline redundantes para cumplir con CSP.
-- Los IDs de participantes en los formularios siguen siendo temporales (TODO: Implementar búsqueda real).
-- Contribución: Gemini (Antigravity AI Assistant).
+- Se implementó un sistema de *debounce* en las búsquedas para optimizar llamadas a la API.
+- Firma: Antigravity (Gemini AI Assistant).
 
 ## 2026-01-16 — Corrección de Tests y Estabilización de Integración TVI-VHV
  

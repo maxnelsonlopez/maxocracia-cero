@@ -52,16 +52,25 @@
                     </div>
 
                     <div class="forms-group">
-                        <label class="forms-label forms-label-required" for="participant_name">Nombre del
+                        <label class="forms-label forms-label-required" for="participant_search">Nombre del
                             Participante</label>
-                        <input type="text" id="participant_name" name="participant_name" class="forms-input"
-                            placeholder="Buscar participante..." required>
+                        <div class="searchable-select">
+                            <input type="text" id="participant_search" class="forms-input"
+                                placeholder="Buscar participante..." autocomplete="off">
+                            <input type="hidden" id="participant_id" name="participant_id" required>
+                            <div id="participant_results" class="search-results-dropdown" style="display: none;"></div>
+                            <div id="participant_badge" class="selected-badge" style="display: none;">
+                                <span class="selected-badge-name"></span>
+                                <span class="selected-badge-remove" onclick="clearParticipant()">×</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="forms-group">
-                        <label class="forms-label" for="related_interchange">Intercambio Relacionado (ID)</label>
-                        <input type="text" id="related_interchange" name="related_interchange_id" class="forms-input"
-                            placeholder="Opcional">
+                    <div class="forms-group" id="interchange_selection_group" style="display: none;">
+                        <label class="forms-label" for="related_interchange_id">Intercambio Relacionado</label>
+                        <select id="related_interchange_id" name="related_interchange_id" class="forms-select">
+                            <option value="">Selecciona un intercambio...</option>
+                        </select>
                     </div>
 
                     <div class="forms-group">
