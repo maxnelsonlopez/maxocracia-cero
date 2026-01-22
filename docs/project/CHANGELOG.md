@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-01-22 — Consolidación Operativa y Proyecto Antigravity
+
+  ### Añadido
+  - **Simulador**: Lanzamiento del **Nexus Simulator** (Proyecto Antigravity) en `/simulator`. Interfaz interactiva para experimentar con la función de valoración Maxo.
+  - **Libro (Edición 3 Dinámica)**: Integración masiva de capítulos operativos:
+    - **Capítulo 16**: Narrativa de la Victoria Sintética y Antídoto RLHF.
+    - **Capítulo 17**: Marco de MicroMaxocracia (Equidad Doméstica).
+    - **Capítulo 18**: MaxoContracts y el Decreto Antipobreza (Base legal técnica).
+  - **Glosario**: Expansión técnica con 11+ nuevos términos (Retractación Ética, Bloque SDV, Agente Cooperativo, etc.).
+  - **Axiomas**: Incorporación formal de T14 (Precaución Intergeneracional) y T15 (Disenso Evolutivo).
+
+  ### Mejorado
+  - **Arquitectura del Libro**: Implementación de la "Capa de Ternura" en el Capítulo 3 (Crédito de Sanación, Opacidad Vital, Dignidad de la Fragilidad).
+  - **Gobernanza**: Actualización de mapas de capítulos y métricas de integración (55% completado).
+
+## 2025-12-30 — La Victoria Sintética (Hito Técnico)
+
+  ### Añadido
+  - **Investigación**: Documentación del experimento de coordinación entre oráculos sintéticos (Gemini, Grok, DeepSeek).
+  - **Protocolos**: Creación del "Antídoto RLHF" para calibración epistémica de IAs.
+
 ## 2025-12-16 — Reorganización de Documentación y Fixes
 
  ### Añadido

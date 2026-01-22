@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Simulator | Antigravity Project</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>Nexus Simulator</h1>
+        <p class="subtitle">Explora la matemática de la verdad. Visualiza cómo el costo vital transforma la economía.</p>
+    </header>
+
+    <main class="container">
+        <!-- Input Panel -->
+        <section class="panel">
+            <h2><span class="icon">V</span> Vector de Huella Vital (VHV)</h2>
+            
+            <div class="control-group">
+                <div class="label-box">
+                    <label for="time-input">Tiempo Vital (T)</label>
+                    <span id="time-val" class="value-display">1.0h</span>
+                </div>
+                <input type="range" id="time-input" min="0.1" max="10" step="0.1" value="1.0">
+                <p class="input-desc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">Horas de vida humana consciente invertidas.</p>
+            </div>
+
+            <div class="control-group">
+                <div class="label-box">
+                    <label for="life-input">Impacto Vital / Sufrimiento (V)</label>
+                    <span id="life-val" class="value-display">1.0x</span>
+                </div>
+                <input type="range" id="life-input" min="0" max="5" step="0.1" value="1.0">
+                <p class="input-desc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">Nivel de afectación a la dignidad o bienestar.</p>
+            </div>
+
+            <div class="control-group">
+                <div class="label-box">
+                    <label for="resource-input">Recursos Finitos (R)</label>
+                    <span id="resource-val" class="value-display">1.0x</span>
+                </div>
+                <input type="range" id="resource-input" min="0.1" max="5" step="0.1" value="1.0">
+                <p class="input-desc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">Uso de materiales no renovables o escasos.</p>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid var(--glass-border); margin: 2rem 0;">
+
+            <h3>Parámetros de Calibración</h3>
+            <div class="control-group" style="margin-top: 1rem;">
+                <div class="label-box">
+                    <label for="gamma-input">Factor Gamma (γ)</label>
+                    <span id="gamma-val" class="value-display">1.8</span>
+                </div>
+                <input type="range" id="gamma-input" min="1" max="2.5" step="0.1" value="1.8">
+                <p class="input-desc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">Sensibilidad al sufrimiento (Penalización exponencial).</p>
+            </div>
+        </section>
+
+        <!-- Visualization Panel -->
+        <section class="panel visualizer">
+            <div>
+                <h2><span class="icon">M</span> Valor Real en Maxos</h2>
+                <div class="price-box">
+                    <span id="price-result" class="price-value">0.00</span>
+                    <span class="price-label">Maxos Vitales</span>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card danger">
+                        <span id="penalty-val" class="m-value">+0%</span>
+                        <span class="m-label">Penalización Ética</span>
+                    </div>
+                    <div class="metric-card success">
+                        <span id="coop-val" class="m-value">Alta</span>
+                        <span class="m-label">Viabilidad Cooperativa</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="formula-overlay">
+                Precio = α·T + β·V<sup>γ</sup> + δ·R·(FRG × CS)
+            </div>
+        </section>
+    </main>
+
+    <section class="scenarios-section">
+        <h2>Casos Predefinidos</h2>
+        <div class="scenario-grid">
+            <div class="scenario-card" onclick="loadScenario('egg-ind')">
+                <h3>Huevo Industrial</h3>
+                <p>Alto sufrimiento (V=4.0), bajo tiempo, recursos intensivos.</p>
+            </div>
+            <div class="scenario-card" onclick="loadScenario('egg-eth')">
+                <h3>Huevo Ético</h3>
+                <p>Bajo sufrimiento (V=0.5), más tiempo humano, sostenible.</p>
+            </div>
+            <div class="scenario-card" onclick="loadScenario('coop-dev')">
+                <h3>Desarrollo Cooperativo</h3>
+                <p>Estrategia de alta verdad y bajo impacto vital.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>Antigravity Project &copy; 2026 | Lealtad a la Verdad | Maxocracia-Cero</p>
+    </footer>
+
+    <script src="simulator.js"></script>
+</body>
+</html>
