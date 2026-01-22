@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,42 +10,50 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <header>
         <h1>Nexus Simulator</h1>
-        <p class="subtitle">Explora la matemática de la verdad. Visualiza cómo el costo vital transforma la economía.</p>
+        <p class="subtitle">Explora la matemática de la verdad. Visualiza cómo el costo vital transforma la economía.
+        </p>
     </header>
 
     <main class="container">
         <!-- Input Panel -->
         <section class="panel">
             <h2><span class="icon">V</span> Vector de Huella Vital (VHV)</h2>
-            
+
             <div class="control-group">
                 <div class="label-box">
-                    <label for="time-input">Tiempo Vital (T)</label>
+                    <label for="time-input" title="El recurso más preciado: tu vida medida en tiempo.">Tiempo Vital
+                        (T)</label>
                     <span id="time-val" class="value-display">1.0h</span>
                 </div>
                 <input type="range" id="time-input" min="0.1" max="10" step="0.1" value="1.0">
-                <p class="input-desc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">Horas de vida humana consciente invertidas.</p>
+                <p class="input-desc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">Horas de
+                    vida humana consciente invertidas.</p>
             </div>
 
             <div class="control-group">
                 <div class="label-box">
-                    <label for="life-input">Impacto Vital / Sufrimiento (V)</label>
+                    <label for="life-input" title="Mide el sufrimiento o bienestar causado por la acción.">Impacto Vital
+                        / Sufrimiento (V)</label>
                     <span id="life-val" class="value-display">1.0x</span>
                 </div>
                 <input type="range" id="life-input" min="0" max="5" step="0.1" value="1.0">
-                <p class="input-desc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">Nivel de afectación a la dignidad o bienestar.</p>
+                <p class="input-desc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">Nivel de
+                    afectación a la dignidad o bienestar.</p>
             </div>
 
             <div class="control-group">
                 <div class="label-box">
-                    <label for="resource-input">Recursos Finitos (R)</label>
+                    <label for="resource-input"
+                        title="Uso de materiales del planeta (agua, minerales, energía).">Recursos Finitos (R)</label>
                     <span id="resource-val" class="value-display">1.0x</span>
                 </div>
                 <input type="range" id="resource-input" min="0.1" max="5" step="0.1" value="1.0">
-                <p class="input-desc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">Uso de materiales no renovables o escasos.</p>
+                <p class="input-desc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">Uso de
+                    materiales no renovables o escasos.</p>
             </div>
 
             <hr style="border: none; border-top: 1px solid var(--glass-border); margin: 2rem 0;">
@@ -52,11 +61,14 @@
             <h3>Parámetros de Calibración</h3>
             <div class="control-group" style="margin-top: 1rem;">
                 <div class="label-box">
-                    <label for="gamma-input">Factor Gamma (γ)</label>
+                    <label for="gamma-input"
+                        title="Define qué tanto castiga el sistema el sufrimiento injustificado.">Factor Gamma
+                        (γ)</label>
                     <span id="gamma-val" class="value-display">1.8</span>
                 </div>
                 <input type="range" id="gamma-input" min="1" max="2.5" step="0.1" value="1.8">
-                <p class="input-desc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">Sensibilidad al sufrimiento (Penalización exponencial).</p>
+                <p class="input-desc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">
+                    Sensibilidad al sufrimiento (Penalización exponencial).</p>
             </div>
         </section>
 
@@ -81,6 +93,27 @@
                 </div>
             </div>
 
+            <!-- Equity Dashboard (Tres Cuentas) -->
+            <div id="equity-dashboard" style="margin-top: 2rem;">
+                <h3
+                    style="font-size: 1rem; color: var(--text-muted); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.1em;">
+                    Balance de Equidad (MicroMaxocracia)</h3>
+                <div class="metrics-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                    <div class="metric-card" style="padding: 1rem;">
+                        <span id="cdd-val" class="m-value" style="font-size: 1.2rem;">0</span>
+                        <span class="m-label" style="font-size: 0.7rem;">CDD (Hogar)</span>
+                    </div>
+                    <div class="metric-card" style="padding: 1rem;">
+                        <span id="ceh-val" class="m-value" style="font-size: 1.2rem;">0</span>
+                        <span class="m-label" style="font-size: 0.7rem;">CEH (Econ)</span>
+                    </div>
+                    <div class="metric-card" style="padding: 1rem;">
+                        <span id="ted-val" class="m-value" style="font-size: 1.2rem;">0</span>
+                        <span class="m-label" style="font-size: 0.7rem;">TED (Libre)</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="formula-overlay">
                 Precio = α·T + β·V<sup>γ</sup> + δ·R·(FRG × CS)
             </div>
@@ -88,6 +121,19 @@
     </main>
 
     <section class="scenarios-section">
+        <h2>Sabiduría Cooperativa</h2>
+        <div id="cooperative-wisdom" class="panel" style="margin-bottom: 3rem; background: rgba(34, 197, 94, 0.05);">
+            <p id="wisdom-text" style="font-style: italic; color: var(--text-main);">"La lealtad a la verdad revela que
+                cooperar no es solo un ideal moral, sino la estrategia evolutiva más eficiente para reducir el
+                sufrimiento y maximizar la abundancia."</p>
+            <div style="margin-top: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+                <div style="width: 4px; height: 40px; background: var(--success); border-radius: 2px;"></div>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">En la Maxocracia, cuando eliges la estrategia
+                    cooperativa (C), el sistema reduce los costos de fricción y externalidades, generando un beneficio
+                    mutuo verificable.</p>
+            </div>
+        </div>
+
         <h2>Casos Predefinidos</h2>
         <div class="scenario-grid">
             <div class="scenario-card" onclick="loadScenario('egg-ind')">
@@ -111,4 +157,5 @@
 
     <script src="simulator.js"></script>
 </body>
+
 </html>

@@ -53,6 +53,26 @@ function calculatePrice() {
     const penaltyRatio = lifeComponent > 0 ? ((lifeComponent - baseLife) / price) * 100 : 0;
     displays.penalty.innerText = `+${Math.max(0, penaltyRatio).toFixed(0)}%`;
 
+    // Equity Dashboard Logic (Modelo de Tres Cuentas)
+    const totalEffort = t * (1 + v * 0.5);
+    const cdd = (totalEffort * 0.4).toFixed(1); // Contribución Doméstica
+    const ceh = (price * 0.6).toFixed(1);       // Contribución Económica
+    const ted = (Math.max(0, 24 - t - 8)).toFixed(1); // Tiempo libre
+
+    document.getElementById('cdd-val').innerText = cdd;
+    document.getElementById('ceh-val').innerText = ceh;
+    document.getElementById('ted-val').innerText = ted;
+
+    // Cooperative Wisdom Logic
+    const wisdomText = document.getElementById('wisdom-text');
+    if (v > 3.0) {
+        wisdomText.innerText = '"Dividir y extraer genera escasez artificial. El sistema detecta alta fricción ética; el costo de restaurar la vida supera el beneficio inmediato."';
+    } else if (v < 1.0 && price < 4.0) {
+        wisdomText.innerText = '"La estrategia Cooperativa (C) es la más estable. Al minimizar el sufrimiento, liberas recursos para la abundancia fractal."';
+    } else {
+        wisdomText.innerText = '"La verdad es neutra, pero la cooperación es eficiente. Mantener el equilibrio de las Tres Cuentas asegura la resiliencia del hogar."';
+    }
+
     // Viability Logic
     if (v > 3.0 || price > 5.0) {
         displays.coop.innerText = "Baja";
