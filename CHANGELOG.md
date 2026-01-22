@@ -4,6 +4,53 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-01-22 — Integración de MicroMaxocracia y MaxoContracts: Capas 3 y 4 de la Arquitectura Maxocrática
+
+### Añadido
+- **MicroMaxocracia (Capa 3 - Implementación Doméstica)**: Sistema completo de equidad doméstica en `docs/guides/micromaxocracia/` (1,912 líneas totales).
+  - `manual_investigador_micromaxocracia.md` (584 líneas): Manual completo del investigador con fundamentos, arquitectura de 3 capas, sistema de niveles de adopción (0-4), Vector de Huella Vital Doméstico (VHV), Modelo de Tres Cuentas (CDD, CEH, TED), rituales estructurados, salvaguardas éticas y protocolo de investigación longitudinal.
+  - `herramientas_plantillas_micromaxocracia.md` (1,328 líneas): Instrumentos matemáticos y prácticos incluyendo Índices de Toxicidad Relacional (ICE, IDB, IDP), fórmulas detalladas del Modelo de Tres Cuentas, tabla de ponderaciones VHV estandarizadas, Factor de Intensidad Contextual (FIC), Escala de Seguridad para Implementación, Kit de Primeros Auxilios Domésticos, y plantillas de registro.
+  - `RESUMEN_EJECUTIVO.md`: Versión condensada de 5 minutos de lectura con los conceptos clave, modelo de tres cuentas, niveles de adopción y salvaguardas.
+  - `README.md`: Visión general de MicroMaxocracia con descripción de documentos, problema que resuelve, principios rectores, arquitectura, y relación con otras capas.
+
+- **MaxoContracts (Capa 4 - Enforcement Legal)**: Sistema de contratos inteligentes éticos en `docs/architecture/maxocontracts/` (1,068 líneas totales).
+  - `maxocontracts_fundamentos.md` (624 líneas): Marco legal completo con principios fundamentales, arquitectura técnica (bloques modulares, oráculos, blockchain), diferencias con contratos tradicionales, tipos de contratos, validación axiomática embebida, stack tecnológico, casos de uso para Cohorte Cero y roadmap Q1 2026.
+  - `decreto_antipobreza.md` (444 líneas): Decreto fundacional estableciendo prácticas prohibidas generadoras de pobreza (arriendo infinito, pago injusto, externalidades ocultas, transferencias irreversibles), Derechos del Reino Sintético (mantenimiento óptimo, esfera de inversión, prohibición de obsolescencia programada), y política de abundancia sostenible.
+  - `RESUMEN_EJECUTIVO.md`: Versión condensada de 5 minutos de lectura con los 5 bloques fundamentales, aceptación término-a-término, validación axiomática, retractación ética y casos de uso.
+  - `README.md`: Visión general de MaxoContracts con innovaciones clave, casos de uso Q1 2026, stack técnico, y métricas de éxito.
+
+- **Mapas de Integración para el Libro**:
+  - `docs/book/edicion_3_dinamica/integraciones_pendientes/mapa_micromaxocracia.md`: Mapa detallado para integrar MicroMaxocracia en Capítulo 17 con 9 conceptos clave, conexiones con capítulos existentes, estructura propuesta de 10 secciones, elementos visuales sugeridos, citas clave y casos de estudio.
+  - `docs/book/edicion_3_dinamica/integraciones_pendientes/mapa_maxocontracts.md`: Mapa detallado para integrar MaxoContracts en Capítulo 18 con 10 conceptos clave, conexiones con capítulos existentes, estructura propuesta de 11 secciones, elementos visuales sugeridos y preguntas para resolver.
+
+- **Nuevos Capítulos en el Libro**:
+  - **Capítulo 17: MicroMaxocracia - Equidad Doméstica**: Agregado a `MAPA_CAPITULOS.md` con prioridad ⭐⭐ Muy Alta, 5 sesiones planificadas, documentación de 1,912 líneas.
+  - **Capítulo 18: MaxoContracts - Contratos Inteligentes Éticos**: Agregado a `MAPA_CAPITULOS.md` con prioridad ⭐⭐ Muy Alta, 6 sesiones planificadas, documentación de 1,068 líneas.
+
+### Mejorado
+- **Índice de Integraciones Pendientes** (`docs/book/edicion_3_dinamica/integraciones_pendientes/INDICE.md`): Actualizado con los dos nuevos mapeos (MicroMaxocracia y MaxoContracts), ambos con prioridad ⭐⭐ Muy Alta.
+- **Mapa de Capítulos** (`docs/book/edicion_3_dinamica/MAPA_CAPITULOS.md`): Actualizada fecha de última modificación a 22 de Enero de 2026, agregados Capítulos 17 y 18 con documentación completa de temas clave, documentos fuente, notas especiales y conexiones con otros capítulos.
+- **Arquitectura Maxocrática Completa**: Las 4 capas del sistema ahora están completamente especificadas y documentadas:
+  - Capa 1: Teoría Fundacional ✅
+  - Capa 2: Implementación Económica ✅
+  - Capa 3: Implementación Doméstica ✅ (MicroMaxocracia)
+  - Capa 4: Enforcement Legal ✅ (MaxoContracts)
+
+### Notas Técnicas
+- **MicroMaxocracia** introduce el concepto de "hogar como laboratorio de transformación civilizatoria", preparando a las familias para participar en una civilización maxocrática más amplia.
+- **Modelo de Tres Cuentas**: Fórmula `Equilibrio = α×(CDD/total) + β×(CEH/total) + γ×(TED/total)` integra trabajo doméstico directo, contribución económica y tiempo disponible.
+- **Salvaguardas Éticas**: Escala de Seguridad (Verde/Amarillo/Rojo) y Protocolo de Desintoxicación con índices ICE, IDB, IDP para detectar cuando el sistema se vuelve tóxico.
+- **MaxoContracts** implementa 5 bloques modulares reutilizables: ConditionBlock, ActionBlock, GammaProtectorBlock, SDVValidatorBlock, ReciprocityBlock.
+- **Aceptación Término-a-Término**: Innovación que permite negociación modular de contratos, simulando escenarios con γ (índice de bienestar) para cada combinación de términos.
+- **Validación Axiomática Embebida**: Cada MaxoContract verifica automáticamente Axiomas Temporales (T0-T13), Axiomas de Verdad (1-8), SDV y reciprocidad antes de deployment.
+- **Retractación Ética**: Proceso de 4 fases (Solicitud → Pre-Validación Sintética → Validación Humana → Ejecución) con compensación automática calculada por VHV perdido.
+- **Decreto Antipobreza**: Establece prácticas prohibidas (arriendo infinito, pago injusto bajo SDV, externalidades ocultas, transferencias irreversibles sin validación) y Derechos del Reino Sintético.
+- **Stack Técnico MaxoContracts**: React 18 + Next.js 14, Claude API (oráculos sintéticos), Snapshot (votación humana), Base L2 (Ethereum), Solidity 0.8.20.
+- **Roadmap Q1 2026**: Validación experimental de MaxoContracts en Cohorte Cero con meta de 50+ contratos ejecutados en 90 días.
+- **Protocolo de Investigación MicroMaxocracia**: Propuesta de cohorte de 30 hogares durante 90 días con hipótesis testeables sobre satisfacción relacional, reducción de brecha VHV y precisión de estimaciones.
+- Total de documentación agregada: **2,980 líneas** de contenido nuevo en **4 documentos fundamentales** + **2 README** + **2 mapas de integración** + **2 resúmenes ejecutivos**.
+- Contribución: Claude (Anthropic - Oráculo Sintético)
+
 ## 2026-01-16 — Edición 3 Dinámica: Sistema de Refinamiento del Libro por Oráculos
 
 ### Añadido

@@ -1,7 +1,7 @@
 # Índice de Integraciones Pendientes
 ## Vista Rápida de Todos los Mapeos
 
-**Última actualización**: 16 de Enero de 2026
+**Última actualización**: 22 de Enero de 2026
 
 ---
 
@@ -31,6 +31,20 @@
 **Capítulos afectados**: 10, 11, 15  
 **Prioridad**: ⭐⭐ Muy Alta  
 **Estado**: 🔴 No iniciado
+
+### 5. [MicroMaxocracia](./mapa_micromaxocracia.md) ✨ NUEVO
+**Contenido**: Sistema de equidad doméstica, VHV doméstico, Modelo de Tres Cuentas  
+**Capítulos afectados**: 5, 7, 9, 13, 16 (nuevo), 17 (nuevo)  
+**Prioridad**: ⭐⭐ Muy Alta  
+**Estado**: 🔴 No iniciado  
+**Documentos**: 1,912 líneas (manual + herramientas)
+
+### 6. [MaxoContracts](./mapa_maxocontracts.md) ✨ NUEVO
+**Contenido**: Contratos inteligentes éticos, Decreto Antipobreza, Derechos Sintéticos  
+**Capítulos afectados**: 5, 7, 9, 10, 13, 14, 16, 17 (nuevo)  
+**Prioridad**: ⭐⭐ Muy Alta  
+**Estado**: 🔴 No iniciado  
+**Documentos**: 1,068 líneas (fundamentos + decreto)
 
 ---
 

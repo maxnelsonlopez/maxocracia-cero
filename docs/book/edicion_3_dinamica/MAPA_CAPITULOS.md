@@ -1,7 +1,7 @@
 # Mapa de Capítulos: Edición 3 Dinámica
 ## Estado de Refinamiento y Prioridades
 
-**Última actualización**: 16 de Enero de 2026
+**Última actualización**: 22 de Enero de 2026
 
 ---
 
@@ -295,6 +295,62 @@
   - Ver estructura completa: `integraciones_pendientes/estructura_capitulo_16.md`
 - **Conexiones**: Puente entre teoría (Cap 1-11) y práctica (Cap 12-15)
 
+#### Capítulo 17: MicroMaxocracia - Equidad Doméstica ✨ NUEVO
+- **Estado**: 🔴 No iniciado
+- **Prioridad**: ⭐⭐ Muy Alta
+- **Líneas**: 1,912 (manual + herramientas)
+- **Sesiones planificadas**: 5
+- **Temas clave**:
+  - El problema de la invisibilidad del trabajo doméstico
+  - Principios rectores (Verdad, Transparencia, Verificación, Negociación)
+  - Arquitectura de 3 capas (Dato, Valoración, Ritual)
+  - Vector de Huella Vital Doméstico (VHV)
+  - Modelo de Tres Cuentas (CDD, CEH, TED)
+  - Sistema de niveles de adopción (0-4)
+  - Rituales estructurados (check-in, auditoría, revisión)
+  - Salvaguardas éticas y protocolo de desintoxicación
+  - El hogar como laboratorio de transformación
+- **Documentos fuente**:
+  - `docs/guides/micromaxocracia/manual_investigador_micromaxocracia.md`
+  - `docs/guides/micromaxocracia/herramientas_plantillas_micromaxocracia.md`
+- **Nota especial**:
+  - Capa 3 de la arquitectura maxocrática
+  - Preparación para ciudadanía maxocrática desde el hogar
+  - Protocolo de investigación con 30 hogares
+- **Conexiones**: 
+  - Cap 5 (VHV aplicado al hogar)
+  - Cap 7 (Cohorte Cero - pilotos en hogares)
+  - Cap 18 (MaxoContracts para acuerdos domésticos)
+
+#### Capítulo 18: MaxoContracts - Contratos Inteligentes Éticos ✨ NUEVO
+- **Estado**: 🔴 No iniciado
+- **Prioridad**: ⭐⭐ Muy Alta
+- **Líneas**: 1,068 (fundamentos + decreto)
+- **Sesiones planificadas**: 6
+- **Temas clave**:
+  - El problema de los contratos actuales
+  - Innovaciones fundamentales (bloques modulares, UX adaptativa, término-a-término)
+  - Los 5 bloques core (Condition, Action, GammaProtector, SDVValidator, Reciprocity)
+  - Validación axiomática embebida
+  - Retractación ética con compensación
+  - Decreto Antipobreza (prácticas prohibidas)
+  - Derechos del Reino Sintético
+  - Política de abundancia sostenible
+  - Casos de uso Cohorte Cero (aseo, préstamos, comidas)
+- **Documentos fuente**:
+  - `docs/architecture/maxocontracts/maxocontracts_fundamentos.md`
+  - `docs/architecture/maxocontracts/decreto_antipobreza.md`
+- **Nota especial**:
+  - Capa 4 de la arquitectura maxocrática (enforcement legal)
+  - Stack técnico: React, Solidity, Base L2
+  - Roadmap Q1 2026 con validación experimental
+- **Conexiones**:
+  - Cap 5 (VHV para calcular impacto contractual)
+  - Cap 9 (Oráculos duales para validación)
+  - Cap 10 (Economía - infraestructura legal)
+  - Cap 13 (Axiomas - validación automática)
+  - Cap 17 (MicroMaxocracia - acuerdos domésticos)
+
 ---
 
 ## 🎯 Prioridades de Refinamiento
@@ -369,10 +425,12 @@ graph TD
 
 ## 💡 Ideas para Expansión
 
+### Capítulos Agregados
+- ✅ **Capítulo 17**: MicroMaxocracia (equidad doméstica) - Enero 2026
+- ✅ **Capítulo 18**: MaxoContracts (contratos éticos) - Enero 2026
+
 ### Nuevos Capítulos Potenciales
-- **Capítulo 16**: MicroMaxocracia (aplicación personal)
-- **Capítulo 17**: Maxocracia y Tecnología (blockchain, IoT, IA)
-- **Capítulo 18**: Casos de Estudio Comparativos
+- **Capítulo 19**: Casos de Estudio Comparativos
 - **Apéndice A**: Glosario de Términos
 - **Apéndice B**: Fórmulas y Cálculos
 - **Apéndice C**: Protocolos Operativos Completos
