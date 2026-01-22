@@ -39,6 +39,175 @@
 
 ---
 
+## 🚀 Fase 0.5: MaxoContracts MVP (Q1 2026) - NUEVO ✨
+
+### Objetivo: Validar contratos inteligentes éticos en Cohorte Cero
+
+**Meta**: 50+ MaxoContracts ejecutados en 90 días con datos reales de γ, SDV y satisfacción.
+
+### Semana 1-2: Especificación (Enero 22 - Febrero 5, 2026)
+
+- [ ] **Especificar 5 Bloques Core en Solidity**
+  - [ ] `ConditionBlock.sol`: Condiciones si-entonces verificables
+  - [ ] `ActionBlock.sol`: Ejecutar transferencias/accesos
+  - [ ] `GammaProtectorBlock.sol`: Monitoreo de γ (índice de bienestar)
+  - [ ] `SDVValidatorBlock.sol`: Validación de Suelo de Dignidad Vital
+  - [ ] `ReciprocityBlock.sol`: Verificación de balance VHV
+
+- [ ] **Diseñar UI Drag-and-Drop**
+  - [ ] Wireframes para construcción de contratos
+  - [ ] Flujo de aceptación término-a-término
+  - [ ] Dashboard de contratos activos
+
+- [ ] **Definir API Contracts para Oráculos**
+  - [ ] Endpoint `/oracle/validate` (sintético - Claude API)
+  - [ ] Endpoint `/oracle/vote` (humano - Snapshot)
+  - [ ] Webhooks para notificaciones
+
+**Entregables**: Especificaciones técnicas, wireframes aprobados, API docs
+
+### Semana 3-4: Prototipo (Febrero 6-19, 2026)
+
+- [ ] **Codificar 3 Bloques Básicos**
+  - [ ] `ConditionBlock.sol` + suite de tests
+  - [ ] `ActionBlock.sol` + suite de tests
+  - [ ] `ReciprocityBlock.sol` + suite de tests
+
+- [ ] **Desarrollar App MVP**
+  - [ ] Frontend React 18 + Next.js 14
+  - [ ] Integración con Base Sepolia testnet
+  - [ ] Oráculo sintético (Claude API)
+
+- [ ] **Deployar Primeros Contratos**
+  - [ ] Contrato de préstamo simple (0% interés)
+  - [ ] Contrato de aseo compartido (rotación)
+  - [ ] Tests de deployment y ejecución
+
+**Entregables**: 3 bloques funcionales, app MVP, 3 contratos de prueba
+
+### Semana 5-8: Validación Experimental (Febrero 20 - Marzo 19, 2026)
+
+- [ ] **Completar 5 Bloques**
+  - [ ] `GammaProtectorBlock.sol` + tests
+  - [ ] `SDVValidatorBlock.sol` + tests
+  - [ ] Integración completa y auditoría
+
+- [ ] **Ejecutar 50+ MaxoContracts en Cohorte Cero**
+  - [ ] 20 contratos de aseo compartido
+  - [ ] 15 contratos de préstamos sin usura
+  - [ ] 15 contratos de comidas colaborativas
+
+- [ ] **Dashboard de Métricas en Vivo**
+  - [ ] γ promedio por contrato
+  - [ ] Tasa de retractaciones éticas
+  - [ ] NPS de usuarios
+  - [ ] Gas fees promedio
+
+**Entregables**: 5 bloques completos, 50+ contratos ejecutados, dashboard
+
+### Semana 9-12: Análisis y Documentación (Marzo 20 - Abril 16, 2026)
+
+- [ ] **Analizar 50+ Casos**
+  - [ ] Identificar patrones de éxito/fracaso
+  - [ ] Calcular γ promedio, SDV coverage, satisfacción
+  - [ ] Documentar casos de retractación ética
+
+- [ ] **Generar Informe de Hallazgos v1.0**
+  - [ ] Resumen ejecutivo
+  - [ ] Análisis cuantitativo (métricas)
+  - [ ] Análisis cualitativo (entrevistas)
+  - [ ] Lecciones aprendidas
+  - [ ] Recomendaciones para escalamiento
+
+- [ ] **Publicar Kit Open-Source**
+  - [ ] Repositorio GitHub público
+  - [ ] Documentación completa
+  - [ ] Tutoriales de uso
+  - [ ] 3 casos de estudio documentados
+
+**Presupuesto**: $5,000-10,000 USD  
+**Stack**: React 18, Next.js 14, Solidity 0.8.20, Base L2, Claude API  
+**Métricas de Éxito**: ≥50 contratos, γ>1.2, adopción ≥80%, NPS>70
+
+---
+
+## 🏠 Fase 0.6: MicroMaxocracia Apps (Q2 2026) - NUEVO ✨
+
+### Objetivo: Crear herramientas digitales para 30 hogares piloto
+
+**Meta**: Validar apps de equidad doméstica con 30 hogares durante 90 días.
+
+### Mes 1: Diseño y Prototipo (Abril - Mayo 2026)
+
+- [ ] **Diseñar 3 Apps Core**
+  - [ ] **Ledger App**: Registro de VHV doméstico
+    - Registro diario de tareas (2-5 min)
+    - Cálculo automático de VHV con ponderaciones
+    - Visualización de equilibrio (Modelo 3 Cuentas)
+  
+  - [ ] **Auditoría App**: Rituales estructurados
+    - Check-in semanal guiado (15 min)
+    - Auditoría mensual con plantillas (60 min)
+    - Generación automática de reportes
+  
+  - [ ] **Desintoxicación App**: Monitoreo de toxicidad
+    - Cálculo automático de ICE, IDB, IDP
+    - Alertas cuando cruzan umbrales
+    - Protocolo de desintoxicación guiado
+
+- [ ] **Prototipar Ledger App**
+  - [ ] Wireframes aprobados
+  - [ ] MVP funcional (web responsive)
+  - [ ] Tests con 3 hogares beta
+
+**Entregables**: Diseños UI/UX, prototipo funcional, feedback beta
+
+### Mes 2-3: Desarrollo y Validación (Mayo - Julio 2026)
+
+- [ ] **Desarrollar 3 Apps Completas**
+  - [ ] Ledger App con todas las funcionalidades
+  - [ ] Auditoría App con rituales guiados
+  - [ ] Desintoxicación App con índices automáticos
+
+- [ ] **Reclutar 30 Hogares Piloto**
+  - [ ] 10 parejas sin hijos
+  - [ ] 10 familias con niños pequeños (<5 años)
+  - [ ] 5 familias con niños mayores (6-12 años)
+  - [ ] 3 hogares multigeneracionales
+  - [ ] 2 configuraciones no tradicionales
+
+- [ ] **Ejecutar Validación Experimental (90 días)**
+  - [ ] Onboarding con Kit de Primeros Auxilios
+  - [ ] Progresión por niveles (0→1→2→3)
+  - [ ] Recolección de datos (VHV, equilibrio, satisfacción)
+
+**Entregables**: 3 apps desplegadas, 30 hogares activos, datos 90 días
+
+### Mes 4: Análisis y Escalamiento (Julio - Agosto 2026)
+
+- [ ] **Analizar Datos de 30 Hogares**
+  - [ ] Satisfacción relacional (meta: +15 puntos)
+  - [ ] Reducción de brecha VHV (meta: 30%)
+  - [ ] Precisión de estimaciones (meta: ±15%)
+  - [ ] Tasa de abandono
+
+- [ ] **Generar Informe MicroMaxocracia v1.0**
+  - [ ] Resumen ejecutivo
+  - [ ] Análisis cuantitativo
+  - [ ] 3 casos de estudio de hogares
+  - [ ] Recomendaciones para escalamiento
+
+- [ ] **Preparar para Escalamiento**
+  - [ ] Optimizar apps basado en feedback
+  - [ ] Crear materiales de onboarding
+  - [ ] Diseñar programa de facilitadores
+
+**Presupuesto**: $8,000-12,000 USD  
+**Stack**: React Native, Flask backend, PostgreSQL, Mixpanel  
+**Métricas de Éxito**: ≥30 hogares, +15pts satisfacción, 30% reducción brecha
+
+---
+
 ## 📐 Fase 1: Formalización Matemática (6-12 meses)
 
 ### Objetivo: Implementar la función de valoración Maxo completa

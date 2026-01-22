@@ -1,10 +1,91 @@
 # Tareas Pendientes - Maxocracia-Cero
 
-**Última actualización:** 2025-12-10
+**Última actualización:** 2026-01-22
 
 ---
 
 ## 🔥 Prioridad Alta
+
+### MaxoContracts MVP (Q1 2026) - NUEVO ✨
+
+**Objetivo**: Validar contratos inteligentes éticos en Cohorte Cero (50+ contratos en 90 días)
+
+- [ ] **Semana 1-2: Especificación (Enero 22 - Febrero 5)**
+  - [ ] Especificar 5 bloques core en Solidity
+    - [ ] `ConditionBlock.sol`: Si-entonces básico
+    - [ ] `ActionBlock.sol`: Ejecutar transferencia/acceso
+    - [ ] `GammaProtectorBlock.sol`: Monitoreo γ con umbral
+    - [ ] `SDVValidatorBlock.sol`: Verificar SDV no violado
+    - [ ] `ReciprocityBlock.sol`: Balance VHV verificable
+  - [ ] Diseñar UI drag-and-drop (wireframes)
+  - [ ] Definir API contracts para oráculos
+  - **Entregables**: Especificaciones técnicas, wireframes, API docs
+
+- [ ] **Semana 3-4: Prototipo (Febrero 6-19)**
+  - [ ] Codificar 3 bloques básicos + tests
+  - [ ] Desarrollar app MVP en React + Next.js
+  - [ ] Deployar primeros contratos en Base Sepolia testnet
+  - **Entregables**: 3 bloques funcionales, app MVP, 3 contratos de prueba
+
+- [ ] **Semana 5-8: Validación (Febrero 20 - Marzo 19)**
+  - [ ] Completar 5 bloques + auditoría
+  - [ ] Ejecutar 50+ contratos en Cohorte Cero
+    - [ ] 20 contratos de aseo compartido
+    - [ ] 15 contratos de préstamos sin usura
+    - [ ] 15 contratos de comidas colaborativas
+  - [ ] Implementar dashboard de métricas (γ, SDV, NPS)
+  - **Entregables**: 5 bloques completos, 50+ contratos ejecutados, dashboard
+
+- [ ] **Semana 9-12: Análisis (Marzo 20 - Abril 16)**
+  - [ ] Analizar 50+ casos (patrones, γ promedio, retractaciones)
+  - [ ] Generar **Informe de Hallazgos v1.0**
+  - [ ] Publicar kit open-source en GitHub
+  - **Entregables**: Informe 30-50 páginas, repo público, 3 casos de estudio
+
+**Stack**: React 18, Next.js 14, Solidity 0.8.20, Base L2, Claude API  
+**Presupuesto**: $5,000-10,000 USD  
+**Métricas de Éxito**: ≥50 contratos, γ>1.2, adopción ≥80%, NPS>70
+
+### MicroMaxocracia Apps (Q2 2026) - NUEVO ✨
+
+**Objetivo**: Crear herramientas digitales para 30 hogares piloto (90 días)
+
+- [ ] **Mes 1: Diseño (Abril - Mayo)**
+  - [ ] Diseñar 3 apps core
+    - [ ] **Ledger App**: Registro VHV doméstico
+    - [ ] **Auditoría App**: Rituales estructurados
+    - [ ] **Desintoxicación App**: Monitoreo ICE/IDB/IDP
+  - [ ] Prototipar Ledger App (MVP)
+  - [ ] Testear con 3 hogares beta
+  - **Entregables**: Diseños UI/UX, prototipo funcional, feedback beta
+
+- [ ] **Mes 2-3: Desarrollo (Mayo - Julio)**
+  - [ ] Desarrollar 3 apps completas (React Native)
+  - [ ] Reclutar 30 hogares piloto
+    - [ ] 10 parejas sin hijos
+    - [ ] 10 familias con niños pequeños
+    - [ ] 5 familias con niños mayores
+    - [ ] 3 hogares multigeneracionales
+    - [ ] 2 configuraciones no tradicionales
+  - [ ] Ejecutar validación de 90 días (niveles 0→1→2→3)
+  - **Entregables**: 3 apps desplegadas, 30 hogares activos, datos 90 días
+
+- [ ] **Mes 4: Análisis (Julio - Agosto)**
+  - [ ] Analizar datos de 30 hogares
+    - [ ] Satisfacción relacional (+15 pts meta)
+    - [ ] Reducción brecha VHV (30% meta)
+    - [ ] Precisión estimaciones (±15% meta)
+  - [ ] Generar **Informe MicroMaxocracia v1.0**
+  - [ ] Preparar escalamiento a 100 hogares
+  - **Entregables**: Informe, apps v2.0 optimizadas, plan escalamiento
+
+**Stack**: React Native, Flask backend, PostgreSQL, Mixpanel  
+**Presupuesto**: $8,000-12,000 USD  
+**Métricas de Éxito**: ≥30 hogares, +15pts satisfacción, 30% reducción brecha
+
+---
+
+## 🔥 Prioridad Alta (Continuación)
 
 ### Cohorte Cero - Red de Apoyo
 
@@ -251,11 +332,11 @@
 
 ## 🎯 Roadmap General
 
-**Q4 2025:** Cohorte Cero - Validación experimental  
-**Q1 2026:** Análisis de datos, refinamiento de fórmulas  
-**Q2 2026:** Escalar a 50-100 participantes  
-**Q3-Q4 2026:** Implementar Maxo beta  
-**2027+:** Expansión a otras ciudades
+**Q1 2026:** MaxoContracts MVP + Cohorte Cero validación (50+ contratos)  
+**Q2 2026:** MicroMaxocracia Apps + 30 hogares piloto (90 días)  
+**Q3 2026:** Análisis de datos, refinamiento de fórmulas, escalamiento  
+**Q4 2026:** Integración completa de 4 capas, preparación mainnet  
+**2027+:** Expansión a 100 cohortes + 1,000 hogares + blockchain mainnet
 
 ---
 
