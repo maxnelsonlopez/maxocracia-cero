@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-import sqlite3
 import os
+import sqlite3
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "comun.db")
 

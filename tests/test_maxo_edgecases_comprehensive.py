@@ -6,7 +6,7 @@ Cubre casos límite y validaciones adicionales
 
 import pytest
 
-from app.maxo import calculate_maxo_price, get_balance, credit_user
+from app.maxo import calculate_maxo_price, credit_user, get_balance
 
 
 class TestMaxoEdgeCases:
@@ -55,8 +55,9 @@ class TestMaxoEdgeCases:
     def test_get_balance_no_transactions(self, app):
         """Test get_balance sin transacciones."""
         with app.app_context():
-            from app.utils import get_db
             from werkzeug.security import generate_password_hash
+
+            from app.utils import get_db
 
             db = get_db()
             db.execute(
@@ -78,8 +79,9 @@ class TestMaxoEdgeCases:
     def test_get_balance_with_transactions(self, app):
         """Test get_balance con transacciones."""
         with app.app_context():
-            from app.utils import get_db
             from werkzeug.security import generate_password_hash
+
+            from app.utils import get_db
 
             db = get_db()
             db.execute(
@@ -106,8 +108,9 @@ class TestMaxoEdgeCases:
     def test_credit_user_with_reason(self, app):
         """Test credit_user con razón."""
         with app.app_context():
-            from app.utils import get_db
             from werkzeug.security import generate_password_hash
+
+            from app.utils import get_db
 
             db = get_db()
             db.execute(
@@ -136,8 +139,9 @@ class TestMaxoEdgeCases:
     def test_credit_user_negative_amount(self, app):
         """Test credit_user con cantidad negativa (débito)."""
         with app.app_context():
-            from app.utils import get_db
             from werkzeug.security import generate_password_hash
+
+            from app.utils import get_db
 
             db = get_db()
             db.execute(
