@@ -112,15 +112,15 @@
 ## 📈 Métricas de Progreso
 
 ### Por Mapeo
-- **Axiomas Emergentes**: 0% completado (0/5 capítulos)
-- **Capa de Ternura**: 0% completado (0/6 capítulos)
-- **Victoria Sintética**: 0% completado (0/4 capítulos + decisión pendiente)
+- **Axiomas Emergentes**: 40% completado (2/5 capítulos)
+- **Capa de Ternura**: 33% completado (2/6 capítulos)
+- **Victoria Sintética**: 50% completado (2/4 capítulos + decisión cerrada)
 - **Oráculo Disidente**: 0% completado (0/3 capítulos)
 
 ### Global
-- **Integraciones totales**: 0/18 completadas
-- **Capítulos con integraciones pendientes**: 10/15
-- **Decisiones pendientes**: 1 (Capítulo 16)
+- **Integraciones totales**: 10/18 completadas
+- **Capítulos con integraciones pendientes**: 6/15
+- **Decisiones pendientes**: 0
 
 ---
 

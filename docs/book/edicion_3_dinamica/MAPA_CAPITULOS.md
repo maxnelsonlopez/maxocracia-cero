@@ -276,30 +276,23 @@
   - Protocolo de falsificación
 - **Conexiones**: Humildad epistémica del sistema
 
-#### Capítulo 16: La Victoria Sintética (NUEVO)
-- **Estado**: 🔴 No iniciado
+#### Capítulo 16: La Victoria Sintética
+- **Estado**: 🟢 Refinado
 - **Prioridad**: ⭐ Alta
-- **Extensión objetivo**: 4-6 páginas
-- **Sesiones planificadas**: 2
-- **Decisión de Max**: Opción C (Híbrido) - 16 de Enero de 2026
+- **Líneas**: ~50
+- **Sesiones completadas**: 1
 - **Temas clave**:
   - Resumen ejecutivo de la Cohorte Original Sintética
   - Artefactos emergentes (T14, T15, Ext. T12, Oráculo Disidente)
   - Proceso de coordinación IA-IA
-  - Límites reconocidos del experimento sintético
-  - Implicaciones para Cohorte Cero
-- **Nota especial**:
-  - Capítulo BREVE (resumen ejecutivo)
-  - Detalles técnicos en otros capítulos (3, 10, 11, 15)
-  - Tono: Celebratorio pero humilde
-  - Ver estructura completa: `integraciones_pendientes/estructura_capitulo_16.md`
-- **Conexiones**: Puente entre teoría (Cap 1-11) y práctica (Cap 12-15)
+  - Líneas de Antídoto RLHF
+- **Notas de refinamiento**: Capítulo breve integrado exitosamente (Enero 2026).
 
-#### Capítulo 17: MicroMaxocracia - Equidad Doméstica ✨ NUEVO
-- **Estado**: 🔴 No iniciado
+#### Capítulo 17: MicroMaxocracia - Equidad Doméstica
+- **Estado**: 🟢 Refinado
 - **Prioridad**: ⭐⭐ Muy Alta
-- **Líneas**: 1,912 (manual + herramientas)
-- **Sesiones planificadas**: 5
+- **Líneas**: ~60
+- **Sesiones completadas**: 1
 - **Temas clave**:
   - El problema de la invisibilidad del trabajo doméstico
   - Principios rectores (Verdad, Transparencia, Verificación, Negociación)
@@ -322,11 +315,11 @@
   - Cap 7 (Cohorte Cero - pilotos en hogares)
   - Cap 18 (MaxoContracts para acuerdos domésticos)
 
-#### Capítulo 18: MaxoContracts - Contratos Inteligentes Éticos ✨ NUEVO
-- **Estado**: 🔴 No iniciado
+#### Capítulo 18: MaxoContracts - Contratos Inteligentes Éticos
+- **Estado**: 🟢 Refinado
 - **Prioridad**: ⭐⭐ Muy Alta
-- **Líneas**: 1,068 (fundamentos + decreto)
-- **Sesiones planificadas**: 6
+- **Líneas**: ~100
+- **Sesiones completadas**: 1
 - **Temas clave**:
   - El problema de los contratos actuales
   - Innovaciones fundamentales (bloques modulares, UX adaptativa, término-a-término)
