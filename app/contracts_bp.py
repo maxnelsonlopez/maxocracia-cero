@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from maxocontracts.core.types import (
     VHV,
-    Gamma,
+    Wellness,
     SDV,
     Participant,
     ContractTerm,
@@ -41,35 +41,181 @@ from maxocontracts.core.contract import MaxoContract
 from maxocontracts.core.axioms import AxiomValidator
 from maxocontracts.oracles import SyntheticOracle
 
+from decimal import Decimal
+import json
+
 contracts_bp = Blueprint("contracts", __name__, url_prefix="/contracts")
 
-# Almacenamiento en memoria para MVP (después: persistir en DB)
-_contracts_store: Dict[str, MaxoContract] = {}
-_participants_store: Dict[str, Participant] = {}
+# Helper functions for persistence
+
+def _save_contract(contract: MaxoContract):
+    """Guarda un objeto MaxoContract en la base de datos."""
+    db = get_db()
+    
+    # 1. Upsert contract header
+    db.execute("""
+        INSERT INTO maxo_contracts (contract_id, civil_description, state, total_vhv_t, total_vhv_v, total_vhv_h, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(contract_id) DO UPDATE SET
+            civil_description=excluded.civil_description,
+            state=excluded.state,
+            total_vhv_t=excluded.total_vhv_t,
+            total_vhv_v=excluded.total_vhv_v,
+            total_vhv_h=excluded.total_vhv_h,
+            updated_at=CURRENT_TIMESTAMP
+    """, (
+        contract.contract_id,
+        contract.civil_summary,
+        contract.state.value,
+        float(contract.total_vhv.T),
+        float(contract.total_vhv.V),
+        float(contract.total_vhv.R)
+    ))
+    
+    # 2. Update participants
+    for p in contract.participants:
+        db.execute("""
+            INSERT INTO maxo_contract_participants (contract_id, participant_id, wellness_value, sdv_status)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(contract_id, participant_id) DO UPDATE SET
+                wellness_value=excluded.wellness_value,
+                sdv_status=excluded.sdv_status
+        """, (
+            contract.contract_id,
+            p.id,
+            float(p.wellness_current.value),
+            "ok" # Simplificado por ahora
+        ))
+    
+    # 3. Update terms and approvals
+    for term in contract._terms:
+        db.execute("""
+            INSERT INTO maxo_contract_terms (contract_id, term_id, civil_text, vhv_t, vhv_v, vhv_h)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(contract_id, term_id) DO UPDATE SET
+                civil_text=excluded.civil_text,
+                vhv_t=excluded.vhv_t,
+                vhv_v=excluded.vhv_v,
+                vhv_h=excluded.vhv_h
+        """, (
+            contract.contract_id,
+            term.id,
+            term.description,
+            float(term.vhv_cost.T),
+            float(term.vhv_cost.V),
+            float(term.vhv_cost.R)
+        ))
+        
+        for p_id, accepted in term.accepted_by.items():
+            if accepted:
+                db.execute("""
+                    INSERT OR IGNORE INTO maxo_contract_term_approvals (contract_id, term_id, participant_id)
+                    VALUES (?, ?, ?)
+                """, (contract.contract_id, term.id, p_id))
+    
+    # 4. Sync events (only new ones)
+    existing_events_count = db.execute("SELECT COUNT(*) FROM maxo_contract_events WHERE contract_id = ?", (contract.contract_id,)).fetchone()[0]
+    for i, event in enumerate(contract.get_event_log()):
+        if i >= existing_events_count:
+            db.execute("""
+                INSERT INTO maxo_contract_events (contract_id, event_type, description, metadata_json)
+                VALUES (?, ?, ?, ?)
+            """, (
+                contract.contract_id,
+                event.event_type,
+                event.data.get("description", ""),
+                json.dumps(event.data)
+            ))
+            
+    db.commit()
+
+
+def _load_contract(contract_id: str) -> Optional[MaxoContract]:
+    """Reconstruye un objeto MaxoContract desde la base de datos."""
+    db = get_db()
+    
+    # 1. Load header
+    row = db.execute("SELECT * FROM maxo_contracts WHERE contract_id = ?", (contract_id,)).fetchone()
+    if not row:
+        return None
+    
+    contract = MaxoContract(
+        contract_id=row["contract_id"],
+        description=row["civil_description"],
+        civil_summary=row["civil_description"]
+    )
+    contract._state = ContractState(row["state"])
+    
+    # 2. Load participants
+    p_rows = db.execute("SELECT * FROM maxo_contract_participants WHERE contract_id = ?", (contract_id,)).fetchall()
+    for p_row in p_rows:
+        participant = _get_or_create_participant_by_pid(p_row["participant_id"])
+        if participant:
+            participant.update_wellness(Decimal(str(p_row["wellness_value"])))
+            contract.add_participant(participant)
+            
+    # 3. Load terms
+    t_rows = db.execute("SELECT * FROM maxo_contract_terms WHERE contract_id = ?", (contract_id,)).fetchall()
+    for t_row in t_rows:
+        term = ContractTerm(
+            id=t_row["term_id"],
+            description=t_row["civil_text"],
+            vhv_cost=VHV(
+                T=Decimal(str(t_row["vhv_t"])),
+                V=Decimal(str(t_row["vhv_v"])),
+                R=Decimal(str(t_row["vhv_h"]))
+            )
+        )
+        
+        # Load approvals for this term
+        a_rows = db.execute(
+            "SELECT participant_id FROM maxo_contract_term_approvals WHERE contract_id = ? AND term_id = ?",
+            (contract_id, term.id)
+        ).fetchall()
+        for a_row in a_rows:
+            term.accepted_by[a_row["participant_id"]] = True
+            
+        contract._terms.append(term)
+        # Note: add_term normally adds VHV, but we are rehydrating, so we just append
+        # To keep total_vhv consistent, we recalculate it
+        
+    contract._total_vhv = VHV(
+        T=Decimal(str(row["total_vhv_t"])),
+        V=Decimal(str(row["total_vhv_v"])),
+        R=Decimal(str(row["total_vhv_h"]))
+    )
+    
+    return contract
+
+
+def _get_or_create_participant_by_pid(pid: str) -> Optional[Participant]:
+    """Obtiene un participante por su PID (user-ID)."""
+    try:
+        user_id = int(pid.split("-")[1])
+    except (IndexError, ValueError):
+        return None
+    return _get_or_create_participant(user_id)
 
 
 def _get_or_create_participant(user_id: int) -> Participant:
     """Obtiene o crea un participante desde la base de datos."""
     pid = f"user-{user_id}"
-    if pid in _participants_store:
-        return _participants_store[pid]
     
     db = get_db()
-    cur = db.execute("SELECT id, username FROM users WHERE id = ?", (user_id,))
+    cur = db.execute("SELECT id, name FROM users WHERE id = ?", (user_id,))
     row = cur.fetchone()
     
     if row is None:
         return None
     
-    # Crear participante con valores por defecto (pueden actualizarse después)
+    # Crear participante con valores por defecto
     participant = Participant(
         id=pid,
-        name=row["username"] if row else f"Usuario {user_id}",
-        vhv=VHV(t=0, v=0, h=0),
-        gamma=Gamma(value=1.0),  # Valor neutro por defecto
-        sdv=SDV()
+        name=row["name"] if row["name"] else f"Usuario {user_id}",
+        vhv_balance=VHV.zero(),
+        wellness_current=Wellness(value=Decimal("1.0")),
+        sdv_actual=SDV()
     )
-    _participants_store[pid] = participant
     return participant
 
 
@@ -91,17 +237,13 @@ def create_contract(current_user):
     if not contract_id:
         return jsonify({"error": "contract_id is required"}), 400
     
-    if contract_id in _contracts_store:
-        return jsonify({"error": "contract already exists"}), 400
-    
-    civil_description = data.get("civil_description", "")
-    
     contract = MaxoContract(
         contract_id=contract_id,
-        civil_description=civil_description
+        description=civil_description,
+        civil_summary=civil_description
     )
     
-    _contracts_store[contract_id] = contract
+    _save_contract(contract)
     
     return jsonify({
         "success": True,
@@ -115,23 +257,26 @@ def create_contract(current_user):
 @token_required
 def get_contract(current_user, contract_id: str):
     """Obtener detalles de un contrato."""
-    contract = _contracts_store.get(contract_id)
+    contract = _load_contract(contract_id)
     
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
     
+    # Preparar VHV para JSON
+    vhv = {
+        "t": float(contract.total_vhv.T),
+        "v": float(contract.total_vhv.V),
+        "r": float(contract.total_vhv.R)
+    }
+    
     return jsonify({
         "contract_id": contract.contract_id,
         "state": contract.state.value,
-        "civil_description": contract.civil_description,
+        "civil_description": contract.civil_summary,
         "participants": [p.id for p in contract.participants],
-        "terms_count": len(contract.terms),
-        "total_vhv": {
-            "t": contract.total_vhv.t,
-            "v": contract.total_vhv.v,
-            "h": contract.total_vhv.h
-        },
-        "events_count": len(contract.event_log)
+        "terms_count": len(contract._terms),
+        "total_vhv": vhv,
+        "events_count": len(contract.get_event_log())
     })
 
 
@@ -148,7 +293,7 @@ def add_term(current_user, contract_id: str):
         "vhv": {"t": 0.5, "v": 0, "h": 0}
     }
     """
-    contract = _contracts_store.get(contract_id)
+    contract = _load_contract(contract_id)
     
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
@@ -167,25 +312,26 @@ def add_term(current_user, contract_id: str):
     
     try:
         vhv = VHV(
-            t=float(vhv_data.get("t", 0)),
-            v=int(vhv_data.get("v", 0)),
-            h=float(vhv_data.get("h", 0))
+            T=Decimal(str(vhv_data.get("t", 0))),
+            V=Decimal(str(vhv_data.get("v", 0))),
+            R=Decimal(str(vhv_data.get("h", 0)))
         )
     except (ValueError, TypeError) as e:
         return jsonify({"error": f"invalid vhv format: {e}"}), 400
     
     term = ContractTerm(
-        term_id=term_id,
-        civil_text=civil_text,
+        id=term_id,
+        description=civil_text,
         vhv_cost=vhv
     )
     
     contract.add_term(term)
+    _save_contract(contract)
     
     return jsonify({
         "success": True,
         "term_id": term_id,
-        "total_terms": len(contract.terms)
+        "total_terms": len(contract._terms)
     })
 
 
@@ -201,7 +347,7 @@ def add_participant(current_user, contract_id: str):
         "gamma": 1.2  (opcional, default 1.0)
     }
     """
-    contract = _contracts_store.get(contract_id)
+    contract = _load_contract(contract_id)
     
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
@@ -217,20 +363,21 @@ def add_participant(current_user, contract_id: str):
     if participant is None:
         return jsonify({"error": "user not found"}), 404
     
-    # Actualizar gamma si se proporciona
+    # Actualizar wellness si se proporciona (renombrado de gamma)
     gamma_value = data.get("gamma")
     if gamma_value is not None:
         try:
-            participant.update_gamma(Gamma(value=float(gamma_value)))
+            participant.update_wellness(Decimal(str(gamma_value)))
         except ValueError as e:
-            return jsonify({"error": f"invalid gamma: {e}"}), 400
+            return jsonify({"error": f"invalid wellness/gamma: {e}"}), 400
     
     contract.add_participant(participant)
+    _save_contract(contract)
     
     return jsonify({
         "success": True,
         "participant_id": participant.id,
-        "gamma": participant.gamma.value,
+        "wellness": float(participant.wellness_current.value),
         "total_participants": len(contract.participants)
     })
 
@@ -239,19 +386,19 @@ def add_participant(current_user, contract_id: str):
 @token_required
 def validate_contract(current_user, contract_id: str):
     """Validar axiomas del contrato."""
-    contract = _contracts_store.get(contract_id)
+    contract = _load_contract(contract_id)
     
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
     
-    results = contract.validate_axioms()
+    valid, results = contract.validate()
     
     return jsonify({
         "contract_id": contract_id,
-        "valid": all(r.is_valid for r in results),
+        "valid": valid,
         "validations": [
             {
-                "axiom": r.axiom_id,
+                "axiom": r.axiom_code,
                 "valid": r.is_valid,
                 "message": r.message
             }
@@ -272,7 +419,7 @@ def accept_term(current_user, contract_id: str):
         "user_id": 123
     }
     """
-    contract = _contracts_store.get(contract_id)
+    contract = _load_contract(contract_id)
     
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
@@ -284,20 +431,18 @@ def accept_term(current_user, contract_id: str):
     if not term_id or not user_id:
         return jsonify({"error": "term_id and user_id are required"}), 400
     
-    participant = _get_or_create_participant(user_id)
-    
-    if participant is None:
-        return jsonify({"error": "user not found"}), 404
-    
-    success = contract.accept_term(participant.id, term_id)
+    pid = f"user-{user_id}"
+    success = contract.accept_term(term_id, pid)
     
     if not success:
-        return jsonify({"error": "failed to accept term"}), 400
+        return jsonify({"error": f"failed to accept term {term_id} for {pid}"}), 400
+    
+    _save_contract(contract)
     
     return jsonify({
         "success": True,
         "term_id": term_id,
-        "accepted_by": participant.id,
+        "accepted_by": pid,
         "contract_state": contract.state.value
     })
 
@@ -306,19 +451,26 @@ def accept_term(current_user, contract_id: str):
 @token_required
 def activate_contract(current_user, contract_id: str):
     """Activar el contrato (todos los términos deben estar aceptados)."""
-    contract = _contracts_store.get(contract_id)
+    contract = _load_contract(contract_id)
     
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
     
+    if contract.state == ContractState.DRAFT:
+        # Intentar pasar a PENDING primero (validación axiomática)
+        if not contract.submit_for_acceptance():
+            return jsonify({"error": "axiom validation failed for submission"}), 400
+            
     success = contract.activate()
     
     if not success:
         return jsonify({
             "error": "activation failed",
             "state": contract.state.value,
-            "hint": "ensure all terms are accepted by all participants"
+            "hint": "ensure all terms are accepted and contract is in PENDING state"
         }), 400
+    
+    _save_contract(contract)
     
     return jsonify({
         "success": True,
@@ -341,7 +493,7 @@ def request_retraction(current_user, contract_id: str):
         "cause": "gamma_crisis"  # gamma_crisis, sdv_violation, mutual_consent, force_majeure
     }
     """
-    contract = _contracts_store.get(contract_id)
+    contract = _load_contract(contract_id)
     
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
@@ -354,22 +506,20 @@ def request_retraction(current_user, contract_id: str):
     if not user_id:
         return jsonify({"error": "user_id is required"}), 400
     
-    participant = _get_or_create_participant(user_id)
-    
-    if participant is None:
-        return jsonify({"error": "user not found"}), 404
+    pid = f"user-{user_id}"
     
     # Usar oráculo sintético para evaluar
     oracle = SyntheticOracle()
     evaluation = oracle.evaluate_retraction_request(
         contract_id=contract_id,
-        requester_id=participant.id,
+        requester_id=pid,
         reason=reason,
         cause=cause
     )
     
     if evaluation["approved"]:
-        success = contract.retract(requester_id=participant.id, reason=reason)
+        success = contract.retract(reason=reason, actor_id=pid)
+        _save_contract(contract)
         
         return jsonify({
             "success": success,
@@ -391,7 +541,7 @@ def request_retraction(current_user, contract_id: str):
 @token_required
 def get_civil_summary(current_user, contract_id: str):
     """Obtener resumen del contrato en lenguaje civil."""
-    contract = _contracts_store.get(contract_id)
+    contract = _load_contract(contract_id)
     
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
@@ -407,16 +557,24 @@ def get_civil_summary(current_user, contract_id: str):
 @contracts_bp.route("/", methods=["GET"])
 @token_required
 def list_contracts(current_user):
-    """Listar todos los contratos (para admin o desarrollo)."""
-    contracts_list = [
-        {
-            "contract_id": c.contract_id,
-            "state": c.state.value,
-            "participants": len(c.participants),
-            "terms": len(c.terms)
-        }
-        for c in _contracts_store.values()
-    ]
+    """Listar todos los contratos desde la base de datos."""
+    db = get_db()
+    rows = db.execute("SELECT contract_id, state FROM maxo_contracts").fetchall()
+    
+    contracts_list = []
+    for row in rows:
+        # Podríamos cargar el objeto completo para contar términos/participantes
+        # o hacer queries adicionales. Por eficiencia hacemos un resumen rápido.
+        c_id = row["contract_id"]
+        p_count = db.execute("SELECT COUNT(*) FROM maxo_contract_participants WHERE contract_id = ?", (c_id,)).fetchone()[0]
+        t_count = db.execute("SELECT COUNT(*) FROM maxo_contract_terms WHERE contract_id = ?", (c_id,)).fetchone()[0]
+        
+        contracts_list.append({
+            "contract_id": c_id,
+            "state": row["state"],
+            "participants": p_count,
+            "terms": t_count
+        })
     
     return jsonify({
         "contracts": contracts_list,

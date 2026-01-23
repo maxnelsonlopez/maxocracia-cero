@@ -1,8 +1,8 @@
 # Maxocracia-Cero: Sistema Operativo para una Civilización Coherente
 
 **Estado del Proyecto:** Fase Cero - Sistema Operativo Completo (Enero 2026)  
-**Última actualización:** 22 de Enero 2026  
-**Versión:** 2.2 - MaxoContracts MVP
+**Última actualización:** 23 de Enero 2026  
+**Versión:** 2.3 - MaxoContracts Persistente
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 
@@ -13,11 +13,13 @@
 La **Maxocracia** es un sistema operativo para la civilización basado en la **verdad vital verificable**, no en abstracciones monetarias infinitas.
 
 ### 🚀 Novedades (Enero 2026)
-- **MaxoContracts MVP** (NUEVO): Implementación Python completa de contratos inteligentes éticos en `maxocontracts/`:
-  - 5 bloques modulares: ConditionBlock, ActionBlock, GammaProtectorBlock, SDVValidatorBlock, ReciprocityBlock
-  - Validación axiomática automática (T1-T15, Invariantes)
-  - Oráculo sintético simulado para testing
-  - Aceptación término-a-término y retractación ética
+- **MaxoContracts v2.3** (NUEVO): Implementación persistente de contratos inteligentes éticos:
+  - **Persistencia en SQLite**: Contratos, términos, participantes y eventos ahora se guardan en `comun.db`.
+  - 5 bloques modulares re-terminados: Condition, Action, WellnessProtector, SDVValidator, Reciprocity.
+  - **Refactorización Wellness**: Cambio de terminología Gamma -> Wellness para claridad axiomática.
+  - Validación axiomática automática (T1-T15, Invariantes).
+  - Oráculo sintético integrado para evaluación de riesgos y retractaciones.
+  - Aceptación término-a-término y ciclo de vida completo (DRAFT -> ACTIVE -> RETRACTED).
 - **Nexus Simulator**: Herramienta interactiva para visualizar la matemática del valor vital. Localizado en `/simulator`.
 - **Edición 3 Dinámica**: El libro fundamental expandido con Capa de Ternura, MicroMaxocracia, MaxoContracts y Victoria Sintética.
 

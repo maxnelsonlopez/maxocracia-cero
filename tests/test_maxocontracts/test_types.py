@@ -5,7 +5,7 @@ Tests para MaxoContracts Core Types
 import pytest
 from decimal import Decimal
 
-from maxocontracts.core.types import VHV, Gamma, SDV, Participant, ContractTerm
+from maxocontracts.core.types import VHV, Wellness, SDV, Participant, ContractTerm
 
 
 class TestVHV:
@@ -51,42 +51,42 @@ class TestVHV:
         assert d["R"] == "2"
 
 
-class TestGamma:
-    """Tests para índice de bienestar γ."""
+class TestWellness:
+    """Tests para índice de bienestar Wellness."""
     
-    def test_gamma_creation(self):
-        """Gamma se crea correctamente."""
-        g = Gamma(value=Decimal("1.2"))
+    def test_wellness_creation(self):
+        """Wellness se crea correctamente."""
+        g = Wellness(value=Decimal("1.2"))
         assert g.value == Decimal("1.2")
     
-    def test_gamma_negative_raises(self):
-        """Gamma negativo lanza error."""
+    def test_wellness_negative_raises(self):
+        """Wellness negativo lanza error."""
         with pytest.raises(ValueError, match="negativo"):
-            Gamma(value=Decimal("-0.5"))
+            Wellness(value=Decimal("-0.5"))
     
-    def test_gamma_is_suffering(self):
-        """is_suffering detecta γ < threshold."""
-        g = Gamma(value=Decimal("0.8"))
+    def test_wellness_is_suffering(self):
+        """is_suffering detecta Wellness < threshold."""
+        g = Wellness(value=Decimal("0.8"))
         assert g.is_suffering() is True
         assert g.is_suffering(threshold=Decimal("0.7")) is False
     
-    def test_gamma_is_flourishing(self):
-        """is_flourishing detecta γ > 1."""
-        flourishing = Gamma(value=Decimal("1.3"))
-        neutral = Gamma(value=Decimal("1.0"))
-        suffering = Gamma(value=Decimal("0.9"))
+    def test_wellness_is_flourishing(self):
+        """is_flourishing detecta Wellness > 1."""
+        flourishing = Wellness(value=Decimal("1.3"))
+        neutral = Wellness(value=Decimal("1.0"))
+        suffering = Wellness(value=Decimal("0.9"))
         
         assert flourishing.is_flourishing() is True
         assert neutral.is_flourishing() is False
         assert suffering.is_flourishing() is False
     
-    def test_gamma_severity_levels(self):
+    def test_wellness_severity_levels(self):
         """severity() clasifica correctamente."""
-        assert Gamma(value=Decimal("1.5")).severity() == "flourishing"
-        assert Gamma(value=Decimal("1.0")).severity() == "neutral"
-        assert Gamma(value=Decimal("0.9")).severity() == "warning"
-        assert Gamma(value=Decimal("0.6")).severity() == "critical"
-        assert Gamma(value=Decimal("0.3")).severity() == "emergency"
+        assert Wellness(value=Decimal("1.5")).severity() == "flourishing"
+        assert Wellness(value=Decimal("1.0")).severity() == "neutral"
+        assert Wellness(value=Decimal("0.9")).severity() == "warning"
+        assert Wellness(value=Decimal("0.6")).severity() == "critical"
+        assert Wellness(value=Decimal("0.3")).severity() == "emergency"
 
 
 class TestSDV:
@@ -142,15 +142,15 @@ class TestParticipant:
         
         assert p.id == "test-001"
         assert p.name == "Test User"
-        assert p.gamma_current.value == Decimal("1.0")  # Default neutral
+        assert p.wellness_current.value == Decimal("1.0")  # Default neutral
     
-    def test_participant_update_gamma(self):
-        """update_gamma actualiza γ con timestamp."""
+    def test_participant_update_wellness(self):
+        """update_wellness actualiza Wellness con timestamp."""
         p = Participant(id="test-001", name="Test")
-        p.update_gamma(Decimal("0.8"))
+        p.update_wellness(Decimal("0.8"))
         
-        assert p.gamma_current.value == Decimal("0.8")
-        assert p.gamma_current.participant_id == "test-001"
+        assert p.wellness_current.value == Decimal("0.8")
+        assert p.wellness_current.participant_id == "test-001"
     
     def test_participant_is_in_good_standing(self):
         """is_in_good_standing verifica γ y SDV."""
@@ -160,19 +160,19 @@ class TestParticipant:
         good = Participant(
             id="good",
             name="Good",
-            gamma_current=Gamma(value=Decimal("1.2")),
+            wellness_current=Wellness(value=Decimal("1.2")),
             sdv_actual=SDV(vivienda_m2=Decimal("15"))
         )
         assert good.is_in_good_standing(sdv_min) is True
         
-        # Bad γ
-        bad_gamma = Participant(
+        # Bad Wellness
+        bad_wellness = Participant(
             id="bad",
             name="Bad",
-            gamma_current=Gamma(value=Decimal("0.8")),
+            wellness_current=Wellness(value=Decimal("0.8")),
             sdv_actual=SDV(vivienda_m2=Decimal("15"))
         )
-        assert bad_gamma.is_in_good_standing(sdv_min) is False
+        assert bad_wellness.is_in_good_standing(sdv_min) is False
 
 
 class TestContractTerm:

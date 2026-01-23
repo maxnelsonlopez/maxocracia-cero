@@ -338,6 +338,64 @@ CREATE INDEX IF NOT EXISTS idx_follow_ups_participant ON follow_ups(participant_
 CREATE INDEX IF NOT EXISTS idx_follow_ups_priority ON follow_ups(follow_up_priority);
 CREATE INDEX IF NOT EXISTS idx_follow_ups_date ON follow_ups(follow_up_date);
 
+-- MaxoContracts Tables (Capa 4 - Legal)
+
+CREATE TABLE IF NOT EXISTS maxo_contracts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    contract_id TEXT UNIQUE NOT NULL,
+    civil_description TEXT,
+    state TEXT NOT NULL CHECK(state IN ('draft', 'pending', 'active', 'executed', 'retracted', 'expired')),
+    total_vhv_t REAL DEFAULT 0,
+    total_vhv_v REAL DEFAULT 0,
+    total_vhv_h REAL DEFAULT 0,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS maxo_contract_terms (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    contract_id TEXT NOT NULL,
+    term_id TEXT NOT NULL,
+    civil_text TEXT,
+    vhv_t REAL DEFAULT 0,
+    vhv_v REAL DEFAULT 0,
+    vhv_h REAL DEFAULT 0,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
+    UNIQUE(contract_id, term_id)
+);
+
+CREATE TABLE IF NOT EXISTS maxo_contract_participants (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    contract_id TEXT NOT NULL,
+    participant_id TEXT NOT NULL, -- Format: user-ID
+    wellness_value REAL DEFAULT 1.0,
+    sdv_status TEXT DEFAULT 'ok',
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
+    UNIQUE(contract_id, participant_id)
+);
+
+CREATE TABLE IF NOT EXISTS maxo_contract_term_approvals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    contract_id TEXT NOT NULL,
+    term_id TEXT NOT NULL,
+    participant_id TEXT NOT NULL,
+    approved_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
+    UNIQUE(contract_id, term_id, participant_id)
+);
+
+CREATE TABLE IF NOT EXISTS maxo_contract_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    contract_id TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    description TEXT,
+    metadata_json TEXT, -- JSON snapshot of the event data
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE
+);
+
 -- Insert default VHV parameters (only if table is empty)
 INSERT OR IGNORE INTO vhv_parameters (id, alpha, beta, gamma, delta, notes)
 VALUES (1, 100.0, 2000.0, 1.0, 100.0, 'Initial parameters based on paper_formalizacion_matematica_maxo.txt');

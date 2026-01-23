@@ -11,7 +11,7 @@ from decimal import Decimal
 from typing import List, Optional, Tuple
 from dataclasses import dataclass
 
-from .types import VHV, Gamma, SDV, Participant
+from .types import VHV, Wellness, SDV, Participant
 
 
 @dataclass
@@ -171,24 +171,24 @@ class AxiomValidator:
     
     @staticmethod
     def validate_invariant_gamma(
-        gamma: Gamma,
+        wellness: Wellness,
         threshold: Decimal = Decimal("1.0")
     ) -> ValidationResult:
         """
-        Invariante 1: γ ≥ 1 (Bienestar No-Negativo)
+        Invariante 1: Wellness ≥ 1 (Bienestar No-Negativo)
         """
-        is_valid = gamma.value >= threshold
+        is_valid = wellness.value >= threshold
         
         return ValidationResult(
             is_valid=is_valid,
             axiom_code="INV1",
-            axiom_name="Gamma No-Negativo",
-            message=f"γ={gamma.value:.2f} ≥ {threshold}" if is_valid
-                    else f"γ={gamma.value:.2f} < {threshold} - SUFRIMIENTO",
+            axiom_name="Wellness No-Negativo",
+            message=f"W={wellness.value:.2f} ≥ {threshold}" if is_valid
+                    else f"W={wellness.value:.2f} < {threshold} - SUFRIMIENTO",
             details={
-                "gamma": str(gamma.value),
+                "wellness": str(wellness.value),
                 "threshold": str(threshold),
-                "severity": gamma.severity()
+                "severity": wellness.severity()
             }
         )
     
@@ -252,7 +252,7 @@ class AxiomValidator:
         
         # Validar cada participante
         for participant in participants:
-            results.append(cls.validate_invariant_gamma(participant.gamma_current))
+            results.append(cls.validate_invariant_gamma(participant.wellness_current))
             results.append(cls.validate_invariant_sdv(participant.sdv_actual, minimum_sdv))
         
         # Validar retractabilidad
@@ -280,8 +280,8 @@ class AxiomValidator:
         results.append(cls.validate_t9_reciprocidad(vhv_giver, vhv_receiver))
         
         # Estado de participantes
-        results.append(cls.validate_invariant_gamma(giver.gamma_current))
-        results.append(cls.validate_invariant_gamma(receiver.gamma_current))
+        results.append(cls.validate_invariant_gamma(giver.wellness_current))
+        results.append(cls.validate_invariant_gamma(receiver.wellness_current))
         results.append(cls.validate_invariant_sdv(giver.sdv_actual, minimum_sdv))
         results.append(cls.validate_invariant_sdv(receiver.sdv_actual, minimum_sdv))
         

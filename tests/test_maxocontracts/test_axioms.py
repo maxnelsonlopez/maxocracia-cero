@@ -5,7 +5,7 @@ Tests para MaxoContracts Axiom Validators
 import pytest
 from decimal import Decimal
 
-from maxocontracts.core.types import VHV, Gamma, SDV, Participant
+from maxocontracts.core.types import VHV, Wellness, SDV, Participant
 from maxocontracts.core.axioms import AxiomValidator
 
 
@@ -126,24 +126,24 @@ class TestAxiomValidatorInvariants:
     """Tests para Invariantes del Sistema."""
     
     def test_invariant1_gamma_valid(self):
-        """γ ≥ 1 pasa Invariante 1."""
-        gamma = Gamma(value=Decimal("1.2"))
-        result = AxiomValidator.validate_invariant_gamma(gamma)
+        """Wellness ≥ 1 pasa Invariante 1."""
+        wellness = Wellness(value=Decimal("1.2"))
+        result = AxiomValidator.validate_invariant_gamma(wellness)
         
         assert result.is_valid is True
         assert result.axiom_code == "INV1"
     
     def test_invariant1_gamma_at_threshold(self):
-        """γ = 1 (exacto) pasa Invariante 1."""
-        gamma = Gamma(value=Decimal("1.0"))
-        result = AxiomValidator.validate_invariant_gamma(gamma)
+        """Wellness = 1 (exacto) pasa Invariante 1."""
+        wellness = Wellness(value=Decimal("1.0"))
+        result = AxiomValidator.validate_invariant_gamma(wellness)
         
         assert result.is_valid is True
     
     def test_invariant1_gamma_below_threshold(self):
-        """γ < 1 falla Invariante 1."""
-        gamma = Gamma(value=Decimal("0.8"))
-        result = AxiomValidator.validate_invariant_gamma(gamma)
+        """Wellness < 1 falla Invariante 1."""
+        wellness = Wellness(value=Decimal("0.8"))
+        result = AxiomValidator.validate_invariant_gamma(wellness)
         
         assert result.is_valid is False
         assert "SUFRIMIENTO" in result.message
@@ -192,7 +192,7 @@ class TestValidateAll:
         participant = Participant(
             id="test",
             name="Test",
-            gamma_current=Gamma(value=Decimal("1.2")),
+            wellness_current=Wellness(value=Decimal("1.2")),
             sdv_actual=SDV(
                 vivienda_m2=Decimal("15"),
                 alimentacion_kcal=Decimal("2500"),
@@ -221,7 +221,7 @@ class TestValidateAll:
         participant = Participant(
             id="suffering",
             name="Suffering",
-            gamma_current=Gamma(value=Decimal("0.7"))
+            wellness_current=Wellness(value=Decimal("0.7"))
         )
         
         is_valid, results = AxiomValidator.validate_all(

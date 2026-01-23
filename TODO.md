@@ -1,6 +1,6 @@
 # Tareas Pendientes - Maxocracia-Cero
 
-**Última actualización:** 2026-01-22
+**Última actualización:** 2026-01-23
 
 ---
 
@@ -11,12 +11,11 @@
 **Objetivo**: Validar contratos inteligentes éticos en Cohorte Cero (50+ contratos en 90 días)
 
 - [ ] **Semana 1-2: Especificación (Enero 22 - Febrero 5)**
-  - [ ] Especificar 5 bloques core en Solidity
-    - [ ] `ConditionBlock.sol`: Si-entonces básico
-    - [ ] `ActionBlock.sol`: Ejecutar transferencia/acceso
-    - [ ] `GammaProtectorBlock.sol`: Monitoreo γ con umbral
-    - [ ] `SDVValidatorBlock.sol`: Verificar SDV no violado
-    - [ ] `ReciprocityBlock.sol`: Balance VHV verificable
+  - [x] **Implementar Persistencia en DB** (Completado 2026-01-23)
+    - [x] Tablas en `schema.sql` para contratos y términos
+    - [x] CRUD persistente en `app/contracts_bp.py`
+    - [x] Refactorización Wellness (limpieza terminológica)
+    - [x] Suite de tests de persistencia
   - [ ] Diseñar UI drag-and-drop (wireframes)
   - [ ] Definir API contracts para oráculos
   - **Entregables**: Especificaciones técnicas, wireframes, API docs

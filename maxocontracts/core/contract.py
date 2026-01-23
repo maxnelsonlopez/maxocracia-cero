@@ -14,7 +14,7 @@ from enum import Enum
 import uuid
 import json
 
-from .types import VHV, Gamma, SDV, Participant, ContractTerm, ContractState
+from .types import VHV, Wellness, SDV, Participant, ContractTerm, ContractState
 from .axioms import AxiomValidator, ValidationResult
 
 
@@ -110,6 +110,15 @@ class MaxoContract:
     @property
     def participant_ids(self) -> List[str]:
         return [p.id for p in self.participants]
+    
+    def add_participant(self, participant: Participant) -> None:
+        """Añade un participante al contrato."""
+        if self._state != ContractState.DRAFT:
+            raise ValueError("Solo se pueden añadir participantes en estado DRAFT")
+        
+        if participant.id not in self.participant_ids:
+            self.participants.append(participant)
+            self._log_event("participant_added", {"participant_id": participant.id})
     
     # --- Gestión de Términos ---
     

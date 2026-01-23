@@ -17,6 +17,22 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
     - Renamed the `Gamma` class in `maxocontracts/core/types.py` to `Wellness` to resolve ambiguity with the pricing exponent.
     - Updated simulator UI and logic to use "Wellness Index" instead of "Gamma Index".
 
+## 2026-01-23 — MaxoContracts: Persistencia en DB y Refactorización Wellness
+
+### Añadido
+- **Persistencia SQLite para MaxoContracts**:
+  - Implementadas tablas en `schema.sql`: `maxo_contracts`, `maxo_contract_terms`, `maxo_contract_participants`, `maxo_contract_term_approvals`, `maxo_contract_events`.
+  - Refactorizado `app/contracts_bp.py` para eliminar almacenamiento en memoria y usar persistencia SQL (CRUD completo).
+  - Funciones de persistencia interna: `_save_contract` y `_load_contract` con reconstrucción de objetos.
+- **Test de Persistencia Interna**: `tests/test_maxocontracts/test_persistence_internal.py` verifica el ciclo de vida SQL.
+
+### Cambiado
+- **Refactorización Terminológica (Gamma → Wellness)**:
+  - Renombrada clase `Gamma` a `Wellness` en todo el subsistema `maxocontracts` para alinearse con la arquitectura de bienestar.
+  - `GammaProtectorBlock` renombrado a `WellnessProtectorBlock`.
+  - Actualizados todos los validadores axiomáticos en `axioms.py` y tests correspondientes.
+  - El participante ahora usa `wellness_current` en lugar de `gamma_current`.
+
 ## 2026-01-22 — MaxoContracts REST API Integration
 
 ### Añadido
