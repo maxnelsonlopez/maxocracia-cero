@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-01-22 — MaxoContracts REST API Integration
+
+### Añadido
+- **REST API Blueprint** (`app/contracts_bp.py`):
+  - `POST /contracts/` - Crear contrato
+  - `GET /contracts/<id>` - Obtener contrato
+  - `POST /contracts/<id>/terms` - Añadir término
+  - `POST /contracts/<id>/participants` - Añadir participante
+  - `GET /contracts/<id>/validate` - Validar axiomas
+  - `POST /contracts/<id>/accept` - Aceptar término
+  - `POST /contracts/<id>/activate` - Activar contrato
+  - `POST /contracts/<id>/retract` - Retractación ética
+  - `GET /contracts/<id>/civil` - Resumen lenguaje civil
+  - `GET /contracts/` - Listar contratos
+
+- Integrado con oráculo sintético para evaluación de retractaciones
+- Almacenamiento en memoria para MVP (planificado: persistencia DB)
+
+---
+
 ## 2026-01-22 — MaxoContracts MVP: Implementación Python de Contratos Inteligentes Éticos
 
 ### Añadido

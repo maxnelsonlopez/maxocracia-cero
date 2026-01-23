@@ -44,7 +44,7 @@ Modo de trabajo: Decisivo, código funcional, commits firmados.
 - [ ] Libro Cap 17: MicroMaxocracia borrador
 
 ### Semana 2 (Ene 29 - Feb 4): INTEGRACIÓN
-- [ ] API REST /contracts/ en Flask
+- [x] API REST /contracts/ en Flask ✅
 - [ ] Nexus Simulator + γ dinámico
 - [ ] Libro Cap 18: MaxoContracts borrador
 - [ ] Sistema feedback público
