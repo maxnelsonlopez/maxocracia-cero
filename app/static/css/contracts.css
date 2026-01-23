@@ -1,0 +1,242 @@
+/* MaxoContracts UI Styles */
+/* Extends forms.css */
+
+/* --- Layout --- */
+
+.contract-builder-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px; /* Canvas | Palette */
+    gap: var(--space-lg);
+    height: calc(100vh - 100px); /* Adjust for header/padding */
+    overflow: hidden;
+}
+
+/* --- Canvas (Left/Center) --- */
+
+.contract-canvas {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+.contract-canvas.drag-over {
+    background: rgba(52, 152, 219, 0.05);
+    border-color: var(--color-maxo);
+}
+
+.canvas-header {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.contract-title-input {
+    background: transparent;
+    border: none;
+    font-size: var(--font-size-2xl);
+    font-weight: 800;
+    color: var(--color-text);
+    width: 100%;
+    margin-bottom: var(--space-xs);
+}
+
+.contract-title-input:focus {
+    outline: none;
+    border-bottom: 2px solid var(--color-maxo);
+}
+
+.vhv-summary-badge {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+    font-family: monospace;
+    font-size: var(--font-size-sm);
+    display: flex;
+    gap: var(--space-md);
+}
+
+/* --- Palette (Right) --- */
+
+.contract-palette {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.palette-header {
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--glass-border);
+    font-weight: 700;
+    font-size: var(--font-size-lg);
+}
+
+.palette-content {
+    padding: var(--space-md);
+    overflow-y: auto;
+    flex: 1;
+}
+
+.palette-section-title {
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin: var(--space-md) 0 var(--space-sm);
+    font-weight: 700;
+}
+
+/* --- Term Blocks --- */
+
+.term-block {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    cursor: grab;
+    transition: all 0.2s ease;
+    user-select: none;
+    position: relative;
+    margin-bottom: var(--space-sm);
+}
+
+.term-block:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.term-block:active {
+    cursor: grabbing;
+}
+
+.term-block.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+}
+
+/* Block Types Colors */
+.term-block[data-type="action"] { border-left: 3px solid var(--color-maxo); }
+.term-block[data-type="condition"] { border-left: 3px solid var(--color-urgency-medium); }
+.term-block[data-type="participant"] { border-left: 3px solid var(--color-urgency-low); }
+
+.block-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xs);
+}
+
+.block-icon {
+    font-size: 1.2em;
+}
+
+.block-title {
+    font-weight: 700;
+    font-size: var(--font-size-sm);
+}
+
+.block-content {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+.block-vhv {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 10px;
+    opacity: 0.6;
+    background: rgba(0,0,0,0.2);
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+/* --- Canvas Specifcs --- */
+
+/* When a block is dropped on canvas, it expands */
+.contract-canvas .term-block {
+    cursor: default;
+    background: rgba(255, 255, 255, 0.08);
+    padding: var(--space-lg);
+}
+
+.contract-canvas .term-block .block-content {
+    font-size: var(--font-size-base);
+    color: var(--color-text);
+    margin-top: var(--space-sm);
+}
+
+.block-controls {
+    display: none; /* Hidden on palette, shown on canvas */
+    position: absolute;
+    top: var(--space-sm);
+    right: var(--space-sm);
+    gap: var(--space-xs);
+}
+
+.contract-canvas .term-block .block-controls {
+    display: flex;
+}
+
+.btn-icon-sm {
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.btn-icon-sm:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--color-text);
+}
+
+.btn-delete:hover {
+    color: var(--color-urgency-high);
+}
+
+/* --- Empty State --- */
+
+.empty-state-message {
+    text-align: center;
+    color: var(--color-text-secondary);
+    margin-top: var(--space-2xl);
+    pointer-events: none;
+}
+
+.empty-state-icon {
+    font-size: 48px;
+    margin-bottom: var(--space-md);
+    opacity: 0.5;
+    display: block;
+}
+
+/* Animations */
+@keyframes pop-in {
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.contract-canvas .term-block {
+    animation: pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}

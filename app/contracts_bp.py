@@ -237,6 +237,8 @@ def create_contract(current_user):
     if not contract_id:
         return jsonify({"error": "contract_id is required"}), 400
     
+    civil_description = data.get("civil_description", "")
+    
     contract = MaxoContract(
         contract_id=contract_id,
         description=civil_description,
@@ -364,12 +366,16 @@ def add_participant(current_user, contract_id: str):
         return jsonify({"error": "user not found"}), 404
     
     # Actualizar wellness si se proporciona (renombrado de gamma)
-    gamma_value = data.get("gamma")
-    if gamma_value is not None:
+    # Soporte para "wellness" (nuevo estándar) y "gamma" (legacy)
+    wellness_val = data.get("wellness")
+    if wellness_val is None:
+        wellness_val = data.get("gamma")
+
+    if wellness_val is not None:
         try:
-            participant.update_wellness(Decimal(str(gamma_value)))
+            participant.update_wellness(Decimal(str(wellness_val)))
         except ValueError as e:
-            return jsonify({"error": f"invalid wellness/gamma: {e}"}), 400
+            return jsonify({"error": f"invalid wellness value: {e}"}), 400
     
     contract.add_participant(participant)
     _save_contract(contract)

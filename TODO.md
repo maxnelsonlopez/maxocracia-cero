@@ -16,7 +16,10 @@
     - [x] CRUD persistente en `app/contracts_bp.py`
     - [x] Refactorización Wellness (limpieza terminológica)
     - [x] Suite de tests de persistencia
-  - [ ] Diseñar UI drag-and-drop (wireframes)
+  - [x] **Diseñar UI drag-and-drop (wireframes)** (Completado 2026-01-23)
+    - [x] Especificaciones de UI en `docs/design/`
+    - [x] Prototipo funcional en `app/static/contract-builder-mock.html`
+    - [x] Estilos Glassmorphism en `app/static/css/contracts.css`
   - [ ] Definir API contracts para oráculos
   - **Entregables**: Especificaciones técnicas, wireframes, API docs
 

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaxoContracts Builder (Prototipo)</title>
+    
+    <!-- Design System -->
+    <link rel="stylesheet" href="css/vhv.css">
+    <link rel="stylesheet" href="css/forms.css">
+    <link rel="stylesheet" href="css/contracts.css">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="dashboard-body">
+
+    <!-- Sidebar injected by ui-shell.js -->
+    
+    <main class="dashboard-main">
+        
+        <div class="forms-container" style="max-width: 1400px;">
+            
+            <!-- Breadcrumb / Header -->
+            <div style="margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm);">
+                <a href="dashboard.html" style="color: var(--color-text-secondary); text-decoration: none;">Dashboard</a>
+                <span>/</span>
+                <span style="color: var(--color-maxo); font-weight: 700;">Nuevo Contrato</span>
+            </div>
+
+            <div class="contract-builder-layout">
+                
+                <!-- CENTER CANVAS -->
+                <div class="contract-canvas" id="dropZone">
+                    
+                    <div class="canvas-header">
+                        <div style="flex: 1;">
+                            <input type="text" class="contract-title-input" placeholder="Título del Contrato (ej. Préstamo Solidario)" value="Contrato Sin Título">
+                            <div style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">
+                                Estado: <span style="color: var(--color-urgency-medium);">Borrador</span> • ID: draft-xyz-123
+                            </div>
+                        </div>
+                        
+                        <div class="vhv-summary-badge">
+                            <div title="Tiempo Vital Humanamente Necesario"><span style="color:#aaa">T:</span> <span>0.0h</span></div>
+                            <div title="Vidas (Unidades Vitales Consumidas)"><span style="color:#e74c3c">V:</span> <span>0.00</span></div>
+                            <div title="Recursos Finitos"><span style="color:#2ecc71">R:</span> <span>0.00</span></div>
+                        </div>
+                    </div>
+
+                    <div class="empty-state-message" id="emptyState">
+                        <span class="empty-state-icon">🏗️</span>
+                        <h3>Comienza tu Contrato</h3>
+                        <p>Arrastra bloques desde la paleta derecha para construir tus términos.</p>
+                    </div>
+
+                    <!-- Dropped blocks will appear here -->
+                    
+                </div>
+
+                <!-- RIGHT PALETTE -->
+                <div class="contract-palette">
+                    <div class="palette-header">
+                        Bloques Disponibles
+                    </div>
+                    
+                    <div style="padding: var(--space-md) var(--space-md) 0;">
+                        <input type="text" class="forms-input" placeholder="Buscar bloque..." style="padding: 8px 12px; font-size: 14px;">
+                    </div>
+
+                    <div class="palette-content">
+                        
+                        <div class="palette-section-title">Acciones (Transferencia)</div>
+                        
+                        <div class="term-block" draggable="true" data-type="action" data-vhv='{"t":0,"v":0,"r":0}'>
+                            <div class="block-vhv">T:0</div>
+                            <div class="block-header">
+                                <span class="block-icon">💸</span>
+                                <span class="block-title">Transferir Maxos</span>
+                            </div>
+                            <div class="block-content">A paga [X] Maxos a B</div>
+                        </div>
+
+                        <div class="term-block" draggable="true" data-type="action" data-vhv='{"t":1,"v":0,"r":0}'>
+                            <div class="block-vhv">T:1</div>
+                            <div class="block-header">
+                                <span class="block-icon">🛠️</span>
+                                <span class="block-title">Prestar Servicio</span>
+                            </div>
+                            <div class="block-content">A realiza [Servicio] para B</div>
+                        </div>
+
+                        <div class="term-block" draggable="true" data-type="action" data-vhv='{"t":0,"v":0,"r":1}'>
+                            <div class="block-vhv">R:1</div>
+                            <div class="block-header">
+                                <span class="block-icon">📦</span>
+                                <span class="block-title">Entregar Bien</span>
+                            </div>
+                            <div class="block-content">A entrega [Objeto] a B</div>
+                        </div>
+
+                        <div class="palette-section-title">Condiciones</div>
+
+                        <div class="term-block" draggable="true" data-type="condition">
+                            <div class="block-header">
+                                <span class="block-icon">⏳</span>
+                                <span class="block-title">Fecha Límite</span>
+                            </div>
+                            <div class="block-content">Antes del [Fecha]</div>
+                        </div>
+                        
+                        <div class="term-block" draggable="true" data-type="condition">
+                            <div class="block-header">
+                                <span class="block-icon">❓</span>
+                                <span class="block-title">Si ocurre evento</span>
+                            </div>
+                            <div class="block-content">Si [Evento] sucede...</div>
+                        </div>
+
+                        <div class="palette-section-title">Participantes</div>
+
+                         <div class="term-block" draggable="true" data-type="participant">
+                            <div class="block-header">
+                                <span class="block-icon">👤</span>
+                                <span class="block-title">Rol: Garante</span>
+                            </div>
+                            <div class="block-content">Añadir garante de Sostenibilidad</div>
+                        </div>
+
+                    </div>
+                    
+                    <div style="padding: var(--space-md); border-top: 1px solid var(--glass-border);">
+                        <button class="forms-btn forms-btn-primary forms-btn-full">
+                            Validar Contrato
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/ui-shell.js"></script>
+    
+    <script>
+        // Prototype Drag and Drop Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const draggables = document.querySelectorAll('.term-block[draggable="true"]');
+            const dropZone = document.getElementById('dropZone');
+            const emptyState = document.getElementById('emptyState');
+
+            draggables.forEach(draggable => {
+                draggable.addEventListener('dragstart', () => {
+                    draggable.classList.add('dragging');
+                });
+
+                draggable.addEventListener('dragend', () => {
+                    draggable.classList.remove('dragging');
+                });
+            });
+
+            dropZone.addEventListener('dragover', e => {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('drag-over');
+            });
+
+            dropZone.addEventListener('drop', e => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                
+                const draggingElement = document.querySelector('.dragging');
+                if (draggingElement) {
+                    // Clone the element for the canvas
+                    const clone = draggingElement.cloneNode(true);
+                    clone.classList.remove('dragging');
+                    clone.setAttribute('draggable', 'true'); // Allow re-sorting later
+                    
+                    // Add controls
+                    const controls = document.createElement('div');
+                    controls.className = 'block-controls';
+                    controls.innerHTML = `
+                        <button class="btn-icon-sm" title="Editar">✏️</button>
+                        <button class="btn-icon-sm btn-delete" title="Eliminar" onclick="this.closest('.term-block').remove()">🗑️</button>
+                    `;
+                    clone.appendChild(controls);
+
+                    // Insert into canvas (hiding empty state if needed)
+                    emptyState.style.display = 'none';
+                    
+                    // Insert after header but before end
+                    dropZone.appendChild(clone);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
