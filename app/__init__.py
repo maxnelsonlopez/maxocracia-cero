@@ -38,6 +38,7 @@ def create_app(db_path=None):
 
     # register blueprints
     from .auth import bp as auth_bp
+    from .contracts_bp import contracts_bp
     from .forms_bp import forms_bp
     from .interchanges import bp as interchanges_bp
     from .maxo_bp import bp as maxo_bp
@@ -56,6 +57,7 @@ def create_app(db_path=None):
     app.register_blueprint(vhv_bp)
     app.register_blueprint(tvi_bp)
     app.register_blueprint(forms_bp)
+    app.register_blueprint(contracts_bp)
 
     # placeholder imports to ensure modules loaded
     # other optional blueprints can be imported here
