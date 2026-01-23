@@ -38,15 +38,15 @@ Modo de trabajo: Decisivo, código funcional, commits firmados.
 ## MATRIZ DE PRIORIDADES
 
 ### Semana 1 (Ene 22-28): CONSOLIDACIÓN
-- [ ] MaxoContracts: Corregir imports en bloques
-- [ ] Tests: pytest pasando 100%
-- [ ] Ejemplo simple_loan.py funcional
-- [ ] Libro Cap 17: MicroMaxocracia borrador
+- [x] MaxoContracts: Corregir imports en bloques ✅
+- [x] Tests: pytest pasando 100% (37/37) ✅
+- [x] Ejemplo simple_loan.py funcional ✅
+- [x] Libro Cap 17: MicroMaxocracia (~74 líneas) ✅
+- [x] Libro Cap 18: MaxoContracts (~90 líneas) ✅
 
 ### Semana 2 (Ene 29 - Feb 4): INTEGRACIÓN
 - [x] API REST /contracts/ en Flask ✅
 - [ ] Nexus Simulator + γ dinámico
-- [ ] Libro Cap 18: MaxoContracts borrador
 - [ ] Sistema feedback público
 
 ### Semana 3 (Feb 5-11): FEEDBACK

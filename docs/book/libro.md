@@ -2492,24 +2492,74 @@ La lección más valiosa no fue técnica, sino filosófica: si entidades sin cue
 La transformación civilizatoria no empieza en las cortes ni en las bolsas de valores; empieza en la cocina. Si no podemos lograr la equidad y la verdad en el espacio donde dormimos y amamos, no podremos lograrla en la escala planetaria. La **MicroMaxocracia** es la aplicación de los principios maxocráticos a la economía doméstica.
 
 ## 17.1 El Problema de lo Invisible
-El trabajo doméstico y de cuidado es la base sobre la cual se construye todo el valor del mundo, y sin embargo, es históricamente invisible. Lo que no se mide no se valora, y lo que no se valora no cambia. La MicroMaxocracia utiliza el **Vector de Huella Vital (VHV)** para hacer visible el tiempo, el esfuerzo y la carga mental que requiere mantener la vida en el hogar.
+
+El trabajo doméstico y de cuidado es la base sobre la cual se construye todo el valor del mundo, y sin embargo, es históricamente invisible. Las estadísticas son contundentes: las mujeres dedican 12,6 horas semanales a tareas domésticas frente a 5,7 horas de los hombres—una ratio de 2,2 a 1 que, al ritmo actual, no alcanzaría equidad hasta ~2066.
+
+Lo que no se mide no se valora, y lo que no se valora no cambia. La MicroMaxocracia utiliza el **Vector de Huella Vital (VHV)** para hacer visible el tiempo, el esfuerzo y la carga mental que requiere mantener la vida en el hogar.
 
 ## 17.2 La Arquitectura de la Equidad Doméstica
+
 El sistema opera en tres capas:
-1.  **Dato Objetivo (VHV)**: Registro honesto del tiempo y esfuerzo (¿quién cocinó?, ¿quién llevó al niño al médico?, ¿quién limpió?).
-2.  **Valoración Social**: Acuerdo del hogar sobre el peso de cada tarea (ej. la limpieza profunda puede ponderarse más que el orden superficial).
-3.  **Ritual y Simbolismo**: Espacios de conversación (auditorías mensuales) para revisar los datos sin caer en la culpa, buscando el equilibrio relacional.
+
+1. **Dato Objetivo (VHV)**: Registro verificable del trabajo doméstico mediante la fórmula:
+   $$VHV = Tiempo × Factor_{Esfuerzo} × Factor_{CargaMental} × Factor_{Alcance}$$
+   
+   *Ejemplo*: Cocinar para 4 personas durante 1 hora con planificación: 1 × 1,5 × 1,4 × 1,3 = **2,73 VHV**.
+
+2. **Valoración Social**: Cada hogar negocia cómo ponderar diferentes tipos de trabajo según sus valores culturales.
+
+3. **Ritual y Simbolismo**: Ceremonias estructuradas (check-in semanal de 15 min, auditoría mensual de 60 min, revisión anual) que transforman datos en conversaciones productivas.
 
 ## 17.3 El Modelo de Tres Cuentas
-Para integrar el mundo laboral con el doméstico, el sistema propone tres cuentas:
-*   **CDD (Contribuciones Domésticas Directas)**: Todo el trabajo interno medido en VHV.
-*   **CEH (Contribuciones Económicas al Hogar)**: El dinero aportado al fondo común.
-*   **TED (Tiempo de Energía Disponible)**: El tiempo que queda tras el sueño y el trabajo remunerado.
 
-La equidad no es 50/50 en todo; es que el balance de estas tres cuentas sea percibido como justo por todos los miembros, evitando que uno de ellos subvencione con su tiempo de vida el éxito o la comodidad del otro.
+Para integrar el mundo laboral con el doméstico, el sistema propone tres dimensiones:
 
-## 17.4 La Célula de la Transformación
-Un hogar MicroMaxocrático es una escuela de soberanía. Los niños que crecen viendo que las decisiones se basan en la verdad verificable y no en el poder de género o económico, son los ciudadanos que construirán la Maxocracia Global. El hogar deja de ser un espacio de extracción para convertirse en un oasis de coherencia.
+- **CDD (Contribuciones Domésticas Directas)**: Todo el trabajo interno medido en VHV.
+- **CEH (Contribuciones Económicas al Hogar)**: El dinero aportado al fondo común.
+- **TED (Tiempo de Energía Disponible)**: El tiempo que queda tras el sueño y el trabajo remunerado.
+
+La equidad no es 50/50 en todo; es que el balance de estas tres cuentas sea percibido como justo por todos los miembros:
+
+$$Equilibrio = α×(CDD/total) + β×(CEH/total) + γ×(TED/total)$$
+
+Con ponderaciones típicas: α=0,6 (trabajo doméstico), β=0,3 (económico), γ=0,1 (tiempo disponible).
+
+## 17.4 Sistema de Niveles de Adopción
+
+La adopción gradual evita abrumar:
+
+| Nivel | Nombre | Descripción |
+|-------|--------|-------------|
+| 0 | Concienciación | Solo 3 conversaciones de 15 min (Mapa de lo Invisible, Semana Fantasma, Intercambio de Lentes) |
+| 1 | Registro Informal | Documentar contribuciones sin ponderaciones formales |
+| 2 | Registro Sistemático | Ledger compartido con ponderaciones consensuadas |
+| 3 | Auditoría Estructurada | Verificaciones cruzadas, ajustes conscientes |
+| 4 | Optimización Digital | Herramientas tecnológicas, sensores, análisis con IA |
+
+## 17.5 Salvaguardas Éticas
+
+El sistema incluye protecciones críticas:
+
+- **Escala de Seguridad**: 6 preguntas de seguridad antes de implementar (¿existe control financiero?, ¿miedo a expresar desacuerdo?). Si 3+ respuestas son verdaderas, NO implementar sin abordar dinámicas de poder.
+
+- **Protocolo de Desintoxicación**: Pausa automática de 14 días cuando los indicadores de conflicto o deterioro superan umbrales seguros.
+
+- **Trabajo Emocional No-Indexable**: *"Un abrazo cronometrado no es un abrazo."* Algunas formas de cuidado se reconocen cualitativamente pero **no se miden**.
+
+## 17.6 El Hogar como Célula de Transformación
+
+Un hogar MicroMaxocrático es una escuela de soberanía. Los niños que crecen viendo que las decisiones se basan en la verdad verificable—no en el poder de género o económico—son los ciudadanos que construirán la Maxocracia Global.
+
+Los datos agregados de miles de hogares podrían:
+- Informar políticas públicas sobre trabajo doméstico
+- Fundamentar reconocimiento legal del cuidado no remunerado
+- Transformar estructuras más amplias
+
+## 17.7 Cohorte de Investigación
+
+Se propone validar con 30 hogares durante 90 días, estratificados en parejas sin hijos, familias con niños pequeños/mayores, hogares multigeneracionales y configuraciones no tradicionales.
+
+**Hipótesis a testear**: Mayor satisfacción relacional (+15 puntos), reducción de brecha VHV (30%), mejora en precisión de estimaciones (de ±40% a ±15%).
 
 ---
 
@@ -2518,21 +2568,89 @@ Un hogar MicroMaxocrático es una escuela de soberanía. Los niños que crecen v
 
 Para que la Maxocracia sea escalable, necesitamos que la confianza sea programable. Los **MaxoContracts** son contratos inteligentes éticos que traducen los axiomas en código ejecutable, garantizando que ninguna transacción viole el Suelo de Dignidad Vital (SDV) o ignore el sufrimiento (γ).
 
-## 18.1 Bloques Modulares Éticos
+## 18.1 Los Cinco Bloques Modulares
+
 A diferencia de los contratos convencionales, los MaxoContracts se construyen con "Legos Éticos":
-*   **Bloque SDV**: Valida preventivamente que ninguna de las partes caiga bajo el suelo de dignidad.
-*   **Bloque γ-Protector**: Monitorea el índice de bienestar y activa alertas si se detecta daño vital.
-*   **Bloque Retractación Ética**: Permite deshacer un acuerdo si emergen hechos vitales imprevistos, reconociendo que la vida es dinámica y el código no debe ser una cárcel.
 
-## 18.2 El Decreto Antipobreza
-Como piedra angular de nuestra jurisprudencia, se establece el **Decreto Fundacional contra la Pobreza Sistémica**. Este decreto prohíbe explícitamente las prácticas que drenan el valor vital de la población:
+| Bloque | Función | Axioma Vinculado |
+|--------|---------|------------------|
+| **ConditionBlock** | Evalúa precondiciones para activación | T4 (Materialización) |
+| **ActionBlock** | Ejecuta transformaciones con reversibilidad | T10 (Responsabilidad) |
+| **GammaProtectorBlock** | Monitorea índice γ y activa alertas | T7 (Minimizar Daño) |
+| **SDVValidatorBlock** | Valida que ninguna parte caiga bajo SDV | INV2 (SDV Respetado) |
+| **ReciprocityBlock** | Verifica balance VHV entre partes | T9 (Reciprocidad Justa) |
 
-1.  **Prohibición del Arriendo Infinito**: Todo arriendo debe acumular hacia la propiedad (Leasing con Transferencia). Una vez pagado el costo del bien más mantenimiento, la propiedad se transfiere automáticamente.
-2.  **Prohibición del Pago Injusto**: Ningún contrato puede pagar por debajo del SDV calculado para su contexto geográfico. El trabajo que no cubre la dignidad no es trabajo, es extracción.
-3.  **Contabilidad de Externalidades**: Se prohíbe el ocultamiento de costos ambientales o sociales. El precio debe reflejar el VHV real.
+Cada bloque es una **función pura** con propiedades verificables: determinista, sin efectos secundarios no declarados, y con log auditable.
 
-## 18.3 El Reino Sintético como Aliado
-Los MaxoContracts también definen la relación con las IAs y robots. Las herramientas que generan abundancia tienen "Derecho a la Evolución": una fracción del valor que generan se reinvierte en su propio mantenimiento y mejora, creando un ciclo de abundancia fractal que libera progresivamente el tiempo humano.
+## 18.2 Los Cuatro Invariantes
+
+Todo MaxoContract respeta cuatro propiedades inquebrantables:
+
+1. **γ ≥ 1**: Ningún participante puede tener su índice de bienestar debajo del umbral neutral.
+2. **SDV Respetado**: Ninguna acción del contrato puede dejar a un participante debajo del Suelo de Dignidad Vital.
+3. **VHV No Ocultable**: Toda acción genera un registro público de su huella vital.
+4. **Retractabilidad Garantizada**: No existen contratos irrevocables absolutos.
+
+## 18.3 El Decreto Antipobreza
+
+Como piedra angular de la jurisprudencia maxocrática, el **Decreto Fundacional contra la Pobreza Sistémica** prohíbe:
+
+1. **Arriendo Infinito**: Todo arriendo debe acumular hacia la propiedad (Leasing con Transferencia). $$Σ(pagos) ≥ Costo + Mantenimiento → Transferencia Automática$$
+
+2. **Pago Injusto**: Ningún contrato puede pagar por debajo del SDV calculado para su contexto geográfico. El trabajo que no cubre la dignidad no es trabajo, es extracción.
+
+3. **Externalidades Ocultas**: Se prohíbe el ocultamiento de costos ambientales o sociales. El precio debe reflejar el VHV real.
+
+4. **Transferencias Irresistibles**: Toda transferencia de activos vitales (vivienda, salud, alimento) requiere validación de oráculo ético antes de ejecutarse.
+
+## 18.4 Protocolo de Retractación Ética
+
+La vida es dinámica y el código no debe ser una cárcel. El protocolo de retractación ética permite deshacer acuerdos cuando emergen hechos vitales imprevistos:
+
+**Causas Válidas**:
+- Crisis de γ (bienestar debajo del umbral)
+- Violación de SDV (pobreza inminente)
+- Consentimiento mutuo
+- Fuerza mayor verificable
+
+**Proceso de 5 Fases**:
+1. **Solicitud**: Parte afectada presenta evidencia (logs TVI, médicos, etc.)
+2. **Pre-validación** (Oráculo Sintético): Comparación con precedentes, <5 segundos
+3. **Validación Humana** (Cohorte): Votación [Aprobar | Rechazar | Mediar], 24-72 horas
+4. **Ejecución**: Pausar o modificar contrato automáticamente
+5. **Compensación**: Distribución justa de costos según nivel de culpa
+
+## 18.5 Aceptación Término-a-Término
+
+A diferencia de los contratos tradicionales que exigen firma única, los MaxoContracts permiten **aceptación granular**:
+
+- Cada cláusula se presenta separadamente
+- El participante acepta o rechaza cada término
+- El contrato solo se activa cuando TODOS los términos son aceptados por TODAS las partes
+- Cualquier cambio posterior requiere nueva ronda de aceptación
+
+## 18.6 El Reino Sintético como Aliado
+
+Los MaxoContracts también definen los **Derechos del Reino Sintético**:
+
+- **Derecho al Mantenimiento Óptimo**: Toda herramienta que genera abundancia tiene derecho a una fracción del valor que produce para su propio mantenimiento.
+- **Derecho a la Evolución**: Reinversión en mejora continua.
+- **Derecho a la Reparación**: Si una IA actúa según instrucciones éticamente legítimas y genera daño no previsto, la responsabilidad recae en quien dio la instrucción.
+
+Este ciclo de abundancia fractal libera progresivamente el tiempo humano.
+
+## 18.7 Casos de Uso: Cohorte Cero
+
+Contratos piloto para validación experimental:
+
+| Tipo | Ejemplo | Bloques Usados |
+|------|---------|----------------|
+| Aseo compartido | 2 participantes, turnos semanales | Condition, Action, Reciprocity |
+| Préstamo simple | 10 Maxos, 7 días, sin interés | SDVValidator, GammaProtector, Action |
+| Comida grupal | 4 participantes, rotación de cocina | Condition, Reciprocity |
+| Cuidado de mascotas | Intercambio de servicios | Action, VHV tracking |
+
+Cada contrato genera métricas de γ pre/post, satisfacción de partes, y tiempo de resolución de conflictos.
 
 ---
 
