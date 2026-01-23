@@ -59,7 +59,7 @@ Received *from* the Oracle.
   "query_id": "uuid-v4-matching-request",
   "oracle_id": "claude-3-opus | human-jury-1",
   "verdict": {
-    "approved": true,
+    "approved": false,
     "confidence": 0.95, // 0.0 - 1.0
     "reasoning": "The contract violates Axiom T1 (Finitude)..."
   },

@@ -51,8 +51,9 @@ CAPA 1: TEORÍA ✅ COMPLETADA
 | **Duración Cohorte** | 90 días | ⏳ 60 días restantes |
 | **Archivos de código** | 40+ | ✅ Organizados |
 | **Documentos teóricos** | 25+ | ✅ Compilados |
-| **Bloques MaxoContracts** | 5 core especificados | 📝 Diseño |
+| **Bloques MaxoContracts** | 5 core especificados | ✅ Diseño UI Completo |
 | **Funcionalidad blockchain** | Base Sepolia testnet ready | 🔧 Listo |
+| **API Oráculos** | Definida v1.0 | ✅ Especificada |
 
 ---
 
