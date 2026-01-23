@@ -2,10 +2,11 @@
 Oracle Interface - Base para Oráculos
 
 Define la interfaz común para oráculos sintéticos y humanos.
+Alineado con docs/specs/ORACLE_API_SPEC.md
 """
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 from decimal import Decimal
@@ -15,31 +16,63 @@ from decimal import Decimal
 class OracleQuery:
     """Consulta a un oráculo."""
     query_id: str
-    query_type: str  # "validation", "retraction", "mediation", "estimation"
+    query_type: str  # "contract_validation", "retraction_evaluation", "impact_estimation"
     context: Dict[str, Any]
     submitted_at: datetime
     requester_id: str
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "query_id": self.query_id,
+            "query_type": self.query_type,
+            "requester_id": self.requester_id,
+            "submitted_at": self.submitted_at.isoformat(),
+            "context": self.context
+        }
+
+
+@dataclass
+class Verdict:
+    """Veredicto del oráculo (nested object)."""
+    approved: bool
+    confidence: Decimal
+    reasoning: str
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "approved": self.approved,
+            "confidence": float(self.confidence),
+            "reasoning": self.reasoning
+        }
 
 
 @dataclass
 class OracleResponse:
     """Respuesta de un oráculo."""
     query_id: str
-    approved: bool
-    confidence: Decimal  # 0.0 a 1.0
-    reasoning: str
-    responded_at: datetime
-    oracle_type: str  # "synthetic" o "human"
+    oracle_id: str
+    verdict: Verdict
     metadata: Optional[Dict[str, Any]] = None
+    signature: Optional[str] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "query_id": self.query_id,
+            "oracle_id": self.oracle_id,
+            "verdict": self.verdict.to_dict(),
+            "metadata": self.metadata or {},
+            "signature": self.signature
+        }
+    
+    @property
+    def approved(self) -> bool:
+        """Helper para compatibilidad."""
+        return self.verdict.approved
 
 
 class OracleInterface(ABC):
     """
     Interfaz base para todos los oráculos.
-    
-    Los oráculos tienen dos roles principales:
-    1. Validación: Verificar coherencia axiomática
-    2. Mediación: Resolver disputas y retractaciones
     """
     
     @abstractmethod

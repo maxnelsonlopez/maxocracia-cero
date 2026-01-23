@@ -20,7 +20,10 @@
     - [x] Especificaciones de UI en `docs/design/`
     - [x] Prototipo funcional en `app/static/contract-builder-mock.html`
     - [x] Estilos Glassmorphism en `app/static/css/contracts.css`
-  - [ ] Definir API contracts para oráculos
+  - [x] **Definir API contracts para oráculos** (Completado 2026-01-23)
+    - [x] Especificación API en `docs/specs/ORACLE_API_SPEC.md`
+    - [x] Refactorización de `maxocontracts/oracles` (Verdict object)
+    - [x] Actualización de `SyntheticOracle` y `app/contracts_bp.py`
   - **Entregables**: Especificaciones técnicas, wireframes, API docs
 
 - [ ] **Semana 3-4: Prototipo (Febrero 6-19)**

@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
 ## [Unreleased]
+### Añadido
+- **UI Prototipado**: Nuevo constructor de contratos "Drag-and-Drop" en `app/static/contract-builder-mock.html`.
+- **Estilos**: Sistema de diseño Glassmorphism extendido en `contracts.css`.
+- **Oracle API**: Especificación completa en `docs/specs/ORACLE_API_SPEC.md`.
+- **Core**: Objeto `Verdict` en `maxocontracts.oracles` para respuestas estructuradas de oráculos.
+
+### Cambiado
+- **API**: Endpoint `/contracts/<id>/participants` ahora acepta `wellness` (con fallback a `gamma`).
+- **Refactor**: `SyntheticOracle` ahora retorna objetos `OracleResponse` en lugar de diccionarios planos.
+
 
 ### Added
 - **Nexus Simulator v2.2**:

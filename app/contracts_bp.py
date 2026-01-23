@@ -516,14 +516,18 @@ def request_retraction(current_user, contract_id: str):
     
     # Usar oráculo sintético para evaluar
     oracle = SyntheticOracle()
-    evaluation = oracle.evaluate_retraction_request(
+    # Nota: evaluate_retraction devuelve un objeto OracleResponse
+    response = oracle.evaluate_retraction(
         contract_id=contract_id,
-        requester_id=pid,
         reason=reason,
-        cause=cause
+        evidence={
+            "requester_id": pid,
+            "cause": cause
+        }
     )
     
-    if evaluation["approved"]:
+    # OracleResponse ahora tiene un objeto Verdict
+    if response.verdict.approved:
         success = contract.retract(reason=reason, actor_id=pid)
         _save_contract(contract)
         
@@ -531,15 +535,15 @@ def request_retraction(current_user, contract_id: str):
             "success": success,
             "contract_id": contract_id,
             "state": contract.state.value,
-            "oracle_confidence": evaluation["confidence"],
-            "oracle_reasoning": evaluation["reasoning"]
+            "oracle_confidence": float(response.verdict.confidence),
+            "oracle_reasoning": response.verdict.reasoning
         })
     else:
         return jsonify({
             "success": False,
             "error": "retraction not approved by oracle",
-            "oracle_confidence": evaluation["confidence"],
-            "oracle_reasoning": evaluation["reasoning"]
+            "oracle_confidence": float(response.verdict.confidence),
+            "oracle_reasoning": response.verdict.reasoning
         }), 400
 
 
