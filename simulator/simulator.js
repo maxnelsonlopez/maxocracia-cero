@@ -36,23 +36,32 @@ let isOracleMode = false;
 // Mathematical Engine
 function calculatePrice() {
     const t = parseFloat(inputs.time.value);
-    const v = parseFloat(inputs.life.value);
+    let v = parseFloat(inputs.life.value);
     const r = parseFloat(inputs.resource.value);
 
-    // Dynamic Oracle Logic: If enabled, Gamma Exponent acts based on Suffering (V)
+    // Dynamic Oracle Logic: If enabled, Gamma Exponent adjusts based on Suffering (V)
     if (isOracleMode) {
-        // Oracle Rule: If V > 0.5, society increases penalty (Gamma Exponent)
-        // Formula: Base 1.0 + (V * 0.8) to create exponential curve
-        let targetGamma = 1.0;
+        // Enhanced Oracle Rule: Non-linear scaling of gamma based on suffering
+        // More aggressive scaling for higher suffering values
+        let targetGamma = 1.0; // Base value for V <= 0.5
+        
         if (v > 0.5) {
-            targetGamma = 1.0 + (v * 0.8);
+            // Cubic scaling for V > 0.5 to make high suffering extremely costly
+            const normalizedV = (v - 0.5) / 4.5; // Normalize to 0-1 range for V=0.5-5.0
+            targetGamma = 1.0 + Math.pow(normalizedV * 4, 2); // Quadratic scaling
         }
-        // Cap max gamma
-        targetGamma = Math.min(5.0, targetGamma);
+        
+        // Cap gamma between 1.0 and 5.0
+        targetGamma = Math.max(1.0, Math.min(5.0, targetGamma));
 
         // Update input visually and value
-        inputs.gamma.value = targetGamma;
+        inputs.gamma.value = targetGamma.toFixed(1);
         inputs.gamma.classList.add('slider-active-anim');
+        
+        // Add visual feedback when oracle adjusts gamma
+        const gammaDisplay = document.getElementById('gamma-val');
+        gammaDisplay.classList.add('pulse-animation');
+        setTimeout(() => gammaDisplay.classList.remove('pulse-animation'), 500);
     } else {
         inputs.gamma.classList.remove('slider-active-anim');
     }
@@ -81,13 +90,28 @@ function calculatePrice() {
     displays.penalty.innerText = `+${Math.max(0, penaltyRatio).toFixed(0)}%`;
 
     // --- NEW: Participant Wellness & Contract Status Logic ---
-    // Calculate Wellness Index (0-2.0) derived inversely from Suffering (V)
-    // If V=0 (No impact) -> Wellness=1.5 (Flourishing)
-    // If V=1 (Neutral) -> Wellness=1.0 (Neutral)
-    // If V=5 (Torture) -> Wellness=0.0 (Emergency)
-    // Linear model: 1.5 - (V * 0.3)
-    let wellnessIndex = 1.5 - (v * 0.3);
-    wellnessIndex = Math.max(0, wellnessIndex); // Floor at 0
+    // Enhanced Wellness Index Calculation (0.0-2.0)
+    // Non-linear model that better reflects real-world impact
+    let wellnessIndex;
+    
+    if (v <= 0.5) {
+        // Flourishing zone: Small positive values slightly boost wellness
+        wellnessIndex = 1.0 + (0.5 - v) * 1.0; // 1.0 to 1.5 range
+    } else if (v <= 2.0) {
+        // Neutral to concerning: Linear decrease
+        wellnessIndex = 1.0 - ((v - 0.5) * 0.33);
+    } else {
+        // High suffering: Steeper decline
+        const excess = v - 2.0;
+        wellnessIndex = Math.max(0, 0.5 - (excess * 0.2));
+    }
+    
+    // Apply non-linear scaling to make extreme values more impactful
+    wellnessIndex = Math.max(0, Math.min(2.0, wellnessIndex));
+    
+    // Add small random fluctuation to simulate real-world variability
+    wellnessIndex += (Math.random() - 0.5) * 0.02;
+    wellnessIndex = Math.max(0, Math.min(2.0, wellnessIndex));
 
     // Update Wellness Visuals
     displays.gammaWell.innerText = wellnessIndex.toFixed(2);
@@ -181,20 +205,74 @@ function animatePrice(target) {
     }, 30);
 }
 
-// Scenarios
+// Enhanced Scenarios for MaxoContracts
 const scenarios = {
-    'egg-ind': { t: 0.2, v: 4.5, r: 2.5, g: 1.8 },
-    'egg-eth': { t: 0.8, v: 0.2, r: 0.5, g: 1.8 },
-    'coop-dev': { t: 3.0, v: 0.5, r: 1.0, g: 1.5 }
+    // Basic Examples
+    'egg-ind': { 
+        name: 'Huevo Industrial',
+        t: 0.2, v: 4.5, r: 2.5, g: 1.8,
+        desc: 'Producción industrial: bajo tiempo humano, alto sufrimiento animal.'
+    },
+    'egg-eth': { 
+        name: 'Huevo Ético',
+        t: 0.8, v: 0.2, r: 0.5, g: 1.8,
+        desc: 'Producción ética: más tiempo humano, casi nulo sufrimiento.'
+    },
+    
+    // Cohorte Cero Scenarios
+    'limpieza': {
+        name: 'Limpieza Compartida',
+        t: 2.0, v: 0.3, r: 0.7, g: 1.5,
+        desc: 'Tareas domésticas en hogar compartido (Cohorte Cero).'
+    },
+    'prestamo': {
+        name: 'Préstamo Solidario',
+        t: 1.5, v: 0.1, r: 3.0, g: 1.6,
+        desc: 'Préstamo sin intereses entre miembros de la cohorte.'
+    },
+    'comida': {
+        name: 'Comida Cooperativa',
+        t: 1.0, v: 0.2, r: 1.2, g: 1.4,
+        desc: 'Preparación de comidas en grupo para ahorro colectivo.'
+    },
+    
+    // Edge Cases
+    'explotacion': {
+        name: 'Trabajo Explotador',
+        t: 10.0, v: 4.8, r: 0.5, g: 2.0,
+        desc: 'Jornada laboral extenuante con condiciones inhumanas.'
+    },
+    'voluntariado': {
+        name: 'Voluntariado',
+        t: 4.0, v: -0.5, r: 0.3, g: 1.2,
+        desc: 'Trabajo voluntario que genera bienestar comunitario.'
+    }
 };
 
 window.loadScenario = function (scKey) {
     const sc = scenarios[scKey];
     if (!sc) return;
 
+    // Update input values
     inputs.time.value = sc.t;
     inputs.life.value = sc.v;
     inputs.resource.value = sc.r;
+    
+    // Update scenario info display
+    const scenarioInfo = document.getElementById('scenario-info');
+    if (scenarioInfo) {
+        scenarioInfo.innerHTML = `
+            <h4>${sc.name || 'Escenario'}</h4>
+            <p>${sc.desc || ''}</p>
+            <div class="scenario-stats">
+                <span>T: ${sc.t}h</span>
+                <span>V: ${sc.v}</span>
+                <span>R: ${sc.r}</span>
+                ${!isOracleMode ? `<span>γ: ${sc.g}</span>` : ''}
+            </div>
+        `;
+    }
+    
     // Note: Gamma input is ignored in Oracle Mode, but we set it for static mode
     if (!isOracleMode) {
         inputs.gamma.value = sc.g;

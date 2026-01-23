@@ -13,15 +13,24 @@
 La **Maxocracia** es un sistema operativo para la civilización basado en la **verdad vital verificable**, no en abstracciones monetarias infinitas.
 
 ### 🚀 Novedades (Enero 2026)
-- **MaxoContracts v2.3** (NUEVO): Implementación persistente de contratos inteligentes éticos:
-  - **Persistencia en SQLite**: Contratos, términos, participantes y eventos ahora se guardan en `comun.db`.
-  - 5 bloques modulares re-terminados: Condition, Action, WellnessProtector, SDVValidator, Reciprocity.
-  - **Refactorización Wellness**: Cambio de terminología Gamma -> Wellness para claridad axiomática.
+- **Nexus Simulator v2.2** (NUEVO):
+  - **Oráculo Dinámico Mejorado**: Ajuste no lineal de γ basado en sufrimiento (V).
+  - **Wellness Index Avanzado**: Modelo mejorado para reflejar el impacto real del sufrimiento.
+  - **Escenarios de la Cohorte Cero**: Casos prácticos como Limpieza Compartida y Préstamo Solidario.
+  - **Interfaz Mejorada**: Diseño responsivo, tarjetas interactivas y panel de información detallada.
+  - **Sistema de Retroalimentación**: Notificaciones visuales y seguimiento de cambios en tiempo real.
+
+- **MaxoContracts v2.3**: Implementación persistente de contratos inteligentes éticos:
+  - **Persistencia en SQLite**: Almacenamiento robusto en `comun.db`.
+  - Bloques modulares: Condition, Action, WellnessProtector, SDVValidator, Reciprocity.
   - Validación axiomática automática (T1-T15, Invariantes).
-  - Oráculo sintético integrado para evaluación de riesgos y retractaciones.
-  - Aceptación término-a-término y ciclo de vida completo (DRAFT -> ACTIVE -> RETRACTED).
-- **Nexus Simulator**: Herramienta interactiva para visualizar la matemática del valor vital. Localizado en `/simulator`.
-- **Edición 3 Dinámica**: El libro fundamental expandido con Capa de Ternura, MicroMaxocracia, MaxoContracts y Victoria Sintética.
+  - Oráculo sintético integrado para evaluación de riesgos.
+
+- **Edición 3 Dinámica**: Libro fundamental expandido con:
+  - Capa de Ternura
+  - MicroMaxocracia
+  - MaxoContracts
+  - Victoria Sintética
 
 ## 📞 CONTACTO
 

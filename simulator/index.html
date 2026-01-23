@@ -165,18 +165,97 @@
         </div>
 
         <h2>Casos Predefinidos</h2>
+        <!-- Scenario Info Panel -->
+        <div id="scenario-info" class="panel" style="margin-bottom: 2rem; background: rgba(99, 102, 241, 0.05);
+            border-left: 4px solid var(--primary); padding: 1.5rem; transition: all 0.3s ease;">
+            <p style="font-style: italic; color: var(--text-muted); margin: 0;">
+                Selecciona un escenario para ver su descripción y parámetros.
+            </p>
+        </div>
+
         <div class="scenario-grid">
-            <div class="scenario-card" onclick="loadScenario('egg-ind')">
-                <h3>Huevo Industrial</h3>
-                <p>Alto sufrimiento (V=4.0), bajo tiempo, recursos intensivos.</p>
+            <!-- Basic Scenarios -->
+            <div class="scenario-category">
+                <h3>Casos Básicos</h3>
+                <div class="scenario-grid-inner">
+                    <div class="scenario-card" onclick="loadScenario('egg-ind')">
+                        <h4>Huevo Industrial</h4>
+                        <p>Alto sufrimiento (V=4.5), bajo tiempo, recursos intensivos.</p>
+                        <div class="scenario-stats">
+                            <span class="stat-tag">T: 0.2h</span>
+                            <span class="stat-tag">V: 4.5</span>
+                            <span class="stat-tag">R: 2.5</span>
+                        </div>
+                    </div>
+                    <div class="scenario-card" onclick="loadScenario('egg-eth')">
+                        <h4>Huevo Ético</h4>
+                        <p>Bajo sufrimiento (V=0.2), más tiempo humano, sostenible.</p>
+                        <div class="scenario-stats">
+                            <span class="stat-tag">T: 0.8h</span>
+                            <span class="stat-tag">V: 0.2</span>
+                            <span class="stat-tag">R: 0.5</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="scenario-card" onclick="loadScenario('egg-eth')">
-                <h3>Huevo Ético</h3>
-                <p>Bajo sufrimiento (V=0.5), más tiempo humano, sostenible.</p>
+
+            <!-- Cohorte Cero Scenarios -->
+            <div class="scenario-category">
+                <h3>Cohorte Cero</h3>
+                <div class="scenario-grid-inner">
+                    <div class="scenario-card" onclick="loadScenario('limpieza')">
+                        <h4>Limpieza Compartida</h4>
+                        <p>Tareas domésticas en hogar compartido.</p>
+                        <div class="scenario-stats">
+                            <span class="stat-tag">T: 2.0h</span>
+                            <span class="stat-tag">V: 0.3</span>
+                            <span class="stat-tag">R: 0.7</span>
+                        </div>
+                    </div>
+                    <div class="scenario-card" onclick="loadScenario('prestamo')">
+                        <h4>Préstamo Solidario</h4>
+                        <p>Préstamo sin intereses entre miembros.</p>
+                        <div class="scenario-stats">
+                            <span class="stat-tag">T: 1.5h</span>
+                            <span class="stat-tag">V: 0.1</span>
+                            <span class="stat-tag">R: 3.0</span>
+                        </div>
+                    </div>
+                    <div class="scenario-card" onclick="loadScenario('comida')">
+                        <h4>Comida Cooperativa</h4>
+                        <p>Preparación de comidas en grupo.</p>
+                        <div class="scenario-stats">
+                            <span class="stat-tag">T: 1.0h</span>
+                            <span class="stat-tag">V: 0.2</span>
+                            <span class="stat-tag">R: 1.2</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="scenario-card" onclick="loadScenario('coop-dev')">
-                <h3>Desarrollo Cooperativo</h3>
-                <p>Estrategia de alta verdad y bajo impacto vital.</p>
+
+            <!-- Edge Cases -->
+            <div class="scenario-category">
+                <h3>Casos Extremos</h3>
+                <div class="scenario-grid-inner">
+                    <div class="scenario-card" onclick="loadScenario('explotacion')">
+                        <h4>Trabajo Explotador</h4>
+                        <p>Condiciones laborales inhumanas.</p>
+                        <div class="scenario-stats">
+                            <span class="stat-tag">T: 10.0h</span>
+                            <span class="stat-tag">V: 4.8</span>
+                            <span class="stat-tag">R: 0.5</span>
+                        </div>
+                    </div>
+                    <div class="scenario-card" onclick="loadScenario('voluntariado')">
+                        <h4>Voluntariado</h4>
+                        <p>Trabajo que genera bienestar comunitario.</p>
+                        <div class="scenario-stats">
+                            <span class="stat-tag">T: 4.0h</span>
+                            <span class="stat-tag">V: -0.5</span>
+                            <span class="stat-tag">R: 0.3</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -185,7 +264,148 @@
         <p>Antigravity Project &copy; 2026 | Lealtad a la Verdad | Maxocracia-Cero</p>
     </footer>
 
+    <script>
+        // Initialize with default scenario
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial scenario
+            loadScenario('limpieza');
+            
+            // Toggle oracle mode
+            const oracleToggle = document.getElementById('oracle-mode-toggle');
+            oracleToggle.addEventListener('change', function() {
+                isOracleMode = this.checked;
+                calculatePrice();
+                
+                // Show notification
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.textContent = `Modo Oráculo ${isOracleMode ? 'activado' : 'desactivado'}`;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.add('fade-out');
+                    setTimeout(() => notification.remove(), 500);
+                }, 2000);
+            });
+            
+            // Initialize oracle mode
+            isOracleMode = oracleToggle.checked;
+        });
+    </script>
     <script src="simulator.js"></script>
+    <style>
+        /* Enhanced Scenario Cards */
+        .scenario-category {
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+        
+        .scenario-category h3 {
+            color: var(--text-main);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .scenario-category h3::before {
+            content: '▶';
+            font-size: 0.8em;
+            transition: transform 0.2s;
+        }
+        
+        .scenario-category.active h3::before {
+            transform: rotate(90deg);
+        }
+        
+        .scenario-grid-inner {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .scenario-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .scenario-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+        
+        .scenario-card h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+        
+        .scenario-card p {
+            margin: 0 0 0.75rem 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.4;
+            flex-grow: 1;
+        }
+        
+        .scenario-stats {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: auto;
+        }
+        
+        .stat-tag {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-family: 'Fira Code', monospace;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        
+        .notification.fade-out {
+            opacity: 0;
+        }
+        
+        /* Pulse animation for gamma display */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 0.5s ease-in-out;
+        }
+    </style>
 </body>
 
 </html>

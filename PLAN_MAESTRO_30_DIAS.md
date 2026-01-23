@@ -22,9 +22,13 @@ DOCUMENTACIÓN CLAVE:
 - CHANGELOG.md (historial completo)
 - PLAN_MAESTRO_30_DIAS.md (este documento)
 
-ESTADO ACTUAL: [Actualizar según progreso]
+ESTADO ACTUAL: [2026-01-23]
 - MaxoContracts MVP: ✅ Implementado (Python)
-- Nexus Simulator: ✅ Existe en /simulator
+- Nexus Simulator: ✅ Mejoras v2.2 implementadas
+  - Oráculo Dinámico mejorado
+  - Modelo de Wellness no lineal
+  - Escenarios de Cohorte Cero
+  - UI/UX mejorada
 - Libro Edición 3: 🔄 En progreso (faltan Cap 17, 18)
 - App Flask: ✅ Funcional para registro TVI
 
@@ -46,7 +50,11 @@ Modo de trabajo: Decisivo, código funcional, commits firmados.
 
 ### Semana 2 (Ene 29 - Feb 4): INTEGRACIÓN
 - [x] API REST /contracts/ en Flask ✅
-- [ ] Nexus Simulator + γ dinámico
+- [x] Nexus Simulator + γ dinámico ✅
+  - [x] Modelo no lineal de Wellness Index
+  - [x] Modo Oráculo Dinámico mejorado
+  - [x] Escenarios de la Cohorte Cero
+  - [x] Interfaz de usuario mejorada
 - [ ] Sistema feedback público
 
 ### Semana 3 (Feb 5-11): FEEDBACK

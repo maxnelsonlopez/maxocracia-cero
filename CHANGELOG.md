@@ -7,10 +7,18 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
 ## [Unreleased]
 
 ### Added
-- **Nexus Simulator v2.1**:
-    - **Dynamic Oracle Mode**: Added a toggle to simulate the "Oráculo Dinámico" where the pricing exponent ($\gamma_{exp}$) automatically scales with suffering ($V$).
-    - **Wellness Gauge**: Visual indicator for participant well-being ($Wellness$), derived inversely from suffering.
-    - **Contract Status Panel**: Visual simulation of MaxoContract states (`ACTIVE`, `WARNING`, `RETRACTED`) based on wellness violations.
+- **Nexus Simulator v2.2**:
+    - **Dynamic Oracle Mode**: Mejoras en el modo "Oráculo Dinámico" con ajuste no lineal de $\gamma_{exp}$ basado en sufrimiento ($V$).
+    - **Wellness Index Avanzado**: Modelo mejorado con escalado no lineal para reflejar mejor el impacto real del sufrimiento.
+    - **Nuevos Escenarios**: Casos de uso de la Cohorte Cero (Limpieza Compartida, Préstamo Solidario, Comida Cooperativa).
+    - **Panel de Información**: Visualización detallada de parámetros y descripción de escenarios.
+    - **Sistema de Notificaciones**: Feedback visual para cambios de estado y acciones del usuario.
+    - **Mejoras de UI/UX**: Diseño responsivo, tarjetas interactivas y animaciones suaves.
+    - **Indicadores Visuales**: Para seguimiento del Wellness Index y estado del contrato.
+
+### Changed
+- **Refactorización de Código**: Mejor organización del código JavaScript y CSS para mayor mantenibilidad.
+- **Optimización de Rendimiento**: Reducción de la carga de recursos y mejor manejo de eventos.
 
 ### Changed
 - **Terminology Refactor**:
