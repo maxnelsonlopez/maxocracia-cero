@@ -250,7 +250,137 @@ footer {
     margin-bottom: 0.5rem;
 }
 
+
 .scenario-card p {
     font-size: 0.85rem;
     color: var(--text-muted);
+}
+
+/* --- Dynamic Simulator Styles --- */
+
+/* Oracle Mode Toggle */
+.oracle-mode-box {
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid var(--primary);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--text-muted);
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Wellness Gauge */
+.wellness-container {
+    margin-top: 1.5rem;
+}
+
+.gauge-bg {
+    height: 10px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+}
+
+.gauge-fill {
+    height: 100%;
+    width: 100%; /* Default fully green */
+    background: linear-gradient(90deg, var(--danger) 0%, var(--primary) 50%, var(--success) 100%);
+    transition: width 0.3s ease, background 0.3s ease;
+}
+
+/* Status Panel */
+.status-panel {
+    margin-top: 2rem;
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 700;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.status-active {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.status-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: #f59e0b;
+    color: #f59e0b;
+}
+
+.status-retracted {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--danger);
+    color: var(--danger);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+    50% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
+    100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+}
+
+/* Dynamic slider animation when controlled by Oracle */
+.slider-locked {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.slider-active-anim {
+    transition: value 0.5s ease;
 }

@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## [Unreleased]
+
+### Added
+- **Nexus Simulator v2.1**:
+    - **Dynamic Oracle Mode**: Added a toggle to simulate the "Oráculo Dinámico" where the pricing exponent ($\gamma_{exp}$) automatically scales with suffering ($V$).
+    - **Wellness Gauge**: Visual indicator for participant well-being ($Wellness$), derived inversely from suffering.
+    - **Contract Status Panel**: Visual simulation of MaxoContract states (`ACTIVE`, `WARNING`, `RETRACTED`) based on wellness violations.
+
+### Changed
+- **Terminology Refactor**:
+    - Renamed the `Gamma` class in `maxocontracts/core/types.py` to `Wellness` to resolve ambiguity with the pricing exponent.
+    - Updated simulator UI and logic to use "Wellness Index" instead of "Gamma Index".
+
 ## 2026-01-22 — MaxoContracts REST API Integration
 
 ### Añadido

@@ -59,16 +59,30 @@
             <hr style="border: none; border-top: 1px solid var(--glass-border); margin: 2rem 0;">
 
             <h3>Parámetros de Calibración</h3>
+
+            <!-- Dynamic Oracle Toggle -->
+            <div class="oracle-mode-box">
+                <div>
+                    <strong style="color: var(--primary-light);">Modo Oráculo Dinámico</strong>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">Ajuste automático de γ según sufrimiento.
+                    </p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="oracle-mode-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
             <div class="control-group" style="margin-top: 1rem;">
                 <div class="label-box">
                     <label for="gamma-input"
                         title="Define qué tanto castiga el sistema el sufrimiento injustificado.">Factor Gamma
-                        (γ)</label>
+                        (γ<sub>exp</sub>)</label>
                     <span id="gamma-val" class="value-display">1.8</span>
                 </div>
-                <input type="range" id="gamma-input" min="1" max="2.5" step="0.1" value="1.8">
+                <input type="range" id="gamma-input" min="1" max="5" step="0.1" value="1.8">
                 <p class="input-desc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">
-                    Sensibilidad al sufrimiento (Penalización exponencial).</p>
+                    Aversión social al sufrimiento (Penalización exponencial).</p>
             </div>
         </section>
 
@@ -90,6 +104,22 @@
                         <span id="coop-val" class="m-value">Alta</span>
                         <span class="m-label">Viabilidad Cooperativa</span>
                     </div>
+                </div>
+
+                <!-- Wellness Gauge (Participant State) -->
+                <div class="wellness-container">
+                    <div class="label-box">
+                        <label style="font-size: 0.9rem;">Bienestar Participante (Wellness Index)</label>
+                        <span id="gamma-well-val" class="value-display" style="color: var(--success);">1.0</span>
+                    </div>
+                    <div class="gauge-bg">
+                        <div id="wellness-bar" class="gauge-fill" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <!-- MaxoContract Status -->
+                <div id="contract-status" class="status-panel status-active">
+                    ESTADO: ACTIVO
                 </div>
             </div>
 

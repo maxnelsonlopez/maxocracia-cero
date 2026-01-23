@@ -85,20 +85,20 @@ class VHV:
 
 
 @dataclass
-class Gamma:
+class Wellness:
     """
-    Índice de Bienestar (γ)
+    Índice de Bienestar (Wellness)
     
     Escala:
-    - γ = 0: Sufrimiento máximo
-    - γ = 1: Neutral (punto de equilibrio)
-    - γ > 1: Florecimiento
+    - Wellness = 0: Sufrimiento máximo
+    - Wellness = 1: Neutral (punto de equilibrio)
+    - Wellness > 1: Florecimiento
     
-    Invariante 1: γ ≥ 1 para todos los participantes siempre.
-    Si γ < 1 sostenido > 14 días, se activa retractación automática.
+    Invariante 1: Wellness ≥ 1 para todos los participantes siempre.
+    Si Wellness < 1 sostenido > 14 días, se activa retractación automática.
     
     Axiomas vinculados:
-    - T7: Minimizar Daño (γ < 1 es daño)
+    - T7: Minimizar Daño (Wellness < 1 es daño)
     """
     value: Decimal
     measured_at: datetime = field(default_factory=datetime.utcnow)
@@ -106,14 +106,14 @@ class Gamma:
     
     def __post_init__(self):
         if self.value < Decimal("0"):
-            raise ValueError("γ no puede ser negativo")
+            raise ValueError("Wellness no puede ser negativo")
     
     def is_suffering(self, threshold: Decimal = Decimal("1.0")) -> bool:
-        """Retorna True si γ está debajo del umbral (sufrimiento)."""
+        """Retorna True si Wellness está debajo del umbral (sufrimiento)."""
         return self.value < threshold
     
     def is_flourishing(self) -> bool:
-        """Retorna True si γ > 1 (florecimiento)."""
+        """Retorna True si Wellness > 1 (florecimiento)."""
         return self.value > Decimal("1.0")
     
     def severity(self) -> str:
@@ -242,26 +242,26 @@ class Participant:
     Cada participante tiene:
     - Identidad única
     - Estado actual de SDV
-    - Historial de γ
+    - Historial de Wellness
     - Balance VHV
     """
     id: str
     name: str
     sdv_actual: SDV = field(default_factory=SDV)
-    gamma_current: Gamma = field(default_factory=lambda: Gamma(value=Decimal("1.0")))
+    wellness_current: Wellness = field(default_factory=lambda: Wellness(value=Decimal("1.0")))
     vhv_balance: VHV = field(default_factory=VHV.zero)
     
-    def update_gamma(self, new_value: Decimal) -> None:
-        """Actualiza γ con timestamp."""
-        self.gamma_current = Gamma(
+    def update_wellness(self, new_value: Decimal) -> None:
+        """Actualiza Wellness con timestamp."""
+        self.wellness_current = Wellness(
             value=new_value,
             participant_id=self.id
         )
     
     def is_in_good_standing(self, sdv_minimum: SDV) -> bool:
-        """Verifica que el participante está en buen estado (γ ≥ 1, SDV met)."""
+        """Verifica que el participante está en buen estado (Wellness ≥ 1, SDV met)."""
         return (
-            not self.gamma_current.is_suffering() and
+            not self.wellness_current.is_suffering() and
             sdv_minimum.meets_minimum(self.sdv_actual)
         )
 
