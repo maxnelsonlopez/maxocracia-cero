@@ -121,10 +121,9 @@ POST /auth/register
 **Respuesta Exitosa (201):**
 ```json
 {
-  "message": "Usuario registrado exitosamente",
-  "user_id": 1,
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "jti.raw_refresh_token",
+  "expires_in": 3600
 }
 ```
 
@@ -150,10 +149,9 @@ POST /auth/login
 **Respuesta Exitosa (200):**
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user_id": 1,
-  "email": "usuario@ejemplo.com"
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "jti.raw_refresh_token",
+  "expires_in": 3600
 }
 ```
 

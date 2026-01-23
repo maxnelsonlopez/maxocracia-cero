@@ -186,3 +186,11 @@ class WellnessProtectorBlock:
             "auto_retract_on_emergency": self.auto_retract_on_emergency,
             "alert_history_count": len(self._alert_history)
         }
+
+
+# ---------------------------------------------------------------------------
+# Backward-compatibility alias
+# ---------------------------------------------------------------------------
+# Muchos docs y ejemplos aún hablan de `GammaProtectorBlock`. El bloque real
+# en el código es WellnessProtectorBlock (γ como símbolo se mantiene).
+GammaProtectorBlock = WellnessProtectorBlock

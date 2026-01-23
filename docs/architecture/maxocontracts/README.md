@@ -41,7 +41,7 @@ Decreto que establece:
 Los usuarios no escriben código. Arrastran bloques pre-validados:
 - `ConditionBlock` (si-entonces)
 - `ActionBlock` (ejecutar)
-- `GammaProtectorBlock` (monitoreo sufrimiento)
+- `WellnessProtectorBlock` (monitoreo bienestar/γ)
 - `SDVValidatorBlock` (dignidad mínima)
 - `ReciprocityBlock` (intercambio justo)
 

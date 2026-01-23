@@ -200,7 +200,7 @@ RESULTADO: Prueba de concepto completa
 **5 Bloques core para Q1**:
 1. ConditionBlock (si-entonces)
 2. ActionBlock (ejecutar acción)
-3. GammaProtectorBlock (monitoreo sufrimiento)
+3. WellnessProtectorBlock (monitoreo bienestar/γ)
 4. SDVValidatorBlock (dignidad mínima)
 5. ReciprocityBlock (intercambio justo)
 

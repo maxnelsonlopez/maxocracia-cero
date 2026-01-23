@@ -154,9 +154,9 @@ Propiedades:
 Axiomas vinculados: T4 (Materialización), T10 (Responsabilidad)
 ```
 
-### Bloque 3: GammaProtectorBlock
+### Bloque 3: WellnessProtectorBlock (γ)
 ```
-GammaProtectorBlock : (Context, Gamma, Threshold) → (Boolean, Alert?)
+WellnessProtectorBlock : (Context, Wellness, Threshold) → (Boolean, Alert?)
 
 Propiedades:
   - VIGILANTE: Monitorea continuamente γ de participantes
@@ -208,7 +208,7 @@ Ningún bloque puede ejecutarse sin pasar validación axiomática primero.
 Para cadena [B1, B2, B3, ...Bn]:
   1. Evaluar todas las ConditionBlocks
   2. Validar SDVValidatorBlock
-  3. Verificar GammaProtectorBlock
+  3. Verificar WellnessProtectorBlock
   4. Ejecutar ActionBlocks
   5. Verificar ReciprocityBlock post-acción
 ```

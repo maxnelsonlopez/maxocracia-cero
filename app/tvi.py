@@ -75,6 +75,13 @@ class TVIManager:
         except ValueError:
             raise ValueError("Invalid date format. Use ISO8601.")
 
+        # Normalizar a UTC si vienen timestamps sin zona horaria (naive).
+        # Esto mantiene compatibilidad con entradas ISO8601 tipo "2025-01-01T10:00:00".
+        if start_dt.tzinfo is None:
+            start_dt = start_dt.replace(tzinfo=timezone.utc)
+        if end_dt.tzinfo is None:
+            end_dt = end_dt.replace(tzinfo=timezone.utc)
+
         if end_dt <= start_dt:
             raise ValueError("End time must be after start time.")
 

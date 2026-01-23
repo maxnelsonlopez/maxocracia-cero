@@ -377,10 +377,10 @@
 ## 📈 Métricas Globales
 
 ### Progreso General
-- **Capítulos totales**: 15 + Resumen Ejecutivo = 16
-- **Capítulos refinados**: 0
+- **Capítulos totales**: 18 + Resumen Ejecutivo = 19
+- **Capítulos refinados**: 3 (Cap 16, 17, 18)
 - **Capítulos en progreso**: 0
-- **Sesiones completadas**: 0
+- **Sesiones completadas**: 3
 - **Sesiones planificadas**: ~50
 
 ### Objetivos

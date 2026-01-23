@@ -64,12 +64,6 @@ def test_balance_and_transfer(client):
     a = seed_user(db_path, "a@example.test", "A")
     b = seed_user(db_path, "b@example.test", "B")
 
-    # initial balances 0
-    resp = client.get(f"/maxo/{a}/balance")
-    assert resp.status_code == 200
-    data = resp.get_json()
-    assert data["balance"] == 0
-
     # login as A to get token
     resp = client.post(
         "/auth/login", json={"email": "a@example.test", "password": "Password1"}
@@ -78,6 +72,14 @@ def test_balance_and_transfer(client):
     data = resp.get_json()
     token = data.get("access_token")
     assert token is not None, f"No se recibió access_token en la respuesta: {data}"
+
+    # initial balances 0 (requires auth)
+    resp = client.get(
+        f"/maxo/{a}/balance", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["balance"] == 0
 
     # credit A with 10 to allow the transfer
     conn = sqlite3.connect(db_path)

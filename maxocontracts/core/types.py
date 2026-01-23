@@ -130,6 +130,16 @@ class Wellness:
             return "emergency"
 
 
+# ---------------------------------------------------------------------------
+# Backward-compatibility aliases
+# ---------------------------------------------------------------------------
+# NOTE:
+# Históricamente este índice se llamó `Gamma` (γ) en el MVP y en documentación.
+# Se renombró a `Wellness` para evitar ambigüedad con γ como exponente de precio.
+# Mantenemos el alias para no romper ejemplos/documentos externos.
+Gamma = Wellness
+
+
 @dataclass
 class SDV:
     """

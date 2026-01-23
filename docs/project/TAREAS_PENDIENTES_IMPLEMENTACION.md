@@ -50,7 +50,7 @@
 - [ ] **Especificar 5 Bloques Core en Solidity**
   - [ ] `ConditionBlock.sol`: Condiciones si-entonces verificables
   - [ ] `ActionBlock.sol`: Ejecutar transferencias/accesos
-  - [ ] `GammaProtectorBlock.sol`: Monitoreo de γ (índice de bienestar)
+  - [ ] `WellnessProtectorBlock.sol`: Monitoreo bienestar/γ (índice de bienestar)
   - [ ] `SDVValidatorBlock.sol`: Validación de Suelo de Dignidad Vital
   - [ ] `ReciprocityBlock.sol`: Verificación de balance VHV
 
@@ -88,7 +88,7 @@
 ### Semana 5-8: Validación Experimental (Febrero 20 - Marzo 19, 2026)
 
 - [ ] **Completar 5 Bloques**
-  - [ ] `GammaProtectorBlock.sol` + tests
+  - [ ] `WellnessProtectorBlock.sol` + tests
   - [ ] `SDVValidatorBlock.sol` + tests
   - [ ] Integración completa y auditoría
 

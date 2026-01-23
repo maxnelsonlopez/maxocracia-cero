@@ -14,11 +14,11 @@ import os
 # Añadir path del proyecto
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from maxocontracts.core.types import VHV, SDV, Participant, ContractTerm, Gamma
+from maxocontracts.core.types import VHV, SDV, Participant, ContractTerm, Wellness
 from maxocontracts.core.contract import MaxoContract
 from maxocontracts.core.axioms import AxiomValidator
 from maxocontracts.blocks.condition import ConditionBlock, CommonConditions
-from maxocontracts.blocks.gamma_protector import GammaProtectorBlock
+from maxocontracts.blocks.gamma_protector import WellnessProtectorBlock
 from maxocontracts.blocks.reciprocity import ReciprocityBlock
 from maxocontracts.oracles.synthetic import SyntheticOracle
 
@@ -42,17 +42,17 @@ def create_simple_loan():
     alice = Participant(
         id="alice-001",
         name="Alice",
-        gamma_current=Gamma(value=Decimal("1.2"))  # Floreciendo
+        wellness_current=Wellness(value=Decimal("1.2"))  # Floreciendo
     )
     
     bob = Participant(
         id="bob-001", 
         name="Bob",
-        gamma_current=Gamma(value=Decimal("1.1"))  # Neutral-positivo
+        wellness_current=Wellness(value=Decimal("1.1"))  # Neutral-positivo
     )
     
-    print(f"   - {alice.name}: γ = {alice.gamma_current.value}")
-    print(f"   - {bob.name}: γ = {bob.gamma_current.value}")
+    print(f"   - {alice.name}: γ = {alice.wellness_current.value}")
+    print(f"   - {bob.name}: γ = {bob.wellness_current.value}")
     print()
     
     # 2. Crear contrato
@@ -148,21 +148,21 @@ def create_simple_loan():
     print("9. Simulando escenario de retractación...")
     
     # Bob tiene crisis - γ cae
-    bob.update_gamma(Decimal("0.7"))
-    print(f"   Bob γ actualizado: {bob.gamma_current.value} (crítico)")
+    bob.update_wellness(Decimal("0.7"))
+    print(f"   Bob γ actualizado: {bob.wellness_current.value} (crítico)")
     
-    # Verificar con GammaProtector
-    protector = GammaProtectorBlock()
+    # Verificar con protector de bienestar
+    protector = WellnessProtectorBlock()
     check = protector.check([alice, bob])
     
     if check.should_trigger_retraction:
-        print("   ⚠️ GammaProtector recomienda retractación")
+        print("   ⚠️ Protector de Bienestar recomienda retractación")
         
         # Evaluar retractación con oráculo
         retraction_response = oracle.evaluate_retraction(
             contract_id=contract.contract_id,
             reason="gamma_below_threshold",
-            evidence={"current_gamma": str(bob.gamma_current.value)}
+            evidence={"current_gamma": str(bob.wellness_current.value)}
         )
         
         print(f"   Oráculo: {retraction_response.reasoning}")

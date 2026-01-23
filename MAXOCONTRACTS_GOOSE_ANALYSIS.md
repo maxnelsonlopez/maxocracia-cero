@@ -92,7 +92,7 @@ mínima                          verificado
 **Bloques base para Q1 2026**:
 - ConditionBlock (si-entonces)
 - ActionBlock (ejecutar)
-- GammaProtectorBlock (monitoreo sufrimiento)
+- WellnessProtectorBlock (monitoreo bienestar/γ)
 - SDVValidatorBlock (dignidad mínima)
 - ReciprocityBlock (intercambio justo)
 

@@ -2576,7 +2576,7 @@ A diferencia de los contratos convencionales, los MaxoContracts se construyen co
 |--------|---------|------------------|
 | **ConditionBlock** | Evalúa precondiciones para activación | T4 (Materialización) |
 | **ActionBlock** | Ejecuta transformaciones con reversibilidad | T10 (Responsabilidad) |
-| **GammaProtectorBlock** | Monitorea índice γ y activa alertas | T7 (Minimizar Daño) |
+| **WellnessProtectorBlock** | Monitorea bienestar (γ) y activa alertas | T7 (Minimizar Daño) |
 | **SDVValidatorBlock** | Valida que ninguna parte caiga bajo SDV | INV2 (SDV Respetado) |
 | **ReciprocityBlock** | Verifica balance VHV entre partes | T9 (Reciprocidad Justa) |
 

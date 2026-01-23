@@ -36,7 +36,7 @@ Los **MaxoContracts** son contratos inteligentes éticos que constituyen la **Ca
 ### 3. Los 5 Bloques Core
 1. **ConditionBlock** (si-entonces)
 2. **ActionBlock** (ejecutar)
-3. **GammaProtectorBlock** (monitoreo γ)
+3. **WellnessProtectorBlock** (monitoreo bienestar/γ)
 4. **SDVValidatorBlock** (dignidad mínima)
 5. **ReciprocityBlock** (intercambio justo)
 - **Capítulo sugerido:** 17.3 (bloques fundamentales)

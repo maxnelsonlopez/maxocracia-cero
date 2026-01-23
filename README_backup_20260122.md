@@ -131,7 +131,7 @@ Copia del README actual antes de modificar
 126: **Bloques Core Propuestos:**
 127: 1. ConditionBlock (si-entonces)
 128: 2. ActionBlock (ejecutar acción)
-129: 3. GammaProtectorBlock (monitorear sufrimiento)
+129: 3. WellnessProtectorBlock (monitorear bienestar/γ)
 130: 4. SDVValidatorBlock (garantizar dignidad mínima)
 131: 5. ReciprocityBlock (intercambio justo verificable)
 132: 

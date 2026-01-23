@@ -44,7 +44,7 @@ Si [evento_verificable] entonces [acción]
 Ejecutar [transferencia/acceso/servicio]
 ```
 
-### 3. **GammaProtectorBlock** (Monitoreo γ)
+### 3. **WellnessProtectorBlock** (Monitoreo bienestar/γ)
 ```
 Si [sufrimiento > umbral] entonces [retractar automáticamente]
 ```
