@@ -4,6 +4,79 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-01-22 — MaxoContracts MVP: Implementación Python de Contratos Inteligentes Éticos
+
+### Añadido
+- **MaxoContracts Python Package** (`maxocontracts/`): Implementación completa del MVP para contratos inteligentes éticos.
+
+- **Core Types** (`maxocontracts/core/types.py`):
+  - `VHV`: Vector de Huella Vital con validación axiomática (T >= 0, V >= 0, R >= 0)
+  - `Gamma`: Índice de bienestar con detección de sufrimiento y niveles de severidad
+  - `SDV`: Suelo de Dignidad Vital con validación multi-dimensional
+  - `MaxoAmount`: Cantidad en Maxos con trazabilidad de cálculo
+  - `Participant`: Participante con estado γ y SDV actual
+  - `ContractTerm`: Término con aceptación individual por participante
+
+- **Axiom Validators** (`maxocontracts/core/axioms.py`):
+  - `validate_t1_finitud`: Verifica finitud del TVI
+  - `validate_t2_igualdad_temporal`: Valida igualdad temporal con tolerancia
+  - `validate_t7_minimizar_dano`: Detecta aumento de sufrimiento (V)
+  - `validate_t9_reciprocidad`: Verifica balance VHV entre partes
+  - `validate_t13_transparencia`: Confirma auditabilidad
+  - `validate_invariant_gamma`: Invariante 1 (γ ≥ 1)
+  - `validate_invariant_sdv`: Invariante 2 (SDV respetado)
+  - `validate_invariant_retractability`: Invariante 4
+
+- **5 Bloques Modulares** (`maxocontracts/blocks/`):
+  - `ConditionBlock`: Si-entonces con lenguaje civil y predicados personalizables
+  - `ActionBlock`: Transformación de contexto con reversibilidad para retractación
+  - `GammaProtectorBlock`: Monitoreo γ con alertas multi-nivel (warning/critical/emergency)
+  - `SDVValidatorBlock`: Validación multi-dimensional con clasificación de severidad
+  - `ReciprocityBlock`: Análisis de balance VHV con sugerencias de ajuste
+
+- **MaxoContract Engine** (`maxocontracts/core/contract.py`):
+  - Ciclo de vida: DRAFT → PENDING → ACTIVE → EXECUTED/RETRACTED
+  - Aceptación término-a-término (no "todo o nada")
+  - Validación axiomática en cada transición
+  - Log de eventos auditable (T13: Transparencia)
+  - Generación de resumen en lenguaje civil
+
+- **Synthetic Oracle** (`maxocontracts/oracles/synthetic.py`):
+  - Modo simulación para testing sin API calls
+  - Validación de contratos con heurísticas
+  - Evaluación de retractaciones por γ y evidencia
+  - Query/Response logging para auditoría
+
+- **Documentación Conceptual** (`docs/architecture/maxocontracts/FUNDAMENTOS_CONCEPTUALES.md`):
+  - Axiomas vinculantes (T1-T15 mapeados a bloques)
+  - 4 Invariantes del sistema
+  - Modelo de estados con transiciones
+  - Semántica formal de los 5 bloques
+  - Protocolo de composición
+  - Protocolo de retractación ética
+
+- **Tests** (`tests/test_maxocontracts/`):
+  - `test_types.py`: 15 tests para VHV, Gamma, SDV, Participant, ContractTerm
+  - `test_axioms.py`: 18 tests para validadores axiomáticos
+
+- **Ejemplo** (`maxocontracts/examples/simple_loan.py`):
+  - Demostración completa de préstamo simple entre dos participantes
+  - Creación, validación, aceptación, activación y retractación
+
+### Verificado
+- Import de todos los módulos: ✅
+- VHV, Gamma, SDV, Participant: Funcionando correctamente
+- Axiom Validators T1, T2, T7, T9, INV1, INV2: Pasando
+
+### Notas Técnicas
+- **Fundamento conceptual primero**: Documento de fundamentos define semántica formal antes del código
+- **Implementación Python sencilla**: MVP sin dependencies externas complejas
+- **Compatible con Solidity futuro**: Interfaces diseñadas para mapear a smart contracts
+- **Modo simulación**: Oráculo sintético permite testing sin API de producción
+- **Lenguaje civil**: Todos los bloques generan descripciones en español ≤20 palabras
+- Total de código: ~2,500 líneas Python + ~800 líneas documentación conceptual
+- Contribución: Claude (Anthropic - Oráculo Sintético)
+
 ## 2026-01-22 — Integración de MicroMaxocracia y MaxoContracts: Capas 3 y 4 de la Arquitectura Maxocrática
 
 ### Añadido

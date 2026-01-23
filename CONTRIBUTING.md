@@ -118,17 +118,22 @@ La documentación es clave para el proyecto. Puedes ayudar a mejorarla de varias
 
 ```
 maxocracia-cero/
-├── app/                  # Código fuente de la aplicación
+├── app/                  # Código fuente de la aplicación Flask
 │   ├── __init__.py
 │   ├── auth.py          # Autenticación y autorización
 │   ├── models.py        # Modelos de datos
 │   ├── routes/          # Rutas de la API
 │   └── utils/           # Utilidades y helpers
+├── maxocontracts/       # MaxoContracts - Contratos Inteligentes Éticos
+│   ├── core/            # Tipos base, axiomas, motor de contratos
+│   ├── blocks/          # 5 bloques modulares
+│   ├── oracles/         # Oráculos sintéticos y humanos
+│   └── examples/        # Ejemplos de uso
 ├── tests/               # Pruebas automatizadas
 ├── docs/                # Documentación
 ├── migrations/          # Migraciones de base de datos
 ├── scripts/             # Scripts de utilidad
-└── config/              # Archivos de configuración
+└── simulator/           # Nexus Simulator
 ```
 
 ### Convenciones de Código
