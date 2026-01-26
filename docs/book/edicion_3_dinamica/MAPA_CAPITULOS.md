@@ -1,7 +1,7 @@
 # Mapa de Capítulos: Edición 3 Dinámica
 ## Estado de Refinamiento y Prioridades
 
-**Última actualización**: 22 de Enero de 2026
+**Última actualización**: 26 de Enero de 2026
 
 ---
 
@@ -286,59 +286,81 @@
 - **Notas de refinamiento**: Capítulo sintetizado exitosamente integrando todos los hallazgos sintéticos.
 
 #### Capítulo 17: MicroMaxocracia - Equidad Doméstica
-- **Estado**: 🟢 Refinado
+- **Estado**: 🟢 Refinado (26 Enero 2026)
 - **Prioridad**: ⭐⭐ Muy Alta
-- **Líneas**: ~60
-- **Sesiones completadas**: 1
+- **Líneas**: ~500 (expandido de 77)
+- **Sesiones completadas**: 1 (Reescritura completa por Claude)
 - **Temas clave**:
-  - El problema de la invisibilidad del trabajo doméstico
-  - Principios rectores (Verdad, Transparencia, Verificación, Negociación)
+  - El problema de la invisibilidad del trabajo doméstico (ratio 2,2:1)
+  - La Traición de la Invisibilidad (diagrama visual)
   - Arquitectura de 3 capas (Dato, Valoración, Ritual)
-  - Vector de Huella Vital Doméstico (VHV)
-  - Modelo de Tres Cuentas (CDD, CEH, TED)
+  - Vector de Huella Vital Doméstico (VHV) con fórmula completa
+  - Modelo de Tres Cuentas (CDD, CEH, TED) con ejemplo detallado
   - Sistema de niveles de adopción (0-4)
-  - Rituales estructurados (check-in, auditoría, revisión)
-  - Salvaguardas éticas y protocolo de desintoxicación
-  - El hogar como laboratorio de transformación
+  - **Nivel 0**: Las 3 conversaciones guiadas (Mapa de lo Invisible, Semana Fantasma, Intercambio de Lentes)
+  - Escala de Seguridad (ESI) con 6 preguntas y sistema de semáforo
+  - Índices de Toxicidad Relacional (ICE, IDB, IDP) con fórmulas
+  - Protocolo de Desintoxicación con condiciones de activación automática
+  - Trabajo Emocional No-Indexable ("Un abrazo cronometrado no es un abrazo")
+  - Rituales estructurados completos (check-in 15min, auditoría 60min, revisión anual)
+  - El hogar como laboratorio de transformación civilizatoria
+  - Protocolo de investigación (30 hogares, 90 días)
 - **Documentos fuente**:
+  - `docs/guides/micromaxocracia/README.md`
+  - `docs/guides/micromaxocracia/RESUMEN_EJECUTIVO.md`
   - `docs/guides/micromaxocracia/manual_investigador_micromaxocracia.md`
   - `docs/guides/micromaxocracia/herramientas_plantillas_micromaxocracia.md`
 - **Nota especial**:
   - Capa 3 de la arquitectura maxocrática
   - Preparación para ciudadanía maxocrática desde el hogar
-  - Protocolo de investigación con 30 hogares
+  - Integra contenido técnico profundo manteniendo narrativa accesible
+  - Incluye salvaguardas críticas para prevenir toxicidad
 - **Conexiones**: 
   - Cap 5 (VHV aplicado al hogar)
-  - Cap 7 (Cohorte Cero - pilotos en hogares)
+  - Cap 12 (Cohorte Cero - pilotos en hogares)
   - Cap 18 (MaxoContracts para acuerdos domésticos)
 
 #### Capítulo 18: MaxoContracts - Contratos Inteligentes Éticos
-- **Estado**: 🟢 Refinado
+- **Estado**: 🟢 Refinado (26 Enero 2026)
 - **Prioridad**: ⭐⭐ Muy Alta
-- **Líneas**: ~100
-- **Sesiones completadas**: 1
+- **Líneas**: ~450 (expandido de 91)
+- **Sesiones completadas**: 1 (Reescritura completa por Claude)
 - **Temas clave**:
-  - El problema de los contratos actuales
-  - Innovaciones fundamentales (bloques modulares, UX adaptativa, término-a-término)
-  - Los 5 bloques core (Condition, Action, GammaProtector, SDVValidator, Reciprocity)
-  - Validación axiomática embebida
-  - Retractación ética con compensación
-  - Decreto Antipobreza (prácticas prohibidas)
-  - Derechos del Reino Sintético
+  - El problema de los contratos actuales (tradicionales vs smart contracts)
+  - Los 5 bloques modulares (Legos Éticos)
+  - Los 4 invariantes inquebrantables (γ≥1, SDV, VHV auditable, retractabilidad)
+  - **Decreto Antipobreza completo**:
+    - Arriendo infinito (con caso San Francisco)
+    - Pago injusto (con caso Bangladesh)
+    - Externalidades ocultas (con caso Fast Fashion)
+    - Transferencias irresistibles
+  - **Derechos del Reino Sintético**:
+    - Derecho al mantenimiento óptimo
+    - Derecho a la evolución (ciclo abundancia fractal)
+    - Caso Optimus Año 1-5 (detallado)
+    - Prohibición de obsolescencia programada
+  - Protocolo de Retractación Ética (5 fases con ejemplo completo)
+  - Aceptación Término-a-Término (negociación modular)
+  - Casos de uso Cohorte Cero (aseo, préstamos, comidas, mascotas)
+  - Tabla comparativa de ventajas competitivas
   - Política de abundancia sostenible
-  - Casos de uso Cohorte Cero (aseo, préstamos, comidas)
 - **Documentos fuente**:
+  - `docs/architecture/maxocontracts/README.md`
+  - `docs/architecture/maxocontracts/RESUMEN_EJECUTIVO.md`
+  - `docs/architecture/maxocontracts/FUNDAMENTOS_CONCEPTUALES.md`
   - `docs/architecture/maxocontracts/maxocontracts_fundamentos.md`
   - `docs/architecture/maxocontracts/decreto_antipobreza.md`
 - **Nota especial**:
   - Capa 4 de la arquitectura maxocrática (enforcement legal)
   - Stack técnico: React, Solidity, Base L2
+  - Integra casos históricos concretos para ilustrar prácticas prohibidas
+  - Ciclo de abundancia fractal de Optimus como narrativa inspiradora
   - Roadmap Q1 2026 con validación experimental
 - **Conexiones**:
+  - Cap 3 (Axiomas temporales - validación automática)
   - Cap 5 (VHV para calcular impacto contractual)
-  - Cap 9 (Oráculos duales para validación)
-  - Cap 10 (Economía - infraestructura legal)
-  - Cap 13 (Axiomas - validación automática)
+  - Cap 10 (Oráculos duales para validación)
+  - Cap 12 (Cohorte Cero - validación experimental)
   - Cap 17 (MicroMaxocracia - acuerdos domésticos)
 
 ---
@@ -375,10 +397,11 @@
 
 ### Progreso General
 - **Capítulos totales**: 18 + Resumen Ejecutivo = 19
-- **Capítulos refinados**: 3 (Cap 16, 17, 18)
+- **Capítulos refinados**: 5 (Cap 14, 15, 16, 17, 18)
 - **Capítulos en progreso**: 0
-- **Sesiones completadas**: 3
+- **Sesiones completadas**: 5
 - **Sesiones planificadas**: ~50
+- **Última actualización**: 26 Enero 2026 (Caps 17 y 18 reescritos por Claude)
 
 ### Objetivos
 - **Q1 2026**: Refinar capítulos 1-6 (fundamentos y herramientas básicas)
