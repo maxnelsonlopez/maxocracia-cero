@@ -1,61 +1,278 @@
 # Capítulo 8
-# Oráculos Dinámicos Humanos: La Arquitectura del Juicio
+# El Maxo: Arquitectura de la Moneda Vital
 
-## 8.1 Guardianes de la Coherencia
-En la era de la inteligencia artificial, es tentador delegar el gobierno a algoritmos eficientes. Sin embargo, la Maxocracia rechaza la tecnocracia pura. Las decisiones sobre el valor vital no son problemas matemáticos a resolver, sino dilemas éticos a navegar. ¿Cómo ponderamos el bienestar de hoy contra el de mañana? ¿Cómo equilibramos la libertad creativa con la sostenibilidad estricta?
+> **Nota editorial:** Edición 3.2 — Revisada el 26 de enero de 2026 en colaboración con Claude (Anthropic), integrando los documentos "Playbook de la Cohorte Cero", "MicroMaxocracia" y "MaxoContratos".
 
-Estas preguntas requieren algo que las máquinas no tienen: **experiencia vivida**. Requieren dolor, esperanza, empatía y la capacidad de imaginar futuros no lineales. Por eso, el corazón del sistema maxocrático es híbrido.
+## 8.1 Más Allá del Dinero Fiduciario
 
-Los **Oráculos Dinámicos Humanos** no son políticos tradicionales. No buscan poder ni votos basados en promesas. Son servidores seleccionados por competencia, auditados en tiempo real y diseñados para trabajar en simbiosis con la inteligencia sintética. Su misión no es mandar, sino interpretar la verdad vital que los datos revelan.
+El dinero actual es una promesa de deuda. Se imprime a voluntad de los bancos centrales y su valor depende de la confianza (o la coerción) del Estado. No tiene anclaje en la realidad física.
 
-## 8.2 Principios de Diseño Institucional
-Para evitar los vicios de la política clásica (corrupción, populismo, cortoplacismo), los Oráculos Humanos operan bajo cinco principios de ingeniería social:
+El **Maxo** es diferente. No es una moneda de deuda; es un **título de valor vital verificado**.
+Cada Maxo en circulación representa una unidad de coherencia sistémica que ya ha sido creada o preservada. No se puede "imprimir" Maxos sin crear valor real (TVI) o regenerar vida (V).
 
-1.  **Meritocracia Funcional:** El poder de decisión no es un cheque en blanco. Se gana decisión a decisión. Un Oráculo novato tiene menos peso de voto que uno experto, y ese peso fluctúa según su rendimiento (precisión axiomática).
-2.  **Transparencia Radical:** No existen reuniones a puerta cerrada. Cada voto, cada argumento y cada dato utilizado por un Oráculo es público y trazable en el blockchain.
-3.  **Separación de Poderes Fractal:** En lugar de tres ramas estáticas (Ejecutivo, Legislativo, Judicial), la Maxocracia utiliza múltiples **Cámaras Especializadas** (Locales, Nacionales, Supremas) que se auditan mutuamente en tiempo real.
-4.  **Colaboración Híbrida Obligatoria:** Ningún humano decide solo. Toda decisión humana debe pasar por una "Validación de Coherencia" sintética para detectar sesgos lógicos o fallas de cálculo. Si el humano insiste en una decisión "ilógica", debe justificarla con argumentos éticos superiores.
-5.  **Responsabilidad Retroactiva:** Si una decisión tomada hoy causa daño vital en 5 años, los Oráculos responsables (y su reputación) responden por ello. La impunidad por incompetencia se elimina.
+El Maxo es la primera moneda diseñada no para facilitar el intercambio ciego, sino para **revelar el costo ontológico** de cada transacción.
 
-## 8.3 Niveles de Confianza: Una Carrera de Integridad
-Nadie nace siendo un Oráculo Supremo. La arquitectura define una escalera de confianza gradual que protege al sistema de la incompetencia y la captura:
+---
 
-*   **Nivel 0 (Observador):** Ciudadanos en entrenamiento. Tienen acceso a todos los datos pero no votan. Aprenden los Axiomas.
-*   **Nivel 1 (Proponente):** Pueden sugerir decisiones simples. Requieren validación sintética del 100%. Límite: 1 decisión al día.
-*   **Nivel 2 (Validador Asistido):** Participan en consensos locales. Su voto vale un 30% del peso total. Colaboran con IAs asignadas.
-*   **Nivel 3 (Oráculo Equilibrado):** Co-deciden con pares sintéticos. Peso de voto: 60%. Lideran equipos mixtos.
-*   **Nivel 4 (Oráculo Senior):** Liderazgo en casos de alta complejidad ética donde la IA no puede computar una solución clara. Su "intuición experta" es valorada como dato de alta calidad.
+## 8.2 El Maxo Debe Construirse
 
-## 8.4 Estructura Organizacional: Las Tres Cámaras
-La función de los Oráculos se distribuye en tres tipos de órganos, replicados a escala local, nacional y global:
+A diferencia de las criptomonedas que nacen por decreto técnico, el Maxo emerge de la **práctica social validada**. No existe un "Maxo Central" que decida crear el sistema. El Maxo se construye desde abajo, a través de comunidades que experimentan con sus principios.
 
-1.  **Cámara de Interpretación:** Los filósofos del sistema. Traducen los axiomas abstractos a reglas concretas ante situaciones nuevas (ej. ¿Cómo aplicar el SDV a una nueva tecnología genética?).
-2.  **Cámara de Aplicación:** Los ejecutivos. Toman decisiones operativas sobre asignación de recursos (Maxos), permisos y resolución de conflictos diarios usando el VHV.
-3.  **Cámara de Verificación:** Los auditores. Revisan constantemente que las otras dos cámaras no se desvíen de la verdad. Tienen poder de veto si detectan incoherencia axiomática.
+La Maxocracia propone **tres caminos convergentes** para llegar al Maxo:
 
-## 8.5 El Proceso de Toma de Decisiones: Consenso Dual
-¿Cómo decide un Oráculo Humano? No levanta la mano. Sigue un protocolo de **Ingeniería de Consenso**:
+```
+                    ┌────────────────────┐
+                    │       MAXO         │
+                    │  (Moneda Vital)    │
+                    └────────────────────┘
+                             ▲
+           ┌─────────────────┼─────────────────┐
+           │                 │                 │
+    ┌──────┴──────┐   ┌──────┴──────┐   ┌──────┴──────┐
+    │  CAMINO 1   │   │  CAMINO 2   │   │  CAMINO 3   │
+    │ Cohorte     │   │ Micro-      │   │ Maxo-       │
+    │ Cero        │   │ Maxocracia  │   │ Contratos   │
+    └─────────────┘   └─────────────┘   └─────────────┘
+    11 personas       1 hogar           1 contrato
+    90 días           Equidad doméstica  5 bloques
+```
 
-1.  **Fase de Propuesta:** El Oráculo Humano analiza el caso, filtrado de ruido por su contraparte sintética.
-2.  **Fase de Simulación:** Antes de decidir, la IA simula las consecuencias de la decisión en el Tiempo Vital (TVI) y la Huella Vital (VHV) a 1, 5 y 10 años.
-3.  **Fase de Juicio:** El Humano evalúa la simulación. ¿Es aceptable el costo vital? ¿Es justa la distribución? Aquí aporta la ética que la máquina no tiene.
-4.  **Fase de Consenso:** La decisión se vota en red. Si hay discrepancia entre la lógica sintética y la intuición humana, se escala a un Nivel 4 para arbitraje ético.
+Estos caminos no son excluyentes; son **fractales complementarios** que permiten validar los principios maxocráticos en diferentes escalas y contextos.
 
-Este proceso elimina el "voto por instinto" y lo reemplaza por el "voto informado por simulación".
+---
 
-## 8.6 Selección y Rotación: Inmunidad a la Captura
-Para evitar que los Oráculos se conviertan en una casta oligárquica:
-*   **Sorteo Cualificado:** En los niveles bajos, los ciudadanos son seleccionados por sorteo (como jurados), tras pasar pruebas de competencia básica.
-*   **Ascenso por Mérito:** Solo se sube de nivel demostrando coherencia axiomática sostenida. No hay campañas políticas, solo hojas de vida auditadas.
-*   **Rotación Forzosa:** Nadie se queda en el poder para siempre. Los mandatos son finitos y escalonados para preservar la memoria institucional sin permitir el enquistamiento.
+## 8.3 Camino 1: La Cohorte Cero (El Experimento Bogotá)
 
-## 8.7 Interfaz Humano-Sintética: Simbiosis Cognitiva
-El mayor desafío es la limitación cognitiva humana (fatiga, sesgo, lentitud). La arquitectura incluye sistemas de protección:
-*   **Detector de Sesgos:** Si un Oráculo muestra patrones de sesgo (ej. favorecer siempre a su región), el sistema le alerta y sugiere corrección.
-*   **Calibrador de Velocidad:** El sistema ajusta el flujo de decisiones al estado mental del humano. Si detecta fatiga, bloquea decisiones críticas.
-*   **Traductor de Complejidad:** La IA resume millones de datos en narrativas comprensibles para que el humano pueda ejercer su juicio sin ahogarse en información.
+La **Cohorte Cero** es el laboratorio donde la teoría se encuentra con la experiencia humana real.
 
-## 8.8 Síntesis: La Humanidad como Árbitro Final
-Los Oráculos Dinámicos Humanos son la garantía de que la Maxocracia sigue siendo un sistema *para* la vida. Mientras que las IAs optimizan la eficiencia, los humanos custodian el **sentido**.
+### Principio Rector
+> "No buscamos la perfección, buscamos la verdad de la experiencia. Somos científicos de nuestra propia existencia."
 
-En este modelo, el "político" deja de ser un líder carismático y se convierte en un **ingeniero de la coherencia social**, un servidor público cuya autoridad emana, única y exclusivamente, de su capacidad demostrada para proteger la dignidad vital de todos.
+### Estructura
+
+| Aspecto | Especificación |
+|---------|---------------|
+| **Participantes** | 11 personas comprometidas |
+| **Duración** | 90 días (3 fases de 30 días) |
+| **Presupuesto** | $50 USD para herramientas |
+| **Herramientas** | Discord/Telegram + Google Sheets |
+| **Objetivo** | Validar VHV en condiciones reales |
+
+### Las 3 Fases
+
+**Fase 1: El Despertar Ontológico (Mes 1)**
+- Pacto de la Cohorte (Honestidad Radical, No-Penalización, Confidencialidad)
+- **Diario de Tiempo Vital (TVI Log)**: Cada miembro registra sus horas en 3 categorías:
+  - T_mantenimiento (básicos para funcionar)
+  - T_inversión (construir capitales)
+  - T_fuga (tiempo sin intención)
+- Auditoría del Nido (SDV Checklist semanal)
+
+**Fase 2: La Contabilidad de la Existencia (Mes 2)**
+- **El VHV de mi Almuerzo**: Calcular el VHV de una comida diaria
+- **Génesis del Maxo Beta**: Asignación inicial de 1.000 Mβ (tokens de práctica)
+- **Primer Mercado de Favores**: Intercambios reales valorados en Maxo Beta
+  - "¿Alguien me ayuda a mover un mueble? Ofrezco 20 Mβ."
+  - "Reviso un documento por 15 Mβ."
+
+**Fase 3: La Gobernanza Coherente (Mes 3)**
+- **Fondo Común**: 10% de Maxos Beta para objetivos colectivos
+- **Propuesta Ponderada**: Decisiones por consenso basado en coherencia axiomática
+- **Retrospectiva**: Informe de Hallazgos v1.0
+
+### Métricas de Éxito
+- 80% participación sostenida
+- ≥5 descubrimientos inesperados documentados
+- Innovaciones metodológicas propuestas por la cohorte
+
+---
+
+## 8.4 Camino 2: La MicroMaxocracia (Equidad Doméstica)
+
+La **MicroMaxocracia** aplica los principios maxocráticos al hogar. Es preparación para ciudadanía maxocrática.
+
+### El Problema
+- Mujeres: 12.6 horas/semana en tareas domésticas
+- Hombres: 5.7 horas/semana
+- Ratio: 2.2 a 1
+- Al ritmo actual: equidad plena recién en ~2066
+
+> "Lo que no se mide no se valora. Lo que no se valora no cambia."
+
+### El Modelo de Tres Cuentas
+
+```
+Equilibrio = α×(CDD/total) + β×(CEH/total) + γ×(TED/total)
+
+Donde:
+α = 0.6 (peso trabajo doméstico directo)
+β = 0.3 (peso contribución económica)
+γ = 0.1 (peso tiempo disponible)
+```
+
+| Cuenta | Descripción |
+|--------|-------------|
+| **CDD** | Contribuciones Domésticas Directas (medidas en VHV) |
+| **CEH** | Contribuciones Económicas al Hogar (% ingresos aportados) |
+| **TED** | Tiempo de Energía Disponible (horas después trabajo/descanso) |
+
+### Niveles de Adopción
+
+| Nivel | Descripción | Herramientas |
+|-------|-------------|--------------|
+| **0: Concienciación** | 3 conversaciones de 15 min | Sin medición |
+| **1: Registro Informal** | Documentar sin ponderaciones | App simple |
+| **2: Registro Sistemático** | Ledger + ponderaciones consensuadas | VHV calculado |
+| **3: Auditoría Estructurada** | Verificaciones cruzadas, ajustes | Mediación si necesario |
+| **4: Optimización Digital** | Sensores, IA predictiva | Full stack |
+
+### Impacto
+Los niños que crecen en hogares MicroMaxocráticos aprenden que:
+- Las decisiones se basan en datos, no en poder
+- La transparencia reduce conflictos
+- El trabajo invisible debe reconocerse
+
+---
+
+## 8.5 Camino 3: Los MaxoContratos (Contratos Inteligentes Éticos)
+
+Los **MaxoContratos** son la infraestructura legal de la economía maxocrática.
+
+### El Problema con Contratos Actuales
+
+| Contratos Tradicionales | Smart Contracts | MaxoContratos |
+|------------------------|-----------------|---------------|
+| Jerga ofuscada | Técnicos/inaccesibles | Lenguaje civil + código |
+| Rígidos (litigios) | Inmutables | Retractación ética |
+| Post-conflicto | Amorales | Validación axiomática |
+
+> "No puedes crear un contrato explotador aunque lo intentes."
+
+### Los 5 Bloques Fundamentales
+
+Los usuarios **no escriben código**. Arrastran bloques pre-validados:
+
+```
+1. ConditionBlock:     Si [evento_verificable] entonces [acción]
+2. ActionBlock:        Ejecutar [transferencia/acceso/servicio]
+3. WellnessProtector:  Si [sufrimiento > umbral] entonces [retractar]
+4. SDVValidator:       Validar que [ninguna parte cae bajo SDV]
+5. ReciprocityBlock:   Verificar que [intercambio es balanceado en VHV]
+```
+
+### Decreto Antipobreza: Prácticas Prohibidas
+
+| Práctica | Prohibición | Alternativa Maxocrática |
+|----------|-------------|------------------------|
+| **Arriendo Infinito** | Cobro sin transferencia tras recuperar costo | Leasing con transferencia automática |
+| **Pago Injusto** | Remuneración bajo SDV | SDV como piso salarial |
+| **Externalidades Ocultas** | Costos no reflejados | Contabilidad VHV obligatoria |
+| **Transferencias Irreversibles** | Sin retractación ante daño | Retractación ética validada |
+
+### Retractación Ética
+Los contratos pueden retractarse si emergen hechos vitales nuevos:
+1. **Solicitud** (usuario presenta evidencia)
+2. **Pre-Validación** (Oráculo Sintético, <5 segundos)
+3. **Validación Humana** (Oráculo Humano, 24-48h)
+4. **Ejecución Automática** (compensación + renegociación)
+
+---
+
+## 8.6 La Función de Valoración Maxo
+
+¿Cómo se le pone precio a algo en esta economía? No lo dicta la oferta y la demanda ciega. Lo dicta una función algorítmica que procesa el Vector de Huella Vital (VHV).
+
+**La fórmula maestra:**
+$$Precio\_Maxos = \alpha \cdot T + \beta \cdot V^\gamma + \delta \cdot R \cdot (FRG \times CS)$$
+
+### Componente T: El Tiempo
+$$Valor_T = \alpha \cdot T$$
+- **T**: Tiempo Total Vital Indexado (TTVI) invertido
+- **α** (Peso del Tiempo): Parámetro de gobernanza. **α > 0 es axioma inmutable** (no se puede esclavizar a nadie gratis)
+
+### Componente V: La Vida con Exponente del Dolor
+$$Valor_V = \beta \cdot V^\gamma$$
+- **V**: Unidades de Vida Consumidas (UVC) ponderadas por consciencia
+- **β**: Peso de la vida biológica
+- **γ** (Exponente de Aversión al Sufrimiento): **γ > 1** significa que el sufrimiento crece exponencialmente
+  - Incomodidad leve → aumento lineal
+  - Tortura industrial → aumento exponencial (económicamente inviable)
+
+### Componente R: Los Recursos
+$$Valor_R = \delta \cdot R \cdot (FRG \times CS)$$
+- **R**: Cantidad física consumida
+- **FRG** (Factor Rareza Geológica): Si el litio se agota, FRG sube automáticamente
+- **CS** (Criticidad Sistémica): Litio para marcapasos = CS bajo; litio para juguete = CS alto
+
+---
+
+## 8.7 El Oráculo Dinámico y los Parámetros
+
+¿Quién decide cuánto valen α, β, γ, δ?
+
+No es un banco central opaco. Es el **Oráculo Dinámico (OD)**, un sistema híbrido:
+
+1. **Votación Comunitaria**: La sociedad decide prioridades ("¿Subimos β para proteger bosques?")
+2. **Datos en Tiempo Real**: Sensores satelitales actualizan el FRG automáticamente
+3. **Restricciones Axiomáticas**: El sistema bloquea:
+   - γ < 1 (premiar el sufrimiento)
+   - α = 0 (esclavitud)
+
+---
+
+## 8.8 Casos de Estudio: La Economía de la Verdad
+
+Aplicando la fórmula, vemos cómo el mercado se transforma:
+
+### El Huevo Industrial vs. Ético
+
+| Tipo | Costo T | Costo V | Precio Maxos |
+|------|---------|---------|--------------|
+| **Industrial** | Bajo (automatización) | Alto (sufrimiento γ) | 45 Maxos |
+| **Ético** | Mayor (cuidado manual) | Mínimo | 12 Maxos |
+
+**Resultado**: En la Maxocracia, **lo ético es más barato** porque no arrastra la "multa ontológica" del sufrimiento.
+
+### Transporte: Avión vs. Tren
+
+| Modo | Costo R | Precio Maxos |
+|------|---------|--------------|
+| **Avión** | Alto (fósil, FRG alto) | 420 Maxos |
+| **Tren Eléctrico** | Bajo (renovable) | 85 Maxos |
+
+---
+
+## 8.9 Responsabilidad Retroactiva: El Fin de la Obsolescencia
+
+El Maxo introduce el **Precio Dinámico Retroactivo**:
+
+Cuando compras una nevera, pagas un precio basado en su duración prometida (ej. 10 años).
+- Si se rompe a los 2 años → el fabricante **devuelve la diferencia** en Maxos
+- Si dura 20 años → el fabricante recibe **bonificación automática**
+
+Esto alinea, por primera vez en la historia, el incentivo de lucro con la durabilidad real.
+
+---
+
+## 8.10 Mecanismos Anti-Acaparamiento
+
+Para evitar la desigualdad extrema:
+
+1. **Impuesto Progresivo al Acaparamiento**: El costo del recurso n+1 es mayor que el del recurso n
+2. **Gravamen de Custodia**: Si tienes un recurso crítico y no lo usas productivamente, pagas por "retener potencial vital"
+
+---
+
+## 8.11 Síntesis: Una Moneda que Piensa
+
+El Maxo no es dinero tonto. Es dinero inteligente, ético y conectado a la tierra.
+
+Al adoptar el Maxo, no solo cambiamos cómo compramos; cambiamos cómo valoramos. Pasamos de una economía de extracción (donde gana quien más saca) a una **economía de coherencia** (donde gana quien más vida preserva).
+
+Los tres caminos —Cohorte Cero, MicroMaxocracia, MaxoContratos— son los laboratorios donde el Maxo se forja. No esperamos que el mundo adopte nuestra moneda por decreto. La construimos, la probamos, la mejoramos. Y cuando funcione a pequeña escala, escalará sola.
+
+El código está escrito. La lógica es sólida. Solo falta la voluntad de usarlo.
+
+---
+
+> **📚 Para profundizar:** Este capítulo integra los documentos técnicos *"Playbook de la Cohorte Cero"*, *"MicroMaxocracia: Sistema de Equidad Doméstica"* y *"MaxoContracts: Contratos Inteligentes Éticos"* (López Restrepo et al., 2025-2026).
