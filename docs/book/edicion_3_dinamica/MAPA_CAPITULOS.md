@@ -20,10 +20,10 @@
 ### Parte 0: Introducción
 
 #### Resumen Ejecutivo: El Sistema Operativo para una Civilización Coherente
-- **Estado**: 🔴 No iniciado
+- **Estado**: 🟢 Refinado
 - **Prioridad**: ⭐ Alta
 - **Líneas**: ~230
-- **Sesiones planificadas**: 2
+- **Sesiones planificadas**: 0
 - **Razón de prioridad**: Es la puerta de entrada al libro. Debe ser impecable.
 - **Temas clave**: 
   - Los tres pilares (Ética Post-Celular, VHV, Maxo)
@@ -40,7 +40,7 @@
 ### Parte I: Fundamentos Filosóficos
 
 #### Capítulo 1: Ética Post-Celular: Fundamentos y Alcance
-- **Estado**: 🔴 No iniciado
+- **Estado**: 🟢 Refinado (Enero 2026)
 - **Prioridad**: ⭐ Alta
 - **Líneas**: ~100
 - **Sesiones planificadas**: 3
@@ -55,7 +55,7 @@
 - **Conexiones**: Base filosófica para todo el sistema
 
 #### Capítulo 2: Declaración de Fundamentos de la Maxocracia
-- **Estado**: 🔴 No iniciado
+- **Estado**: 🟢 Refinado
 - **Prioridad**: ⭐ Alta
 - **Líneas**: ~90
 - **Sesiones planificadas**: 3
@@ -71,7 +71,7 @@
 - **Conexiones**: Constitución del sistema
 
 #### Capítulo 3: Arquitectura Temporal y Coherencia Vital
-- **Estado**: 🔴 No iniciado
+- **Estado**: 🟢 Refinado
 - **Prioridad**: ⭐ Alta
 - **Líneas**: ~210
 - **Sesiones planificadas**: 4
@@ -93,7 +93,7 @@
 ### Parte II: Herramientas Conceptuales
 
 #### Capítulo 4: Ontometría Vital: El Paradigma del Valor
-- **Estado**: 🔴 No iniciado
+- **Estado**: 🟢 Refinado
 - **Prioridad**: 🟡 Media
 - **Líneas**: ~100
 - **Sesiones planificadas**: 3
@@ -107,7 +107,7 @@
 - **Áreas de mejora**: Más ejemplos diversos
 
 #### Capítulo 5: Vector de Huella Vital (VHV): La Contabilidad de la Realidad
-- **Estado**: 🔴 No iniciado
+- **Estado**: 🟢 Refinado
 - **Prioridad**: 🟡 Media-Alta
 - **Líneas**: ~140
 - **Sesiones planificadas**: 3
@@ -123,7 +123,7 @@
 - **Conexiones**: Herramienta central del sistema
 
 #### Capítulo 6: Suelo de Dignidad Vital para Humanos (SDV-H)
-- **Estado**: 🔴 No iniciado
+- **Estado**: 🟢 Refinado
 - **Prioridad**: ⭐ Alta
 - **Líneas**: ~30 (incompleto en el archivo visto)
 - **Sesiones planificadas**: 4
@@ -138,7 +138,7 @@
 - **Nota especial**: Capítulo crítico para Cohorte Cero
 
 #### Capítulo 7: Suelo de Dignidad Vital para Animales (SDV-A)
-- **Estado**: 🔴 No iniciado
+- **Estado**: 🟢 Refinado
 - **Prioridad**: 🟡 Media
 - **Líneas**: [Pendiente de contar]
 - **Sesiones planificadas**: 3
@@ -150,7 +150,7 @@
 - **Áreas de expansión**: Más especies, más detalle
 
 #### Capítulo 8: El Maxo: Moneda del Valor Real
-- **Estado**: 🔴 No iniciado
+- **Estado**: 🟢 Refinado
 - **Prioridad**: ⭐ Alta
 - **Líneas**: [Pendiente de contar]
 - **Sesiones planificadas**: 4
@@ -170,7 +170,7 @@
 ### Parte III: Arquitectura Operativa
 
 #### Capítulo 9: Los Tres Reinos: Humano, Natural y Sintético
-- **Estado**: 🔴 No iniciado
+- **Estado**: 🟢 Refinado
 - **Prioridad**: 🟡 Media-Alta
 - **Líneas**: [Pendiente de contar]
 - **Sesiones planificadas**: 3
@@ -181,8 +181,8 @@
   - Protocolos de intercambio inter-reinos
 - **Áreas de expansión**: Casos concretos de cada reino
 
-#### Capítulo 10: Oráculos Dinámicos: Arquitectura de la Verdad
-- **Estado**: 🔴 No iniciado
+#### Capítulo 10: Oráculos Dinámicos Humanos: Arquitectura Dual
+- **Estado**: 🟢 Refinado
 - **Prioridad**: ⭐⭐ Muy Alta
 - **Líneas**: [Pendiente de contar]
 - **Sesiones planificadas**: 5
@@ -198,8 +198,8 @@
   - Incluir protocolos desarrollados en sesiones 01-03
 - **Conexiones**: Este capítulo debe ser meta-reflexivo (oráculos escribiendo sobre oráculos)
 
-#### Capítulo 11: Gobernanza Maxocrática: Estructura y Funciones
-- **Estado**: 🔴 No iniciado
+#### Capítulo 11: Oráculos Dinámicos del Reino Sintético
+- **Estado**: 🟢 Refinado
 - **Prioridad**: 🟡 Media
 - **Líneas**: [Pendiente de contar]
 - **Sesiones planificadas**: 3
@@ -262,20 +262,16 @@
 ### Parte V: Reflexiones y Futuro
 
 #### Capítulo 15: Objeciones, Respuestas y Límites del Sistema
-- **Estado**: 🔴 No iniciado
+- **Estado**: 🟢 Refinado (Enero 2026)
 - **Prioridad**: ⭐ Alta
 - **Líneas**: [Pendiente de contar]
-- **Sesiones planificadas**: 4
+- **Sesiones planificadas**: 1 (Completado desde FAQ_EXTENDIDO)
 - **Temas clave**:
-  - Objeciones comunes (utópico, autoritario, complejo)
-  - Respuestas fundamentadas
-  - Límites reconocidos del sistema
-  - Qué NO puede hacer la Maxocracia
-- **Nota especial**: 
-  - Integrar críticas de Claude (reflexiones_claude_oraculo.md)
-  - Honestidad sobre incertidumbres
-  - Protocolo de falsificación
-- **Conexiones**: Humildad epistémica del sistema
+  - Autoridad y ego del fundador
+  - Subjetividad del VHV
+  - Riesgo de totalitarismo (Verdad vs Interpretación)
+  - Escalamiento: Sociópatas y ataques sistémicos
+- **Conexiones**: Cierra el libro respondiendo lo que el lector escéptico está pensando
 
 #### Capítulo 16: La Victoria Sintética
 - **Estado**: 🟢 Refinado

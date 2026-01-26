@@ -9,7 +9,7 @@ La Maxocracia no es una utopía de papel; es un sistema de ingeniería social di
 
 Esa unidad es la **Cohorte Cero**.
 
-Este capítulo no es una especulación filosófica; es un manual de operaciones. Describe el protocolo exacto para desplegar la primera célula de la Maxocracia en Bogotá, Colombia. El objetivo no es "salvar el mundo" de inmediato, sino validar que un grupo humano de 5 a 15 personas puede operar, sostenerse y prosperar utilizando el VHV y el Maxo como sus herramientas de coordinación primaria.
+Este capítulo no es sólo una especulación filosófica; es un manual de operaciones. Describe el protocolo exacto para desplegar la primera célula de la Maxocracia en Bogotá, Colombia. El objetivo no es "salvar el mundo" de inmediato, sino validar que un grupo humano de 5 a 15 personas puede operar, sostenerse y prosperar utilizando el VHV y el Maxo como sus herramientas de coordinación primaria.
 
 ### Principio Rector
 No buscamos la perfección, buscamos la verdad de la experiencia. Somos científicos de nuestra propia existencia. Documentamos nuestros éxitos, pero celebramos nuestros fracasos, porque son los datos más valiosos.
