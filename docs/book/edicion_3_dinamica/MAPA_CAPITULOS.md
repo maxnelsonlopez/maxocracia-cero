@@ -230,7 +230,7 @@
   - Integrar feedback de participantes reales
   - Documentar éxitos y fracasos con honestidad brutal
 - **Conexiones**: Validación empírica de todo el sistema
-- **Estado actual**: Transición de teoría a práctica iniciada (llamada con posible participante)
+- **Estado actual**: 🟢 Refinado (Enero 2026) - Integrado con Playbook y Métricas
 
 #### Capítulo 13: Estándar EVV-1:2025: Protocolo Universal
 - **Estado**: 🔴 No iniciado
@@ -245,13 +245,14 @@
 - **Áreas de expansión**: Casos de uso concretos
 
 #### Capítulo 14: Hoja de Ruta 2025-2050: Escalamiento Fractal
-- **Estado**: 🔴 No iniciado
+- **Estado**: 🟢 Refinado
 - **Prioridad**: 🟡 Media
-- **Líneas**: [Pendiente de contar]
-- **Sesiones planificadas**: 2
+- **Líneas**: ~50
+- **Sesiones planificadas**: 1 (Completada via Claude)
 - **Temas clave**:
-  - Fases de expansión
-  - Replicación fractal
+  - Fases de expansión (Germinación, Viral, Institucional, Coherente)
+  - Replicación fractal del modelo hogar -> ciudad
+  - Visión 2050
   - Integración política
   - Visión 2050
 - **Tensiones conocidas**: Equilibrio entre ambición y realismo

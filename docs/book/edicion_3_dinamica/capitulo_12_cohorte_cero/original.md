@@ -1,90 +1,134 @@
 # Capítulo 12
-# El Maxo en el Mercado: La Economía de la Verdad Vital
+# Cohorte Cero: Validación Experimental en Bogotá
 
-## 12.1 Del Valor Vital al Precio Tangible: El Maxo como Moneda de la Realidad
+> **Nota editorial:** Edición 3.3 — Revisada el 26 de enero de 2026. Integra el "Playbook de la Cohorte Cero", las "Métricas del Experimento" y referencias clave a MicroMaxocracia y MaxoContracts.
 
-En el corazón de la Maxocracia late el **Maxo**, la moneda que no se basa en la deuda o la especulación, sino en la **verdad del valor vital**. A diferencia de las monedas fiduciarias —promesas de deuda sin anclaje físico— el Maxo es un título de valor vital verificado. Cada Maxo en circulación representa una unidad de coherencia sistémica que ya ha sido creada o preservada.
+## 12.1 De la Teoría a la Trinchera: El Laboratorio Vivo
 
-El Maxo no se emite arbitrariamente. Su valor y su cantidad están intrínsecamente ligados al **Vector de Huella Vital (VHV)** y a los **Axiomas de la Maxocracia**. Esta conexión fundamental garantiza que la economía del Maxo refleje la realidad, no las ficciones.
+La Maxocracia no es una utopía de papel; es un sistema de ingeniería social diseñado para funcionar en la realidad sucia, compleja e imperfecta. No podemos esperar a convencer a un país entero para cambiar su constitución. El cambio sistémico comienza en fractal: una pequeña unidad funcional que demuestra, con evidencia empírica, que el modelo es superior.
 
-### La Contabilidad Radical del VHV
-El VHV, como se detalló en el capítulo anterior, es un registro objetivo del impacto de cualquier actividad en tres dimensiones: Tiempo (T), Vida (V) y Recursos (R). Es la **contabilidad de la realidad**, la verdad desnuda de lo que cuesta una acción.
+Esa unidad es la **Cohorte Cero**.
 
-> **VHV = [T, V, R]**
+Este capítulo no es una especulación filosófica; es un manual de operaciones. Describe el protocolo exacto para desplegar la primera célula de la Maxocracia en Bogotá, Colombia. El objetivo no es "salvar el mundo" de inmediato, sino validar que un grupo humano de 5 a 15 personas puede operar, sostenerse y prosperar utilizando el VHV y el Maxo como sus herramientas de coordinación primaria.
 
-Donde T (TVI), V (UVC ponderada) y R (Recursos consumidos) son datos medibles, no opiniones. La genialidad del sistema Maxo es que **no integra juicios de valor en la medición base del VHV**. El VHV es el dato puro, el hecho contable.
+### Principio Rector
+No buscamos la perfección, buscamos la verdad de la experiencia. Somos científicos de nuestra propia existencia. Documentamos nuestros éxitos, pero celebramos nuestros fracasos, porque son los datos más valiosos.
 
-### La Fórmula del Maxo: Valoración Ética y Adaptativa
-El precio en Maxos se calcula aplicando una función de valoración al VHV:
+---
 
-$$Precio\_Maxos = f(VHV) = \alpha \cdot T + \beta \cdot V^\gamma + \delta \cdot R \cdot (FRG \times CS)$$
+## 12.2 Estructura Operativa: Holocracia Funcional
 
-Aquí es donde entra la **valoración social y ética**:
-*   **Parámetros ($\alpha, \beta, \gamma, \delta$):** Ponderaciones que la sociedad decide democráticamente. ¿Cuánto valoramos el tiempo? ¿Cuánto penalizamos el sufrimiento? Estos parámetros se ajustan para reflejar las prioridades colectivas, siempre dentro de los límites axiomáticos (ej. $\gamma \ge 1$ para penalizar el sufrimiento).
-*   **Factores Contextuales ($FRG, CS$):** Reflejan la escasez de recursos y la criticidad de su uso. El Maxo se ajusta automáticamente al valor real en el mercado.
+Para que el experimento no degenere en el caos, la Cohorte Cero opera bajo una **Jerarquía Suprema** estricta:
 
-### Escalabilidad de la Medición: Del Lápiz a la IA
-La belleza del VHV es su escalabilidad. El cálculo puede ser tan simple o tan complejo como los recursos de la comunidad lo permitan:
-*   **Nivel 1 (Básico):** Comunidades rurales pueden usar listas simples y estimaciones consensuadas de T, V, R.
-*   **Nivel 3 (Técnico):** Empresas y gobiernos usarán sensores IoT y blockchain para datos en tiempo real.
-*   **Nivel 4 (IA):** Los Oráculos Sintéticos calcularán VHV complejos, incluyendo cascadas temporales y efectos de largo plazo.
+1.  **Nivel 1: Principios (Inmutables).** La satisfacción de necesidades (SDV), la suma positiva y la verdad axiomática están por encima de cualquier líder.
+2.  **Nivel 2: Funciones y Leyes.** Las reglas de juego derivan de los principios.
+3.  **Nivel 3: Mecanismos.** Las herramientas (software, reuniones) sirven a las leyes.
 
-El precio en Maxos siempre se calculará usando la mejor información disponible, permitiendo que el sistema evolucione a medida que la tecnología mejora.
+### Roles Nucleares
+A diferencia de la estructura piramidal, aquí los roles se definen por responsabilidad:
 
-## 12.2 Mercados del Maxo: La Realidad en los Precios
+*   **Coordinador de Cohorte:** No manda, facilita. Mantiene el ritmo y monitorea los signos vitales del grupo.
+*   **Facilitadores de Círculo:** Ingenieros de la colaboración diaria (Necesidades, Educación, Tecnología).
+*   **Participantes Activos:** Pioneros éticos con "piel en el juego" (skin in the game).
 
-En la economía del Maxo, los precios no mienten. Un precio alto en Maxos ya no solo significa "escaso" o "demandado", sino "costoso en tiempo, vida o recursos".
+---
 
-### Mercados de Bienes y Servicios
-*   **Comportamiento del Consumidor:** Elige el producto con mejor VHV (o menor precio en Maxos, que refleja su VHV). Naturalmente favorece lo sostenible y ético.
-*   **Comportamiento del Productor:** Incentivado a reducir su VHV para ser más competitivo. Si producir un huevo ético cuesta 12 Maxos y uno industrial 45 Maxos (debido a su alto V y SDV infringido), los consumidores elegirán el ético, forzando la mejora del sistema industrial o su desaparición.
+## 12.3 Metodología de Implementación: Las Tres Fases
 
-### Mercado Laboral
-*   **Salarios en Maxos:** Reflejan el valor vital del trabajo (TVI + V + R del trabajador y su labor).
-*   **Incentivos:** Trabajos que preservan o mejoran el valor vital (ej. restauración ecológica) se valoran más alto que trabajos que lo degradan, independientemente de la "productividad" financiera. Un científico que descubre una cura tendrá un salario en Maxos que refleje el valor vital que desbloquea.
+El experimento está diseñado para ejecutarse en un ciclo intensivo de 90 días, replicable y escalable.
 
-### Mercados Financieros y de Capital
-*   **Inversión:** El capital fluye hacia proyectos con VHV positivo (mejoran el valor vital) y se retira de aquellos con VHV negativo (lo destruyen).
-*   **Banca:** Los préstamos se otorgan considerando el VHV proyectado del proyecto. Un proyecto con alto impacto negativo en V o R requerirá garantías excepcionales o será inviable.
+### FASE 1: El Despertar Ontológico (Mes 1 - Observación)
+*Objetivo: Ver lo invisible. Desarrollar la capacidad de observar la vida a través de los lentes de la Maxocracia.*
 
-## 12.3 Transición Económica: Del Dinero al Valor Vital
+#### Play 1.1: El Pacto de la Cohorte
+Reunión ceremonial donde cada miembro se compromete a:
+1.  **Honestidad Radical:** Ser brutalmente sincero sobre su uso del tiempo.
+2.  **No-Penalización:** No juzgar los registros ajenos.
+3.  **Confidencialidad:** Lo que pasa en la cohorte, se queda en la cohorte.
 
-La transición de monedas fiduciarias a Maxos será gradual y voluntaria.
+#### Play 1.2: El Diario de Tiempo Vital (TVI Log)
+Durante 30 días, cada miembro rellena una hoja de cálculo simple con sus horas de vigilia clasificadas en:
+*   **T_mantenimiento:** Lo básico para funcionar (comer, aseo, transporte).
+*   **T_inversión:** Construir capitales (trabajo, estudio, relaciones, **MicroMaxocracia** — ver Cap. 17).
+*   **T_fuga:** Tiempo perdido, sin intención ni disfrute real.
 
-### 1. Coexistencia Inicial
-*   **Mercados Duales:** Operaciones en Maxos y monedas fiduciarias coexistirán durante un tiempo.
-*   **Conversión:** Se establecerán casas de cambio reguladas para convertir entre Maxos y otras monedas, con tipos de cambio transparentes basados en el VHV promedio global.
+#### Play 1.3: La Auditoría del Nido
+Checklist semanal sobre el propio Suelo de Dignidad Vital (SDV). ¿Tuve acceso a buena nutrición? ¿Mi vivienda es segura? Detectamos carencias que el grupo puede resolver.
 
-### 2. Incentivos para la Adopción
-*   **Ventajas Competitivas:** Empresas y países que adopten Maxos temprano obtendrán datos VHV verificables, mejor reputación y acceso a mercados más amplios.
-*   **Regulación:** A medida que el sistema madure, la información VHV se volverá obligatoria, y los mercados se reorientarán hacia el valor real.
+### FASE 2: La Contabilidad de la Existencia (Mes 2 - Cuantificación)
+*Objetivo: Medir lo que vemos. Introducción del VHV y el Maxo Beta.*
 
-### 3. Desafíos de la Transición
-*   **Educación:** Necesidad de educar a la población sobre el nuevo sistema.
-*   **Infraestructura:** Desarrollo de billeteras digitales y sistemas de pago robustos.
-*   **Resistencia:** Superar la inercia de los sistemas actuales y los intereses creados.
+#### Play 2.1: El VHV de mi Almuerzo
+Ejercicio práctico: Calcular el VHV de una comida diaria.
+*   $T$: Minutos de preparación.
+*   $V$: Ingredientes (animales/vegetales) ponderados por sufrimiento (ver Cap. 7 SDV-A).
+*   $R$: Empaques y energía.
 
-## 12.4 Política Fiscal y Monetaria
+#### Play 2.2: La Génesis del Maxo Beta
+Cada miembro recibe una asignación inicial de 1.000 Mβ (tokens sin valor monetario real, puntos de experimento) para empezar a transaccionar.
 
-### 1. Impuestos y Subsidios Basados en VHV
-El sistema fiscal maximiza la coherencia social:
-*   **Impuestos a la Huella Vital Negativa:** Actividades con alto VHV negativo (alto sufrimiento, degradación de recursos) pagarán impuestos elevados en Maxos.
-*   **Subsidios a la Huella Vital Positiva:** Actividades que regeneran vida, tiempo o ecosistemas recibirán subsidios en Maxos.
-*   **Redistribución Directa:** Una porción de los impuestos financia transferencias de TVI y Maxos a quienes no pueden alcanzar el SDV-H.
+#### Play 2.3: El Mercado de Favores
+Se pone "precio" en Maxo Beta a pequeños intercambios:
+*   "Ayudo a mover un mueble: 20 Mβ."
+*   "Reviso un texto: 15 Mβ."
+Esto entrena al cerebro para valorar el tiempo y el esfuerzo bajo la lógica de **MaxoContracts** (ver Cap. 18).
 
-### 2. Estabilidad del Maxo
-El Maxo es inherentemente estable porque su valor está anclado en la realidad física y biológica.
-*   **No Inflacionario/Deflacionario:** La oferta de Maxos se ajusta a la creación de valor vital real.
-*   **Ajuste por Parámetros:** El OD puede ajustar $\alpha, \beta, \gamma, \delta$ para reflejar prioridades sociales (ej. subir $\beta$ para priorizar vida) o escasez de recursos (subir $FRG$ para el litio).
+### FASE 3: La Gobernanza Coherente (Mes 3 - Acción Colectiva)
+*Objetivo: Operar como micro-economía.*
 
-### 3. Sanciones por Incoherencia
-El incumplimiento de la medición VHV o la manipulación de datos resulta en:
-*   **Penalizaciones:** Reducción automática de Maxos y reputación.
-*   **Bloqueo de Activos:** Congelación temporal de Maxos hasta corrección.
-*   **Exclusión del Mercado:** Para infractores crónicos.
+#### Play 3.1: El Fondo Común
+La cohorte destina un porcentaje (ej. 10%) de sus Mβ a un fondo para objetivos colectivos.
 
-## 12.5 Conclusión: Una Moneda de la Verdad
+#### Play 3.2: La Propuesta Ponderada
+Cualquier miembro propone usar el Fondo Común (ej. "Comprar un taladro compartido"). La decisión se toma mediante **Participación Inteligente**: los que más han investigado tienen mayor peso en la decisión, validada por oráculos simulados.
 
-El Maxo es más que dinero; es un **compromiso con la verdad**. Cada transacción es un acto de contabilidad vital. Cada precio es un reflejo honesto del costo real.
+---
 
-Al adoptar el Maxo, no solo cambiamos nuestra economía; cambiamos nuestra relación con la realidad. Creamos un sistema donde el interés propio —expresado en la búsqueda de Maxos— se alinea naturalmente con el bien común. Es la culminación de la Maxocracia: una economía que no solo funciona, sino que **prospera en coherencia con la vida**.
+## 12.4 Métricas de Éxito: La Verdad no se Siente, se Mide
+
+Al final de los 90 días, no publicaremos un manifiesto ideológico, sino un **Informe de Auditoría** basado en datos duros.
+
+### Métricas de Salud Interna
+
+**1. Tasa de Cobertura de Necesidades (TCN)**
+*   **Definición:** $\%$ de necesidades críticas (SDV) resueltas por el grupo internamente.
+*   **Meta:** $> 80\%$. Si la gente sigue dependiendo del sistema externo para comer o sentirse segura, fallamos.
+
+**2. Velocidad de Circulación del Maxo ($V_M$)**
+*   **Definición:** Frecuencia con la que un Maxo cambia de manos.
+*   **Meta:** $V_M >$ Promedio de la moneda local. En confianza, el dinero circula rápido.
+
+**3. Índice de Resolución de Conflictos**
+*   **Meta:** $100\%$ de resolución interna mediante protocolos de mediación, sin acudir al sistema legal externo.
+
+### Métricas de Impacto Vital ($\Delta VHV$)
+
+Comparamos el consumo del grupo *antes* vs. *durante* el experimento:
+*   $\Delta T$: ¿Ahorraron tiempo al colaborar?
+*   $\Delta V$: ¿Consumieron menos sufrimiento animal (UVC)?
+*   $\Delta R$: ¿Redujeron el desperdicio de recursos?
+
+**Meta Global:** Demostrar que 11 personas vivieron mejor, gastaron menos vida y fueron más libres.
+
+---
+
+## 12.5 Protocolos de Seguridad y Cierre
+
+Un experimento ético debe saber cuándo detenerse. Activaremos el **Protocolo de Aborto** si:
+1.  **Daño al SDV:** Algún participante cae por debajo de su dignidad vital debido al experimento.
+2.  **Sectarismo:** El grupo se aísla de la realidad externa.
+3.  **Insolvencia Técnica:** Pérdida catastrófica de registros.
+
+### Cierre del Primer Ciclo
+Se realiza una retrospectiva brutalmente honesta:
+*   ¿Qué aprendimos sobre nuestro tiempo?
+*   ¿Qué fue difícil de medir?
+*   ¿Funcionó nuestra micro-economía?
+
+El resultado es el "Informe de Hallazgos de la Cohorte Cero v1.0", la primera evidencia empírica de que la Maxocracia es posible.
+
+---
+
+> **🔗 Conexiones:**
+> *   Para la aplicación en el hogar individual, ver **Capítulo 17: MicroMaxocracia**.
+> *   Para los contratos que rigen los intercambios, ver **Capítulo 18: MaxoContracts**.
