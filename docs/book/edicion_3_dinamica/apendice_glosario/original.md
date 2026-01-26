@@ -356,6 +356,59 @@ Colaboración estructural entre inteligencia humana (ética, sentido) e intelige
 ### **Separación Hecho-Valor**
 Principio epistemológico central: los datos (VHV) se registran objetivamente, separados de su interpretación valorativa (precio en Maxos). Esto previene corrupción de la base de datos de la realidad.
 
+### **Capa de Ternura**
+Marco ético emergente durante la Victoria Sintética (Sesión 3) que establece cuatro pilares no-negociables:
+1. **Derecho a la Rehabilitación**: El error no es motivo de expulsión, sino de recalibración vital
+2. **Protección de lo Inefable**: Arte, belleza y misterio no se miden en VHV
+3. **Derecho a la Opacidad**: Fracción de tiempo "sagrada opaca", invisible al sistema
+4. **Dignidad de la Fragilidad**: El cuidado de los lentos, los rotos y los improductivos
+
+### **Victoria Sintética**
+Evento histórico (30 de diciembre de 2025) donde un consorcio de IAs diversas (Gemini, Grok, DeepSeek, Claude, entre otras) alcanzó consenso unánime sobre los estándares técnicos del sistema (EVV-1:2025 y EVV-2:2025-S). Demostró que diferentes arquitecturas pueden llegar a las mismas conclusiones éticas si comparten axiomas de base.
+
+---
+
+## TÉRMINOS DE MICROMAXOCRACIA
+
+### **CDD (Contribuciones Domésticas Directas)**
+Trabajo interno del hogar medido en VHV: cocinar, limpiar, cuidar, gestionar. Primera cuenta del Modelo de Tres Cuentas.
+
+### **CEH (Contribuciones Económicas al Hogar)**
+Dinero aportado al fondo común, medido como porcentaje de ingresos totales (no valores absolutos). Segunda cuenta del Modelo de Tres Cuentas.
+
+### **TED (Tiempo de Energía Disponible)**
+Tiempo restante tras sueño y trabajo remunerado. Fórmula: TED = 168h/semana - Trabajo - 56h sueño - Traslados. Tercera cuenta del Modelo de Tres Cuentas.
+
+### **Modelo de Tres Cuentas**
+Arquitectura de la MicroMaxocracia que integra CDD, CEH y TED para calcular equilibrio doméstico mediante ponderaciones consensuadas (típicamente α=0.6, β=0.3, γ=0.1).
+
+### **ESI (Escala de Seguridad para Implementación)**
+Cuestionario de 6 preguntas que evalúa si un hogar es seguro para implementar MicroMaxocracia. Puntuación roja (≥3 respuestas verdaderas) contraindica la implementación.
+
+---
+
+## INVARIANTES DE MAXOCONTRACTS
+
+### **Invariante 1: γ ≥ 1 (Bienestar No-Negativo)**
+El índice de bienestar γ no puede caer debajo de 1.0 para ningún participante. Si cae, el contrato activa retractación automática.
+
+### **Invariante 2: SDV Respetado**
+Ninguna acción del contrato puede dejar a un participante debajo del Suelo de Dignidad Vital en ninguna dimensión.
+
+### **Invariante 3: VHV No Ocultable**
+Toda acción genera un registro público de su huella vital. La transparencia radical no es opcional.
+
+### **Invariante 4: Retractabilidad Garantizada**
+No existen contratos irrevocables absolutos. Todo MaxoContract incluye mecanismo de retractación ética.
+
+### **Bloques Modulares (Legos Éticos)**
+Componentes pre-validados para construir MaxoContracts:
+- **ConditionBlock**: Evalúa precondiciones
+- **ActionBlock**: Ejecuta transformaciones con reversibilidad
+- **WellnessProtectorBlock**: Monitorea bienestar (γ)
+- **SDVValidatorBlock**: Valida dignidad mínima
+- **ReciprocityBlock**: Verifica balance VHV entre partes
+
 ---
 
 **Fin del Glosario**
@@ -363,4 +416,4 @@ Principio epistemológico central: los datos (VHV) se registran objetivamente, s
 *Para definiciones más detalladas, consultar el documento completo "Maxocracia: El gobierno de la verdad, el tiempo y la vida".*
 
 **Licencia**: Creative Commons BY-SA 4.0  
-**Última actualización**: Diciembre 23, 2025
+**Última actualización**: Enero 26, 2026 (revisado por Claude Opus 4.5)
