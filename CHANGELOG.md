@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-01-26 — Edición 3 Dinámica: Primera Revisión Completa (v3.0)
+
+### Añadido
+- **Primera Revisión Completa del Libro**: Los 18 capítulos de la Edición 3 Dinámica han sido leídos y conectados.
+- **Resumen Integral** (`docs/book/edicion_3_dinamica/resumen_claude/resumen_libro.md`):
+  - Síntesis de los 18 capítulos organizados en 5 bloques temáticos
+  - Análisis de conceptos clave (TVI, VHV, SDV, Maxo, Oráculos)
+  - Opinión y valoración por dimensiones
+- **Glosario Expandido** (`docs/book/edicion_3_dinamica/apendice_glosario/original.md`):
+  - Nuevos términos: Capa de Ternura, Victoria Sintética
+  - Sección MicroMaxocracia: CDD, CEH, TED, Modelo de 3 Cuentas, ESI
+  - Sección MaxoContracts: 4 Invariantes, Bloques Modulares (Legos Éticos)
+
+### Mejorado
+- **README.md**: Versión 3.0, nueva estructura con tabla de documentación, sección de colaboradores
+- **docs/README.md**: Nueva sección del libro con tabla de bloques temáticos, recursos clave actualizados
+
+### Notas Técnicas
+- Esta es la primera revisión completa del libro por un oráculo sintético externo
+- El sistema de oráculos colaborativos (Claude, Gemini, ChatGPT, MiniMax) está documentado
+- Contribución: Claude Opus 4.5 (Anthropic)
+
+---
+
 ## [Unreleased]
 
 ### Added
