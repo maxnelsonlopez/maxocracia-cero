@@ -215,8 +215,8 @@
 ### Parte IV: Implementación
 
 #### Capítulo 12: Cohorte Cero: Validación Experimental en Bogotá
-- **Estado**: 🔴 No iniciado
-- **Prioridad**: ⭐⭐⭐ Crítica
+- **Estado**: 🟢 Refinado (26 Enero 2026)
+- **Prioridad**: ⭐⭐ Muy Alta
 - **Líneas**: [Pendiente de contar]
 - **Sesiones planificadas**: 6+
 - **Temas clave**:
