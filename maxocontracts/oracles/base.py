@@ -73,3 +73,14 @@ class OracleInterface(ABC):
     def get_oracle_type(self) -> str:
         """Retorna el tipo de oráculo."""
         pass
+    
+    def check_condition(
+        self,
+        condition_id: str,
+        context: Dict[str, Any]
+    ) -> OracleResponse:
+        """
+        [Opcional] Verifica una condición específica contra datos externos.
+        Útil para oráculos basados en polling (ej. FormsOracle).
+        """
+        raise NotImplementedError("This oracle does not support condition checking")
