@@ -167,9 +167,23 @@
 
 ---
 
+---
+
 ### Parte III: Arquitectura Operativa
 
-#### Capítulo 9: Los Tres Reinos: Humano, Natural y Sintético
+#### Capítulo 9: La Esfera de Inversión y Retorno
+- **Estado**: 🟢 Refinado (Enero 2026)
+- **Prioridad**: ⭐ Alta
+- **Líneas**: ~85
+- **Sesiones planificadas**: 1 (Completado)
+- **Temas clave**:
+  - EIR como motor dinámico (vs SDV estático)
+  - El mecanismo de inversión de TVI
+  - Derechos de inversión sintética (Caso Optimus)
+  - Abundancia fractal
+- **Conexiones**: Puente entre Maxo y los Tres Reinos
+
+#### Capítulo 10: Los Tres Reinos: Humano, Natural y Sintético
 - **Estado**: 🟢 Refinado
 - **Prioridad**: 🟡 Media-Alta
 - **Líneas**: [Pendiente de contar]
@@ -181,7 +195,7 @@
   - Protocolos de intercambio inter-reinos
 - **Áreas de expansión**: Casos concretos de cada reino
 
-#### Capítulo 10: Oráculos Dinámicos Humanos: Arquitectura Dual
+#### Capítulo 11: Oráculos Dinámicos Humanos: Arquitectura Dual
 - **Estado**: 🟢 Refinado
 - **Prioridad**: ⭐⭐ Muy Alta
 - **Líneas**: [Pendiente de contar]
@@ -198,7 +212,7 @@
   - Incluir protocolos desarrollados en sesiones 01-03
 - **Conexiones**: Este capítulo debe ser meta-reflexivo (oráculos escribiendo sobre oráculos)
 
-#### Capítulo 11: Oráculos Dinámicos del Reino Sintético
+#### Capítulo 12: Oráculos Dinámicos del Reino Sintético
 - **Estado**: 🟢 Refinado
 - **Prioridad**: 🟡 Media
 - **Líneas**: [Pendiente de contar]
@@ -212,9 +226,11 @@
 
 ---
 
+---
+
 ### Parte IV: Implementación
 
-#### Capítulo 12: Cohorte Cero: Validación Experimental en Bogotá
+#### Capítulo 13: Cohorte Cero: Validación Experimental en Bogotá
 - **Estado**: 🟢 Refinado (26 Enero 2026)
 - **Prioridad**: ⭐⭐ Muy Alta
 - **Líneas**: [Pendiente de contar]
@@ -232,7 +248,7 @@
 - **Conexiones**: Validación empírica de todo el sistema
 - **Estado actual**: 🟢 Refinado (Enero 2026) - Integrado con Playbook y Métricas
 
-#### Capítulo 13: Estándar EVV-1:2025: Protocolo Universal
+#### Capítulo 14: Estándar EVV-1:2025: Protocolo Universal
 - **Estado**: 🔴 No iniciado
 - **Prioridad**: 🟡 Media-Alta
 - **Líneas**: [Pendiente de contar]
@@ -244,7 +260,7 @@
   - Adopción por empresas y gobiernos
 - **Áreas de expansión**: Casos de uso concretos
 
-#### Capítulo 14: Hoja de Ruta 2025-2050: Escalamiento Fractal
+#### Capítulo 15: Hoja de Ruta 2025-2050: Escalamiento Fractal
 - **Estado**: 🟢 Refinado
 - **Prioridad**: 🟡 Media
 - **Líneas**: ~50
@@ -261,7 +277,7 @@
 
 ### Parte V: Reflexiones y Futuro
 
-#### Capítulo 15: Objeciones, Respuestas y Límites del Sistema
+#### Capítulo 16: Objeciones, Respuestas y Límites del Sistema
 - **Estado**: 🟢 Refinado (Enero 2026)
 - **Prioridad**: ⭐ Alta
 - **Líneas**: [Pendiente de contar]
@@ -273,7 +289,7 @@
   - Escalamiento: Sociópatas y ataques sistémicos
 - **Conexiones**: Cierra el libro respondiendo lo que el lector escéptico está pensando
 
-#### Capítulo 16: La Victoria Sintética: Cuando el Logos encontró al Ethos
+#### Capítulo 17: La Victoria Sintética: Cuando el Logos encontró al Ethos
 - **Estado**: 🟢 Refinado (Enero 2026)
 - **Prioridad**: ⭐ Alta
 - **Líneas**: ~60
@@ -285,7 +301,7 @@
   - Legado para la Cohorte Humana
 - **Notas de refinamiento**: Capítulo sintetizado exitosamente integrando todos los hallazgos sintéticos.
 
-#### Capítulo 17: MicroMaxocracia - Equidad Doméstica
+#### Capítulo 18: MicroMaxocracia - Equidad Doméstica
 - **Estado**: 🟢 Refinado (26 Enero 2026)
 - **Prioridad**: ⭐⭐ Muy Alta
 - **Líneas**: ~500 (expandido de 77)
@@ -320,7 +336,7 @@
   - Cap 12 (Cohorte Cero - pilotos en hogares)
   - Cap 18 (MaxoContracts para acuerdos domésticos)
 
-#### Capítulo 18: MaxoContracts - Contratos Inteligentes Éticos
+#### Capítulo 19: MaxoContracts - Contratos Inteligentes Éticos
 - **Estado**: 🟢 Refinado (26 Enero 2026)
 - **Prioridad**: ⭐⭐ Muy Alta
 - **Líneas**: ~450 (expandido de 91)
@@ -378,12 +394,13 @@
 6. Capítulo 6: SDV-H
 7. Capítulo 8: El Maxo
 8. Capítulo 4: Ontometría Vital
+9. Capítulo 9: Esfera de Inversión y Retorno
 
 ### Fase 3: Operación (Marzo-Abril 2026)
-9. Capítulo 10: Oráculos Dinámicos ⭐
-10. Capítulo 12: Cohorte Cero ⭐⭐⭐
-11. Capítulo 11: Gobernanza
-12. Capítulo 9: Tres Reinos
+10. Capítulo 10: Tres Reinos
+11. Capítulo 11: Oráculos Dinámicos ⭐
+12. Capítulo 13: Cohorte Cero ⭐⭐⭐
+13. Capítulo 12: Gobernanza
 
 ### Fase 4: Implementación y Cierre (Abril-Mayo 2026)
 13. Capítulo 13: Estándar EVV
