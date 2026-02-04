@@ -15,6 +15,7 @@ Bienvenido a la documentación de la API de Maxocracia. Este documento proporcio
 - [Rate Limiting](#rate-limiting)
 - [Calculadora VHV](#calculadora-vhv)
 - [TVI (Tiempo Vital Indexado)](#tvi-tiempo-vital-indexado)
+- [MaxoContracts (Capa 4)](#maxocontracts-capa-4)
 - [Seguridad](#seguridad)
 - [Ejecución Local](#ejecución-local)
 - [Pruebas](#pruebas)
@@ -858,6 +859,127 @@ Calcula el VHV usando entradas TVI registradas del usuario para el componente T 
 - Las categorías WORK e INVESTMENT se consideran "direct_hours" (tiempo directamente invertido)
 - Las horas heredadas y futuras pueden sobrescribirse si se conocen valores más precisos
 - Este endpoint implementa el Axioma T8 (Encadenamiento Temporal) integrando TVI con VHV
+
+## MaxoContracts (Capa 4)
+
+Los MaxoContracts son acuerdos inteligentes que incorporan validación axiomática automática.
+
+### Listar Contratos
+
+```http
+GET /contracts/
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "contracts": [
+    {
+      "contract_id": "loan-001",
+      "state": "active",
+      "participants": 2,
+      "terms": 3
+    }
+  ],
+  "total": 1
+}
+```
+
+### Crear Contrato
+
+```http
+POST /contracts/
+```
+
+**Cuerpo:**
+```json
+{
+  "contract_id": "unique-id",
+  "civil_description": "Descripción en lenguaje civil"
+}
+```
+
+### Obtener Detalles de Contrato
+
+```http
+GET /contracts/<contract_id>
+```
+
+### Añadir Término
+
+```http
+POST /contracts/<contract_id>/terms
+```
+
+**Cuerpo:**
+```json
+{
+  "term_id": "term-1",
+  "civil_text": "Alice transfiere 10 Maxos a Bob",
+  "vhv": {"t": 0.5, "v": 0, "h": 0}
+}
+```
+
+### Registrar Participante
+
+```http
+POST /contracts/<contract_id>/participants
+```
+
+**Cuerpo:**
+```json
+{
+  "user_id": 1,
+  "gamma": 1.0
+}
+```
+
+### Validar Axiomas
+
+```http
+GET /contracts/<contract_id>/validate
+```
+
+Ejecuta los validadores de `axioms.py` (T1, T2, T7, T9, T13, INV1, INV2, INV4).
+
+### Aceptar Término
+
+```http
+POST /contracts/<contract_id>/accept
+```
+
+**Cuerpo:**
+```json
+{
+  "term_id": "term-1",
+  "user_id": 1
+}
+```
+
+### Activar Contrato
+
+```http
+POST /contracts/<contract_id>/activate
+```
+
+Cambia el estado de `PENDING` a `ACTIVE` si todos los términos están aceptados.
+
+### Solicitar Retractación
+
+```http
+POST /contracts/<contract_id>/retract
+```
+
+Solicita una retractación ética evaluada por un **Oráculo Sintético**.
+
+**Cuerpo:**
+```json
+{
+  "user_id": 1,
+  "reason": "Emergencia médica",
+  "cause": "gamma_crisis"
+}
+```
 
 ## Rate Limiting
 
