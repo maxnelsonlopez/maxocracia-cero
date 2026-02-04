@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-02-04 — Consolidación Edición 3 Dinámica (v3.3)
+
+### Añadido
+- **Libro Completo Consolidado**: Archivos `docs/book/edicion_3_dinamica/libro_completo_310126.md` y `.docx`.
+- **Nueva Numeración de Capítulos**: Reestructuración para mejorar el flujo lógico.
+  - Cap. 03: Victoria Sintética (antes Cap. 16).
+  - Cap. 16: MicroMaxocracia (antes Cap. 17).
+  - Cap. 17: MaxoContracts (antes Cap. 18).
+  - Cap. 18: Estándar EVV 1.2 (nuevo).
+
+### Cambiado
+- **Aplanamiento de Directorio**: La carpeta `docs/book/edicion_3_dinamica/` ahora contiene todos los capítulos en su raíz para facilitar el acceso y la gestión.
+- **README.md**: Actualizado a la versión 3.3 con enlaces corregidos y novedades de consolidación.
+
+### Eliminado
+- Subcarpetas redundantes dentro de `docs/book/edicion_3_dinamica/`.
+
 ## 2026-01-26 — Edición 3 Dinámica: Primera Revisión Completa (v3.0)
 
 ### Añadido

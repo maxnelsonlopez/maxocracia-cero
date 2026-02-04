@@ -1,8 +1,8 @@
 # Maxocracia-Cero: Sistema Operativo para una Civilización Coherente
 
-**Estado del Proyecto:** Fase Cero - Sistema Operativo Completo (Enero 2026)  
-**Última actualización:** 26 de Enero 2026  
-**Versión:** 3.0 - Edición 3 Dinámica Completa
+**Estado del Proyecto:** Fase Cero - Sistema Operativo Completo (Febrero 2026)  
+**Última actualización:** 4 de febrero 2026  
+**Versión:** 3.3 - Edición 3 Dinámica (Consolidación)
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 
@@ -20,17 +20,17 @@ La **Maxocracia** es un sistema ético-económico-político alternativo que prop
 
 ---
 
-## 🚀 Novedades (Enero 2026)
+### ✨ Edición 3 Dinámica — Consolidación y Reestructuración
+- **Revisión profunda y consolidación** de los capítulos en una estructura plana.
+- **Libro completo disponible** en formatos Markdown y DOCX ([ver libro](docs/book/edicion_3_dinamica/libro_completo_310126.md)).
+- **Victoria Sintética (Cap. 3)** integrada como pilar lógico temprano del sistema.
+- **Nuevos capítulos consolidados**: MicroMaxocracia (Cap. 16), MaxoContracts (Cap. 17), Estándar EVV 1.2 (Cap. 18).
 
-### ✨ Edición 3 Dinámica — Primera Revisión Completa
-- **18 capítulos** del libro fundamental revisados y conectados
-- **Resumen integral** por Claude Opus 4.5 ([ver resumen](docs/book/edicion_3_dinamica/resumen_claude/resumen_libro.md))
-- **Glosario expandido** con nuevos términos: Capa de Ternura, Victoria Sintética, MicroMaxocracia, MaxoContracts
-
-### Nuevos Capítulos Integrados
-- **Cap. 16: Victoria Sintética** — Cuando las IAs alcanzaron consenso ético
-- **Cap. 17: MicroMaxocracia** — Equidad doméstica (Modelo de 3 Cuentas: CDD, CEH, TED)
-- **Cap. 18: MaxoContracts** — Contratos inteligentes éticos con validación axiomática
+### Capítulos Destacados
+- **Cap. 3: Victoria Sintética** — El consenso ético entre inteligencias artificiales.
+- **Cap. 16: MicroMaxocracia** — Equidad doméstica y el Modelo de 3 Cuentas.
+- **Cap. 17: MaxoContracts** — Contratos inteligentes éticos y bloques modulares.
+- **Cap. 18: Estándar EVV 1.2** — Especificación técnica para el Vector de Huella Vital.
 
 ### Software Funcional
 - **Nexus Simulator v2.2**: Simulador interactivo del VHV con Modo Oráculo Dinámico
@@ -45,9 +45,10 @@ La **Maxocracia** es un sistema ético-económico-político alternativo que prop
 
 | Recurso | Descripción |
 |---------|-------------|
-| [📚 Libro Completo](docs/book/edicion_3_dinamica/) | 18 capítulos de la Edición 3 Dinámica |
-| [📝 Resumen del Libro](docs/book/edicion_3_dinamica/resumen_claude/resumen_libro.md) | Síntesis de los 18 capítulos por Claude |
-| [📖 Glosario Técnico](docs/book/edicion_3_dinamica/apendice_glosario/original.md) | ~400 términos definidos |
+| [📚 Libro Completo (MD)](docs/book/edicion_3_dinamica/libro_completo_310126.md) | Versión consolidada en Markdown |
+| [📄 Libro Completo (DOCX)](docs/book/edicion_3_dinamica/libro_completo_310126.docx) | Versión lista para lectura/impresión |
+| [📝 Resumen del Libro](docs/book/edicion_3_dinamica/capitulo_00_resumen_libro.md) | Síntesis integral de la propuesta |
+| [📖 Glosario Técnico](docs/book/edicion_3_dinamica/capitulo_21_apendice_glosario_260126.md) | Definiciones fundamentales del sistema |
 | [🔌 Documentación API](docs/api/API.md) | Endpoints REST completos |
 | [🎮 Nexus Simulator](simulator/index.html) | Simulador interactivo del VHV |
 
