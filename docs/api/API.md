@@ -894,8 +894,8 @@ POST /contracts/
 **Cuerpo:**
 ```json
 {
-  "contract_id": "unique-id",
-  "civil_description": "Descripción en lenguaje civil"
+  "contract_id": "loan-001",
+  "civil_description": "Préstamo de 10 Maxos entre amigos"
 }
 ```
 
@@ -932,6 +932,8 @@ POST /contracts/<contract_id>/participants
   "user_id": 1,
   "gamma": 1.0
 }
+
+**Nota:** El parámetro `gamma` establece el nivel inicial del **Índice de Bienestar (Wellness Index)** del participante.
 ```
 
 ### Validar Axiomas
@@ -979,6 +981,20 @@ Solicita una retractación ética evaluada por un **Oráculo Sintético**.
   "reason": "Emergencia médica",
   "cause": "gamma_crisis"
 }
+
+### Obtener Resumen Civil
+
+```http
+GET /contracts/<contract_id>/civil
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "contract_id": "loan-001",
+  "civil_summary": "Este contrato establece que Alice transfiere 10 Maxos a Bob..."
+}
+```
 ```
 
 ## Rate Limiting

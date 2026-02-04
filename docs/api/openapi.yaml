@@ -82,6 +82,38 @@ components:
           default: 0
           description: Puntuación de impacto/resolución
     
+    VHV:
+      type: object
+      properties:
+        t:
+          type: number
+          description: Tiempo (Tiempo Vital Indexado)
+        v:
+          type: number
+          description: Vida (Impacto en vida/sufrimiento)
+        r:
+          type: number
+          description: Recursos (Uso de recursos finitos)
+    
+    MaxoContract:
+      type: object
+      properties:
+        contract_id:
+          type: string
+        state:
+          type: string
+          enum: [draft, pending, active, executed, partial, retracted]
+        civil_description:
+          type: string
+        participants:
+          type: array
+          items:
+            type: string
+        terms_count:
+          type: integer
+        total_vhv:
+          $ref: '#/components/schemas/VHV'
+    
     Error:
       type: object
       properties:
@@ -332,6 +364,247 @@ paths:
                   score:
                     type: number
                     description: Puntuación de reputación
+
+  /contracts:
+    get:
+      tags: [MaxoContracts]
+      summary: Listar todos los contratos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de contratos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contracts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MaxoContract'
+                  total:
+                    type: integer
+    post:
+      tags: [MaxoContracts]
+      summary: Crear un nuevo contrato
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [contract_id]
+              properties:
+                contract_id:
+                  type: string
+                civil_description:
+                  type: string
+      responses:
+        '201':
+          description: Contrato creado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  contract_id:
+                    type: string
+                  state:
+                    type: string
+
+  /contracts/{contract_id}:
+    get:
+      tags: [MaxoContracts]
+      summary: Obtener detalles de un contrato
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contract_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalles del contrato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaxoContract'
+        '404':
+          description: No encontrado
+
+  /contracts/{contract_id}/terms:
+    post:
+      tags: [MaxoContracts]
+      summary: Añadir un término al contrato
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contract_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [term_id, civil_text]
+              properties:
+                term_id:
+                  type: string
+                civil_text:
+                  type: string
+                vhv:
+                  $ref: '#/components/schemas/VHV'
+      responses:
+        '200':
+          description: Término añadido
+        '400':
+          description: Error en la solicitud
+
+  /contracts/{contract_id}/participants:
+    post:
+      tags: [MaxoContracts]
+      summary: Añadir un participante al contrato
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contract_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id]
+              properties:
+                user_id:
+                  type: integer
+                gamma:
+                  type: number
+                  description: Nivel inicial de bienestar (Wellness Index)
+      responses:
+        '200':
+          description: Participante añadido
+
+  /contracts/{contract_id}/validate:
+    get:
+      tags: [MaxoContracts]
+      summary: Validar axiomas del contrato
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contract_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Resultados de la validación
+
+  /contracts/{contract_id}/accept:
+    post:
+      tags: [MaxoContracts]
+      summary: Aceptar un término del contrato
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contract_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [term_id, user_id]
+              properties:
+                term_id:
+                  type: string
+                user_id:
+                  type: integer
+      responses:
+        '200':
+          description: Término aceptado
+
+  /contracts/{contract_id}/activate:
+    post:
+      tags: [MaxoContracts]
+      summary: Activar el contrato
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contract_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Contrato activado
+
+  /contracts/{contract_id}/retract:
+    post:
+      tags: [MaxoContracts]
+      summary: Solicitar retractación ética
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contract_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, reason]
+              properties:
+                user_id:
+                  type: integer
+                reason:
+                  type: string
+                cause:
+                  type: string
+      responses:
+        '200':
+          description: Retractación procesada
+
+  /contracts/{contract_id}/civil:
+    get:
+      tags: [MaxoContracts]
+      summary: Obtener resumen del contrato en lenguaje civil
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contract_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Resumen civil
 
 security:
   - bearerAuth: []
