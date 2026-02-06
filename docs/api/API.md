@@ -862,12 +862,28 @@ Calcula el VHV usando entradas TVI registradas del usuario para el componente T 
 
 ## MaxoContracts (Capa 4)
 
-Los MaxoContracts son acuerdos inteligentes que incorporan validación axiomática automática.
+Los MaxoContracts son contratos inteligentes éticos que incorporan validación axiomática automática. Implementan los 15 Axiomas Temporales (T0-T13) y garantizan que ningún acuerdo viole el Suelo de Dignidad Vital (SDV) o el Índice de Bienestar (Wellness).
+
+### Conceptos Clave
+
+- **Estados del Contrato**: `DRAFT` → `PENDING` → `ACTIVE` → `EXECUTED` / `RETRACTED`
+- **Validación Axiomática**: Cada transición valida automáticamente axiomas T1, T2, T7, T9, T13, INV1, INV2, INV4
+- **Aceptación Término-a-Término**: Los participantes aceptan cada término individualmente
+- **Retractación Ética**: Proceso evaluado por Oráculo Sintético con compensación automática
+
+---
 
 ### Listar Contratos
 
 ```http
 GET /contracts/
+```
+
+**Requiere Autenticación:** Sí
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
 ```
 
 **Respuesta Exitosa (200):**
@@ -879,11 +895,26 @@ GET /contracts/
       "state": "active",
       "participants": 2,
       "terms": 3
+    },
+    {
+      "contract_id": "cleaning-shared-002",
+      "state": "pending",
+      "participants": 4,
+      "terms": 5
     }
   ],
-  "total": 1
+  "total": 2
 }
 ```
+
+**Errores:**
+- 401: No autorizado (token inválido o faltante)
+
+**Notas:**
+- Devuelve todos los contratos en la base de datos
+- Los contadores de `participants` y `terms` son calculados dinámicamente
+
+---
 
 ### Crear Contrato
 
@@ -891,13 +922,46 @@ GET /contracts/
 POST /contracts/
 ```
 
-**Cuerpo:**
+**Requiere Autenticación:** Sí
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Cuerpo de la Solicitud:**
 ```json
 {
   "contract_id": "loan-001",
-  "civil_description": "Préstamo de 10 Maxos entre amigos"
+  "civil_description": "Préstamo de 10 Maxos entre amigos sin interés"
 }
 ```
+
+**Parámetros:**
+- `contract_id` (string, requerido): Identificador único del contrato
+- `civil_description` (string, opcional): Descripción en lenguaje civil
+
+**Respuesta Exitosa (201):**
+```json
+{
+  "success": true,
+  "contract_id": "loan-001",
+  "state": "draft",
+  "created_at": "2026-02-04T01:50:00Z"
+}
+```
+
+**Errores:**
+- 400: `contract_id` faltante o inválido
+- 401: No autorizado
+- 409: El `contract_id` ya existe (conflicto)
+
+**Notas:**
+- El contrato se crea en estado `DRAFT`
+- Puedes añadir términos y participantes antes de activarlo
+
+---
 
 ### Obtener Detalles de Contrato
 
@@ -905,36 +969,153 @@ POST /contracts/
 GET /contracts/<contract_id>
 ```
 
+**Requiere Autenticación:** Sí
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros de Ruta:**
+- `contract_id` (string): ID del contrato
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "contract_id": "loan-001",
+  "state": "active",
+  "civil_description": "Préstamo de 10 Maxos entre amigos sin interés",
+  "participants": ["user-1", "user-2"],
+  "terms_count": 3,
+  "total_vhv": {
+    "t": 0.5,
+    "v": 0.0,
+    "r": 0.0
+  },
+  "events_count": 8
+}
+```
+
+**Errores:**
+- 401: No autorizado
+- 404: Contrato no encontrado
+
+**Notas:**
+- `total_vhv` es la suma de VHV de todos los términos
+- `events_count` incluye todos los eventos del log auditable
+
+---
+
 ### Añadir Término
 
 ```http
 POST /contracts/<contract_id>/terms
 ```
 
-**Cuerpo:**
+**Requiere Autenticación:** Sí
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Parámetros de Ruta:**
+- `contract_id` (string): ID del contrato
+
+**Cuerpo de la Solicitud:**
 ```json
 {
   "term_id": "term-1",
   "civil_text": "Alice transfiere 10 Maxos a Bob",
-  "vhv": {"t": 0.5, "v": 0, "h": 0}
+  "vhv": {
+    "t": 0.5,
+    "v": 0.0,
+    "h": 0.0
+  }
 }
 ```
 
-### Registrar Participante
+**Parámetros:**
+- `term_id` (string, requerido): Identificador único del término
+- `civil_text` (string, opcional): Descripción en lenguaje civil
+- `vhv` (object, requerido): Vector de Huella Vital del término
+  - `t` (number): Tiempo en horas
+  - `v` (number): Vidas afectadas
+  - `h` (number): Recursos (nota: el campo se llama `h` pero representa `R`)
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "success": true,
+  "term_id": "term-1",
+  "total_terms": 1
+}
+```
+
+**Errores:**
+- 400: Datos inválidos, `term_id` faltante, o formato VHV incorrecto
+- 400: El contrato no está en estado `DRAFT`
+- 401: No autorizado
+- 404: Contrato no encontrado
+
+**Notas:**
+- Solo puedes añadir términos en estado `DRAFT`
+- El VHV debe ser válido según los axiomas (T ≥ 0, V ≥ 0, R ≥ 0)
+
+---
+
+### Añadir Participante
 
 ```http
 POST /contracts/<contract_id>/participants
 ```
 
-**Cuerpo:**
+**Requiere Autenticación:** Sí
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Parámetros de Ruta:**
+- `contract_id` (string): ID del contrato
+
+**Cuerpo de la Solicitud:**
 ```json
 {
-  "user_id": 1,
-  "gamma": 1.0
+  "user_id": 123,
+  "gamma": 1.2
 }
-
-**Nota:** El parámetro `gamma` establece el nivel inicial del **Índice de Bienestar (Wellness Index)** del participante.
 ```
+
+**Parámetros:**
+- `user_id` (integer, requerido): ID del usuario en la base de datos
+- `gamma` (number, opcional, default: 1.0): Índice de Bienestar (Wellness) inicial
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "success": true,
+  "participant_id": "user-123",
+  "wellness": 1.2,
+  "total_participants": 2
+}
+```
+
+**Errores:**
+- 400: `user_id` faltante o valor de `gamma` inválido
+- 401: No autorizado
+- 404: Contrato no encontrado
+- 404: Usuario no encontrado
+
+**Notas:**
+- El parámetro `gamma` establece el **Índice de Bienestar (Wellness Index)** inicial
+- El sistema valida que γ ≥ 1.0 (Invariante 1)
+- Los participantes deben existir en la tabla `users`
+
+---
 
 ### Validar Axiomas
 
@@ -942,7 +1123,97 @@ POST /contracts/<contract_id>/participants
 GET /contracts/<contract_id>/validate
 ```
 
-Ejecuta los validadores de `axioms.py` (T1, T2, T7, T9, T13, INV1, INV2, INV4).
+**Requiere Autenticación:** Sí
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros de Ruta:**
+- `contract_id` (string): ID del contrato
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "contract_id": "loan-001",
+  "valid": true,
+  "validations": [
+    {
+      "axiom": "T1",
+      "valid": true,
+      "message": "TVI finitude validated"
+    },
+    {
+      "axiom": "T2",
+      "valid": true,
+      "message": "Temporal equality validated"
+    },
+    {
+      "axiom": "T7",
+      "valid": true,
+      "message": "Harm minimization validated"
+    },
+    {
+      "axiom": "T9",
+      "valid": true,
+      "message": "Reciprocity validated"
+    },
+    {
+      "axiom": "T13",
+      "valid": true,
+      "message": "Transparency validated"
+    },
+    {
+      "axiom": "INV1",
+      "valid": true,
+      "message": "Wellness ≥ 1.0 for all participants"
+    },
+    {
+      "axiom": "INV2",
+      "valid": true,
+      "message": "SDV respected for all participants"
+    },
+    {
+      "axiom": "INV4",
+      "valid": true,
+      "message": "Retractability enabled"
+    }
+  ]
+}
+```
+
+**Respuesta con Violaciones (200):**
+```json
+{
+  "contract_id": "loan-001",
+  "valid": false,
+  "validations": [
+    {
+      "axiom": "T7",
+      "valid": false,
+      "message": "Harm detected: participant wellness below threshold"
+    },
+    {
+      "axiom": "INV1",
+      "valid": false,
+      "message": "Wellness violation: user-2 has γ=0.8 (< 1.0)"
+    }
+  ]
+}
+```
+
+**Errores:**
+- 401: No autorizado
+- 404: Contrato no encontrado
+
+**Notas:**
+- Ejecuta validadores de `maxocontracts/core/axioms.py`
+- Valida: T1 (Finitud), T2 (Igualdad Temporal), T7 (Minimizar Daño), T9 (Reciprocidad), T13 (Transparencia)
+- Valida invariantes: INV1 (γ ≥ 1), INV2 (SDV respetado), INV4 (Retractabilidad)
+- El contrato puede estar en cualquier estado para validación
+
+---
 
 ### Aceptar Término
 
@@ -950,13 +1221,51 @@ Ejecuta los validadores de `axioms.py` (T1, T2, T7, T9, T13, INV1, INV2, INV4).
 POST /contracts/<contract_id>/accept
 ```
 
-**Cuerpo:**
+**Requiere Autenticación:** Sí
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Parámetros de Ruta:**
+- `contract_id` (string): ID del contrato
+
+**Cuerpo de la Solicitud:**
 ```json
 {
   "term_id": "term-1",
-  "user_id": 1
+  "user_id": 123
 }
 ```
+
+**Parámetros:**
+- `term_id` (string, requerido): ID del término a aceptar
+- `user_id` (integer, requerido): ID del usuario que acepta
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "success": true,
+  "term_id": "term-1",
+  "accepted_by": "user-123",
+  "contract_state": "pending"
+}
+```
+
+**Errores:**
+- 400: `term_id` o `user_id` faltantes
+- 400: Fallo al aceptar (término no existe, usuario no es participante, o término ya aceptado)
+- 401: No autorizado
+- 404: Contrato no encontrado
+
+**Notas:**
+- Cada participante debe aceptar cada término individualmente
+- El sistema registra la aceptación en `maxo_contract_term_approvals`
+- Cuando todos los términos son aceptados por todos, el contrato puede activarse
+
+---
 
 ### Activar Contrato
 
@@ -964,7 +1273,48 @@ POST /contracts/<contract_id>/accept
 POST /contracts/<contract_id>/activate
 ```
 
-Cambia el estado de `PENDING` a `ACTIVE` si todos los términos están aceptados.
+**Requiere Autenticación:** Sí
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros de Ruta:**
+- `contract_id` (string): ID del contrato
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "success": true,
+  "contract_id": "loan-001",
+  "state": "active",
+  "activated_at": "2026-02-04T02:00:00Z"
+}
+```
+
+**Errores:**
+- 400: Validación axiomática falló durante la sumisión
+- 400: Activación falló (no todos los términos están aceptados o estado incorrecto)
+  ```json
+  {
+    "error": "activation failed",
+    "state": "draft",
+    "hint": "ensure all terms are accepted and contract is in PENDING state"
+  }
+  ```
+- 401: No autorizado
+- 404: Contrato no encontrado
+
+**Notas:**
+- **Flujo de activación**:
+  1. Si está en `DRAFT`, primero intenta pasar a `PENDING` (valida axiomas)
+  2. Luego intenta activar (requiere todos los términos aceptados)
+- El contrato debe estar en estado `PENDING` para activarse
+- Todos los términos deben estar aceptados por todos los participantes
+- La validación axiomática se ejecuta automáticamente
+
+---
 
 ### Solicitar Retractación
 
@@ -972,15 +1322,73 @@ Cambia el estado de `PENDING` a `ACTIVE` si todos los términos están aceptados
 POST /contracts/<contract_id>/retract
 ```
 
-Solicita una retractación ética evaluada por un **Oráculo Sintético**.
+**Requiere Autenticación:** Sí
 
-**Cuerpo:**
+**Encabezados:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Parámetros de Ruta:**
+- `contract_id` (string): ID del contrato
+
+**Cuerpo de la Solicitud:**
 ```json
 {
-  "user_id": 1,
-  "reason": "Emergencia médica",
+  "user_id": 123,
+  "reason": "Emergencia médica que impide cumplir el contrato",
   "cause": "gamma_crisis"
 }
+```
+
+**Parámetros:**
+- `user_id` (integer, requerido): ID del usuario solicitante
+- `reason` (string, requerido): Razón detallada de la retractación
+- `cause` (string, opcional): Causa categórica
+  - `gamma_crisis`: Crisis de bienestar (γ < 0.8)
+  - `sdv_violation`: Violación del Suelo de Dignidad Vital
+  - `mutual_consent`: Consentimiento mutuo de todas las partes
+  - `force_majeure`: Fuerza mayor (evento imprevisto)
+
+**Respuesta Exitosa - Aprobada (200):**
+```json
+{
+  "success": true,
+  "contract_id": "loan-001",
+  "state": "retracted",
+  "oracle_confidence": 0.95,
+  "oracle_reasoning": "Retraction approved: wellness crisis detected (γ=0.6), medical emergency documented, SDV at risk"
+}
+```
+
+**Respuesta - Rechazada (400):**
+```json
+{
+  "success": false,
+  "error": "retraction not approved by oracle",
+  "oracle_confidence": 0.85,
+  "oracle_reasoning": "Retraction denied: insufficient evidence of wellness crisis, no SDV violation detected, alternative solutions available"
+}
+```
+
+**Errores:**
+- 400: `user_id` faltante
+- 400: Retractación rechazada por el Oráculo Sintético
+- 401: No autorizado
+- 404: Contrato no encontrado
+
+**Notas:**
+- **Proceso de Retractación Ética**:
+  1. Solicitud del participante con razón y evidencia
+  2. Evaluación por Oráculo Sintético (`SyntheticOracle`)
+  3. Si aprobada: contrato pasa a estado `RETRACTED`
+  4. Compensación automática calculada por VHV perdido (futuro)
+- El oráculo evalúa: γ del solicitante, SDV, evidencia, y causa
+- La confianza del oráculo (`oracle_confidence`) indica certeza de la decisión
+- En modo simulación, el oráculo usa heurísticas; en producción usará Claude API
+
+---
 
 ### Obtener Resumen Civil
 
@@ -988,14 +1396,125 @@ Solicita una retractación ética evaluada por un **Oráculo Sintético**.
 GET /contracts/<contract_id>/civil
 ```
 
+**Requiere Autenticación:** Sí
+
+**Encabezados:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros de Ruta:**
+- `contract_id` (string): ID del contrato
+
 **Respuesta Exitosa (200):**
 ```json
 {
   "contract_id": "loan-001",
-  "civil_summary": "Este contrato establece que Alice transfiere 10 Maxos a Bob..."
+  "civil_summary": "Este contrato establece que Alice transfiere 10 Maxos a Bob sin interés, a devolver en 30 días. Bob acepta las condiciones y se compromete a devolver el monto completo. El contrato respeta el SDV de ambas partes y permite retractación ética en caso de emergencia."
 }
 ```
+
+**Errores:**
+- 401: No autorizado
+- 404: Contrato no encontrado
+
+**Notas:**
+- Genera un resumen en **lenguaje civil** (español, ≤20 palabras por cláusula)
+- Usa el método `to_civil_language()` del contrato
+- Útil para presentar el contrato a usuarios no técnicos
+- El resumen incluye términos, participantes, y condiciones clave
+
+---
+
+### Tabla de Resumen de Endpoints
+
+| Método | Endpoint | Autenticación | Descripción |
+|--------|----------|---------------|-------------|
+| GET | `/contracts/` | Sí | Listar todos los contratos |
+| POST | `/contracts/` | Sí | Crear nuevo contrato |
+| GET | `/contracts/<id>` | Sí | Obtener detalles de contrato |
+| POST | `/contracts/<id>/terms` | Sí | Añadir término al contrato |
+| POST | `/contracts/<id>/participants` | Sí | Añadir participante |
+| GET | `/contracts/<id>/validate` | Sí | Validar axiomas del contrato |
+| POST | `/contracts/<id>/accept` | Sí | Aceptar un término |
+| POST | `/contracts/<id>/activate` | Sí | Activar contrato |
+| POST | `/contracts/<id>/retract` | Sí | Solicitar retractación ética |
+| GET | `/contracts/<id>/civil` | Sí | Obtener resumen en lenguaje civil |
+
+---
+
+### Flujo Típico de Uso
+
+1. **Crear contrato** (`POST /contracts/`)
+2. **Añadir términos** (`POST /contracts/<id>/terms`) - Repetir para cada término
+3. **Añadir participantes** (`POST /contracts/<id>/participants`) - Repetir para cada participante
+4. **Validar** (`GET /contracts/<id>/validate`) - Verificar axiomas
+5. **Aceptar términos** (`POST /contracts/<id>/accept`) - Cada participante acepta cada término
+6. **Activar** (`POST /contracts/<id>/activate`) - Cuando todos aceptaron
+7. **Ejecutar** - El contrato está activo
+8. **(Opcional) Retractar** (`POST /contracts/<id>/retract`) - Si surge una emergencia
+
+---
+
+### Ejemplo Completo: Préstamo Simple
+
+```bash
+# 1. Crear contrato
+curl -X POST http://localhost:5001/contracts/ \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contract_id": "loan-simple-001",
+    "civil_description": "Préstamo de 10 Maxos sin interés"
+  }'
+
+# 2. Añadir término
+curl -X POST http://localhost:5001/contracts/loan-simple-001/terms \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "term_id": "transfer",
+    "civil_text": "Alice transfiere 10 Maxos a Bob",
+    "vhv": {"t": 0.5, "v": 0, "h": 0}
+  }'
+
+# 3. Añadir participantes
+curl -X POST http://localhost:5001/contracts/loan-simple-001/participants \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id": 1, "gamma": 1.2}'
+
+curl -X POST http://localhost:5001/contracts/loan-simple-001/participants \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id": 2, "gamma": 1.0}'
+
+# 4. Validar axiomas
+curl -X GET http://localhost:5001/contracts/loan-simple-001/validate \
+  -H "Authorization: Bearer <token>"
+
+# 5. Aceptar términos (ambos participantes)
+curl -X POST http://localhost:5001/contracts/loan-simple-001/accept \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"term_id": "transfer", "user_id": 1}'
+
+curl -X POST http://localhost:5001/contracts/loan-simple-001/accept \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"term_id": "transfer", "user_id": 2}'
+
+# 6. Activar contrato
+curl -X POST http://localhost:5001/contracts/loan-simple-001/activate \
+  -H "Authorization: Bearer <token>"
+
+# 7. Ver resumen civil
+curl -X GET http://localhost:5001/contracts/loan-simple-001/civil \
+  -H "Authorization: Bearer <token>"
 ```
+
+---
+
 
 ## Rate Limiting
 

@@ -1,6 +1,6 @@
 # Tareas Pendientes - Maxocracia-Cero
 
-**Última actualización:** 2026-01-23
+**Última actualización:** 2026-02-04
 
 ---
 
@@ -10,15 +10,19 @@
 
 **Objetivo**: Validar contratos inteligentes éticos en Cohorte Cero (50+ contratos en 90 días)
 
-- [ ] **Semana 1-2: Especificación (Enero 22 - Febrero 5)**
+- [x] **Semana 1-2: Especificación (Enero 22 - Febrero 5)** ✅ COMPLETADA
   - [x] **Implementar Persistencia en DB** (Completado 2026-01-23)
     - [x] Tablas en `schema.sql` para contratos y términos
     - [x] CRUD persistente en `app/contracts_bp.py`
     - [x] Refactorización Wellness (limpieza terminológica)
     - [x] Suite de tests de persistencia
+  - [x] **Consolidar Libro Edición 3.3** (Completado 2026-02-04)
+    - [x] Estructura plana de capítulos
+    - [x] Libro completo en MD y DOCX
+    - [x] Actualizar README.md a v3.3
   - [ ] Diseñar UI drag-and-drop (wireframes)
   - [ ] Definir API contracts para oráculos
-  - **Entregables**: Especificaciones técnicas, wireframes, API docs
+  - **Entregables**: ✅ Persistencia SQL, ✅ Libro v3.3, ⏳ Wireframes pendientes
 
 - [ ] **Semana 3-4: Prototipo (Febrero 6-19)**
   - [ ] Codificar 3 bloques básicos + tests
