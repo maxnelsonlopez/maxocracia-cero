@@ -1516,6 +1516,104 @@ curl -X GET http://localhost:5001/contracts/loan-simple-001/civil \
 ---
 
 
+
+## Oracles API
+
+Endpoints para interacción con oráculos sintéticos (IA), humanos (votación) y de datos (IoT).
+
+### Validar Evento (Oráculo)
+
+```http
+POST /oracles/validate
+```
+
+**Requiere Autenticación:** Sí (Oráculo registrado)
+
+Envía un resultado de validación desde una fuente externa (ej. script de análisis de IA o sistema de votación).
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "contract_id": "loan-001",
+  "event_type": "condition_met",
+  "data": {
+    "term_id": "term-1",
+    "result": true,
+    "confidence": 0.98,
+    "source": "claude-3-opus",
+    "timestamp": "2026-02-04T10:00:00Z"
+  }
+}
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "success": true,
+  "processed": true,
+  "contract_state_updated": "active"
+}
+```
+
+### Enviar Datos IoT
+
+```http
+POST /oracles/data
+```
+
+**Requiere Autenticación:** Sí (Dispositivo IoT registrado)
+
+Envía datos de sensores para bloques tipo `ConditionBlock` (ej. geolocalización, temperatura, uso).
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "device_id": "roomba-042",
+  "data_type": "cleaning_session",
+  "value": {
+    "duration_minutes": 45,
+    "area_sqm": 30,
+    "battery_start": 100,
+    "battery_end": 60
+  }
+}
+```
+
+**Respuesta Exitosa (201):**
+```json
+{
+  "success": true,
+  "data_id": "data-8833",
+  "linked_contracts": ["leasing-roomba-042"]
+}
+```
+
+### Listar Validaciones Pendientes
+
+```http
+GET /oracles/pending
+```
+
+**Requiere Autenticación:** Sí (Oráculo Humano/Moderador)
+
+Lista contratos o eventos que requieren validación humana manual (ej. retractaciones complejas).
+
+**Respuesta Exitosa (200):**
+```json
+[
+  {
+    "id": "req-123",
+    "contract_id": "loan-005",
+    "type": "retraction_request",
+    "reason": "Gamma crisis claimed",
+    "created_at": "2026-02-04T09:00:00Z",
+    "status": "pending_human_review"
+  }
+]
+```
+
+---
+
 ## Rate Limiting
 
 La API implementa límites de tasa para prevenir abusos. Los límites varían según el endpoint:

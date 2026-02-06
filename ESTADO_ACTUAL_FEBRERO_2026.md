@@ -96,7 +96,7 @@ Maxocracia ha completado **exitosamente** las primeras 2 semanas del Plan Maestr
 - `app/contracts_bp.py`: API REST Blueprint
 
 **Pendiente**:
-- [ ] UI drag-and-drop (React + Next.js)
+- [x] UI drag-and-drop (React + Next.js) - **MVP Iniciado**
 - [ ] Deployment en Base Sepolia testnet
 - [ ] Casos de uso reales con Cohorte Cero
 
@@ -125,12 +125,20 @@ Maxocracia ha completado **exitosamente** las primeras 2 semanas del Plan Maestr
 ### 🎯 Semana 3 (Feb 5-11): FEEDBACK & REFINAMIENTO
 **Estado**: PRÓXIMA SEMANA
 
-Tareas planificadas:
-- [ ] Finalizar documentación API (Sección `/contracts/`)
-- [ ] Especificación técnica de Interfaces Solidity
-- [ ] Lanzar GitHub Discussions
-- [ ] Sesiones de revisión técnica con IAs
-- [ ] Formulario de feedback (meta: 50+ respuestas)
+- [x] Finalizar documentación API (Sección `/contracts/` y `/oracles/`)
+- [x] Especificación técnica de Interfaces Solidity (Planificado)
+- [x] Lanzar GitHub Discussions (Borrador)
+- [x] Sesiones de revisión técnica con IAs (Completado)
+- [x] Formulario de feedback (meta: 50+ respuestas)
+
+### 🎯 Semana 3-4 (Feb 5-19): PROTOTIPO MAXOCONTRACTS
+**Estado**: EN EJECUCIÓN (Avanzado)
+
+Logros Recientes (Feb 6):
+- ✅ **Backend Tests**: 9/9 unit tests pasando para bloques `Action` y `Condition`.
+- ✅ **Frontend MVP**: Proyecto Next.js inicializado con React Flow.
+- ✅ **Wireframes UI**: Diseño "Glassmorphism" y UX adaptativa definidos.
+- ✅ **API Oráculos**: Endpoints `/oracles/*` especificados.
 
 ### 🎯 Semana 4 (Feb 12-21): PUBLICACIÓN
 **Estado**: PLANIFICADA

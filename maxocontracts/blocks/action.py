@@ -16,9 +16,7 @@ from typing import Callable, Dict, Any, Optional, Tuple
 from datetime import datetime
 import copy
 
-import sys
-sys.path.insert(0, str(__file__).rsplit("/", 2)[0])
-from core.types import VHV
+from ..core.types import VHV
 
 
 @dataclass

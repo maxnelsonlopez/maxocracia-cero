@@ -37,7 +37,8 @@ La **Maxocracia** es un sistema ético-económico-político alternativo que prop
 - **MaxoContracts v2.3**: Persistencia SQLite, 5 bloques modulares, oráculo sintético
 - **Calculadora VHV**: Frontend completo con Chart.js
 - **Sistema TVI**: Detección de overlap temporal, cálculo de CCP
-- **~150+ tests** pasando ✅
+- **Frontend MaxoContracts**: Next.js + React Flow (Lienzo de la Verdad MVP)
+- **199+ tests** pasando ✅ (Backend Core + Blocks)
 
 ---
 

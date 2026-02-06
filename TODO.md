@@ -20,9 +20,9 @@
     - [x] Estructura plana de capítulos
     - [x] Libro completo en MD y DOCX
     - [x] Actualizar README.md a v3.3
-  - [ ] Diseñar UI drag-and-drop (wireframes)
-  - [ ] Definir API contracts para oráculos
-  - **Entregables**: ✅ Persistencia SQL, ✅ Libro v3.3, ⏳ Wireframes pendientes
+  - [x] Diseñar UI drag-and-drop (wireframes)
+  - [x] Definir API contracts para oráculos
+  - **Entregables**: ✅ Persistencia SQL, ✅ Libro v3.3, ✅ Wireframes y API Oráculos listos
 
 - [ ] **Semana 3-4: Prototipo (Febrero 6-19)**
   - [ ] Codificar 3 bloques básicos + tests
