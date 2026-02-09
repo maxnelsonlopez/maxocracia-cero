@@ -236,6 +236,8 @@ def create_contract(current_user):
     contract_id = data.get("contract_id")
     if not contract_id:
         return jsonify({"error": "contract_id is required"}), 400
+        
+    civil_description = data.get("civil_description", "")
     
     civil_description = data.get("civil_description", "")
     

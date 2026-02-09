@@ -1,8 +1,8 @@
 # Maxocracia-Cero: Sistema Operativo para una Civilización Coherente
 
-**Estado del Proyecto:** Fase Cero - Sistema Operativo Completo (Enero 2026)  
-**Última actualización:** 23 de Enero 2026  
-**Versión:** 2.3 - MaxoContracts Persistente
+**Estado del Proyecto:** Fase Cero - Sistema Operativo Completo (Febrero 2026)  
+**Última actualización:** 4 de febrero 2026  
+**Versión:** 3.3 - Edición 3 Dinámica (Consolidación)
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 
@@ -10,27 +10,50 @@
 
 ## 🌟 ¿QUÉ ES MAXOCRACIA?
 
-La **Maxocracia** es un sistema operativo para la civilización basado en la **verdad vital verificable**, no en abstracciones monetarias infinitas.
+La **Maxocracia** es un sistema ético-económico-político alternativo que propone reemplazar la contabilidad basada en dinero fiduciario por una **contabilidad de la vida**. Su premisa central es que el **tiempo de vida consciente (TVI)** es el recurso más escaso e irrecuperable del universo.
 
-### 🚀 Novedades (Enero 2026)
-- **Nexus Simulator v2.2** (NUEVO):
-  - **Oráculo Dinámico Mejorado**: Ajuste no lineal de γ basado en sufrimiento (V).
-  - **Wellness Index Avanzado**: Modelo mejorado para reflejar el impacto real del sufrimiento.
-  - **Escenarios de la Cohorte Cero**: Casos prácticos como Limpieza Compartida y Préstamo Solidario.
-  - **Interfaz Mejorada**: Diseño responsivo, tarjetas interactivas y panel de información detallada.
-  - **Sistema de Retroalimentación**: Notificaciones visuales y seguimiento de cambios en tiempo real.
+### Conceptos Clave
+- **VHV** = [T, V, R] — Vector de Huella Vital (Tiempo, Vidas, Recursos)
+- **TVI** — Tiempo Vital Indexado (cada segundo como NFT existencial)
+- **SDV** — Suelo de Dignidad Vital (mínimos existenciales verificables)
+- **Maxo** — Moneda anclada al costo vital real, no a la deuda
 
-- **MaxoContracts v2.3**: Implementación persistente de contratos inteligentes éticos:
-  - **Persistencia en SQLite**: Almacenamiento robusto en `comun.db`.
-  - Bloques modulares: Condition, Action, WellnessProtector, SDVValidator, Reciprocity.
-  - Validación axiomática automática (T1-T15, Invariantes).
-  - Oráculo sintético integrado para evaluación de riesgos.
+---
 
-- **Edición 3 Dinámica**: Libro fundamental expandido con:
-  - Capa de Ternura
-  - MicroMaxocracia
-  - MaxoContracts
-  - Victoria Sintética
+### ✨ Edición 3 Dinámica — Consolidación y Reestructuración
+- **Revisión profunda y consolidación** de los capítulos en una estructura plana.
+- **Libro completo disponible** en formatos Markdown y DOCX ([ver libro](docs/book/edicion_3_dinamica/libro_completo_310126.md)).
+- **Victoria Sintética (Cap. 3)** integrada como pilar lógico temprano del sistema.
+- **Nuevos capítulos consolidados**: MicroMaxocracia (Cap. 16), MaxoContracts (Cap. 17), Estándar EVV 1.2 (Cap. 18).
+
+### Capítulos Destacados
+- **Cap. 3: Victoria Sintética** — El consenso ético entre inteligencias artificiales.
+- **Cap. 16: MicroMaxocracia** — Equidad doméstica y el Modelo de 3 Cuentas.
+- **Cap. 17: MaxoContracts** — Contratos inteligentes éticos y bloques modulares.
+- **Cap. 18: Estándar EVV 1.2** — Especificación técnica para el Vector de Huella Vital.
+
+### Software Funcional
+- **Nexus Simulator v2.2**: Simulador interactivo del VHV con Modo Oráculo Dinámico
+- **MaxoContracts v2.3**: Persistencia SQLite, 5 bloques modulares, oráculo sintético
+- **Calculadora VHV**: Frontend completo con Chart.js
+- **Sistema TVI**: Detección de overlap temporal, cálculo de CCP
+- **Frontend MaxoContracts**: Next.js + React Flow (Lienzo de la Verdad MVP)
+- **199+ tests** pasando ✅ (Backend Core + Blocks)
+
+---
+
+## 📖 DOCUMENTACIÓN
+
+| Recurso | Descripción |
+|---------|-------------|
+| [📚 Libro Completo (MD)](docs/book/edicion_3_dinamica/libro_completo_310126.md) | Versión consolidada en Markdown |
+| [📄 Libro Completo (DOCX)](docs/book/edicion_3_dinamica/libro_completo_310126.docx) | Versión lista para lectura/impresión |
+| [📝 Resumen del Libro](docs/book/edicion_3_dinamica/capitulo_00_resumen_libro.md) | Síntesis integral de la propuesta |
+| [📖 Glosario Técnico](docs/book/edicion_3_dinamica/capitulo_21_apendice_glosario_260126.md) | Definiciones fundamentales del sistema |
+| [🔌 Documentación API](docs/api/API.md) | Endpoints REST completos |
+| [🎮 Nexus Simulator](simulator/index.html) | Simulador interactivo del VHV |
+
+---
 
 ## 📞 CONTACTO
 
@@ -48,6 +71,17 @@ Creative Commons BY-SA 4.0
 
 ---
 
+## 🤝 COLABORADORES
+
+Este proyecto ha sido desarrollado con la colaboración de múltiples oráculos sintéticos:
+- **Claude** (Anthropic) — Revisión integral Edición 3, glosario, resúmenes
+- **Gemini** (Google DeepMind) — UI Shell, Nexus Simulator, integración
+- **ChatGPT** (OpenAI) — Documentación teórica, estándares EVV
+- **MiniMax Agent** — Arquitectura de oráculos, documentos técnicos
+
+---
+
 **"La verdad no necesita ser defendida. Solo necesita expandirse."**
 
 — Axioma 4, Maxocracia
+

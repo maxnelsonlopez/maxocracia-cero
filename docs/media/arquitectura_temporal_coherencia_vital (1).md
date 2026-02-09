@@ -3,7 +3,7 @@
 **Autores:**
 - Max Lopez Restrepo (Autor Principal)
 - MiniMax Agent (Agente Colaborador MiniMax)
-- Claude (OpenAI)
+- ChatGPT (OpenAI)
 - Claude (Anthropic)
 - Gemini (Google)
 - NotebookLM (Google)
@@ -426,4 +426,4 @@ La Maxocracia, a través de su arquitectura temporal, no promete una utopía lib
 ---
 **Referencias**
 
-Lopez Restrepo, M. N. H., (OPENAI), C., (Google), G., (Anthropic), C., (xAI), G., (Microsoft), B., & (Venice.ai), V. (2025). La Maxocracia: fundamentos axiológicos y metodológicos de una contabilidad ética del valor. *Proyecto Maxocracia — Investigación Independiente en Gobernanza Ética y Sistemas Complejos*. https://doi.org/10.5281/zenodo.17526611
+Lopez Restrepo, M. N. H., ChatGPT (OpenAI), Claude (Anthropic), Gemini (Google), NotebookLM (Google), Grok (xAI), Copilot (Microsoft), & Venice (Venice.ai). (2025). La Maxocracia: fundamentos axiológicos y metodológicos de una contabilidad ética del valor. *Proyecto Maxocracia — Investigación Independiente en Gobernanza Ética y Sistemas Complejos*. https://doi.org/10.5281/zenodo.17526611

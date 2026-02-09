@@ -16,9 +16,7 @@ from decimal import Decimal
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 
-import sys
-sys.path.insert(0, str(__file__).rsplit("/", 2)[0])
-from core.types import SDV, Participant
+from ..core.types import SDV, Participant
 
 
 @dataclass

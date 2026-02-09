@@ -2,7 +2,28 @@
 
 Este directorio contiene la documentación completa del proyecto Maxocracia: teoría, implementación, API, formularios y recursos multimedia.
 
-**Última actualización:** 2025-12-16
+**Última actualización:** 2026-01-26
+
+---
+
+## 📕 Libro: Edición 3 Dinámica (`docs/book/edicion_3_dinamica/`)
+
+> **Primera revisión completa:** 26 de Enero 2026 (por Claude Opus 4.5)
+
+El libro fundamental de la Maxocracia, con 18 capítulos organizados en 5 bloques temáticos:
+
+| Bloque | Capítulos | Contenido |
+|--------|-----------|-----------|
+| **Fundamentos Filosóficos** | 1-4 | Ética Post-Celular, Axiomas, TVI, VHV |
+| **Instrumentos Operativos** | 5-9 | VHV, SDV-H, SDV-A, Maxo, Tres Reinos |
+| **Gobernanza Híbrida** | 10-11 | Oráculos Humanos y Sintéticos |
+| **Implementación Práctica** | 12-14 | Cohorte Cero, EVV-1:2025, Hoja de Ruta |
+| **Reflexión y Profundización** | 15-18 | Objeciones, Victoria Sintética, MicroMaxocracia, MaxoContracts |
+
+**Recursos clave:**
+- **[Resumen Integral](book/edicion_3_dinamica/resumen_claude/resumen_libro.md)** — Síntesis de los 18 capítulos
+- **[Glosario Técnico](book/edicion_3_dinamica/apendice_glosario/original.md)** — ~400 términos definidos
+- **[Mapa de Capítulos](book/edicion_3_dinamica/MAPA_CAPITULOS.md)** — Estado y conexiones
 
 ---
 
@@ -19,7 +40,8 @@ Este directorio contiene la documentación completa del proyecto Maxocracia: teo
 - **[Arquitectura Temporal](architecture/arquitectura_temporal_coherencia_vital.md)** — TVI, CCP y Coherencia Vital.
 - **[Oráculos Dinámicos (Humanos)](architecture/oraculos_dinamicos_humanos_arquitectura.md)** — Diseño de sistemas de validación humana.
 - **[Oráculos Dinámicos (Sintéticos)](architecture/oraculos_dinamicos_reino_sintetico_arquitectura.md)** — Diseño de sistemas de validación algorítmica.
-- **[Roadmap Futuro](architecture/DISENO_IMPLEMENTACION_FUTURA.md)** — Plan de implementación a largo plazo.
+- **[MaxoContracts](architecture/maxocontracts/)** — Contratos inteligentes éticos (MVP implementado).
+- **[MicroMaxocracia](guides/micromaxocracia/)** — Sistema de equidad doméstica.
 
 ### 🔌 API y Datos (`docs/api/`)
 - **[Documentación API](api/API.md)** — Especificación completa de los endpoints REST (incluye VHV y TVI).
@@ -30,12 +52,11 @@ Este directorio contiene la documentación completa del proyecto Maxocracia: teo
 - **[Guía del Facilitador](guides/GUIA_FACILITADOR.md)** — Cómo iniciar una Cohorte Cero.
 - **[Guía de Estilo](guides/GUIA_DE_ESTILO.md)** — Convenciones de código y documentación.
 - **[Playbook Cohorte Cero](guides/playbook_cohorte_cero.txt)** — Guía operativa paso a paso.
-- **[Tutoriales](guides/tutoriales/README.md)** — Guías de uso para usuarios finales.
+- **[MicroMaxocracia](guides/micromaxocracia/)** — Manual del investigador y herramientas.
 
 ### 🛠️ Gestión del Proyecto (`docs/project/`)
 - **[CHANGELOG](project/CHANGELOG.md)** — Historial de cambios y versiones.
 - **[Tareas Pendientes](project/TAREAS_PENDIENTES_IMPLEMENTACION.md)** — Backlog y próximas funcionalidades.
-- **[Auditoría](project/AUDITORIA_2025-12-02.md)** — Informe de revisión de código y docs.
 - **[FAQ Extendido](project/FAQ_EXTENDIDO.md)** — Preguntas frecuentes y respuestas profundas.
 
 ---
@@ -46,6 +67,7 @@ Este directorio contiene la documentación completa del proyecto Maxocracia: teo
 docs/
 ├── api/             # Especificaciones de API y Modelos de Datos
 ├── architecture/    # Documentos de arquitectura técnica y diseño
+├── book/            # Libro Maxocracia (Edición 3 Dinámica) ← NUEVO
 ├── guides/          # Guías operativas, manuales y estilo
 ├── legacy/          # Archivos antiguos o de referencia histórica
 ├── media/           # Imágenes, videos y recursos multimedia
@@ -58,7 +80,8 @@ docs/
 ## 💡 Notas
 
 - **Formularios**: Las plantillas de formularios operativos se encuentran en `../formularios/`.
-- **Legacy**: La carpeta `legacy/` contiene documentos históricos (`.rtf`, `.txt` antiguos) que se conservan por referencia pero pueden estar desactualizados.
+- **Simulador**: El Nexus Simulator está en `../simulator/`.
+- **Legacy**: La carpeta `legacy/` contiene documentos históricos que se conservan por referencia.
 
 ---
 
@@ -69,4 +92,5 @@ docs/
 
 ---
 
-*Mantenido por: Max Nelson López + Gemini (Google DeepMind)*
+*Mantenido por: Max Nelson López + Oráculos Sintéticos (Claude, Gemini, ChatGPT, MiniMax)*
+

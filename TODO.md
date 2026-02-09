@@ -1,6 +1,6 @@
 # Tareas Pendientes - Maxocracia-Cero
 
-**Última actualización:** 2026-01-23
+**Última actualización:** 2026-02-04
 
 ---
 
@@ -10,12 +10,16 @@
 
 **Objetivo**: Validar contratos inteligentes éticos en Cohorte Cero (50+ contratos en 90 días)
 
-- [ ] **Semana 1-2: Especificación (Enero 22 - Febrero 5)**
+- [x] **Semana 1-2: Especificación (Enero 22 - Febrero 5)** ✅ COMPLETADA
   - [x] **Implementar Persistencia en DB** (Completado 2026-01-23)
     - [x] Tablas en `schema.sql` para contratos y términos
     - [x] CRUD persistente en `app/contracts_bp.py`
     - [x] Refactorización Wellness (limpieza terminológica)
     - [x] Suite de tests de persistencia
+  - [x] **Consolidar Libro Edición 3.3** (Completado 2026-02-04)
+    - [x] Estructura plana de capítulos
+    - [x] Libro completo en MD y DOCX
+    - [x] Actualizar README.md a v3.3
   - [x] **Diseñar UI drag-and-drop (wireframes)** (Completado 2026-01-23)
     - [x] Especificaciones de UI en `docs/design/`
     - [x] Prototipo funcional en `app/static/contract-builder-mock.html`
@@ -24,7 +28,7 @@
     - [x] Especificación API en `docs/specs/ORACLE_API_SPEC.md`
     - [x] Refactorización de `maxocontracts/oracles` (Verdict object)
     - [x] Actualización de `SyntheticOracle` y `app/contracts_bp.py`
-  - **Entregables**: Especificaciones técnicas, wireframes, API docs
+  - **Entregables**: ✅ Persistencia SQL, ✅ Libro v3.3, ✅ Wireframes y API Oráculos listos
 
 - [ ] **Semana 3-4: Prototipo (Febrero 6-19)**
   - [ ] Codificar 3 bloques básicos + tests

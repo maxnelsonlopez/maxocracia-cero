@@ -812,9 +812,9 @@ En última instancia, este trabajo demuestra que la **Maxocracia no es solo una 
 
 **Papers de la Serie Maxocrática:**
 
-Lopez Restrepo, M. N. H., (OPENAI), C., (Google), G., (Anthropic), C., (xAI), G., (Microsoft), B., & (Venice.ai), V. (2025). La Maxocracia: fundamentos axiológicos y metodológicos de una contabilidad ética del valor. Proyecto Maxocracia — Investigación Independiente en Gobernanza Ética y Sistemas Complejos. https://doi.org/10.5281/zenodo.17526611
+Lopez Restrepo, M. N. H., ChatGPT (OpenAI), Claude (Anthropic), Gemini (Google), NotebookLM (Google), Grok (xAI), Copilot (Microsoft), & Venice (Venice.ai). (2025). La Maxocracia: fundamentos axiológicos y metodológicos de una contabilidad ética del valor. Proyecto Maxocracia — Investigación Independiente en Gobernanza Ética y Sistemas Complejos. https://doi.org/10.5281/zenodo.17526611
 
-Lopez Restrepo, M. N. H., (MiniMax), M., (OpenAI), C., (Anthropic), C., (Google), G., (xAI), G., & (Venice.ai), V. (2025). Arquitectura Temporal de la Coherencia Vital: Un Marco Operativo para la Epistemología del Tiempo en la Maxocracia. Proyecto Maxocracia — Investigación Independiente en Gobernanza Ética y Sistemas Complejos. https://doi.org/10.5281/zenodo.17544993
+Lopez Restrepo, M. N. H., MiniMax Agent, ChatGPT (OpenAI), Claude (Anthropic), Gemini (Google), Grok (xAI), & Venice (Venice.ai). (2025). Arquitectura Temporal de la Coherencia Vital: Un Marco Operativo para la Epistemología del Tiempo en la Maxocracia. Proyecto Maxocracia — Investigación Independiente en Gobernanza Ética y Sistemas Complejos. https://doi.org/10.5281/zenodo.17544993
 
 **Documentos Técnicos Base:**
 - López Restrepo, M.N., & MiniMax Agent (2025). "VHV: Clasificación Formal - Maxocracia v1.0." *Proyecto Maxocracia*
