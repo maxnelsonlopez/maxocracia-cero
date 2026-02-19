@@ -388,7 +388,7 @@ def stripe_webhook():
     sig_header = request.headers.get("Stripe-Signature", "")
     
     # Verificar firma del webhook
-    if STRIPE_WEBHOOK_SECRET:
+    if STRIPE_WEBHOOK_SECRET and stripe:
         try:
             event = stripe.Webhook.construct_event(
                 payload, sig_header, STRIPE_WEBHOOK_SECRET
@@ -402,15 +402,28 @@ def stripe_webhook():
     else:
         # Sin webhook secret, parsear manualmente (solo desarrollo)
         try:
-            event = stripe.Event.construct_from(
-                request.get_json(), stripe.api_key
-            )
-        except ValueError:
+            json_data = request.get_json()
+            if not json_data:
+                return jsonify({"error": "invalid_payload"}), 400
+            # Crear un objeto simple que funcione como el evento de Stripe
+            from types import SimpleNamespace
+            event = SimpleNamespace(**json_data)
+            if not hasattr(event, 'type'):
+                event.type = json_data.get('type', 'unknown')
+            if not hasattr(event, 'data'):
+                event.data = {'object': json_data.get('data', {}).get('object', {})}
+        except (ValueError, AttributeError):
             return jsonify({"error": "invalid_payload"}), 400
     
-    # Procesar evento
-    event_type = event["type"]
-    data_object = event["data"]["object"]
+    # Procesar evento (manejar tanto dict como StripeObject)
+    if hasattr(event, 'get'):
+        event_type = event.get("type", "unknown")
+        data_object = event.get("data", {}).get("object", {})
+    else:
+        # StripeObject usa attribute access
+        event_type = getattr(event, 'type', 'unknown')
+        data = getattr(event, 'data', {}) or {}
+        data_object = data.get('object', {}) if isinstance(data, dict) else getattr(data, 'object', {})
     
     current_app.logger.info(f"[STRIPE WEBHOOK] Evento recibido: {event_type}")
     
