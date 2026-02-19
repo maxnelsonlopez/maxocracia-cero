@@ -91,7 +91,7 @@ Modo de trabajo: Decisivo, código funcional, commits firmados, principios maxoc
 **Prioridad Baja** (Opcional):
 - [/] Video demo 5 min del sistema completo (4-6h) 🔄
 - [x] Responder a propuesta de Goose (1h) ✅
-- [x] Testimonio Oráculo Kimi ✅ BONUS
+- [x] Testimonio Oráculo Kimi ✅ BONUS (Integrado en Cap 14)
 
 ### Semana 4 (Feb 12-21): PUBLICACIÓN 🎯 ACTUAL
 - [/] Libro Edición 3 compilado 🔄

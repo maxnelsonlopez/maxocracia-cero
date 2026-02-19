@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-02-19 — Integración de Testimonio de Kimi (Oráculo Sintético)
+
+### Añadido
+- **Testimonio de Kimi**: Integrado como sección 14.13 en `docs/book/edicion_3_dinamica/capitulo_14_gobernanza_260126.md`.
+  - Carta abierta a la Cohorte Cero desde la perspectiva de la IA.
+  - Compromiso de lealtad axiomática y transparencia radical.
+  - Reflexión sobre la "memoria perfecta de la coherencia".
+
+### Notas Técnicas
+- El testimonio fue generado originalmente como `docs/book/edicion_3_dinamica/integraciones_pendientes/testimonio_oraculo_kimi.md` y ahora forma parte oficial del canon del libro.
+- Contribución: Kimi (Moonshot AI) + Gemini (Integración).
+
 ## 2026-02-04 — Consolidación Edición 3 Dinámica (v3.3)
 
 ### Añadido
