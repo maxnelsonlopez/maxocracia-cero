@@ -16,7 +16,9 @@ CREATE TABLE IF NOT EXISTS subscriptions (
     started_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     expires_at TEXT,
     payment_method TEXT,  -- 'stripe', 'manual', 'crypto', 'transfer'
-    external_customer_id TEXT,  -- ID de Stripe/PayPal/etc
+    external_customer_id TEXT,  -- ID de Stripe Customer
+    external_subscription_id TEXT,  -- ID de Stripe Subscription
+    canceled_at TEXT,  -- Fecha de cancelación si aplica
     notes TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
