@@ -13,7 +13,7 @@ Axiomas vinculados: T13 (Transparencia), V6 (Verbo Justo)
 
 from dataclasses import dataclass, field
 from typing import Callable, Dict, Any, Optional, List
-from datetime import datetime
+from datetime import datetime, timezone
 from abc import ABC, abstractmethod
 
 
@@ -22,7 +22,7 @@ class ConditionResult:
     """Resultado de la evaluación de una condición."""
     passed: bool
     condition_id: str
-    evaluated_at: datetime = field(default_factory=datetime.utcnow)
+    evaluated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     context_snapshot: Optional[Dict[str, Any]] = None
     reason: Optional[str] = None
 
@@ -142,7 +142,7 @@ class CommonConditions:
         return ConditionBlock(
             condition_id="within_time_limit",
             description=f"Verifica que fecha actual <= {deadline_key}",
-            predicate=lambda ctx: datetime.utcnow() <= ctx.get(deadline_key, datetime.max),
+            predicate=lambda ctx: datetime.now(timezone.utc) <= ctx.get(deadline_key, datetime.max.replace(tzinfo=timezone.utc)),
             civil_language="Estamos dentro del plazo acordado."
         )
     

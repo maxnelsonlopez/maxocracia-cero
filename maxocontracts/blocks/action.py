@@ -13,7 +13,7 @@ Axiomas vinculados: T4 (Materialización), T10 (Responsabilidad)
 
 from dataclasses import dataclass, field
 from typing import Callable, Dict, Any, Optional, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 import copy
 
 from ..core.types import VHV
@@ -25,7 +25,7 @@ class ActionResult:
     success: bool
     action_id: str
     vhv_consumed: VHV
-    executed_at: datetime = field(default_factory=datetime.utcnow)
+    executed_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     context_before: Optional[Dict[str, Any]] = None
     context_after: Optional[Dict[str, Any]] = None
     error_message: Optional[str] = None
@@ -230,7 +230,7 @@ class CommonActions:
             action_id=f"record_timestamp_{key}",
             description=f"Registra timestamp en {key}",
             vhv_cost=vhv_cost or VHV.zero(),
-            transformer=lambda ctx: {**ctx, key: datetime.utcnow().isoformat()},
+            transformer=lambda ctx: {**ctx, key: datetime.now(timezone.utc).isoformat()},
             reverse_transformer=lambda ctx: {k: v for k, v in ctx.items() if k != key},
             civil_language=f"Registramos la fecha y hora actual en {key}."
         )

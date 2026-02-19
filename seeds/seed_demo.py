@@ -1,7 +1,7 @@
 import secrets
 import sqlite3
 import string
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from werkzeug.security import generate_password_hash
@@ -76,8 +76,8 @@ def init_db():
                         user["alias"],
                         generate_password_hash(user["password"]),
                         user.get("is_admin", False),
-                        datetime.utcnow(),
-                        datetime.utcnow(),
+                        datetime.now(timezone.utc),
+                        datetime.now(timezone.utc),
                     ),
                 )
                 print(

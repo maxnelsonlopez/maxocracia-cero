@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from enum import Enum
 from typing import Optional, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class ContractState(Enum):
@@ -101,7 +101,7 @@ class Wellness:
     - T7: Minimizar Daño (Wellness < 1 es daño)
     """
     value: Decimal
-    measured_at: datetime = field(default_factory=datetime.utcnow)
+    measured_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     participant_id: Optional[str] = None
     
     def __post_init__(self):

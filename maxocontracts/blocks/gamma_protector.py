@@ -14,7 +14,7 @@ Axiomas vinculados: T7 (Minimizar Daño), Invariante 1 (Wellness ≥ 1)
 from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Dict, Any, Optional, List, Callable
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 from maxocontracts.core.types import Wellness, Participant
@@ -37,7 +37,7 @@ class WellnessAlert:
     wellness_value: Decimal
     threshold: Decimal
     message: str
-    triggered_at: datetime = field(default_factory=datetime.utcnow)
+    triggered_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     should_retract: bool = False
 
 
@@ -47,7 +47,7 @@ class WellnessCheckResult:
     all_ok: bool
     alerts: List[WellnessAlert]
     should_trigger_retraction: bool
-    checked_at: datetime = field(default_factory=datetime.utcnow)
+    checked_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class WellnessProtectorBlock:

@@ -14,7 +14,7 @@ Axiomas vinculados: T9 (Reciprocidad Justa), T2 (Igualdad Temporal)
 from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Dict, Any, Optional, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..core.types import VHV
 
@@ -30,7 +30,7 @@ class ReciprocityBalance:
     imbalance_R: Decimal  # Desbalance en recursos
     overall_imbalance: Decimal
     tolerance_used: Decimal
-    checked_at: datetime = field(default_factory=datetime.utcnow)
+    checked_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     analysis: Optional[str] = None
     
     @property

@@ -14,7 +14,7 @@ Axiomas vinculados: Axioma SDV, Invariante 2
 from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Dict, Any, Optional, List
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..core.types import SDV, Participant
 
@@ -44,7 +44,7 @@ class SDVValidationResult:
     is_valid: bool
     participant_id: str
     violations: List[SDVViolation]
-    checked_at: datetime = field(default_factory=datetime.utcnow)
+    checked_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     should_block_action: bool = False
     
     @property

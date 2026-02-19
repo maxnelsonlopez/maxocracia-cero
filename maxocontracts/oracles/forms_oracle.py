@@ -14,7 +14,7 @@ Permite que los contratos reaccionen a eventos como:
 import sqlite3
 import uuid
 from typing import Dict, Any, Optional, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 import json
 
@@ -36,7 +36,7 @@ class FormsOracle(OracleInterface):
             approved=True,
             confidence=Decimal("1.0"),
             reasoning="FormsOracle does not validate contract structure",
-            responded_at=datetime.utcnow(),
+            responded_at=datetime.now(timezone.utc),
             oracle_type="forms"
         )
         
@@ -47,7 +47,7 @@ class FormsOracle(OracleInterface):
             approved=False,
             confidence=Decimal("0.0"),
             reasoning="FormsOracle cannot evaluate retractions",
-            responded_at=datetime.utcnow(),
+            responded_at=datetime.now(timezone.utc),
             oracle_type="forms"
         )
         
@@ -76,7 +76,7 @@ class FormsOracle(OracleInterface):
                 approved=False,
                 confidence=Decimal("1.0"),
                 reasoning="participant_id required in context",
-                responded_at=datetime.utcnow(),
+                responded_at=datetime.now(timezone.utc),
                 oracle_type="forms"
             )
             
@@ -89,7 +89,7 @@ class FormsOracle(OracleInterface):
                 approved=False,
                 confidence=Decimal("1.0"),
                 reasoning=f"Invalid participant_id format: {participant_id_str}",
-                responded_at=datetime.utcnow(),
+                responded_at=datetime.now(timezone.utc),
                 oracle_type="forms"
             )
             
@@ -106,7 +106,7 @@ class FormsOracle(OracleInterface):
                 approved=False,
                 confidence=Decimal("1.0"),
                 reasoning=f"Unknown condition_id: {condition_id}",
-                responded_at=datetime.utcnow(),
+                responded_at=datetime.now(timezone.utc),
                 oracle_type="forms"
             )
 
@@ -119,7 +119,7 @@ class FormsOracle(OracleInterface):
         
         # Opcional: ventana de tiempo (por defecto 7 días atrás)
         hours = context.get("time_window_hours", 24 * 7)
-        since_date = (datetime.utcnow() - timedelta(hours=hours)).isoformat()
+        since_date = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
         
         # Buscar participant_id correspondiente al user_id
         # Nota: La tabla follow_ups usa participant_id, que es ID de la tabla participants,
@@ -162,7 +162,7 @@ class FormsOracle(OracleInterface):
                 approved=True,
                 confidence=Decimal("1.0"),
                 reasoning=f"Verification found: ID {row['id']} on {row['follow_up_date']}",
-                responded_at=datetime.utcnow(),
+                responded_at=datetime.now(timezone.utc),
                 oracle_type="forms",
                 metadata={"follow_up_id": row["id"], "notes": row["facilitator_notes"]}
             )
@@ -172,7 +172,7 @@ class FormsOracle(OracleInterface):
                 approved=False,
                 confidence=Decimal("0.9"), # Alta confianza de que NO existe
                 reasoning="No verification found in time window",
-                responded_at=datetime.utcnow(),
+                responded_at=datetime.now(timezone.utc),
                 oracle_type="forms"
             )
 
@@ -212,7 +212,7 @@ class FormsOracle(OracleInterface):
                 approved=True,
                 confidence=Decimal("1.0"),
                 reasoning="High priority alert found",
-                responded_at=datetime.utcnow(),
+                responded_at=datetime.now(timezone.utc),
                 oracle_type="forms",
                 metadata={"follow_up_id": row["id"]}
             )

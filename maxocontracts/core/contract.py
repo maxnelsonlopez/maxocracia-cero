@@ -9,7 +9,7 @@ Referencia: FUNDAMENTOS_CONCEPTUALES.md
 from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Dict, Any, List, Optional, Callable
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 import uuid
 import json
@@ -74,7 +74,7 @@ class MaxoContract:
         
         # Estado
         self._state = ContractState.DRAFT
-        self._created_at = datetime.utcnow()
+        self._created_at = datetime.now(timezone.utc)
         self._activated_at: Optional[datetime] = None
         self._completed_at: Optional[datetime] = None
         
@@ -227,7 +227,7 @@ class MaxoContract:
             return False
         
         self._state = ContractState.ACTIVE
-        self._activated_at = datetime.utcnow()
+        self._activated_at = datetime.now(timezone.utc)
         self._log_event("state_changed", {"from": "PENDING", "to": "ACTIVE"})
         return True
     
@@ -241,7 +241,7 @@ class MaxoContract:
             return False
         
         self._state = ContractState.EXECUTED
-        self._completed_at = datetime.utcnow()
+        self._completed_at = datetime.now(timezone.utc)
         self._log_event("state_changed", {"from": "ACTIVE", "to": "EXECUTED"})
         return True
     
@@ -256,7 +256,7 @@ class MaxoContract:
         
         previous_state = self._state.value
         self._state = ContractState.RETRACTED
-        self._completed_at = datetime.utcnow()
+        self._completed_at = datetime.now(timezone.utc)
         
         self._log_event("contract_retracted", {
             "reason": reason,
@@ -272,7 +272,7 @@ class MaxoContract:
         """Registra un evento en el log."""
         event = ContractEvent(
             event_type=event_type,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             data=data,
             actor_id=actor_id
         )
