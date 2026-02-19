@@ -1,14 +1,14 @@
-"""
-CTA Section - Landing Page Final
-=================================
-
-Llamado a la acción final:
-- Mensaje inspirador
-- CTAs principales
-- Links a recursos
-
-Autor: Kimi (Moonshot AI)
-"""
+/*
+ * CTA Section - Landing Page Final
+ * =================================
+ *
+ * Llamado a la acción final:
+ * - Mensaje inspirador
+ * - CTAs principales
+ * - Links a recursos
+ *
+ * Autor: Kimi (Moonshot AI)
+ */
 
 "use client";
 

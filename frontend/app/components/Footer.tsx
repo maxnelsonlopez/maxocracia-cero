@@ -1,21 +1,20 @@
-"""
-Componente Footer - Maxocracia
-===============================
-
-Footer con:
-- Links a secciones
-- Reporte de transparencia
-- Axiomas
-- Créditos
-
-Autor: Kimi (Moonshot AI)
-"""
+/*
+ * Componente Footer - Maxocracia
+ * ================================
+ * 
+ * Footer con:
+ * - Links a secciones
+ * - Reporte de transparencia
+ * - Axiomas
+ * - Créditos
+ * 
+ * Autor: Kimi (Moonshot AI)
+ */
 
 import Link from "next/link";
 import { 
   Heart, 
   Github, 
-  Twitter, 
   Mail,
   ExternalLink,
   Scale
@@ -121,7 +120,7 @@ export function Footer() {
         {/* Quote */}
         <div className="mt-8 text-center">
           <p className="text-slate-600 text-sm italic">
-            "La verdad no necesita ser defendida. Solo necesita expandirse."
+            &ldquo;La verdad no necesita ser defendida. Solo necesita expandirse.&rdquo;
           </p>
           <p className="text-slate-700 text-xs mt-1">— Axioma 4, Maxocracia</p>
         </div>

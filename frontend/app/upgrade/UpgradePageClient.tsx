@@ -1,15 +1,15 @@
-"""
-Cliente de Upgrade - Lógica interactiva
-========================================
-
-Componente cliente que maneja:
-- Selección de tier
-- Cálculo PPP
-- Integración con Stripe Checkout
-- Gestión de estado de suscripción
-
-Autor: Kimi (Moonshot AI)
-"""
+/*
+ * Cliente de Upgrade - Lógica interactiva
+ * ========================================
+ * 
+ * Componente cliente que maneja:
+ * - Selección de tier
+ * - Cálculo PPP
+ * - Integración con Stripe Checkout
+ * - Gestión de estado de suscripción
+ * 
+ * Autor: Kimi (Moonshot AI)
+ */
 
 "use client";
 

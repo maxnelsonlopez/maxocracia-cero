@@ -1,16 +1,16 @@
-"""
-Componente de Navegación - Maxocracia
-======================================
-
-Navegación principal con:
-- Logo y marca
-- Links a secciones principales
-- Badge de suscripción
-- Botón de contribuir
-- Modo responsive
-
-Autor: Kimi (Moonshot AI)
-"""
+/*
+ * Componente de Navegación - Maxocracia
+ * ======================================
+ * 
+ * Navegación principal con:
+ * - Logo y marca
+ * - Links a secciones principales
+ * - Badge de suscripción
+ * - Botón de contribuir
+ * - Modo responsive
+ * 
+ * Autor: Kimi (Moonshot AI)
+ */
 
 "use client";
 

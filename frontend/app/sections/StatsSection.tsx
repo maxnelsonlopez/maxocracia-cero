@@ -1,15 +1,15 @@
-"""
-Stats Section - Landing Page
-=============================
-
-Métricas del proyecto con animaciones:
-- Tests pasando
-- Líneas de código
-- Capítulos del libro
-- Miembros cohorte
-
-Autor: Kimi (Moonshot AI)
-"""
+/*
+ * Stats Section - Landing Page
+ * =============================
+ *
+ * Métricas del proyecto con animaciones:
+ * - Tests pasando
+ * - Líneas de código
+ * - Capítulos del libro
+ * - Miembros cohorte
+ *
+ * Autor: Kimi (Moonshot AI)
+ */
 
 "use client";
 

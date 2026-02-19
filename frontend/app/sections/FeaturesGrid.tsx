@@ -1,14 +1,14 @@
-"""
-Features Grid Section - Landing Page
-=====================================
-
-Grid de características principales del proyecto:
-- 4 capas de Maxocracia
-- Features con iconos
-- Hover effects
-
-Autor: Kimi (Moonshot AI)
-"""
+/*
+ * Features Grid Section - Landing Page
+ * =====================================
+ *
+ * Grid de características principales del proyecto:
+ * - 4 capas de Maxocracia
+ * - Features con iconos
+ * - Hover effects
+ *
+ * Autor: Kimi (Moonshot AI)
+ */
 
 "use client";
 

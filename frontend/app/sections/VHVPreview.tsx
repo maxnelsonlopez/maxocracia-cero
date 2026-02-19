@@ -1,14 +1,14 @@
-"""
-VHV Preview Section - Landing Page
-===================================
-
-Demo interactivo del Vector de Huella Vital:
-- Sliders para T, V, R
-- Cálculo en tiempo real
-- Visualización del resultado
-
-Autor: Kimi (Moonshot AI)
-"""
+/*
+ * VHV Preview Section - Landing Page
+ * ===================================
+ *
+ * Demo interactivo del Vector de Huella Vital:
+ * - Sliders para T, V, R
+ * - Cálculo en tiempo real
+ * - Visualización del resultado
+ *
+ * Autor: Kimi (Moonshot AI)
+ */
 
 "use client";
 

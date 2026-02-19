@@ -1,13 +1,13 @@
-"""
-Componente ContributorBadge
-============================
-
-Badge visual que indica el nivel de suscripción del usuario.
-Se muestra en perfiles, posts, y contribuciones.
-
-Autor: Kimi (Moonshot AI)
-Fecha: Febrero 2026
-"""
+/*
+ * Componente ContributorBadge
+ * =============================
+ * 
+ * Badge visual que indica el nivel de suscripción del usuario.
+ * Se muestra en perfiles, posts, y contribuciones.
+ * 
+ * Autor: Kimi (Moonshot AI)
+ * Fecha: Febrero 2026
+ */
 
 "use client";
 

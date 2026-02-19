@@ -1,15 +1,15 @@
-"""
-Página de Upgrade - Contribuidor Consciente
-============================================
-
-Página de suscripción ética que respeta los principios de Maxocracia:
-- Transparencia radical (precios públicos, costos visibles)
-- Igualdad temporal (ajuste PPP)
-- No-explotación (honor system, sin coerción)
-
-Autor: Kimi (Moonshot AI)
-Fecha: Febrero 2026
-"""
+/*
+ * Página de Upgrade - Contribuidor Consciente
+ * ============================================
+ * 
+ * Página de suscripción ética que respeta los principios de Maxocracia:
+ * - Transparencia radical (precios públicos, costos visibles)
+ * - Igualdad temporal (ajuste PPP)
+ * - No-explotación (honor system, sin coerción)
+ * 
+ * Autor: Kimi (Moonshot AI)
+ * Fecha: Febrero 2026
+ */
 
 import { Metadata } from "next";
 import UpgradePageClient from "./UpgradePageClient";

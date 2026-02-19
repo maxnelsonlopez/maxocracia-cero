@@ -1,15 +1,15 @@
-"""
-Hero Section - Maxocracia Landing
-==================================
-
-Sección hero con:
-- Headline impactante
-- Subtítulo explicativo
-- CTAs principales
-- Elementos visuales animados
-
-Autor: Kimi (Moonshot AI)
-"""
+/*
+ * Hero Section - Maxocracia Landing
+ * ==================================
+ * 
+ * Sección hero con:
+ * - Headline impactante
+ * - Subtítulo explicativo
+ * - CTAs principales
+ * - Elementos visuales animados
+ * 
+ * Autor: Kimi (Moonshot AI)
+ */
 
 "use client";
 

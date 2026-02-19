@@ -1,16 +1,16 @@
-"""
-Landing Page - Maxocracia
-==========================
-
-Página principal que sirve como portal al ecosistema:
-- Hero impactante con valor proposición
-- Demo interactiva del VHV
-- Features principales
-- CTA a suscripción
-- Stats del proyecto
-
-Autor: Kimi (Moonshot AI)
-"""
+/*
+ * Landing Page - Maxocracia
+ * ==========================
+ * 
+ * Página principal que sirve como portal al ecosistema:
+ * - Hero impactante con valor proposición
+ * - Demo interactiva del VHV
+ * - Features principales
+ * - CTA a suscripción
+ * - Stats del proyecto
+ * 
+ * Autor: Kimi (Moonshot AI)
+ */
 
 import { Metadata } from "next";
 import { HeroSection } from "./sections/HeroSection";
