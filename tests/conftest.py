@@ -28,6 +28,10 @@ def app():
     # Create the database and load test data
     with app.app_context():
         init_db()
+        
+        # Crear tablas de suscripción para pruebas
+        from app.subscriptions import init_subscription_tables
+        init_subscription_tables(app)
 
         # Add test user with valid password that meets requirements
         db = sqlite3.connect(db_path)

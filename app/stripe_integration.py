@@ -14,7 +14,10 @@ from datetime import datetime, timedelta, timezone
 from functools import wraps
 from typing import Dict, Optional
 
-import stripe
+try:
+    import stripe
+except ImportError:
+    stripe = None  # Opcional para testing
 from flask import Blueprint, jsonify, request, current_app
 
 from .jwt_utils import token_required
@@ -25,7 +28,8 @@ from .subscriptions import PREMIUM_TIERS, PPP_ADJUSTMENTS, get_db
 # ============================================================================
 
 # Inicializar Stripe con API key desde variables de entorno
-stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "")
+if stripe:
+    stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
 STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "")
 
@@ -61,7 +65,7 @@ def stripe_configured(f):
     """
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not stripe.api_key:
+        if not stripe or not stripe.api_key:
             return jsonify({
                 "error": "stripe_not_configured",
                 "message": "Integración con Stripe no configurada",

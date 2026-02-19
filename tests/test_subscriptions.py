@@ -82,7 +82,7 @@ class TestFairPriceCalculation:
         resp = client.post("/subscriptions/calculate-fair-price",
                           json={
                               "country_code": "CO",
-                              "monthly_income_usd": 400
+                              "reported_monthly_income_usd": 400
                           })
         data = resp.get_json()
         # Base: 25 * 0.35 (PPP) = 8.75
