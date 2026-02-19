@@ -44,6 +44,7 @@ def create_app(db_path=None):
     from .maxo_bp import bp as maxo_bp
     from .reputation_bp import bp as reputation_bp
     from .resources_bp import bp as resources_bp
+    from .subscriptions import subscriptions_bp
     from .tvi_bp import tvi_bp
     from .users import bp as users_bp
     from .vhv_bp import vhv_bp
@@ -58,6 +59,7 @@ def create_app(db_path=None):
     app.register_blueprint(tvi_bp)
     app.register_blueprint(forms_bp)
     app.register_blueprint(contracts_bp)
+    app.register_blueprint(subscriptions_bp)
 
     # placeholder imports to ensure modules loaded
     # other optional blueprints can be imported here
