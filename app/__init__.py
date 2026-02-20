@@ -91,21 +91,33 @@ def create_app(db_path=None):
         return response
 
     # serve a small static UI at /
-    @app.route("/")
-    def root_index():
+    @app.route("/", defaults={"path": ""})
+    @app.route("/<path:path>")
+    def catch_all(path):
         from flask import send_from_directory
+        
+        dist_dir = os.path.join(os.path.dirname(__file__), "static", "dist")
+        
+        if not os.path.exists(dist_dir):
+            # Fallback al static tradicional si no hay dist
+            return send_from_directory(os.path.join(os.path.dirname(__file__), "static"), "index.html")
 
-        # Intentar servir desde el build de Next.js si existe
-        next_index = os.path.join(os.path.dirname(__file__), "static", "dist", "index.html")
-        if os.path.exists(next_index):
-            return send_from_directory(
-                os.path.join(os.path.dirname(__file__), "static", "dist"), "index.html"
-            )
+        # Intentar servir el archivo exacto (ej: /_next/static/...)
+        if os.path.exists(os.path.join(dist_dir, path)) and not os.path.isdir(os.path.join(dist_dir, path)):
+            return send_from_directory(dist_dir, path)
+            
+        # Intentar servir .html si existe (ej: /upgrade -> upgrade.html)
+        html_file = f"{path}.html"
+        if os.path.exists(os.path.join(dist_dir, html_file)):
+            return send_from_directory(dist_dir, html_file)
+            
+        # Intentar servir index.html en la carpeta (ej: /admin -> admin/index.html)
+        folder_index = os.path.join(path, "index.html")
+        if os.path.exists(os.path.join(dist_dir, folder_index)):
+            return send_from_directory(dist_dir, folder_index)
 
-        # Fallback al index tradicional
-        return send_from_directory(
-            os.path.join(os.path.dirname(__file__), "static"), "index.html"
-        )
+        # Si nada funciona, servir index.html (SPA Fallback)
+        return send_from_directory(dist_dir, "index.html")
 
     @app.route("/favicon.ico")
     def favicon():

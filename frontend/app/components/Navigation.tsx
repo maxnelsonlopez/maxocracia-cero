@@ -17,13 +17,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Menu, 
-  X, 
-  Zap, 
-  Calculator, 
-  FileText, 
-  Users, 
+import {
+  Menu,
+  X,
+  Zap,
+  Calculator,
+  FileText,
+  Users,
   Heart,
   Sparkles,
   Github
@@ -34,7 +34,7 @@ const navLinks = [
   { href: "/", label: "Inicio", icon: Sparkles },
   { href: "/upgrade", label: "Contribuir", icon: Heart },
   { href: "/contracts/builder", label: "Contratos", icon: FileText },
-  { href: "http://localhost:5001/admin", label: "Dashboard", icon: Users, external: true },
+  { href: "/admin/dashboard", label: "Admin", icon: Users },
   { href: "http://localhost:5001/vhv-calculator.html", label: "VHV Calc", icon: Calculator, external: true },
 ];
 
@@ -55,11 +55,10 @@ export function Navigation() {
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
             ? "bg-slate-950/80 backdrop-blur-lg border-b border-slate-800"
             : "bg-transparent"
-        }`}
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -126,7 +125,7 @@ export function Navigation() {
                   <MobileNavLink {...link} onClick={() => setIsOpen(false)} />
                 </motion.div>
               ))}
-              
+
               <div className="mt-6 pt-6 border-t border-slate-800">
                 <ContributorBadge />
               </div>

@@ -525,6 +525,76 @@ def activate_manual(current_user):
 
 
 # ============================================================================
+# ENDPOINTS DE ADMINISTRACIÓN (Next.js Dashboard support)
+# ============================================================================
+
+@subscriptions_bp.route("/admin/users", methods=["GET"])
+@token_required
+def admin_list_users(current_user):
+    """
+    Lista todos los usuarios con su estado de suscripción actual.
+    Solo para administradores.
+    """
+    if not current_user.get("is_admin"):
+        return jsonify({"error": "admin_required"}), 403
+        
+    db = get_db()
+    users = db.execute(
+        """
+        SELECT 
+            u.id, u.email, u.name, u.alias,
+            s.tier, s.status as sub_status, s.expires_at, s.payment_method
+        FROM users u
+        LEFT JOIN subscriptions s ON u.id = s.user_id
+        ORDER BY u.created_at DESC
+        """
+    ).fetchall()
+    
+    return jsonify([dict(u) for u in users])
+
+
+@subscriptions_bp.route("/admin/stats", methods=["GET"])
+@token_required
+def admin_stats(current_user):
+    """
+    Estadísticas globales de suscripciones para el Dashboard.
+    """
+    if not current_user.get("is_admin"):
+        return jsonify({"error": "admin_required"}), 403
+        
+    db = get_db()
+    
+    # Total de usuarios
+    total_users = db.execute("SELECT COUNT(*) as count FROM users").fetchone()["count"]
+    
+    # Contribuidores activos por tier
+    tiers_count = db.execute(
+        """
+        SELECT tier, COUNT(*) as count 
+        FROM subscriptions 
+        WHERE status = 'active' 
+        AND (expires_at IS NULL OR expires_at > datetime('now'))
+        GROUP BY tier
+        """
+    ).fetchall()
+    
+    # Ingresos mensuales base (estimados por tier)
+    mrr = 0
+    for row in tiers_count:
+        price = PREMIUM_TIERS.get(row["tier"], {}).get("price_usd", 0)
+        mrr += row["count"] * price
+        
+    return jsonify({
+        "total_users": total_users,
+        "active_contributors": sum(row["count"] for row in tiers_count),
+        "mrr_usd_estimated": mrr,
+        "tiers_breakdown": [dict(row) for row in tiers_count],
+        "operational_costs": 100,  # Placeholder fijo por ahora
+        "surplus": mrr - 100
+    })
+
+
+# ============================================================================
 # FUNCIONES AUXILIARES
 # ============================================================================
 
