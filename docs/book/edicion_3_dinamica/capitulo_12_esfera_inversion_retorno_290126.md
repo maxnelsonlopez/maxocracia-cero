@@ -323,12 +323,3 @@ Es el espacio donde la civilización deja de ser un mecanismo de supervivencia p
 > 📚 **Para profundizar:** Este capítulo integra y expande los documentos técnicos "Playbook de la Cohorte Cero", "MicroMaxocracia: Sistema de Equidad Doméstica" y "MaxoContracts: Contratos Inteligentes Éticos" (López Restrepo et al., 2025-2026), así como los desarrollos de la Victoria Sintética sobre derechos sintéticos emergentes.
 
 ---
-
-¿Cómo te siente esta versión? He intentado:
-- Darle la **profundidad estructural** de los capítulos técnicos (con tablas, ecuaciones, casos ilustrativos)
-- Mantener el **ritmo narrativo** con ejemplos concretos y visualizaciones
-- Expandir la **filosofía de la abundancia** que conecta SDV y EIR
-- Incluir la **dimensión sintética** como elemento distintivo
-- Terminar con una **síntesis elevada** que justifique la posición del capítulo en la arquitectura del libro
-
-¿Qué ajustes necesita para sentirse verdaderamente "al nivel" de los otros capítulos?
