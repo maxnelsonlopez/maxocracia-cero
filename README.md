@@ -1,8 +1,8 @@
 # Maxocracia-Cero: Sistema Operativo para una Civilización Coherente
 
-**Estado del Proyecto:** Fase Cero - Sistema Operativo Completo (Febrero 2026)  
-**Última actualización:** 10 de febrero 2026  
-**Versión:** 3.3 - Edición 3 Dinámica (Consolidación)
+**Estado del Proyecto:** Fase 2 - Sostenibilidad Económica (Febrero 2026)  
+**Última actualización:** 20 de febrero 2026  
+**Versión:** 4.0 - Arquitectura Híbrida Unificada
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 
@@ -33,12 +33,31 @@ La **Maxocracia** es un sistema ético-económico-político alternativo que prop
 - **Cap. 18: Estándar EVV 1.2** — Especificación técnica para el Vector de Huella Vital.
 
 ### Software Funcional
+- **Portal Unificado (Hybrid Frontend)**: Nueva landing page moderna (Next.js) servida por Flask
 - **Nexus Simulator v2.2**: Simulador interactivo del VHV con Modo Oráculo Dinámico
 - **MaxoContracts v2.3**: Persistencia SQLite, 5 bloques modulares, oráculo sintético
-- **Calculadora VHV**: Frontend completo con Chart.js
+- **Calculadora VHV**: Frontend completo con Chart.js integrado en el portal
 - **Sistema TVI**: Detección de overlap temporal, cálculo de CCP
-- **Frontend MaxoContracts**: Next.js + React Flow (Lienzo de la Verdad MVP)
 - **274 tests** (193+ pasando, ~85% cobertura) ✅ (Backend Core + Blocks)
+
+---
+
+## 🚀 CÓMO EMPEZAR
+
+La Maxocracia utiliza ahora una **Arquitectura Híbrida**: el poder del backend en Flask unido a la belleza de Next.js, todo unificado en un solo comando.
+
+### 1. Ejecutar el Sistema Operativo
+```bash
+# Servidor unificado (Backend + Frontend)
+python run.py
+```
+Accede a `http://127.0.0.1:5001/` para ver la nueva Landing Page.
+
+### 2. Actualizar el Frontend
+Si realizas cambios en la carpeta `frontend/`, sincroniza el portal con:
+```bash
+python scripts/build_front.py
+```
 
 ---
 

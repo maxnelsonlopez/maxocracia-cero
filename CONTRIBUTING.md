@@ -114,25 +114,25 @@ La documentación es clave para el proyecto. Puedes ayudar a mejorarla de varias
    python scripts/init_db.py
    ```
 
+6. Construye el frontend (requiere Node.js):
+   ```bash
+   python scripts/build_front.py
+   ```
+
 ### Estructura del Proyecto
 
 ```
 maxocracia-cero/
-├── app/                  # Código fuente de la aplicación Flask
-│   ├── __init__.py
-│   ├── auth.py          # Autenticación y autorización
-│   ├── models.py        # Modelos de datos
-│   ├── routes/          # Rutas de la API
-│   └── utils/           # Utilidades y helpers
+├── app/                  # Backend Flask
+│   ├── static/dist/      # Build exportado del Frontend (NO editar aquí)
+│   └── ...
+├── frontend/             # Frontend Moderno (Next.js + Tailwind + Framer Motion)
+│   ├── app/              # Componentes y páginas (EDITAR AQUÍ)
+│   └── ...
 ├── maxocontracts/       # MaxoContracts - Contratos Inteligentes Éticos
-│   ├── core/            # Tipos base, axiomas, motor de contratos
-│   ├── blocks/          # 5 bloques modulares
-│   ├── oracles/         # Oráculos sintéticos y humanos
-│   └── examples/        # Ejemplos de uso
 ├── tests/               # Pruebas automatizadas
 ├── docs/                # Documentación
-├── migrations/          # Migraciones de base de datos
-├── scripts/             # Scripts de utilidad
+├── scripts/             # Scripts de utilidad (incluyendo build_front.py)
 └── simulator/           # Nexus Simulator
 ```
 

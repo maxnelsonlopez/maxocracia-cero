@@ -95,6 +95,14 @@ def create_app(db_path=None):
     def root_index():
         from flask import send_from_directory
 
+        # Intentar servir desde el build de Next.js si existe
+        next_index = os.path.join(os.path.dirname(__file__), "static", "dist", "index.html")
+        if os.path.exists(next_index):
+            return send_from_directory(
+                os.path.join(os.path.dirname(__file__), "static", "dist"), "index.html"
+            )
+
+        # Fallback al index tradicional
         return send_from_directory(
             os.path.join(os.path.dirname(__file__), "static"), "index.html"
         )
