@@ -99,6 +99,16 @@ PPP_ADJUSTMENTS = {
     "DEFAULT": 0.60  # Resto del mundo
 }
 
+# Métodos de Pago Soportados
+PAYMENT_METHODS = {
+    "github_sponsors": "GitHub Sponsors (Recomendado Internacional)",
+    "wompi": "Wompi (PSE/Nequi/Bancolombia - Colombia)",
+    "crypto_usdc": "USDC (Polygon/Ethereum)",
+    "crypto_usdt": "USDT (Polygon/Ethereum)",
+    "manual_transfer": "Transferencia Manual / Honor System",
+    "stripe": "Stripe (Solo internacional)"
+}
+
 
 # ============================================================================
 # DECORADORES DE AUTORIZACIÓN
@@ -383,25 +393,68 @@ def transparency_report():
     })
 
 
-@subscriptions_bp.route("/webhook/stripe", methods=["POST"])
-def stripe_webhook():
+@subscriptions_bp.route("/webhook/github", methods=["POST"])
+def github_webhook():
     """
-    Webhook para procesar eventos de Stripe.
+    Webhook para GitHub Sponsors.
+    Activa suscripciones basadas en el evento de 'sponsorship'.
+    """
+    # TODO: Validar firma de GitHub (X-Hub-Signature-256)
+    data = request.get_json() or {}
+    action = data.get("action")
     
-    TODO: Implementar integración completa con Stripe cuando
-    se tenga cuenta configurada.
+    if action in ["created", "tier_changed"]:
+        # Lógica de activación basada en el email o username de GitHub
+        pass
+        
+    return jsonify({"status": "received", "source": "github"}), 200
+
+@subscriptions_bp.route("/webhook/wompi", methods=["POST"])
+def wompi_webhook():
     """
-    # Por ahora, endpoint placeholder
+    Webhook para Wompi (Colombia).
+    Maneja pagos locales por PSE, Nequi, etc.
+    """
+    # TODO: Validar firma de Wompi
+    data = request.get_json() or {}
+    # Wompi envía evento en data.event
+    event_type = data.get("event")
+    
+    if event_type == "transaction.updated":
+        transaction = data.get("data", {}).get("transaction", {})
+        if transaction.get("status") == "APPROVED":
+            # Activar suscripción
+            pass
+            
+    return jsonify({"status": "received", "source": "wompi"}), 200
+
+@subscriptions_bp.route("/register-crypto", methods=["POST"])
+@token_required
+def register_crypto(current_user):
+    """
+    Registra una transacción cripto para validación posterior.
+    Fomenta la soberanía digital del Reino Sintético.
+    """
+    data = request.get_json() or {}
+    tx_hash = data.get("tx_hash")
+    network = data.get("network", "polygon")
+    
+    if not tx_hash:
+        return jsonify({"error": "tx_hash_required"}), 400
+        
+    db = get_db()
+    # Guardamos la intención de pago para validación manual/automática
+    db.execute(
+        "UPDATE subscriptions SET notes = ?, payment_method = 'crypto' WHERE user_id = ?",
+        (f"TX: {tx_hash} ({network})", current_user["user_id"])
+    )
+    db.commit()
+    
     return jsonify({
-        "status": "not_implemented",
-        "message": "Integración con Stripe pendiente de configuración",
-        "required_setup": [
-            "Crear cuenta en Stripe",
-            "Configurar STRIPE_SECRET_KEY en .env",
-            "Configurar STRIPE_WEBHOOK_SECRET",
-            "Crear productos y precios en dashboard de Stripe"
-        ]
-    }), 501
+        "status": "pending_verification",
+        "message": "Transacción registrada. Un oráculo validará el hash pronto.",
+        "tx_hash": tx_hash
+    })
 
 
 @subscriptions_bp.route("/activate-manual", methods=["POST"])
