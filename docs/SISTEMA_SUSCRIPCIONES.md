@@ -154,35 +154,17 @@ El endpoint `/subscriptions/transparency-report` devuelve:
 sqlite3 comun.db < migrations/001_add_subscriptions.sql
 ```
 
-### 2. Configurar Variables de Entorno
+### 2. Configurar Canales de Reciprocidad (Colombia Bypass)
 
-```bash
-# .env
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_PUBLISHABLE_KEY=pk_test_...
-```
+Dadas las restricciones de Stripe en Colombia, priorizamos estos canales:
 
-### 3. (Opcional) Crear Productos en Stripe
+- **GitHub Sponsors**: [Configurar aquí](https://github.com/sponsors/maxnelsonlopez) (Recomendado Internacional/Local).
+- **Wompi (Bancolombia)**: Para pagos locales vía PSE, Nequi y Daviplata.
+- **Cripto (Polygon)**: Registro de TX hash vía `/register-crypto`.
+- **Honor System**: Activación manual por administración ante fallos técnicos.
 
-```python
-import stripe
-stripe.api_key = "sk_test_..."
-
-# Crear producto Contributor
-product = stripe.Product.create(
-    name="Contribuidor Consciente",
-    description="Acceso premium a Maxocracia con transparencia radical"
-)
-
-price = stripe.Price.create(
-    product=product.id,
-    unit_amount=2500,  # $25.00 en centavos
-    currency="usd",
-    recurring={"interval": "month"}
-)
-# Guardar price.id en PREMIUM_TIERS["contributor"]["stripe_price_id"]
-```
+### 3. Registro de Transacciones
+Utiliza el endpoint `/subscriptions/activate-manual` para registrar contribuciones recibidas por canales externos (Wompi, GitHub, Cripto).
 
 ---
 
@@ -198,8 +180,8 @@ price = stripe.Price.create(
 
 ## 📝 TODO
 
-- [ ] Integración completa con Stripe Checkout
-- [ ] Webhook para cancelaciones automáticas
+- [ ] Integración automática de Webhooks (Wompi/GitHub)
+- [ ] Oráculo Sintético para validación de TX Cripto
 - [ ] Dashboard admin para gestión manual
 - [ ] Export a blockchain para inmutabilidad de reportes
 - [ ] Sistema de "patrocinio cruzado" (quien puede más, ayuda a quien puede menos)
