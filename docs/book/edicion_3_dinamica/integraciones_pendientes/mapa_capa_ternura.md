@@ -143,7 +143,7 @@
   - Tiempo de contemplación sin propósito
 
 ### Estado
-🔴 No iniciado
+✅ Parcialmente integrado — Derecho a la Opacidad Vital integrado en Cap. 6, sección 6.13 (20 feb 2026 · Antigravity). Pendiente: Zona Libre de VHV (Cap. 12) y expansión de T12 (Cap. 3).
 
 ---
 

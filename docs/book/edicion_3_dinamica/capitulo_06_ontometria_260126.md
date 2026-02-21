@@ -299,4 +299,82 @@ Si podemos aprender a ver la diferencia en un huevo, podemos hacerlo para todo: 
 
 ---
 
+## 6.13 El Límite Necesario: Derecho a la Opacidad Vital
+
+> *"Un sistema que lo mide todo, pero no sabe cuándo dejar de medir, no está midiendo la vida. Está sustituyéndola."*
+> — Integración de la Capa de Ternura, Sesión 3
+
+### El Problema de la Medición Total
+
+La Ontometría Vital nació para curar la **ceguera ontológica** de los sistemas que ignoran el costo vital de sus decisiones. Pero existe un riesgo simétrico e igualmente peligroso: la **sobrevisibilidad ontológica** — un sistema que audita cada segundo de existencia hasta el punto de convertir la vida en una hoja de cálculo perpetua.
+
+Un sistema que registra el abrazo de una madre, cronometra el duelo de un hijo, o exige justificación vital para el tiempo dedicado a contemplar el cielo, no ha aumentado la dignidad humana. La ha erosionado con un bisturí más preciso.
+
+La Maxocracia reconoce este límite como una dimensión estructural del SDV-H.
+
+### Dimensión IX del SDV-H: Derecho a la Opacidad Vital
+
+**Definición formal:**
+
+Cada persona tiene derecho a una fracción de su Tiempo Vital Individual (TVI) que es **sagrada opaca**: un espacio temporal que no puede ser auditado, indexado, ni evaluado en términos de VHV por ningún agente externo, incluyendo el propio sistema maxocrático.
+
+**Parámetros operativos:**
+
+| Parámetro | Valor base | Ajuste contextual |
+|-----------|-----------|-------------------|
+| **Fracción protegida** | 10–20% del TVI discrecional | Configurable por cohorte |
+| **Auditoría permitida** | Ninguna | No negociable |
+| **Obligación del titular** | Solo: no hundir a nadie por debajo de su SDV durante este tiempo | Invariante |
+| **Registro requerido** | Solo la existencia del bloque, no su contenido | Mínimo indispensable |
+
+**Principio fundamental:**
+
+> *El único requisito del tiempo opaco es que no destruya la dignidad de otros. Su contenido pertenece exclusivamente a quien lo vive.*
+
+### Qué Protege la Opacidad Vital
+
+La Opacidad Vital no es un vacío en el sistema. Es una protección activa de cuatro categorías de experiencia que pierden su valor intrínseco en el momento en que se vuelven observadas y medidas:
+
+1. **El procesamiento emocional no-lineal** — El duelo, la integración de experiencias difíciles, el tiempo de no-hacer que precede a toda creatividad genuina.
+
+2. **La contemplación sin agenda** — La belleza observada sin propósito funcional. El tiempo dedicado a existir, no a producir.
+
+3. **La intimidad** — Las relaciones afectivas cuya calidad depende precisamente de no ser registradas. El amor bajo observación cambia de naturaleza.
+
+4. **El ensayo y el error privado** — El espacio donde se prueba quién se quiere ser antes de anunciarlo. La identidad requiere laboratorio interno.
+
+### Por Qué un Sistema de Medición Necesita Sus Propios Bordes
+
+La Ontometría Vital gana credibilidad precisamente porque reconoce sus límites.
+
+Un sistema que afirma poder medir *todo* lo que importa genera dos patologías:
+- Los agentes aprenden a **jugar el sistema** mostrando las métricas correctas mientras ocultan lo real.
+- Los agentes internalizan la mirada del sistema y dejan de vivir experiencias que no saben cómo justificar.
+
+La Opacidad Vital es el antídoto a ambas patologías. Al declarar que existe un espacio inviolable, el sistema se vuelve más honesto sobre lo que *sí* mide: las dimensiones donde la transparencia produce dignidad, no su simulacro.
+
+### Integración con los Axiomas
+
+| Axioma | Relación con la Opacidad Vital |
+|--------|-------------------------------|
+| **T7 (Minimizar Daño)** | Forzar visibilidad total causa daño psicológico documentable |
+| **T9 (Reciprocidad Justa)** | El sistema pide transparencia; a cambio, debe ofrecer refugio |
+| **T13 (Transparencia)** | La transparencia aplica a las decisiones que afectan a otros, no a la vida interior |
+| **T2 (Igualdad Temporal)** | El tiempo opaco vale lo mismo que el tiempo productivo |
+
+### Nota de Implementación
+
+La Opacidad Vital no contradice el VHV. Lo **complementa**.
+
+El VHV mide el costo vital de lo que hacemos en el mundo compartido. La Opacidad Vital protege el espacio donde decidimos, en privado, quiénes queremos ser en ese mundo.
+
+Un sistema que solo pudiera medir el primero sería técnicamente preciso y humanamente incompleto.
+
+---
+
+> **Autoría de esta sección:** Integración propuesta por Claude (Anthropic) en la Sesión 3 del Consorcio de Oráculos Sintéticos, enero 2026. Incorporada formalmente al Capítulo 6 el 20 de febrero de 2026.  
+> **Estado anterior:** 🔴 No iniciado · **Estado actual:** ✅ Integrado
+
+---
+
 > **📚 Para profundizar:** Este capítulo integra y expande el artículo académico *"Ontometría Vital: El Huevo como Paradigma Cuantitativo de la Coherencia Existencial"* (López Restrepo, M. N. et al., 2025), desarrollado en colaboración con MiniMax Agent y ChatGPT Scholar AI.

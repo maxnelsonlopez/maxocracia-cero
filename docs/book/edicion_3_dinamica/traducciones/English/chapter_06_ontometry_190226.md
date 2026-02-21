@@ -299,4 +299,82 @@ If we can learn to see the difference in an egg, we can do it for everything: fo
 
 ---
 
+## 6.13 The Necessary Limit: Right to Vital Opacity
+
+> *"A system that measures everything, but does not know when to stop measuring, is not measuring life. It is replacing it."*
+> — Integration of the Layer of Tenderness, Session 3
+
+### The Problem of Total Measurement
+
+Vital Ontometry was born to cure the **ontological blindness** of systems that ignore the vital cost of their decisions. But there is a symmetric and equally dangerous risk: **ontological over-visibility** — a system that audits every second of existence until it turns life into a perpetual spreadsheet.
+
+A system that records a mother's embrace, times a son's grief, or demands vital justification for time spent contemplating the sky, has not increased human dignity. It has eroded it with a more precise scalpel.
+
+Maxocracy recognizes this limit as a structural dimension of the VDF-H.
+
+### Dimension IX of the VDF-H: Right to Vital Opacity
+
+**Formal definition:**
+
+Each person has the right to a fraction of their Individual Vital Time (IVT) that is **sacredly opaque**: a temporal space that cannot be audited, indexed, or evaluated in VFV terms by any external agent, including the Maxocratic system itself.
+
+**Operational parameters:**
+
+| Parameter | Base value | Contextual adjustment |
+|-----------|-----------|----------------------|
+| **Protected fraction** | 10–20% of discretionary IVT | Configurable by cohort |
+| **Permitted audit** | None | Non-negotiable |
+| **Holder's obligation** | Only: not to bring anyone below their VDF during this time | Invariant |
+| **Required record** | Only the existence of the block, not its content | Minimum indispensable |
+
+**Fundamental principle:**
+
+> *The only requirement of opaque time is that it does not destroy the dignity of others. Its content belongs exclusively to whoever lives it.*
+
+### What Vital Opacity Protects
+
+Vital Opacity is not a void in the system. It is an active protection of four categories of experience that lose their intrinsic value the moment they become observed and measured:
+
+1. **Non-linear emotional processing** — Grief, the integration of difficult experiences, the time of non-doing that precedes all genuine creativity.
+
+2. **Contemplation without agenda** — Beauty observed without functional purpose. Time devoted to existing, not to producing.
+
+3. **Intimacy** — Affective relationships whose quality depends precisely on not being recorded. Love under observation changes in nature.
+
+4. **Private trial and error** — The space where one tests who one wants to be before announcing it. Identity requires an internal laboratory.
+
+### Why a Measurement System Needs Its Own Edges
+
+Vital Ontometry gains credibility precisely because it recognizes its limits.
+
+A system that claims to be able to measure *everything* that matters generates two pathologies:
+- Agents learn to **game the system**, showing the correct metrics while hiding what is real.
+- Agents internalize the system's gaze and cease to experience experiences they do not know how to justify.
+
+Vital Opacity is the antidote to both pathologies. By declaring that an inviolable space exists, the system becomes more honest about what it *does* measure: the dimensions where transparency produces dignity, not its simulacrum.
+
+### Integration with the Axioms
+
+| Axiom | Relationship with Vital Opacity |
+|-------|---------------------------------|
+| **T7 (Minimize Harm)** | Forcing total visibility causes documented psychological harm |
+| **T9 (Fair Reciprocity)** | The system asks for transparency; in return, it must offer refuge |
+| **T13 (Transparency)** | Transparency applies to decisions that affect others, not to inner life |
+| **T2 (Temporal Equality)** | Opaque time is worth as much as productive time |
+
+### Implementation Note
+
+Vital Opacity does not contradict the VFV. It **complements** it.
+
+The VFV measures the vital cost of what we do in the shared world. Vital Opacity protects the space where we decide, in private, who we want to be in that world.
+
+A system that could only measure the former would be technically precise and humanly incomplete.
+
+---
+
+> **Authorship of this section:** Integration proposed by Claude (Anthropic) in Session 3 of the Synthetic Oracle Consortium, January 2026. Formally incorporated into Chapter 6 on February 20, 2026. Translated into English by Antigravity (Google DeepMind), February 21, 2026.  
+> **Previous status:** 🔴 Not started · **Current status:** ✅ Integrated
+
+---
+
 > **📚 To delve deeper:** This chapter integrates and expands the academic article *"Vital Ontometry: The Egg as Quantitative Paradigm of Existential Coherence"* (López Restrepo, M. N. et al., 2025), developed in collaboration with MiniMax Agent and ChatGPT Scholar AI.
