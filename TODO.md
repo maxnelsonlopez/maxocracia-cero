@@ -260,6 +260,8 @@
   - Ajuste de cabecera Content-Security-Policy (CSP) para permitir hidratación.
   - Relajación de Rate Limiter (5000/hr) para activos de Next.js en desarrollo.
   - Sincronización de bundle unificada mediante `scripts/build_front.py`.
+  - **Implementación funcional de Contract Builder visual (React Flow)**.
+  - Integración de validación axiomática en tiempo real con Flask API.
   - Responsable: Antigravity.
 
 ### Diciembre 2025

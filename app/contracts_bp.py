@@ -46,6 +46,12 @@ import json
 
 contracts_bp = Blueprint("contracts", __name__, url_prefix="/contracts")
 
+@contracts_bp.route("/builder")
+def serve_builder():
+    """Sirve el constructor de contratos de Next.js."""
+    from flask import current_app
+    return current_app.send_static_file("dist/contracts/builder.html")
+
 # Helper functions for persistence
 
 def _save_contract(contract: MaxoContract):
@@ -261,6 +267,10 @@ def create_contract(current_user):
 @token_required
 def get_contract(current_user, contract_id: str):
     """Obtener detalles de un contrato."""
+    if contract_id == "builder":
+        # Evitar conflicto con la ruta del frontend
+        return jsonify({"error": "This is a frontend route"}), 404
+        
     contract = _load_contract(contract_id)
     
     if contract is None:
@@ -563,6 +573,62 @@ def get_civil_summary(current_user, contract_id: str):
     return jsonify({
         "contract_id": contract_id,
         "civil_summary": summary
+    })
+
+
+@contracts_bp.route("/validate_graph", methods=["POST"])
+@token_required
+def validate_graph(current_user):
+    """
+    Valida un grafo proveniente del Constructor Visual (React Flow).
+    """
+    data = request.get_json() or {}
+    nodes = data.get("nodes", [])
+    edges = data.get("edges", [])
+    
+    if not nodes:
+        return jsonify({"error": "no nodes found in graph"}), 400
+        
+    # Crear un contrato temporal para validación
+    temp_contract = MaxoContract(
+        contract_id="visual-temp",
+        description="Validación Visual de Grafo"
+    )
+    
+    # Mapear nodos a términos del contrato
+    for node in nodes:
+        node_type = node.get("type")
+        node_id = node.get("id")
+        label = node.get("data", {}).get("label", "Sin etiqueta")
+        
+        if node_type == "action":
+            # Extraer costo VHV si existe en la data (simplificado por ahora)
+            vhv_cost = VHV(T=Decimal("0.5"), V=Decimal("0"), R=Decimal("0"))
+            term = ContractTerm(id=node_id, description=f"Acción: {label}", vhv_cost=vhv_cost)
+            temp_contract.add_term(term)
+            
+        elif node_type == "sdv":
+            # El bloque SDV asegura que el contrato respeta el suelo de dignidad
+            temp_contract.minimum_sdv = SDV() # En el futuro, cargar parámetros específicos
+            
+    # Ejecutar validación axiomática
+    valid, results = temp_contract.validate()
+    
+    return jsonify({
+        "valid": valid,
+        "results": [
+            {
+                "axiom": r.axiom_code,
+                "is_valid": r.is_valid,
+                "message": r.message
+            }
+            for r in results
+        ],
+        "total_vhv": {
+            "t": float(temp_contract.total_vhv.T),
+            "v": float(temp_contract.total_vhv.V),
+            "r": float(temp_contract.total_vhv.R)
+        }
     })
 
 
