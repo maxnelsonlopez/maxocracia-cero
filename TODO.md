@@ -264,6 +264,12 @@
   - Integración de validación axiomática en tiempo real con Flask API.
   - Responsable: Antigravity.
 
+- [x] **Interactividad en Bloques Visuales de Contratos** (2026-05-06)
+  - Implementación de `useReactFlow` en Nodos Personalizados para el Visual Builder.
+  - Sincronización de inputs de nodos (costo VHV, Condiciones, Oráculos, Reciprocidad) con el backend.
+  - Parsing dinámico de variables VHV en la ruta `validate_graph` de Flask.
+  - Responsable: Antigravity.
+
 ### Diciembre 2025
 
 - [x] **Refactorización Lógica Maxo (Fórmula VHV Polinómica)** (2025-12-10)

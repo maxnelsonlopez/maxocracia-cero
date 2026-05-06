@@ -602,8 +602,14 @@ def validate_graph(current_user):
         label = node.get("data", {}).get("label", "Sin etiqueta")
         
         if node_type == "action":
-            # Extraer costo VHV si existe en la data (simplificado por ahora)
-            vhv_cost = VHV(T=Decimal("0.5"), V=Decimal("0"), R=Decimal("0"))
+            # Extraer costo VHV si existe en la data
+            vhv_cost_val = node.get("data", {}).get("vhvCost", 0.5)
+            try:
+                t_val = Decimal(str(vhv_cost_val))
+            except:
+                t_val = Decimal("0.5")
+                
+            vhv_cost = VHV(T=t_val, V=Decimal("0"), R=Decimal("0"))
             term = ContractTerm(id=node_id, description=f"Acción: {label}", vhv_cost=vhv_cost)
             temp_contract.add_term(term)
             
