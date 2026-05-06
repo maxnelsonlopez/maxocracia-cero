@@ -9,7 +9,7 @@ limiter = Limiter(
     key_func=get_remote_address,
     storage_uri=os.environ.get("REDIS_URL", "memory://"),
     strategy="fixed-window",
-    default_limits=["200 per day", "50 per hour"],
+    default_limits=["10000 per day", "5000 per hour"],
 )
 
 

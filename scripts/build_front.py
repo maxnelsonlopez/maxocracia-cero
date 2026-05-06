@@ -8,7 +8,7 @@ def build_frontend():
     frontend_dir = os.path.join(base_dir, "frontend")
     static_dist_dir = os.path.join(base_dir, "app", "static", "dist")
 
-    print(f"🚀 Iniciando build en {frontend_dir}...")
+    print(f"INFO: Iniciando build en {frontend_dir}...")
     
     try:
         # Ejecutar npm install por si acaso
@@ -21,20 +21,20 @@ def build_frontend():
         if not os.path.exists(static_dist_dir):
             os.makedirs(static_dist_dir)
             
-        print(f"📦 Moviendo archivos a {static_dist_dir}...")
+        print(f"INFO: Moviendo archivos a {static_dist_dir}...")
         # Usamos xcopy en Windows para asegurar la copia recursiva correcta
         subprocess.run(["xcopy", "/E", "/I", "/Y", "frontend\\out\\*", "app\\static\\dist\\"], cwd=base_dir, check=True, shell=True)
         
         if os.path.exists(os.path.join(static_dist_dir, "index.html")):
-            print(f"✅ Build completado exitosamente en {static_dist_dir}")
+            print(f"OK: Build completado exitosamente en {static_dist_dir}")
         else:
-            print(f"⚠️ El build terminó pero no se encontró index.html en {static_dist_dir}")
+            print(f"AVISO: El build terminó pero no se encontró index.html en {static_dist_dir}")
             
     except subprocess.CalledProcessError as e:
-        print(f"❌ Error durante el build: {e}")
+        print(f"ERROR: Durante el build: {e}")
         sys.exit(1)
     except FileNotFoundError:
-        print("❌ Error: No se encontró 'npm'. Asegúrate de tener Node.js instalado.")
+        print("ERROR: No se encontró 'npm'. Asegúrate de tener Node.js instalado.")
         sys.exit(1)
 
 if __name__ == "__main__":

@@ -1,12 +1,12 @@
 import os
 
 # Intentar cargar .env, pero no fallar si hay error de encoding o falta librería
-try:
-    from dotenv import load_dotenv
-    load_dotenv(encoding="utf-8") # Intentar forzar utf-8
-    print("INFO: Intentando cargar .env con python-dotenv...")
-except Exception as e:
-    print(f"ADVERTENCIA: No se pudo cargar .env: {e}")
+#try:
+#    from dotenv import load_dotenv
+#    load_dotenv(encoding="utf-8") # Intentar forzar utf-8
+#    print("INFO: Intentando cargar .env con python-dotenv...")
+#except Exception as e:
+#    print(f"ADVERTENCIA: No se pudo cargar .env: {e}")
 
 # FALLBACKS DE SEGURIDAD (Para desbloquear al usuario)
 # Si no hay SECRET_KEY, lo forzamos.

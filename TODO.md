@@ -1,6 +1,6 @@
 # Tareas Pendientes - Maxocracia-Cero
 
-**Última actualización:** 2026-02-10
+**Última actualización:** 2026-05-06 (Sesión Antigravity Pro)
 
 ---
 
@@ -252,6 +252,15 @@
 ---
 
 ## ✅ Completadas Recientemente
+
+### Mayo 2026
+
+- [x] **Reparación Integral de Frontend (Next.js 16 + Tailwind v4)** (2026-05-06)
+  - Corrección de sintaxis de Tailwind v4 en `globals.css` (@import).
+  - Ajuste de cabecera Content-Security-Policy (CSP) para permitir hidratación.
+  - Relajación de Rate Limiter (5000/hr) para activos de Next.js en desarrollo.
+  - Sincronización de bundle unificada mediante `scripts/build_front.py`.
+  - Responsable: Antigravity.
 
 ### Diciembre 2025
 
