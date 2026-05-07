@@ -396,6 +396,28 @@ CREATE TABLE IF NOT EXISTS maxo_contract_events (
     FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS api_keys (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    api_key TEXT UNIQUE NOT NULL,
+    name TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    last_used_at TEXT,
+    revoked INTEGER DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS maxo_webhooks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    url TEXT NOT NULL,
+    events TEXT NOT NULL,
+    secret TEXT NOT NULL,
+    is_active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Insert default VHV parameters (only if table is empty)
 INSERT OR IGNORE INTO vhv_parameters (id, alpha, beta, gamma, delta, notes)
 VALUES (1, 100.0, 2000.0, 1.0, 100.0, 'Initial parameters based on paper_formalizacion_matematica_maxo.txt');

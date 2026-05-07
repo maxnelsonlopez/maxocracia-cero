@@ -16,6 +16,10 @@ def create_app(db_path=None):
     # Inicializar rate limiter
     init_limiter(app)
 
+    # Permitir CORS en desarrollo y para el dev server de Next.js
+    from flask_cors import CORS
+    CORS(app, supports_credentials=True, origins=["http://localhost:3000", "http://127.0.0.1:3000", os.environ.get("FRONTEND_URL", "")])
+
     # Inicializar SQLAlchemy y Admin
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + app.config["DATABASE"]
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False

@@ -41,6 +41,8 @@ from maxocontracts.core.contract import MaxoContract
 from maxocontracts.core.axioms import AxiomValidator
 from maxocontracts.oracles import SyntheticOracle
 
+from .webhooks import dispatch_event
+
 from decimal import Decimal
 import json
 
@@ -253,6 +255,38 @@ def create_contract(current_user):
         civil_summary=civil_description
     )
     
+    # Batch creation support: add participants
+    participants_data = data.get("participants", [])
+    for p_data in participants_data:
+        p_id = p_data.get("user_id")
+        if p_id:
+            participant = _get_or_create_participant(p_id)
+            if participant:
+                wellness_val = p_data.get("wellness", p_data.get("gamma", 1.0))
+                try:
+                    participant.update_wellness(Decimal(str(wellness_val)))
+                except ValueError:
+                    pass
+                contract.add_participant(participant)
+
+    # Batch creation support: add terms
+    terms_data = data.get("terms", [])
+    for t_data in terms_data:
+        t_id = t_data.get("term_id")
+        t_civil = t_data.get("civil_text", "")
+        t_vhv = t_data.get("vhv", {})
+        if t_id:
+            try:
+                vhv = VHV(
+                    T=Decimal(str(t_vhv.get("t", 0))),
+                    V=Decimal(str(t_vhv.get("v", 0))),
+                    R=Decimal(str(t_vhv.get("h", 0)))
+                )
+                term = ContractTerm(id=t_id, description=t_civil, vhv_cost=vhv)
+                contract.add_term(term)
+            except Exception:
+                pass
+    
     _save_contract(contract)
     
     return jsonify({
@@ -283,6 +317,11 @@ def get_contract(current_user, contract_id: str):
         "r": float(contract.total_vhv.R)
     }
     
+    import hashlib
+    # Generar un hash simplificado para inmutabilidad local
+    hash_payload = f"{contract.contract_id}:{contract.state.value}:{contract.total_vhv.T}:{contract.total_vhv.V}:{contract.total_vhv.R}:{len(contract._terms)}".encode('utf-8')
+    contract_hash = hashlib.sha256(hash_payload).hexdigest()
+    
     return jsonify({
         "contract_id": contract.contract_id,
         "state": contract.state.value,
@@ -290,7 +329,8 @@ def get_contract(current_user, contract_id: str):
         "participants": [p.id for p in contract.participants],
         "terms_count": len(contract._terms),
         "total_vhv": vhv,
-        "events_count": len(contract.get_event_log())
+        "events_count": len(contract.get_event_log()),
+        "hash": contract_hash
     })
 
 
@@ -490,6 +530,12 @@ def activate_contract(current_user, contract_id: str):
     
     _save_contract(contract)
     
+    # Despachar evento
+    dispatch_event("contract.activated", {
+        "contract_id": contract_id,
+        "activated_at": datetime.now().isoformat()
+    })
+    
     return jsonify({
         "success": True,
         "contract_id": contract_id,
@@ -542,6 +588,14 @@ def request_retraction(current_user, contract_id: str):
     if response.verdict.approved:
         success = contract.retract(reason=reason, actor_id=pid)
         _save_contract(contract)
+        
+        # Despachar evento
+        dispatch_event("contract.retracted", {
+            "contract_id": contract_id,
+            "reason": reason,
+            "cause": cause,
+            "oracle_confidence": float(response.verdict.confidence)
+        })
         
         return jsonify({
             "success": success,
@@ -641,15 +695,41 @@ def validate_graph(current_user):
 @contracts_bp.route("/", methods=["GET"])
 @token_required
 def list_contracts(current_user):
-    """Listar todos los contratos desde la base de datos."""
+    """Listar todos los contratos desde la base de datos con paginación y filtros."""
     db = get_db()
-    rows = db.execute("SELECT contract_id, state FROM maxo_contracts").fetchall()
+    
+    # Parámetros de paginación
+    limit = int(request.args.get('limit', 50))
+    offset = int(request.args.get('offset', 0))
+    
+    # Filtros
+    state_filter = request.args.get('state')
+    participant_filter = request.args.get('participant_id')
+    
+    query = "SELECT contract_id, state FROM maxo_contracts WHERE 1=1"
+    params = []
+    
+    if state_filter:
+        query += " AND state = ?"
+        params.append(state_filter)
+        
+    if participant_filter:
+        query += " AND contract_id IN (SELECT contract_id FROM maxo_contract_participants WHERE participant_id = ?)"
+        params.append(participant_filter)
+        
+    # Total sin límite
+    total = db.execute(f"SELECT COUNT(*) FROM ({query})", params).fetchone()[0]
+    
+    # Añadir paginación
+    query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
+    params.extend([limit, offset])
+    
+    rows = db.execute(query, params).fetchall()
     
     contracts_list = []
     for row in rows:
-        # Podríamos cargar el objeto completo para contar términos/participantes
-        # o hacer queries adicionales. Por eficiencia hacemos un resumen rápido.
         c_id = row["contract_id"]
+        # Por eficiencia hacemos un resumen rápido
         p_count = db.execute("SELECT COUNT(*) FROM maxo_contract_participants WHERE contract_id = ?", (c_id,)).fetchone()[0]
         t_count = db.execute("SELECT COUNT(*) FROM maxo_contract_terms WHERE contract_id = ?", (c_id,)).fetchone()[0]
         
@@ -662,5 +742,8 @@ def list_contracts(current_user):
     
     return jsonify({
         "contracts": contracts_list,
-        "total": len(contracts_list)
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "has_more": (offset + limit) < total
     })

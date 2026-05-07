@@ -47,6 +47,8 @@ def validate_name(name):
 
 def validate_alias(alias):
     """Valida que el alias no exceda la longitud máxima"""
+    if alias == "":
+        return True
     if not alias or not isinstance(alias, str):
         return False
     return len(alias) <= ALIAS_MAX_LENGTH

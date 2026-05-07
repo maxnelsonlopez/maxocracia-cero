@@ -1,12 +1,59 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Premium Dark Theme Variables */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #020617; /* slate-950 */
+  --foreground: #f1f5f9; /* slate-100 */
+  --muted: #0f172a; /* slate-900 */
+  --muted-foreground: #94a3b8; /* slate-400 */
+  --accent: #10b981; /* emerald-500 */
+  --accent-foreground: #022c22; /* emerald-950 */
+  --border: #1e293b; /* slate-800 */
 }
 
 body {
   color: var(--foreground);
+  background-color: var(--background);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Premium Utilities */
+@layer utilities {
+  .glass {
+    @apply bg-slate-900/50 backdrop-blur-md border border-slate-800/50 shadow-xl;
+  }
+  
+  .glass-card {
+    @apply bg-slate-900/40 backdrop-blur-lg border border-slate-800/60 rounded-2xl hover:border-slate-700/80 transition-all duration-300;
+  }
+  
+  .text-gradient {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155; /* slate-700 */
 }

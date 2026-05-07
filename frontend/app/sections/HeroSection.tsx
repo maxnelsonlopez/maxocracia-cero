@@ -72,7 +72,7 @@ export function HeroSection() {
           className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight"
         >
           La economía del{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
+          <span className="text-gradient">
             tiempo vital
           </span>
         </motion.h1>
@@ -170,7 +170,7 @@ function ConceptCard({
   description: string;
 }) {
   return (
-    <div className="p-6 bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-2xl hover:border-slate-700 transition-colors">
+    <div className="p-6 glass-card">
       <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-4">
         <Icon className="w-5 h-5 text-emerald-400" />
       </div>

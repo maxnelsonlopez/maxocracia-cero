@@ -1,12 +1,12 @@
 import os
 
 # Intentar cargar .env, pero no fallar si hay error de encoding o falta librería
-#try:
-#    from dotenv import load_dotenv
-#    load_dotenv(encoding="utf-8") # Intentar forzar utf-8
-#    print("INFO: Intentando cargar .env con python-dotenv...")
-#except Exception as e:
-#    print(f"ADVERTENCIA: No se pudo cargar .env: {e}")
+try:
+    from dotenv import load_dotenv
+    load_dotenv(encoding="utf-8") # Intentar forzar utf-8
+    print("INFO: Intentando cargar .env con python-dotenv...")
+except Exception as e:
+    print(f"ADVERTENCIA: No se pudo cargar .env: {e}")
 
 # FALLBACKS DE SEGURIDAD (Para desbloquear al usuario)
 # Si no hay SECRET_KEY, lo forzamos.
@@ -26,4 +26,11 @@ app = create_app()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5001"))
-    app.run(host="127.0.0.1", port=port)
+    
+    if os.environ.get("FLASK_ENV") == "production":
+        print(f"Iniciando servidor de PRODUCCIÓN con Waitress en el puerto {port}...")
+        from waitress import serve
+        serve(app, host="0.0.0.0", port=port)
+    else:
+        print(f"Iniciando servidor de DESARROLLO en el puerto {port}...")
+        app.run(host="0.0.0.0", port=port, debug=True)

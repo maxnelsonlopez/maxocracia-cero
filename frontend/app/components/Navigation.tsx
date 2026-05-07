@@ -26,9 +26,13 @@ import {
   Users,
   Heart,
   Sparkles,
-  Github
+  Github,
+  LogOut,
+  LogIn,
+  UserPlus
 } from "lucide-react";
 import { ContributorBadge } from "./ContributorBadge";
+import { useAuth } from "../context/AuthContext";
 
 const navLinks = [
   { href: "/", label: "Inicio", icon: Sparkles },
@@ -41,6 +45,7 @@ const navLinks = [
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { isAuthenticated, user, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,7 +61,7 @@ export function Navigation() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
-            ? "bg-slate-950/80 backdrop-blur-lg border-b border-slate-800"
+            ? "glass border-t-0 border-x-0"
             : "bg-transparent"
           }`}
       >
@@ -82,11 +87,44 @@ export function Navigation() {
             {/* Right Side */}
             <div className="hidden md:flex items-center gap-4">
               <ContributorBadge size="sm" />
+              
+              {isAuthenticated ? (
+                <div className="flex items-center gap-3 ml-2 border-l border-slate-800 pl-4">
+                  <span className="text-sm font-medium text-emerald-400">
+                    {user?.alias || user?.name?.split(' ')[0]}
+                  </span>
+                  <button
+                    onClick={logout}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Salir
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 ml-2 border-l border-slate-800 pl-4">
+                  <Link
+                    href="/login"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    Entrar
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Registro
+                  </Link>
+                </div>
+              )}
+
               <Link
                 href="https://github.com/maxnelsonlopez/maxocracia-cero"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-slate-400 hover:text-white transition-colors"
+                className="text-slate-400 hover:text-white transition-colors ml-2"
               >
                 <Github className="w-5 h-5" />
               </Link>

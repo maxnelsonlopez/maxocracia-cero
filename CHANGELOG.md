@@ -58,6 +58,23 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
 ---
 
 ## [Unreleased]
+
+## 2026-05-07 — Sistema de Autenticación Frontend y UI Premium
+
+### Añadido
+- **Estado Global de Autenticación**: Implementado `AuthContext.tsx` en el frontend Next.js para gestionar la sesión del usuario utilizando JWT.
+- **Cliente API**: Creado `lib/api.ts` como wrapper centralizado para inyectar tokens de autorización y apuntar dinámicamente al backend (puerto 5001 en dev).
+- **Páginas de Autenticación**: Desarrolladas `/login` y `/register` con validaciones robustas y redirección automática al Constructor de Contratos.
+- **Componentes Base Premium**: Creados `Input.tsx` y `Button.tsx` con estética *glassmorphism*, indicadores de carga integrados y animaciones usando `framer-motion`.
+- **Navegación Dinámica**: El componente `Navigation.tsx` ahora cambia su interfaz basándose en si el usuario está autenticado, mostrando su alias y la opción de cerrar sesión.
+
+### Mejorado
+- **Estilos Globales**: Refinada la paleta de colores slate/emerald en `globals.css` y añadida barra de desplazamiento personalizada.
+- **Configuración de CORS**: Actualizado `app/__init__.py` para aceptar explícitamente peticiones desde el servidor de desarrollo de Next.js (`localhost:3000`).
+
+### Corregido
+- **Validación de Alias**: El decorador de validación del backend `app/validators.py` ahora acepta correctamente alias vacíos al ser un campo opcional.
+- **Retroalimentación Visual**: Corregida la falta de claridad en las reglas de contraseña mostrando requisitos explícitos en el registro.
 ### Añadido
 - **UI Prototipado**: Nuevo constructor de contratos "Drag-and-Drop" en `app/static/contract-builder-mock.html`.
 - **Estilos**: Sistema de diseño Glassmorphism extendido en `contracts.css`.
