@@ -59,6 +59,30 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
 
 ## [Unreleased]
 
+## 2026-05-08 — Curaduría Documental y Auditoría de API
+
+### Añadido
+- **Jerarquía de Documentación**: Reorganizados 16 archivos `.md` de la raíz en subdirectorios especializados dentro de `docs/` (`project/reports`, `project/status`, `project/roadmap`, `legacy`, etc.) para mejorar la mantenibilidad.
+- **Índice de Documentación**: Actualizado `docs/README.md` con un mapa detallado de la nueva estructura y descripciones de los informes de auditoría y estado.
+- **Auditoría de API**: Realizado un conteo y validación exhaustiva de los 74 endpoints operativos del sistema, categorizados por módulos (Auth, Contracts, Subscriptions, VHV, etc.).
+
+### Mejorado
+- **Limpieza de Raíz**: El directorio raíz ahora solo contiene archivos de configuración y documentación esencial de alto nivel, reduciendo el ruido visual.
+- **Trazabilidad**: Consolidado el historial de versiones en `CHANGELOG.md` integrando hitos de febrero 2026 y mayo 2026.
+
+### Notas Técnicas
+- **Firma**: Antigravity (Gemini AI Assistant - Google DeepMind).
+- **Nexus Simulator v2.2**:
+    - **Dynamic Oracle Mode**: Mejoras en el modo "Oráculo Dinámico" con ajuste no lineal de $\gamma_{exp}$ basado en sufrimiento ($V$).
+    - **Wellness Index Avanzado**: Modelo mejorado con escalado no lineal para reflejar mejor el impacto real del sufrimiento.
+    - **Nuevos Escenarios**: Casos de uso de la Cohorte Cero (Limpieza Compartida, Préstamo Solidario, Comida Cooperativa).
+    - **Panel de Información**: Visualización detallada de parámetros y descripción de escenarios.
+    - **Sistema de Notificaciones**: Feedback visual para cambios de estado y acciones del usuario.
+    - **Mejoras de UI/UX**: Diseño responsivo, tarjetas interactivas y animaciones suaves.
+    - **Indicadores Visuales**: Para seguimiento del Wellness Index y estado del contrato.
+- **Refactorización de Código**: Mejor organización del código JavaScript y CSS para mayor mantenibilidad.
+- **Optimización de Rendimiento**: Reducción de la carga de recursos y mejor manejo de eventos.
+
 ## 2026-05-07 — Sistema de Autenticación Frontend y UI Premium
 
 ### Añadido
@@ -75,35 +99,35 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
 ### Corregido
 - **Validación de Alias**: El decorador de validación del backend `app/validators.py` ahora acepta correctamente alias vacíos al ser un campo opcional.
 - **Retroalimentación Visual**: Corregida la falta de claridad en las reglas de contraseña mostrando requisitos explícitos en el registro.
+
+## 2026-05-06 — Constructor de Contratos Visual y Optimización Next.js
+
 ### Añadido
-- **UI Prototipado**: Nuevo constructor de contratos "Drag-and-Drop" en `app/static/contract-builder-mock.html`.
-- **Estilos**: Sistema de diseño Glassmorphism extendido en `contracts.css`.
-- **Oracle API**: Especificación completa en `docs/specs/ORACLE_API_SPEC.md`.
-- **Core**: Objeto `Verdict` en `maxocontracts.oracles` para respuestas estructuradas de oráculos.
+- **Constructor de Contratos Visual**: Implementado constructor interactivo utilizando React Flow para diseño de contratos éticos mediante nodos modulares.
+- **Nodos Interactivos**: Los nodos del constructor (Acción, Condición, Oráculo, SDV, Reciprocidad) ahora son interactivos y están conectados a la lógica del backend.
+- **Oracle API Spec**: Especificación completa en `docs/specs/ORACLE_API_SPEC.md` para la integración de oráculos sintéticos y humanos.
+
+### Mejorado
+- **Next.js 16 + Tailwind v4**: Reparada y optimizada la integración de las últimas versiones del stack frontend.
+- **Seguridad y Límites**: Optimizadas políticas de CSP y ajustados límites de tasa (Rate Limits) para el flujo de autenticación y contratos.
+
+## 2026-02-21 — Ontometría Vital y Capítulo 6.13
+
+### Añadido
+- **Capítulo 6.13**: "Ontometría Vital" integrado en el libro, detallando el Vector de Huella Vital (VFV), sus componentes y protocolos de cálculo.
+- **Documentación de Ontometría**: Definición formal de las dimensiones T, V, R y su intersección ética.
+
+## 2026-02-20 — Expansión de Ecosistema y Monetización Ética
+
+### Añadido
+- **Capítulo 12**: Introducción de la "Esfera de Inversión y Retorno" (EIR) como pilar de la economía maxocrática.
+- **Dashboard de Administración**: Construcción de un panel administrativo robusto para gestión de usuarios y métricas de cohorte.
+- **Traducción al Chino Mandarín**: Completada la traducción del libro para ampliar el alcance global de la Maxocracia.
 
 ### Cambiado
-- **API**: Endpoint `/contracts/<id>/participants` ahora acepta `wellness` (con fallback a `gamma`).
-- **Refactor**: `SyntheticOracle` ahora retorna objetos `OracleResponse` en lugar de diccionarios planos.
+- **Estrategia de Monetización**: Pivot de Stripe a un sistema multi-canal (GitHub Sponsors, Wompi, Crypto) para evitar bloqueos geográficos y reducir intermediarios.
+- **Terminología**: Refactorización de "Gamma" a "Wellness Index" para mayor claridad en el simulador y tipos base.
 
-
-### Added
-- **Nexus Simulator v2.2**:
-    - **Dynamic Oracle Mode**: Mejoras en el modo "Oráculo Dinámico" con ajuste no lineal de $\gamma_{exp}$ basado en sufrimiento ($V$).
-    - **Wellness Index Avanzado**: Modelo mejorado con escalado no lineal para reflejar mejor el impacto real del sufrimiento.
-    - **Nuevos Escenarios**: Casos de uso de la Cohorte Cero (Limpieza Compartida, Préstamo Solidario, Comida Cooperativa).
-    - **Panel de Información**: Visualización detallada de parámetros y descripción de escenarios.
-    - **Sistema de Notificaciones**: Feedback visual para cambios de estado y acciones del usuario.
-    - **Mejoras de UI/UX**: Diseño responsivo, tarjetas interactivas y animaciones suaves.
-    - **Indicadores Visuales**: Para seguimiento del Wellness Index y estado del contrato.
-
-### Changed
-- **Refactorización de Código**: Mejor organización del código JavaScript y CSS para mayor mantenibilidad.
-- **Optimización de Rendimiento**: Reducción de la carga de recursos y mejor manejo de eventos.
-
-### Changed
-- **Terminology Refactor**:
-    - Renamed the `Gamma` class in `maxocontracts/core/types.py` to `Wellness` to resolve ambiguity with the pricing exponent.
-    - Updated simulator UI and logic to use "Wellness Index" instead of "Gamma Index".
 
 ## 2026-01-23 — MaxoContracts: Persistencia en DB y Refactorización Wellness
 

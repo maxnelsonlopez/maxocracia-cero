@@ -55,6 +55,11 @@ El libro fundamental de la Maxocracia, con 18 capítulos organizados en 5 bloque
 - **[MicroMaxocracia](guides/micromaxocracia/)** — Manual del investigador y herramientas.
 
 ### 🛠️ Gestión del Proyecto (`docs/project/`)
+- **[PLAN_MAESTRO_30_DIAS.md](project/roadmap/PLAN_MAESTRO_30_DIAS.md)** — Hoja de ruta estratégica para la implementación.
+- **[ESTADO_ACTUAL_FEBRERO_2026.md](project/status/ESTADO_ACTUAL_FEBRERO_2026.md)** — Resumen ejecutivo del estado del sistema.
+- **[AUDITORIA_FEBRERO_2026.md](project/reports/AUDITORIA_FEBRERO_2026.md)** — Revisión técnica y de coherencia axiomática.
+- **[HISTORIAL_GIT_ANALISIS.md](project/reports/HISTORIAL_GIT_ANALISIS.md)** — Análisis profundo de la evolución del código.
+- **[RESUMEN_TRABAJO_AUTONOMO.md](project/reports/RESUMEN_TRABAJO_AUTONOMO.md)** — Registro de sesiones de desarrollo autónomo.
 - **[CHANGELOG](project/CHANGELOG.md)** — Historial de cambios y versiones.
 - **[Tareas Pendientes](project/TAREAS_PENDIENTES_IMPLEMENTACION.md)** — Backlog y próximas funcionalidades.
 - **[FAQ Extendido](project/FAQ_EXTENDIDO.md)** — Preguntas frecuentes y respuestas profundas.
@@ -72,6 +77,9 @@ docs/
 ├── legacy/          # Archivos antiguos o de referencia histórica
 ├── media/           # Imágenes, videos y recursos multimedia
 ├── project/         # Gestión del proyecto (changelog, tareas, auditorías)
+│   ├── reports/     # Informes de análisis y sesiones
+│   ├── roadmap/     # Planes maestros y hojas de ruta
+│   └── status/      # Instantáneas del estado del proyecto
 └── theory/          # Papers, manifiestos y fundamentos teóricos
 ```
 
