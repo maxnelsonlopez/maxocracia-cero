@@ -29,17 +29,40 @@ import {
   Github,
   LogOut,
   LogIn,
-  UserPlus
+  UserPlus,
+  ClipboardList,
+  Handshake,
+  Activity,
+  BarChart3,
+  ChevronDown
 } from "lucide-react";
 import { ContributorBadge } from "./ContributorBadge";
 import { useAuth } from "../context/AuthContext";
 
-const navLinks = [
-  { href: "/", label: "Inicio", icon: Sparkles },
-  { href: "/upgrade", label: "Contribuir", icon: Heart },
-  { href: "/contracts/builder", label: "Contratos", icon: FileText },
-  { href: "/admin/dashboard", label: "Admin", icon: Users },
-  { href: "http://localhost:5001/vhv-calculator.html", label: "VHV Calc", icon: Calculator, external: true },
+const navSections = [
+  {
+    label: "Operaciones",
+    links: [
+      { href: "/forms/cero", label: "Inscripción", icon: ClipboardList },
+      { href: "/forms/exchange", label: "Intercambio", icon: Handshake },
+      { href: "/forms/follow-up", label: "Seguimiento", icon: Activity },
+    ]
+  },
+  {
+    label: "Inteligencia",
+    links: [
+      { href: "/vhv/calculator", label: "VHV Calc", icon: Calculator },
+      { href: "/vhv/comparison", label: "Comparador", icon: BarChart3 },
+      { href: "/tvi/stats", label: "TVI Stats", icon: Activity },
+    ]
+  },
+  {
+    label: "Contratos",
+    links: [
+      { href: "/contracts/builder", label: "Builder", icon: Zap },
+      { href: "/contracts", label: "Lista", icon: FileText },
+    ]
+  },
 ];
 
 export function Navigation() {
@@ -79,17 +102,32 @@ export function Navigation() {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-1">
-              {navLinks.map((link) => (
-                <NavLink key={link.href} {...link} />
+              <Link href="/" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+                Inicio
+              </Link>
+              
+              {navSections.map((section) => (
+                <NavDropdown key={section.label} section={section} />
               ))}
+
+              {isAuthenticated && (
+                <Link href="/admin/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+                  Admin
+                </Link>
+              )}
             </nav>
 
             {/* Right Side */}
             <div className="hidden md:flex items-center gap-4">
-              <ContributorBadge size="sm" />
+              <Link href="/upgrade" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-emerald-500 text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 active:scale-95">
+                <Heart className="w-4 h-4" />
+                Contribuir
+              </Link>
+              
+              <div className="h-6 w-[1px] bg-slate-800 mx-2" />
               
               {isAuthenticated ? (
-                <div className="flex items-center gap-3 ml-2 border-l border-slate-800 pl-4">
+                <div className="flex items-center gap-3 ml-2">
                   <span className="text-sm font-medium text-emerald-400">
                     {user?.alias || user?.name?.split(' ')[0]}
                   </span>
@@ -102,7 +140,7 @@ export function Navigation() {
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 ml-2 border-l border-slate-800 pl-4">
+                <div className="flex items-center gap-2 ml-2">
                   <Link
                     href="/login"
                     className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
@@ -152,19 +190,47 @@ export function Navigation() {
             className="fixed inset-0 z-40 md:hidden"
           >
             <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-lg" />
-            <nav className="absolute top-16 left-0 right-0 bottom-0 p-6 flex flex-col gap-2">
-              {navLinks.map((link, index) => (
-                <motion.div
-                  key={link.href}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <MobileNavLink {...link} onClick={() => setIsOpen(false)} />
-                </motion.div>
+            <nav className="absolute top-16 left-0 right-0 bottom-0 p-6 overflow-y-auto flex flex-col gap-6">
+              <Link 
+                href="/" 
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-bold text-white bg-slate-900 border border-slate-800"
+                onClick={() => setIsOpen(false)}
+              >
+                <Sparkles className="w-5 h-5 text-amber-400" />
+                Inicio
+              </Link>
+
+              {navSections.map((section) => (
+                <div key={section.label} className="space-y-3">
+                  <h3 className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                    {section.label}
+                  </h3>
+                  <div className="grid grid-cols-1 gap-1">
+                    {section.links.map((link) => (
+                      <MobileNavLink key={link.href} {...link} onClick={() => setIsOpen(false)} />
+                    ))}
+                  </div>
+                </div>
               ))}
 
-              <div className="mt-6 pt-6 border-t border-slate-800">
+              {isAuthenticated && (
+                <div className="space-y-3">
+                  <h3 className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                    Administración
+                  </h3>
+                  <MobileNavLink href="/admin/dashboard" label="Dashboard Maestro" icon={Users} onClick={() => setIsOpen(false)} />
+                </div>
+              )}
+
+              <div className="mt-auto pt-6 flex flex-col gap-4">
+                <Link 
+                  href="/upgrade" 
+                  className="flex items-center justify-center gap-2 p-4 rounded-2xl bg-emerald-500 text-white font-bold"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Heart className="w-5 h-5" />
+                  Contribuir al Proyecto
+                </Link>
                 <ContributorBadge />
               </div>
             </nav>
@@ -175,6 +241,49 @@ export function Navigation() {
       {/* Spacer */}
       <div className="h-16" />
     </>
+  );
+}
+
+function NavDropdown({ section }: { section: typeof navSections[0] }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div 
+      className="relative"
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+    >
+      <button className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+        isOpen ? "text-white bg-slate-800" : "text-slate-400 hover:text-white hover:bg-slate-800"
+      }`}>
+        {section.label}
+        <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${isOpen ? 'rotate-180 text-emerald-500' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="absolute top-full left-0 mt-1 w-52 glass border border-slate-800 rounded-xl overflow-hidden shadow-2xl z-50 p-2"
+          >
+            <div className="flex flex-col gap-1">
+              {section.links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all group"
+                >
+                  <link.icon className="w-4 h-4 text-emerald-500/60 group-hover:text-emerald-500 transition-colors" />
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 

@@ -95,7 +95,7 @@ def create_app(db_path=None):
 
         return response
 
-    # serve a small static UI at /
+    # Serve Next.js SPA
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")
     def catch_all(path):
@@ -103,25 +103,22 @@ def create_app(db_path=None):
         
         dist_dir = os.path.join(os.path.dirname(__file__), "static", "dist")
         
-        if not os.path.exists(dist_dir):
-            # Fallback al static tradicional si no hay dist
-            return send_from_directory(os.path.join(os.path.dirname(__file__), "static"), "index.html")
-
-        # Intentar servir el archivo exacto (ej: /_next/static/...)
-        if os.path.exists(os.path.join(dist_dir, path)) and not os.path.isdir(os.path.join(dist_dir, path)):
+        # 1. Intentar servir el archivo exacto (ej: /_next/static/...)
+        target_path = os.path.join(dist_dir, path)
+        if os.path.exists(target_path) and not os.path.isdir(target_path):
             return send_from_directory(dist_dir, path)
             
-        # Intentar servir .html si existe (ej: /upgrade -> upgrade.html)
+        # 2. Intentar servir .html si existe (ej: /upgrade -> upgrade.html)
         html_file = f"{path}.html"
         if os.path.exists(os.path.join(dist_dir, html_file)):
             return send_from_directory(dist_dir, html_file)
             
-        # Intentar servir index.html en la carpeta (ej: /admin -> admin/index.html)
+        # 3. Intentar servir index.html en la carpeta (ej: /admin -> admin/index.html)
         folder_index = os.path.join(path, "index.html")
         if os.path.exists(os.path.join(dist_dir, folder_index)):
             return send_from_directory(dist_dir, folder_index)
-
-        # Si nada funciona, servir index.html (SPA Fallback)
+ 
+        # 4. SPA Fallback: Servir el index.html principal
         return send_from_directory(dist_dir, "index.html")
 
     @app.route("/favicon.ico")
