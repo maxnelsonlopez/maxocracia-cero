@@ -577,6 +577,85 @@ class FormsManager:
             "hub_nodes": hubs,
         }
 
+    def get_full_network_graph(self, limit: int = 200) -> Dict:
+        """
+        Get nodes and edges for the full network graph.
+        
+        Args:
+            limit: Maximum number of exchanges to return
+            
+        Returns:
+            Dictionary with nodes and edges
+        """
+        cursor = self.conn.cursor()
+
+        # Get recent interchanges with participant names
+        # Note: We join with participants table. We assume IDs match.
+        # If IDs refer to users table, we'd join there.
+        # Based on forms_bp.py, it seems Red de Apoyo uses participants.
+        cursor.execute("""
+            SELECT 
+                i.id, i.giver_id, i.receiver_id, i.uth_hours, i.type, i.urgency,
+                p1.name as giver_name, p2.name as receiver_name
+            FROM interchange i
+            LEFT JOIN participants p1 ON i.giver_id = p1.id
+            LEFT JOIN participants p2 ON i.receiver_id = p2.id
+            ORDER BY i.date DESC
+            LIMIT ?
+        """, (limit,))
+        
+        exchanges = []
+        node_ids = set()
+        nodes = []
+        edges = []
+
+        for row in cursor.fetchall():
+            ex = dict(zip([d[0] for d in cursor.description], row))
+            exchanges.append(ex)
+            
+            # Track nodes
+            if ex['giver_id']:
+                node_ids.add((ex['giver_id'], ex['giver_name'] or f"User {ex['giver_id']}"))
+            if ex['receiver_id']:
+                node_ids.add((ex['receiver_id'], ex['receiver_name'] or f"User {ex['receiver_id']}"))
+            
+            # Create edge
+            if ex['giver_id'] and ex['receiver_id']:
+                edges.append({
+                    "id": f"e{ex['id']}",
+                    "source": str(ex['giver_id']),
+                    "target": str(ex['receiver_id']),
+                    "label": f"{ex['uth_hours']} UTH",
+                    "data": {
+                        "type": ex['type'],
+                        "urgency": ex['urgency']
+                    }
+                })
+
+        # Create nodes
+        # Determine hub nodes (heuristic: degree > 3)
+        degree_map = {}
+        for e in edges:
+            degree_map[e['source']] = degree_map.get(e['source'], 0) + 1
+            degree_map[e['target']] = degree_map.get(e['target'], 0) + 1
+
+        for nid, name in node_ids:
+            nodes.append({
+                "id": str(nid),
+                "type": "participant",
+                "data": { 
+                    "label": name,
+                    "is_hub": degree_map.get(str(nid), 0) > 3
+                },
+                # Initial random position, will be fitted by React Flow
+                "position": { "x": 0, "y": 0 }
+            })
+
+        return {
+            "nodes": nodes,
+            "edges": edges
+        }
+
     def get_temporal_trends(self, period_days: int = 30) -> Dict:
         """
         Get temporal trends for dashboard visualizations.

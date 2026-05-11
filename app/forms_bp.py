@@ -393,7 +393,8 @@ def get_network_flow(current_user):
     db = get_db()
     manager = FormsManager(db)
 
-    network = manager.get_network_flow()
+    # We return the full graph data for the React Flow visualization
+    network = manager.get_full_network_graph()
 
     return jsonify(network), 200
 
