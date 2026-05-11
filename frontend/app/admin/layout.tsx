@@ -10,11 +10,15 @@ import {
     Settings,
     ShieldCheck,
     ArrowLeft,
-    Activity
+    Activity,
+    Network,
+    FileBarChart
 } from "lucide-react";
 
 const sidebarLinks = [
     { href: "/admin/dashboard", label: "Vista General", icon: LayoutDashboard },
+    { href: "/admin/network", label: "Red de Intercambio", icon: Network },
+    { href: "/admin/reports", label: "Informes e Impacto", icon: FileBarChart },
     { href: "/admin/users", label: "Usuarios", icon: Users },
     { href: "/admin/subscriptions", label: "Suscripciones", icon: CreditCard },
     { href: "/admin/settings", label: "Configuración", icon: Settings },
