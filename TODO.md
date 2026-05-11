@@ -68,6 +68,29 @@
   - [ ] Testear con 3 hogares beta
   - **Entregables**: Diseños UI/UX, prototipo funcional, feedback beta
 
+- [x] **Migración Frontend Unificado (Segmento 1: Formularios)** (Completado 2026-05-08) ✅
+  - [x] Crear componentes base `FormWizard`, `FormStep`, `FormUI`
+  - [x] Migrar Formulario CERO (Inscripción) a `/forms/cero`
+  - [x] Migrar Formulario de Intercambio a `/forms/exchange`
+  - [x] Migrar Formulario de Seguimiento a `/forms/follow-up`
+  - [x] Actualizar navegación global
+
+- [x] **Migración Frontend Unificado (Segmento 2: VHV & TVI)** (Completado 2026-05-08) ✅
+  - [x] Migrar Calculadora VHV interactiva
+  - [x] Implementar visualizaciones de TVI con Chart.js
+  - [x] Integrar comparador de productos
+
+- [x] **Migración Frontend Unificado (Segmento 3: Admin Dashboard & Red)** (Completado 2026-05-08) ✅
+  - [x] Consolidar métricas de red en `/admin/dashboard`
+  - [x] Implementar visualización de Grafos de Intercambio (React Flow)
+  - [x] Panel de filtros avanzados de red
+  - [x] Exportación de reportes de impacto (UI Base)
+
+- [x] **Migración Frontend Unificado (Segmento 4: Unificación e Integración)** (Completado 2026-05-11) ✅
+  - [x] Build final unificado y despliegue a `static/dist`
+  - [x] Limpieza de archivos legados (.html, .js antiguos)
+  - [x] Optimización de SPA routing en Flask
+
 - [ ] **Mes 2-3: Desarrollo (Mayo - Julio)**
   - [ ] Desarrollar 3 apps completas (React Native)
   - [ ] Reclutar 30 hogares piloto

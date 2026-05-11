@@ -35,6 +35,7 @@ El libro fundamental de la Maxocracia, con 18 capítulos organizados en 5 bloque
 - **[Matemáticas Maxocracia](theory/matematicas_maxocracia_compiladas.md)** — Compendio de fórmulas y modelos.
 - **[Ontometría Vital](theory/tercer_paper_ontometria_vital_huevo.md)** — Tercer paper sobre la métrica de la vida.
 - **[Suelo de Dignidad Vital](theory/SDV-H_Suelo_Dignidad_Vital_Humanos.txt)** — Definición del mínimo vital garantizado.
+- **[Evolución VHV+SDV](theory/Evolucion_VHV_SDV_Mayo2026.md)** — Integración de la dignidad humana en el motor económico.
 
 ### 🏗️ Arquitectura y Diseño (`docs/architecture/`)
 - **[Arquitectura Temporal](architecture/arquitectura_temporal_coherencia_vital.md)** — TVI, CCP y Coherencia Vital.
