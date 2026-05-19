@@ -278,6 +278,15 @@
 
 ### Mayo 2026
 
+- [x] **Auditoría, Estabilización y Tipado Estricto del Frontend** (2026-05-19)
+  - Corrección de bugs de sesión en local storage centralizando el uso de `mc_access_token`.
+  - Desacoplamiento de hosts y estandarización de API en Next.js con el wrapper `apiFetch` y la constante `API_URL`.
+  - Refactorización de componentes para React 19 eliminando efectos de renderizado en cascada y previniendo loops circulares.
+  - Implementación de placeholders interactivos premium con glassmorphism para `/admin/subscriptions` y `/admin/settings`.
+  - Reemplazo completo de tipos `any` con tipado estricto e interfaces sólidas en todas las vistas de administración (`dashboard`, `network`, `reports`, `sdv`, `comparison`, `parameters`).
+  - Verificación exitosa mediante `npm run lint`, `npx tsc --noEmit` y compilación de producción con Next.js.
+  - Responsable: Antigravity (Gemini).
+
 - [x] **Reparación Integral de Frontend (Next.js 16 + Tailwind v4)** (2026-05-06)
   - Corrección de sintaxis de Tailwind v4 en `globals.css` (@import).
   - Ajuste de cabecera Content-Security-Policy (CSP) para permitir hidratación.

@@ -273,9 +273,10 @@ function NavDropdown({ section }: { section: typeof navSections[0] }) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all group"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-all group"
                 >
-                  <link.icon className="w-4 h-4 text-emerald-500/60 group-hover:text-emerald-500 transition-colors" />
+                  <link.icon className="w-4 h-4 text-slate-500 group-hover:text-emerald-500 transition-colors" />
                   {link.label}
                 </Link>
               ))}
@@ -284,35 +285,6 @@ function NavDropdown({ section }: { section: typeof navSections[0] }) {
         )}
       </AnimatePresence>
     </div>
-  );
-}
-
-function NavLink({ href, label, icon: Icon, external }: {
-  href: string;
-  label: string;
-  icon: React.ElementType;
-  external?: boolean;
-}) {
-  const baseClasses = `
-    flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium
-    transition-all duration-200
-    text-slate-400 hover:text-white hover:bg-slate-800
-  `;
-
-  if (external) {
-    return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={baseClasses}>
-        <Icon className="w-4 h-4" />
-        {label}
-      </a>
-    );
-  }
-
-  return (
-    <Link href={href} className={baseClasses}>
-      <Icon className="w-4 h-4" />
-      {label}
-    </Link>
   );
 }
 
@@ -345,3 +317,5 @@ function MobileNavLink({ href, label, icon: Icon, external, onClick }: {
     </Link>
   );
 }
+
+

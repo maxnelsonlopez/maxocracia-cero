@@ -13,7 +13,15 @@ import ReactFlow, {
     OnEdgesChange,
     OnConnect,
     Panel,
+    ReactFlowInstance,
 } from 'reactflow';
+import { apiFetch } from '../../lib/api';
+
+interface AxiomResult {
+    axiom: string;
+    is_valid: boolean;
+    message: string;
+}
 import 'reactflow/dist/style.css';
 
 import { ActionNode, ConditionNode, OracleNode, SDVNode, ReciprocityNode } from './components/CustomNodes';
@@ -57,7 +65,7 @@ export default function ContractBuilder() {
     const reactFlowWrapper = useRef<HTMLDivElement>(null);
     const [nodes, setNodes] = useState<Node[]>(initialNodes);
     const [edges, setEdges] = useState<Edge[]>(initialEdges);
-    const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
+    const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
 
     const onNodesChange: OnNodesChange = useCallback(
         (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -124,12 +132,8 @@ export default function ContractBuilder() {
         console.log('Enviando para validación axiomática...', { nodes, edges });
         
         try {
-            const response = await fetch('/contracts/validate_graph', {
+            const response = await apiFetch('/contracts/validate_graph', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}` // Asumiendo que el token está en localStorage
-                },
                 body: JSON.stringify({ nodes, edges })
             });
 
@@ -138,9 +142,9 @@ export default function ContractBuilder() {
             if (result.valid) {
                 alert('✅ Contrato Éticamente Válido. Todos los axiomas se cumplen.');
             } else {
-                const errors = result.results
-                    .filter((r: any) => !r.is_valid)
-                    .map((r: any) => `• ${r.axiom}: ${r.message}`)
+                const errors = (result.results || [])
+                    .filter((r: AxiomResult) => !r.is_valid)
+                    .map((r: AxiomResult) => `• ${r.axiom}: ${r.message}`)
                     .join('\n');
                 alert(`⚠️ Violación Axiomática Detectada:\n\n${errors}`);
             }

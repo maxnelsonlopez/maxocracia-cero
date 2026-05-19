@@ -59,6 +59,22 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
 
 ## [Unreleased]
 
+## 2026-05-19 — Auditoría, Estabilización y Tipado Estricto del Frontend
+
+### Añadido
+- **Módulos Administrativos Premium**: Creadas las vistas estáticas `/admin/subscriptions` y `/admin/settings` con interfaz glassmorphism interactiva (controles axiológicos y cards de facturación simulados).
+- **Tipado TypeScript Estricto**: Definidas interfaces TypeScript específicas para todas las vistas y componentes del panel de administración (`TrendPoint`, `ParticipantDetails`, `ImpactCardProps`, `CommunitySDV`, `ParticipantSDV`, etc.), eliminando el uso de `any`.
+
+### Cambiado
+- **Mapeo de Sesión**: Unificada la autenticación del cliente Next.js para leer `mc_access_token` en local storage en lugar de variables inconsistentes.
+- **Ciclo de Renders (React 19)**: Modificado `VHVPreview.tsx` para computar precios de forma pura durante el renderizado, eliminando el estado redundante y los efectos en cascada.
+- **Rutas API**: Estandarizados los llamados de red en el frontend usando `apiFetch` y la constante `API_URL` para desacoplar el puerto de backend en entornos locales.
+- **Limpieza de Código**: Removidos imports y helper-components no utilizados (`NavLink`, `Heart`, `TrendingUp`, `Calendar`, `Zap`) en la base de código.
+
+### Notas Técnicas
+- **Firma**: Antigravity (Gemini AI Assistant - Google DeepMind).
+- **Verificación**: Compilación de producción Next.js completada con éxito tras pasar las suites de linter y compilación estática (`npm run lint`, `npx tsc --noEmit`, `npm run build`).
+
 ## 2026-05-08 — Curaduría Documental y Auditoría de API
 
 ### Añadido

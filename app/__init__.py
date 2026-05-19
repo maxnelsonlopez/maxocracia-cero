@@ -49,7 +49,7 @@ def create_app(db_path=None):
     from .reputation_bp import bp as reputation_bp
     from .resources_bp import bp as resources_bp
     from .stripe_integration import stripe_bp
-    from .subscriptions import subscriptions_bp
+    from .subscriptions import subscriptions_bp, init_subscription_tables
     from .tvi_bp import tvi_bp
     from .users import bp as users_bp
     from .vhv_bp import vhv_bp
@@ -67,6 +67,9 @@ def create_app(db_path=None):
     app.register_blueprint(stripe_bp)
     app.register_blueprint(subscriptions_bp)
 
+    # Inicializar tablas específicas si no existen
+    init_subscription_tables(app)
+
     # placeholder imports to ensure modules loaded
     # other optional blueprints can be imported here
 
@@ -82,9 +85,14 @@ def create_app(db_path=None):
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
 
-        # Content Security Policy - basic policy
+        # Content Security Policy
         response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://api.stripe.com;"
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "img-src 'self' data: blob: https:; "
+            "font-src 'self' data: https://fonts.gstatic.com; "
+            "connect-src 'self' https://api.stripe.com ws://localhost:* wss://localhost:*;"
         )
 
         # Strict Transport Security (always in tests, only over HTTPS in production)
@@ -99,27 +107,43 @@ def create_app(db_path=None):
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")
     def catch_all(path):
-        from flask import send_from_directory
+        from flask import send_from_directory, jsonify
         
         dist_dir = os.path.join(os.path.dirname(__file__), "static", "dist")
         
-        # 1. Intentar servir el archivo exacto (ej: /_next/static/...)
+        # 1. Intentar servir el archivo exacto (ej: /_next/static/..., .txt, .js, etc.)
         target_path = os.path.join(dist_dir, path)
         if os.path.exists(target_path) and not os.path.isdir(target_path):
             return send_from_directory(dist_dir, path)
-            
+
         # 2. Intentar servir .html si existe (ej: /upgrade -> upgrade.html)
         html_file = f"{path}.html"
         if os.path.exists(os.path.join(dist_dir, html_file)):
             return send_from_directory(dist_dir, html_file)
             
-        # 3. Intentar servir index.html en la carpeta (ej: /admin -> admin/index.html)
+        # 3. Intentar servir index.html en la carpeta (ej: /admin/sdv -> admin/sdv/index.html)
         folder_index = os.path.join(path, "index.html")
         if os.path.exists(os.path.join(dist_dir, folder_index)):
             return send_from_directory(dist_dir, folder_index)
- 
-        # 4. SPA Fallback: Servir el index.html principal
+
+        # 4. Si llegamos aquí y el path coincide con un prefijo de API conocido,
+        # devolvemos un 404 real (JSON si es posible) en lugar del SPA.
+        api_prefixes = ["auth/", "api/", "subscriptions/", "forms/", "contracts/", "vhv/", "tvi/", "users/", "interchanges/"]
+        if any(path.startswith(pref) for pref in api_prefixes):
+            if "application/json" in request.headers.get("Accept", "") or path.startswith("api/"):
+                return jsonify({"error": f"Endpoint '{path}' no encontrado"}), 404
+
+        # 5. SPA Fallback: Servir el index.html principal para que Next.js router tome control
         return send_from_directory(dist_dir, "index.html")
+
+    @app.errorhandler(404)
+    def handle_not_found(e):
+        # Si algo llega aquí es porque no coincidió con NINGUNA ruta (ni el catch_all)
+        # o porque algún blueprint hizo abort(404)
+        if request.path.startswith('/api/'):
+            return jsonify({"error": "API route not found"}), 404
+        # Re-intentar catch_all para ver si es una ruta de Next.js
+        return catch_all(request.path.lstrip('/'))
 
     @app.route("/favicon.ico")
     def favicon():

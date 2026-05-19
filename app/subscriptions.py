@@ -649,16 +649,20 @@ def init_subscription_tables(app):
     Inicializa las tablas de suscripción en la base de datos.
     Llamar desde create_app() si las tablas no existen.
     """
-    with app.app_context():
-        db = get_db()
-        
+    import sqlite3
+    db_path = app.config["DATABASE"]
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    
+    try:
         # Verificar si tabla existe
-        table_exists = db.execute(
+        cur.execute(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='subscriptions'"
-        ).fetchone()
+        )
+        table_exists = cur.fetchone()
         
         if not table_exists:
-            db.execute("""
+            cur.execute("""
                 CREATE TABLE IF NOT EXISTS subscriptions (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id INTEGER NOT NULL UNIQUE,
@@ -673,7 +677,7 @@ def init_subscription_tables(app):
                 )
             """)
             
-            db.execute("""
+            cur.execute("""
                 CREATE TABLE IF NOT EXISTS premium_benefits_log (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id INTEGER NOT NULL,
@@ -683,5 +687,9 @@ def init_subscription_tables(app):
                 )
             """)
             
-            db.commit()
+            conn.commit()
             app.logger.info("Tablas de suscripción creadas correctamente")
+    except Exception as e:
+        app.logger.error(f"Error inicializando tablas de suscripción: {e}")
+    finally:
+        conn.close()

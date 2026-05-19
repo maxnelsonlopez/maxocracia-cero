@@ -1,15 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { apiFetch } from "../../lib/api";
 import { 
     BarChart3, 
-    PieChart, 
     Target, 
     Zap, 
     Clock, 
     ShieldCheck,
-    ArrowUpRight,
-    Search
+    ArrowUpRight
 } from "lucide-react";
 import {
     Chart as ChartJS,
@@ -53,12 +52,9 @@ export default function ReportsPage() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const token = localStorage.getItem("mc_token");
-                const headers = { "Authorization": `Bearer ${token}` };
-
                 const [catRes, resRes] = await Promise.all([
-                    fetch("/forms/dashboard/categories", { headers }),
-                    fetch("/forms/dashboard/resolution", { headers })
+                    apiFetch("/forms/dashboard/categories"),
+                    apiFetch("/forms/dashboard/resolution")
                 ]);
 
                 if (catRes.ok && resRes.ok) {
@@ -226,8 +222,16 @@ export default function ReportsPage() {
     );
 }
 
-function ImpactCard({ label, value, icon: Icon, desc, color }: any) {
-    const colors: any = {
+interface ImpactCardProps {
+    label: string;
+    value: string;
+    icon: React.ComponentType<{ className?: string }>;
+    desc: string;
+    color: "emerald" | "amber" | "blue";
+}
+
+function ImpactCard({ label, value, icon: Icon, desc, color }: ImpactCardProps) {
+    const colors: Record<"emerald" | "amber" | "blue", string> = {
         emerald: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
         amber: "text-amber-500 bg-amber-500/10 border-amber-500/20",
         blue: "text-blue-500 bg-blue-500/10 border-blue-500/20"

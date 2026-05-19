@@ -1,17 +1,34 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Input } from "../ui/Input";
 import { Button } from "../ui/Button";
-import { motion } from "framer-motion";
+
+export interface VHVFormData {
+  name: string;
+  t_direct_hours: number;
+  t_inherited_hours: number;
+  t_future_hours: number;
+  v_organisms_affected: number;
+  v_consciousness_factor: number;
+  v_suffering_factor: number;
+  v_abundance_factor: number;
+  v_rarity_factor: number;
+  r_minerals_kg: number;
+  r_water_m3: number;
+  r_petroleum_l: number;
+  r_land_hectares: number;
+  r_frg_factor: number;
+  r_cs_factor: number;
+}
 
 interface VHVFormProps {
-  onCalculate: (data: any) => void;
-  initialData?: any;
+  onCalculate: (data: VHVFormData) => void;
+  initialData?: Partial<VHVFormData>;
 }
 
 export default function VHVForm({ onCalculate, initialData }: VHVFormProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<VHVFormData>({
     name: initialData?.name || "",
     t_direct_hours: initialData?.t_direct_hours || 0,
     t_inherited_hours: initialData?.t_inherited_hours || 0,
@@ -29,11 +46,11 @@ export default function VHVForm({ onCalculate, initialData }: VHVFormProps) {
     r_cs_factor: initialData?.r_cs_factor || 1,
   });
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData(prev => ({ ...prev, ...initialData }));
-    }
-  }, [initialData]);
+  const [prevInitialData, setPrevInitialData] = useState<Partial<VHVFormData> | undefined>(initialData);
+  if (initialData !== prevInitialData) {
+    setPrevInitialData(initialData);
+    setFormData((prev) => ({ ...prev, ...initialData }));
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;

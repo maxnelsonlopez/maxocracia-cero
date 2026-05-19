@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await apiFetch("/auth/logout", { method: "POST" });
-    } catch (e) {}
+    } catch {}
     localStorage.removeItem("mc_access_token");
     setUser(null);
   };

@@ -28,6 +28,7 @@ import {
   ArrowRight,
   Loader2
 } from "lucide-react";
+import { apiFetch, API_URL } from "../lib/api";
 
 // Tipos
 interface TierConfig {
@@ -130,7 +131,7 @@ export default function UpgradePageClient() {
 
   // Verificar configuración de Stripe al cargar
   useEffect(() => {
-    fetch("http://localhost:5001/stripe/config")
+    fetch(`${API_URL}/stripe/config`)
       .then((res) => res.json())
       .then((data) => {
         setStripeConfigured(data.stripe_configured);
@@ -180,7 +181,7 @@ export default function UpgradePageClient() {
 
     try {
       // Obtener token de autenticación (del localStorage o cookie)
-      const token = localStorage.getItem("access_token");
+      const token = localStorage.getItem("mc_access_token");
       if (!token) {
         setError("Debes iniciar sesión para suscribirte.");
         setIsLoading(false);
@@ -188,14 +189,10 @@ export default function UpgradePageClient() {
       }
 
       // Crear sesión de checkout
-      const response = await fetch(
-        "http://localhost:5001/stripe/create-checkout-session",
+      const response = await apiFetch(
+        "/stripe/create-checkout-session",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
           body: JSON.stringify({
             tier: selectedTier,
             country_code: countryCode,
@@ -581,7 +578,7 @@ export default function UpgradePageClient() {
             <div className="mt-8 pt-8 border-t border-slate-800">
               <p className="text-slate-400 text-sm">
                 ¿Preguntas? Revisa nuestro{" "}
-                <a href="http://localhost:5001/subscriptions/transparency-report" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline">
+                <a href={`${API_URL}/subscriptions/transparency-report`} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline">
                   reporte de transparencia público
                 </a>{" "}
                 o{" "}

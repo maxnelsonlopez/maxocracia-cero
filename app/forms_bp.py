@@ -6,12 +6,15 @@ Provides REST API for:
 - Formulario A (Exchange Registration)
 - Formulario B (Follow-up Reports)
 - Dashboard analytics
+- Matching Engine (Motor de Emparejamiento SDV)
 """
 
 from flask import Blueprint, jsonify, request
 
 from .auth import token_required
 from .forms_manager import FormsManager
+from .matching import MatchingEngine
+from .sdv_analyzer import SDVAnalyzer
 from .utils import get_db
 
 forms_bp = Blueprint("forms", __name__, url_prefix="/forms")
@@ -433,3 +436,192 @@ def get_resolution(current_user):
     manager = FormsManager(db)
     resolution = manager.get_resolution_metrics()
     return jsonify(resolution), 200
+
+
+# ==================== MOTOR DE MATCHING ====================
+
+
+def _match_result_to_dict(m) -> dict:
+    """Convierte un MatchResult dataclass a dict JSON-serializable."""
+    return {
+        "offerer_id": m.offerer_id,
+        "offerer_name": m.offerer_name,
+        "offerer_city": m.offerer_city,
+        "offerer_neighborhood": m.offerer_neighborhood,
+        "offerer_phone_whatsapp": m.offerer_phone_whatsapp,
+        "offerer_telegram": m.offerer_telegram,
+        "matched_categories": m.matched_categories,
+        "offerer_description": m.offerer_description,
+        "offerer_dimensions": m.offerer_dimensions,
+        "compatibility_score": m.compatibility_score,
+        "urgency_weight": m.urgency_weight,
+        "same_city": m.same_city,
+        "same_neighborhood": m.same_neighborhood,
+        "recently_exchanged": m.recently_exchanged,
+    }
+
+
+def _urgent_need_to_dict(u) -> dict:
+    """Convierte un UrgentNeed dataclass a dict JSON-serializable."""
+    return {
+        "participant_id": u.participant_id,
+        "participant_name": u.participant_name,
+        "city": u.city,
+        "neighborhood": u.neighborhood,
+        "need_description": u.need_description,
+        "need_urgency": u.need_urgency,
+        "need_categories": u.need_categories,
+        "need_dimensions": u.need_dimensions,
+        "days_without_exchange": u.days_without_exchange,
+        "latest_need_level": u.latest_need_level,
+        "is_coherence_crime": u.is_coherence_crime,
+        "top_matches": [_match_result_to_dict(m) for m in u.top_matches],
+    }
+
+
+def _gap_to_dict(g) -> dict:
+    """Convierte un CommunityGap dataclass a dict JSON-serializable."""
+    return {
+        "dimension": g.dimension,
+        "dimension_label": g.dimension_label,
+        "participants_needing": g.participants_needing,
+        "participants_offering": g.participants_offering,
+        "coverage_ratio": g.coverage_ratio,
+        "gap_severity": g.gap_severity,
+    }
+
+
+@forms_bp.route("/matching/participant/<int:participant_id>", methods=["GET"])
+@token_required
+def get_matches_for_participant(current_user, participant_id):
+    """
+    Retorna los mejores matches para un participante dado.
+
+    Query params:
+    - limit: Número máximo de resultados (default 10)
+    - exclude_recent: Excluir pares recientes (default true)
+    """
+    limit = request.args.get("limit", 10, type=int)
+    exclude_recent = request.args.get("exclude_recent", "true").lower() != "false"
+
+    db = get_db()
+    engine = MatchingEngine(db)
+
+    matches = engine.find_matches(
+        seeker_id=participant_id, limit=limit, exclude_recent=exclude_recent
+    )
+
+    return jsonify({
+        "participant_id": participant_id,
+        "matches": [_match_result_to_dict(m) for m in matches],
+        "count": len(matches),
+    }), 200
+
+
+@forms_bp.route("/matching/urgent", methods=["GET"])
+@token_required
+def get_urgent_needs(current_user):
+    """
+    Retorna participantes con necesidad urgente sin resolver.
+
+    Los marcados como is_coherence_crime=true son Alertas de Crimen de
+    Coherencia SDV y deben recibir atención inmediata de toda la comunidad.
+
+    Query params:
+    - days_threshold: Días sin intercambio para considerar urgente (default 7)
+    - top_matches: Cuántos matches incluir por participante (default 3)
+    """
+    days_threshold = request.args.get("days_threshold", 7, type=int)
+    top_matches = request.args.get("top_matches", 3, type=int)
+
+    db = get_db()
+    engine = MatchingEngine(db)
+
+    urgent = engine.get_urgent_unmet_needs(
+        days_threshold=days_threshold, top_matches=top_matches
+    )
+
+    coherence_crimes = [u for u in urgent if u.is_coherence_crime]
+    warnings = [u for u in urgent if not u.is_coherence_crime]
+
+    return jsonify({
+        "coherence_crimes": [_urgent_need_to_dict(u) for u in coherence_crimes],
+        "warnings": [_urgent_need_to_dict(u) for u in warnings],
+        "total_urgent": len(urgent),
+        "crimes_count": len(coherence_crimes),
+        "system_alert": len(coherence_crimes) > 0,
+    }), 200
+
+
+@forms_bp.route("/matching/gaps", methods=["GET"])
+@token_required
+def get_community_gaps(current_user):
+    """
+    Retorna el análisis de brechas de cobertura por dimensión humana
+    en la comunidad actual de la Cohorte Cero.
+
+    Sirve para identificar qué necesidades la red no puede cubrir sola
+    y planificar incorporación de nuevos participantes con esas capacidades.
+    """
+    db = get_db()
+    engine = MatchingEngine(db)
+
+    gaps = engine.get_community_sdv_gaps()
+
+    critical = [g for g in gaps if g.gap_severity == "critical"]
+    warnings = [g for g in gaps if g.gap_severity == "warning"]
+    covered = [g for g in gaps if g.gap_severity == "ok"]
+
+    return jsonify({
+        "gaps": [_gap_to_dict(g) for g in gaps],
+        "critical": [_gap_to_dict(g) for g in critical],
+        "warnings": [_gap_to_dict(g) for g in warnings],
+        "covered": [_gap_to_dict(g) for g in covered],
+        "critical_count": len(critical),
+    }), 200
+
+
+@forms_bp.route("/matching/summary", methods=["GET"])
+@token_required
+def get_matching_summary(current_user):
+    """
+    Resumen ejecutivo del motor de matching para el dashboard principal.
+    Incluye conteos de alertas y nivel de alerta general del sistema.
+    """
+    db = get_db()
+    engine = MatchingEngine(db)
+    summary = engine.get_matching_summary()
+    return jsonify(summary), 200
+
+
+# ==================== SDV ANALYSIS ====================
+
+
+@forms_bp.route("/sdv/participant/<int:p_id>", methods=["GET"])
+@token_required
+def get_participant_sdv(current_user, p_id):
+    """Retorna el estado de dignidad vital estimado de un participante con narrativa."""
+    db = get_db()
+    analyzer = SDVAnalyzer(db)
+    analysis = analyzer.get_participant_analysis(p_id)
+    return jsonify(analysis), 200
+
+
+@forms_bp.route("/sdv/community", methods=["GET"])
+@token_required
+def get_community_sdv(current_user):
+    """Retorna el estatus agregado de la Cohorte Cero con resumen narrativo."""
+    db = get_db()
+    analyzer = SDVAnalyzer(db)
+    status = analyzer.get_community_sdv_status()
+    
+    # Agregar narrativa comunitaria básica
+    avg = status["average_overall"]
+    if avg >= 0.9:
+        status["community_narrative"] = "La Cohorte Cero se encuentra en un estado de alta resiliencia y plenitud vital."
+    elif avg >= 0.7:
+        status["community_narrative"] = "La comunidad muestra una base sólida, pero existen vulnerabilidades focalizadas que requieren atención."
+    else:
+        status["community_narrative"] = "⚠️ Alerta de Coherencia: Múltiples dimensiones vitales están por debajo del umbral de dignidad en la comunidad."
+        
+    return jsonify(status), 200

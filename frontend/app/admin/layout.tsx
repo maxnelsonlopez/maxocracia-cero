@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -12,11 +12,16 @@ import {
     ArrowLeft,
     Activity,
     Network,
-    FileBarChart
+    FileBarChart,
+    GitMerge,
+    ShieldAlert,
 } from "lucide-react";
+import { apiFetch } from "../lib/api";
 
 const sidebarLinks = [
     { href: "/admin/dashboard", label: "Vista General", icon: LayoutDashboard },
+    { href: "/admin/sdv", label: "Panel SDV", icon: Activity },
+    { href: "/admin/matching", label: "Motor de Matching", icon: GitMerge, alertKey: "matching" },
     { href: "/admin/network", label: "Red de Intercambio", icon: Network },
     { href: "/admin/reports", label: "Informes e Impacto", icon: FileBarChart },
     { href: "/admin/users", label: "Usuarios", icon: Users },
@@ -30,6 +35,18 @@ export default function AdminLayout({
     children: React.ReactNode;
 }) {
     const pathname = usePathname();
+    const [urgentCount, setUrgentCount] = useState(0);
+    const [hasCrime, setHasCrime] = useState(false);
+
+    useEffect(() => {
+        apiFetch("/forms/matching/summary")
+            .then((r) => r.json())
+            .then((data) => {
+                setUrgentCount(data.urgent_unmet_count || 0);
+                setHasCrime(data.system_alert_level === "coherence_crime");
+            })
+            .catch(() => {});
+    }, []);
 
     return (
         <div className="flex min-h-screen bg-slate-950 text-slate-100">
@@ -45,18 +62,32 @@ export default function AdminLayout({
                         {sidebarLinks.map((link) => {
                             const isActive = pathname === link.href;
                             const Icon = link.icon;
+                            const isMatchingLink = link.href === "/admin/matching";
 
                             return (
                                 <Link
                                     key={link.href}
                                     href={link.href}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                        isActive
                                             ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
                                             : "text-slate-400 hover:text-white hover:bg-slate-800"
-                                        }`}
+                                    }`}
                                 >
                                     <Icon className="w-4 h-4" />
                                     {link.label}
+                                    {isMatchingLink && urgentCount > 0 && (
+                                        <span
+                                            className={`ml-auto text-[10px] font-black px-2 py-0.5 rounded-full ${
+                                                hasCrime
+                                                    ? "bg-rose-500 text-white animate-pulse"
+                                                    : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                                            }`}
+                                        >
+                                            {hasCrime && <ShieldAlert className="inline w-2.5 h-2.5 mr-0.5" />}
+                                            {urgentCount}
+                                        </span>
+                                    )}
                                 </Link>
                             );
                         })}

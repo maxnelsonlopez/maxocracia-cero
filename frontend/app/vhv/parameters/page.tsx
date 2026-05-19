@@ -7,8 +7,10 @@ import { Settings, Save, AlertTriangle, ShieldCheck, RotateCcw } from "lucide-re
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
 
+import { VHVParametersInput } from "../../lib/api";
+
 export default function VHVParametersPage() {
-  const [params, setParams] = useState<any>(null);
+  const [params, setParams] = useState<VHVParametersInput | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export default function VHVParametersPage() {
     try {
       const data = await api.getVHVParameters();
       setParams(data);
-    } catch (err: any) {
+    } catch {
       setError("Error al cargar parámetros. ¿Tienes permisos de administrador?");
     } finally {
       setIsLoading(false);
@@ -32,13 +34,17 @@ export default function VHVParametersPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setParams((prev: any) => ({
-      ...prev,
-      [name]: parseFloat(value) || 0,
-    }));
+    setParams((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        [name]: parseFloat(value) || 0,
+      };
+    });
   };
 
   const handleSave = async () => {
+    if (!params) return;
     setIsSaving(true);
     setError(null);
     setSuccess(false);
@@ -60,8 +66,8 @@ export default function VHVParametersPage() {
       await api.updateVHVParameters(params);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-    } catch (err: any) {
-      setError(err.message || "Error al actualizar parámetros");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al actualizar parámetros");
     } finally {
       setIsSaving(false);
     }

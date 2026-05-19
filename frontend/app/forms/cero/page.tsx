@@ -88,7 +88,7 @@ export default function CeroFormPage() {
         setErrorMessage(data.error || "Ocurrió un error al enviar el formulario.");
         setStatus("error");
       }
-    } catch (err) {
+    } catch {
       setErrorMessage("Error de conexión con el servidor.");
       setStatus("error");
     }

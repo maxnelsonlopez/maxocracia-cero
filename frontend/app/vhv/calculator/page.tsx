@@ -1,23 +1,33 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import VHVForm from "../../components/vhv/VHVForm";
+import VHVForm, { VHVFormData } from "../../components/vhv/VHVForm";
 import VHVChart from "../../components/vhv/VHVChart";
 import { api } from "../../lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calculator, Info, Save, BookOpen, ArrowRight } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 
-export default function VHVCalculatorPage() {
-  const [calculationResult, setCalculationResult] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [caseStudies, setCaseStudies] = useState<any[]>([]);
-  const [selectedCaseStudy, setSelectedCaseStudy] = useState<any>(null);
+interface CalculationResult {
+  maxo_price: number;
+  breakdown: {
+    time_contribution: number;
+    life_contribution: number;
+    resource_contribution: number;
+  };
+  input_data: VHVFormData;
+}
 
-  useEffect(() => {
-    loadCaseStudies();
-  }, []);
+interface CaseStudy {
+  name: string;
+  data: Partial<VHVFormData>;
+}
+
+export default function VHVCalculatorPage() {
+  const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [caseStudies, setCaseStudies] = useState<CaseStudy[]>([]);
+  const [selectedCaseStudy, setSelectedCaseStudy] = useState<CaseStudy | null>(null);
 
   const loadCaseStudies = async () => {
     try {
@@ -28,16 +38,18 @@ export default function VHVCalculatorPage() {
     }
   };
 
-  const handleCalculate = async (formData: any) => {
-    setIsLoading(true);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadCaseStudies();
+  }, []);
+
+  const handleCalculate = async (formData: VHVFormData) => {
     setError(null);
     try {
       const result = await api.calculateVHV(formData);
       setCalculationResult(result);
-    } catch (err: any) {
-      setError(err.message || "Error al calcular el VHV");
-    } finally {
-      setIsLoading(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al calcular el VHV");
     }
   };
 
@@ -46,12 +58,12 @@ export default function VHVCalculatorPage() {
     try {
       await api.calculateVHV({ ...calculationResult.input_data, save: true });
       alert("Producto guardado exitosamente");
-    } catch (err: any) {
-      alert("Error al guardar: " + err.message);
+    } catch (err) {
+      alert("Error al guardar: " + (err instanceof Error ? err.message : "Error desconocido"));
     }
   };
 
-  const selectCaseStudy = (study: any) => {
+  const selectCaseStudy = (study: CaseStudy) => {
     setSelectedCaseStudy(study);
     // This will trigger the useEffect in VHVForm to update the fields
   };

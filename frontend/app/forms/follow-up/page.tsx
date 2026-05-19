@@ -10,7 +10,7 @@ import { FormRadioGroup } from "../../components/ui/FormRadioGroup";
 import { ParticipantSearch } from "../../components/ui/ParticipantSearch";
 import { apiFetch } from "../../lib/api";
 import { motion } from "framer-motion";
-import { CheckCircle2, AlertCircle, Calendar, RefreshCcw } from "lucide-react";
+import { CheckCircle2, AlertCircle, RefreshCcw } from "lucide-react";
 
 const FOLLOWUP_TYPES = [
   { label: "Rutina", value: "Rutina", emoji: "🔄" },
@@ -142,8 +142,8 @@ export default function FollowUpFormPage() {
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
       setExchanges(uniqueExchanges);
-    } catch (err) {
-      console.error("Error loading exchanges:", err);
+    } catch {
+      console.error("Error loading exchanges");
     } finally {
       setIsLoadingExchanges(false);
     }
@@ -179,7 +179,7 @@ export default function FollowUpFormPage() {
         setErrorMessage(data.error || "Ocurrió un error al registrar el seguimiento.");
         setStatus("error");
       }
-    } catch (err) {
+    } catch {
       setErrorMessage("Error de conexión con el servidor.");
       setStatus("error");
     }

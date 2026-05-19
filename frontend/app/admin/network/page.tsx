@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
+import { apiFetch } from "../../lib/api";
 import { Node, Edge } from "reactflow";
 import { 
     Search, 
@@ -16,21 +17,28 @@ import {
 import ExchangeNetworkGraph from "@/app/components/admin/ExchangeNetworkGraph";
 import { motion, AnimatePresence } from "framer-motion";
 
+interface ParticipantDetails {
+    name: string;
+    neighborhood: string;
+    city: string;
+    email: string;
+    phone_whatsapp: string;
+    offer_description: string;
+    need_description: string;
+}
+
 export default function NetworkPage() {
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedNode, setSelectedNode] = useState<Node | null>(null);
-    const [participantDetails, setParticipantDetails] = useState<any>(null);
+    const [participantDetails, setParticipantDetails] = useState<ParticipantDetails | null>(null);
 
     const fetchNetwork = useCallback(async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem("mc_token");
-            const res = await fetch("/forms/dashboard/network", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
+            const res = await apiFetch("/forms/dashboard/network");
 
             if (!res.ok) throw new Error("Error al obtener la red");
 
@@ -61,10 +69,7 @@ export default function NetworkPage() {
     const handleNodeClick = async (_: React.MouseEvent, node: Node) => {
         setSelectedNode(node);
         try {
-            const token = localStorage.getItem("mc_token");
-            const res = await fetch(`/forms/participants/${node.id}`, {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
+            const res = await apiFetch(`/forms/participants/${node.id}`);
             if (res.ok) {
                 const data = await res.json();
                 setParticipantDetails(data);

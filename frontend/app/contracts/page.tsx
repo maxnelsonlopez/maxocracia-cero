@@ -15,6 +15,7 @@ import {
   Users
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { apiFetch } from "../lib/api";
 
 interface Contract {
   contract_id: string;
@@ -32,12 +33,7 @@ export default function ContractsPage() {
   useEffect(() => {
     async function fetchContracts() {
       try {
-        const token = localStorage.getItem("mc_access_token");
-        const res = await fetch("/contracts/", {
-          headers: {
-            "Authorization": `Bearer ${token}`
-          }
-        });
+        const res = await apiFetch("/contracts/");
 
         if (!res.ok) throw new Error("Error al cargar contratos");
         const data = await res.json();

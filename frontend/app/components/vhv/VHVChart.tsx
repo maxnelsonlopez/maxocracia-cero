@@ -9,6 +9,8 @@ import {
   Tooltip,
   Legend,
   ArcElement,
+  ChartOptions,
+  TooltipItem,
 } from "chart.js";
 import { Bar, Doughnut } from "react-chartjs-2";
 import { motion } from "framer-motion";
@@ -58,7 +60,7 @@ export default function VHVChart({
     ],
   };
 
-  const options = {
+  const options: ChartOptions<"bar" | "doughnut"> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -80,7 +82,7 @@ export default function VHVChart({
         cornerRadius: 8,
         displayColors: false,
         callbacks: {
-          label: (context: any) => `${context.parsed.y || context.parsed} Ⓜ`,
+          label: (context: TooltipItem<"bar" | "doughnut">) => `${context.formattedValue} Ⓜ`,
         },
       },
     },
@@ -92,7 +94,7 @@ export default function VHVChart({
         },
         ticks: {
           color: "rgba(255, 255, 255, 0.5)",
-          callback: (value: any) => `${value} Ⓜ`,
+          callback: (value) => `${value} Ⓜ`,
         },
       },
       x: {
@@ -113,9 +115,9 @@ export default function VHVChart({
       className="w-full h-64 md:h-80"
     >
       {type === "bar" ? (
-        <Bar data={data} options={options as any} />
+        <Bar data={data} options={options as ChartOptions<"bar">} />
       ) : (
-        <Doughnut data={data} options={options as any} />
+        <Doughnut data={data} options={options as ChartOptions<"doughnut">} />
       )}
     </motion.div>
   );

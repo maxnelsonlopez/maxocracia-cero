@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Zap, ArrowRight, Lock, Mail, User, Shield } from "lucide-react";
+import { ArrowRight, Lock, Mail, User, Shield } from "lucide-react";
 import { Input } from "../components/ui/Input";
 import { Button } from "../components/ui/Button";
 import { useAuth } from "../context/AuthContext";
@@ -39,7 +39,7 @@ export default function RegisterPage() {
       } else {
         setError(data.error || "Error al registrar ciudadano");
       }
-    } catch (err) {
+    } catch {
       setError("Error de red. Intenta nuevamente.");
     } finally {
       setIsLoading(false);

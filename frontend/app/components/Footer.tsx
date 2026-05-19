@@ -13,7 +13,6 @@
 
 import Link from "next/link";
 import { 
-  Heart, 
   Github, 
   Mail,
   ExternalLink,
@@ -23,7 +22,7 @@ import {
 const footerLinks = {
   proyecto: [
     { label: "Libro Completo", href: "https://github.com/maxnelsonlopez/maxocracia-cero/blob/main/docs/book/edicion_3_dinamica/libro_completo_310126.md" },
-    { label: "API Docs", href: "http://localhost:5001/admin" },
+    { label: "API Docs", href: "/admin" },
     { label: "Changelog", href: "https://github.com/maxnelsonlopez/maxocracia-cero/blob/main/CHANGELOG.md" },
   ],
   comunidad: [
@@ -32,7 +31,7 @@ const footerLinks = {
     { label: "Contribuir", href: "/upgrade" },
   ],
   legal: [
-    { label: "Transparencia", href: "http://localhost:5001/subscriptions/transparency-report" },
+    { label: "Transparencia", href: "/subscriptions/transparency-report" },
     { label: "Privacidad", href: "#" },
     { label: "Términos", href: "#" },
   ],

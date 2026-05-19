@@ -10,7 +10,8 @@ import {
     Title,
     Tooltip,
     Legend,
-    Filler
+    Filler,
+    TooltipItem
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
@@ -76,7 +77,7 @@ export default function TrendChart({
                 padding: 12,
                 displayColors: false,
                 callbacks: {
-                    label: (context: any) => `${label}: ${context.parsed.y}`,
+                    label: (context: TooltipItem<"line">) => `${label}: ${context.parsed.y ?? ""}`,
                 },
             },
         },

@@ -3,13 +3,32 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../../lib/api";
 import { motion } from "framer-motion";
-import { Activity, Clock, Users, Zap, TrendingUp, Award, BarChart3 } from "lucide-react";
+import { Activity, Zap, Award, BarChart3 } from "lucide-react";
 import TVIStatsCard from "../../components/tvi/TVIStatsCard";
 import { Button } from "../../components/ui/Button";
 
+interface UserStats {
+  user_ccp: number;
+  total_hours: number;
+}
+
+interface TopContributor {
+  name: string;
+  hours: number;
+  ccp: number;
+}
+
+interface CommunityStats {
+  total_hours: number;
+  active_participants: number;
+  reciprocity_rate: number;
+  avg_ccp: number;
+  top_contributors?: TopContributor[];
+}
+
 export default function TVIStatsPage() {
-  const [stats, setStats] = useState<any>(null);
-  const [communityStats, setCommunityStats] = useState<any>(null);
+  const [stats, setStats] = useState<UserStats | null>(null);
+  const [communityStats, setCommunityStats] = useState<CommunityStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,9 +45,9 @@ export default function TVIStatsPage() {
       ]);
       setStats(sData);
       setCommunityStats(cData);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error loading TVI stats", err);
-      setError(err.message || "Error al conectar con el servidor");
+      setError(err instanceof Error ? err.message : "Error al conectar con el servidor");
     } finally {
       setIsLoading(false);
     }
@@ -88,7 +107,7 @@ export default function TVIStatsPage() {
            />
            <TVIStatsCard 
              label="Tasa de Reciprocidad"
-             value={`${(communityStats?.reciprocity_rate * 100 || 0).toFixed(1)}%`}
+             value={`${((communityStats?.reciprocity_rate ?? 0) * 100).toFixed(1)}%`}
              icon="trend"
              color="indigo"
            />
@@ -157,7 +176,7 @@ export default function TVIStatsPage() {
                    { name: "Julian S.", hours: 120, ccp: 0.92 },
                    { name: "Marta L.", hours: 98, ccp: 0.89 },
                    { name: "Sofia P.", hours: 85, ccp: 0.87 }
-                 ]).map((user: any, i: number) => (
+                 ]).map((user: TopContributor, i: number) => (
                     <div key={i} className="flex items-center gap-4 group">
                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-400 group-hover:bg-indigo-500/20 group-hover:text-indigo-400 transition-colors">
                           {i + 1}

@@ -68,9 +68,12 @@ Ejecuta `python scripts/build_front.py` para que la nueva ruta sea accesible des
 
 ## 📋 Información Relevante
 
-*   **Autenticación**: El frontend maneja tokens JWT almacenados en `localStorage`. El componente `AuthContext` gestiona el estado de sesión.
+*   **Autenticación**: El frontend maneja tokens JWT almacenados en `localStorage` bajo la clave **`mc_access_token`** (¡no usar `mc_token`, esa clave no existe!). El componente `AuthContext` gestiona el estado de sesión.
+    *   **Regla de Oro**: **Usar siempre `apiFetch` de `@/lib/api`** para cualquier petición al backend. Este wrapper inyecta automáticamente el header `Authorization: Bearer <mc_access_token>`. Nunca usar `fetch()` directo con headers manuales en páginas de admin — es la causa raíz de los fallos de autenticación intermitentes.
 *   **Visualizaciones**: Usamos `chart.js` y `react-chartjs-2`. Para grafos de red, usamos `react-flow`.
 *   **Rutas SPA**: Flask está configurado con un "catch-all" en `app/__init__.py` que redirige cualquier ruta no encontrada al `index.html` de Next.js, permitiendo que el App Router de Next maneje la navegación.
 
+*   **Auditoría y Estabilización (19 de Mayo de 2026)**: Se saneó el 100% del tipado explícito `any` en los componentes del panel de administración (`/admin/dashboard`, `/admin/sdv`, `/admin/reports`, `/admin/network`, `/admin/users`), reemplazándolos con interfaces TypeScript robustas. También se solucionaron problemas de re-renderizado circular en cascada de React 19 y se crearon placeholders interactivos y dinámicos para configuración y suscripciones.
+
 ---
-*Documento generado tras la exitosa migración del Segmento 4 - Mayo 2026.*
+*Documento actualizado y estabilizado por Antigravity (Gemini AI Assistant - Google DeepMind) tras la auditoría integral de Mayo 2026.*

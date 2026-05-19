@@ -21,6 +21,7 @@ import {
   Sparkles,
   CheckCircle2
 } from "lucide-react";
+import { apiFetch } from "../lib/api";
 
 interface ContributorBadgeProps {
   tier?: "free" | "contributor" | "enterprise";
@@ -85,7 +86,6 @@ export function ContributorBadge({
 }: ContributorBadgeProps) {
   const [tier, setTier] = useState<string>(propTier || "free");
   const [loading, setLoading] = useState(!propTier);
-  const [error, setError] = useState(false);
 
   // Si no se pasa tier, fetch desde API
   useEffect(() => {
@@ -96,21 +96,14 @@ export function ContributorBadge({
 
     const fetchSubscription = async () => {
       try {
-        const token = localStorage.getItem("access_token");
+        const token = localStorage.getItem("mc_access_token");
         if (!token) {
           setTier("free");
           setLoading(false);
           return;
         }
 
-        const response = await fetch(
-          "http://localhost:5001/subscriptions/my-subscription",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await apiFetch("/subscriptions/my-subscription");
 
         if (response.ok) {
           const data: SubscriptionData = await response.json();
@@ -119,7 +112,6 @@ export function ContributorBadge({
           setTier("free");
         }
       } catch {
-        setError(true);
         setTier("free");
       } finally {
         setLoading(false);
@@ -233,20 +225,13 @@ export function SubscriptionBanner() {
   useEffect(() => {
     const fetchSubscription = async () => {
       try {
-        const token = localStorage.getItem("access_token");
+        const token = localStorage.getItem("mc_access_token");
         if (!token) {
           setLoading(false);
           return;
         }
 
-        const response = await fetch(
-          "http://localhost:5001/subscriptions/my-subscription",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await apiFetch("/subscriptions/my-subscription");
 
         if (response.ok) {
           const data = await response.json();
@@ -305,7 +290,7 @@ export function SubscriptionBanner() {
           </div>
         </div>
         <a
-          href="http://localhost:5001/stripe/customer-portal"
+          href="/stripe/customer-portal"
           className={`
             px-4 py-2 rounded-lg text-sm font-medium transition-colors
             ${isExpiringSoon 

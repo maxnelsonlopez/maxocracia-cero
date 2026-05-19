@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 interface FormWizardProps {
   steps: string[];
   children: React.ReactNode[];
-  onComplete: (data: any) => void;
+  onComplete: (data: Record<string, unknown>) => void;
   isSubmitting?: boolean;
 }
 

@@ -88,7 +88,7 @@ export function CTASection() {
               description="18 capítulos en Markdown"
             />
             <ResourceLink
-              href="http://localhost:5001/vhv-calculator.html"
+              href="/vhv/calculator"
               icon={Heart}
               label="Calculadora VHV"
               description="Calcula el valor real"
@@ -111,8 +111,8 @@ export function CTASection() {
           className="mt-16"
         >
           <blockquote className="text-2xl sm:text-3xl font-light text-slate-300 italic">
-            "La verdad no necesita ser defendida. 
-            Solo necesita expandirse."
+            &quot;La verdad no necesita ser defendida. 
+            Solo necesita expandirse.&quot;
           </blockquote>
           <cite className="text-slate-500 mt-4 block not-italic">
             — Axioma 4, Maxocracia

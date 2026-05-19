@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { apiFetch } from "../../lib/api";
 import {
     Search,
     Filter,
@@ -10,7 +11,6 @@ import {
     CheckCircle2,
     XCircle,
     Clock,
-    ExternalLink,
     Edit,
     Check
 } from "lucide-react";
@@ -46,10 +46,7 @@ export default function AdminUsers() {
     async function fetchUsers() {
         try {
             setLoading(true);
-            const token = localStorage.getItem("mc_token");
-            const res = await fetch("/subscriptions/admin/users", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
+            const res = await apiFetch("/subscriptions/admin/users");
             if (!res.ok) throw new Error("Error cargando usuarios");
             const data = await res.json();
             setUsers(data);
@@ -65,13 +62,8 @@ export default function AdminUsers() {
 
         try {
             setIsActivating(true);
-            const token = localStorage.getItem("mc_token");
-            const res = await fetch("/subscriptions/activate-manual", {
+            const res = await apiFetch("/subscriptions/activate-manual", {
                 method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
                 body: JSON.stringify({
                     user_id: selectedUser.id,
                     tier: activationTier,
@@ -101,6 +93,11 @@ export default function AdminUsers() {
 
     return (
         <div className="space-y-6">
+            {error && (
+                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold text-center">
+                    ⚠️ {error}
+                </div>
+            )}
             {/* Header Actions */}
             <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
                 <div className="relative w-full sm:w-96">

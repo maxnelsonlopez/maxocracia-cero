@@ -7,8 +7,25 @@ import { LayoutGrid, List, Trophy, Zap, Info, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import VHVChart from "../../components/vhv/VHVChart";
 
+interface Product {
+  id: string;
+  name: string;
+  category?: string;
+  maxo_price: number;
+  breakdown?: {
+    time_contribution: number;
+    life_contribution: number;
+    resource_contribution: number;
+  };
+  vhv?: {
+    T: number;
+    V: number;
+    R: number;
+  };
+}
+
 export default function VHVComparisonPage() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,8 +38,8 @@ export default function VHVComparisonPage() {
     try {
       const data = await api.getVHVProducts();
       setProducts(data.products || []);
-    } catch (err: any) {
-      setError(err.message || "Error al cargar productos");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al cargar productos");
     } finally {
       setIsLoading(false);
     }
@@ -43,7 +60,7 @@ export default function VHVComparisonPage() {
               Volver a la calculadora
             </Link>
             <h1 className="text-4xl font-bold tracking-tight">Comparador Ético</h1>
-            <p className="text-slate-400 mt-2">Contrasta el impacto vital de tus productos guardados</p>
+            <p className="text-slate-400 mt-2">Contrasta el impact vital de tus productos guardados</p>
           </motion.div>
 
           <div className="flex bg-slate-900/50 p-1 rounded-xl border border-slate-800">
@@ -51,6 +68,12 @@ export default function VHVComparisonPage() {
              <button className="p-2 text-slate-500 hover:text-slate-300"><List size={20} /></button>
           </div>
         </header>
+
+        {error && (
+          <div className="p-4 mb-6 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold text-center">
+            ⚠️ {error}
+          </div>
+        )}
 
         {isLoading ? (
           <div className="flex justify-center py-20">

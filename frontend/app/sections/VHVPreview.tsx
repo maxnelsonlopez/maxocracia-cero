@@ -12,7 +12,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Calculator, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -22,22 +22,19 @@ export function VHVPreview() {
   const [life, setLife] = useState(1.0);
   const [resources, setResources] = useState(1.0);
   const [gamma, setGamma] = useState(1.8);
-  const [price, setPrice] = useState(0);
 
   // Calculate price based on formula: α·T + β·V^γ + δ·R·(FRG × CS)
-  useEffect(() => {
-    const alpha = 0.25;
-    const beta = 0.50;
-    const delta = 0.20;
-    const frg = 1.0;
-    const cs = 1.0;
+  const alpha = 0.25;
+  const beta = 0.50;
+  const delta = 0.20;
+  const frg = 1.0;
+  const cs = 1.0;
 
-    const timeComponent = alpha * time;
-    const lifeComponent = beta * Math.pow(life, gamma);
-    const resourceComponent = delta * resources * (frg * cs);
+  const timeComponent = alpha * time;
+  const lifeComponent = beta * Math.pow(life, gamma);
+  const resourceComponent = delta * resources * (frg * cs);
 
-    setPrice(timeComponent + lifeComponent + resourceComponent);
-  }, [time, life, resources, gamma]);
+  const price = timeComponent + lifeComponent + resourceComponent;
 
   return (
     <section className="py-24 px-4 sm:px-6 lg:px-8">
@@ -147,8 +144,7 @@ export function VHVPreview() {
             </div>
 
             <Link
-              href="http://localhost:5001/vhv-calculator.html"
-              target="_blank"
+              href="/vhv/calculator"
               className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 transition-colors"
             >
               Calculadora completa con gráficos

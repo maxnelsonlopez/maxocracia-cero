@@ -10,7 +10,7 @@ import { FormRadioGroup } from "../../components/ui/FormRadioGroup";
 import { ParticipantSearch } from "../../components/ui/ParticipantSearch";
 import { apiFetch } from "../../lib/api";
 import { motion } from "framer-motion";
-import { CheckCircle2, AlertCircle, TrendingUp } from "lucide-react";
+import { CheckCircle2, AlertCircle } from "lucide-react";
 
 const EXCHANGE_TYPES = [
   { label: "Objeto", value: "objeto", emoji: "📦" },
@@ -113,7 +113,7 @@ export default function ExchangeFormPage() {
         setErrorMessage(data.error || "Ocurrió un error al registrar el intercambio.");
         setStatus("error");
       }
-    } catch (err) {
+    } catch {
       setErrorMessage("Error de conexión con el servidor.");
       setStatus("error");
     }

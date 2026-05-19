@@ -1,7 +1,17 @@
 import React, { memo } from 'react';
 import { Handle, Position, useReactFlow } from 'reactflow';
 
-export const ActionNode = memo(({ id, data }: any) => {
+interface CustomNodeProps {
+    id: string;
+    data: {
+        label?: string;
+        vhvCost?: number;
+        oracleType?: string;
+        penaltyType?: string;
+    };
+}
+
+export const ActionNode = memo(({ id, data }: CustomNodeProps) => {
     const { setNodes } = useReactFlow();
 
     const onCostChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,7 +44,7 @@ export const ActionNode = memo(({ id, data }: any) => {
     );
 });
 
-export const ConditionNode = memo(({ id, data }: any) => {
+export const ConditionNode = memo(({ id, data }: CustomNodeProps) => {
     const { setNodes } = useReactFlow();
 
     const onLabelChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -59,7 +69,7 @@ export const ConditionNode = memo(({ id, data }: any) => {
     );
 });
 
-export const OracleNode = memo(({ id, data }: any) => {
+export const OracleNode = memo(({ id, data }: CustomNodeProps) => {
     const { setNodes } = useReactFlow();
 
     const onOracleChange = (evt: React.ChangeEvent<HTMLSelectElement>) => {
@@ -87,7 +97,7 @@ export const OracleNode = memo(({ id, data }: any) => {
     );
 });
 
-export const SDVNode = memo(({ data }: any) => {
+export const SDVNode = memo(() => {
     return (
         <div className="px-4 py-3 shadow-xl rounded-2xl bg-white border-2 border-emerald-100 min-w-[180px]">
             <Handle type="target" position={Position.Top} className="w-3 h-3 bg-emerald-400 border-2 border-white" />
@@ -104,7 +114,7 @@ export const SDVNode = memo(({ data }: any) => {
     );
 });
 
-export const ReciprocityNode = memo(({ id, data }: any) => {
+export const ReciprocityNode = memo(({ id, data }: CustomNodeProps) => {
     const { setNodes } = useReactFlow();
 
     const onPenaltyChange = (evt: React.ChangeEvent<HTMLSelectElement>) => {

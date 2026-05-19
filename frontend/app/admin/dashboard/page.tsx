@@ -4,18 +4,22 @@ import React, { useEffect, useState } from "react";
 import {
     Users,
     DollarSign,
-    TrendingUp,
-    Target,
     AlertCircle,
-    Clock,
     CheckCircle2,
     Activity,
     HandHelping,
     Zap,
     BarChart3
 } from "lucide-react";
+import { apiFetch } from "../../lib/api";
 import MetricCard from "@/app/components/admin/MetricCard";
 import TrendChart from "@/app/components/admin/TrendChart";
+
+interface TrendPoint {
+    date: string;
+    exchanges: number;
+    uth: number;
+}
 
 interface DashboardData {
     financials: {
@@ -54,14 +58,11 @@ export default function AdminDashboard() {
     useEffect(() => {
         async function fetchAllData() {
             try {
-                const token = localStorage.getItem("mc_token");
-                const headers = { "Authorization": `Bearer ${token}` };
-
                 const [finRes, opRes, trendRes, alertRes] = await Promise.all([
-                    fetch("/subscriptions/admin/stats", { headers }),
-                    fetch("/forms/dashboard/stats", { headers }),
-                    fetch("/forms/dashboard/trends", { headers }),
-                    fetch("/forms/dashboard/alerts", { headers })
+                    apiFetch("/subscriptions/admin/stats"),
+                    apiFetch("/forms/dashboard/stats"),
+                    apiFetch("/forms/dashboard/trends"),
+                    apiFetch("/forms/dashboard/alerts")
                 ]);
 
                 if (!finRes.ok || !opRes.ok) throw new Error("Error al obtener datos del servidor");
@@ -75,9 +76,9 @@ export default function AdminDashboard() {
                     financials,
                     operational,
                     trends: {
-                        dates: trends.map((t: any) => t.date),
-                        exchanges: trends.map((t: any) => t.exchanges),
-                        uth: trends.map((t: any) => t.uth)
+                        dates: trends.map((t: TrendPoint) => t.date),
+                        exchanges: trends.map((t: TrendPoint) => t.exchanges),
+                        uth: trends.map((t: TrendPoint) => t.uth)
                     },
                     alerts: alertsData.alerts || []
                 });
