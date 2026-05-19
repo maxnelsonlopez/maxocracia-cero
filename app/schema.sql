@@ -421,3 +421,77 @@ CREATE TABLE IF NOT EXISTS maxo_webhooks (
 -- Insert default VHV parameters (only if table is empty)
 INSERT OR IGNORE INTO vhv_parameters (id, alpha, beta, gamma, delta, notes)
 VALUES (1, 100.0, 2000.0, 1.0, 100.0, 'Initial parameters based on paper_formalizacion_matematica_maxo.txt');
+
+-- MicroMaxocracia Tables (Capa 3 - Equidad Doméstica y Salud Relacional)
+
+CREATE TABLE IF NOT EXISTS micromax_households (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    invite_code TEXT UNIQUE NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS micromax_members (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    household_id INTEGER NOT NULL,
+    user_id INTEGER UNIQUE,
+    name TEXT NOT NULL,
+    monthly_income REAL DEFAULT 0,
+    work_hours REAL DEFAULT 0,
+    travel_hours REAL DEFAULT 0,
+    sleep_hours REAL DEFAULT 56,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (household_id) REFERENCES micromax_households(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS micromax_cdd_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    member_id INTEGER NOT NULL,
+    task_name TEXT NOT NULL,
+    duration_hours REAL NOT NULL,
+    effort_factor REAL NOT NULL,
+    mental_factor REAL NOT NULL,
+    scope_factor REAL NOT NULL,
+    attention_factor REAL DEFAULT 1.0,
+    fragmentation_factor REAL DEFAULT 1.0,
+    loneliness_factor REAL DEFAULT 1.0,
+    calculated_vhv REAL NOT NULL,
+    logged_date TEXT NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (member_id) REFERENCES micromax_members(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS micromax_safety_surveys (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    member_id INTEGER NOT NULL UNIQUE,
+    score INTEGER NOT NULL,
+    answers_json TEXT NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (member_id) REFERENCES micromax_members(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS micromax_audits (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    household_id INTEGER NOT NULL,
+    audit_date TEXT NOT NULL,
+    conflicts_count INTEGER NOT NULL,
+    weapon_count INTEGER NOT NULL,
+    accusations_count INTEGER NOT NULL,
+    threats_count INTEGER NOT NULL,
+    s1_hours REAL DEFAULT 0,
+    s2_score REAL DEFAULT 0,
+    s3_score REAL DEFAULT 0,
+    s4_score REAL DEFAULT 0,
+    s5_score REAL DEFAULT 0,
+    duration_weeks INTEGER NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (household_id) REFERENCES micromax_households(id) ON DELETE CASCADE
+);
+
+-- Indices for MicroMaxocracia tables
+CREATE INDEX IF NOT EXISTS idx_micromax_members_household ON micromax_members(household_id);
+CREATE INDEX IF NOT EXISTS idx_micromax_cdd_member ON micromax_cdd_logs(member_id);
+CREATE INDEX IF NOT EXISTS idx_micromax_cdd_date ON micromax_cdd_logs(logged_date);
+CREATE INDEX IF NOT EXISTS idx_micromax_audits_household ON micromax_audits(household_id);
+

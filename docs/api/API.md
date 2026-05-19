@@ -15,6 +15,7 @@ Bienvenido a la documentación de la API de Maxocracia. Este documento proporcio
 - [Rate Limiting](#rate-limiting)
 - [Calculadora VHV](#calculadora-vhv)
 - [TVI (Tiempo Vital Indexado)](#tvi-tiempo-vital-indexado)
+- [MicroMaxocracia (Capítulo 16)](#micromaxocracia-capítulo-16)
 - [MaxoContracts (Capa 4)](#maxocontracts-capa-4)
 - [Seguridad](#seguridad)
 - [Ejecución Local](#ejecución-local)
@@ -859,6 +860,363 @@ Calcula el VHV usando entradas TVI registradas del usuario para el componente T 
 - Las categorías WORK e INVESTMENT se consideran "direct_hours" (tiempo directamente invertido)
 - Las horas heredadas y futuras pueden sobrescribirse si se conocen valores más precisos
 - Este endpoint implementa el Axioma T8 (Encadenamiento Temporal) integrando TVI con VHV
+
+## MicroMaxocracia (Capítulo 16)
+
+Módulo enfocado en la equidad doméstica y la salud relacional. Permite registrar hogares, vincular miembros con factores de energía, registrar la Contribución Directa Doméstica (CDD), realizar encuestas de seguridad relacional (ESI) y registrar auditorías para medir toxicidad.
+
+### Endpoints
+
+#### Crear Hogar
+
+```http
+POST /api/micromax/household
+```
+
+**Requiere Autenticación:** Sí
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "name": "Casa de Alice"
+}
+```
+
+**Respuesta Exitosa (201):**
+```json
+{
+  "household": {
+    "id": 1,
+    "name": "Casa de Alice",
+    "invite_code": "ABC123XYZ",
+    "created_at": "2026-05-19 20:30:00"
+  },
+  "member": {
+    "id": 1,
+    "user_id": 1,
+    "household_id": 1,
+    "profile_name": "Alice",
+    "monthly_income": 0.0,
+    "work_hours": 0.0,
+    "travel_hours": 0.0,
+    "sleep_hours": 56.0
+  }
+}
+```
+
+#### Unirse a Hogar
+
+```http
+POST /api/micromax/household/join
+```
+
+**Requiere Autenticación:** Sí
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "invite_code": "ABC123XYZ"
+}
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "household": {
+    "id": 1,
+    "name": "Casa de Alice",
+    "invite_code": "ABC123XYZ",
+    "created_at": "2026-05-19 20:30:00"
+  },
+  "member": {
+    "id": 2,
+    "user_id": 2,
+    "household_id": 1,
+    "profile_name": "Bob",
+    "monthly_income": 0.0,
+    "work_hours": 0.0,
+    "travel_hours": 0.0,
+    "sleep_hours": 56.0
+  }
+}
+```
+
+#### Obtener Detalles de Hogar y Miembros
+
+```http
+GET /api/micromax/household
+```
+
+**Requiere Autenticación:** Sí
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "household": {
+    "id": 1,
+    "name": "Casa de Alice",
+    "invite_code": "ABC123XYZ",
+    "created_at": "2026-05-19 20:30:00"
+  },
+  "members": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "household_id": 1,
+      "profile_name": "Alice",
+      "monthly_income": 1000.0,
+      "work_hours": 40.0,
+      "travel_hours": 5.0,
+      "sleep_hours": 56.0
+    },
+    {
+      "id": 2,
+      "user_id": 2,
+      "household_id": 1,
+      "profile_name": "Bob",
+      "monthly_income": 1200.0,
+      "work_hours": 35.0,
+      "travel_hours": 10.0,
+      "sleep_hours": 56.0
+    }
+  ]
+}
+```
+
+#### Actualizar Configuración de Miembro
+
+```http
+POST /api/micromax/member/config
+```
+
+**Requiere Autenticación:** Sí
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "monthly_income": 1000.0,
+  "work_hours": 40.0,
+  "travel_hours": 5.0,
+  "sleep_hours": 56.0
+}
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "id": 1,
+  "user_id": 1,
+  "household_id": 1,
+  "profile_name": "Alice",
+  "monthly_income": 1000.0,
+  "work_hours": 40.0,
+  "travel_hours": 5.0,
+  "sleep_hours": 56.0
+}
+```
+
+#### Registrar Tarea CDD
+
+```http
+POST /api/micromax/cdd
+```
+
+**Requiere Autenticación:** Sí
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "task_name": "Lavar platos",
+  "duration_hours": 1.5,
+  "effort_factor": 1.2,
+  "mental_factor": 1.1,
+  "scope_factor": 1.0,
+  "attention_factor": 1.0,
+  "fragmentation_factor": 1.0,
+  "loneliness_factor": 1.0
+}
+```
+
+**Respuesta Exitosa (201):**
+```json
+{
+  "id": 1,
+  "user_id": 1,
+  "household_id": 1,
+  "task_name": "Lavar platos",
+  "duration_hours": 1.5,
+  "effort_factor": 1.2,
+  "mental_factor": 1.1,
+  "scope_factor": 1.0,
+  "attention_factor": 1.0,
+  "fragmentation_factor": 1.0,
+  "loneliness_factor": 1.0,
+  "calculated_vhv": 1.98,
+  "logged_date": "2026-05-19 20:31:00"
+}
+```
+
+**Errores:**
+- 403: Si la encuesta de seguridad ESI del usuario reporta una puntuación >= 3, se bloquea el registro de nuevas tareas CDD para prevenir manipulación.
+
+#### Listar Bitácoras CDD
+
+```http
+GET /api/micromax/cdd
+```
+
+**Requiere Autenticación:** Sí
+
+**Parámetros de Consulta:**
+- `limit` (opcional, default=50)
+- `offset` (opcional, default=0)
+
+**Respuesta Exitosa (200):**
+```json
+[
+  {
+    "id": 1,
+    "user_id": 1,
+    "household_id": 1,
+    "task_name": "Lavar platos",
+    "duration_hours": 1.5,
+    "calculated_vhv": 1.98,
+    "logged_date": "2026-05-19 20:31:00"
+  }
+]
+```
+
+#### Guardar Encuesta de Seguridad ESI
+
+```http
+POST /api/micromax/safety-survey
+```
+
+**Requiere Autenticación:** Sí
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "answers": {
+    "q1": false,
+    "q2": true,
+    "q3": false,
+    "q4": false,
+    "q5": false,
+    "q6": false
+  }
+}
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "score": 1,
+  "blocked": false
+}
+```
+
+#### Obtener Encuesta ESI del Usuario
+
+```http
+GET /api/micromax/safety-survey
+```
+
+**Requiere Autenticación:** Sí
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "id": 1,
+  "user_id": 1,
+  "score": 1,
+  "answers_json": "{\"q1\": false, \"q2\": true, \"q3\": false, \"q4\": false, \"q5\": false, \"q6\": false}",
+  "created_at": "2026-05-19 20:30:00"
+}
+```
+
+#### Registrar Auditoría Relacional
+
+```http
+POST /api/micromax/audit
+```
+
+**Requiere Autenticación:** Sí
+
+**Cuerpo de la Solicitud:**
+```json
+{
+  "audit_date": "2026-05-19",
+  "conflicts_count": 1,
+  "weapon_count": 0,
+  "accusations_count": 0,
+  "threats_count": 0,
+  "s1_hours": 0.0,
+  "s2_score": 1.0,
+  "s3_score": 1.0,
+  "s4_score": 1.0,
+  "s5_score": 1.0,
+  "duration_weeks": 4
+}
+```
+
+**Respuesta Exitosa (201):**
+```json
+{
+  "id": 1,
+  "user_id": 1,
+  "household_id": 1,
+  "audit_date": "2026-05-19",
+  "conflicts_count": 1,
+  "weapon_count": 0,
+  "accusations_count": 0,
+  "threats_count": 0,
+  "s1_hours": 0.0,
+  "s2_score": 1.0,
+  "s3_score": 1.0,
+  "s4_score": 1.0,
+  "s5_score": 1.0,
+  "duration_weeks": 4,
+  "created_at": "2026-05-19 20:32:00"
+}
+```
+
+#### Obtener Dashboard de Estadísticas y Balances
+
+```http
+GET /api/micromax/dashboard
+```
+
+**Requiere Autenticación:** Sí
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "three_accounts": [
+    {
+      "user_id": 1,
+      "name": "Alice",
+      "cdd_vhv": 1.98,
+      "cdd_pct": 100.0,
+      "ceh_income": 1000.0,
+      "ceh_pct": 100.0,
+      "ted_hours": 67.0,
+      "ted_pct": 100.0,
+      "equilibrium_pct": 100.0
+    }
+  ],
+  "toxicity": {
+    "ice": 0.5,
+    "idb": 1.0,
+    "idp": 0.0,
+    "detox_active": false
+  },
+  "safety_survey": {
+    "score": 1,
+    "blocked": false
+  }
+}
+```
 
 ## MaxoContracts (Capa 4)
 

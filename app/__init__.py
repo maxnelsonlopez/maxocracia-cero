@@ -53,6 +53,8 @@ def create_app(db_path=None):
     from .tvi_bp import tvi_bp
     from .users import bp as users_bp
     from .vhv_bp import vhv_bp
+    from .micromax_bp import micromax_bp
+    from .micromax import init_micromax_tables
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
@@ -66,9 +68,11 @@ def create_app(db_path=None):
     app.register_blueprint(contracts_bp)
     app.register_blueprint(stripe_bp)
     app.register_blueprint(subscriptions_bp)
+    app.register_blueprint(micromax_bp)
 
     # Inicializar tablas específicas si no existen
     init_subscription_tables(app)
+    init_micromax_tables(app)
 
     # placeholder imports to ensure modules loaded
     # other optional blueprints can be imported here

@@ -1,6 +1,6 @@
 # Tareas Pendientes - Maxocracia-Cero
 
-**Última actualización:** 2026-05-06 (Sesión Antigravity Pro)
+**Última actualización:** 2026-05-19 (Sesión Antigravity Pro)
 
 ---
 
@@ -59,14 +59,14 @@
 
 **Objetivo**: Crear herramientas digitales para 30 hogares piloto (90 días)
 
-- [ ] **Mes 1: Diseño (Abril - Mayo)**
-  - [ ] Diseñar 3 apps core
-    - [ ] **Ledger App**: Registro VHV doméstico
-    - [ ] **Auditoría App**: Rituales estructurados
-    - [ ] **Desintoxicación App**: Monitoreo ICE/IDB/IDP
-  - [ ] Prototipar Ledger App (MVP)
-  - [ ] Testear con 3 hogares beta
-  - **Entregables**: Diseños UI/UX, prototipo funcional, feedback beta
+- [x] **Mes 1: Diseño e Implementación MVP (Abril - Mayo)** ✅
+  - [x] Diseñar e implementar 3 apps core en panel unificado (`frontend/app/micromax/page.tsx`):
+    - [x] **Ledger App**: Registro VHV doméstico con sliders interactivos y multiplicadores FIC.
+    - [x] **Auditoría App**: Rituales estructurados con inserción de auditorías relacionales.
+    - [x] **Desintoxicación App**: Monitoreo de índices de toxicidad (ICE/IDB/IDP) y visualización del balance de Tres Cuentas.
+  - [x] Prototipar y desplegar Ledger App (MVP funcional e integrado con API Flask).
+  - [x] Implementar Escala de Seguridad Relacional (ESI) con sistema de bloqueo por coerción (Red Block Screen).
+  - **Entregables**: ✅ Estructura SQL, ✅ Backend Flask, ✅ Suite de pruebas automatizadas, ✅ Panel de visualización e interacción React/Next.js.
 
 - [x] **Migración Frontend Unificado (Segmento 1: Formularios)** (Completado 2026-05-08) ✅
   - [x] Crear componentes base `FormWizard`, `FormStep`, `FormUI`

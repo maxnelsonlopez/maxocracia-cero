@@ -1,8 +1,8 @@
 # Maxocracia-Cero: Sistema Operativo para una Civilización Coherente
 
-**Estado del Proyecto:** Fase 2 - Sostenibilidad Económica (Mayo 2026)  
-**Última actualización:** 06 de mayo 2026  
-**Versión:** 4.1 - Frontend Optimizado y Seguro (Antigravity)
+**Estado del Proyecto:** Fase 2 - Sostenibilidad Económica y MicroMaxocracia Doméstica (Mayo 2026)  
+**Última actualización:** 19 de mayo 2026  
+**Versión:** 4.2 - MicroMaxocracia e Integración de Cuidado (Antigravity)
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 
@@ -33,12 +33,13 @@ La **Maxocracia** es un sistema ético-económico-político alternativo que prop
 - **Cap. 18: Estándar EVV 1.2** — Especificación técnica para el Vector de Huella Vital.
 
 ### Software Funcional
-- **Portal Unificado (Hybrid Frontend)**: Nueva landing page moderna (Next.js) servida por Flask
-- **Nexus Simulator v2.2**: Simulador interactivo del VHV con Modo Oráculo Dinámico
-- **MaxoContracts v2.3**: Persistencia SQLite, 5 bloques modulares, oráculo sintético
-- **Calculadora VHV**: Frontend completo con Chart.js integrado en el portal
-- **Sistema TVI**: Detección de overlap temporal, cálculo de CCP
-- **274 tests** (193+ pasando, ~85% cobertura) ✅ (Backend Core + Blocks)
+- **Portal Unificado (Hybrid Frontend)**: Nueva landing page moderna (Next.js) servida por Flask.
+- **MicroMaxocracia v1.0**: Registro interactivo de CDD, balance de Tres Cuentas en UI, encuesta de seguridad ESI con pantalla de bloqueo y monitor Detox relacional en tiempo real.
+- **Nexus Simulator v2.2**: Simulador interactivo del VHV con Modo Oráculo Dinámico.
+- **MaxoContracts v2.3**: Persistencia SQLite, 5 bloques modulares, oráculo sintético.
+- **Calculadora VHV**: Frontend completo con Chart.js integrado en el portal.
+- **Sistema TVI**: Detección de overlap temporal, cálculo de CCP.
+- **316 tests** (309+ pasando, ~85% cobertura) ✅ (Backend Core + Blocks)
 
 ---
 

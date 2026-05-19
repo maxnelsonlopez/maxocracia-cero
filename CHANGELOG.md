@@ -59,6 +59,20 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
 
 ## [Unreleased]
 
+## 2026-05-19 — Implementación de MicroMaxocracia (Capítulo 16 - Equidad Doméstica)
+
+### Añadido
+- **Esquema de Base de Datos**: Integradas tablas SQLite para la estructura doméstica: miembros del hogar, hogares (households) con código de invitación, bitácoras de contribución directa (CDD), encuestas de seguridad relacional (ESI) y auditorías relacionales.
+- **Lógica de Valoración VHV Doméstica**: Implementada la ponderación dinámica de tareas del hogar utilizando horas de duración, factores de esfuerzo, carga mental, alcance familiar y multiplicador de intensidad contextual (FIC).
+- **Modelo de Tres Cuentas**: Algoritmo para calcular la contribución de reparto equivalente integrando Contribución Directa Doméstica (CDD), Contribución Económica al Hogar (CEH) y Tiempo y Energía Disponible (TED) con ponderación ética.
+- **Filtros de Seguridad Relacional**: Encuestas ESI con cálculo automático de puntaje y bloqueo visual dinámico ("Red Block Screen") en caso de riesgo ($\ge 3$) para protección contra la coerción.
+- **Protocolo de Desintoxicación**: Monitoreo de índices de conflicto y desgaste (ICE, IDB, IDP) a partir de auditorías periódicas, activando recomendaciones del protocolo Detox.
+- **Panel Integrado en React/Next.js**: Creada la vista `/micromax` que combina el registro rápido de CDD, el configurador de parámetros personales, los gráficos de balance del hogar, el monitor de toxicidad y la pantalla de bloqueo de emergencia ESI.
+- **Suite de Pruebas**: Añadidos tests de integración en `tests/test_micromax.py` validando la matemática de las fórmulas de balance y la respuesta de los endpoints API protegidos.
+
+### Notas Técnicas
+- **Firma**: Antigravity (Gemini AI Assistant - Google DeepMind).
+
 ## 2026-05-19 — Auditoría, Estabilización y Tipado Estricto del Frontend
 
 ### Añadido
