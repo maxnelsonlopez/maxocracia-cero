@@ -634,9 +634,9 @@ export default function MicroMaxPage() {
                           <div className="text-2xl font-black text-white">{dashboard.toxicity.ice}</div>
                         </div>
                         <span className={`px-2.5 py-1 text-xs rounded-full font-bold ${
-                          dashboard.toxicity.alerts.ice ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                          dashboard.toxicity.alerts?.ice ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                         }`}>
-                          {dashboard.toxicity.alerts.ice ? "Alerta" : "Normal"}
+                          {dashboard.toxicity.alerts?.ice ? "Alerta" : "Normal"}
                         </span>
                       </div>
 
@@ -647,9 +647,9 @@ export default function MicroMaxPage() {
                           <div className="text-2xl font-black text-white">{dashboard.toxicity.idb}</div>
                         </div>
                         <span className={`px-2.5 py-1 text-xs rounded-full font-bold ${
-                          dashboard.toxicity.alerts.idb ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                          dashboard.toxicity.alerts?.idb ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                         }`}>
-                          {dashboard.toxicity.alerts.idb ? "Alerta" : "Normal"}
+                          {dashboard.toxicity.alerts?.idb ? "Alerta" : "Normal"}
                         </span>
                       </div>
 
@@ -660,9 +660,9 @@ export default function MicroMaxPage() {
                           <div className="text-2xl font-black text-white">{dashboard.toxicity.idp}</div>
                         </div>
                         <span className={`px-2.5 py-1 text-xs rounded-full font-bold ${
-                          dashboard.toxicity.alerts.idp ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                          dashboard.toxicity.alerts?.idp ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                         }`}>
-                          {dashboard.toxicity.alerts.idp ? "Alerta" : "Normal"}
+                          {dashboard.toxicity.alerts?.idp ? "Alerta" : "Normal"}
                         </span>
                       </div>
                     </div>

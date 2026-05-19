@@ -160,6 +160,10 @@ def test_micromax_flow(client, auth_headers):
     assert "three_accounts" in data
     assert "toxicity" in data
     assert "safety_survey" in data
+    assert "alerts" in data["toxicity"]
+    assert data["toxicity"]["alerts"]["ice"] is False
+    assert data["toxicity"]["alerts"]["idb"] is False
+    assert data["toxicity"]["alerts"]["idp"] is False
 
     # 10. Log an audit
     res = client.post(

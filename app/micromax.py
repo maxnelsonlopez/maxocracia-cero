@@ -524,7 +524,12 @@ class MicroMaxManager:
                 "idb": 0.0,
                 "idp": 0.0,
                 "detox_triggered": False,
-                "reasons": ["Sin auditorías registradas"]
+                "reasons": ["Sin auditorías registradas"],
+                "alerts": {
+                    "ice": False,
+                    "idb": False,
+                    "idp": False
+                }
             }
             
         latest_audit = audits[0]
