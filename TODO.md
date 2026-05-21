@@ -1,6 +1,6 @@
 # Tareas Pendientes - Maxocracia-Cero
 
-**Última actualización:** 2026-05-19 (Sesión Antigravity Pro)
+**Última actualización:** 2026-05-21 (Sesión Antigravity Pro)
 
 ---
 
@@ -173,6 +173,14 @@
     - Tests de concurrencia en TVI
     - Tests de integración end-to-end
     - Tests de performance para consultas complejas
+
+- [x] **Estabilización de Rutas Backend, Red y Suite de Tests**
+  - **Completado:** 2026-05-21 (Antigravity)
+  - Resuelto Werkzeug Rule binding RuntimeError clonando las reglas de la aplicación.
+  - Soportada verificación estricta de métodos HTTP en catch_all levantando MethodNotAllowed (405).
+  - Unificados datos de grafo y métricas en `/dashboard/network`.
+  - Deshabilitado fallback de SPA en tests para validar endpoints inexistentes.
+  - Todos los 316 tests pasando exitosamente. ✅
 
 ---
 

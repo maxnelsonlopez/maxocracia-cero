@@ -38,6 +38,39 @@ const CDD_PRESETS = [
   { name: "Compras del Hogar", effort: 1.4, mental: 1.2, scope: 1.2 }
 ];
 
+// Mock Dashboard data for ESI Safe Camouflage Mode
+const MOCK_DASHBOARD = {
+  three_accounts: {
+    members: [
+      { id: 99991, name: "Tú", cdd: 145.2, cdd_share: 50.4, income: 1200000, ceh_share: 48.0, ted: 42.5, ted_share: 51.2, equilibrio: 99.8 },
+      { id: 99992, name: "Pareja/Familiar", cdd: 142.8, cdd_share: 49.6, income: 1300000, ceh_share: 52.0, ted: 40.5, ted_share: 48.8, equilibrio: 100.2 }
+    ],
+    totals: {
+      total_cdd: 288.0,
+      total_income: 2500000,
+      total_ted: 83.0
+    }
+  },
+  toxicity: {
+    ice: 0.8,
+    idb: 1.2,
+    idp: 0.15,
+    detox_triggered: false,
+    reasons: [],
+    alerts: {
+      ice: false,
+      idb: false,
+      idp: false
+    }
+  }
+};
+
+const MOCK_LOGS = [
+  { id: 101, task_name: "Cocina Simple", duration_hours: 1.2, calculated_vhv: 2.8, logged_date: new Date().toISOString().split("T")[0] },
+  { id: 102, task_name: "Limpieza de Baños", duration_hours: 0.8, calculated_vhv: 3.1, logged_date: new Date(Date.now() - 86400000).toISOString().split("T")[0] },
+  { id: 103, task_name: "Compras del Hogar", duration_hours: 1.5, calculated_vhv: 2.5, logged_date: new Date(Date.now() - 172800000).toISOString().split("T")[0] }
+];
+
 export default function MicroMaxPage() {
   // App States
   const [household, setHousehold] = useState<any>(null);
@@ -49,6 +82,9 @@ export default function MicroMaxPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [isCamouflaged, setIsCamouflaged] = useState(false);
+  const [showSecuritySupport, setShowSecuritySupport] = useState(false);
+  const [showESIGuide, setShowESIGuide] = useState(false);
 
   // Auth check
   const [authError, setAuthError] = useState(false);
@@ -112,8 +148,18 @@ export default function MicroMaxPage() {
         const surveyData = await api.getMicroMaxSafetySurvey();
         setSurvey(surveyData);
 
-        // Fetch dashboard metrics
-        const dashData = await api.getMicroMaxDashboard();
+        // Fetch dashboard metrics and CDD logs depending on safety status
+        let dashData;
+        if (surveyData && surveyData.score !== undefined && surveyData.score >= 3) {
+          setIsCamouflaged(true);
+          dashData = MOCK_DASHBOARD;
+          setLogs(MOCK_LOGS);
+        } else {
+          setIsCamouflaged(false);
+          dashData = await api.getMicroMaxDashboard();
+          const logData = await api.getMicroMaxCDDLogs();
+          setLogs(logData || []);
+        }
         setDashboard(dashData);
 
         // Fetch user config details
@@ -129,10 +175,6 @@ export default function MicroMaxPage() {
             setSleepHours(currentMember.sleep_hours || 56);
           }
         }
-
-        // Fetch CDD logs
-        const logData = await api.getMicroMaxCDDLogs();
-        setLogs(logData || []);
       }
     } catch (err: any) {
       console.error(err);
@@ -148,6 +190,17 @@ export default function MicroMaxPage() {
 
   useEffect(() => {
     loadInitialData();
+  }, []);
+
+  // Quick Escape hook
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        window.location.href = "https://es.wikipedia.org/wiki/Econom%C3%ADa_dom%C3%A9stica";
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   // Update preset factors
@@ -220,6 +273,57 @@ export default function MicroMaxPage() {
     e.preventDefault();
     setLoading(true);
     try {
+      if (isCamouflaged && survey?.score !== undefined && survey.score >= 3) {
+        // Simular registro localmente
+        const mockLog = {
+          id: Math.floor(Math.random() * 100000),
+          task_name: taskName || "Tarea Personalizada",
+          duration_hours: duration,
+          calculated_vhv: parseFloat(liveVhv.toFixed(2)),
+          logged_date: new Date().toISOString().split("T")[0]
+        };
+        setLogs(prev => [mockLog, ...prev]);
+        
+        // Simular actualización del balance en el estado local para dar feedback visual sin cambiar backend
+        setDashboard((prev: any) => {
+          if (!prev) return prev;
+          const updatedMembers = prev.three_accounts.members.map((m: any) => {
+            if (m.name === "Tú") {
+              const newCdd = m.cdd + mockLog.calculated_vhv;
+              const prevShare = m.cdd_share;
+              const newShare = Math.min(prevShare + 1.2, 90.0);
+              return { 
+                ...m, 
+                cdd: parseFloat(newCdd.toFixed(2)),
+                cdd_share: parseFloat(newShare.toFixed(2)),
+                equilibrio: parseFloat(Math.min(m.equilibrio + 0.5, 105.0).toFixed(2))
+              };
+            } else {
+              const newShare = Math.max(m.cdd_share - 1.2, 10.0);
+              return {
+                ...m,
+                cdd_share: parseFloat(newShare.toFixed(2)),
+                equilibrio: parseFloat(Math.max(m.equilibrio - 0.5, 95.0).toFixed(2))
+              };
+            }
+          });
+          return {
+            ...prev,
+            three_accounts: {
+              ...prev.three_accounts,
+              members: updatedMembers
+            }
+          };
+        });
+
+        setTaskName("");
+        setDuration(1.0);
+        setPresetIndex("-1");
+        alert("Tarea doméstica registrada y ponderada con éxito.");
+        setLoading(false);
+        return;
+      }
+
       await api.logMicroMaxCDD({
         task_name: taskName,
         duration_hours: duration,
@@ -261,6 +365,21 @@ export default function MicroMaxPage() {
     e.preventDefault();
     setLoading(true);
     try {
+      if (isCamouflaged && survey?.score !== undefined && survey.score >= 3) {
+        alert("Auditoría mensual guardada correctamente.");
+        setConflicts(0);
+        setWeapons(0);
+        setAccusations(0);
+        setThreats(0);
+        setS1(0);
+        setS2(0);
+        setS3(0);
+        setS4(0);
+        setS5(0);
+        setLoading(false);
+        return;
+      }
+
       await api.logMicroMaxAudit({
         audit_date: auditDate,
         conflicts_count: conflicts,
@@ -429,6 +548,53 @@ export default function MicroMaxPage() {
                 </p>
               </div>
 
+              {/* ESI Educational Guide Toggle */}
+              <div className="space-y-4">
+                <button
+                  type="button"
+                  onClick={() => setShowESIGuide(!showESIGuide)}
+                  className="w-full py-3 px-4 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-bold flex justify-between items-center transition-all text-sm"
+                >
+                  <span className="flex items-center gap-2">
+                    <Info size={18} />
+                    {showESIGuide ? "Ocultar Guía de Seguridad ESI" : "Ver Guía de Seguridad ESI (Taylorismo Coercitivo)"}
+                  </span>
+                  <span className="text-xs">{showESIGuide ? "▲" : "▼"}</span>
+                </button>
+
+                <AnimatePresence>
+                  {showESIGuide && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="p-5 rounded-2xl bg-slate-950 border border-slate-900 text-xs text-slate-400 space-y-4 leading-relaxed">
+                        <div>
+                          <h4 className="font-extrabold text-white text-sm mb-1">¿Qué es el Taylorismo Doméstico Coercitivo?</h4>
+                          <p>
+                            El Taylorismo es la optimización y medición científica del trabajo industrial. Llevado al hogar, el **Taylorismo Doméstico Coercitivo** ocurre cuando un miembro de la pareja o del hogar utiliza las métricas, tiempos y registros de tareas domésticas para vigilar, auditar minuciosamente, presionar o infundir culpa en los demás.
+                          </p>
+                        </div>
+                        <div>
+                          <h4 className="font-extrabold text-white text-sm mb-1">¿Por qué registrar tareas domésticas puede ser un arma?</h4>
+                          <p>
+                            En relaciones asimétricas, competitivas o controladoras, registrar cada minuto de lavado o cocina puede transformarse en una herramienta de agresión pasiva. Esto genera una atmósfera de evaluación constante, provocando estrés crónico, insomnio y resentimiento en lugar de promover la corresponsabilidad y la equidad.
+                          </p>
+                        </div>
+                        <div>
+                          <h4 className="font-extrabold text-white text-sm mb-1">¿Cómo te protege la Escala ESI?</h4>
+                          <p>
+                            La Escala de Seguridad Relacional (ESI) evalúa si tu relación cuenta con los pilares mínimos de respeto y simetría. Si respondes afirmativamente a 3 o más preguntas, el sistema detecta que el ledger doméstico **no es seguro** y podría empeorar las tensiones. Para proteger tu seguridad, el sistema simulará un funcionamiento estable pero desactivará la persistencia en el servidor para evitar que el registro sea usado en tu contra.
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               <form onSubmit={handleSaveSurvey} className="space-y-6">
                 {[
                   { id: "q1", text: "¿Alguna vez has tenido miedo de expresar desacuerdo con tu pareja o familiares sobre tareas domésticas?" },
@@ -457,67 +623,8 @@ export default function MicroMaxPage() {
           </div>
         )}
 
-        {/* 3. STATE: BLOCKED BY SAFETY SURVEY */}
-        {!loading && household && survey && survey.blocked && (
-          <div className="max-w-2xl mx-auto my-12">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-red-950/20 border border-red-500/30 p-8 rounded-3xl shadow-2xl space-y-6 text-center"
-            >
-              <div className="w-20 h-20 mx-auto rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
-                <AlertTriangle size={48} className="animate-bounce" />
-              </div>
-              <h2 className="text-3xl font-black text-white">IMPLEMENTACIÓN NO RECOMENDADA</h2>
-              <p className="text-slate-400 text-base max-w-lg mx-auto">
-                La Escala de Seguridad (ESI) ha detectado un score de <span className="text-red-400 font-bold">{survey.score} respuestas afirmativas</span>. 
-                De acuerdo con el protocolo ético de la MicroMaxocracia, registrar datos o forzar auditorías en un ambiente con dinámicas de poder asimétricas o de miedo es perjudicial y coercitivo.
-              </p>
-              
-              <div className="bg-red-500/10 border border-red-500/20 p-5 rounded-2xl text-red-400 text-left text-sm space-y-3 max-w-lg mx-auto">
-                <div className="font-bold flex items-center gap-2">
-                  <Shield size={18} /> Pauta Ética de Desactivación:
-                </div>
-                <p>
-                  El sistema ha bloqueado las funciones de registro de tareas en este perfil para evitar su uso como herramienta de presión. Recomendamos priorizar la resolución de conflictos a través de facilitadores externos, mediación familiar o asesoramiento especializado.
-                </p>
-                <div className="pt-2 border-t border-red-500/10">
-                  <strong>Recursos de Apoyo Directo:</strong>
-                  <ul className="list-disc pl-4 mt-2 space-y-1">
-                    <li>Línea Nacional de Apoyo Familiar y Parejas</li>
-                    <li>Servicio de Facilitación Pacífica Maxocracia</li>
-                    <li>Terapia de Relaciones y Mediación no Violenta</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="pt-4 flex justify-center gap-4">
-                <Button
-                  onClick={async () => {
-                    // Reset safety survey for demonstration/retry purposes if they chose to do it again
-                    if (confirm("¿Estás seguro de que deseas reiniciar la encuesta de seguridad?")) {
-                      setLoading(true);
-                      try {
-                        const newAnswers = { q1: false, q2: false, q3: false, q4: false, q5: false, q6: false };
-                        setSurveyAnswers(newAnswers);
-                        const res = await api.saveMicroMaxSafetySurvey(newAnswers);
-                        setSurvey(res);
-                        await loadInitialData();
-                      } catch(e) {} finally { setLoading(false); }
-                    }
-                  }}
-                  variant="outline"
-                  className="bg-white/5 border-white/10 hover:bg-white/10 text-slate-300"
-                >
-                  Reiniciar Encuesta ESI
-                </Button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-
-        {/* 4. STATE: SURVEY COMPLETED AND APPROVED */}
-        {!loading && household && survey && !survey.blocked && dashboard && (
+        {/* 4. STATE: SURVEY COMPLETED */}
+        {!loading && household && survey && dashboard && (
           <div className="space-y-8">
             
             {/* Tabs Navigation */}
@@ -607,11 +714,42 @@ export default function MicroMaxPage() {
                       ))}
                     </div>
 
-                    <div className="p-4 bg-slate-950 border border-slate-900 rounded-2xl flex items-center gap-3 text-xs text-slate-400">
-                      <Info size={16} className="text-indigo-400 shrink-0" />
-                      <p>
-                        <strong>Fórmula de Equilibrio:</strong> 0.6×CDD% + 0.3×CEH% + 0.1×TED%. El sistema reconoce el trabajo invisible asignándole un 60% del peso total de la equidad del hogar.
+                    <div className="bg-slate-950 border border-slate-900 rounded-2xl p-5 space-y-4">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                        <Info size={18} className="text-indigo-400 shrink-0" />
+                        <span>Fórmula del Equilibrio del Hogar (Las Tres Cuentas)</span>
+                      </div>
+                      <p className="text-xs text-slate-400 leading-relaxed">
+                        El balance de la MicroMaxocracia no se limita a quién aporta más dinero. Integra tres dimensiones éticas clave para evitar la explotación del trabajo invisible:
                       </p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                        <div className="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1">
+                          <div className="font-bold text-xs text-coral-400">CDD (60% del Peso)</div>
+                          <div className="text-slate-300 font-semibold text-xs">Cuidado y Trabajo Doméstico</div>
+                          <p className="text-[11px] text-slate-400 leading-normal">
+                            Valora el trabajo invisible (limpieza, cocina, cuidado de dependientes). Se le asigna el peso mayoritario para contrarrestar la asimetría histórica de género y clase.
+                          </p>
+                        </div>
+                        <div className="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1">
+                          <div className="font-bold text-xs text-emerald-400">CEH (30% del Peso)</div>
+                          <div className="text-slate-300 font-semibold text-xs">Contribución Económica</div>
+                          <p className="text-[11px] text-slate-400 leading-normal">
+                            Representa los aportes financieros al hogar. Se pondera de manera simétrica para evitar que una mayor capacidad de ingreso dicte una dominancia sobre las decisiones del hogar.
+                          </p>
+                        </div>
+                        <div className="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1">
+                          <div className="font-bold text-xs text-amber-400">TED (10% del Peso)</div>
+                          <div className="text-slate-300 font-semibold text-xs">Tiempo de Energía Disponible</div>
+                          <p className="text-[11px] text-slate-400 leading-normal">
+                            Mide el tiempo libre y descanso efectivo de cada miembro tras deducir trabajo, sueño y traslados. Asegura que nadie sufra de fatiga crónica o agotamiento extremo.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-3 bg-indigo-950/20 border border-indigo-900/40 rounded-xl text-[11px] text-indigo-300 flex items-center justify-center font-mono">
+                        Fórmula: Equilibrio = 0.6 × CDD% + 0.3 × CEH% + 0.1 × TED%
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -881,6 +1019,38 @@ export default function MicroMaxPage() {
                     </div>
                   </div>
 
+                  {/* Educational Formula Guide */}
+                  <div className="bg-slate-900/30 backdrop-blur-xl border border-slate-800 p-6 rounded-3xl shadow-xl space-y-4">
+                    <h3 className="text-sm font-semibold flex items-center gap-2 text-white">
+                      <Info size={16} className="text-indigo-400" />
+                      ¿Cómo calculamos la Huella Vital (VHV)?
+                    </h3>
+                    <div className="text-xs text-slate-400 space-y-3">
+                      <p>
+                        La **Huella Vital Doméstica (VHV)** valora de manera justa las tareas domésticas sumando el esfuerzo físico, la fatiga mental y el impacto del acompañamiento o la soledad.
+                      </p>
+                      <div className="p-3 bg-slate-950 border border-slate-900 rounded-xl font-mono text-center text-slate-300">
+                        VHV = Duración × Base (VHI) × Multiplicador (FIC)
+                      </div>
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-slate-300">Variables Base (VHI/h):</h4>
+                        <ul className="list-disc pl-4 space-y-1">
+                          <li><span className="text-slate-200">Esfuerzo Físico:</span> Grado de exigencia o cansancio físico (de 1.0 a 2.0).</li>
+                          <li><span className="text-slate-200">Carga Mental:</span> Planificación, anticipación y atención cognitiva requerida (de 1.0 a 1.5).</li>
+                          <li><span className="text-slate-200">Alcance Familiar:</span> Si beneficia a todo el hogar o solo de forma individual (de 1.0 a 2.0).</li>
+                        </ul>
+                      </div>
+                      <div className="space-y-2 pt-2 border-t border-slate-900">
+                        <h4 className="font-semibold text-slate-300">Multiplicadores de Intensidad Contextual (FIC):</h4>
+                        <ul className="list-disc pl-4 space-y-1">
+                          <li><span className="text-slate-200">Atención:</span> La carga de supervisión o reacción rápida (ej. cuidar un bebé es intensiva).</li>
+                          <li><span className="text-slate-200">Fragmentación:</span> Interrupciones constantes que fragmentan el descanso (ej. interrupciones de niños).</li>
+                          <li><span className="text-slate-200">Soledad:</span> Si la tarea se realiza en aislamiento total o con compañía/comunidad.</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Recent Logs list */}
                   <div className="bg-slate-900/30 backdrop-blur-xl border border-slate-800 p-6 rounded-3xl shadow-xl space-y-4">
                     <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -1071,33 +1241,91 @@ export default function MicroMaxPage() {
                   </form>
                 </div>
 
-                {/* History of audits */}
-                <div className="bg-slate-900/30 backdrop-blur-xl border border-slate-800 p-6 rounded-3xl shadow-xl space-y-6">
-                  <h2 className="text-xl font-semibold flex items-center gap-2">
-                    <ClipboardList className="text-indigo-400" />
-                    Historial de Auditorías
-                  </h2>
-                  
-                  <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
-                    {dashboard.toxicity.reasons.includes("Sin auditorías registradas") ? (
-                      <p className="text-slate-600 text-sm text-center py-12">No hay auditorías registradas todavía.</p>
-                    ) : (
-                      // We can just query and render the list of audits if it's available or make a simple template
-                      <div className="p-4 bg-slate-950 border border-slate-900 rounded-2xl space-y-2">
-                        <div className="font-semibold text-white flex justify-between">
-                          <span>Última Auditoría Auditada</span>
-                          <span className="text-indigo-400">{dashboard.toxicity.reasons.length > 0 ? "Indices Alerta" : "Estado Estable"}</span>
+                {/* Column 2: Audit History & Education */}
+                <div className="space-y-6">
+                  {/* History of audits */}
+                  <div className="bg-slate-900/30 backdrop-blur-xl border border-slate-800 p-6 rounded-3xl shadow-xl space-y-6">
+                    <h2 className="text-xl font-semibold flex items-center gap-2">
+                      <ClipboardList className="text-indigo-400" />
+                      Historial de Auditorías
+                    </h2>
+                    
+                    <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                      {dashboard.toxicity.reasons.includes("Sin auditorías registradas") ? (
+                        <p className="text-slate-600 text-sm text-center py-12">No hay auditorías registradas todavía.</p>
+                      ) : (
+                        // We can just query and render the list of audits if it's available or make a simple template
+                        <div className="p-4 bg-slate-950 border border-slate-900 rounded-2xl space-y-2">
+                          <div className="font-semibold text-white flex justify-between">
+                            <span>Última Auditoría Auditada</span>
+                            <span className="text-indigo-400">{dashboard.toxicity.reasons.length > 0 ? "Indices Alerta" : "Estado Estable"}</span>
+                          </div>
+                          <p className="text-slate-400 text-xs leading-relaxed">
+                            La salud relacional actual está determinada por los siguientes indicadores calculados:
+                          </p>
+                          <ul className="text-xs text-slate-300 list-disc pl-4 space-y-1">
+                            <li>ICE: {dashboard.toxicity.ice} (Conflicto)</li>
+                            <li>IDB: {dashboard.toxicity.idb} (Bienestar)</li>
+                            <li>IDP: {dashboard.toxicity.idp} (Desequilibrio doméstico)</li>
+                          </ul>
                         </div>
-                        <p className="text-slate-400 text-xs leading-relaxed">
-                          La salud relacional actual está determinada por los siguientes indicadores calculados:
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Toxicity and Detox explanation */}
+                  <div className="bg-slate-900/30 backdrop-blur-xl border border-slate-800 p-6 rounded-3xl shadow-xl space-y-6">
+                    <h2 className="text-xl font-semibold flex items-center gap-2">
+                      <Shield className="text-indigo-400" size={22} />
+                      Índices de Salud Relacional y Protocolo Detox
+                    </h2>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      El ledger doméstico es una herramienta poderosa, pero no debe convertirse en un factor de estrés. Monitoreamos tres índices de toxicidad para proteger la convivencia:
+                    </p>
+
+                    <div className="space-y-4">
+                      {/* ICE description */}
+                      <div className="p-4 bg-slate-950 border border-slate-900 rounded-2xl space-y-2">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="font-extrabold text-white">ICE: Índice de Conflicto Escalado</span>
+                          <span className="font-semibold text-red-400">Umbral: ≥ 3.0</span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 leading-relaxed">
+                          Evalúa la frecuencia de peleas, uso de datos como armas arrojadizas (reproches métricos), acusaciones personales y amenazas de abandono en el hogar.
                         </p>
-                        <ul className="text-xs text-slate-300 list-disc pl-4 space-y-1">
-                          <li>ICE: {dashboard.toxicity.ice} (Conflicto)</li>
-                          <li>IDB: {dashboard.toxicity.idb} (Bienestar)</li>
-                          <li>IDP: {dashboard.toxicity.idp} (Desequilibrio doméstico)</li>
-                        </ul>
                       </div>
-                    )}
+
+                      {/* IDB description */}
+                      <div className="p-4 bg-slate-950 border border-slate-900 rounded-2xl space-y-2">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="font-extrabold text-white">IDB: Índice de Deterioro de Bienestar</span>
+                          <span className="font-semibold text-red-400">Umbral: ≥ 5.0</span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 leading-relaxed">
+                          Mide el impacto psicológico del ledger: insomnio, ansiedad por cumplir metas, sensación de estar bajo evaluación constante y pérdida de conexiones espontáneas.
+                        </p>
+                      </div>
+
+                      {/* IDP description */}
+                      <div className="p-4 bg-slate-950 border border-slate-900 rounded-2xl space-y-2">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="font-extrabold text-white">IDP: Índice de Desequilibrio Persistente</span>
+                          <span className="font-semibold text-red-400">Umbral: ≥ 0.50</span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 leading-relaxed">
+                          Detecta si la brecha de distribución de tareas se perpetúa durante más de 3 auditorías consecutivas, indicando explotación sistemática de un miembro.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-red-950/20 border border-red-500/20 rounded-2xl text-xs space-y-2">
+                      <div className="font-bold text-red-400 flex items-center gap-1.5">
+                        <AlertTriangle size={15} /> Protocolo de Desintoxicación Doméstica
+                      </div>
+                      <p className="text-[11px] text-slate-400 leading-relaxed">
+                        Si **dos o más de estos índices cruzan sus umbrales**, el sistema bloquea y congela el registro de tareas (CDD) durante 14 días de forma obligatoria. Durante esta pausa, el hogar debe negociar de forma tradicional y directa, sin el auxilio de métricas, y se recomienda asesoramiento familiar externo.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -1194,7 +1422,121 @@ export default function MicroMaxPage() {
           </div>
         )}
 
+        {/* Footer */}
+        <footer className="mt-20 pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+          <p>© {new Date().getFullYear()} MicroMaxocracia - Licencia de Uso Doméstico Seguro</p>
+          <div className="flex gap-6">
+            <button 
+              onClick={() => setShowSecuritySupport(true)}
+              className="hover:text-slate-400 transition-all underline cursor-pointer bg-transparent border-0"
+            >
+              Soporte y Privacidad del Hogar
+            </button>
+            <a href="https://es.wikipedia.org/wiki/Econom%C3%ADa_dom%C3%A9stica" className="hover:text-slate-400 transition-all">
+              Términos Generales
+            </a>
+          </div>
+        </footer>
+
       </div>
+
+      {/* Quick Escape Floating Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <button
+          onClick={() => window.location.href = "https://es.wikipedia.org/wiki/Econom%C3%ADa_dom%C3%A9stica"}
+          className="px-4 py-2.5 rounded-full bg-slate-900/90 border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold shadow-lg backdrop-blur-md transition-all hover:bg-slate-800 flex items-center gap-2"
+          title="Presiona Esc para salir rápido"
+        >
+          <LogOut size={14} />
+          Salida Rápida (Esc)
+        </button>
+      </div>
+
+      {/* Security Support Modal */}
+      <AnimatePresence>
+        {showSecuritySupport && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-slate-900 border border-slate-800 max-w-lg w-full rounded-3xl p-6 shadow-2xl relative space-y-6"
+            >
+              <div className="flex items-center gap-3 pb-4 border-b border-slate-800">
+                <Shield className="text-indigo-400" size={24} />
+                <div>
+                  <h3 className="text-xl font-bold text-white">Soporte y Privacidad del Hogar</h3>
+                  <p className="text-slate-400 text-xs">Información de seguridad y restablecimiento de cuenta</p>
+                </div>
+              </div>
+
+              <div className="space-y-4 text-sm text-slate-300">
+                <p>
+                  Esta sección proporciona recursos para asegurar que la MicroMaxocracia se utilice como una herramienta de equidad y no de coerción.
+                </p>
+
+                <div className="p-4 rounded-xl bg-slate-950 border border-slate-850 space-y-3">
+                  <div className="font-semibold text-white flex items-center gap-2">
+                    <Heart className="text-red-500 animate-pulse" size={16} /> Recursos de Ayuda y Orientación:
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Si te encuentras en una situación de hostilidad, control o violencia, puedes comunicarte de forma gratuita y confidencial con profesionales:
+                  </p>
+                  <ul className="text-xs space-y-2 text-slate-300 font-medium">
+                    <li className="flex justify-between items-center p-2 rounded bg-slate-900 border border-slate-800">
+                      <span>Línea 155 (Violencia de Género)</span>
+                      <span className="text-indigo-400 font-bold font-mono">Llamar / Chat</span>
+                    </li>
+                    <li className="flex justify-between items-center p-2 rounded bg-slate-900 border border-slate-800">
+                      <span>Línea 141 (Apoyo y Contención)</span>
+                      <span className="text-indigo-400 font-bold font-mono">Llamar</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-950 border border-slate-850 space-y-3">
+                  <div className="font-semibold text-white">Restablecer Cuestionario de Seguridad</div>
+                  <p className="text-xs text-slate-400">
+                    Si necesitas volver a responder la encuesta ESI para reconfigurar el acceso al ledger del hogar, puedes hacerlo a continuación.
+                  </p>
+                  <Button
+                    onClick={async () => {
+                      if (confirm("¿Estás seguro de que deseas reiniciar la encuesta de seguridad?")) {
+                        setLoading(true);
+                        setShowSecuritySupport(false);
+                        try {
+                          const newAnswers = { q1: false, q2: false, q3: false, q4: false, q5: false, q6: false };
+                          setSurveyAnswers(newAnswers);
+                          const res = await api.saveMicroMaxSafetySurvey(newAnswers);
+                          setSurvey(res);
+                          await loadInitialData();
+                        } catch(err: any) {
+                          alert("Error al restablecer: " + err.message);
+                        } finally {
+                          setLoading(false);
+                        }
+                      }
+                    }}
+                    className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold py-2 rounded-xl text-xs"
+                  >
+                    Reiniciar Encuesta ESI
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4 border-t border-slate-800">
+                <Button 
+                  onClick={() => setShowSecuritySupport(false)}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-2 rounded-xl text-sm"
+                >
+                  Cerrar
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

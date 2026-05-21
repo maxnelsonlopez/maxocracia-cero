@@ -32,7 +32,7 @@ bp = Blueprint("auth", __name__, url_prefix="/auth")
         "email": validate_email,
         "password": validate_password,
         "name": validate_name,
-        "alias": validate_alias,  # Campo opcional
+        "alias?": validate_alias,  # Campo opcional
     }
 )
 def register():

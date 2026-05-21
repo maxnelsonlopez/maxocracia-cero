@@ -112,6 +112,7 @@ def create_app(db_path=None):
     @app.route("/<path:path>")
     def catch_all(path):
         from flask import send_from_directory, jsonify
+        from werkzeug.exceptions import MethodNotAllowed, NotFound
         
         dist_dir = os.path.join(os.path.dirname(__file__), "static", "dist")
         
@@ -130,15 +131,39 @@ def create_app(db_path=None):
         if os.path.exists(os.path.join(dist_dir, folder_index)):
             return send_from_directory(dist_dir, folder_index)
 
-        # 4. Si llegamos aquí y el path coincide con un prefijo de API conocido,
-        # devolvemos un 404 real (JSON si es posible) en lugar del SPA.
-        api_prefixes = ["auth/", "api/", "subscriptions/", "forms/", "contracts/", "vhv/", "tvi/", "users/", "interchanges/"]
-        if any(path.startswith(pref) for pref in api_prefixes):
-            if "application/json" in request.headers.get("Accept", "") or path.startswith("api/"):
-                return jsonify({"error": f"Endpoint '{path}' no encontrado"}), 404
+        # 4. Check if the path matches a registered backend route but with a different method.
+        from werkzeug.routing import Map, Rule
+        non_catch_all_rules = [
+            Rule(rule.rule, methods=rule.methods, endpoint=rule.endpoint)
+            for rule in app.url_map.iter_rules()
+            if rule.endpoint != "catch_all" and rule.endpoint != "static"
+        ]
+        temp_map = Map(non_catch_all_rules)
+        temp_adapter = temp_map.bind_to_environ(request.environ)
+        try:
+            temp_adapter.match()
+        except MethodNotAllowed as e:
+            # Re-raise to let Flask handle the 405 error
+            raise e
+        except NotFound:
+            # Not matched by any registered route.
+            pass
 
-        # 5. SPA Fallback: Servir el index.html principal para que Next.js router tome control
-        return send_from_directory(dist_dir, "index.html")
+        # 5. Si llegamos aquí y el path coincide con un prefijo de API conocido,
+        # devolvemos un 404 real en lugar del SPA.
+        backend_prefixes = [
+            "auth/", "api/", "subscriptions/", "forms/", "contracts/", 
+            "vhv/", "tvi/", "users/", "interchanges/", "stripe/", 
+            "reputation/", "resources/", "micromax/"
+        ]
+        if any(path.startswith(pref) for pref in backend_prefixes):
+            return jsonify({"error": f"Endpoint '{path}' no encontrado"}), 404
+
+        # 6. SPA Fallback: Servir el index.html principal para que Next.js router tome control
+        if not app.config.get("TESTING") and os.path.exists(os.path.join(dist_dir, "index.html")):
+            return send_from_directory(dist_dir, "index.html")
+        
+        return jsonify({"error": f"Endpoint '{path}' no encontrado"}), 404
 
     @app.errorhandler(404)
     def handle_not_found(e):

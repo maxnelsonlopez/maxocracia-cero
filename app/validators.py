@@ -48,7 +48,7 @@ def validate_name(name):
 def validate_alias(alias):
     """Valida que el alias no exceda la longitud máxima"""
     if alias == "":
-        return True
+        return False
     if not alias or not isinstance(alias, str):
         return False
     return len(alias) <= ALIAS_MAX_LENGTH
@@ -82,13 +82,18 @@ def validate_json_request(schema):
             errors = {}
 
             for field, validator in schema.items():
-                if field in data:
-                    if not validator(data[field]):
-                        errors[field] = "valor inválido"
-                elif field.endswith("?"):  # Campo opcional
+                is_optional = field.endswith("?")
+                actual_field = field[:-1] if is_optional else field
+
+                if actual_field in data:
+                    if is_optional and data[actual_field] is None:
+                        continue
+                    if not validator(data[actual_field]):
+                        errors[actual_field] = "valor inválido"
+                elif is_optional:  # Campo opcional
                     continue
                 else:  # Campo requerido
-                    errors[field] = "campo requerido"
+                    errors[actual_field] = "campo requerido"
 
             if errors:
                 # Usar mensajes genéricos sin detalles técnicos

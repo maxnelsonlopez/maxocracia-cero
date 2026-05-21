@@ -48,16 +48,19 @@ La interfaz del módulo de MicroMaxocracia está desarrollada con **React, Next.
     $$\text{Equilibrio} = 0.6 \cdot CDD\% + 0.3 \cdot CEH\% + 0.1 \cdot TED\%$$
     Si las diferencias individuales superan el $\pm 15\%$, la interfaz tiñe los bordes en un tono ámbar indicando "Desbalance Relacional Detectado".
 
-### D. Protocolo ESI de Seguridad y Bloqueo (Red Block Screen)
-*   **Frecuencia**: Se le solicita al usuario responder la encuesta ESI periódicamente (o en el primer inicio de sesión).
-*   **Flujo UX de Bloqueo**:
-    *   Si el usuario marca $\ge 3$ respuestas afirmativas a situaciones de violencia verbal, coerción financiera, intimidación o control de movimiento, el sistema bloquea de inmediato la aplicación.
-    *   Se muestra una **pantalla roja de emergencia a pantalla completa** que oculta cualquier dato financiero u horas registradas para evitar que un agresor coaccione al usuario para "mostrar sus números".
-    *   La pantalla ofrece botones discretos con números telefónicos de emergencia gubernamentales/sociales de apoyo y un botón de salida rápida para camuflar la pantalla de inmediato con un dashboard financiero genérico o Wikipedia.
+### D. Protocolo ESI de Seguridad y Camuflaje Seguro (Safe Camouflage Mode)
+*   **Frecuencia**: Se le solicita al usuario responder la encuesta ESI en el primer inicio de sesión o para reconfigurar el acceso al ledger del hogar.
+*   **Flujo UX de Camuflaje (Stealth)**:
+    *   Si la encuesta de seguridad relacional (ESI) detecta riesgo ($\ge 3$ respuestas afirmativas), el sistema **NO** muestra una pantalla de bloqueo roja o estática (lo cual podría despertar sospechas o furia en un agresor que vigile el dispositivo).
+    *   En su lugar, activa el **Modo de Camuflaje Seguro**: la interfaz carga un dashboard idéntico al real pero alimentado con datos simulados y equilibrados ("Hogar Nelson-Lopez", contribuciones de ~50%, índices de salud excelentes).
+    *   **Simulación Local Interceptada**: Toda acción de escritura (registrar tareas CDD, guardar auditorías) es interceptada por el frontend. Muestra un aviso de éxito local y actualiza los listados en memoria de manera dinámica, pero **nunca** realiza la llamada HTTP al backend (evitando que los errores de bloqueo del servidor delaten el estado de seguridad).
+    *   **Atajo de Teclado y Botón de Pánico (Quick Escape)**: Un discreto botón flotante de "Salida Rápida (Esc)" y el atajo de la tecla `Esc` redirigen instantáneamente al usuario a un artículo genérico sobre Economía Doméstica en Wikipedia.
+    *   **Puerta Trasera de Soporte**: En la parte inferior, un discreto enlace de "Soporte y Privacidad del Hogar" abre el modal confidencial donde se exponen las líneas de ayuda (Línea 155, 141) y se permite reiniciar la encuesta de seguridad (ESI) de forma segura.
 
 ### E. Monitor Relacional y Protocolo Detox
 *   **Panel de Índices Relacionales**: Muestra tres tarjetas flotantes animadas con los niveles calculados a partir de las auditorías periódicas:
-    1.  **ICE** (Índice de Conflicto Escalado): Proporción de altercados graves en el período.
-    2.  **IDB** (Índice de Deterioro de Bienestar): Relación de fatiga y desgaste.
-    3.  **IDP** (Índice de Desequilibrio Persistente): Desviación acumulada en el reparto del CDD.
-*   **Banner de Detox Activo**: Si dos o más de estos índices superan el umbral tolerable, se renderiza una advertencia en la cabecera del dashboard recomendando suspender tareas, establecer una mesa de diálogo y activar las cláusulas de arbitraje relacional.
+    1.  **ICE** (Índice de Conflicto Escalado): Proporción de altercados graves en el período (Umbral crítico: $\ge 3.0$).
+    2.  **IDB** (Índice de Deterioro de Bienestar): Relación de fatiga, insomnio y desgaste relacional (Umbral crítico: $\ge 5.0$).
+    3.  **IDP** (Índice de Desequilibrio Persistente): Desviación acumulada en el reparto del CDD (Umbral crítico: $\ge 0.50$ o $\ge 0.40$ en 8+ semanas).
+*   **Banner de Detox Activo**: Si dos o más de estos índices superan el umbral tolerable, se activa el **Protocolo de Desintoxicación Doméstica**, bloqueando el registro de CDD durante 14 días para desactivar la competitividad métrica y promover la comunicación facilitada tradicional.
+

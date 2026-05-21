@@ -409,6 +409,21 @@ def github_webhook():
         
     return jsonify({"status": "received", "source": "github"}), 200
 
+@subscriptions_bp.route("/webhook/stripe", methods=["POST"])
+def stripe_webhook_placeholder():
+    """
+    Webhook de Stripe (no implementado en este módulo, usar /stripe/webhook).
+    """
+    return jsonify({
+        "status": "not_implemented",
+        "message": "Este endpoint de webhook no está activo. Utilizar /stripe/webhook para producción.",
+        "required_setup": [
+            "Configurar STRIPE_SECRET_KEY",
+            "Configurar STRIPE_WEBHOOK_SECRET",
+            "Redirigir webhooks de Stripe a /stripe/webhook"
+        ]
+    }), 501
+
 @subscriptions_bp.route("/webhook/wompi", methods=["POST"])
 def wompi_webhook():
     """

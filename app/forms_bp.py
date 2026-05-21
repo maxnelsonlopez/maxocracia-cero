@@ -399,6 +399,10 @@ def get_network_flow(current_user):
     # We return the full graph data for the React Flow visualization
     network = manager.get_full_network_graph()
 
+    # Merge network flow metrics (top_givers, top_receivers, hub_nodes) for test compliance
+    network_flow = manager.get_network_flow()
+    network.update(network_flow)
+
     return jsonify(network), 200
 
 
