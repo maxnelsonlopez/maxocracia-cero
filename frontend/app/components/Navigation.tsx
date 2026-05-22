@@ -111,6 +111,12 @@ export function Navigation() {
               ))}
 
               {isAuthenticated && (
+                <Link href="/matching" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/20 transition-all border border-emerald-500/20 mr-1 shadow-lg shadow-emerald-500/5">
+                  Plaza de Apoyo
+                </Link>
+              )}
+
+              {isAuthenticated && (
                 <Link href="/admin/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
                   Admin
                 </Link>
@@ -212,6 +218,15 @@ export function Navigation() {
                   </div>
                 </div>
               ))}
+
+              {isAuthenticated && (
+                <div className="space-y-3">
+                  <h3 className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                    Comunidad
+                  </h3>
+                  <MobileNavLink href="/matching" label="Plaza de Apoyo" icon={Handshake} onClick={() => setIsOpen(false)} />
+                </div>
+              )}
 
               {isAuthenticated && (
                 <div className="space-y-3">

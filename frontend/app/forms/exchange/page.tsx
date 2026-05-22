@@ -1,6 +1,6 @@
 "use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { FormWizard } from "../../components/ui/FormWizard";
 import { FormStep } from "../../components/ui/FormStep";
 import { Input } from "../../components/ui/Input";
@@ -56,7 +56,7 @@ interface Participant {
   city: string;
 }
 
-export default function ExchangeFormPage() {
+function ExchangeForm() {
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split("T")[0],
     interchange_id: "",
@@ -81,6 +81,62 @@ export default function ExchangeFormPage() {
   const [receiver, setReceiver] = useState<Participant | null>(null);
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const giverId = searchParams.get("giver_id");
+    const receiverId = searchParams.get("receiver_id");
+    const type = searchParams.get("type");
+    const description = searchParams.get("description");
+    const urgency = searchParams.get("urgency");
+    const uthHours = searchParams.get("uth_hours");
+
+    // Generate a default interchange_id if not present
+    setFormData(prev => ({
+      ...prev,
+      interchange_id: prev.interchange_id || `INT-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`
+    }));
+
+    if (giverId) {
+      const gId = parseInt(giverId);
+      setFormData(prev => ({ ...prev, giver_id: gId }));
+      apiFetch(`/forms/participants/${gId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && !data.error) {
+            setGiver(data);
+          }
+        })
+        .catch(err => console.error("Error fetching giver:", err));
+    }
+
+    if (receiverId) {
+      const rId = parseInt(receiverId);
+      setFormData(prev => ({ ...prev, receiver_id: rId }));
+      apiFetch(`/forms/participants/${rId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && !data.error) {
+            setReceiver(data);
+          }
+        })
+        .catch(err => console.error("Error fetching receiver:", err));
+    }
+
+    if (type) {
+      setFormData(prev => ({ ...prev, type: [type] }));
+    }
+    if (description) {
+      setFormData(prev => ({ ...prev, description }));
+    }
+    if (urgency) {
+      setFormData(prev => ({ ...prev, urgency }));
+    }
+    if (uthHours) {
+      setFormData(prev => ({ ...prev, uth_hours: uthHours }));
+    }
+  }, [searchParams]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -338,5 +394,20 @@ export default function ExchangeFormPage() {
         </FormStep>
       </FormWizard>
     </div>
+  );
+}
+
+export default function ExchangeFormPage() {
+  return (
+    <React.Suspense fallback={
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+          <p className="text-slate-400 font-medium text-sm animate-pulse">Cargando formulario de intercambio...</p>
+        </div>
+      </div>
+    }>
+      <ExchangeForm />
+    </React.Suspense>
   );
 }

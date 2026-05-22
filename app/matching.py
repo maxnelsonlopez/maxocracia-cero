@@ -223,11 +223,7 @@ class MatchingEngine:
         if not need_cats:
             return []
 
-        recent_partners = (
-            self._get_recent_exchange_partners(seeker_id)
-            if exclude_recent
-            else set()
-        )
+        recent_partners = self._get_recent_exchange_partners(seeker_id)
 
         # Candidatos: todos los activos excepto el propio buscador
         cursor.execute(
@@ -244,6 +240,12 @@ class MatchingEngine:
         results: List[MatchResult] = []
         for cand_row in cursor.fetchall():
             cand = dict(zip([d[0] for d in cursor.description], cand_row))
+
+            # Exclude recent exchange partners if requested
+            is_recent = cand["id"] in recent_partners
+            if exclude_recent and is_recent:
+                continue
+
             offer_cats = self._parse_json(cand.get("offer_categories"))
 
             if not offer_cats:
@@ -255,16 +257,19 @@ class MatchingEngine:
 
             overlap = len(matched) / max(len(need_cats), 1)
 
+            # Prevent empty neighborhood or city strings from matching as proximity hits
+            seeker_neighborhood = seeker.get("neighborhood", "").lower().strip()
+            cand_neighborhood = (cand.get("neighborhood") or "").lower().strip()
             same_neighborhood = (
-                seeker.get("neighborhood", "").lower().strip()
-                == cand["neighborhood"].lower().strip()
-                and seeker.get("city", "").lower().strip()
-                == cand["city"].lower().strip()
+                seeker_neighborhood != ""
+                and seeker_neighborhood == cand_neighborhood
+                and seeker.get("city", "").lower().strip() == (cand.get("city") or "").lower().strip()
             )
-            same_city = (
-                seeker.get("city", "").lower().strip()
-                == cand["city"].lower().strip()
-            )
+
+            seeker_city = seeker.get("city", "").lower().strip()
+            cand_city = (cand.get("city") or "").lower().strip()
+            same_city = seeker_city != "" and seeker_city == cand_city
+
             proximity = 1.0 if same_neighborhood else (0.5 if same_city else 0.0)
 
             score = overlap * 0.6 + urgency_w * 0.3 + proximity * 0.1
@@ -286,12 +291,114 @@ class MatchingEngine:
                     urgency_weight=urgency_w,
                     same_city=same_city,
                     same_neighborhood=same_neighborhood,
-                    recently_exchanged=cand["id"] in recent_partners,
+                    recently_exchanged=is_recent,
                 )
             )
 
         results.sort(key=lambda r: r.compatibility_score, reverse=True)
         return results[:limit]
+
+    def find_matches_for_offerer(
+        self,
+        offerer_id: int,
+        limit: int = 10,
+        exclude_recent: bool = True,
+    ) -> List[MatchResult]:
+        """
+        Encuentra participantes (buscadores/seekers) cuyas necesidades coinciden
+        con lo que ofrece `offerer_id`.
+        """
+        cursor = self.conn.cursor()
+
+        # Cargar el oferente
+        cursor.execute(
+            "SELECT * FROM participants WHERE id = ? AND status = 'active'",
+            (offerer_id,),
+        )
+        row = cursor.fetchone()
+        if not row:
+            return []
+
+        offerer = dict(zip([d[0] for d in cursor.description], row))
+        offer_cats = self._parse_json(offerer.get("offer_categories"))
+
+        if not offer_cats:
+            return []
+
+        recent_partners = self._get_recent_exchange_partners(offerer_id)
+
+        # Candidatos: todos los activos excepto el propio oferente
+        cursor.execute(
+            """
+            SELECT id, name, city, neighborhood, phone_whatsapp, telegram_handle,
+                   need_categories, need_description, need_human_dimensions, need_urgency
+            FROM participants
+            WHERE status = 'active'
+              AND id != ?
+            """,
+            (offerer_id,),
+        )
+
+        results: List[MatchResult] = []
+        for cand_row in cursor.fetchall():
+            cand = dict(zip([d[0] for d in cursor.description], cand_row))
+
+            is_recent = cand["id"] in recent_partners
+            if exclude_recent and is_recent:
+                continue
+
+            need_cats = self._parse_json(cand.get("need_categories"))
+
+            if not need_cats:
+                continue
+
+            matched = [c for c in offer_cats if c in need_cats]
+            if not matched:
+                continue
+
+            overlap = len(matched) / max(len(need_cats), 1)
+            urgency_w = URGENCY_WEIGHTS.get(cand.get("need_urgency", "Baja"), 0.2)
+
+            offerer_neighborhood = offerer.get("neighborhood", "").lower().strip()
+            cand_neighborhood = (cand.get("neighborhood") or "").lower().strip()
+            same_neighborhood = (
+                offerer_neighborhood != ""
+                and offerer_neighborhood == cand_neighborhood
+                and offerer.get("city", "").lower().strip() == (cand.get("city") or "").lower().strip()
+            )
+
+            offerer_city = offerer.get("city", "").lower().strip()
+            cand_city = (cand.get("city") or "").lower().strip()
+            same_city = offerer_city != "" and offerer_city == cand_city
+
+            proximity = 1.0 if same_neighborhood else (0.5 if same_city else 0.0)
+
+            score = overlap * 0.6 + urgency_w * 0.3 + proximity * 0.1
+
+            results.append(
+                MatchResult(
+                    offerer_id=cand["id"],
+                    offerer_name=cand["name"],
+                    offerer_city=cand["city"],
+                    offerer_neighborhood=cand["neighborhood"],
+                    offerer_phone_whatsapp=cand.get("phone_whatsapp"),
+                    offerer_telegram=cand.get("telegram_handle"),
+                    matched_categories=matched,
+                    offerer_description=cand.get("need_description", ""),
+                    offerer_dimensions=self._parse_json(
+                        cand.get("need_human_dimensions")
+                    ),
+                    compatibility_score=round(score, 4),
+                    urgency_weight=urgency_w,
+                    same_city=same_city,
+                    same_neighborhood=same_neighborhood,
+                    recently_exchanged=is_recent,
+                )
+            )
+
+        results.sort(key=lambda r: r.compatibility_score, reverse=True)
+        return results[:limit]
+
 
     def get_urgent_unmet_needs(
         self, days_threshold: int = UNRESOLVED_DAYS_THRESHOLD, top_matches: int = 3
@@ -326,6 +433,11 @@ class MatchingEngine:
                 continue
 
             latest_level = self._get_latest_need_level(p["id"])
+
+            # Skip resolved needs
+            if latest_level == 1:
+                continue
+
             is_crime = latest_level is not None and latest_level >= CRITICAL_NEED_LEVEL
 
             matches = self.find_matches(p["id"], limit=top_matches, exclude_recent=False)
@@ -382,13 +494,19 @@ class MatchingEngine:
             for dim in offers:
                 offer_counts[dim] = offer_counts.get(dim, 0) + 1
 
-        all_dims = set(need_counts) | set(offer_counts)
+        # Always audit all 8 standard dimensions of the SDV
+        all_dims = set(self.DIMENSION_LABELS.keys()) | set(need_counts) | set(offer_counts)
         gaps: List[CommunityGap] = []
 
         for dim in all_dims:
             needing = need_counts.get(dim, 0)
             offering = offer_counts.get(dim, 0)
-            ratio = offering / max(needing, 1)
+
+            # If no one needs this dimension, the coverage is fully satisfied (1.0 or higher)
+            if needing == 0:
+                ratio = float(offering) if offering > 0 else 1.0
+            else:
+                ratio = offering / needing
 
             if ratio < 0.5:
                 severity = "critical"

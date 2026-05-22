@@ -171,7 +171,7 @@ export default function AdminSettings() {
             <div className="flex gap-2">
               <input 
                 type="password" 
-                value="whsec_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" 
+                value="whsec_mock_secret_key_placeholder" 
                 disabled 
                 className="flex-1 px-3 py-2 text-xs rounded-lg bg-slate-950 border border-slate-800 text-slate-500 font-mono"
               />

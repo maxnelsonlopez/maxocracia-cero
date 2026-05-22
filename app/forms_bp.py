@@ -629,3 +629,283 @@ def get_community_sdv(current_user):
         status["community_narrative"] = "⚠️ Alerta de Coherencia: Múltiples dimensiones vitales están por debajo del umbral de dignidad en la comunidad."
         
     return jsonify(status), 200
+
+
+# ==================== P2P PLAZA Y ORÁCULO SINTÉTICO ====================
+
+
+@forms_bp.route("/matching/me", methods=["GET"])
+@token_required
+def get_my_matches(current_user):
+    """
+    Retorna los matches para el participante autenticado (basado en su email).
+    Retorna tanto los oferentes para sus necesidades (find_matches)
+    como los buscadores para sus ofertas (find_matches_for_offerer).
+    """
+    email = current_user.get("email")
+    if not email:
+        return jsonify({"error": "email not found in token"}), 400
+
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        "SELECT * FROM participants WHERE email = ? AND status = 'active'",
+        (email,),
+    )
+    row = cursor.fetchone()
+    if not row:
+        return jsonify({
+            "status": "no_profile",
+            "email": email,
+            "message": "No profile found for this email in Cohorte Cero. Please complete the Formulario CERO."
+        }), 200
+
+    participant = dict(zip([d[0] for d in cursor.description], row))
+    participant_id = participant["id"]
+
+    engine = MatchingEngine(db)
+
+    # Quién me ayuda (matches for my needs)
+    seeker_matches = engine.find_matches(seeker_id=participant_id, limit=10, exclude_recent=True)
+    # A quién ayudo (matches for what I offer)
+    offerer_matches = engine.find_matches_for_offerer(offerer_id=participant_id, limit=10, exclude_recent=True)
+
+    # Parse JSON fields
+    participant["offer_categories"] = engine._parse_json(participant.get("offer_categories"))
+    participant["offer_human_dimensions"] = engine._parse_json(participant.get("offer_human_dimensions"))
+    participant["need_categories"] = engine._parse_json(participant.get("need_categories"))
+    participant["need_human_dimensions"] = engine._parse_json(participant.get("need_human_dimensions"))
+
+    return jsonify({
+        "status": "ok",
+        "participant": participant,
+        "seeker_matches": [_match_result_to_dict(m) for m in seeker_matches],
+        "offerer_matches": [_match_result_to_dict(m) for m in offerer_matches],
+    }), 200
+
+
+def _simulate_oracle(message: str, participants_list: list) -> dict:
+    """
+    Simulación heurística basada en reglas para extraer datos de intercambio.
+    """
+    import re
+    msg_lower = message.lower()
+    
+    # 1. Identificar participantes
+    matched_participants = []
+    for p in participants_list:
+        p_name = p["name"].lower()
+        first_name = p_name.split()[0] if p_name else ""
+        
+        if p_name in msg_lower:
+            matched_participants.append((p, msg_lower.index(p_name), len(p_name)))
+        elif first_name and len(first_name) > 2 and first_name in msg_lower:
+            matched_participants.append((p, msg_lower.index(first_name), len(first_name)))
+
+    matched_participants.sort(key=lambda x: x[1])
+    
+    giver = None
+    receiver = None
+    
+    if len(matched_participants) >= 2:
+        p1, idx1, len1 = matched_participants[0]
+        p2, idx2, len2 = matched_participants[1]
+        
+        text_between = msg_lower[idx1 + len1 : idx2].strip()
+        
+        if any(kw in text_between for kw in ["ayudo", "ayudó", "dio", "para", "entregó", "entrego", "le dio"]):
+            giver = p1
+            receiver = p2
+        elif any(kw in text_between for kw in ["recibió de", "recibio de", "de"]):
+            giver = p2
+            receiver = p1
+        else:
+            giver = p1
+            receiver = p2
+    elif len(matched_participants) == 1:
+        p = matched_participants[0][0]
+        if any(kw in msg_lower for kw in ["ayudo", "ayudó", "dio", "ofrece"]):
+            giver = p
+        else:
+            receiver = p
+
+    # 2. Extraer horas UTH
+    hours_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:hora|horas|uth|u\.t\.h)', msg_lower)
+    uth_hours = 1.0
+    if hours_match:
+        try:
+            uth_hours = float(hours_match.group(1))
+        except ValueError:
+            pass
+            
+    # 3. Extraer urgencia
+    urgency = "Media"
+    if any(kw in msg_lower for kw in ["alta", "urgente"]):
+        urgency = "Alta"
+    elif any(kw in msg_lower for kw in ["baja", "tranquilo"]):
+        urgency = "Baja"
+        
+    # 4. Descripción
+    description = message
+    if giver and receiver:
+        desc_match = re.search(r'(?:con|para|de)\s+([^,.\n]+)', message, re.IGNORECASE)
+        if desc_match:
+            description = desc_match.group(1).strip()
+            
+    giver_name = giver["name"] if giver else "alguien"
+    receiver_name = receiver["name"] if receiver else "alguien"
+    
+    if giver and receiver:
+        reply = (
+            f"¡Entendido! He procesado tu mensaje en modo de simulación. "
+            f"Detecté que {giver_name} ayudó a {receiver_name} con '{description}' por un total de {uth_hours} UTH (horas). "
+            f"Haz clic en el botón de abajo para registrar este intercambio."
+        )
+        prefill = {
+            "giver_id": giver["id"],
+            "giver_name": giver["name"],
+            "receiver_id": receiver["id"],
+            "receiver_name": receiver["name"],
+            "type": "UTH",
+            "description": description,
+            "urgency": urgency,
+            "uth_hours": uth_hours
+        }
+    else:
+        reply = (
+            "Hola, soy el Oráculo Sintético. No logré identificar claramente a ambos participantes (emisor y receptor) "
+            "en tu mensaje. Por favor menciona algo como 'Nelson ayudó a Max con 2 horas de diseño'."
+        )
+        prefill = None
+        
+    return {
+        "reply": reply,
+        "prefill": prefill
+    }
+
+
+@forms_bp.route("/oracle/chat", methods=["POST"])
+@token_required
+def oracle_chat(current_user):
+    """
+    Interactúa con el Oráculo Sintético (LLM) para procesar lenguaje natural
+    y detectar posibles registros de intercambio.
+    """
+    import os
+    import json
+    import requests
+
+    data = request.get_json() or {}
+    message = data.get("message", "").strip()
+    if not message:
+        return jsonify({"error": "message is required"}), 400
+
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT id, name, email, city, neighborhood FROM participants WHERE status = 'active'")
+    participants = [dict(zip([d[0] for d in cursor.description], row)) for row in cursor.fetchall()]
+
+    participants_context = "\n".join([
+        f"- ID: {p['id']}, Nombre: {p['name']}, Email: {p['email']}, Ciudad: {p['city']}, Barrio: {p['neighborhood']}"
+        for p in participants
+    ])
+
+    gemini_key = os.environ.get("GEMINI_API_KEY")
+    local_url = os.environ.get("LOCAL_LLM_URL")
+
+    system_prompt = f"""
+Eres el Oráculo Sintético de la Maxocracia, un asistente de IA encargado de facilitar la gestión y registro de datos de la Cohorte Cero.
+Tu objetivo principal es leer la conversación del usuario, responder con amabilidad y, si el usuario describe un intercambio/ayuda/servicio que ocurrió o está ocurriendo entre participantes, estructurar y extraer los datos para pre-llenar un formulario de registro de intercambio.
+
+Contexto de los Participantes Registrados:
+{participants_context}
+
+Instrucciones de Extracción:
+- Identifica quién es el emisor/giver (la persona que ayuda o provee) y el receptor/receiver (la persona que recibe la ayuda). Busca coincidencia de nombres exactos o parciales con los participantes listados en el contexto y obtén sus IDs.
+- Estima el número de horas o UTH (Unidad de Tiempo Humano). Por defecto, usa 1.0 hora si no se especifica.
+- Escribe una descripción breve e informativa del intercambio.
+- Define la urgencia ('Baja', 'Media', 'Alta') basándote en la descripción de la necesidad. Por defecto es 'Media'.
+- Define el tipo (usualmente 'UTH').
+
+Debes responder ÚNICAMENTE en formato JSON con la siguiente estructura:
+{{
+  "reply": "Respuesta textual en español dirigida al usuario, explicando qué entendiste o confirmando el registro del intercambio.",
+  "prefill": {{
+    "giver_id": <int o null>,
+    "giver_name": "<nombre del giver o null>",
+    "receiver_id": <int o null>,
+    "receiver_name": "<nombre del receiver o null>",
+    "type": "UTH",
+    "description": "<descripción corta>",
+    "urgency": "Baja" | "Media" | "Alta",
+    "uth_hours": <float o null>
+  }} (o null si no se detecta ningún intercambio en el mensaje del usuario)
+}}
+"""
+
+    if gemini_key:
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={gemini_key}"
+            headers = {"Content-Type": "application/json"}
+            payload = {
+                "contents": [
+                    {
+                        "parts": [
+                            {"text": system_prompt + f"\nMensaje del usuario: {message}"}
+                        ]
+                    }
+                ],
+                "generationConfig": {
+                    "responseMimeType": "application/json"
+                }
+            }
+            res = requests.post(url, json=payload, headers=headers, timeout=10)
+            if res.status_code == 200:
+                res_data = res.json()
+                text_response = res_data["candidates"][0]["content"]["parts"][0]["text"]
+                parsed = json.loads(text_response)
+                # Resolve names if missing
+                if parsed.get("prefill"):
+                    giver_id = parsed["prefill"].get("giver_id")
+                    receiver_id = parsed["prefill"].get("receiver_id")
+                    for p in participants:
+                        if giver_id and p["id"] == giver_id:
+                            parsed["prefill"]["giver_name"] = p["name"]
+                        if receiver_id and p["id"] == receiver_id:
+                            parsed["prefill"]["receiver_name"] = p["name"]
+                return jsonify(parsed), 200
+        except Exception as e:
+            pass
+
+    if local_url:
+        try:
+            url = f"{local_url.rstrip('/')}/v1/chat/completions"
+            headers = {"Content-Type": "application/json"}
+            payload = {
+                "model": "local-model",
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": message}
+                ],
+                "response_format": {"type": "json_object"}
+            }
+            res = requests.post(url, json=payload, headers=headers, timeout=10)
+            if res.status_code == 200:
+                res_data = res.json()
+                text_response = res_data["choices"][0]["message"]["content"]
+                parsed = json.loads(text_response)
+                if parsed.get("prefill"):
+                    giver_id = parsed["prefill"].get("giver_id")
+                    receiver_id = parsed["prefill"].get("receiver_id")
+                    for p in participants:
+                        if giver_id and p["id"] == giver_id:
+                            parsed["prefill"]["giver_name"] = p["name"]
+                        if receiver_id and p["id"] == receiver_id:
+                            parsed["prefill"]["receiver_name"] = p["name"]
+                return jsonify(parsed), 200
+        except Exception as e:
+            pass
+
+    # Heuristic simulation mode fallback
+    result = _simulate_oracle(message, participants)
+    return jsonify(result), 200
