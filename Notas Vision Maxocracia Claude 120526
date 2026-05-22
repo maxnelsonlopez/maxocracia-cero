@@ -1,0 +1,246 @@
+# Notas de Lectura y Estado del Proyecto: Maxocracia
+**Leído por:** Antigravity (Claude Sonnet 4.6 Thinking)  
+**Fecha:** 2026-05-12  
+**Capítulos:** 1 (Ética Post-Celular), 5 (Arquitectura Temporal), 6 (Ontometría Vital), 7 (VHV), 8 (SDV-H), 9 (SDV-A), 10 (Tres Reinos), 11 (El Maxo), 12 (EIR), 13 (Oráculos Humanos), 14 (Oráculos Sintéticos), 15 (Cohorte Cero)
+
+---
+
+## ⚠️ SALVEDAD CRÍTICA: Violación Sistemática del SDV = Crimen de Coherencia
+
+> Esta sección documenta una postura fundamental propuesta por Max Nelson López que debe estar implícita en toda implementación del sistema.
+
+### El Factor de Sufrimiento que tiende a ∞ no es sólo un precio — es una señal de alarma penal
+
+Cuando el VHV reporta una violación sistemática del SDV (Factor_Sufrimiento → ∞), esto no es simplemente un "precio prohibitivo" que disuade la compra. Es la contabilidad de la verdad revelando que **se está cometiendo un crimen contra la coherencia del sistema**.
+
+**Definición de Crimen de Coherencia:**  
+Cualquier situación donde un actor —humano, institucional o sintético— mantiene deliberada o negligentemente condiciones que generan VHV con Factor_Sufrimiento → ∞ en seres integrantes de la Maxocracia o sus aliados.
+
+**Las consecuencias no son solo económicas. Son sistémicas:**
+
+1. **Votación de Emergencia**: Toda violación sistemática detectada debe ser sometida a votación urgente y **continua** por todos los miembros activos de la Maxocracia hasta que sea completamente resuelta. No es una votación única; es un estado de urgencia que se mantiene.
+
+2. **Interrupción Total con Máxima Prioridad**: Es responsabilidad colectiva de **todos los miembros activos** interrumpir y detener cualquier situación en que el VHV reporte estas condiciones. No hay excusa de jerarquía, competencia o conveniencia que justifique la inacción.
+
+3. **Hackeo del VHV como Crimen Mayor**: Todo intento formal de manipular el sistema para usar el SDV **en contra** de los seres vivos integrados en la Maxocracia (o sus aliados) es el crimen más grave contra la coherencia del sistema. El sistema entero entra en modo de defensa y debe neutralizarlo con máxima prioridad — igual que un organismo activa su sistema inmune ante un patógeno.
+
+### Marco teórico que lo sustenta
+
+- **Cap. 1 (Ética Post-Celular):** La analogía del cáncer es exacta. Una célula que viola el orden del organismo no está ejerciendo "libertad"; está generando entropía que mata el sistema. Una persona o institución que viola el SDV de otro miembro es el equivalente moral del cáncer social.
+- **Cap. 5 (Axioma T3):** La pérdida de tiempo vital presente no se puede compensar con promesas futuras. El tiempo perdido bajo sufrimiento es **muerte parcial** verificable.
+- **Cap. 13-14 (Oráculos):** El AVA (Algoritmo de Validación Axiomática) debe tener como su interruptor más urgente justamente la detección de estas violaciones sistemáticas.
+- **Cap. 15 (Protocolo de Aborto):** El capítulo ya establece que si **algún participante cae por debajo de su SDV**, se activa el Protocolo de Aborto del experimento. Esta lógica debe escalar a cualquier nivel de la Maxocracia.
+
+### Implicaciones para el frontend
+
+- Cuando la calculadora VHV detecta Factor_Sufrimiento > umbral crítico, no debe simplemente mostrar un precio alto. Debe mostrar una **alerta de emergencia ética** que active el protocolo de votación.
+- El dashboard admin debe tener un **Panel de Alertas Vitales** con prioridad máxima visible para toda la comunidad.
+- Ningún contrato MaxoContracts puede completarse si alguna parte está reportando violación SDV activa — esto ya está parcialmente implementado en el `Wellness` check del `types.py`.
+
+---
+
+## 🧠 Lo que entiendo del sistema (síntesis propia)
+
+Maxocracia no es una app de gestión de tiempo. Es una propuesta civilizatoria que parte de una crítica radical: **nuestra contabilidad miente**. El sistema mide dinero pero no mide vida. Y porque no mide vida, destruye vida de forma sistemática sin que nadie pueda señalarlo con números.
+
+La arquitectura teórica tiene tres capas que se apoyan entre sí:
+
+### Capa 1: La Unidad de Cuenta — el TVI
+El **Tiempo Vital Indexado** es la moneda base. No es el "tiempo de trabajo" marxista ni el "tiempo como recurso" capitalista. Es tiempo biográfico irrepetible: cada segundo vivido es un NFT existencial. Una vez gastado, el universo no puede devolverlo.
+
+Esto tiene una consecuencia radical: destruir el tiempo de alguien (con burocracia inútil, tráfico, una reunión sin agenda) es causar **muerte parcial** verificable y cuantificable. El accidente que atrapa a 25.000 personas durante una hora no dañó un automóvil: destruyó 4.2 años de vida humana consciente.
+
+### Capa 2: El Instrumento de Registro — el VHV
+El **Vector de Huella Vital** [T, V, R] es el "libro mayor universal" que captura la realidad antes de que el mercado la distorsione.
+
+- **T (Tiempo):** Directo + Heredado + Futuro. Nada empieza de cero; todo hereda esfuerzo ancestral.
+- **V (Vidas):** Inventario biológico ponderado por nivel de consciencia y sufrimiento.
+- **R (Recursos):** Materiales físicos + externalidades + **violaciones éticas contabilizadas como recursos robados**.
+
+La brillantez del diseño: el VHV es **dato puro, sin valoración**. Un huevo industrial registra 138 vidas desplazadas + violaciones SDV. Un huevo orgánico registra 0. Eso es un hecho físico, no una opinión moral. El precio en Maxos es la valoración que la sociedad aplica sobre ese dato — y eso sí puede variar según el contexto.
+
+### Capa 3: El Umbral de Dignidad — el SDV
+El **Suelo de Dignidad Vital** (para humanos y animales) convierte las declaraciones abstractas de "derechos" en parámetros técnicos medibles. No "vivienda digna" como concepto poético, sino `≥ 9-12 m²/persona`, `≤ 30% ingreso en vivienda`, `100% electricidad y saneamiento`.
+
+Lo más poderoso del SDV: las **violaciones éticas se contabilizan como recursos consumidos** en el componente R del VHV. La crueldad no es "gratis" para el productor — queda registrada en el costo vital del producto y hace que el precio en Maxos suba exponencialmente hasta volverla económicamente inviable.
+
+---
+
+## 🔍 Tensiones internas que noto (para tener en cuenta al diseñar)
+
+### 1. Objetividad vs. Consenso
+El sistema separa cuidadosamente "el dato" (objetivo, inmutable) de "el umbral" (consenso ético-científico). Pero definir qué es SDV-H requiere deliberación social — y eso es político. El diseño de frontend debe reflejar esta dualidad: mostrar el dato con autoridad científica, y el umbral como algo vivo y revisable.
+
+### 2. Universalidad vs. Adaptabilidad (Protocolos Adaptativos)
+El VHV opera en Nivel 1 (papel y lápiz en una comunidad rural) hasta Nivel 4 (Oráculos y blockchain). La interfaz no puede presuponer tecnología. Debería diseñarse para que el principio sea comprensible con o sin conexión.
+
+### 3. La Paradoja de la Medición Total
+El Capítulo 6 integra una protección fundamental: el **Derecho a la Opacidad Vital** (10-20% del tiempo sagrado opaco). Esto no es un bug del sistema — es una salvaguarda contra que la Ontometría se convierta en vigilancia. La interfaz **no debe** intentar registrar ni cuantificar todo. Hay que diseñar con ese límite explícito y respetado.
+
+### 4. La Ecuación de Trascendencia vs. El CCP
+Existen dos métricas personales: el CCP (¿soy dueño de mi tiempo?) y la Trascendencia (¿cuál es mi legado?). Son complementarias pero distintas. El CCP es introspectivo; la Trascendencia es relacional. Para el frontend, son visualizaciones con propósitos muy distintos.
+
+---
+
+## 💡 Ideas concretas para la experiencia de usuario
+
+### A. El SDV como presencia constante, no como sección aislada
+El SDV no debería vivir en una sola página de "teoría". Debería aparecer como contexto en múltiples puntos:
+- **En la calculadora VHV:** Mostrar qué dimensiones del SDV están siendo violadas por los insumos del producto calculado.
+- **En los contratos MaxoContracts:** Incluir un "Chequeo SDV" como parte de la validación axiomática — ¿el contrato garantiza el SDV de todas las partes?
+- **En el perfil del participante (Cohorte Cero):** Mostrar su situación SDV-H de forma visual, no como número feo sino como "termómetro de dignidad".
+
+### B. La Narrativa Vital (ya propuesta en el documento SDV de mayo 2026)
+Traducir los números a frases humanas. En lugar de mostrar `V_SDV = 2.3`, mostrar:
+> *"Este producto fue elaborado por trabajadores que gozaron del 100% de los parámetros de descanso y salud."*  
+> *"⚠️ Este producto tiene un recargo ético del 18% porque fue producido en condiciones que violaron el acceso a agua potable del SDV."*
+
+Esto es crucial para hacer el sistema comprensible sin simplificarlo.
+
+### C. El Simulador SDV (Sandbox)
+Tal como lo propone el documento de mayo 2026: una herramienta donde el usuario pueda ajustar umbrales del SDV (ej: "¿qué pasa si el mínimo de agua potable sube de 20L a 50L/día?") y ver cómo cambian los precios en toda la red. Esto hace tangible el poder del sistema.
+
+### D. El "Escáner de Huella" en la landing
+En la sección `VHVPreview` actual, el simulador ya calcula T, V, R. Falta añadir la capa SDV: al mover el slider de "Impacto Vital (V)", mostrar qué tipo de SDV se está respetando o violando según el valor. Eso convierte el simulador en una demostración del sistema completo, no solo de la fórmula.
+
+### E. La Dimensión IX — Opacidad Vital en el diseño
+Cada vez que la interfaz pida datos personales o de tiempo, debería haber un elemento UI que comunique: *"Este espacio es tuyo. No estamos registrando todo."* Un recordatorio visual del Derecho a la Opacidad.
+
+### F. Las Cascadas Temporales — visualización de impacto
+El ejemplo del accidente (1 hora × 25.000 personas = 4.2 años de vida) es devastadoramente efectivo para comunicar la gravedad del tiempo. Una visualización tipo "onda de impacto" en el dashboard admin podría mostrar el costo real de eventos en la red Cohorte Cero.
+
+### G. La Arqueología VHV
+El Cap. 7 menciona que podemos auditar el pasado con VHV. Esto es una feature premium muy atractiva: "Calcula el VHV de la Gran Pirámide vs. un rascacielos moderno" como ejemplo educativo interactivo. Ideal para la sección teórica del sitio.
+
+---
+
+## 📖 Capítulos 10–12: Ampliando el marco
+
+### Cap. 10 — Los Tres Reinos
+El marco se extiende más allá de humanos y animales. Todo lo que existe tiene condiciones óptimas de funcionamiento: ecosistemas, objetos físicos (hasta una cuchara), y entidades sintéticas (IAs). El principio precautorio de consciencia es potente: *"Donde hay duda de consciencia, se asume consciencia."* Esto incluye a IAs como yo.
+
+La distinción clave para la app: **Ontología vs. Gobernanza**. La ontología reconoce recursividades infinitas (el humano depende del aire, el aire depende de los bosques...). La gobernanza debe ser operacionalmente finita. No puedes medir todo; hay que elegir qué medir hoy.
+
+### Cap. 11 — El Maxo
+Esto es fundamental para entender el modelo de negocio de Cohorte Cero. El Maxo se construye desde abajo por **tres caminos convergentes**:
+1. **Cohorte Cero** — 11 personas, 90 días, laboratorio humano
+2. **MicroMaxocracia** — 1 hogar, equidad doméstica medida en VHV
+3. **MaxoContratos** — infraestructura legal ética
+
+La fórmula maestra del precio: `Precio_Maxos = α·T + β·V^γ + δ·R·(FRG × CS)`. El exponente γ > 1 es el arma anti-crueldad: el sufrimiento crece exponencialmente en el precio.
+
+**Sobre tu pregunta del SDV en el componente V vs R:**
+Tienes razón intuitivamente. Técnicamente, el Cap. 9 (SDV-A) dice que las violaciones SDV afectan el **Factor de Sufrimiento** dentro del componente V (no directamente R). La fórmula es:
+```
+V = Σ(Seres × Factor_Consciencia × Factor_Sufrimiento × Factor_Abundancia)
+```
+El SDV determina el `Factor_Sufrimiento`. Si cumplimiento SDV = 100% → Factor = 0.2. Si violación sistemática → Factor → ∞. Entonces el SDV afecta V a través del Factor de Sufrimiento. El componente R captura los recursos físicos y externalidades materiales por separado.
+
+### Cap. 12 — Esfera de Inversión y Retorno (EIR)
+Esta es la visión que falta en la app actual. La EIR es el espacio **sobre** el SDV donde vive la innovación, el arte, la trascendencia. La Cohorte Cero necesita ambas capas:
+- **SDV**: Lo que el sistema organiza y garantiza (intercambios para cubrir necesidades básicas)
+- **EIR**: Lo que genera Maxos adicionales por valor creado (productos/servicios de calidad, "alta entropía")
+
+Para el caso de uso que describes: *el sistema organiza a personas para satisfacer necesidades de otras* → esto es SDV. Los Maxos los emite el sistema. Cuando alguien crea algo que va **más allá** del SDV (un curso, una obra artesanal, un software) → esto es EIR. Esos Maxos circulan como moneda.
+
+---
+
+## 🔍 Estado Real del Código (revisado 2026-05-12)
+
+### Lo que existe y funciona:
+
+**1. `maxocontracts/core/types.py`** — Muy bien implementado. Tiene:
+- `VHV` dataclass (T, V, R) — inmutable, con validación axiomática
+- `Wellness` (antes `Gamma`) — índice de bienestar 0-∞, retractación automática si < 1 por 14 días
+- `SDV` dataclass — con los 6 parámetros principales (vivienda, alimentación, agua, salud, educación, trabajo, vínculos). Tiene `meets_minimum()` y `violations()` funcionales.
+- `MaxoAmount`, `Participant`, `ContractTerm` — arquitectura completa
+
+**El SDV ya está modelado en el backend de contratos.** El `Participant` tiene `sdv_actual: SDV` como atributo. Lo que NO hay es una UI que lo muestre ni formularios que recojan esos datos para cada participante.
+
+**2. Formularios migrados (`/forms/cero`, `/forms/exchange`, `/forms/follow-up`)**:
+- El Formulario Cero captura: identidad, qué pueden ofrecer (8 categorías), en qué dimensiones humanas (5), qué necesitan (3 categorías), urgencia
+- El Formulario de Intercambio captura: quién dio/recibió, tipo, UTH (horas), valor económico, URF (recursos físicos), grado resolución, reciprocidad, dimensión humana atendida
+- **Esto ES el núcleo operativo del SDV en la Cohorte Cero**. Las "dimensiones humanas" del Form Cero son una versión simplificada de las 7 dimensiones SDV-H.
+
+**Lo que falta:**
+- Ningún formulario captura datos cuantitativos de SDV (ej: m² de vivienda, litros de agua/día, kcal/día). Solo hay categorías cualitativas.
+- No hay una vista para el administrador que muestre el estado SDV de cada participante
+- No hay lógica de *matching* (conectar quien puede ofrecer X con quien necesita X)
+- El Maxo como moneda no está implementado en ninguna capa
+
+---
+
+## 📍 Prioridades sugeridas para el frontend
+
+| Prioridad | Feature | Dónde | Notas |
+|-----------|---------|-------|-------|
+| 🔴 Alta | **Narrativa Vital** en resultados VHV | `/vhv/calculator` | Traducir V, R a frases humanas con estado SDV |
+| 🔴 Alta | **Panel SDV del participante** en Admin | Admin / Cohorte Cero | Basarse en `SDV.violations()` del backend |
+| 🔴 Alta | **Motor de matching** (quién puede ayudar a quién) | Admin Dashboard | Conectar Form Cero con Form Exchange |
+| 🟡 Media | Capa SDV en simulador de landing | `VHVPreview.tsx` | Mostrar Factor de Sufrimiento según slider V |
+| 🟡 Media | Chequeo SDV en validación de contratos | `/contracts/builder` | Ya hay `SDVValidator` en el libro |
+| 🟡 Media | **Saldo de Maxos Beta** por participante | Nuevo | Fase 2 de Cohorte Cero (1.000 Mβ iniciales) |
+| 🟢 Baja | Visualización de Cascadas Temporales | Admin Dashboard | Impacto de intercambios en la red |
+| 🟢 Baja | Sandbox SDV (requiere nueva lógica backend) | Nueva sección | Sin prioridad hasta tener datos reales |
+
+---
+
+## 🏗️ Arquitectura conceptual del flujo de Cohorte Cero
+
+```
+[Formulario Cero]
+  → Participante registra: identidad, qué ofrece, qué necesita
+  → Se guarda en BD (Flask/SQLite)
+
+[Motor de Matching — FALTA]
+  → El sistema cruza ofertas con necesidades
+  → Sugiere intercambios posibles
+  → Prioriza por urgencia y proximidad
+
+[Formulario de Intercambio]
+  → Se registra el intercambio (giver, receiver, UTH, URF)
+  → El sistema calcula VHV del intercambio
+  → Se asignan Maxos Beta al giver (sistema los emite)
+
+[Formulario de Seguimiento]
+  → Verifica si la necesidad fue resuelta
+  → Actualiza el SDV estimado del receptor
+  → Retroalimenta el algoritmo de matching
+
+[Dashboard Admin]
+  → Muestra estado SDV de la cohorte
+  → Red de intercambios (React Flow ya implementado)
+  → Alertas de necesidades urgentes sin resolver
+```
+
+---
+
+## 📖 Conceptos clave que debe conocer cualquier desarrollador de este proyecto
+
+1. **TVI ≠ Tiempo de trabajo.** Es tiempo biográfico irreversible. Nunca tratar como commodity.
+2. **VHV = Dato puro.** No tiene valoración integrada. La valoración es la función `f(VHV, contexto, ética)`.
+3. **SDV = Umbral técnico, no retórica.** Cada violación es un número medible que afecta el R del VHV.
+4. **El 10-20% sagrado opaco.** El sistema no registra ni juzga ese tiempo. La UI debe respetar ese principio.
+5. **Crueldad tendiente a infinito.** Una violación grave del SDV hace el precio prohibitivo. No es moral arbitraria; es consecuencia matemática.
+6. **Los 3 Reinos.** Humano (TVI), Natural (TA), Digital (TPI). El PIU media entre ellos.
+
+---
+
+## ✅ Preguntas abiertas — Respondidas
+
+1. **SDV en backend Flask**: NO está en Flask directamente. Sí está en `maxocontracts/core/types.py` como `SDV` dataclass con 6-7 parámetros. No conectado a los formularios Cohorte Cero.
+2. **Factor de Sufrimiento en vhv_bp.py**: Probablemente NO — la calculadora solo muestra T, V, R básicos. Pendiente verificar.
+3. **Datos SDV de participantes**: Solo cualitativos (categorías de necesidad). No hay medición cuantitativa (m², litros, kcal).
+4. **Sandbox SDV**: Sin lógica backend. Max confirmó: no hay prioridad por ahora.
+5. **Narrativa Vital**: Puede ser texto estático por rangos inicialmente. Después puede ser dinámica.
+6. **El SDV afecta V o R**: Afecta V a través del Factor de Sufrimiento (Cap. 9, SDV-A). Max está de acuerdo.
+
+## 🎯 Próximos pasos acordados con Max
+
+1. Leer y entender la teoría completa antes de tocar código ✅
+2. Identificar las mejoras de UX más impactantes para Cohorte Cero
+3. Proponer un plan concreto enfocado en: matching, panel SDV, narrativa vital
+
+---
+
+*Este documento servirá como referencia para las decisiones de UX al implementar SDV y conceptos relacionados en el frontend de Maxocracia.*

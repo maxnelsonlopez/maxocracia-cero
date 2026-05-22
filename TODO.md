@@ -1,6 +1,6 @@
 # Tareas Pendientes - Maxocracia-Cero
 
-**Última actualización:** 2026-05-21 (Sesión Antigravity Pro)
+**Última actualización:** 2026-05-21 (Sesión Antigravity - UX & Plantillas)
 
 ---
 
@@ -30,14 +30,15 @@
     - [x] Actualización de `SyntheticOracle` y `app/contracts_bp.py`
   - **Entregables**: ✅ Persistencia SQL, ✅ Libro v3.3, ✅ Wireframes y API Oráculos listos
 
-- [ ] **Semana 3-4: Prototipo (Febrero 6-19)**
-  - [ ] Codificar 3 bloques básicos + tests
-  - [ ] Desarrollar app MVP en React + Next.js
-  - [ ] Deployar primeros contratos en Base Sepolia testnet
-  - **Entregables**: 3 bloques funcionales, app MVP, 3 contratos de prueba
+- [x] **Semana 3-4: Prototipo (Febrero 6 - Mayo 21)** ✅ COMPLETADA
+  - [x] Codificar 5 bloques modulares + tests (Condition, Action, Wellness, SDV, Reciprocity)
+  - [x] Desarrollar app MVP en React + Next.js (Constructor de Contratos Visual con React Flow)
+  - [x] Implementar visualización de flujo, leyendas explicativas y glosario en UI
+  - **Entregables**: 5 bloques funcionales, app MVP de visual builder, 3 contratos de prueba
 
-- [ ] **Semana 5-8: Validación (Febrero 20 - Marzo 19)**
-  - [ ] Completar 5 bloques + auditoría
+- [/] **Semana 5-8: Validación (Febrero 20 - Junio)**
+  - [/] Completar 5 bloques + auditoría (ver maxocontracts_audit_report.md)
+  - [x] Biblioteca de plantillas predefinidas en la barra lateral (Colaboración, Soporte, Préstamo)
   - [ ] Ejecutar 50+ contratos en Cohorte Cero
     - [ ] 20 contratos de aseo compartido
     - [ ] 15 contratos de préstamos sin usura
@@ -285,6 +286,14 @@
 ## ✅ Completadas Recientemente
 
 ### Mayo 2026
+
+- [x] **UX Sobre-Explicada y Plantillas Predefinidas para MaxoContracts** (2026-05-21)
+  - Integración de descripciones inline y definiciones de axiomas y conceptos de bienestar ($\gamma$, SDV, T1) en todo el flujo del constructor de contratos, listado y detalles.
+  - Creación de biblioteca de plantillas predefinidas (Colaboración Simétrica, Soporte Condicionado, Préstamo Protegido) en la barra lateral del Constructor Visual, permitiendo carga dinámica en el lienzo.
+  - Implementación de firma modular interactiva (Simple, Moderada, Rigurosa) con timers obligatorios y preguntas de comprensión.
+  - Separación del componente client-side (`ContractDetailsClient.tsx`) y estático para habilitar compilación estática (`npm run build`) en Next.js.
+  - Suite de pruebas de validación de grafos (`test_validate_graph.py`) y backend pasando al 100% (319/319 tests).
+  - Responsable: Antigravity (Gemini).
 
 - [x] **Auditoría, Estabilización y Tipado Estricto del Frontend** (2026-05-19)
   - Corrección de bugs de sesión en local storage centralizando el uso de `mc_access_token`.

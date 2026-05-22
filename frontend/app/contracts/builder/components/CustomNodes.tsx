@@ -39,6 +39,9 @@ export const ActionNode = memo(({ id, data }: CustomNodeProps) => {
                     />
                 </div>
             </div>
+            <div className="text-[8px] text-slate-450 mt-1.5 leading-tight text-slate-400">
+                <strong>Costo VHV:</strong> Tiempo Vital (en horas) que invertirás conscientemente para realizar esta acción.
+            </div>
             <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-blue-400 border-2 border-white" />
         </div>
     );
@@ -64,6 +67,9 @@ export const ConditionNode = memo(({ id, data }: CustomNodeProps) => {
                 value={data.label || ''}
                 onChange={onLabelChange}
             />
+            <div className="text-[8px] text-slate-400 mt-1.5 leading-tight">
+                <strong>Condición:</strong> Hecho verificable en el mundo real que activa o bifurca los términos del acuerdo.
+            </div>
             <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-amber-400 border-2 border-white" />
         </div>
     );
@@ -92,6 +98,9 @@ export const OracleNode = memo(({ id, data }: CustomNodeProps) => {
                 <option value="Formulario (Humano)">Formulario (Humano)</option>
                 <option value="Híbrido (Consenso)">Híbrido (Consenso)</option>
             </select>
+            <div className="text-[8px] text-slate-400 mt-1.5 leading-tight">
+                <strong>Oráculo:</strong> Juez sintético o humano neutral que evalúa el cumplimiento o las solicitudes de retractación.
+            </div>
             <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-purple-400 border-2 border-white" />
         </div>
     );
@@ -105,7 +114,9 @@ export const SDVNode = memo(() => {
                 <div className="w-2 h-2 rounded-full bg-emerald-500" />
                 <div className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Suelo de Dignidad (SDV)</div>
             </div>
-            <div className="text-[11px] text-slate-500 italic mb-2">Garantiza mínimos existenciales</div>
+            <div className="text-[8px] text-slate-400 leading-tight mb-2">
+                <strong>Suelo de Dignidad Vital (INV2):</strong> Protege que tus obligaciones no reduzcan tus mínimos vitales (alimento, techo, salud o descanso básico).
+            </div>
             <div className="bg-emerald-50 p-2 rounded-lg text-[10px] font-bold text-emerald-700 text-center">
                 VALIDACIÓN ACTIVA
             </div>
@@ -138,6 +149,9 @@ export const ReciprocityNode = memo(({ id, data }: CustomNodeProps) => {
                 <option value="Restitución de Tiempo">Restitución de Tiempo</option>
                 <option value="Mediación Humana">Mediación Humana</option>
             </select>
+            <div className="text-[8px] text-slate-400 mt-1.5 leading-tight">
+                <strong>Axioma T9 (Reciprocidad Justa):</strong> Toda acción de costo vital (DO) requiere una contraprestación equivalente (GIVE), evitando la explotación.
+            </div>
             <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-rose-400 border-2 border-white" />
         </div>
     );

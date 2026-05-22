@@ -1,0 +1,44 @@
+# Segmento 2: Inteligencia Económica (VHV & TVI)
+
+Hemos completado la migración del motor de inteligencia económica de Maxocracia a la arquitectura moderna de Next.js. Este segmento transforma las herramientas analíticas en experiencias interactivas y visualmente premium.
+
+## Logros Principales
+
+### 1. Calculadora VHV Interactiva
+Migramos la lógica de cálculo desde el legado estático a una aplicación reactiva.
+- **Gráficos Dinámicos:** Implementación de `Chart.js` para visualizar el desglose del precio Maxo.
+- **Presets:** Integración de casos de estudio (Huevo Ético vs Industrial) para facilitar el uso.
+- **Ruta:** [`/vhv/calculator`](http://localhost:3000/vhv/calculator)
+
+### 2. Comparador Ético
+Herramienta para contrastar productos guardados y resaltar aquellos con menor "Costo Vital".
+- **Visualización:** Gráficos de dona para comparar la composición de T, V y R.
+- **Ruta:** [`/vhv/comparison`](http://localhost:3000/vhv/comparison)
+
+### 3. Editor de Parámetros Axiomáticos
+Panel para que administradores ajusten los coeficientes (α, β, γ, δ) con validación en tiempo real de "violaciones de axiomas".
+- **Ruta:** [`/vhv/parameters`](http://localhost:3000/vhv/parameters)
+
+### 4. Dashboard de TVI (Tiempo Vital Invertido)
+Visualización de métricas comunitarias y el Coeficiente de Correlación de Participación (CCP).
+- **Ruta:** [`/tvi/stats`](http://localhost:3000/tvi/stats)
+
+## Evidencia Visual
+
+![Calculadora VHV](/C:/Users/DARKM/.gemini/antigravity/brain/d6cccd72-8036-457c-8593-b5716b49a749/vhv_calc_result_1778231274570.png)
+*Cálculo del Huevo de Granja Ética (23.00 Ⓜ)*
+
+![Parámetros Axiomáticos](/C:/Users/DARKM/.gemini/antigravity/brain/d6cccd72-8036-457c-8593-b5716b49a749/vhv_parameters_1778231304863.png)
+*Panel de control de la fórmula económica maestra*
+
+## Cambios Técnicos
+- **Dependencias:** Añadidas `chart.js` y `react-chartjs-2`.
+- **Componentes UI:** Nuevos componentes `VHVChart`, `VHVForm` y `TVIStatsCard`.
+- **API:** Centralización de métodos económicos en `lib/api.ts`.
+- **Navegación:** Actualización de [`Navigation.tsx`](file:///c:/Users/DARKM/Documents/maxocracia-cero/maxocracia-cero/frontend/app/components/Navigation.tsx) para incluir las nuevas herramientas.
+
+## Verificación Realizada
+- [x] Verificado cálculo exitoso de presets (23.00 Maxos para Huevo Ético).
+- [x] Validado que la UI bloquea parámetros negativos.
+- [x] Verificado manejo de errores 401 en el dashboard de TVI.
+- [x] Corregido error de importación de `AnimatePresence`.

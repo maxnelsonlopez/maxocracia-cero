@@ -59,6 +59,25 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
 
 ## [Unreleased]
 
+## 2026-05-21 — UX Sobre-Explicada y Plantillas Predefinidas de MaxoContracts
+
+### Añadido
+- **UX Sobre-Explicada y Liminal**: Rediseño completo para visibilizar conceptos de bienestar maxocrático en todas las pantallas.
+  - **Nodos del Constructor (`CustomNodes.tsx`)**: Descripciones integradas dentro del cuerpo de los nodos (Action, Condition, Oracle, SDV, Reciprocity) que definen variables VHV, el Axioma T9, y la Invariante INV2.
+  - **Constructor Visual (`builder/page.tsx`)**: Inclusión de guías de conectividad, desglose matemático de la fórmula de complejidad ética del contrato y detalles sobre las tres modalidades de firma modular.
+  - **Detalles y Firma (`[id]/ContractDetailsClient.tsx`)**: Sobre-explicación de estados del contrato, delay de reflexión para firmas rigurosas, timers y preguntas de comprobación ética obligatorias.
+  - **Leyendas y Comparador (`page.tsx`)**: Banner introductorio que contrasta MaxoContracts con contratos tradicionales, y leyenda explicativa de los estados de flujo de vida del contrato.
+- **Biblioteca de Plantillas**: Creador de plantillas interactivas en el menú lateral izquierdo que permite cargar de forma dinámica diagramas base para *Colaboración Simétrica*, *Soporte Condicionado* y *Préstamo Protegido* en el lienzo de React Flow.
+- **Suite de Pruebas de Grafo**: Añadida suite `tests/test_maxocontracts/test_validate_graph.py` para probar la lógica de validación de grafos (Axioma T9, peso y complejidad de firmas) desde Flask.
+
+### Cambiado
+- **Arquitectura de Generación Estática (SSG)**: Reestructurado `/contracts/[id]/page.tsx` para separar el componente dinámico del cliente (`ContractDetailsClient.tsx`) y habilitar `generateStaticParams()` con marcadores de posición, logrando compilar con éxito el frontend estático (`output: 'export'`).
+- **Oráculo Sintético**: Integración del motor de veredicto con tipado correcto en ejemplos y respuestas.
+
+### Notas Técnicas
+- **Firma**: Antigravity (Gemini AI Assistant - Google DeepMind).
+- **Verificación**: Suite de pruebas completa pasando exitosamente (319/319 tests) y compilación de Next.js libre de advertencias y errores.
+
 ## 2026-05-21 — Estabilización de Rutas Backend, Red y Suite de Tests
 
 ### Añadido

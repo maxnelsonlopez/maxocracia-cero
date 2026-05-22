@@ -38,7 +38,7 @@ from maxocontracts.core.types import (
     MaxoAmount,
 )
 from maxocontracts.core.contract import MaxoContract
-from maxocontracts.core.axioms import AxiomValidator
+from maxocontracts.core.axioms import AxiomValidator, ValidationResult
 from maxocontracts.oracles import SyntheticOracle
 
 from .webhooks import dispatch_event
@@ -327,6 +327,27 @@ def get_contract(current_user, contract_id: str):
         "state": contract.state.value,
         "civil_description": contract.civil_summary,
         "participants": [p.id for p in contract.participants],
+        "participants_details": [
+            {
+                "id": p.id,
+                "name": p.name,
+                "wellness": float(p.wellness_current.value)
+            }
+            for p in contract.participants
+        ],
+        "terms": [
+            {
+                "term_id": t.id,
+                "civil_text": t.description,
+                "vhv": {
+                    "t": float(t.vhv_cost.T),
+                    "v": float(t.vhv_cost.V),
+                    "r": float(t.vhv_cost.R)
+                },
+                "accepted_by": t.accepted_by
+            }
+            for t in contract._terms
+        ],
         "terms_count": len(contract._terms),
         "total_vhv": vhv,
         "events_count": len(contract.get_event_log()),
@@ -639,6 +660,7 @@ def validate_graph(current_user):
     data = request.get_json() or {}
     nodes = data.get("nodes", [])
     edges = data.get("edges", [])
+    duration = float(data.get("duration", 30.0))
     
     if not nodes:
         return jsonify({"error": "no nodes found in graph"}), 400
@@ -650,6 +672,9 @@ def validate_graph(current_user):
     )
     
     # Mapear nodos a términos del contrato
+    vhv_total_t = Decimal("0")
+    n_cond = 0
+    
     for node in nodes:
         node_type = node.get("type")
         node_id = node.get("id")
@@ -663,17 +688,100 @@ def validate_graph(current_user):
             except:
                 t_val = Decimal("0.5")
                 
+            vhv_total_t += t_val
             vhv_cost = VHV(T=t_val, V=Decimal("0"), R=Decimal("0"))
             term = ContractTerm(id=node_id, description=f"Acción: {label}", vhv_cost=vhv_cost)
             temp_contract.add_term(term)
+            
+        elif node_type == "condition":
+            n_cond += 1
             
         elif node_type == "sdv":
             # El bloque SDV asegura que el contrato respeta el suelo de dignidad
             temp_contract.minimum_sdv = SDV() # En el futuro, cargar parámetros específicos
             
-    # Ejecutar validación axiomática
+    # Calcular Peso del Contrato (Complejidad)
+    # Peso = (Nº_Condiciones * 2) + (VHV_total_T * 5) + (Duración / 30)
+    weight = (n_cond * 2) + float(vhv_total_t * 5) + (duration / 30.0)
+    
+    if weight < 10:
+        ux_signature_type = "simple"
+    elif weight <= 50:
+        ux_signature_type = "medium"
+    else:
+        ux_signature_type = "rigorous"
+        
+    # Inyectar participantes de simulación para evaluaciones de INV1 e INV2
+    user_id = current_user.get("user_id") or current_user.get("id") or 1
+    db = get_db()
+    user_row = db.execute("SELECT id, name FROM users WHERE id = ?", (user_id,)).fetchone()
+    user_name = user_row["name"] if user_row else f"Usuario {user_id}"
+    
+    p1 = Participant(
+        id=f"user-{user_id}",
+        name=user_name,
+        wellness_current=Wellness(value=Decimal("1.0")),
+        sdv_actual=SDV()
+    )
+    p2 = Participant(
+        id="user-counterparty",
+        name="Bob",
+        wellness_current=Wellness(value=Decimal("1.0")),
+        sdv_actual=SDV()
+    )
+    
+    temp_contract.add_participant(p1)
+    temp_contract.add_participant(p2)
+            
+    # Ejecutar validación axiomática de core
     valid, results = temp_contract.validate()
     
+    # Construir mapa de conexiones para validación de reciprocidad
+    connections = {}
+    for edge in edges:
+        source = edge.get("source")
+        target = edge.get("target")
+        if source and target:
+            connections.setdefault(source, []).append(target)
+            connections.setdefault(target, []).append(source)
+            
+    def has_path_to_type(start_id, target_type):
+        visited = set()
+        queue = [start_id]
+        node_types = {n.get("id"): n.get("type") for n in nodes}
+        
+        while queue:
+            curr = queue.pop(0)
+            if curr in visited:
+                continue
+            visited.add(curr)
+            
+            if node_types.get(curr) == target_type:
+                return True
+                
+            for neighbor in connections.get(curr, []):
+                if neighbor not in visited:
+                    queue.append(neighbor)
+        return False
+        
+    # Validar que cada nodo de acción tenga una reciprocidad conectada (Axioma T9)
+    connections_valid = True
+    for node in nodes:
+        if node.get("type") == "action":
+            node_id = node.get("id")
+            label = node.get("data", {}).get("label", "Acción")
+            if not has_path_to_type(node_id, "reciprocity"):
+                connections_valid = False
+                results.append(ValidationResult(
+                    is_valid=False,
+                    axiom_code="T9",
+                    axiom_name="Reciprocidad Justa",
+                    message=f"La acción '{label}' ({node_id}) no está conectada a ningún bloque de Reciprocidad."
+                ))
+                
+    if not connections_valid:
+        valid = False
+        
     return jsonify({
         "valid": valid,
         "results": [
@@ -684,6 +792,8 @@ def validate_graph(current_user):
             }
             for r in results
         ],
+        "weight": weight,
+        "ux_signature_type": ux_signature_type,
         "total_vhv": {
             "t": float(temp_contract.total_vhv.T),
             "v": float(temp_contract.total_vhv.V),

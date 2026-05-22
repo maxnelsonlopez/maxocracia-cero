@@ -133,8 +133,8 @@ def create_simple_loan():
     response = oracle.validate_contract(contract.to_dict())
     
     print(f"   Aprobado: {response.approved}")
-    print(f"   Confianza: {response.confidence}")
-    print(f"   Razonamiento: {response.reasoning}")
+    print(f"   Confianza: {response.verdict.confidence}")
+    print(f"   Razonamiento: {response.verdict.reasoning}")
     print()
     
     # 8. Mostrar resumen en lenguaje civil

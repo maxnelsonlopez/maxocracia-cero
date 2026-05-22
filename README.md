@@ -1,8 +1,8 @@
 # Maxocracia-Cero: Sistema Operativo para una Civilización Coherente
 
 **Estado del Proyecto:** Fase 2 - Sostenibilidad Económica y MicroMaxocracia Doméstica (Mayo 2026)  
-**Última actualización:** 19 de mayo 2026  
-**Versión:** 4.2 - MicroMaxocracia e Integración de Cuidado (Antigravity)
+**Última actualización:** 21 de mayo 2026  
+**Versión:** 4.3 - MaxoContracts Visual Builder y UX Sobre-Explicada (Antigravity)
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 
@@ -36,10 +36,10 @@ La **Maxocracia** es un sistema ético-económico-político alternativo que prop
 - **Portal Unificado (Hybrid Frontend)**: Nueva landing page moderna (Next.js) servida por Flask.
 - **MicroMaxocracia v1.0**: Registro interactivo de CDD, balance de Tres Cuentas en UI, encuesta de seguridad ESI con pantalla de bloqueo y monitor Detox relacional en tiempo real.
 - **Nexus Simulator v2.2**: Simulador interactivo del VHV con Modo Oráculo Dinámico.
-- **MaxoContracts v2.3**: Persistencia SQLite, 5 bloques modulares, oráculo sintético.
+- **MaxoContracts v2.4**: Persistencia SQLite, 5 bloques modulares, oráculo sintético, constructor de contratos visual (React Flow) con biblioteca de plantillas, validador de grafos y UX sobre-explicada liminal.
 - **Calculadora VHV**: Frontend completo con Chart.js integrado en el portal.
 - **Sistema TVI**: Detección de overlap temporal, cálculo de CCP.
-- **316 tests** (309+ pasando, ~85% cobertura) ✅ (Backend Core + Blocks)
+- **319 tests** (319/319 pasando, ~85% cobertura) ✅ (Backend Core + Blocks + Visual Graph Validation)
 
 ---
 
