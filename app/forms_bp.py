@@ -631,6 +631,113 @@ def get_community_sdv(current_user):
     return jsonify(status), 200
 
 
+# ==================== PULSO VITAL (COHORT HEARTBEAT) ====================
+
+
+@forms_bp.route("/pulse", methods=["GET"])
+@token_required
+def get_cohort_pulse(current_user):
+    """
+    Endpoint agregado que retorna el "Pulso Vital" completo de la Cohorte Cero.
+
+    Combina en una sola respuesta:
+    - SDV comunitario (scores + narrativas por dimensión)
+    - Brechas de cobertura de la comunidad
+    - Alertas urgentes y Crímenes de Coherencia
+    - Estadísticas generales del dashboard
+
+    Este endpoint alimenta la página /pulso en el frontend.
+
+    Autor: Claude Opus (Anthropic)
+    """
+    from datetime import datetime
+    from .sdv_analyzer import SDVScore
+
+    db = get_db()
+
+    # 1. SDV Community: scores + narratives
+    analyzer = SDVAnalyzer(db)
+    sdv_community = analyzer.get_community_sdv_status()
+
+    dims = sdv_community.get("dimensions", {})
+    community_score = SDVScore(
+        vivienda=dims.get("vivienda", 1.0),
+        alimentacion=dims.get("alimentacion", 1.0),
+        agua=dims.get("agua", 1.0),
+        salud=dims.get("salud", 1.0),
+        educacion=dims.get("educacion", 1.0),
+        trabajo=dims.get("trabajo", 1.0),
+        vinculos=dims.get("vinculos", 1.0),
+    )
+    narratives = analyzer.generate_narrative(community_score)
+
+    avg = sdv_community.get("average_overall", 1.0)
+    if avg >= 0.9:
+        community_narrative = (
+            "La Cohorte Cero se encuentra en un estado de alta "
+            "resiliencia y plenitud vital."
+        )
+    elif avg >= 0.7:
+        community_narrative = (
+            "La comunidad muestra una base sólida, pero existen "
+            "vulnerabilidades focalizadas que requieren atención."
+        )
+    else:
+        community_narrative = (
+            "⚠️ Alerta de Coherencia: Múltiples dimensiones vitales "
+            "están por debajo del umbral de dignidad en la comunidad."
+        )
+
+    # 2. Matching gaps
+    engine = MatchingEngine(db)
+    gaps = engine.get_community_sdv_gaps()
+
+    # 3. Urgent needs + Coherence Crimes
+    urgent = engine.get_urgent_unmet_needs(days_threshold=7, top_matches=3)
+    coherence_crimes = [u for u in urgent if u.is_coherence_crime]
+    warnings = [u for u in urgent if not u.is_coherence_crime]
+
+    # 4. Dashboard stats
+    manager = FormsManager(db)
+    stats = manager.get_dashboard_stats()
+
+    return jsonify({
+        "sdv": {
+            "average_overall": avg,
+            "dimensions": dims,
+            "participant_count": sdv_community.get("participant_count", 0),
+            "community_narrative": community_narrative,
+            "narratives": narratives,
+        },
+        "gaps": {
+            "all": [_gap_to_dict(g) for g in gaps],
+            "critical": [
+                _gap_to_dict(g) for g in gaps if g.gap_severity == "critical"
+            ],
+            "warnings": [
+                _gap_to_dict(g) for g in gaps if g.gap_severity == "warning"
+            ],
+            "covered": [
+                _gap_to_dict(g) for g in gaps if g.gap_severity == "ok"
+            ],
+            "critical_count": len(
+                [g for g in gaps if g.gap_severity == "critical"]
+            ),
+        },
+        "alerts": {
+            "coherence_crimes": [
+                _urgent_need_to_dict(u) for u in coherence_crimes
+            ],
+            "warnings": [_urgent_need_to_dict(u) for u in warnings],
+            "total_urgent": len(urgent),
+            "crimes_count": len(coherence_crimes),
+            "system_alert": len(coherence_crimes) > 0,
+        },
+        "stats": stats,
+        "timestamp": datetime.now().isoformat(),
+    }), 200
+
+
 # ==================== P2P PLAZA Y ORÁCULO SINTÉTICO ====================
 
 
