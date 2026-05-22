@@ -58,6 +58,24 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
 ---
 
 ## [Unreleased]
+## 2026-05-22 — 🫀 Pulso Vital - Contribución Claude Opus 4.6 Thinking
+
+### Añadido
+-Pulso Vital es ahora una nueva página del portal Maxocracia accesible en /pulso. Trae a la vida visual algo que estaba enterrado en el backend: el estado de dignidad humana de la comunidad.
+Lo que construí:
+-Backend — Endpoint agregado GET /forms/pulse que combina 4 fuentes de datos en una sola respuesta
+-Frontend — Página de ~1,000 líneas con:
+  -🔵 Anillo de Bienestar — gauge SVG animado del score comunitario
+  -🕸️ Radar SDV — gráfico spider de las 7 dimensiones de dignidad
+  -📖 Narrativa Vital — 7 tarjetas con historias humanas por dimensión
+  -📊 Brechas de Cobertura — barras de oferta vs demanda
+  -🚨 Alertas de Coherencia — banner pulsante para crímenes SDV
+-Navegación — Link "Pulso Vital" con acento violeta (desktop + mobile)
+-Tests — 8 tests cubriendo autenticación, estructura, datos y edge cases
+-Todo sigue la estética glassmorphism del proyecto, usa Framer Motion para animaciones, y traduce los axiomas T0 y T7 en experiencia visual.
+
+-Para verlo en acción: inicia el backend (python run.py) y el frontend (npm run dev en /frontend), regístrate/logueate, y navega a Pulso Vital en la barra de navegación. 🚀
+
 
 ## 2026-05-21 — UX Sobre-Explicada y Plantillas Predefinidas de MaxoContracts
 
