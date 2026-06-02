@@ -106,6 +106,268 @@ def get_participant(current_user, participant_id):
     return jsonify(participant), 200
 
 
+@forms_bp.route("/participants/<int:participant_id>", methods=["PUT"])
+@token_required
+def update_participant(current_user, participant_id):
+    """Update details of a specific participant."""
+    db = get_db()
+    manager = FormsManager(db)
+
+    participant = manager.get_participant(participant_id)
+    if not participant:
+        return jsonify({"error": "Participante no encontrado"}), 404
+
+    # Authorization check: must be owner or admin
+    if participant["email"] != current_user.get("email") and not current_user.get("is_admin"):
+        return jsonify({"error": "No tienes autorización para realizar esta acción"}), 403
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No se proporcionaron datos"}), 400
+
+    success, message = manager.update_participant(participant_id, data)
+    if success:
+        return jsonify({"success": True, "message": message}), 200
+    else:
+        return jsonify({"success": False, "error": message}), 400
+
+
+@forms_bp.route("/participants/<int:participant_id>", methods=["DELETE"])
+@token_required
+def delete_participant(current_user, participant_id):
+    """Delete a specific participant."""
+    db = get_db()
+    manager = FormsManager(db)
+
+    participant = manager.get_participant(participant_id)
+    if not participant:
+        return jsonify({"error": "Participante no encontrado"}), 404
+
+    # Authorization check: must be owner or admin
+    if participant["email"] != current_user.get("email") and not current_user.get("is_admin"):
+        return jsonify({"error": "No tienes autorización para realizar esta acción"}), 403
+
+    success, message = manager.delete_participant(participant_id)
+    if success:
+        return jsonify({"success": True, "message": message}), 200
+    else:
+        return jsonify({"success": False, "error": message}), 400
+
+
+@forms_bp.route("/participants/<int:participant_id>/offers", methods=["GET"])
+@token_required
+def get_participant_offers(current_user, participant_id):
+    """Get all secondary offers of a participant."""
+    db = get_db()
+    manager = FormsManager(db)
+
+    participant = manager.get_participant(participant_id)
+    if not participant:
+        return jsonify({"error": "Participante no encontrado"}), 404
+
+    # Authorization check: must be owner or admin
+    if participant["email"] != current_user.get("email") and not current_user.get("is_admin"):
+        return jsonify({"error": "No tienes autorización"}), 403
+
+    offers = manager.get_participant_offers(participant_id)
+    return jsonify({"offers": offers}), 200
+
+
+@forms_bp.route("/participants/<int:participant_id>/offers", methods=["POST"])
+@token_required
+def add_participant_offer(current_user, participant_id):
+    """Add a secondary offer for a participant."""
+    db = get_db()
+    manager = FormsManager(db)
+
+    participant = manager.get_participant(participant_id)
+    if not participant:
+        return jsonify({"error": "Participante no encontrado"}), 404
+
+    # Authorization check: must be owner or admin
+    if participant["email"] != current_user.get("email") and not current_user.get("is_admin"):
+        return jsonify({"error": "No tienes autorización"}), 403
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No se proporcionaron datos"}), 400
+
+    success, message, offer_id = manager.add_participant_offer(participant_id, data)
+    if success:
+        return jsonify({"success": True, "message": message, "offer_id": offer_id}), 201
+    else:
+        return jsonify({"success": False, "error": message}), 400
+
+
+@forms_bp.route("/offers/<int:offer_id>", methods=["PUT"])
+@token_required
+def update_offer(current_user, offer_id):
+    """Update a secondary offer."""
+    db = get_db()
+    manager = FormsManager(db)
+
+    # Authorization check
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT p.email FROM participants p
+        JOIN participant_offers o ON p.id = o.participant_id
+        WHERE o.id = ?
+    """, (offer_id,))
+    row = cursor.fetchone()
+    if not row:
+        return jsonify({"error": "Oferta no encontrada"}), 404
+
+    email = row[0]
+    if email != current_user.get("email") and not current_user.get("is_admin"):
+        return jsonify({"error": "No tienes autorización"}), 403
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No se proporcionaron datos"}), 400
+
+    success, message = manager.update_participant_offer(offer_id, data)
+    if success:
+        return jsonify({"success": True, "message": message}), 200
+    else:
+        return jsonify({"success": False, "error": message}), 400
+
+
+@forms_bp.route("/offers/<int:offer_id>", methods=["DELETE"])
+@token_required
+def delete_offer(current_user, offer_id):
+    """Delete a secondary offer."""
+    db = get_db()
+    manager = FormsManager(db)
+
+    # Authorization check
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT p.email FROM participants p
+        JOIN participant_offers o ON p.id = o.participant_id
+        WHERE o.id = ?
+    """, (offer_id,))
+    row = cursor.fetchone()
+    if not row:
+        return jsonify({"error": "Oferta no encontrada"}), 404
+
+    email = row[0]
+    if email != current_user.get("email") and not current_user.get("is_admin"):
+        return jsonify({"error": "No tienes autorización"}), 403
+
+    success, message = manager.delete_participant_offer(offer_id)
+    if success:
+        return jsonify({"success": True, "message": message}), 200
+    else:
+        return jsonify({"success": False, "error": message}), 400
+
+
+@forms_bp.route("/participants/<int:participant_id>/needs", methods=["GET"])
+@token_required
+def get_participant_needs(current_user, participant_id):
+    """Get all secondary needs of a participant."""
+    db = get_db()
+    manager = FormsManager(db)
+
+    participant = manager.get_participant(participant_id)
+    if not participant:
+        return jsonify({"error": "Participante no encontrado"}), 404
+
+    # Authorization check: must be owner or admin
+    if participant["email"] != current_user.get("email") and not current_user.get("is_admin"):
+        return jsonify({"error": "No tienes autorización"}), 403
+
+    needs = manager.get_participant_needs(participant_id)
+    return jsonify({"needs": needs}), 200
+
+
+@forms_bp.route("/participants/<int:participant_id>/needs", methods=["POST"])
+@token_required
+def add_participant_need(current_user, participant_id):
+    """Add a secondary need for a participant."""
+    db = get_db()
+    manager = FormsManager(db)
+
+    participant = manager.get_participant(participant_id)
+    if not participant:
+        return jsonify({"error": "Participante no encontrado"}), 404
+
+    # Authorization check: must be owner or admin
+    if participant["email"] != current_user.get("email") and not current_user.get("is_admin"):
+        return jsonify({"error": "No tienes autorización"}), 403
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No se proporcionaron datos"}), 400
+
+    success, message, need_id = manager.add_participant_need(participant_id, data)
+    if success:
+        return jsonify({"success": True, "message": message, "need_id": need_id}), 201
+    else:
+        return jsonify({"success": False, "error": message}), 400
+
+
+@forms_bp.route("/needs/<int:need_id>", methods=["PUT"])
+@token_required
+def update_need(current_user, need_id):
+    """Update a secondary need."""
+    db = get_db()
+    manager = FormsManager(db)
+
+    # Authorization check
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT p.email FROM participants p
+        JOIN participant_needs n ON p.id = n.participant_id
+        WHERE n.id = ?
+    """, (need_id,))
+    row = cursor.fetchone()
+    if not row:
+        return jsonify({"error": "Necesidad no encontrada"}), 404
+
+    email = row[0]
+    if email != current_user.get("email") and not current_user.get("is_admin"):
+        return jsonify({"error": "No tienes autorización"}), 403
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No se proporcionaron datos"}), 400
+
+    success, message = manager.update_participant_need(need_id, data)
+    if success:
+        return jsonify({"success": True, "message": message}), 200
+    else:
+        return jsonify({"success": False, "error": message}), 400
+
+
+@forms_bp.route("/needs/<int:need_id>", methods=["DELETE"])
+@token_required
+def delete_need(current_user, need_id):
+    """Delete a secondary need."""
+    db = get_db()
+    manager = FormsManager(db)
+
+    # Authorization check
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT p.email FROM participants p
+        JOIN participant_needs n ON p.id = n.participant_id
+        WHERE n.id = ?
+    """, (need_id,))
+    row = cursor.fetchone()
+    if not row:
+        return jsonify({"error": "Necesidad no encontrada"}), 404
+
+    email = row[0]
+    if email != current_user.get("email") and not current_user.get("is_admin"):
+        return jsonify({"error": "No tienes autorización"}), 403
+
+    success, message = manager.delete_participant_need(need_id)
+    if success:
+        return jsonify({"success": True, "message": message}), 200
+    else:
+        return jsonify({"success": False, "error": message}), 400
+
+
 # ==================== FORMULARIO A (EXCHANGES) ====================
 
 
@@ -480,6 +742,8 @@ def _urgent_need_to_dict(u) -> dict:
         "latest_need_level": u.latest_need_level,
         "is_coherence_crime": u.is_coherence_crime,
         "top_matches": [_match_result_to_dict(m) for m in u.top_matches],
+        "phone_whatsapp": u.phone_whatsapp,
+        "telegram": u.telegram,
     }
 
 

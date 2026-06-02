@@ -1396,6 +1396,17 @@ export default function MicroMaxPage() {
                       />
                     </div>
 
+                    {/* Derecho a la Opacidad Vital */}
+                    <div className="p-4 bg-indigo-950/20 border border-indigo-900/40 rounded-2xl space-y-2">
+                      <div className="font-bold text-xs text-indigo-400 flex items-center gap-1.5">
+                        <Eye className="w-4 h-4 text-indigo-400" />
+                        Derecho a la Opacidad Vital (Capítulo 6)
+                      </div>
+                      <p className="text-[11px] text-slate-400 leading-relaxed">
+                        La Maxocracia reserva automáticamente entre un <strong>10% y un 20% de tu tiempo discrecional semanal como sagrado y opaco</strong>. Este tiempo no está sujeto a auditoría por oráculos ni familiares. Tu perfil nunca intentará fiscalizar ni pedir reportes de estas horas para garantizar tu privacidad profunda y proteger la convivencia del taylorismo coercitivo.
+                      </p>
+                    </div>
+
                     <Button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold rounded-xl shadow-lg">
                       Guardar Cambios de Perfil
                     </Button>

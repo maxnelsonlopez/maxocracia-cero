@@ -271,4 +271,4 @@ Tareas planificadas:
 
 ---
 
-*"La verdad no necesita ser defendida. Solo necesita expandirse."* — Axioma 4, Maxocracia
+*"La verdad es el camino más corto de sucesos e información entre las personas, los hechos y la verdad misma."* — Axioma 4, Maxocracia

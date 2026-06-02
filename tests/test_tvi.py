@@ -27,7 +27,7 @@ def tvi_manager(app):
     # Initialize DB with schema
     with app.app_context():
         db = sqlite3.connect(":memory:")
-        with open("app/schema.sql") as f:
+        with open("app/schema.sql", encoding="utf-8") as f:
             db.executescript(f.read())
         # We need to use a persistent DB for the manager in tests if not using the app's db connection handling
         # But TVIManager creates its own connection.
@@ -44,7 +44,7 @@ def db_path(tmp_path):
     d = tmp_path / "test_tvi.db"
     # Init schema
     conn = sqlite3.connect(str(d))
-    with open("app/schema.sql") as f:
+    with open("app/schema.sql", encoding="utf-8") as f:
         conn.executescript(f.read())
     # Create a user
     conn.execute(

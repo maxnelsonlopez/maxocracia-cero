@@ -530,7 +530,7 @@ function CoherenceCrimeBanner({ crimes }: { crimes: UrgentNeed[] }) {
               ⚠️ Crimen de Coherencia Detectado
             </h3>
             <p className="text-[10px] text-rose-400/70">
-              La comunidad tiene la obligación ética de actuar (Axioma T7)
+              La comunidad tiene la obligación ética de actuar (Axioma T10: Responsabilidad Temporal Colectiva)
             </p>
           </div>
         </div>

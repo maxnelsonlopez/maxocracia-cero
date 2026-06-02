@@ -122,6 +122,9 @@ export default function VHVForm({ onCalculate, initialData }: VHVFormProps) {
             <span className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-sm">V</span>
             Costo de Vida Afectada
           </h3>
+          <p className="text-xs text-slate-400 mb-4 max-w-2xl leading-relaxed ml-1">
+            Mide el impacto en seres sintientes. El <strong>Factor de Sufrimiento</strong> es el interruptor ético más potente: si hay crueldad o explotación, este factor escala y encarece el precio en Maxos de forma exponencial.
+          </p>
           <div className={inputGroupClass}>
             <Input
               type="number"
@@ -172,6 +175,9 @@ export default function VHVForm({ onCalculate, initialData }: VHVFormProps) {
             <span className="w-8 h-8 rounded-full bg-amber-600/20 flex items-center justify-center text-sm">R</span>
             Recursos Naturales
           </h3>
+          <p className="text-xs text-slate-400 mb-4 max-w-2xl leading-relaxed ml-1">
+            Registra los materiales físicos consumidos. El <strong>Factor de Rareza Geológica (FRG)</strong> pondera la escasez física del recurso en la Tierra, mientras que la <strong>Criticidad Sistémica (CS)</strong> pondera si el uso es frívolo o esencial (ej: litio en juguetes vs. en desfibriladores).
+          </p>
           <div className={inputGroupClass}>
             <Input
               type="number"
@@ -205,10 +211,10 @@ export default function VHVForm({ onCalculate, initialData }: VHVFormProps) {
               value={formData.r_land_hectares}
               onChange={handleChange}
             />
-            <Input
+             <Input
               type="number"
               step="0.1"
-              label="Factor FRG"
+              label="Rareza Geológica (FRG)"
               name="r_frg_factor"
               value={formData.r_frg_factor}
               onChange={handleChange}
@@ -216,7 +222,7 @@ export default function VHVForm({ onCalculate, initialData }: VHVFormProps) {
             <Input
               type="number"
               step="0.1"
-              label="Factor CS"
+              label="Criticidad Sistémica (CS)"
               name="r_cs_factor"
               value={formData.r_cs_factor}
               onChange={handleChange}

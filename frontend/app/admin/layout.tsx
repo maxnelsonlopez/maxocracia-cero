@@ -15,12 +15,14 @@ import {
     FileBarChart,
     GitMerge,
     ShieldAlert,
+    Heart,
 } from "lucide-react";
 import { apiFetch } from "../lib/api";
 
 const sidebarLinks = [
     { href: "/admin/dashboard", label: "Vista General", icon: LayoutDashboard },
     { href: "/admin/sdv", label: "Panel SDV", icon: Activity },
+    { href: "/admin/participants", label: "Participantes Red", icon: Heart },
     { href: "/admin/matching", label: "Motor de Matching", icon: GitMerge, alertKey: "matching" },
     { href: "/admin/network", label: "Red de Intercambio", icon: Network },
     { href: "/admin/reports", label: "Informes e Impacto", icon: FileBarChart },

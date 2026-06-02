@@ -119,7 +119,7 @@ export function Footer() {
         {/* Quote */}
         <div className="mt-8 text-center">
           <p className="text-slate-600 text-sm italic">
-            &ldquo;La verdad no necesita ser defendida. Solo necesita expandirse.&rdquo;
+            "La verdad es el camino más corto de sucesos e información entre las personas, los hechos y la verdad misma."
           </p>
           <p className="text-slate-700 text-xs mt-1">— Axioma 4, Maxocracia</p>
         </div>

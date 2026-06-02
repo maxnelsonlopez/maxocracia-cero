@@ -101,7 +101,7 @@ Este proyecto ha sido desarrollado con la colaboración de múltiples oráculos 
 
 ---
 
-**"La verdad no necesita ser defendida. Solo necesita expandirse."**
+**"La verdad es el camino más corto de sucesos e información entre las personas, los hechos y la verdad misma."**
 
 — Axioma 4, Maxocracia
 

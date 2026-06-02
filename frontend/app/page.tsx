@@ -14,6 +14,7 @@
 
 import { Metadata } from "next";
 import { HeroSection } from "./sections/HeroSection";
+import { ManifestoSection } from "./sections/ManifestoSection";
 import { VHVPreview } from "./sections/VHVPreview";
 import { FeaturesGrid } from "./sections/FeaturesGrid";
 import { StatsSection } from "./sections/StatsSection";
@@ -34,6 +35,7 @@ export default function HomePage() {
       </div>
 
       <HeroSection />
+      <ManifestoSection />
       <VHVPreview />
       <FeaturesGrid />
       <StatsSection />

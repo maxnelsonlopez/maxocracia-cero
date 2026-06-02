@@ -237,6 +237,37 @@ CREATE TABLE IF NOT EXISTS participants (
   status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'paused'))
 );
 
+-- Tabla para ofertas adicionales de los participantes
+CREATE TABLE IF NOT EXISTS participant_offers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  participant_id INTEGER NOT NULL,
+  description TEXT NOT NULL,
+  categories TEXT NOT NULL,          -- Array JSON de categorías (ej: ["habilidad", "tiempo"])
+  human_dimensions TEXT,            -- Array JSON de dimensiones humanas del SDV
+  status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'paused')),
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE CASCADE
+);
+
+-- Tabla para necesidades adicionales de los participantes
+CREATE TABLE IF NOT EXISTS participant_needs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  participant_id INTEGER NOT NULL,
+  description TEXT NOT NULL,
+  categories TEXT NOT NULL,          -- Array JSON de categorías
+  urgency TEXT CHECK(urgency IN ('Alta', 'Media', 'Baja')),
+  human_dimensions TEXT,            -- Array JSON de dimensiones humanas
+  status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'paused')),
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE CASCADE
+);
+
+-- Índices de rendimiento
+CREATE INDEX IF NOT EXISTS idx_participant_offers_pid ON participant_offers(participant_id);
+CREATE INDEX IF NOT EXISTS idx_participant_needs_pid ON participant_needs(participant_id);
+
 -- Follow-ups table (Formulario B - Reporte de Seguimiento)
 CREATE TABLE IF NOT EXISTS follow_ups (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

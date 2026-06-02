@@ -73,7 +73,7 @@ const principles = [
   {
     icon: Users,
     title: "No Explotación",
-    description: "Sin dark patterns. Cancelación libre. Honor system.",
+    description: "Sin coerción. La crueldad se encarece exponencialmente en el cálculo mediante el exponente de aversión al sufrimiento (γ > 1).",
   },
   {
     icon: Globe,

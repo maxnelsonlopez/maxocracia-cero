@@ -30,7 +30,7 @@ def client(app):
 def db_path(tmp_path):
     d = tmp_path / "test_tvi_vhv.db"
     conn = sqlite3.connect(str(d))
-    with open("app/schema.sql") as f:
+    with open("app/schema.sql", encoding="utf-8") as f:
         conn.executescript(f.read())
 
     # Create a user

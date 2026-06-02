@@ -26,7 +26,8 @@ import {
   Calculator,
   Sparkles,
   ArrowRight,
-  Loader2
+  Loader2,
+  Info
 } from "lucide-react";
 import { apiFetch, API_URL } from "../lib/api";
 
@@ -385,6 +386,11 @@ export default function UpgradePageClient() {
                 </div>
               </div>
             </div>
+
+            <p className="mt-4 text-xs text-slate-500 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-700/50 pt-4">
+              <Info className="w-3.5 h-3.5 inline mr-1 text-emerald-500" />
+              <strong>Justificación ética (Axioma T2):</strong> Si una hora de vida tiene el mismo valor existencial para todos, el costo monetario de contribuir debe ajustarse a la paridad adquisitiva de tu país. Así, la contribución representa la misma cantidad equivalente de tiempo de vida (TVI) trabajado, sin importar dónde residas.
+            </p>
           </div>
         </motion.div>
 

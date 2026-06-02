@@ -71,6 +71,8 @@ class UrgentNeed:
     latest_need_level: Optional[int]      # Del follow-up más reciente (1-5)
     is_coherence_crime: bool              # True si need_level == 5
     top_matches: List[MatchResult] = field(default_factory=list)
+    phone_whatsapp: Optional[str] = None
+    telegram: Optional[str] = None
 
 
 @dataclass
@@ -218,12 +220,53 @@ class MatchingEngine:
 
         seeker = dict(zip([d[0] for d in cursor.description], row))
         need_cats = self._parse_json(seeker.get("need_categories"))
-        urgency_w = URGENCY_WEIGHTS.get(seeker.get("need_urgency", "Baja"), 0.2)
+        urgency_val = seeker.get("need_urgency", "Baja")
+
+        # Cargar necesidades secundarias activas del buscador
+        cursor.execute(
+            "SELECT categories, urgency FROM participant_needs WHERE participant_id = ? AND status = 'active'",
+            (seeker_id,),
+        )
+        seeker_sec_needs = cursor.fetchall()
+        for sec_row in seeker_sec_needs:
+            sec_cats = self._parse_json(sec_row[0])
+            need_cats.extend(sec_cats)
+            sec_urgency = sec_row[1] or "Baja"
+            if URGENCY_WEIGHTS.get(sec_urgency, 0.2) > URGENCY_WEIGHTS.get(urgency_val, 0.2):
+                urgency_val = sec_urgency
+
+        # Deduplicar
+        seen = set()
+        need_cats = [x for x in need_cats if not (x in seen or seen.add(x))]
+        urgency_w = URGENCY_WEIGHTS.get(urgency_val, 0.2)
 
         if not need_cats:
             return []
 
         recent_partners = self._get_recent_exchange_partners(seeker_id)
+
+        # Cargar todas las ofertas secundarias activas en la comunidad
+        cursor.execute(
+            """
+            SELECT o.participant_id, o.description, o.categories, o.human_dimensions
+            FROM participant_offers o
+            JOIN participants p ON o.participant_id = p.id
+            WHERE o.status = 'active' AND p.status = 'active'
+            """
+        )
+        secondary_offers = {}
+        for r in cursor.fetchall():
+            pid = r[0]
+            offer_desc = r[1]
+            offer_cats = self._parse_json(r[2])
+            offer_dims = self._parse_json(r[3])
+            if pid not in secondary_offers:
+                secondary_offers[pid] = []
+            secondary_offers[pid].append({
+                "description": offer_desc,
+                "categories": offer_cats,
+                "human_dimensions": offer_dims
+            })
 
         # Candidatos: todos los activos excepto el propio buscador
         cursor.execute(
@@ -247,6 +290,25 @@ class MatchingEngine:
                 continue
 
             offer_cats = self._parse_json(cand.get("offer_categories"))
+            offer_desc = cand.get("offer_description", "")
+            offer_dims = self._parse_json(cand.get("offer_human_dimensions"))
+
+            # Combinar con ofertas secundarias
+            cand_sec_offers = secondary_offers.get(cand["id"], [])
+            for sec_off in cand_sec_offers:
+                offer_cats.extend(sec_off["categories"])
+                offer_dims.extend(sec_off["human_dimensions"])
+                if sec_off["description"]:
+                    if offer_desc:
+                        offer_desc += " | " + sec_off["description"]
+                    else:
+                        offer_desc = sec_off["description"]
+
+            # Deduplicar
+            seen_cats = set()
+            offer_cats = [x for x in offer_cats if not (x in seen_cats or seen_cats.add(x))]
+            seen_dims = set()
+            offer_dims = [x for x in offer_dims if not (x in seen_dims or seen_dims.add(x))]
 
             if not offer_cats:
                 continue
@@ -283,10 +345,8 @@ class MatchingEngine:
                     offerer_phone_whatsapp=cand.get("phone_whatsapp"),
                     offerer_telegram=cand.get("telegram_handle"),
                     matched_categories=matched,
-                    offerer_description=cand.get("offer_description", ""),
-                    offerer_dimensions=self._parse_json(
-                        cand.get("offer_human_dimensions")
-                    ),
+                    offerer_description=offer_desc,
+                    offerer_dimensions=offer_dims,
                     compatibility_score=round(score, 4),
                     urgency_weight=urgency_w,
                     same_city=same_city,
@@ -322,10 +382,48 @@ class MatchingEngine:
         offerer = dict(zip([d[0] for d in cursor.description], row))
         offer_cats = self._parse_json(offerer.get("offer_categories"))
 
+        # Cargar ofertas secundarias del oferente
+        cursor.execute(
+            "SELECT categories FROM participant_offers WHERE participant_id = ? AND status = 'active'",
+            (offerer_id,),
+        )
+        offerer_sec_offers = cursor.fetchall()
+        for sec_row in offerer_sec_offers:
+            offer_cats.extend(self._parse_json(sec_row[0]))
+
+        # Deduplicar
+        seen = set()
+        offer_cats = [x for x in offer_cats if not (x in seen or seen.add(x))]
+
         if not offer_cats:
             return []
 
         recent_partners = self._get_recent_exchange_partners(offerer_id)
+
+        # Cargar todas las necesidades secundarias activas en la comunidad
+        cursor.execute(
+            """
+            SELECT n.participant_id, n.description, n.categories, n.human_dimensions, n.urgency
+            FROM participant_needs n
+            JOIN participants p ON n.participant_id = p.id
+            WHERE n.status = 'active' AND p.status = 'active'
+            """
+        )
+        secondary_needs = {}
+        for r in cursor.fetchall():
+            pid = r[0]
+            need_desc = r[1]
+            need_cats = self._parse_json(r[2])
+            need_dims = self._parse_json(r[3])
+            need_urgency = r[4] or "Media"
+            if pid not in secondary_needs:
+                secondary_needs[pid] = []
+            secondary_needs[pid].append({
+                "description": need_desc,
+                "categories": need_cats,
+                "human_dimensions": need_dims,
+                "urgency": need_urgency
+            })
 
         # Candidatos: todos los activos excepto el propio oferente
         cursor.execute(
@@ -348,6 +446,28 @@ class MatchingEngine:
                 continue
 
             need_cats = self._parse_json(cand.get("need_categories"))
+            need_desc = cand.get("need_description", "")
+            need_dims = self._parse_json(cand.get("need_human_dimensions"))
+            urgency_val = cand.get("need_urgency", "Baja")
+
+            # Combinar con necesidades secundarias
+            cand_sec_needs = secondary_needs.get(cand["id"], [])
+            for sec_need in cand_sec_needs:
+                need_cats.extend(sec_need["categories"])
+                need_dims.extend(sec_need["human_dimensions"])
+                if sec_need["description"]:
+                    if need_desc:
+                        need_desc += " | " + sec_need["description"]
+                    else:
+                        need_desc = sec_need["description"]
+                if URGENCY_WEIGHTS.get(sec_need["urgency"], 0.2) > URGENCY_WEIGHTS.get(urgency_val, 0.2):
+                    urgency_val = sec_need["urgency"]
+
+            # Deduplicar
+            seen_cats = set()
+            need_cats = [x for x in need_cats if not (x in seen_cats or seen_cats.add(x))]
+            seen_dims = set()
+            need_dims = [x for x in need_dims if not (x in seen_dims or seen_dims.add(x))]
 
             if not need_cats:
                 continue
@@ -357,7 +477,7 @@ class MatchingEngine:
                 continue
 
             overlap = len(matched) / max(len(need_cats), 1)
-            urgency_w = URGENCY_WEIGHTS.get(cand.get("need_urgency", "Baja"), 0.2)
+            urgency_w = URGENCY_WEIGHTS.get(urgency_val, 0.2)
 
             offerer_neighborhood = offerer.get("neighborhood", "").lower().strip()
             cand_neighborhood = (cand.get("neighborhood") or "").lower().strip()
@@ -384,10 +504,8 @@ class MatchingEngine:
                     offerer_phone_whatsapp=cand.get("phone_whatsapp"),
                     offerer_telegram=cand.get("telegram_handle"),
                     matched_categories=matched,
-                    offerer_description=cand.get("need_description", ""),
-                    offerer_dimensions=self._parse_json(
-                        cand.get("need_human_dimensions")
-                    ),
+                    offerer_description=need_desc,
+                    offerer_dimensions=need_dims,
                     compatibility_score=round(score, 4),
                     urgency_weight=urgency_w,
                     same_city=same_city,
@@ -405,7 +523,7 @@ class MatchingEngine:
     ) -> List[UrgentNeed]:
         """
         Retorna todos los participantes con:
-          - need_urgency = 'Alta'
+          - need_urgency = 'Alta' (sea primaria o secundaria)
           - Sin intercambio reciente (> days_threshold días)
 
         Para cada uno, incluye sus mejores matches y detecta
@@ -414,10 +532,13 @@ class MatchingEngine:
         Orden: need_level crítico primero, luego por días sin intercambio.
         """
         cursor = self.conn.cursor()
+        
+        # 1. Recuperar necesidades urgentes primarias
         cursor.execute(
             """
             SELECT id, name, city, neighborhood, need_description,
-                   need_urgency, need_categories, need_human_dimensions
+                   need_urgency, need_categories, need_human_dimensions,
+                   phone_whatsapp, telegram_handle
             FROM participants
             WHERE status = 'active'
               AND need_urgency = 'Alta'
@@ -456,6 +577,58 @@ class MatchingEngine:
                     latest_need_level=latest_level,
                     is_coherence_crime=is_crime,
                     top_matches=matches,
+                    phone_whatsapp=p.get("phone_whatsapp"),
+                    telegram=p.get("telegram_handle"),
+                )
+            )
+
+        # 2. Recuperar necesidades urgentes secundarias (de participant_needs)
+        cursor.execute(
+            """
+            SELECT p.id as participant_id, p.name, p.city, p.neighborhood, p.phone_whatsapp, p.telegram_handle,
+                   n.description as need_description, n.urgency as need_urgency,
+                   n.categories as need_categories, n.human_dimensions as need_human_dimensions
+            FROM participant_needs n
+            JOIN participants p ON n.participant_id = p.id
+            WHERE p.status = 'active'
+              AND n.status = 'active'
+              AND n.urgency = 'Alta'
+            """
+        )
+        for row in cursor.fetchall():
+            p = dict(zip([d[0] for d in cursor.description], row))
+            pid = p["participant_id"]
+            days_without = self._days_since_last_exchange(pid)
+
+            if days_without < days_threshold:
+                continue
+
+            latest_level = self._get_latest_need_level(pid)
+
+            # Skip resolved needs
+            if latest_level == 1:
+                continue
+
+            is_crime = latest_level is not None and latest_level >= CRITICAL_NEED_LEVEL
+
+            matches = self.find_matches(pid, limit=top_matches, exclude_recent=False)
+
+            urgent_needs.append(
+                UrgentNeed(
+                    participant_id=pid,
+                    participant_name=p["name"],
+                    city=p["city"],
+                    neighborhood=p["neighborhood"],
+                    need_description=p.get("need_description", ""),
+                    need_urgency=p["need_urgency"],
+                    need_categories=self._parse_json(p.get("need_categories")),
+                    need_dimensions=self._parse_json(p.get("need_human_dimensions")),
+                    days_without_exchange=days_without,
+                    latest_need_level=latest_level,
+                    is_coherence_crime=is_crime,
+                    top_matches=matches,
+                    phone_whatsapp=p.get("phone_whatsapp"),
+                    telegram=p.get("telegram_handle"),
                 )
             )
 
@@ -475,9 +648,45 @@ class MatchingEngine:
         Un ratio < 0.5 es "critical", < 1.0 es "warning", >= 1.0 es "ok".
         """
         cursor = self.conn.cursor()
+
+        # Cargar dimensiones de ofertas secundarias agrupadas por participant_id
         cursor.execute(
             """
-            SELECT need_human_dimensions, offer_human_dimensions
+            SELECT o.participant_id, o.human_dimensions
+            FROM participant_offers o
+            JOIN participants p ON o.participant_id = p.id
+            WHERE o.status = 'active' AND p.status = 'active'
+            """
+        )
+        sec_offers_by_p = {}
+        for r in cursor.fetchall():
+            pid = r[0]
+            dims = self._parse_json(r[1])
+            if pid not in sec_offers_by_p:
+                sec_offers_by_p[pid] = []
+            sec_offers_by_p[pid].extend(dims)
+
+        # Cargar dimensiones de necesidades secundarias agrupadas por participant_id
+        cursor.execute(
+            """
+            SELECT n.participant_id, n.human_dimensions
+            FROM participant_needs n
+            JOIN participants p ON n.participant_id = p.id
+            WHERE n.status = 'active' AND p.status = 'active'
+            """
+        )
+        sec_needs_by_p = {}
+        for r in cursor.fetchall():
+            pid = r[0]
+            dims = self._parse_json(r[1])
+            if pid not in sec_needs_by_p:
+                sec_needs_by_p[pid] = []
+            sec_needs_by_p[pid].extend(dims)
+
+        # Cargar dimensiones primarias
+        cursor.execute(
+            """
+            SELECT id, need_human_dimensions, offer_human_dimensions
             FROM participants
             WHERE status = 'active'
             """
@@ -487,11 +696,19 @@ class MatchingEngine:
         offer_counts: Dict[str, int] = {}
 
         for row in cursor.fetchall():
-            needs = self._parse_json(row[0])
-            offers = self._parse_json(row[1])
-            for dim in needs:
+            pid, need_raw, offer_raw = row
+            # Fusionar primaria + secundarias
+            p_needs = self._parse_json(need_raw)
+            s_needs = sec_needs_by_p.get(pid, [])
+            total_needs = set(p_needs + s_needs)
+
+            p_offers = self._parse_json(offer_raw)
+            s_offers = sec_offers_by_p.get(pid, [])
+            total_offers = set(p_offers + s_offers)
+
+            for dim in total_needs:
                 need_counts[dim] = need_counts.get(dim, 0) + 1
-            for dim in offers:
+            for dim in total_offers:
                 offer_counts[dim] = offer_counts.get(dim, 0) + 1
 
         # Always audit all 8 standard dimensions of the SDV

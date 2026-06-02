@@ -239,6 +239,376 @@ class FormsManager:
 
         return participant
 
+    def update_participant(self, participant_id: int, data: Dict) -> Tuple[bool, str]:
+        """
+        Update an existing participant.
+
+        Args:
+            participant_id: ID of the participant to update
+            data: Dictionary with fields to update
+
+        Returns:
+            Tuple of (success, message)
+        """
+        allowed_fields = [
+            "name",
+            "email",
+            "referred_by",
+            "phone_call",
+            "phone_whatsapp",
+            "telegram_handle",
+            "city",
+            "neighborhood",
+            "personal_values",
+            "offer_categories",
+            "offer_description",
+            "offer_human_dimensions",
+            "need_categories",
+            "need_description",
+            "need_urgency",
+            "need_human_dimensions",
+            "consent_given",
+            "status",
+        ]
+
+        # Filter update data to allowed fields
+        update_data = {k: v for k, v in data.items() if k in allowed_fields}
+        if not update_data:
+            return False, "No se proporcionaron campos válidos para actualizar"
+
+        # Validate urgency
+        if "need_urgency" in update_data and update_data["need_urgency"] not in ["Alta", "Media", "Baja"]:
+            return False, "Urgencia debe ser Alta, Media o Baja"
+
+        # Validate status
+        if "status" in update_data and update_data["status"] not in ["active", "inactive", "paused"]:
+            return False, "Estado debe ser active, inactive o paused"
+
+        # Serialize JSON fields
+        json_fields = [
+            "offer_categories",
+            "offer_human_dimensions",
+            "need_categories",
+            "need_human_dimensions",
+        ]
+        for field in json_fields:
+            if field in update_data:
+                update_data[field] = self._safe_json_dump(update_data[field])
+
+        try:
+            cursor = self.conn.cursor()
+            
+            # Check if participant exists
+            cursor.execute("SELECT id FROM participants WHERE id = ?", (participant_id,))
+            if not cursor.fetchone():
+                return False, "Participante no encontrado"
+
+            # Construct query dynamically
+            set_clause = ", ".join([f"{field} = ?" for field in update_data.keys()])
+            query = f"UPDATE participants SET {set_clause} WHERE id = ?"
+            params = list(update_data.values()) + [participant_id]
+
+            cursor.execute(query, params)
+            self.conn.commit()
+
+            return True, "Participante actualizado exitosamente"
+
+        except sqlite3.IntegrityError as e:
+            if "UNIQUE constraint failed: participants.email" in str(e):
+                return False, "Este email ya está registrado"
+            return False, f"Error de integridad: {e}"
+        except sqlite3.Error as e:
+            return False, f"Error de base de datos: {e}"
+
+    def delete_participant(self, participant_id: int) -> Tuple[bool, str]:
+        """
+        Delete a participant from the database.
+
+        Args:
+            participant_id: ID of the participant to delete
+
+        Returns:
+            Tuple of (success, message)
+        """
+        try:
+            cursor = self.conn.cursor()
+
+            # Check if participant exists
+            cursor.execute("SELECT id FROM participants WHERE id = ?", (participant_id,))
+            if not cursor.fetchone():
+                return False, "Participante no encontrado"
+
+            # Set giver_id and receiver_id to NULL in interchanges to avoid breaking references
+            cursor.execute("UPDATE interchange SET giver_id = NULL WHERE giver_id = ?", (participant_id,))
+            cursor.execute("UPDATE interchange SET receiver_id = NULL WHERE receiver_id = ?", (participant_id,))
+
+            # Delete participant (follow_ups will cascade delete if enabled, but let's make sure by deleting manually just in case)
+            cursor.execute("DELETE FROM follow_ups WHERE participant_id = ?", (participant_id,))
+            cursor.execute("DELETE FROM participant_offers WHERE participant_id = ?", (participant_id,))
+            cursor.execute("DELETE FROM participant_needs WHERE participant_id = ?", (participant_id,))
+            cursor.execute("DELETE FROM participants WHERE id = ?", (participant_id,))
+
+            self.conn.commit()
+            return True, "Participante eliminado exitosamente"
+        except sqlite3.Error as e:
+            return False, f"Error de base de datos: {e}"
+
+    # ==================== SEGUNDARIOS: MULTI-OFERTAS Y MULTI-NECESIDADES ====================
+
+    def get_participant_offers(self, participant_id: int) -> List[Dict]:
+        """Obtiene todas las ofertas secundarias de un participante."""
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "SELECT * FROM participant_offers WHERE participant_id = ? ORDER BY created_at DESC",
+            (participant_id,),
+        )
+        offers = []
+        for row in cursor.fetchall():
+            offer = dict(zip([d[0] for d in cursor.description], row))
+            if offer.get("categories"):
+                offer["categories"] = json.loads(offer["categories"])
+            if offer.get("human_dimensions"):
+                offer["human_dimensions"] = json.loads(offer["human_dimensions"])
+            offers.append(offer)
+        return offers
+
+    def add_participant_offer(self, participant_id: int, data: Dict) -> Tuple[bool, str, Optional[int]]:
+        """Agrega una oferta secundaria para un participante."""
+        if not data.get("description"):
+            return False, "Descripción requerida para la oferta", None
+        
+        categories = data.get("categories", [])
+        if not isinstance(categories, list) or not categories:
+            return False, "Debe seleccionar al menos una categoría válida", None
+            
+        # Validar categorías
+        for cat in categories:
+            if cat not in self.CATEGORIES:
+                return False, f"Categoría inválida: {cat}", None
+
+        # Validar dimensiones si se proporcionan
+        human_dims = data.get("human_dimensions", [])
+        if human_dims:
+            for dim in human_dims:
+                if dim not in self.HUMAN_DIMENSIONS:
+                    return False, f"Dimensión humana inválida: {dim}", None
+
+        try:
+            cursor = self.conn.cursor()
+            # Verificar si el participante existe
+            cursor.execute("SELECT id FROM participants WHERE id = ?", (participant_id,))
+            if not cursor.fetchone():
+                return False, "Participante no encontrado", None
+
+            cursor.execute(
+                """
+                INSERT INTO participant_offers (
+                    participant_id, description, categories, human_dimensions, status
+                ) VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    participant_id,
+                    data["description"],
+                    self._safe_json_dump(categories),
+                    self._safe_json_dump(human_dims),
+                    data.get("status", "active"),
+                ),
+            )
+            self.conn.commit()
+            offer_id = cursor.lastrowid
+            return True, "Oferta agregada exitosamente", offer_id
+        except sqlite3.Error as e:
+            return False, f"Error de base de datos: {e}", None
+
+    def update_participant_offer(self, offer_id: int, data: Dict) -> Tuple[bool, str]:
+        """Actualiza una oferta secundaria."""
+        allowed_fields = ["description", "categories", "human_dimensions", "status"]
+        update_data = {k: v for k, v in data.items() if k in allowed_fields}
+        if not update_data:
+            return False, "No se proporcionaron campos para actualizar"
+
+        if "description" in update_data and not update_data["description"]:
+            return False, "La descripción no puede estar vacía"
+
+        if "status" in update_data and update_data["status"] not in ["active", "inactive", "paused"]:
+            return False, "Estado inválido"
+
+        if "categories" in update_data:
+            cats = update_data["categories"]
+            if not isinstance(cats, list) or not cats:
+                return False, "Debe seleccionar al menos una categoría válida"
+            for cat in cats:
+                if cat not in self.CATEGORIES:
+                    return False, f"Categoría inválida: {cat}"
+            update_data["categories"] = self._safe_json_dump(cats)
+
+        if "human_dimensions" in update_data:
+            dims = update_data["human_dimensions"]
+            for dim in dims:
+                if dim not in self.HUMAN_DIMENSIONS:
+                    return False, f"Dimensión humana inválida: {dim}"
+            update_data["human_dimensions"] = self._safe_json_dump(dims)
+
+        try:
+            cursor = self.conn.cursor()
+            # Verificar existencia
+            cursor.execute("SELECT id FROM participant_offers WHERE id = ?", (offer_id,))
+            if not cursor.fetchone():
+                return False, "Oferta no encontrada"
+
+            set_clause = ", ".join([f"{field} = ?" for field in update_data.keys()])
+            query = f"UPDATE participant_offers SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
+            params = list(update_data.values()) + [offer_id]
+
+            cursor.execute(query, params)
+            self.conn.commit()
+            return True, "Oferta actualizada exitosamente"
+        except sqlite3.Error as e:
+            return False, f"Error de base de datos: {e}"
+
+    def delete_participant_offer(self, offer_id: int) -> Tuple[bool, str]:
+        """Elimina una oferta secundaria."""
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT id FROM participant_offers WHERE id = ?", (offer_id,))
+            if not cursor.fetchone():
+                return False, "Oferta no encontrada"
+
+            cursor.execute("DELETE FROM participant_offers WHERE id = ?", (offer_id,))
+            self.conn.commit()
+            return True, "Oferta eliminada exitosamente"
+        except sqlite3.Error as e:
+            return False, f"Error de base de datos: {e}"
+
+    def get_participant_needs(self, participant_id: int) -> List[Dict]:
+        """Obtiene todas las necesidades secundarias de un participante."""
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "SELECT * FROM participant_needs WHERE participant_id = ? ORDER BY created_at DESC",
+            (participant_id,),
+        )
+        needs = []
+        for row in cursor.fetchall():
+            need = dict(zip([d[0] for d in cursor.description], row))
+            if need.get("categories"):
+                need["categories"] = json.loads(need["categories"])
+            if need.get("human_dimensions"):
+                need["human_dimensions"] = json.loads(need["human_dimensions"])
+            needs.append(need)
+        return needs
+
+    def add_participant_need(self, participant_id: int, data: Dict) -> Tuple[bool, str, Optional[int]]:
+        """Agrega una necesidad secundaria para un participante."""
+        if not data.get("description"):
+            return False, "Descripción requerida para la necesidad", None
+        
+        categories = data.get("categories", [])
+        if not isinstance(categories, list) or not categories:
+            return False, "Debe seleccionar al menos una categoría válida", None
+            
+        for cat in categories:
+            if cat not in self.CATEGORIES:
+                return False, f"Categoría inválida: {cat}", None
+
+        urgency = data.get("urgency", "Media")
+        if urgency not in ["Alta", "Media", "Baja"]:
+            return False, "Urgencia debe ser Alta, Media o Baja", None
+
+        human_dims = data.get("human_dimensions", [])
+        if human_dims:
+            for dim in human_dims:
+                if dim not in self.HUMAN_DIMENSIONS:
+                    return False, f"Dimensión humana inválida: {dim}", None
+
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT id FROM participants WHERE id = ?", (participant_id,))
+            if not cursor.fetchone():
+                return False, "Participante no encontrado", None
+
+            cursor.execute(
+                """
+                INSERT INTO participant_needs (
+                    participant_id, description, categories, urgency, human_dimensions, status
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    participant_id,
+                    data["description"],
+                    self._safe_json_dump(categories),
+                    urgency,
+                    self._safe_json_dump(human_dims),
+                    data.get("status", "active"),
+                ),
+            )
+            self.conn.commit()
+            need_id = cursor.lastrowid
+            return True, "Necesidad agregada exitosamente", need_id
+        except sqlite3.Error as e:
+            return False, f"Error de base de datos: {e}", None
+
+    def update_participant_need(self, need_id: int, data: Dict) -> Tuple[bool, str]:
+        """Actualiza una necesidad secundaria."""
+        allowed_fields = ["description", "categories", "urgency", "human_dimensions", "status"]
+        update_data = {k: v for k, v in data.items() if k in allowed_fields}
+        if not update_data:
+            return False, "No se proporcionaron campos para actualizar"
+
+        if "description" in update_data and not update_data["description"]:
+            return False, "La descripción no puede estar vacía"
+
+        if "urgency" in update_data and update_data["urgency"] not in ["Alta", "Media", "Baja"]:
+            return False, "Urgencia inválida"
+
+        if "status" in update_data and update_data["status"] not in ["active", "inactive", "paused"]:
+            return False, "Estado inválido"
+
+        if "categories" in update_data:
+            cats = update_data["categories"]
+            if not isinstance(cats, list) or not cats:
+                return False, "Debe seleccionar al menos una categoría válida"
+            for cat in cats:
+                if cat not in self.CATEGORIES:
+                    return False, f"Categoría inválida: {cat}"
+            update_data["categories"] = self._safe_json_dump(cats)
+
+        if "human_dimensions" in update_data:
+            dims = update_data["human_dimensions"]
+            for dim in dims:
+                if dim not in self.HUMAN_DIMENSIONS:
+                    return False, f"Dimensión humana inválida: {dim}"
+            update_data["human_dimensions"] = self._safe_json_dump(dims)
+
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT id FROM participant_needs WHERE id = ?", (need_id,))
+            if not cursor.fetchone():
+                return False, "Necesidad no encontrada"
+
+            set_clause = ", ".join([f"{field} = ?" for field in update_data.keys()])
+            query = f"UPDATE participant_needs SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
+            params = list(update_data.values()) + [need_id]
+
+            cursor.execute(query, params)
+            self.conn.commit()
+            return True, "Necesidad actualizada exitosamente"
+        except sqlite3.Error as e:
+            return False, f"Error de base de datos: {e}"
+
+    def delete_participant_need(self, need_id: int) -> Tuple[bool, str]:
+        """Elimina una necesidad secundaria."""
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT id FROM participant_needs WHERE id = ?", (need_id,))
+            if not cursor.fetchone():
+                return False, "Necesidad no encontrada"
+
+            cursor.execute("DELETE FROM participant_needs WHERE id = ?", (need_id,))
+            self.conn.commit()
+            return True, "Necesidad eliminada exitosamente"
+        except sqlite3.Error as e:
+            return False, f"Error de base de datos: {e}"
+
     # ==================== FORMULARIO A (uses existing interchange table) ====================
 
     def register_exchange(self, data: Dict) -> Tuple[bool, str, Optional[int]]:
@@ -878,3 +1248,53 @@ class FormsManager:
             "avg_days_to_resolve": avg_days_to_resolve,
             "success_rate_by_category": success_by_category,
         }
+
+
+def init_multi_offers_needs_tables(app):
+    """
+    Initializes multi offers and needs tables in SQLite.
+    Called on app startup.
+    """
+    db_path = app.config["DATABASE"]
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    try:
+        # Create participant_offers table
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS participant_offers (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          participant_id INTEGER NOT NULL,
+          description TEXT NOT NULL,
+          categories TEXT NOT NULL,
+          human_dimensions TEXT,
+          status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'paused')),
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE CASCADE
+        );
+        """)
+        # Create participant_needs table
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS participant_needs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          participant_id INTEGER NOT NULL,
+          description TEXT NOT NULL,
+          categories TEXT NOT NULL,
+          urgency TEXT CHECK(urgency IN ('Alta', 'Media', 'Baja')),
+          human_dimensions TEXT,
+          status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'paused')),
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE CASCADE
+        );
+        """)
+        # Create indexes
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_participant_offers_pid ON participant_offers(participant_id);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_participant_needs_pid ON participant_needs(participant_id);")
+        conn.commit()
+        print("Initialized participant_offers and participant_needs tables if not existed.")
+    except sqlite3.Error as e:
+        print(f"Error initializing multi offers/needs tables: {e}")
+    finally:
+        conn.close()
+

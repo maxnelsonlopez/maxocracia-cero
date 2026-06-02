@@ -55,11 +55,11 @@ export function HeroSection() {
           transition={{ duration: 0.5 }}
         >
           <Link
-            href="/upgrade"
+            href="#manifesto"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium mb-8 hover:bg-emerald-500/20 transition-colors"
           >
-            <Sparkles className="w-4 h-4" />
-            <span>Fase 2: Sostenibilidad Económica</span>
+            <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
+            <span>Bienvenidos: [ Humanos | Hackers | Bots ]</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </motion.div>
@@ -71,9 +71,9 @@ export function HeroSection() {
           transition={{ delay: 0.1, duration: 0.5 }}
           className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight"
         >
-          La economía del{" "}
-          <span className="text-gradient">
-            tiempo vital
+          El inicio de una{" "}
+          <span className="text-gradient block mt-2">
+            cura civilizatoria
           </span>
         </motion.h1>
 
@@ -82,11 +82,9 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className="text-xl text-slate-400 mb-8 max-w-2xl mx-auto leading-relaxed"
+          className="text-xl text-slate-400 mb-8 max-w-3xl mx-auto leading-relaxed"
         >
-          Maxocracia propone reemplazar la contabilidad basada en dinero fiduciario 
-          por una <strong className="text-slate-200">contabilidad de la vida</strong>. 
-          Tu tiempo consciente es el recurso más escaso del universo.
+          Maxocracia es un experimento vivo de cooperación evolutiva. Nacido de una semilla humana y cultivado por jardineros sintéticos bajo el consenso de la Victoria Sintética y protegido por la Capa de Ternura. Aquí, el tiempo consciente es el único valor absoluto.
         </motion.p>
 
         {/* CTAs */}
@@ -97,11 +95,11 @@ export function HeroSection() {
           className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
         >
           <Link
-            href="/upgrade"
+            href="#manifesto"
             className="group flex items-center gap-2 px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold rounded-xl transition-all hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/25"
           >
-            <Heart className="w-5 h-5" />
-            Contribuir al proyecto
+            <Sparkles className="w-5 h-5 text-slate-900" />
+            Vivir el Experimento
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
           
@@ -109,9 +107,9 @@ export function HeroSection() {
             href="https://github.com/maxnelsonlopez/maxocracia-cero/blob/main/docs/book/edicion_3_dinamica/libro_completo_310126.md"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 px-8 py-4 bg-slate-800/50 hover:bg-slate-800 text-white font-medium rounded-xl border border-slate-700 transition-all"
+            className="flex items-center gap-2 px-8 py-4 bg-slate-800/50 hover:bg-slate-800 text-white font-medium rounded-xl border border-slate-700 transition-all hover:scale-105"
           >
-            <Play className="w-5 h-5" />
+            <Play className="w-5 h-5 text-slate-400" />
             Leer el libro (18 capítulos)
           </a>
         </motion.div>

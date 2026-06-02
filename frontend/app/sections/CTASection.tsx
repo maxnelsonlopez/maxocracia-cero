@@ -111,8 +111,7 @@ export function CTASection() {
           className="mt-16"
         >
           <blockquote className="text-2xl sm:text-3xl font-light text-slate-300 italic">
-            &quot;La verdad no necesita ser defendida. 
-            Solo necesita expandirse.&quot;
+            &quot;La verdad es el camino más corto de sucesos e información entre las personas, los hechos y la verdad misma.&quot;
           </blockquote>
           <cite className="text-slate-500 mt-4 block not-italic">
             — Axioma 4, Maxocracia

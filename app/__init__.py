@@ -55,6 +55,7 @@ def create_app(db_path=None):
     from .vhv_bp import vhv_bp
     from .micromax_bp import micromax_bp
     from .micromax import init_micromax_tables
+    from .forms_manager import init_multi_offers_needs_tables
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
@@ -73,6 +74,7 @@ def create_app(db_path=None):
     # Inicializar tablas específicas si no existen
     init_subscription_tables(app)
     init_micromax_tables(app)
+    init_multi_offers_needs_tables(app)
 
     # placeholder imports to ensure modules loaded
     # other optional blueprints can be imported here

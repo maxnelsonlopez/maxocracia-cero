@@ -18,7 +18,7 @@ def client():
     with app.test_client() as client:
         with app.app_context():
             db = get_db()
-            with open('app/schema.sql', 'r') as f:
+            with open('app/schema.sql', 'r', encoding='utf-8') as f:
                 db.executescript(f.read())
             
             # Crear usuarios de prueba

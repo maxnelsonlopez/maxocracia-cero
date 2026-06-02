@@ -22,7 +22,7 @@ def client():
         with app.app_context():
             # Initialize schema
             db = get_db()
-            with open('app/schema.sql', 'r') as f:
+            with open('app/schema.sql', 'r', encoding='utf-8') as f:
                 db.executescript(f.read())
             
             # Create a test user
