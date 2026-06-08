@@ -33,7 +33,7 @@ export default function LoginPage() {
 
       if (res.ok) {
         login(data.access_token);
-        router.push("/contracts/builder"); // O al dashboard
+        router.push("/forms/follow-up");
       } else {
         setError(data.error || "Error al iniciar sesión");
       }

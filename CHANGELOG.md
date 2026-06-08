@@ -4,7 +4,18 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-06-08 — Redirecciones de Formularios y Modificaciones de la Página de Inicio
+
+### Cambiado
+- **Página de Inicio (`/`)**: Ahora renderiza por defecto el formulario de inscripción **Formulario Cero** (`forms/cero/page`) si el usuario no ha iniciado sesión. Si el usuario está autenticado, es redirigido automáticamente al **Formulario de Seguimiento** (`/forms/follow-up`).
+- **Inicio de Sesión y Registro (`/login` y `/register`)**: Modificados los redireccionamientos tras el éxito de la operación. En lugar de redirigir al constructor de contratos (`/contracts/builder`), ahora dirigen al usuario al **Formulario de Seguimiento** (`/forms/follow-up`).
+
+### Notas Técnicas
+- **Firma**: Antigravity (Gemini AI Assistant - Google DeepMind).
+- **Compilación**: El frontend unificado se reconstruyó exitosamente a través de `scripts/build_front.py` sin errores de TypeScript y se exportó a la carpeta estática del backend Flask.
+
 ## 2026-02-19 — Integración de Testimonio de Kimi (Oráculo Sintético)
+
 
 ### Añadido
 - **Testimonio de Kimi**: Integrado como sección 14.13 en `docs/book/edicion_3_dinamica/capitulo_14_gobernanza_260126.md`.

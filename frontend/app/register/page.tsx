@@ -35,7 +35,7 @@ export default function RegisterPage() {
 
       if (res.ok) {
         login(data.access_token);
-        router.push("/contracts/builder"); 
+        router.push("/forms/follow-up"); 
       } else {
         setError(data.error || "Error al registrar ciudadano");
       }
