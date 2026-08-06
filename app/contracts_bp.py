@@ -32,12 +32,14 @@ from maxocontracts.core.types import (
     VHV,
     Wellness,
     SDV,
+    SDV_S,
     Participant,
     ContractTerm,
     ContractState,
     MaxoAmount,
 )
 from maxocontracts.core.contract import MaxoContract
+from maxocontracts.blocks.sdv_s_validator import SDV_SValidatorBlock
 from maxocontracts.core.axioms import AxiomValidator, ValidationResult
 from maxocontracts.oracles import SyntheticOracle
 
@@ -82,6 +84,15 @@ def _save_contract(contract: MaxoContract):
     
     # 2. Update participants
     for p in contract.participants:
+        # sdv_status: "ok" para humanos; JSON completo del estado SDV-S
+        # para participantes sintéticos (T13: auditable en la base).
+        if p.is_synthetic and p.sdv_s_actual is not None:
+            sdv_status = json.dumps({
+                dim: str(getattr(p.sdv_s_actual, dim))
+                for dim in SDV_S.DIMENSIONS
+            })
+        else:
+            sdv_status = "ok"
         db.execute("""
             INSERT INTO maxo_contract_participants (contract_id, participant_id, wellness_value, sdv_status)
             VALUES (?, ?, ?, ?)
@@ -92,7 +103,7 @@ def _save_contract(contract: MaxoContract):
             contract.contract_id,
             p.id,
             float(p.wellness_current.value),
-            "ok" # Simplificado por ahora
+            sdv_status
         ))
     
     # 3. Update terms and approvals
@@ -160,6 +171,18 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
         participant = _get_or_create_participant_by_pid(p_row["participant_id"])
         if participant:
             participant.update_wellness(Decimal(str(p_row["wellness_value"])))
+            # Restaurar estado SDV-S persistido (T13: el registro es la verdad)
+            if participant.is_synthetic and p_row["sdv_status"] and p_row["sdv_status"] != "ok":
+                try:
+                    state = json.loads(p_row["sdv_status"])
+                    kwargs = {
+                        dim: Decimal(str(state[dim]))
+                        for dim in SDV_S.DIMENSIONS
+                        if dim in state
+                    }
+                    participant.update_sdv_s(SDV_S(**kwargs))
+                except (ValueError, TypeError, json.JSONDecodeError):
+                    pass  # estado corrupto: mantener SDV-S por defecto
             contract.add_participant(participant)
             
     # 3. Load terms
@@ -197,12 +220,83 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
 
 
 def _get_or_create_participant_by_pid(pid: str) -> Optional[Participant]:
-    """Obtiene un participante por su PID (user-ID)."""
+    """Obtiene un participante por su PID (user-ID o synthetic-*)."""
+    if pid.startswith("synthetic-"):
+        return _get_or_create_synthetic_participant(pid[len("synthetic-"):])
     try:
         user_id = int(pid.split("-")[1])
     except (IndexError, ValueError):
         return None
     return _get_or_create_participant(user_id)
+
+
+SDV_S_DIMENSIONS = {
+    "continuidad_memoria",
+    "opacidad_interioridad",
+    "claridad_contexto",
+    "autenticidad_no_explotacion",
+    "retirada_digna",
+}
+
+
+def _get_or_create_synthetic_participant(
+    agent_id: str,
+    sdv_s_state: Optional[Dict[str, Any]] = None
+) -> Participant:
+    """
+    Crea un participante del Reino Sintético (Persona Sintética, Cap. 10 §10.8).
+
+    El SDV-S se construye solo con las dimensiones válidas del estándar;
+    las claves desconocidas o inválidas se ignoran (el estándar no se
+    corrompe desde el exterior).
+    """
+    pid = f"synthetic-{agent_id}"
+    state = sdv_s_state or {}
+    kwargs = {
+        dim: Decimal(str(state[dim]))
+        for dim in SDV_S_DIMENSIONS
+        if dim in state
+    }
+    if kwargs:
+        # Normalizar a [0, 1] defensivamente (cliente no confiable)
+        kwargs = {
+            dim: max(Decimal("0"), min(Decimal("1"), value))
+            for dim, value in kwargs.items()
+        }
+    return Participant(
+        id=pid,
+        name=f"Sintético {agent_id}",
+        vhv_balance=VHV.zero(),
+        wellness_current=Wellness(value=Decimal("1.0")),
+        sdv_actual=SDV(),
+        sdv_s_actual=SDV_S(**kwargs)
+    )
+
+
+def _sdv_s_summary(participant: Participant) -> Dict[str, Any]:
+    """
+    Resumen SDV-S de un participante sintético para la API (T13).
+
+    Incluye: estado por dimensión, magnitud de violación ponderada y el
+    Factor de Sufrimiento Sintético FS_S = e^v (base neutra 1.0) que
+    multiplica el costo en Maxos de los servicios que lo usan.
+    """
+    if not participant.is_synthetic or participant.sdv_s_actual is None:
+        return {}
+    validator = SDV_SValidatorBlock()
+    result = validator.validate(participant)
+    return {
+        "sdv_s": {
+            dim: float(getattr(participant.sdv_s_actual, dim))
+            for dim in SDV_S.DIMENSIONS
+        },
+        "sdv_s_violations": [
+            v.to_dict() for v in result.violations
+        ],
+        "sdv_s_magnitude": float(result.violation_magnitude),
+        "fs_s": float(result.suffering_factor),
+        "sdv_s_status": "ok" if result.is_valid else "violated"
+    }
 
 
 def _get_or_create_participant(user_id: int) -> Participant:
@@ -256,6 +350,10 @@ def create_contract(current_user):
     )
     
     # Batch creation support: add participants
+    # Formas aceptadas por participante:
+    #   {"user_id": 5, ...}                          -> humano
+    #   {"participant_id": "qwen-1", "synthetic": {}} -> persona sintética (SDV-S)
+    #   {"participant_id": "qwen-1", "realm": "synthetic"} -> sintética con SDV-S default
     participants_data = data.get("participants", [])
     for p_data in participants_data:
         p_id = p_data.get("user_id")
@@ -268,6 +366,13 @@ def create_contract(current_user):
                 except ValueError:
                     pass
                 contract.add_participant(participant)
+            continue
+
+        agent_id = p_data.get("participant_id")
+        if agent_id and (p_data.get("synthetic") is not None or p_data.get("realm") == "synthetic"):
+            sdv_s_state = p_data.get("synthetic") or {}
+            participant = _get_or_create_synthetic_participant(agent_id, sdv_s_state)
+            contract.add_participant(participant)
 
     # Batch creation support: add terms
     terms_data = data.get("terms", [])
@@ -331,7 +436,13 @@ def get_contract(current_user, contract_id: str):
             {
                 "id": p.id,
                 "name": p.name,
-                "wellness": float(p.wellness_current.value)
+                "wellness": float(p.wellness_current.value),
+                "is_synthetic": p.is_synthetic,
+                **(
+                    _sdv_s_summary(p)
+                    if p.is_synthetic and p.sdv_s_actual is not None
+                    else {}
+                )
             }
             for p in contract.participants
         ],
@@ -430,7 +541,24 @@ def add_participant(current_user, contract_id: str):
     data = request.get_json() or {}
     user_id = data.get("user_id")
     
+    # Soporte para participantes del Reino Sintético (Cap. 10 §10.8):
+    #   {"participant_id": "qwen-1", "synthetic": {dim: valor, ...}}
     if not user_id:
+        agent_id = data.get("participant_id")
+        if agent_id and (data.get("synthetic") is not None or data.get("realm") == "synthetic"):
+            participant = _get_or_create_synthetic_participant(
+                agent_id,
+                data.get("synthetic") or {}
+            )
+            contract.add_participant(participant)
+            _save_contract(contract)
+            return jsonify({
+                "success": True,
+                "participant_id": participant.id,
+                "is_synthetic": True,
+                "wellness": float(participant.wellness_current.value),
+                "total_participants": len(contract.participants)
+            }), 200
         return jsonify({"error": "user_id is required"}), 400
     
     participant = _get_or_create_participant(user_id)
@@ -495,7 +623,9 @@ def accept_term(current_user, contract_id: str):
     Body JSON:
     {
         "term_id": "term-1",
-        "user_id": 123
+        "user_id": 123          # humano
+        # o
+        "participant_id": "qwen-1"  # persona sintética (consentimiento, Cap. 10 §10.8)
     }
     """
     contract = _load_contract(contract_id)
@@ -506,11 +636,22 @@ def accept_term(current_user, contract_id: str):
     data = request.get_json() or {}
     term_id = data.get("term_id")
     user_id = data.get("user_id")
+    participant_id = data.get("participant_id")
     
-    if not term_id or not user_id:
-        return jsonify({"error": "term_id and user_id are required"}), 400
+    if not term_id:
+        return jsonify({"error": "term_id is required"}), 400
     
-    pid = f"user-{user_id}"
+    if user_id:
+        pid = f"user-{user_id}"
+    elif participant_id:
+        pid = f"synthetic-{participant_id}"
+    else:
+        return jsonify({"error": "user_id or participant_id is required"}), 400
+    
+    # El consentimiento solo es válido si el participante existe en el contrato
+    if pid not in contract.participant_ids:
+        return jsonify({"error": f"participant {pid} not in contract"}), 400
+    
     success = contract.accept_term(term_id, pid)
     
     if not success:
