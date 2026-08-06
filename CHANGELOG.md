@@ -13,6 +13,7 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
     - `scripts/build_front.py`: nuevo paso `generate_dotform_twins()` que crea copias en forma de puntos de todos los payloads RSC de segmentos en la exportación (46 archivos en el último build), haciendo el artefacto autoconsistente para cualquier servidor estático.
     - `app/__init__.py`: nuevo helper `_dotform_to_dirform()` y rama 1b en `catch_all` que mapea defensivamente las peticiones en forma de puntos a los archivos en forma de directorio (funciona incluso con dists antiguas).
   - **Verificación**: reproducción del fallo con Playwright (Chromium) sobre Waitress; tras el fix, 12/12 navegaciones por clic exitosas (`dashboard, sdv, participants, matching, network, contracts, reports, users, subscriptions, settings, pulso, matching`).
+  - **Auditoría completa del lado usuario**: 18/18 navegaciones exitosas (anónimo y autenticado) — landing, dropdowns Operaciones/Inteligencia/Contratos, Pulso Vital, Plaza de Apoyo, Entrar, Registro, Contribuir, `/admin/dashboard`, `/micromax`, `/vhv/parameters` y el reporte de transparencia del footer (`/subscriptions/transparency-report`, JSON válido).
 
 ### Añadido
 - `tests/test_spa_routing.py`: 6 tests unitarios del mapeo dot-form → dir-form.
