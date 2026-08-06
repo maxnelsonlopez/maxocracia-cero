@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiFetch } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
+import LegalContractView from './LegalContractView';
 import { 
   FileText, ArrowLeft, ShieldAlert, Award, Info, CheckCircle2, 
   UserCheck, AlertTriangle, Play, RefreshCw, Send, Zap,
@@ -74,7 +75,8 @@ export default function ContractDetailsPage() {
   // Estados principales
   const [contract, setContract] = useState<ContractDetails | null>(null);
   const [civilSummary, setCivilSummary] = useState<string>('');
-  const [activeRole, setActiveRole] = useState<'creator' | 'counterparty'>('creator'); // Rol simulado para firmar
+  const [activePid, setActivePid] = useState<string>(''); // firmante activo (user-N o synthetic-X)
+  const [viewMode, setViewMode] = useState<'visual' | 'legal'>('visual'); // vista panel o documento legal
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -127,34 +129,20 @@ export default function ContractDetailsPage() {
     loadContractData();
   }, [loadContractData]);
 
-  // Obtener ID real del participante según el rol simulado
-  const getSimulatedUserId = useCallback(() => {
-    if (!contract) return null;
-    
-    // El creador es típicamente el primer participante
-    const creatorIdStr = contract.participants[0] || `user-${currentUser?.id || 1}`;
-    // La contraparte es típicamente el segundo participante
-    const counterpartyIdStr = contract.participants[1] || 'user-2';
+  // Firmante activo: cualquier participante del contrato (humano o sintético)
+  const getActivePid = useCallback(() => {
+    if (!contract) return '';
+    if (activePid && contract.participants.includes(activePid)) return activePid;
+    // Por defecto: el primer participante humano
+    const humans = contract.participants.filter(p => !p.startsWith('synthetic-'));
+    return humans[0] || contract.participants[0] || '';
+  }, [contract, activePid]);
 
-    const cleanId = (pId: string) => {
-      const numStr = pId.replace('user-', '');
-      const parsed = parseInt(numStr);
-      return isNaN(parsed) ? 2 : parsed;
-    };
-
-    if (activeRole === 'creator') {
-      return cleanId(creatorIdStr);
-    } else {
-      return cleanId(counterpartyIdStr);
-    }
-  }, [contract, currentUser, activeRole]);
-
-  // Determinar si el participante simulado ya firmó todo
-  const hasParticipantSignedAll = useCallback(() => {
-    if (!contract) return false;
-    const simPid = `user-${getSimulatedUserId()}`;
-    return contract.terms.every(t => t.accepted_by[simPid] === true);
-  }, [contract, getSimulatedUserId]);
+  // Determinar si un participante ya firmó todos los términos
+  const hasParticipantSignedAll = useCallback((pid: string) => {
+    if (!contract || !pid) return false;
+    return contract.terms.every(t => t.accepted_by[pid] === true);
+  }, [contract]);
 
   // Manejo del contador para firma Rigurosa
   useEffect(() => {
@@ -181,20 +169,20 @@ export default function ContractDetailsPage() {
   useEffect(() => {
     if (contract) {
       // Inicializar checklist de firma media
+      const pid = getActivePid();
       const initialChecklist: Record<string, boolean> = {};
       contract.terms.forEach(t => {
-        const simPid = `user-${getSimulatedUserId()}`;
-        initialChecklist[t.term_id] = t.accepted_by[simPid] === true;
+        initialChecklist[t.term_id] = t.accepted_by[pid] === true;
       });
       setChecklistSelections(initialChecklist);
 
       // Si es rigurosa, iniciar el primer paso si no ha firmado todo
-      const signedAll = contract.terms.every(t => t.accepted_by[`user-${getSimulatedUserId()}`] === true);
+      const signedAll = hasParticipantSignedAll(pid);
       if (!signedAll) {
         startRigorousStep(0);
       }
     }
-  }, [contract, activeRole, getSimulatedUserId, startRigorousStep]);
+  }, [contract, activePid, getActivePid, hasParticipantSignedAll, startRigorousStep]);
 
   // Determinar Peso y Complejidad UX
   const getWeightAndComplexity = () => {
@@ -215,18 +203,20 @@ export default function ContractDetailsPage() {
 
   const { weight, complexity } = getWeightAndComplexity();
 
-  // Acción: Aceptar un término vía API
+  // Acción: Aceptar un término vía API (humanos y personas sintéticas)
   const handleAcceptTerm = async (termId: string) => {
-    const userId = getSimulatedUserId();
-    if (!userId) return;
+    const pid = getActivePid();
+    if (!pid) return;
 
     try {
+      const isSynthetic = pid.startsWith('synthetic-');
       const res = await apiFetch(`/contracts/${contractId}/accept`, {
         method: 'POST',
-        body: JSON.stringify({
-          term_id: termId,
-          user_id: userId
-        })
+        body: JSON.stringify(
+          isSynthetic
+            ? { term_id: termId, participant_id: pid.replace('synthetic-', '') }
+            : { term_id: termId, user_id: parseInt(pid.replace('user-', '')) }
+        )
       });
 
       if (!res.ok) {
@@ -244,7 +234,8 @@ export default function ContractDetailsPage() {
 
   // Guardar todas las firmas del checklist (Firma Media)
   const handleSaveChecklist = async () => {
-    const pendingTerms = contract?.terms.filter(t => checklistSelections[t.term_id] && !t.accepted_by[`user-${getSimulatedUserId()}`]) || [];
+    const pid = getActivePid();
+    const pendingTerms = contract?.terms.filter(t => checklistSelections[t.term_id] && !t.accepted_by[pid]) || [];
     
     if (pendingTerms.length === 0) {
       alert('No hay nuevos términos seleccionados para firmar.');
@@ -356,7 +347,8 @@ export default function ContractDetailsPage() {
     setIsRetracting(true);
     setOracleVerdict(null);
 
-    const userId = getSimulatedUserId();
+    const pid = getActivePid();
+    const userId = pid && !pid.startsWith('synthetic-') ? parseInt(pid.replace('user-', '')) : undefined;
 
     try {
       const res = await apiFetch(`/contracts/${contractId}/retract`, {
@@ -429,10 +421,11 @@ export default function ContractDetailsPage() {
   const isContractDraft = contract.state.toLowerCase() === 'draft';
   const isContractPending = contract.state.toLowerCase() === 'pending';
 
-  // Verificar si ambas partes han firmado todos los términos
-  const creatorSignedAll = contract.terms.every(t => t.accepted_by[contract.participants[0]] === true);
-  const counterpartySignedAll = contract.terms.every(t => t.accepted_by[contract.participants[1]] === true);
-  const canActivate = (isContractDraft || isContractPending) && creatorSignedAll && counterpartySignedAll;
+  // Verificar si todas las partes han firmado todos los términos
+  const allParticipantsSignedAll = contract.participants.every(pid =>
+    contract.terms.every(t => t.accepted_by[pid] === true)
+  );
+  const canActivate = (isContractDraft || isContractPending) && allParticipantsSignedAll;
 
   // Encontrar bienestar actual de cada participante
   const getWellnessValue = (pId: string) => {
@@ -440,8 +433,10 @@ export default function ContractDetailsPage() {
     return detail ? detail.wellness : 1.0;
   };
 
-  const creatorWellness = getWellnessValue(contract.participants[0]);
-  const counterpartyWellness = getWellnessValue(contract.participants[1]);
+  const participantName = (pid: string) =>
+    contract.participants_details?.find(d => d.id === pid)?.name || pid;
+
+  const activePidValue = getActivePid();
 
   // Personas Sintéticas del contrato con su estado SDV-S (Cap. 10 §10.8)
   const syntheticParticipants = contract.participants_details?.filter(d => d.is_synthetic && d.sdv_s) || [];
@@ -474,41 +469,71 @@ export default function ContractDetailsPage() {
           </div>
         </div>
 
-        {/* Simulador de Rol (Role Switcher) */}
+        {/* Toggle de vista: Panel Visual / Documento Legal */}
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+            <button
+              onClick={() => setViewMode('visual')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                viewMode === 'visual'
+                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/10'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Panel Visual
+            </button>
+            <button
+              onClick={() => setViewMode('legal')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                viewMode === 'legal'
+                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/10'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Documento Legal
+            </button>
+          </div>
+          <span className="text-[9px] text-slate-500 max-w-[320px] leading-snug">
+            Misma información, dos lenguajes: bloques visuales o cláusulas declaratorias homologables a contrato tradicional.
+          </span>
+        </div>
+
+        {/* Selector de Firmante Activo (cualquier co-firmante) */}
         <div className="bg-slate-900/80 border border-slate-800 p-3 rounded-2xl flex flex-col gap-2">
           <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1">
             <UserCheck className="w-3.5 h-3.5 text-emerald-500" />
-            Simulador de Identidad Activa (Firmante actual)
+            Firmante Activo ({contract.participants.length} co-firmantes)
           </span>
-          <p className="text-[9px] text-slate-400 max-w-[320px] leading-snug">
-            <strong>Simulación local:</strong> Alterna tu identidad de firmante para probar cómo cada parte visualiza, revisa y firma modularmente este acuerdo.
-          </p>
-          <div className="flex gap-2 bg-slate-950 p-1 rounded-xl border border-slate-850">
-            <button
-              onClick={() => setActiveRole('creator')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeRole === 'creator' 
-                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/10' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Creador ({contract.participants[0] || 'Tú'})
-            </button>
-            <button
-              onClick={() => setActiveRole('counterparty')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeRole === 'counterparty' 
-                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/10' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Contraparte ({contract.participants[1] || 'Bob'})
-            </button>
+          <div className="flex flex-wrap gap-2 bg-slate-950 p-1 rounded-xl border border-slate-850">
+            {contract.participants.map((pid) => {
+              const isActive = getActivePid() === pid;
+              const isSynth = pid.startsWith('synthetic-');
+              return (
+                <button
+                  key={pid}
+                  onClick={() => setActivePid(pid)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                    isActive
+                      ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/10'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {isSynth && <Bot className="w-3 h-3" />}
+                  {isSynth ? participantName(pid).split(' ')[0] : (participantName(pid).split(' ')[0] || pid)}
+                  <span className={`text-[9px] ${isActive ? 'text-slate-800' : 'text-slate-600'}`}>
+                    {hasParticipantSignedAll(pid) ? '✓' : ''}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* Grid Principal */}
+      {/* Vista: Documento Legal */}
+      {viewMode === 'legal' ? (
+        <LegalContractView contract={contract} civilSummary={civilSummary} />
+      ) : (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Columna Izquierda: Detalles del Contrato y Monitoreo Vital (7 Cols) */}
@@ -574,33 +599,36 @@ export default function ContractDetailsPage() {
 
             <div className="space-y-4">
               {contract.terms.map((term, index) => {
-                const creatorSigned = term.accepted_by[contract.participants[0]] === true;
-                const counterpartySigned = term.accepted_by[contract.participants[1]] === true;
-
+                const assignedPid = (term as { assigned_participant?: string | null }).assigned_participant;
                 return (
                   <div key={term.term_id} className="p-4 rounded-2xl bg-slate-950/65 border border-slate-900 space-y-3">
                     <div className="flex justify-between items-start">
                       <span className="text-xs font-mono text-emerald-500 font-bold">#{index + 1} Cláusula: {term.term_id}</span>
-                      <div className="flex gap-2">
-                        {/* Indicadores de Firma */}
-                        <div className="flex items-center gap-1.5 text-[9px] px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800">
-                          <span className="text-slate-500">Creador:</span>
-                          {creatorSigned ? (
-                            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                          ) : (
-                            <Clock className="w-3 h-3 text-amber-500" />
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[9px] px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800">
-                          <span className="text-slate-500">Contraparte:</span>
-                          {counterpartySigned ? (
-                            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                          ) : (
-                            <Clock className="w-3 h-3 text-amber-500" />
-                          )}
-                        </div>
+                      <div className="flex gap-1.5 flex-wrap justify-end">
+                        {/* Indicadores de firma por co-firmante */}
+                        {contract.participants.map((pid) => {
+                          const signed = term.accepted_by[pid] === true;
+                          const shortName = participantName(pid).split(' ')[0] || pid;
+                          return (
+                            <div key={pid} className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-md bg-slate-900 border border-slate-800">
+                              <span className="text-slate-500 max-w-[70px] truncate">{shortName}</span>
+                              {signed ? (
+                                <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                              ) : (
+                                <Clock className="w-3 h-3 text-amber-500" />
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
+
+                    {assignedPid && (
+                      <div className="flex items-center gap-1.5 text-[9px] text-blue-300/80">
+                        <Zap className="w-3 h-3 text-blue-400" />
+                        Parte obligada: {participantName(assignedPid)} ({assignedPid})
+                      </div>
+                    )}
 
                     <p className="text-slate-300 text-xs font-normal leading-relaxed">
                       {term.civil_text}
@@ -642,51 +670,41 @@ export default function ContractDetailsPage() {
             </div>
 
             <div className="space-y-4">
-              {/* Creator Status */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs font-bold">
-                  <span className="text-slate-300">Creador ({contract.participants[0] || 'Tú'})</span>
-                  <span className={creatorWellness < 0.8 ? 'text-rose-400 font-mono' : 'text-emerald-400 font-mono'}>
-                    γ = {creatorWellness.toFixed(2)}
-                  </span>
-                </div>
-                <div className="h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-900">
-                  <div 
-                    className={`h-full transition-all duration-500 ${
-                      creatorWellness < 0.8 ? 'bg-rose-500 shadow-md shadow-rose-500/50' : 'bg-emerald-500 shadow-md shadow-emerald-500/50'
-                    }`}
-                    style={{ width: `${creatorWellness * 100}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Counterparty Status */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs font-bold">
-                  <span className="text-slate-300">Contraparte ({contract.participants[1] || 'Bob'})</span>
-                  <span className={counterpartyWellness < 0.8 ? 'text-rose-400 font-mono' : 'text-emerald-400 font-mono'}>
-                    γ = {counterpartyWellness.toFixed(2)}
-                  </span>
-                </div>
-                <div className="h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-900">
-                  <div 
-                    className={`h-full transition-all duration-500 ${
-                      counterpartyWellness < 0.8 ? 'bg-rose-500 shadow-md shadow-rose-500/50' : 'bg-emerald-500 shadow-md shadow-emerald-500/50'
-                    }`}
-                    style={{ width: `${counterpartyWellness * 100}%` }}
-                  />
-                </div>
-              </div>
+              {/* Vigilancia de bienestar por co-firmante */}
+              {contract.participants.map((pid) => {
+                const wellness = getWellnessValue(pid);
+                return (
+                  <div key={pid} className="space-y-2">
+                    <div className="flex justify-between text-xs font-bold">
+                      <span className="text-slate-300 truncate">
+                        {participantName(pid).split(' ')[0]}
+                        {pid.startsWith('synthetic-') && <Bot className="inline w-3 h-3 text-violet-400 ml-1" />}
+                      </span>
+                      <span className={wellness < 0.8 ? 'text-rose-400 font-mono' : 'text-emerald-400 font-mono'}>
+                        γ = {wellness.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-900">
+                      <div
+                        className={`h-full transition-all duration-500 ${
+                          wellness < 0.8 ? 'bg-rose-500 shadow-md shadow-rose-500/50' : 'bg-emerald-500 shadow-md shadow-emerald-500/50'
+                        }`}
+                        style={{ width: `${wellness * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
 
               {/* Simulación e Info de Invariantes */}
-              {isContractActive && (
+              {isContractActive && contract.participants[1] && (
                 <div className="pt-2">
                   <button 
                     onClick={handleSimulateWellnessDrop}
                     className="w-full py-2 bg-slate-950 hover:bg-slate-900 border border-slate-800 text-slate-300 text-[10px] font-bold rounded-xl flex items-center justify-center gap-2 transition-all hover:border-amber-500/20"
                   >
                     <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
-                    Simular Crisis de Bienestar en Bob (γ = 0.65)
+                    Simular Crisis de Bienestar en {participantName(contract.participants[1]).split(' ')[0]} (γ = 0.65)
                   </button>
                 </div>
               )}
@@ -849,14 +867,18 @@ export default function ContractDetailsPage() {
               </div>
 
               {/* Si ya firmó todo */}
-              {hasParticipantSignedAll() ? (
+              {hasParticipantSignedAll(activePidValue) ? (
                 <div className="p-5 rounded-2xl bg-emerald-950/20 border border-emerald-900/30 text-center space-y-4">
                   <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
                   <div className="space-y-1">
-                    <h4 className="text-sm font-bold text-white">¡Has firmado este MaxoContract!</h4>
-                    <p className="text-xs text-slate-400">Esperando firmas de la contraparte si hay pendientes para su activación.</p>
+                    <h4 className="text-sm font-bold text-white">¡{participantName(activePidValue).split(' ')[0]} ha firmado este MaxoContract!</h4>
+                    <p className="text-xs text-slate-400">
+                      {allParticipantsSignedAll
+                        ? 'Todas las partes han firmado. Puedes activar el contrato.'
+                        : 'Faltan firmas de otros co-firmantes para su activación.'}
+                    </p>
                   </div>
-                  {canActivate && activeRole === 'creator' && (
+                  {canActivate && (
                     <button
                       onClick={handleActivateContract}
                       className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-md shadow-emerald-500/10 flex items-center justify-center gap-2"
@@ -891,7 +913,8 @@ export default function ContractDetailsPage() {
                       </p>
                       <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                         {contract.terms.map((t, idx) => {
-                          const isAlreadySigned = t.accepted_by[`user-${getSimulatedUserId()}`] === true;
+                          const pid = getActivePid();
+                          const isAlreadySigned = t.accepted_by[pid] === true;
                           return (
                             <label 
                               key={t.term_id} 
@@ -1124,6 +1147,7 @@ export default function ContractDetailsPage() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

@@ -391,6 +391,7 @@ CREATE TABLE IF NOT EXISTS maxo_contract_terms (
     vhv_t REAL DEFAULT 0,
     vhv_v REAL DEFAULT 0,
     vhv_h REAL DEFAULT 0,
+    assigned_participant TEXT, -- Parte obligada del término (user-N o synthetic-X)
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
     UNIQUE(contract_id, term_id)

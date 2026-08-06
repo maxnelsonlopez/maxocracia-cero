@@ -82,7 +82,7 @@ export default function ContractBuilder() {
     // Nuevos estados
     const [duration, setDuration] = useState<number>(30);
     const [usersList, setUsersList] = useState<UserProfile[]>([]);
-    const [counterpartyId, setCounterpartyId] = useState<string>('');
+    const [selectedCoSigners, setSelectedCoSigners] = useState<number[]>([]);
     const [validationReport, setValidationReport] = useState<{
         valid: boolean;
         results: AxiomResult[];
@@ -90,6 +90,21 @@ export default function ContractBuilder() {
         ux_signature_type: string;
         total_vhv: { t: number; v: number; r: number };
     } | null>(null);
+
+    // Opciones de parte obligada para los bloques (creador + co-firmantes)
+    const ownerOptions = React.useMemo(() => [
+        ...(currentUser ? [{ id: currentUser.id, label: `Yo (${currentUser.name.split(' ')[0]})` }] : []),
+        ...usersList.map((u) => ({ id: u.id, label: u.name.split(' ')[0] })),
+    ], [currentUser, usersList]);
+
+    const injectOwners = useCallback((nds: Node[]) => {
+        return nds.map((n) => ({ ...n, data: { ...n.data, owners: ownerOptions } }));
+    }, [ownerOptions]);
+
+    // Mantener la lista de partes disponible en los bloques al cambiar la selección
+    useEffect(() => {
+        setNodes((nds) => injectOwners(nds));
+    }, [injectOwners]);
 
     // Cargador de plantillas predefinidas
     const loadTemplate = (templateName: string) => {
@@ -100,17 +115,19 @@ export default function ContractBuilder() {
 
         if (templateName === 'colab') {
             setDuration(15);
-            setNodes([
+            const me = currentUser ? currentUser.id : 1;
+            const firstCo = selectedCoSigners[0];
+            setNodes(injectOwners([
                 {
                     id: 'start-node',
                     type: 'input',
                     data: { label: 'Inicio Contrato' },
                     position: { x: 300, y: 10 },
-                    style: { 
-                        background: 'rgba(255, 255, 255, 0.8)', 
+                    style: {
+                        background: 'rgba(255, 255, 255, 0.8)',
                         backdropFilter: 'blur(10px)',
-                        border: '2px solid #10b981', 
-                        borderRadius: '12px', 
+                        border: '2px solid #10b981',
+                        borderRadius: '12px',
                         padding: '12px',
                         color: '#064e3b',
                         fontWeight: 'bold',
@@ -121,32 +138,42 @@ export default function ContractBuilder() {
                     id: 'node_colab_do',
                     type: 'action',
                     position: { x: 260, y: 140 },
-                    data: { label: 'Consultoría Técnica de Programación (10 hrs)', vhvCost: 10.0 }
+                    data: { label: 'Max ofrece 10 horas de trabajo', vhvCost: 10.0, ownerUserId: me }
                 },
                 {
                     id: 'node_colab_give',
                     type: 'reciprocity',
-                    position: { x: 260, y: 290 },
-                    data: { label: 'Diseño de Interfaz UI/UX de Landing Page (10 hrs)' }
+                    position: { x: 260, y: 300 },
+                    data: {
+                        label: 'La contraparte ofrece a cambio: [objeto / servicio / 10 horas de trabajo]',
+                        ownerUserId: firstCo
+                    }
+                },
+                {
+                    id: 'node_colab_sdv',
+                    type: 'sdv',
+                    position: { x: 260, y: 460 },
+                    data: { label: 'Suelo de Dignidad Vital (ninguna parte cae bajo sus mínimos)' }
                 }
-            ]);
+            ]));
             setEdges([
                 { id: 'e1', source: 'start-node', target: 'node_colab_do', animated: true, style: { stroke: '#10b981' } },
-                { id: 'e2', source: 'node_colab_do', target: 'node_colab_give', animated: true, style: { stroke: '#10b981' } }
+                { id: 'e2', source: 'node_colab_do', target: 'node_colab_give', animated: true, style: { stroke: '#10b981' } },
+                { id: 'e3', source: 'node_colab_give', target: 'node_colab_sdv', animated: true, style: { stroke: '#10b981' } }
             ]);
         } else if (templateName === 'support') {
             setDuration(30);
-            setNodes([
+            setNodes(injectOwners([
                 {
                     id: 'start-node',
                     type: 'input',
                     data: { label: 'Inicio Contrato' },
                     position: { x: 300, y: 10 },
-                    style: { 
-                        background: 'rgba(255, 255, 255, 0.8)', 
+                    style: {
+                        background: 'rgba(255, 255, 255, 0.8)',
                         backdropFilter: 'blur(10px)',
-                        border: '2px solid #10b981', 
-                        borderRadius: '12px', 
+                        border: '2px solid #10b981',
+                        borderRadius: '12px',
                         padding: '12px',
                         color: '#064e3b',
                         fontWeight: 'bold',
@@ -177,7 +204,7 @@ export default function ContractBuilder() {
                     position: { x: 260, y: 550 },
                     data: { label: 'Devolución de 15 horas de consultoría de negocio equivalente' }
                 }
-            ]);
+            ]));
             setEdges([
                 { id: 'e1', source: 'start-node', target: 'node_support_if', animated: true, style: { stroke: '#10b981' } },
                 { id: 'e2', source: 'node_support_if', target: 'node_support_oracle', animated: true, style: { stroke: '#10b981' } },
@@ -186,7 +213,7 @@ export default function ContractBuilder() {
             ]);
         } else if (templateName === 'loan') {
             setDuration(60);
-            setNodes([
+            setNodes(injectOwners([
                 {
                     id: 'start-node',
                     type: 'input',
@@ -221,7 +248,7 @@ export default function ContractBuilder() {
                     position: { x: 260, y: 440 },
                     data: { label: 'Devolver 40 horas de asistencia en proyectos de desarrollo' }
                 }
-            ]);
+            ]));
             setEdges([
                 { id: 'e1', source: 'start-node', target: 'node_loan_do', animated: true, style: { stroke: '#10b981' } },
                 { id: 'e2', source: 'node_loan_do', target: 'node_loan_sdv', animated: true, style: { stroke: '#10b981' } },
@@ -233,19 +260,16 @@ export default function ContractBuilder() {
     const [isValidating, setIsValidating] = useState<boolean>(false);
     const [isSaving, setIsSaving] = useState<boolean>(false);
 
-    // Cargar lista de usuarios para la contraparte
+    // Cargar lista de usuarios para los co-firmantes
     useEffect(() => {
         const fetchUsers = async () => {
             try {
                 const response = await apiFetch('/users');
                 if (response.ok) {
                     const data = await response.json();
-                    // Filtrar al usuario logueado de la lista de contrapartes
+                    // Filtrar al usuario logueado de la lista de co-firmantes
                     const otherUsers = data.filter((u: UserProfile) => u.id !== currentUser?.id);
                     setUsersList(otherUsers);
-                    if (otherUsers.length > 0) {
-                        setCounterpartyId(String(otherUsers[0].id));
-                    }
                 }
             } catch (err) {
                 console.error("Error al cargar usuarios:", err);
@@ -291,7 +315,7 @@ export default function ContractBuilder() {
             });
 
             // Establecer costos predeterminados
-            let data: any = { label: `${type.charAt(0).toUpperCase() + type.slice(1)} Block` };
+            const data: { label: string; vhvCost?: number } = { label: `${type.charAt(0).toUpperCase() + type.slice(1)} Block` };
             if (type === 'action') {
                 data.vhvCost = 1.5; // Costo por defecto en horas de vida
             }
@@ -300,7 +324,11 @@ export default function ContractBuilder() {
                 id: getId(),
                 type,
                 position,
-                data,
+                data: {
+                    ...data,
+                    owners: ownerOptions,
+                    ownerUserId: type === 'action' ? currentUser?.id : undefined,
+                },
                 style: { 
                     background: 'white', 
                     border: '1px solid #cbd5e1', 
@@ -312,7 +340,7 @@ export default function ContractBuilder() {
 
             setNodes((nds) => nds.concat(newNode));
         },
-        [reactFlowInstance]
+        [reactFlowInstance, ownerOptions, currentUser]
     );
 
     const onDragStart = (event: React.DragEvent, nodeType: string) => {
@@ -349,8 +377,8 @@ export default function ContractBuilder() {
     }, [nodes, edges, duration, performValidation]);
 
     const onSaveAndCreate = async () => {
-        if (!counterpartyId) {
-            alert('⚠️ Debes seleccionar una contraparte (otro ciudadano de la cohorte) para asociarla al contrato.');
+        if (selectedCoSigners.length === 0) {
+            alert('⚠️ Debes seleccionar al menos un co-firmante (otro ciudadano de la cohorte) para asociarla al contrato.');
             return;
         }
 
@@ -379,29 +407,35 @@ export default function ContractBuilder() {
                 return;
             }
 
-            // 2. Crear contrato vía API REST
+            // 2. Crear contrato vía API REST con todos los co-firmantes
             const contractId = `maxo-ctr-${Date.now()}`;
             const actionNodes = nodes.filter(n => n.type === 'action');
             const civilDesc = `Contrato de Intercambio Ético diseñado visualmente. Duración: ${duration} días. Complejidad: ${valResult.ux_signature_type.toUpperCase()}.`;
+
+            const participants = [
+                { user_id: currentUser?.id, wellness: 1.0 },
+                ...selectedCoSigners.map((uid) => ({ user_id: uid, wellness: 1.0 })),
+            ];
 
             const createRes = await apiFetch('/contracts/', {
                 method: 'POST',
                 body: JSON.stringify({
                     contract_id: contractId,
                     civil_description: civilDesc,
-                    participants: [
-                        { user_id: currentUser?.id, wellness: 1.0 },
-                        { user_id: parseInt(counterpartyId), wellness: 1.0 }
-                    ],
-                    terms: actionNodes.map(node => ({
-                        term_id: node.id,
-                        civil_text: node.data.label || 'Acción del Contrato',
-                        vhv: {
-                            t: node.data.vhvCost !== undefined ? node.data.vhvCost : 1.5,
-                            v: 0,
-                            h: 0
-                        }
-                    }))
+                    participants,
+                    terms: actionNodes.map(node => {
+                        const ownerId = (node.data as { ownerUserId?: number }).ownerUserId ?? currentUser?.id;
+                        return {
+                            term_id: node.id,
+                            civil_text: node.data.label || 'Acción del Contrato',
+                            vhv: {
+                                t: node.data.vhvCost !== undefined ? node.data.vhvCost : 1.5,
+                                v: 0,
+                                h: 0
+                            },
+                            assigned_participant_id: ownerId ? `user-${ownerId}` : undefined,
+                        };
+                    })
                 })
             });
 
@@ -470,21 +504,47 @@ export default function ContractBuilder() {
                         <p className="text-xs text-slate-400">Define los fundamentos de la relación del contrato.</p>
                     </div>
 
-                    {/* Selector de Contraparte */}
+                    {/* Selector de Co-Firmantes */}
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-300 block uppercase tracking-wider">Contraparte (Co-Firmante)</label>
-                        <select 
-                            value={counterpartyId} 
-                            onChange={(e) => setCounterpartyId(e.target.value)}
-                            className="w-full bg-slate-950/80 border border-slate-800 text-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500 transition-colors"
-                        >
-                            <option value="">Selecciona un firmante...</option>
-                            {usersList.map((u) => (
-                                <option key={u.id} value={u.id}>{u.name} (@{u.alias || 'sin alias'})</option>
-                            ))}
-                        </select>
+                        <label className="text-xs font-bold text-slate-300 block uppercase tracking-wider">
+                            Co-Firmantes ({selectedCoSigners.length} seleccionad{selectedCoSigners.length === 1 ? 'o' : 'os'})
+                        </label>
+                        <div className="max-h-40 overflow-y-auto space-y-1.5 pr-1 border border-slate-800 rounded-xl p-2 bg-slate-950/40">
+                            {usersList.length === 0 && (
+                                <p className="text-[10px] text-slate-500 p-2">No hay otros ciudadanos registrados en la cohorte.</p>
+                            )}
+                            {usersList.map((u) => {
+                                const checked = selectedCoSigners.includes(u.id);
+                                return (
+                                    <label
+                                        key={u.id}
+                                        className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg cursor-pointer border transition-all text-xs ${
+                                            checked
+                                                ? 'bg-emerald-500/10 border-emerald-500/30 text-slate-200'
+                                                : 'bg-slate-900/40 border-slate-800 text-slate-400 hover:border-slate-700'
+                                        }`}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={checked}
+                                            onChange={(e) => {
+                                                setSelectedCoSigners((prev) =>
+                                                    e.target.checked
+                                                        ? [...prev, u.id]
+                                                        : prev.filter((id) => id !== u.id)
+                                                );
+                                            }}
+                                            className="accent-emerald-500 rounded"
+                                        />
+                                        <span className="font-bold truncate">{u.name}</span>
+                                        <span className="text-[9px] text-slate-500 ml-auto">@{u.alias || 'sin alias'}</span>
+                                    </label>
+                                );
+                            })}
+                        </div>
                         <p className="text-[10px] text-slate-500 leading-normal">
-                            Persona de la cohorte que compartirá las obligaciones vitales de este acuerdo.
+                            Personas de la cohorte que compartirán las obligaciones vitales de este acuerdo.
+                            Cada bloque del lienzo puede asignarse a una parte distinta (selector en el nodo).
                         </p>
                     </div>
 
@@ -528,8 +588,8 @@ export default function ContractBuilder() {
                                 onClick={() => loadTemplate('colab')}
                                 className="w-full text-left p-2.5 rounded-xl bg-slate-950/60 hover:bg-slate-900 border border-slate-900 hover:border-emerald-500/30 transition-all text-[11px] space-y-1 group"
                             >
-                                <span className="font-bold text-slate-200 block group-hover:text-emerald-400 transition-colors">1. Colaboración Simétrica</span>
-                                <span className="text-[9px] text-slate-500 block leading-snug">Intercambio equilibrado de horas 1:1. Nivel de Firma: Simple.</span>
+                                <span className="font-bold text-slate-200 block group-hover:text-emerald-400 transition-colors">1. Intercambio Ético (10h ↔ Objeto/Servicio)</span>
+                                <span className="text-[9px] text-slate-500 block leading-snug">Max ofrece 10 horas de trabajo; la contraparte elige reciprocidad: objeto, servicio u horas. Editable en el lienzo.</span>
                             </button>
                             <button
                                 onClick={() => loadTemplate('support')}

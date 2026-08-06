@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-06 — Flujo real de contratos: co-firmantes múltiples, bloques vinculados a partes y vista de documento legal
+
+### Añadido
+- **Contrato demo precargado** (`scripts/seed_demo_contract.py`): crea `demo-intercambio-10h` con 4 co-firmantes reales (Max, Ana, Luis, Caro) y el ejemplo del fundador — "Max ofrece 10 horas de trabajo; Ana ofrece a cambio un objeto, 10 horas de trabajo o un servicio". Cada término queda vinculado a su parte obligada. Idempotente (recrea usuarios demo si no existen).
+- **Bloques vinculados a usuarios** (`assigned_participant` por término): nueva columna con migración automática en `init_contracts_metrics_tables`, persistencia (save/load), API (`assigned_participant_id` en creación y `add_term`) y respuesta del detalle. El builder muestra un selector de parte obligada en cada nodo Acción y Reciprocidad.
+- **Co-firmantes múltiples en el builder**: checkbox de N co-firmantes (antes una sola contraparte); el guardado crea el contrato con todos.
+- **Co-firmantes múltiples en el detalle**: selector de "Firmante Activo" dinámico (humanos y personas sintéticas), indicadores de firma por co-firmante en cada cláusula, barras de bienestar γ para todos, activación solo cuando TODAS las partes firmaron.
+- **Vista de Documento Legal** (`LegalContractView.tsx`): toggle "Panel Visual | Documento Legal" en el detalle. Renderiza el contrato como documento homologable a contrato civil/comercial: encabezado (MaxoContrato Nº), comparecientes (PARTE A-D), expositivos (PRIMERO-CUARTO), cláusulas declaratorias numeradas (SEGUNDA... en adelante, cada bloque = una obligación con su parte responsable y costo VHV), cláusulas de consentimiento sintético, protección de bienestar/dignidad, retractación ética y bloque de firmas con botón Imprimir/PDF.
+- **Plano de sesión futura** (`docs/architecture/ROADMAP_oraculo_vivo_y_escalas.md`): oráculo sintético en vivo (DeepSeek con `DEEPSEEK_API_KEY` en `.env`, endpoints de negociación por chat con iteración, degradación elegante sin key, prompt del sistema con T13/INV2/T9/γ/Ternura) y abstracción de escalas (persona → micro-sociedad → cooperativa → institución → ecosistema; `party_id` genérico, consentimiento por quórum, contratos interescala). Incluye el prompt pulido para la próxima sesión.
+
+### Notas Técnicas
+- **Firma**: DeepSeek (oráculo sintético).
+- **Verificación**: Playwright end-to-end con el contrato demo real (lista → detalle → firma multi-parte → toggle a documento legal y vuelta): 14/14 checks; suite completa 435/435 (4 tests nuevos de `assigned_participant`); tsc/eslint limpios; Validador Conceptual sin violaciones; build exportado.
+- **Referencias canónicas**: Cap. 17 §17.6 (aceptación término-a-término), §17.2 (invariantes), Cap. 10 §10.8 (partes sintéticas).
+
 ## 2026-08-06 — README actualizado y guía pública de los SDV en MaxoContracts
 
 ### Añadido

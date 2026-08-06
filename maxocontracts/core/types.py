@@ -410,9 +410,10 @@ class ContractTerm:
     (Aceptación Término-a-Término, no "todo o nada").
     """
     id: str
-    description: str  # Lenguaje civil, ≤20 palabras
+    description: str  # Lenguaje civil, =20 palabras
     vhv_cost: VHV
     accepted_by: Dict[str, bool] = field(default_factory=dict)
+    assigned_participant: Optional[str] = None  # Parte obligada (ej. 'user-1', 'synthetic-qwen-1')
     
     def is_accepted_by_all(self, participant_ids: list) -> bool:
         """Verifica si todos los participantes aceptaron este término."""

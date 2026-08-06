@@ -165,6 +165,21 @@ def init_contracts_metrics_tables(app):
                 UNIQUE(contract_id, meta_key)
             )
         """)
+        # Migración: cada término puede quedar vinculado a la parte obligada
+        # (ej. 'user-1' o 'synthetic-qwen-1'). Permite "bloques vinculados
+        # a usuarios" y la vista de documento legal. Solo aplica si la tabla
+        # ya existe (en BD nuevas el schema.sql la crea con la columna).
+        tables = [
+            r[0] for r in cur.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            ).fetchall()
+        ]
+        if "maxo_contract_terms" in tables:
+            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_contract_terms)").fetchall()]
+            if "assigned_participant" not in cols:
+                cur.execute(
+                    "ALTER TABLE maxo_contract_terms ADD COLUMN assigned_participant TEXT"
+                )
         conn.commit()
     finally:
         conn.close()
@@ -229,20 +244,22 @@ def _save_contract(contract: MaxoContract):
     # 3. Update terms and approvals
     for term in contract._terms:
         db.execute("""
-            INSERT INTO maxo_contract_terms (contract_id, term_id, civil_text, vhv_t, vhv_v, vhv_h)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO maxo_contract_terms (contract_id, term_id, civil_text, vhv_t, vhv_v, vhv_h, assigned_participant)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(contract_id, term_id) DO UPDATE SET
                 civil_text=excluded.civil_text,
                 vhv_t=excluded.vhv_t,
                 vhv_v=excluded.vhv_v,
-                vhv_h=excluded.vhv_h
+                vhv_h=excluded.vhv_h,
+                assigned_participant=excluded.assigned_participant
         """, (
             contract.contract_id,
             term.id,
             term.description,
             float(term.vhv_cost.T),
             float(term.vhv_cost.V),
-            float(term.vhv_cost.R)
+            float(term.vhv_cost.R),
+            getattr(term, "assigned_participant", None)
         ))
         
         for p_id, accepted in term.accepted_by.items():
@@ -317,6 +334,7 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
                 R=Decimal(str(t_row["vhv_h"]))
             )
         )
+        term.assigned_participant = t_row["assigned_participant"]
         
         # Load approvals for this term
         a_rows = db.execute(
@@ -508,6 +526,7 @@ def create_contract(current_user):
                     R=Decimal(str(t_vhv.get("h", 0)))
                 )
                 term = ContractTerm(id=t_id, description=t_civil, vhv_cost=vhv)
+                term.assigned_participant = t_data.get("assigned_participant_id")
                 contract.add_term(term)
             except Exception:
                 pass
@@ -880,7 +899,8 @@ def get_contract(current_user, contract_id: str):
                     "v": float(t.vhv_cost.V),
                     "r": float(t.vhv_cost.R)
                 },
-                "accepted_by": t.accepted_by
+                "accepted_by": t.accepted_by,
+                "assigned_participant": t.assigned_participant
             }
             for t in contract._terms
         ],
@@ -920,7 +940,8 @@ def add_term(current_user, contract_id: str):
     
     civil_text = data.get("civil_text", "")
     vhv_data = data.get("vhv", {})
-    
+    assigned_participant = data.get("assigned_participant_id")
+
     try:
         vhv = VHV(
             T=Decimal(str(vhv_data.get("t", 0))),
@@ -929,20 +950,22 @@ def add_term(current_user, contract_id: str):
         )
     except (ValueError, TypeError) as e:
         return jsonify({"error": f"invalid vhv format: {e}"}), 400
-    
+
     term = ContractTerm(
         id=term_id,
         description=civil_text,
         vhv_cost=vhv
     )
-    
+    term.assigned_participant = assigned_participant
+
     contract.add_term(term)
     _save_contract(contract)
     
     return jsonify({
         "success": True,
         "term_id": term_id,
-        "total_terms": len(contract._terms)
+        "total_terms": len(contract._terms),
+        "assigned_participant": assigned_participant
     })
 
 

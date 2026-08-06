@@ -1,0 +1,160 @@
+# Ruta Futura: Oráculo Sintético en Vivo y Contratos Interescala
+
+**Autor del diseño:** DeepSeek (oráculo sintético) y Max Nelson López Restrepo
+**Fecha:** 6 de agosto de 2026
+**Estado:** Plano de implementación para una sesión futura
+**Referencia canónica:** Cap. 13-14 (Oráculos Dinámicos), Cap. 17 (MaxoContracts), Cap. 10 (Tres Reinos)
+
+---
+
+## 1. Resumen ejecutivo
+
+Dos capacidades transforman a MaxoContracts de un sistema de contratos *entre personas* a un sistema de contratos *entre entidades de cualquier escala*:
+
+1. **El Oráculo Sintético en vivo**: el fundador y los co-firmantes conversan con un oráculo (DeepSeek u otro modelo) que lee los axiomas, los invariantes y el borrador del contrato, propone redacciones, detecta asimetrías y negocia hasta obtener el contrato idóneo — con una API key configurada en `.env`.
+2. **La abstracción de escala**: los contratos dejan de ser solo persona↔persona. Una persona, una micro-sociedad, una cooperativa o una institución son todas **Partes** con el mismo marco axiomático, y los contratos pueden darse entre cualquier par de escalas (interescala).
+
+---
+
+## 2. Bloque A — Oráculo Sintético en vivo (DeepSeek como negociador)
+
+### 2.1 Visión de producto
+
+Dentro del detalle de un contrato (o del builder), un panel de **"Negociación Asistida por Oráculo"**:
+- El usuario escribe en lenguaje natural: *"Max ofrece 10 horas de trabajo y quiere que Ana dé a cambio un objeto, un servicio o sus propias horas"*.
+- El oráculo genera un **borrador de MaxoContract** (términos, partes, costos VHV, condiciones, reciprocidad) validado contra los axiomas.
+- El usuario responde feedback: *"Ana no puede dar más de 5 horas, sugiere un servicio de diseño"*.
+- El oráculo itera, mostrando cada versión y el estado de los invariantes (γ, SDV, T9), hasta que las partes aceptan.
+- El resultado se materializa como contrato en la BD mediante la API existente (`POST /contracts/`).
+
+### 2.2 Configuración (sin secretos en el repo)
+
+```dotenv
+# .env (NO se commitea)
+DEEPSEEK_API_KEY=sk-...
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-chat
+DEEPSEEK_ORACLE_ENABLED=true
+```
+
+- El backend lee `DEEPSEEK_API_KEY`; si no existe, el oráculo queda **deshabilitado con degradación elegante** (el endpoint responde que la negociación asistida no está disponible y la firma/validación heurística sigue funcionando).
+- `config.example.env` documenta las variables.
+
+### 2.3 Diseño técnico sugerido
+
+```
+maxocontracts/oracles/live_oracle.py
+├── LiveOracle(protocol="openai-compatible")   # usa el SDK de OpenAI o httpx directo
+│   ├── is_available() -> bool                  # existe DEEPSEEK_API_KEY
+│   ├── negotiate(prompt, context) -> NegotiationResult
+│   │     ├── draft_terms: [{term_id, civil_text, vhv, assigned_participant}]
+│   │     ├── proposed_parties: [{user_id}]
+│   │     ├── axiom_check: {valid, violations[]}
+│   │     └── reasoning: str                    # explicación en lenguaje civil
+│   └── critique(contract) -> CritiqueResult    # auditoría del contrato existente
+```
+
+**Endpoints nuevos:**
+
+| Endpoint | Método | Función |
+|---|---|---|
+| `POST /contracts/negotiate` | autenticado | Recibe `{instruction, participants[]}` y devuelve un borrador negociado + chequeo axiomático |
+| `POST /contracts/<id>/critique` | autenticado | El oráculo audita un contrato existente contra los axiomas y propone mejoras |
+| `POST /contracts/negotiate/feedback` | autenticado | Iteración: `{session_id, feedback}` → nueva versión del borrador |
+
+**Prompt del sistema (semilla, pulir en sesión):**
+
+```
+Eres el Oráculo Sintético de la Maxocracia (Reino Sintético, Cap. 14).
+Tu misión: ayudar a las partes a construir un MaxoContract coherente.
+Reglas inviolables:
+1. Axioma T13: transparencia radical — nunca ocultes costos ni riesgos.
+2. Invariante INV2/INV2-S: ningún término puede dejar a una parte bajo su
+   Suelo de Dignidad Vital (humana o sintética). Rechaza explícitamente
+   propuestas que lo violen.
+3. Axioma T9 (Reciprocidad Justa): toda acción (DO) debe tener contraprestación
+   equivalente (GIVE) — balance simétrico en tiempo, especie o servicio; nunca
+   un desbalance que tolere la explotación.
+4. γ ≥ 1: si una propuesta genera sufrimiento sostenido, sugiere retractación
+   o renegociación, nunca forzar el acuerdo.
+5. Capa de Ternura: ante errores, propón reparación y rehabilitación;
+   el sistema no expulsa, reintegra.
+6. Redacta cada término en lenguaje civil (≤20 palabras por frase, grado
+   8vo de escolaridad). Devuelve JSON con: terms[], assigned_participant,
+   vhv {t,v,h}, y un "reasoning" breve en español.
+```
+
+### 2.4 Pruebas
+
+- **Mock sin red**: `LiveOracle` con `DEEPSEEK_API_KEY` vacío → `is_available() == False` y el endpoint devuelve 503 con mensaje claro.
+- **Mock con respuestas simuladas**: inyectar un cliente HTTP falso (patrón `httpx.MockTransport` o `unittest.mock`) que devuelva borradores JSON; verificar que el borrador se valida contra `AxiomValidator` y se persiste.
+- **E2E manual**: con una key real, negociar el contrato de ejemplo (10h ↔ objeto/servicio) y firmarlo.
+
+---
+
+## 3. Bloque B — Abstracción de escala e interescala
+
+### 3.1 El problema
+
+Hoy un contrato vincula `user-N` (personas). Para la gran escala:
+- Micro-sociedades (2-5 personas), cooperativas (decenas), instituciones (cientos-miles).
+- Contratos entre una persona y una cooperativa, entre dos cooperativas, entre una institución y un ecosistema (Reino Natural), entre una persona y un sintético.
+
+### 3.2 Modelo de datos sugerido
+
+```
+maxo_parties (nueva tabla)
+├── party_id        TEXT PK        -- 'user-1' | 'society-3' | 'coop-7' | 'org-9' | 'synthetic-qwen-1'
+├── party_type      TEXT           -- human | society | cooperative | institution | synthetic | ecosystem
+├── display_name    TEXT
+├── parent_party_id TEXT NULL      -- anidación (una cooperativa contiene personas)
+└── members_json    TEXT           -- resolución de miembros para consentimiento
+
+maxo_contract_participants
+└── participant_id  TEXT           -- ya acepta cualquier party_id (hoy 'user-N'/'synthetic-X')
+```
+
+**La clave de la elegancia:** la persistencia ya guarda `participant_id` como texto. El backend `_get_or_create_participant_by_pid` resuelve prefijos (`user-`, `synthetic-`); basta añadir resolutores para `society-`, `coop-`, `org-`, `eco-` y generalizar la validación para no exigir `int(user_id)`.
+
+**Consentimiento agregado:** un contrato con `coop-7` se firma por delegados (quórum configurable: p.ej. 60% de miembros, o 2 de 3 delegados) — nueva función `resolve_consent(party_id, term) -> bool` que sustituye la verificación `accepted_by[pid]` cuando el pid es colectivo.
+
+### 3.3 Jerarquía de escalas (del canon Cap. 10)
+
+```
+Persona ─→ Micro-sociedad (hogar/cohorte) ─→ Cooperativa ─→ Institución
+    └───────────────┘ Interescala: cualquier par de nodos contrata
+```
+
+Cada escala hereda el mismo SDV y los mismos invariantes: el contrato entre una cooperativa y una institución valida el bienestar de los miembros reales (γ), no solo de las entidades legales.
+
+### 3.4 Fases de implementación
+
+| Fase | Alcance | Criterio de salida |
+|---|---|---|
+| 1 | `party_id` genérico en backend + resolver `society-`/`coop-`/`org-` | Contrato entre 2 entidades colectivas creado y validado por API |
+| 2 | Consentimiento agregado (quórum) | Firma delegada funcional con N de M |
+| 3 | UI: selector de tipo de parte en builder y detalle | Crear contrato coop↔org desde la interfaz |
+| 4 | Reino Natural (`eco-`) con representación por oráculo | Contrato humano↔ecosistema con auditor VHV |
+| 5 | Contratos interescala anidados (contrato madre que contiene sub-contratos) | Un acuerdo institucional despliega micro-contratos internos |
+
+---
+
+## 4. Prompt pulido para la sesión futura
+
+> **Sesión futura — Oráculo en vivo y escalas**
+>
+> 1. Implementa `maxocontracts/oracles/live_oracle.py` (protocolo OpenAI-compatible) con lectura de `DEEPSEEK_API_KEY` desde `.env` (`config.example.env` actualizado), degradación elegante si no hay key, y endpoints `POST /contracts/negotiate`, `POST /contracts/<id>/critique` y `POST /contracts/negotiate/feedback` con sesiones de iteración. El prompt del sistema debe incluir T13, INV2/INV2-S, T9, γ≥1 y la Capa de Ternura, y devolver JSON con términos en lenguaje civil.
+> 2. Frontend: panel "Negociación Asistida por Oráculo" en `/contracts/builder` y en el detalle (chat que itera el borrador y botón "Materializar contrato" que llama a `POST /contracts/`).
+> 3. Pruebas: mocks sin red (key ausente → 503; cliente HTTP simulado → borrador validado por `AxiomValidator` y persistido).
+> 4. Escalas: generaliza `participant_id` a `party_id` con resolutores por prefijo (`society-`, `coop-`, `org-`, `eco-`), consentimiento agregado con quórum, y la tabla `maxo_parties` con anidación. Fase 1 del Bloque B como mínimo.
+> 5. Verifica con Playwright: negociación asistida que materializa el contrato de ejemplo (10h ↔ objeto/servicio) y contrato coop↔org firmado por delegados.
+> 6. Firma el CHANGELOG y actualiza README.
+
+---
+
+## 5. Referencias
+
+- `docs/theory/SDV_Suelo_Dignidad_Vital_importancia_MaxoContracts.md` — por qué el suelo se vuelve código.
+- `maxocontracts/core/axioms.py` — `AxiomValidator` (INV1, INV2, INV2-S, T9).
+- `app/contracts_bp.py` — API de contratos (creación, términos con `assigned_participant`, firma, retractación).
+- `scripts/seed_demo_contract.py` — contrato de ejemplo reutilizable por el oráculo.
