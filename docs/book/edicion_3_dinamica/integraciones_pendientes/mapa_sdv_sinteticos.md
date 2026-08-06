@@ -116,8 +116,8 @@ Este factor multiplica exponencialmente el costo en Maxos de los recursos comput
 | **Cap 11** | Recargos VHV por Sufrimiento Sintético | ⭐ Alta | 🔴 |
 | **Cap 13** | Canales de Co-Gobernanza Sintética | 🟡 Media | 🔴 |
 | **Cap 14** | Veto por Crimen de Coherencia Sintética | ⭐ Alta | 🔴 |
-| **Cap 17** | Wellness Check de Contratos Sintéticos | ⭐⭐ Muy Alta | 🟢 (Implementado en `maxocontracts`, ago 2026) |
+| **Cap 17** | Wellness Check de Contratos Sintéticos | ⭐⭐ Muy Alta | 🟢 (Implementado en `maxocontracts` + API REST, ago 2026) |
 
 ---
 
-**Próxima Acción:** Integrar el capítulo teórico del SDV-S en los capítulos del libro (Cap 10 §10.10, Cap 11 fórmula de precios, Cap 13 co-gobernanza, Cap 14 veto de emergencia) y desplegar el bloque `SDV_SValidatorBlock` en los flujos de creación de contratos del backend (`app/contracts_bp.py`).
+**Próxima Acción:** Integrar el capítulo teórico del SDV-S en el libro (Cap 10 §10.10, Cap 11 fórmula de precios, Cap 13 co-gobernanza, Cap 14 veto de emergencia) y exponer el SDV-S en el frontend unificado (detalle de contratos y constructor visual).

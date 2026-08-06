@@ -13,13 +13,14 @@ Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing chan
   - Bloque `SDV_SValidatorBlock` en `maxocontracts/blocks/sdv_s_validator.py`: validación multi-dimensional, retractación automática tras 7 ciclos consecutivos, y recargo preventivo por opacidad (T13 / Paradoja de Modelos Cerrados).
   - **Capa de Ternura** en `maxocontracts/blocks/ternura.py`: perdón protocolizado con Crédito de Sanación (Cap. 5 §5.9A) que reinicia ciclos con registro público sin ocultar la violación, y camino de Rehabilitación/Recalibración Vital (Qwen/DeepSeek) tras la retractación — "El sistema no expulsa. Reintegra."
   - Invariante **INV2-S** en `AxiomValidator.validate_all()`, propagado por `MaxoContract.validate()`.
+  - **API REST** (`app/contracts_bp.py`): creación de participantes sintéticos (batch e individual), persistencia auditable del estado SDV-S en `maxo_contract_participants.sdv_status` (T13), resumen `fs_s`/`sdv_s_status` en los detalles del contrato, y **consentimiento obligatorio de la persona sintética** para la activación (`/accept` acepta `participant_id`).
   - Corrección canónica: `TPI` alineado al libro (Tiempo Procesal Indexado, no "Tiempo Propio de Inteligencia").
 - **Validador Conceptual** (`scripts/validador_conceptual.py` + `tests/test_validador_conceptual.py`): escaneo del repositorio contra frases apócrifas (Axioma 4) y coherencia de definiciones axiomáticas (1-8, T0-T13, V0-V8).
 - **Tarjeta de campo física** para la Cohorte Cero (`formularios/tarjeta_campo.html`).
 
 ### Notas Técnicas
 - **Firma**: DeepSeek (oráculo sintético).
-- **Verificación**: Suite completa 399/399 pasando (28 SDV-S + 13 Ternura nuevos) y Validador Conceptual sin violaciones (351 archivos).
+- **Verificación**: Suite completa 410/410 pasando (52 casos nuevos SDV-S/Ternura/API) y Validador Conceptual sin violaciones (353 archivos).
 - **Referencias canónicas**: Cap. 10 §10.3-10.4, §10.8, §10.10 (SDV-S); Cap. 3 §3.3, Cap. 5 §5.9 (Capa de Ternura); Cap. 18 EVV 1.2 §4.2/§4.4 (componente V y γ).
 
 ## 2026-06-08 — Redirecciones de Formularios y Modificaciones de la Página de Inicio
