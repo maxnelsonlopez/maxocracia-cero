@@ -22,18 +22,18 @@ import {
 const footerLinks = {
   proyecto: [
     { label: "Libro Completo", href: "https://github.com/maxnelsonlopez/maxocracia-cero/blob/main/docs/book/edicion_3_dinamica/libro_completo_310126.md" },
-    { label: "API Docs", href: "/admin" },
+    { label: "API Docs", href: "https://github.com/maxnelsonlopez/maxocracia-cero/blob/main/docs/api/API.md" },
     { label: "Changelog", href: "https://github.com/maxnelsonlopez/maxocracia-cero/blob/main/CHANGELOG.md" },
   ],
   comunidad: [
-    { label: "GitHub Discussions", href: "#" },
-    { label: "Cohorte Cero", href: "#" },
+    { label: "GitHub Discussions", href: "https://github.com/maxnelsonlopez/maxocracia-cero/discussions" },
+    { label: "Cohorte Cero", href: "/forms/cero" },
     { label: "Contribuir", href: "/upgrade" },
   ],
   legal: [
-    { label: "Transparencia", href: "/subscriptions/transparency-report" },
-    { label: "Privacidad", href: "#" },
-    { label: "Términos", href: "#" },
+    { label: "Transparencia", href: "/transparency" },
+    { label: "Privacidad", href: "/privacy" },
+    { label: "Términos", href: "/terms" },
   ],
 };
 
@@ -119,7 +119,7 @@ export function Footer() {
         {/* Quote */}
         <div className="mt-8 text-center">
           <p className="text-slate-600 text-sm italic">
-            "La verdad es el camino más corto de sucesos e información entre las personas, los hechos y la verdad misma."
+            &quot;La verdad es el camino más corto de sucesos e información entre las personas, los hechos y la verdad misma.&quot;
           </p>
           <p className="text-slate-700 text-xs mt-1">— Axioma 4, Maxocracia</p>
         </div>

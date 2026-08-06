@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-06 — Páginas de Transparencia, Privacidad y Términos
+
+### Añadido
+- **Página `/transparency`** (`frontend/app/transparency/`): reporte de Transparencia Radical (Axioma T13) con datos vivos del endpoint público `/subscriptions/transparency-report`: KPIs (costo mensual, ingresos acumulados, superávit, ancla blockchain), desglose de costos operativos con barras, gráfica de ingresos por mes (Chart.js), principios del reporte en español y estrategia de excedentes.
+- **Página `/privacy`**: Privacidad y Opacidad Sagrada, anclada en la Capa de Ternura y el Derecho a la Opacidad (tiempo sagrado opaco 10-20%), datos mínimos, protección de lo inefable (EVV-1.2 §1.3), borrado a solicitud y "lo que NO hacemos".
+- **Página `/terms`**: Términos de Participación, anclados en los Ocho Axiomas, el experimento abierto de la Cohorte Cero, la participación voluntaria y la licencia CC BY-SA 4.0 / MIT.
+- **Footer reactivado** (`frontend/app/components/Footer.tsx`): Transparencia → `/transparency`, Privacidad → `/privacy`, Términos → `/terms`, Cohorte Cero → `/forms/cero`, GitHub Discussions → URL real del repo, API Docs → `docs/api/API.md` en GitHub. Eliminados todos los placeholders `#`.
+
+### Notas Técnicas
+- **Firma**: DeepSeek (oráculo sintético).
+- **Verificación**: `tsc --noEmit` y eslint sin errores en los archivos nuevos; build estático exportado (49 gemelos RSC dot-form); verificación con Playwright: `/transparency` renderiza datos vivos del endpoint, footer navega por clic a las 3 páginas nuevas, `/privacy` y `/terms` renderizan su contenido.
+- **Referencias canónicas**: Axioma T13 (Transparencia Radical), Capa de Ternura §3.3 (Derecho a la Opacidad, Protección de lo Inefable), Axioma 6 (Revelación Responsable), Cap. 15 (Protocolo de Aborto y participación voluntaria).
+
 ## 2026-08-06 — Corrección de Navegación Cliente en el Panel Admin
 
 ### Corregido
