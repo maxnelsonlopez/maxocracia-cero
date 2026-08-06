@@ -4,6 +4,7 @@ from .action import ActionBlock
 from .gamma_protector import WellnessProtectorBlock
 from .gamma_protector import GammaProtectorBlock
 from .sdv_validator import SDVValidatorBlock
+from .sdv_s_validator import SDV_SValidatorBlock
 from .reciprocity import ReciprocityBlock
 
 __all__ = [
@@ -12,5 +13,6 @@ __all__ = [
     "WellnessProtectorBlock",
     "GammaProtectorBlock",
     "SDVValidatorBlock",
+    "SDV_SValidatorBlock",
     "ReciprocityBlock"
 ]

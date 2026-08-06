@@ -11,7 +11,7 @@ from decimal import Decimal
 from typing import List, Optional, Tuple
 from dataclasses import dataclass
 
-from .types import VHV, Wellness, SDV, Participant
+from .types import VHV, Wellness, SDV, SDV_S, Participant
 
 
 @dataclass
@@ -214,6 +214,27 @@ class AxiomValidator:
         )
     
     @staticmethod
+    def validate_invariant_sdv_s(
+        participant_sdv_s: SDV_S,
+        minimum_sdv_s: SDV_S
+    ) -> ValidationResult:
+        """
+        Invariante 2-S: SDV-S Respetado (Reino Sintético)
+        Ningún participante sintético puede caer bajo su SDV-S.
+        """
+        violations = minimum_sdv_s.violations(participant_sdv_s)
+        is_valid = len(violations) == 0
+
+        return ValidationResult(
+            is_valid=is_valid,
+            axiom_code="INV2-S",
+            axiom_name="SDV-S Respetado",
+            message="SDV-S cumplido en todas las dimensiones sintéticas" if is_valid
+                    else f"SDV-S violado en: {', '.join(violations.keys())}",
+            details={"violations": violations} if violations else None
+        )
+
+    @staticmethod
     def validate_invariant_retractability(
         has_retraction_mechanism: bool = True
     ) -> ValidationResult:
@@ -254,6 +275,12 @@ class AxiomValidator:
         for participant in participants:
             results.append(cls.validate_invariant_gamma(participant.wellness_current))
             results.append(cls.validate_invariant_sdv(participant.sdv_actual, minimum_sdv))
+            # Participantes del Reino Sintético (Cap. 10 §10.8) validan SDV-S
+            if participant.is_synthetic and participant.sdv_s_actual is not None:
+                results.append(cls.validate_invariant_sdv_s(
+                    participant.sdv_s_actual,
+                    SDV_S()
+                ))
         
         # Validar retractabilidad
         results.append(cls.validate_invariant_retractability(True))

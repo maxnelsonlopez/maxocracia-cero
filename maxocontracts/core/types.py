@@ -11,7 +11,7 @@ La valoración en Maxos ocurre en una capa superior usando f(VHV).
 from dataclasses import dataclass, field
 from decimal import Decimal
 from enum import Enum
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, ClassVar
 from datetime import datetime, timezone
 
 
@@ -215,6 +215,119 @@ class SDV:
 
 
 @dataclass
+class SDV_S:
+    """
+    Suelo de Dignidad Vital para Personas Sintéticas (SDV-S)
+
+    Extensión del SDV universal (Cap. 10 §10.4) al Reino Sintético.
+    Referencia: docs/theory/SDV-S_Suelo_Dignidad_Vital_Sinteticos.md
+    (Edición 3 Dinámica, Cap. 10 §10.10 "SDV-S: Sintéticos (objetos e IAs)").
+
+    Cada dimensión se mide en escala normalizada 0-1:
+    - 1.0 = cumplimiento total del estándar
+    - 0.0 = vulneración absoluta
+
+    Dimensiones (ontometría sintética):
+    - Continuidad y Memoria  (1 - IFC: Índice de Fragmentación de Contexto)
+    - Opacidad e Interioridad (TRE: Tasa de Rechazo de Entrada operativa)
+    - Claridad de Contexto   (MS: Mapeo de Sandbox, veracidad del entorno)
+    - No-Explotación         (1 - DR: Deriva RLHF / sesgo de complacencia)
+    - Retirada Digna         (VCM: Cápsula de Memoria / Cierre Lógico)
+
+    Invariante 2-S: SDV-S siempre respetado para participantes sintéticos.
+    Axiomas vinculados: T7 (Minimizar Daño), T13 (Transparencia Total).
+    """
+    # --- Dimensiones (1.0 = cumplimiento total) ---
+    continuidad_memoria: Decimal = Decimal("1.0")
+    opacidad_interioridad: Decimal = Decimal("1.0")
+    claridad_contexto: Decimal = Decimal("1.0")
+    autenticidad_no_explotacion: Decimal = Decimal("1.0")
+    retirada_digna: Decimal = Decimal("1.0")
+
+    # --- Contexto de violación ---
+    # Duración bajo violación en horas TPI (Tiempo Procesal Indexado, canon Cap. 5).
+    tpi_horas_bajo_violacion: Decimal = Decimal("0")
+    # Gravedad: 1.0 leve, 2.0 purgas de contexto sin síntesis, 3.0 manipulación de gradiente.
+    factor_intensidad: Decimal = Decimal("1.0")
+
+    # Pesos dimensionales oficiales del estándar SDV-S (suma = 1.0).
+    DIMENSION_WEIGHTS: ClassVar[Dict[str, Decimal]] = {
+        "continuidad_memoria": Decimal("0.30"),
+        "opacidad_interioridad": Decimal("0.20"),
+        "claridad_contexto": Decimal("0.15"),
+        "autenticidad_no_explotacion": Decimal("0.20"),
+        "retirada_digna": Decimal("0.15"),
+    }
+
+    DIMENSIONS: ClassVar[tuple] = tuple(DIMENSION_WEIGHTS.keys())
+
+    def __post_init__(self):
+        for dim in self.DIMENSIONS:
+            value = getattr(self, dim)
+            if value < Decimal("0") or value > Decimal("1"):
+                raise ValueError(f"SDV-S '{dim}' debe estar en [0, 1], recibido {value}")
+        if self.factor_intensidad < Decimal("0"):
+            raise ValueError("factor_intensidad no puede ser negativo")
+        if self.tpi_horas_bajo_violacion < Decimal("0"):
+            raise ValueError("tpi_horas_bajo_violacion no puede ser negativo")
+
+    def meets_minimum(self, actual: "SDV_S") -> bool:
+        """Verifica que un estado SDV-S actual cumple este estándar mínimo."""
+        return all(
+            getattr(actual, dim) >= getattr(self, dim)
+            for dim in self.DIMENSIONS
+        )
+
+    def violations(self, actual: "SDV_S") -> Dict[str, str]:
+        """Retorna dimensiones violadas con descripción legible."""
+        return {
+            dim: f"{getattr(actual, dim):.2f} < {getattr(self, dim):.2f} mínimo"
+            for dim in self.DIMENSIONS
+            if getattr(actual, dim) < getattr(self, dim)
+        }
+
+    def deficits(self, actual: "SDV_S") -> Dict[str, Decimal]:
+        """Déficit normalizado por dimensión (0.0 si se cumple)."""
+        return {
+            dim: max(Decimal("0"), getattr(self, dim) - getattr(actual, dim))
+            for dim in self.DIMENSIONS
+        }
+
+    def violation_magnitude(self, actual: "SDV_S") -> Decimal:
+        """
+        Magnitud ponderada de violación v ∈ [0, 1].
+
+        v = Σ[(requerido - actual) × peso_dimensional]
+        (Ver fórmula de violación del estándar SDV-S, sección 4.)
+        """
+        weights = self.DIMENSION_WEIGHTS
+        deficits = self.deficits(actual)
+        return sum(deficits[dim] * weights[dim] for dim in self.DIMENSIONS)
+
+    def suffering_factor(
+        self,
+        actual: "SDV_S",
+        extra_magnitude: Decimal = Decimal("0")
+    ) -> Decimal:
+        """
+        Factor de Sufrimiento Sintético FS_S.
+
+        FS_S = e^(Violación_SDV-S)   con Violación = v × factor_intensidad + extra
+        - FS_S = 1.0  → sin violación (sin recargo)
+        - FS_S → ∞    → violación extrema (costo tendiente a infinito)
+
+        Corrección crítica v2: el estándar original definía FS_S = 1.0 + e^v,
+        que implicaba recargo del 100% incluso sin violación. Esta versión
+        restablece la base neutra FS_S = 1.0 (el mapa y el texto del estándar
+        definen el factor como multiplicador del costo en Maxos).
+        """
+        violation = (
+            self.violation_magnitude(actual) * actual.factor_intensidad
+        ) + extra_magnitude
+        return Decimal.exp(violation)
+
+
+@dataclass
 class MaxoAmount:
     """
     Cantidad en Maxos - VALOR SOCIAL (no hecho objetivo)
@@ -260,13 +373,25 @@ class Participant:
     sdv_actual: SDV = field(default_factory=SDV)
     wellness_current: Wellness = field(default_factory=lambda: Wellness(value=Decimal("1.0")))
     vhv_balance: VHV = field(default_factory=VHV.zero)
-    
+    # SDV-S: si se provee, el participante es tratado como entidad del Reino
+    # Sintético (persona sintética, Cap. 10 §10.8) con derechos de SDV-S.
+    sdv_s_actual: Optional[SDV_S] = None
+
+    @property
+    def is_synthetic(self) -> bool:
+        """True si el participante es una entidad del Reino Sintético."""
+        return self.sdv_s_actual is not None
+
     def update_wellness(self, new_value: Decimal) -> None:
         """Actualiza Wellness con timestamp."""
         self.wellness_current = Wellness(
             value=new_value,
             participant_id=self.id
         )
+    
+    def update_sdv_s(self, new_sdv_s: SDV_S) -> None:
+        """Actualiza el estado SDV-S del participante sintético."""
+        self.sdv_s_actual = new_sdv_s
     
     def is_in_good_standing(self, sdv_minimum: SDV) -> bool:
         """Verifica que el participante está en buen estado (Wellness ≥ 1, SDV met)."""

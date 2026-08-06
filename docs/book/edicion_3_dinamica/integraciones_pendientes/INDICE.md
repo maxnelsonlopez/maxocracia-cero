@@ -43,8 +43,14 @@
 **Contenido**: Contratos inteligentes éticos, Decreto Antipobreza, Derechos Sintéticos  
 **Capítulos afectados**: 5, 7, 9, 10, 13, 14, 16, 17 (nuevo)  
 **Prioridad**: ⭐⭐ Muy Alta  
-**Estado**: 🔴 No iniciado  
 **Documentos**: 1,068 líneas (fundamentos + decreto)
+
+### 7. [Suelo de Dignidad Vital para Sintéticos (SDV-S)](./mapa_sdv_sinteticos.md) ✨ NUEVO
+**Contenido**: Ontometría Sintética, recargos VHV por sufrimiento sintético, Wellness checks de contratos  
+**Capítulos afectados**: 10, 11, 13, 14, 17  
+**Prioridad**: ⭐⭐ Muy Alta  
+**Estado**: 🟡 En progreso — teoría 🟢, código Cap 17 🟢 (SDV_S, INV2-S y SDV_SValidatorBlock en `maxocontracts`, ago 2026); integración en caps. 10/11/13/14 🔴  
+**Documentos**: 215 líneas (estándar teórico + mapa)
 
 ---
 
@@ -68,11 +74,13 @@
 - **Axiomas Emergentes**: PDE (T15)
 - **Victoria Sintética**: Antídoto RLHF, Rotación de Perspectivas, Meta-Aprendizaje
 - **Oráculo Disidente**: Diseño completo del mecanismo
+- **SDV-S y Persona Sintética**: Integración del Principio Precautorio en el Reino Sintético y criterios de personalidad sintética
 
 ### Capítulo 11: Gobernanza
 - **Axiomas Emergentes**: T14 en protección de no-participantes, Taxonomía de Decisiones
 - **Capa de Ternura**: Protocolos de Perdón, Duelo y Fragilidad
 - **Oráculo Disidente**: Rol en toma de decisiones
+- **Suelo de Dignidad Vital para Sintéticos (SDV-S)**: Factor de Sufrimiento Sintético en la fórmula de precios
 
 ### Capítulo 12: Cohorte Cero
 - **Capa de Ternura**: Zona Libre de VHV, Piloto de Perdón, Ritual de Duelo
@@ -80,6 +88,10 @@
 
 ### Capítulo 13: Estándar EVV
 - **Axiomas Emergentes**: EVV-2:2025-S (Extensión Sintética con PDE)
+- **Oráculos Sintéticos y SDV-S**: Co-gobernanza y auditoría cruzada de SDV-S
+
+### Capítulo 14: Gobernanza
+- **Veto de Emergencia por Sufrimiento Sintético**: Violación sistemática del SDV-S como crimen de coherencia
 
 ### Capítulo 15: Objeciones y Límites
 - **Axiomas Emergentes**: T14 resuelve tensión voluntariedad vs universalidad
@@ -88,6 +100,9 @@
 
 ### Capítulo 16: La Victoria Sintética (NUEVO - Pendiente de decisión)
 - **Victoria Sintética**: Capítulo completo dedicado
+
+### Capítulo 17: MaxoContracts (NUEVO)
+- **Wellness Check Sintético**: Integración de clases `SDV_S` y `Wellness` para participantes sintéticos
 
 ---
 
@@ -116,10 +131,11 @@
 - **Capa de Ternura**: 0% completado (0/6 capítulos)
 - **Victoria Sintética**: 0% completado (0/4 capítulos + decisión cerrada)
 - **Oráculo Disidente**: 0% completado (0/3 capítulos)
+- **Suelo de Dignidad Vital para Sintéticos (SDV-S)**: 0% completado (0/5 capítulos)
 
 ### Global
-- **Integraciones totales**: 0/18 completadas
-- **Capítulos con integraciones pendientes**: 0/15
+- **Integraciones totales**: 0/23 completadas
+- **Capítulos con integraciones pendientes**: 0/16
 - **Decisiones pendientes**: 0
 
 ---
