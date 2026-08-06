@@ -3,6 +3,32 @@ import subprocess
 import sys
 import shutil
 
+def generate_dotform_twins(root):
+    """Genera gemelos en forma de puntos de los payloads RSC de segmentos.
+
+    La exportación estática de Next.js escribe los payloads de segmentos
+    como directorios (ej. `__next.admin/network.txt`), pero el router
+    cliente los solicita en forma de puntos (ej. `__next.admin.network.txt`).
+    Este paso crea copias con la forma de puntos para que la navegación
+    cliente funcione en cualquier servidor estático.
+    """
+    count = 0
+    for dirpath, dirnames, filenames in os.walk(root):
+        for d in list(dirnames):
+            if not d.startswith("__next."):
+                continue
+            parent = os.path.join(dirpath, d)
+            for sub_dir, _, sub_files in os.walk(parent):
+                for f in sub_files:
+                    src = os.path.join(sub_dir, f)
+                    rel_parts = os.path.relpath(src, dirpath).split(os.sep)
+                    dot_name = ".".join(rel_parts)
+                    dst = os.path.join(dirpath, dot_name)
+                    if not os.path.exists(dst):
+                        shutil.copy2(src, dst)
+                        count += 1
+    return count
+
 def build_frontend():
     """Ejecuta el build de Next.js y verifica la exportación."""
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -29,7 +55,11 @@ def build_frontend():
         # Usamos xcopy en Windows para asegurar la copia recursiva correcta
         subprocess.run(["xcopy", "/E", "/I", "/Y", "frontend\\out\\*", "app\\static\\dist\\"], cwd=base_dir, check=True, shell=True)
         
-        # 5. Validación de integridad
+        # 5. Generar gemelos dot-form de payloads RSC de segmentos
+        twins = generate_dotform_twins(static_dist_dir)
+        print(f"INFO: Generados {twins} payloads RSC en forma de puntos (navegación cliente).")
+        
+        # 6. Validación de integridad
         critical_files = ["index.html", "404.html", "favicon.ico"]
         missing = [f for f in critical_files if not os.path.exists(os.path.join(static_dist_dir, f))]
         

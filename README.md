@@ -37,6 +37,7 @@ La **Maxocracia** es un sistema ético-económico-político alternativo que prop
 - **MicroMaxocracia v1.0**: Registro interactivo de CDD, balance de Tres Cuentas en UI, encuesta de seguridad ESI con pantalla de bloqueo y monitor Detox relacional en tiempo real.
 - **Nexus Simulator v2.2**: Simulador interactivo del VHV con Modo Oráculo Dinámico.
 - **MaxoContracts v2.4**: Persistencia SQLite, 5 bloques modulares, oráculo sintético, constructor de contratos visual (React Flow) con biblioteca de plantillas, validador de grafos y UX sobre-explicada liminal.
+- **Dashboard de Métricas MaxoContracts**: Panel `/admin/contracts` con γ (bienestar), alertas del Invariante 1 (γ<1), violaciones SDV (humanos y sintéticos), NPS de la Cohorte y progreso hacia la meta de 50 contratos.
 - **Calculadora VHV**: Frontend completo con Chart.js integrado en el portal.
 - **Sistema TVI**: Detección de overlap temporal, cálculo de CCP.
 - **319 tests** (319/319 pasando, ~85% cobertura) ✅ (Backend Core + Blocks + Visual Graph Validation)

@@ -36,15 +36,20 @@
   - [x] Implementar visualización de flujo, leyendas explicativas y glosario en UI
   - **Entregables**: 5 bloques funcionales, app MVP de visual builder, 3 contratos de prueba
 
-- [/] **Semana 5-8: Validación (Febrero 20 - Junio)**
-  - [/] Completar 5 bloques + auditoría (ver maxocontracts_audit_report.md)
+- [x] **Semana 5-8: Validación (Febrero 20 - Junio)** ✅ PARCIAL (backend + dashboard)
+  - [x] Completar 5 bloques + auditoría (ver maxocontracts_audit_report.md)
   - [x] Biblioteca de plantillas predefinidas en la barra lateral (Colaboración, Soporte, Préstamo)
+  - [x] **Implementar dashboard de métricas (γ, SDV, NPS)** (Completado 2026-08-06)
+    - [x] Endpoint `GET /contracts/stats`: γ promedio/mínimo + histograma + alertas Invariante 1
+    - [x] Violaciones SDV (humanos + Personas Sintéticas SDV-S)
+    - [x] NPS: registro `POST /contracts/<id>/nps` + score agregado + distribución
+    - [x] Tendencias semanales, categorías (aseo/préstamo/comida) y VHV agregado
+    - [x] Panel `/admin/contracts` en el frontend unificado (KPIs, gráficas, alertas, registro NPS)
+    - [x] Suite de tests `test_contracts_stats.py` (417/417 totales)
   - [ ] Ejecutar 50+ contratos en Cohorte Cero
     - [ ] 20 contratos de aseo compartido
     - [ ] 15 contratos de préstamos sin usura
     - [ ] 15 contratos de comidas colaborativas
-  - [ ] Implementar dashboard de métricas (γ, SDV, NPS)
-  - **Entregables**: 5 bloques completos, 50+ contratos ejecutados, dashboard
 
 - [ ] **Semana 9-12: Análisis (Marzo 20 - Abril 16)**
   - [ ] Analizar 50+ casos (patrones, γ promedio, retractaciones)

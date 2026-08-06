@@ -427,6 +427,28 @@ CREATE TABLE IF NOT EXISTS maxo_contract_events (
     FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE
 );
 
+-- Métricas de MaxoContracts (dashboard de Cohorte Cero: γ, SDV, NPS)
+CREATE TABLE IF NOT EXISTS maxo_contract_nps (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    contract_id TEXT NOT NULL,
+    participant_id TEXT NOT NULL, -- user-ID o synthetic-*
+    score INTEGER NOT NULL CHECK(score >= 0 AND score <= 10),
+    comment TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
+    UNIQUE(contract_id, participant_id)
+);
+
+CREATE TABLE IF NOT EXISTS maxo_contract_meta (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    contract_id TEXT NOT NULL,
+    meta_key TEXT NOT NULL, -- ej: 'category' (aseo | prestamo | comida | otros)
+    meta_value TEXT NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
+    UNIQUE(contract_id, meta_key)
+);
+
 CREATE TABLE IF NOT EXISTS api_keys (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,

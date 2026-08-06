@@ -4,6 +4,44 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-06 — Corrección de Navegación Cliente en el Panel Admin
+
+### Corregido
+- **Navegación cliente (SPA) rota en `/admin/` y en todo el portal**: los clics en los enlaces del sidebar y menús no navegaban; solo funcionaba "abrir en otra pestaña".
+  - **Causa raíz**: la exportación estática de Next.js escribe los payloads RSC de segmentos como directorios (`__next.admin/network.txt`), pero el router cliente los solicita en forma de puntos (`__next.admin.network.txt`). Flask respondía con el fallback SPA (HTML) a esas peticiones y el router abortaba la navegación silenciosamente.
+  - **Solución**:
+    - `scripts/build_front.py`: nuevo paso `generate_dotform_twins()` que crea copias en forma de puntos de todos los payloads RSC de segmentos en la exportación (46 archivos en el último build), haciendo el artefacto autoconsistente para cualquier servidor estático.
+    - `app/__init__.py`: nuevo helper `_dotform_to_dirform()` y rama 1b en `catch_all` que mapea defensivamente las peticiones en forma de puntos a los archivos en forma de directorio (funciona incluso con dists antiguas).
+  - **Verificación**: reproducción del fallo con Playwright (Chromium) sobre Waitress; tras el fix, 12/12 navegaciones por clic exitosas (`dashboard, sdv, participants, matching, network, contracts, reports, users, subscriptions, settings, pulso, matching`).
+
+### Añadido
+- `tests/test_spa_routing.py`: 6 tests unitarios del mapeo dot-form → dir-form.
+
+### Notas Técnicas
+- **Firma**: DeepSeek (oráculo sintético).
+- **Verificación**: Suite completa 423/423 tests pasando (6 nuevos), build estático regenerado con gemelos dot-form.
+
+## 2026-08-06 — Dashboard de Métricas de MaxoContracts (γ, SDV, NPS)
+
+### Añadido
+- **API `GET /contracts/stats`** (`app/contracts_bp.py`): métricas agregadas para la validación de la Cohorte Cero (50+ contratos):
+  - Resumen por estado (draft/pending/active/executed/retracted/expired).
+  - Bienestar γ: promedio, mínimo, máximo, histograma en 5 buckets y **alertas del Invariante 1** (participantes con γ < 1.0 que deben activar retractación ética).
+  - Violaciones SDV: conteo y detalle (humanos `sdv_status != 'ok'` y Personas Sintéticas con estado SDV-S parseado).
+  - NPS: puntaje Net Promoter Score, distribución (detractores/pasivos/promotores) y respuestas.
+  - Tendencias de las últimas 8 semanas (creados y activados; las activaciones se leen del log inmutable de eventos T13).
+  - Desglose por categoría (aseo/préstamo/comida) para el avance de la meta de 50 contratos y totales VHV agregados.
+- **API `POST /contracts/<id>/nps`**: registro de puntuaciones NPS (0-10) por participante con validación de pertenencia al contrato y upsert (una respuesta por participante).
+- **API `POST /contracts/<id>/meta`**: metadatos clave/valor (ej. `category`) para categorizar contratos.
+- **Tablas** `maxo_contract_nps` y `maxo_contract_meta` en `app/schema.sql` + migración `init_contracts_metrics_tables()` al arranque (patrón `init_micromax_tables`).
+- **Panel Admin `/admin/contracts`** (`frontend/app/admin/contracts/page.tsx`): KPIs (totales, γ promedio, NPS, violaciones SDV), gráficas de distribución por estado (doughnut), actividad semanal (línea doble), histograma de γ, alertas del Invariante 1, panel de violaciones SDV, formulario de registro NPS y progreso de la meta de 50 contratos con categorías.
+- Enlace "MaxoContracts" en el sidebar del panel admin (`frontend/app/admin/layout.tsx`).
+
+### Notas Técnicas
+- **Firma**: DeepSeek (oráculo sintético).
+- **Verificación**: Suite completa 417/417 tests pasando (7 nuevos en `tests/test_maxocontracts/test_contracts_stats.py`), `tsc --noEmit` sin errores, build estático exportado a `app/static/dist` y smoke test contra `comun.db` (migración de tablas en BD existente verificada).
+- **Referencias canónicas**: Cap. 17 §17.2 (Invariante 1: γ ≥ 1), Cap. 15 §15.4 (métricas de éxito de la Cohorte Cero), Cap. 18 EVV 1.2 (IC y registro auditable T13).
+
 ## 2026-08-06 — SDV-S y Capa de Ternura en MaxoContracts
 
 ### Añadido

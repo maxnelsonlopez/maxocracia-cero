@@ -15,6 +15,7 @@ Endpoints:
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+import sqlite3
 
 from flask import Blueprint, jsonify, request
 
@@ -49,6 +50,47 @@ from decimal import Decimal
 import json
 
 contracts_bp = Blueprint("contracts", __name__, url_prefix="/contracts")
+
+
+def init_contracts_metrics_tables(app):
+    """Crea las tablas de métricas (NPS y metadatos) si no existen.
+
+    Sigue el patrón de init_subscription_tables / init_micromax_tables:
+    permite que bases de datos ya existentes reciban las tablas nuevas
+    sin re-ejecutar todo el schema.sql.
+    """
+    db_path = app.config["DATABASE"]
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS maxo_contract_nps (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                contract_id TEXT NOT NULL,
+                participant_id TEXT NOT NULL,
+                score INTEGER NOT NULL CHECK(score >= 0 AND score <= 10),
+                comment TEXT,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
+                UNIQUE(contract_id, participant_id)
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS maxo_contract_meta (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                contract_id TEXT NOT NULL,
+                meta_key TEXT NOT NULL,
+                meta_value TEXT NOT NULL,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
+                UNIQUE(contract_id, meta_key)
+            )
+        """)
+        conn.commit()
+    finally:
+        conn.close()
+
 
 @contracts_bp.route("/builder")
 def serve_builder():
@@ -400,6 +442,311 @@ def create_contract(current_user):
         "state": contract.state.value,
         "created_at": datetime.now().isoformat()
     }), 201
+
+
+@contracts_bp.route("/stats", methods=["GET"])
+@token_required
+def contract_stats(current_user):
+    """
+    Métricas agregadas de MaxoContracts para el dashboard de la Cohorte Cero.
+
+    Devuelve:
+    - summary: totales y conteo por estado
+    - gamma: promedio/mínimo de bienestar (γ) y distribución de participantes
+    - sdv: violaciones del Suelo de Dignidad Vital (humanos y sintéticos)
+    - nps: Net Promoter Score y distribución de respuestas
+    - trends: contratos creados y activados por semana (últimas 8 semanas)
+    - categories: desglose por categoría (aseo, prestamo, comida, otros)
+    - vhv: totales agregados de T, V, R
+    """
+    db = get_db()
+
+    # --- Summary por estado ---
+    state_rows = db.execute(
+        "SELECT state, COUNT(*) AS n FROM maxo_contracts GROUP BY state"
+    ).fetchall()
+    by_state = {row["state"]: row["n"] for row in state_rows}
+    total = sum(by_state.values())
+
+    # --- Gamma (bienestar) de participantes ---
+    gamma_rows = db.execute(
+        """
+        SELECT cp.participant_id, cp.wellness_value, cp.contract_id, c.state
+        FROM maxo_contract_participants cp
+        JOIN maxo_contracts c ON c.contract_id = cp.contract_id
+        """
+    ).fetchall()
+
+    wellness_values = [row["wellness_value"] for row in gamma_rows]
+    gamma_distribution = {
+        "lt_05": sum(1 for v in wellness_values if v < 0.5),
+        "05_08": sum(1 for v in wellness_values if 0.5 <= v < 0.8),
+        "08_10": sum(1 for v in wellness_values if 0.8 <= v < 1.0),
+        "10_12": sum(1 for v in wellness_values if 1.0 <= v < 1.2),
+        "gte_12": sum(1 for v in wellness_values if v >= 1.2),
+    }
+
+    gamma_alerts = []
+    seen_alerts = set()
+    for row in gamma_rows:
+        if row["wellness_value"] < 1.0:
+            key = (row["contract_id"], row["participant_id"])
+            if key not in seen_alerts:
+                seen_alerts.add(key)
+                gamma_alerts.append({
+                    "contract_id": row["contract_id"],
+                    "contract_state": row["state"],
+                    "participant_id": row["participant_id"],
+                    "gamma": row["wellness_value"],
+                })
+    gamma_alerts.sort(key=lambda a: a["gamma"])
+
+    # --- SDV: violaciones ---
+    sdv_rows = db.execute(
+        """
+        SELECT cp.contract_id, cp.participant_id, cp.sdv_status, c.state
+        FROM maxo_contract_participants cp
+        JOIN maxo_contracts c ON c.contract_id = cp.contract_id
+        WHERE cp.sdv_status IS NOT NULL AND cp.sdv_status != 'ok'
+        """
+    ).fetchall()
+
+    sdv_violations = []
+    for row in sdv_rows:
+        status = row["sdv_status"]
+        detail = None
+        try:
+            parsed = json.loads(status)
+            detail = parsed
+        except (ValueError, TypeError):
+            pass
+        sdv_violations.append({
+            "contract_id": row["contract_id"],
+            "contract_state": row["state"],
+            "participant_id": row["participant_id"],
+            "status": detail if detail is not None else status,
+        })
+
+    # --- NPS ---
+    nps_rows = db.execute(
+        "SELECT score, comment, contract_id, participant_id FROM maxo_contract_nps"
+    ).fetchall()
+    nps_scores = [row["score"] for row in nps_rows]
+    nps = None
+    nps_distribution = {"detractors": 0, "passives": 0, "promoters": 0}
+    if nps_scores:
+        n_detractors = sum(1 for s in nps_scores if s <= 6)
+        n_passives = sum(1 for s in nps_scores if s in (7, 8))
+        n_promoters = sum(1 for s in nps_scores if s >= 9)
+        nps_distribution = {
+            "detractors": n_detractors,
+            "passives": n_passives,
+            "promoters": n_promoters,
+        }
+        nps = round(
+            ((n_promoters - n_detractors) / len(nps_scores)) * 100.0, 1
+        )
+
+    nps_responses = [
+        {
+            "contract_id": row["contract_id"],
+            "participant_id": row["participant_id"],
+            "score": row["score"],
+            "comment": row["comment"],
+        }
+        for row in nps_rows
+    ]
+
+    # --- Tendencias: últimas 8 semanas ---
+    from datetime import timedelta
+
+    weeks_created = []
+    weeks_activated = []
+    week_labels = []
+    for w in range(7, -1, -1):
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        start = today - timedelta(days=w * 7)
+        end = start + timedelta(days=7)
+        label = start.strftime("%d/%m")
+        week_labels.append(label)
+
+        created = db.execute(
+            "SELECT COUNT(*) FROM maxo_contracts WHERE created_at >= ? AND created_at < ?",
+            (start.strftime("%Y-%m-%d %H:%M:%S"), end.strftime("%Y-%m-%d %H:%M:%S")),
+        ).fetchone()[0]
+
+        # Activaciones: eventos state_changed con metadata 'to': 'ACTIVE'
+        events = db.execute(
+            """
+            SELECT metadata_json FROM maxo_contract_events
+            WHERE event_type = 'state_changed'
+              AND created_at >= ? AND created_at < ?
+            """,
+            (start.strftime("%Y-%m-%d %H:%M:%S"), end.strftime("%Y-%m-%d %H:%M:%S")),
+        ).fetchall()
+        activated = sum(
+            1
+            for e in events
+            if e["metadata_json"]
+            and json.loads(e["metadata_json"]).get("to") == "ACTIVE"
+        )
+
+        weeks_created.append(created)
+        weeks_activated.append(activated)
+
+    # --- Categorías (meta) ---
+    cat_rows = db.execute(
+        "SELECT meta_value, COUNT(*) AS n FROM maxo_contract_meta WHERE meta_key = 'category' GROUP BY meta_value"
+    ).fetchall()
+    categories = {row["meta_value"]: row["n"] for row in cat_rows}
+
+    # --- VHV totales ---
+    vhv_row = db.execute(
+        """
+        SELECT
+            COALESCE(SUM(total_vhv_t), 0) AS t,
+            COALESCE(SUM(total_vhv_v), 0) AS v,
+            COALESCE(SUM(total_vhv_h), 0) AS r
+        FROM maxo_contracts
+        """
+    ).fetchone()
+
+    return jsonify({
+        "summary": {
+            "total": total,
+            "by_state": by_state,
+        },
+        "gamma": {
+            "sample_count": len(wellness_values),
+            "avg": round(sum(wellness_values) / len(wellness_values), 3) if wellness_values else None,
+            "min": round(min(wellness_values), 3) if wellness_values else None,
+            "max": round(max(wellness_values), 3) if wellness_values else None,
+            "distribution": gamma_distribution,
+            "alerts": gamma_alerts,
+        },
+        "sdv": {
+            "violations_count": len(sdv_violations),
+            "violations": sdv_violations,
+        },
+        "nps": {
+            "score": nps,
+            "responses_count": len(nps_scores),
+            "distribution": nps_distribution,
+            "responses": nps_responses,
+        },
+        "trends": {
+            "labels": week_labels,
+            "created": weeks_created,
+            "activated": weeks_activated,
+        },
+        "categories": categories,
+        "vhv": {
+            "t": round(float(vhv_row["t"]), 2),
+            "v": round(float(vhv_row["v"]), 2),
+            "r": round(float(vhv_row["r"]), 2),
+        },
+    })
+
+
+@contracts_bp.route("/<contract_id>/nps", methods=["POST"])
+@token_required
+def record_nps(current_user, contract_id: str):
+    """
+    Registrar la puntuación NPS (0-10) de un participante sobre un contrato.
+
+    Body JSON:
+    {
+        "participant_id": "user-3",   # obligatorio
+        "score": 9,                    # 0-10, obligatorio
+        "comment": "Resolvimos todo sin fricción"  # opcional
+    }
+
+    El participante debe existir en el contrato (T13: el registro es la verdad).
+    """
+    contract = _load_contract(contract_id)
+    if contract is None:
+        return jsonify({"error": "contract not found"}), 404
+
+    data = request.get_json() or {}
+    participant_id = data.get("participant_id")
+    score = data.get("score")
+
+    if not participant_id:
+        return jsonify({"error": "participant_id is required"}), 400
+
+    if participant_id not in contract.participant_ids:
+        return jsonify({"error": f"participant {participant_id} not in contract"}), 400
+
+    try:
+        score_int = int(score)
+    except (TypeError, ValueError):
+        return jsonify({"error": "score must be an integer between 0 and 10"}), 400
+
+    if score_int < 0 or score_int > 10:
+        return jsonify({"error": "score must be an integer between 0 and 10"}), 400
+
+    comment = (data.get("comment") or "").strip()
+
+    db = get_db()
+    db.execute(
+        """
+        INSERT INTO maxo_contract_nps (contract_id, participant_id, score, comment)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(contract_id, participant_id) DO UPDATE SET
+            score = excluded.score,
+            comment = excluded.comment,
+            created_at = CURRENT_TIMESTAMP
+        """,
+        (contract_id, participant_id, score_int, comment),
+    )
+    db.commit()
+
+    return jsonify({
+        "success": True,
+        "contract_id": contract_id,
+        "participant_id": participant_id,
+        "score": score_int,
+    }), 201
+
+
+@contracts_bp.route("/<contract_id>/meta", methods=["POST"])
+@token_required
+def set_contract_meta(current_user, contract_id: str):
+    """
+    Guardar un metadato del contrato (ej. categoria: aseo | prestamo | comida).
+
+    Body JSON:
+    {
+        "key": "category",
+        "value": "aseo"
+    }
+    """
+    db = get_db()
+    exists = db.execute(
+        "SELECT 1 FROM maxo_contracts WHERE contract_id = ?", (contract_id,)
+    ).fetchone()
+    if not exists:
+        return jsonify({"error": "contract not found"}), 404
+
+    data = request.get_json() or {}
+    key = (data.get("key") or "").strip()
+    value = (data.get("value") or "").strip()
+
+    if not key or not value:
+        return jsonify({"error": "key and value are required"}), 400
+
+    db.execute(
+        """
+        INSERT INTO maxo_contract_meta (contract_id, meta_key, meta_value)
+        VALUES (?, ?, ?)
+        ON CONFLICT(contract_id, meta_key) DO UPDATE SET
+            meta_value = excluded.meta_value
+        """,
+        (contract_id, key, value),
+    )
+    db.commit()
+
+    return jsonify({"success": True, "contract_id": contract_id, "key": key, "value": value})
 
 
 @contracts_bp.route("/<contract_id>", methods=["GET"])

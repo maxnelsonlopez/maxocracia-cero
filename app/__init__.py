@@ -6,6 +6,31 @@ from .limiter import init_limiter
 from .utils import close_db, init_db
 
 
+def _dotform_to_dirform(path: str):
+    """Convierte una ruta de payload RSC en forma de puntos a la forma
+    de directorios usada por la exportación estática de Next.js.
+
+    Ejemplos:
+      admin/network/__next.admin.network.txt  -> admin/network/__next.admin/network.txt
+      admin/network/__next.admin.network.__PAGE__.txt
+        -> admin/network/__next.admin/network/__PAGE__.txt
+      micromax/__next.micromax.txt            -> micromax/__next.micromax.txt
+
+    Devuelve siempre barras "/" (independiente del sistema operativo).
+    """
+    head, _, tail = path.rpartition("/")
+    if not tail.startswith("__next.") or not tail.endswith(".txt"):
+        return None
+    segments = tail[len("__next."):-len(".txt")].split(".")
+    if not segments:
+        return None
+    first, rest = segments[0], segments[1:]
+    parts = [head] if head else []
+    parts.append(f"__next.{first}")
+    parts.extend(rest)
+    return "/".join(parts) + ".txt"
+
+
 def create_app(db_path=None):
     app = Flask(__name__)
     app.config["DATABASE"] = db_path or os.path.join(
@@ -56,6 +81,7 @@ def create_app(db_path=None):
     from .micromax_bp import micromax_bp
     from .micromax import init_micromax_tables
     from .forms_manager import init_multi_offers_needs_tables
+    from .contracts_bp import init_contracts_metrics_tables
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
@@ -75,6 +101,7 @@ def create_app(db_path=None):
     init_subscription_tables(app)
     init_micromax_tables(app)
     init_multi_offers_needs_tables(app)
+    init_contracts_metrics_tables(app)
 
     # placeholder imports to ensure modules loaded
     # other optional blueprints can be imported here
@@ -122,6 +149,14 @@ def create_app(db_path=None):
         target_path = os.path.join(dist_dir, path)
         if os.path.exists(target_path) and not os.path.isdir(target_path):
             return send_from_directory(dist_dir, path)
+
+        # 1b. Payloads RSC de segmentos en forma de puntos (navegación cliente de Next).
+        # La exportación estática los escribe como directorios (__next.admin/network.txt)
+        # pero el router los solicita como __next.admin.network.txt.
+        if "__next." in path and path.endswith(".txt"):
+            dot_path = _dotform_to_dirform(path)
+            if dot_path and os.path.exists(os.path.join(dist_dir, dot_path)):
+                return send_from_directory(dist_dir, dot_path)
 
         # 2. Intentar servir .html si existe (ej: /upgrade -> upgrade.html)
         html_file = f"{path}.html"
