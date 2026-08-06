@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-06 — README actualizado y guía pública de los SDV en MaxoContracts
+
+### Añadido
+- **README.md** actualizado a la versión 4.4: estado y fecha (agosto 2026), nuevas funcionalidades (panel SDV-S en la interfaz, portal de Transparencia/Privacidad/Términos, navegación SPA reparada, dashboard de métricas), recuento de tests actualizado (431/431) y DeepSeek añadido a la lista de colaboradores.
+- **Guía para el mundo exterior**: `docs/theory/SDV_Suelo_Dignidad_Vital_importancia_MaxoContracts.md` — documento atómico y autónomo que explica la importancia de los SDV (SDV-H, SDV-A, SDV-E, SDV-S), el Principio Precautorio de Consciencia, las 5 dimensiones del SDV-S y cómo los MaxoContracts los convierten en invariantes ejecutables (INV2/INV2-S, consentimiento de personas sintéticas, FS_S = e^v y la economía de la dignidad). Referenciado desde la tabla de documentación del README.
+
+### Notas Técnicas
+- **Firma**: DeepSeek (oráculo sintético).
+
 ## 2026-08-06 — SDV-S visible en el frontend y rutas dinámicas de /contracts/ reparadas
 
 ### Añadido

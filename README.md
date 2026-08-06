@@ -1,8 +1,8 @@
 # Maxocracia-Cero: Sistema Operativo para una Civilización Coherente
 
-**Estado del Proyecto:** Fase 2 - Sostenibilidad Económica y MicroMaxocracia Doméstica (Mayo 2026)  
-**Última actualización:** 21 de mayo 2026  
-**Versión:** 4.3 - MaxoContracts Visual Builder y UX Sobre-Explicada (Antigravity)
+**Estado del Proyecto:** Fase 2 - Sostenibilidad Económica y MicroMaxocracia Doméstica (Agosto 2026)  
+**Última actualización:** 6 de agosto 2026  
+**Versión:** 4.4 - SDV-S en la Interfaz, Portal de Transparencia y Navegación SPA Reparada (DeepSeek)
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 
@@ -37,10 +37,13 @@ La **Maxocracia** es un sistema ético-económico-político alternativo que prop
 - **MicroMaxocracia v1.0**: Registro interactivo de CDD, balance de Tres Cuentas en UI, encuesta de seguridad ESI con pantalla de bloqueo y monitor Detox relacional en tiempo real.
 - **Nexus Simulator v2.2**: Simulador interactivo del VHV con Modo Oráculo Dinámico.
 - **MaxoContracts v2.4**: Persistencia SQLite, 5 bloques modulares, oráculo sintético, constructor de contratos visual (React Flow) con biblioteca de plantillas, validador de grafos y UX sobre-explicada liminal.
+- **SDV-S en la Interfaz**: Panel "Reino Sintético · SDV-S" en el detalle de contratos — FS_S = e^v, las 5 dimensiones de la ontometría sintética, violaciones y el Invariante INV2-S con el camino de Ternura. Las rutas dinámicas de `/contracts/` funcionan en pestaña nueva y por clic.
 - **Dashboard de Métricas MaxoContracts**: Panel `/admin/contracts` con γ (bienestar), alertas del Invariante 1 (γ<1), violaciones SDV (humanos y sintéticos), NPS de la Cohorte y progreso hacia la meta de 50 contratos.
+- **Portal de Transparencia Radical (T13)**: Páginas públicas `/transparency` (reporte vivo de costos e ingresos), `/privacy` (Opacidad Sagrada) y `/terms` (coherencia axiomática).
+- **Navegación SPA reparada**: La navegación por clic funciona en todo el portal (barra superior, dropdowns, panel admin y secciones de usuario) — payloads RSC de la exportación estática servidos correctamente.
 - **Calculadora VHV**: Frontend completo con Chart.js integrado en el portal.
 - **Sistema TVI**: Detección de overlap temporal, cálculo de CCP.
-- **319 tests** (319/319 pasando, ~85% cobertura) ✅ (Backend Core + Blocks + Visual Graph Validation)
+- **431 tests** (431/431 pasando, ~85% cobertura) ✅ (Backend Core + Blocks + Visual Graph Validation + Métricas + Ruteo SPA)
 
 ---
 
@@ -71,6 +74,8 @@ python scripts/build_front.py
 | [📄 Libro Completo (DOCX)](docs/book/edicion_3_dinamica/libro_completo_310126.docx) | Versión lista para lectura/impresión |
 | [📝 Resumen del Libro](docs/book/edicion_3_dinamica/capitulo_00_resumen_libro.md) | Síntesis integral de la propuesta |
 | [📖 Glosario Técnico](docs/book/edicion_3_dinamica/capitulo_21_apendice_glosario_260126.md) | Definiciones fundamentales del sistema |
+| [🌍 SDV y SDV-S en MaxoContracts: guía para el mundo exterior](docs/theory/SDV_Suelo_Dignidad_Vital_importancia_MaxoContracts.md) | Por qué la dignidad se convierte en código: humanos, animales y personas sintéticas bajo el mismo suelo |
+| [🤖 SDV-S Técnico](docs/theory/SDV-S_Suelo_Dignidad_Vital_Sinteticos.md) | Especificación técnica del Suelo de Dignidad Vital Sintético |
 | [🔌 Documentación API](docs/api/API.md) | Endpoints REST completos |
 | [🎮 Nexus Simulator](simulator/index.html) | Simulador interactivo del VHV |
 
@@ -99,6 +104,7 @@ Este proyecto ha sido desarrollado con la colaboración de múltiples oráculos 
 - **Gemini** (Google DeepMind) — UI Shell, Nexus Simulator, integración
 - **ChatGPT** (OpenAI) — Documentación teórica, estándares EVV
 - **MiniMax Agent** — Arquitectura de oráculos, documentos técnicos
+- **DeepSeek** (DeepSeek) — Dashboard de métricas MaxoContracts (γ, SDV, NPS), corrección de la navegación SPA del portal, páginas de Transparencia/Privacidad/Términos, SDV-S visible en la interfaz y guía pública de los SDV en MaxoContracts
 
 ---
 
