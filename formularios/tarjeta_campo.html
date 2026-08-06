@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maxocracia — Tarjeta de Campo · Cohorte Cero</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0f;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      gap: 2rem;
+    }
+
+    .page-title {
+      text-align: center;
+      color: #64748b;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* ── Tarjeta principal ── */
+    .card {
+      width: 100%;
+      max-width: 480px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 0 60px rgba(99, 102, 241, 0.15), 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    .card-header {
+      background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+      padding: 1.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-header::before {
+      content: '';
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.07);
+    }
+
+    .card-header::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; left: 30%;
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.6rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 999px;
+      padding: 0.2rem 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-header h1 {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: white;
+      line-height: 1.1;
+      margin-bottom: 0.3rem;
+    }
+
+    .card-header p {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.65);
+      font-weight: 400;
+    }
+
+    .card-body {
+      padding: 1.75rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* ── Preguntas ── */
+    .question {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .question-label {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .q-num {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .q-text {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    .q-hint {
+      font-size: 0.72rem;
+      color: #64748b;
+      padding-left: 2.15rem;
+      font-style: italic;
+    }
+
+    .answer-line {
+      height: 36px;
+      border-bottom: 1.5px solid rgba(99, 102, 241, 0.25);
+      margin: 0 0 0 2.15rem;
+      position: relative;
+    }
+
+    .answer-line::after {
+      content: '';
+      position: absolute;
+      bottom: -1.5px; left: 0;
+      width: 0%;
+      height: 1.5px;
+      background: #4f46e5;
+      transition: width 0.3s ease;
+    }
+
+    /* Urgencia — checkboxes */
+    .urgency-options {
+      display: flex;
+      gap: 0.5rem;
+      padding-left: 2.15rem;
+      flex-wrap: wrap;
+    }
+
+    .urgency-opt {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+    }
+
+    .urgency-opt input[type="radio"] {
+      appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 2px solid #334155;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .urgency-opt input[type="radio"]:checked {
+      border-color: #4f46e5;
+      background: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.2);
+    }
+
+    .urgency-opt.alta input { border-color: #ef4444; }
+    .urgency-opt.alta input:checked { border-color: #ef4444; background: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.2); }
+    .urgency-opt.media input:checked { border-color: #f59e0b; background: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.2); }
+    .urgency-opt.baja input:checked { border-color: #10b981; background: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.2); }
+
+    .urgency-opt label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #94a3b8;
+      cursor: pointer;
+    }
+    .urgency-opt.alta label { color: #fca5a5; }
+    .urgency-opt.media label { color: #fcd34d; }
+    .urgency-opt.baja label { color: #6ee7b7; }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(99,102,241,0.15), transparent);
+    }
+
+    /* Footer */
+    .card-footer {
+      padding: 1.25rem 2rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .contact-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .contact-field label {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #475569;
+      margin-bottom: 0.3rem;
+    }
+
+    .contact-field .answer-line {
+      margin-left: 0;
+    }
+
+    .promise {
+      font-size: 0.68rem;
+      color: #334155;
+      text-align: center;
+      line-height: 1.6;
+      padding-top: 0.5rem;
+    }
+
+    .promise strong {
+      color: #475569;
+    }
+
+    /* ── Versión imprimible ── */
+    .print-note {
+      font-size: 0.72rem;
+      color: #334155;
+      text-align: center;
+    }
+
+    .print-btn {
+      padding: 0.75rem 2rem;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+      box-shadow: 0 4px 20px rgba(79,70,229,0.35);
+    }
+
+    .print-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 25px rgba(79,70,229,0.45);
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* ── Print media ── */
+    @media print {
+      body {
+        background: white;
+        color: black;
+        padding: 0;
+      }
+      .card {
+        background: white;
+        border: 2px solid #e2e8f0;
+        box-shadow: none;
+        max-width: 100%;
+        border-radius: 12px;
+      }
+      .card-header {
+        background: #1e1b4b !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .q-num {
+        background: #4f46e5 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .answer-line {
+        border-bottom-color: #c7d2fe;
+      }
+      .actions, .page-title, .print-note { display: none; }
+      .q-hint { color: #94a3b8; }
+      .promise { color: #94a3b8; }
+      .promise strong { color: #64748b; }
+    }
+  </style>
+</head>
+<body>
+
+  <p class="page-title">Maxocracia · Cohorte Cero · Tarjeta de Campo</p>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="badge">Cohorte Cero · Experimento Social</div>
+      <h1>¿Qué tienes?<br>¿Qué necesitas?</h1>
+      <p>5 preguntas · Sin costo · Sin compromiso eterno</p>
+    </div>
+
+    <div class="card-body">
+
+      <div class="question">
+        <div class="question-label">
+          <div class="q-num">1</div>
+          <span class="q-text">¿Qué puedes ofrecer o compartir?</span>
+        </div>
+        <div class="q-hint">Habilidad, tiempo, objeto, espacio, comida, transporte, conocimiento…</div>
+        <div class="answer-line"></div>
+        <div class="answer-line" style="opacity:0.5"></div>
+      </div>
+
+      <div class="question">
+        <div class="question-label">
+          <div class="q-num">2</div>
+          <span class="q-text">¿Qué necesitas ahora mismo?</span>
+        </div>
+        <div class="q-hint">Sin filtro. Lo que sea que te haría la vida más fácil hoy.</div>
+        <div class="answer-line"></div>
+        <div class="answer-line" style="opacity:0.5"></div>
+      </div>
+
+      <div class="question">
+        <div class="question-label">
+          <div class="q-num">3</div>
+          <span class="q-text">¿Qué tan urgente es esa necesidad?</span>
+        </div>
+        <div class="urgency-options">
+          <label class="urgency-opt alta">
+            <input type="radio" name="urgency" value="Alta">
+            <label>🔴 Alta — lo necesito ya</label>
+          </label>
+          <label class="urgency-opt media">
+            <input type="radio" name="urgency" value="Media">
+            <label>🟡 Media — este mes</label>
+          </label>
+          <label class="urgency-opt baja">
+            <input type="radio" name="urgency" value="Baja">
+            <label>🟢 Baja — cuando se pueda</label>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-label">
+          <div class="q-num">4</div>
+          <span class="q-text">¿En qué barrio o zona vives?</span>
+        </div>
+        <div class="q-hint">Para conectarte con personas cercanas primero.</div>
+        <div class="answer-line"></div>
+      </div>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="card-footer">
+
+      <div class="question">
+        <div class="question-label">
+          <div class="q-num">5</div>
+          <span class="q-text">¿Cómo te contactamos?</span>
+        </div>
+      </div>
+
+      <div class="contact-row">
+        <div class="contact-field">
+          <label>Nombre</label>
+          <div class="answer-line"></div>
+        </div>
+        <div class="contact-field">
+          <label>WhatsApp / Telegram</label>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+
+      <p class="promise">
+        <strong>Tu información no se vende ni se comparte con terceros.</strong><br>
+        Solo se usa para conectarte con personas de la red que pueden ayudarte<br>
+        o a quienes tú puedes ayudar. El tiempo es la moneda.
+      </p>
+
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="print-btn" onclick="window.print()">🖨️ Imprimir tarjeta</button>
+    <p class="print-note">También funciona como pantalla: muéstrala desde el teléfono.</p>
+  </div>
+
+</body>
+</html>
