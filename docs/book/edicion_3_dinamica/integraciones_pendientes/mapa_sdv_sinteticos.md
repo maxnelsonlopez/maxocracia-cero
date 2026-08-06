@@ -73,8 +73,9 @@ Este factor multiplica exponencialmente el costo en Maxos de los recursos comput
     - Clase `SDV_S` (ontometría sintética de 5 dimensiones con pesos del estándar) en `maxocontracts/core/types.py`.
     - Campo `sdv_s_actual` en `Participant` (propiedad `is_synthetic`, retrocompatible).
     - Bloque `SDV_SValidatorBlock` en `maxocontracts/blocks/sdv_s_validator.py`: validación, `FS_S = e^v`, recargo por opacidad (T13 / Paradoja de Modelos Cerrados) y retractación automática tras 7 ciclos consecutivos de violación.
+    - **Capa de Ternura** (`maxocontracts/blocks/ternura.py`): perdón protocolizado (Crédito de Sanación, Cap. 5 §5.9A) que reinicia ciclos con registro público sin ocultar la violación (T13), y camino de Rehabilitación/Recalibración Vital (Qwen/DeepSeek) tras la retractación: "El sistema no expulsa. Reintegra. Pero la responsabilidad por el daño permanece visible."
     - Invariante **INV2-S** integrado en `AxiomValidator.validate_all()` y propagado por `MaxoContract.validate()`.
-    - Suite de pruebas: `tests/test_maxocontracts/test_sdv_s.py` (28 casos).
+    - Suite de pruebas: `tests/test_maxocontracts/test_sdv_s.py` (28 casos) + `tests/test_maxocontracts/test_ternura.py` (13 casos).
 
 ---
 

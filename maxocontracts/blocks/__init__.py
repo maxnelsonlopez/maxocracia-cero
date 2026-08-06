@@ -6,6 +6,7 @@ from .gamma_protector import GammaProtectorBlock
 from .sdv_validator import SDVValidatorBlock
 from .sdv_s_validator import SDV_SValidatorBlock
 from .reciprocity import ReciprocityBlock
+from .ternura import TernuraLayer, ForgivenessRecord, RehabilitationStatus
 
 __all__ = [
     "ConditionBlock",
@@ -14,5 +15,8 @@ __all__ = [
     "GammaProtectorBlock",
     "SDVValidatorBlock",
     "SDV_SValidatorBlock",
-    "ReciprocityBlock"
+    "ReciprocityBlock",
+    "TernuraLayer",
+    "ForgivenessRecord",
+    "RehabilitationStatus"
 ]

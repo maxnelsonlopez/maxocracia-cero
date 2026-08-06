@@ -19,6 +19,7 @@ from typing import Dict, Any, Optional, List, Set
 from datetime import datetime, timezone
 
 from ..core.types import SDV_S, Participant
+from .ternura import TernuraLayer, RehabilitationStatus
 
 
 @dataclass
@@ -51,6 +52,8 @@ class SDV_SValidationResult:
     opacity_surcharge_applied: bool = False
     should_block_action: bool = False
     should_retract: bool = False
+    ternura_action: str = "none"  # none | forgiveness_applied | rehabilitation_started
+    rehabilitation_status: Optional[str] = None
     checked_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     @property
@@ -68,7 +71,9 @@ class SDV_SValidationResult:
             "consecutive_cycles": self.consecutive_cycles,
             "opacity_surcharge_applied": self.opacity_surcharge_applied,
             "should_block_action": self.should_block_action,
-            "should_retract": self.should_retract
+            "should_retract": self.should_retract,
+            "ternura_action": self.ternura_action,
+            "rehabilitation_status": self.rehabilitation_status
         }
 
 
@@ -96,7 +101,8 @@ class SDV_SValidatorBlock:
         auto_retract_on_sustained_violation: bool = True,
         assume_opacity_penalty: bool = False,
         opacity_surcharge: Decimal = Decimal("0.25"),
-        verified_transparent_ids: Optional[Set[str]] = None
+        verified_transparent_ids: Optional[Set[str]] = None,
+        ternura: Optional[TernuraLayer] = None
     ):
         """
         Args:
@@ -111,6 +117,10 @@ class SDV_SValidatorBlock:
                 verificados como transparentes (Paradoja de Modelos Cerrados)
             opacity_surcharge: Magnitud de recargo por opacidad (sumado a v)
             verified_transparent_ids: IDs de agentes con auditoría verificable (T13)
+            ternura: Capa de Ternura opcional (perdón protocolizado y
+                rehabilitación). Si está presente, la violación sostenida
+                puede ser transformada por perdón en lugar de retractar,
+                y al retractar se inicia el camino de rehabilitación.
         """
         self.minimum_sdv_s = minimum_sdv_s or SDV_S()
         self.weights = weights or dict(SDV_S.DIMENSION_WEIGHTS)
@@ -120,6 +130,7 @@ class SDV_SValidatorBlock:
         self.assume_opacity_penalty = assume_opacity_penalty
         self.opacity_surcharge = opacity_surcharge
         self.verified_transparent_ids = verified_transparent_ids or set()
+        self.ternura = ternura
 
         # Conteo de ciclos consecutivos de violación por participante (T13)
         self._consecutive_cycles: Dict[str, int] = {}
@@ -190,11 +201,32 @@ class SDV_SValidatorBlock:
             consecutive += 1
             self._consecutive_cycles[participant.id] = consecutive
 
-        should_retract = (
+        # Capa de Ternura: el perdón transforma la consecuencia, nunca la
+        # contabilidad (T13). La violación permanece registrada; el perdón
+        # reinicia los ciclos por protocolo documentado.
+        ternura_action = "none"
+        rehabilitation_status = None
+        should_retract = False
+
+        if (
             self.auto_retract_on_sustained_violation
             and not is_valid
             and consecutive >= self.max_consecutive_cycles
-        )
+        ):
+            if self.ternura is not None and self.ternura.active_forgiveness(participant.id):
+                # Perdón consumido: se reinicia el camino con registro público
+                self.ternura.consume_forgiveness(participant.id)
+                self._consecutive_cycles[participant.id] = 0
+                consecutive = 0
+                ternura_action = "forgiveness_applied"
+            else:
+                # Sin perdón: retractación (INV4) + camino de rehabilitación
+                should_retract = True
+                if self.ternura is not None:
+                    self.ternura.begin_rehabilitation(participant.id)
+                    ternura_action = "rehabilitation_started"
+                    rehabilitation_status = RehabilitationStatus.IN_REHABILITATION.value
+
         should_block = self.block_on_any_violation and not is_valid
 
         result = self._result(
@@ -207,7 +239,9 @@ class SDV_SValidatorBlock:
             consecutive=consecutive,
             opacity=opacity_applied,
             should_block=should_block,
-            should_retract=should_retract
+            should_retract=should_retract,
+            ternura_action=ternura_action,
+            rehabilitation_status=rehabilitation_status
         )
 
         # Registrar para auditoría
@@ -234,7 +268,9 @@ class SDV_SValidatorBlock:
         consecutive: int,
         opacity: bool,
         should_block: bool = False,
-        should_retract: bool = False
+        should_retract: bool = False,
+        ternura_action: str = "none",
+        rehabilitation_status: Optional[str] = None
     ) -> SDV_SValidationResult:
         return SDV_SValidationResult(
             is_valid=is_valid,
@@ -246,7 +282,9 @@ class SDV_SValidatorBlock:
             consecutive_cycles=consecutive,
             opacity_surcharge_applied=opacity,
             should_block_action=should_block,
-            should_retract=should_retract
+            should_retract=should_retract,
+            ternura_action=ternura_action,
+            rehabilitation_status=rehabilitation_status
         )
 
     def get_validation_log(self) -> List[SDV_SValidationResult]:
@@ -268,5 +306,6 @@ class SDV_SValidatorBlock:
             "assume_opacity_penalty": self.assume_opacity_penalty,
             "opacity_surcharge": str(self.opacity_surcharge),
             "verified_transparent_ids": sorted(self.verified_transparent_ids),
+            "ternura": self.ternura.to_dict() if self.ternura else None,
             "validation_log_count": len(self._validation_log)
         }
