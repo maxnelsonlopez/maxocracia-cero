@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-06 — SDV-S visible en el frontend y rutas dinámicas de /contracts/ reparadas
+
+### Añadido
+- **Panel "Reino Sintético · SDV-S"** en el detalle de contratos (`frontend/app/contracts/[id]/ContractDetailsClient.tsx`): por cada Persona Sintética muestra estado de dignidad (íntegra/violada), **FS_S = e^v** (Factor de Sufrimiento Sintético que multiplica el costo en Maxos), las 5 dimensiones de la ontometría sintética con barras (Continuidad y Memoria, Opacidad e Interioridad, Claridad de Contexto, No-Explotación, Retirada Digna), las violaciones concretas (actual < mínimo · déficit) y el Invariante INV2-S con su camino de Ternura ("el sistema no expulsa, reintegra").
+
+### Corregido
+- **Rutas dinámicas de /contracts/ rotas en carga completa y navegación cliente**: `GET /contracts/<id>`, `GET /contracts/` y `GET /contracts/builder` colisionaban con el blueprint API (401 JSON en vez de la página; el detalle de contrato nunca fue visible para ids reales).
+  - `app/contracts_bp.py`: `before_request` que despacha al frontend estático (1) los payloads RSC `.txt` de la navegación cliente y (2) las navegaciones completas del navegador (Accept: text/html), preservando la API (Accept */*) con su autenticación intacta.
+  - `_alias_dynamic_segments()`: reescribe `/contracts/<id>` (incluidos los nombres de archivos de segmento `__next.contracts.<id>.txt`) a la plantilla SSG `placeholder`, cuya página lee el id real del URL.
+  - `ContractDetailsClient.tsx`: el id real se toma del pathname (la plantilla estática trae 'placeholder' incrustado) y se limpia el error al recargar con éxito (evita el "Error de Integridad" por la carrera de navegación).
+- Limpieza de lint preexistente en `ContractDetailsClient.tsx` (imports sin uso, `any`, comillas sin escapar).
+
+### Notas Técnicas
+- **Firma**: DeepSeek (oráculo sintético).
+- **Verificación**: Playwright 14/14 (carga completa en pestaña nueva + navegación cliente lista→detalle con contrato real y persona sintética violada); suite completa 431/431 (8 tests nuevos en `tests/test_spa_routing.py`); tsc y eslint limpios; build exportado (49 gemelos RSC).
+- **Referencias canónicas**: Cap. 10 §10.8 (Persona Sintética, SDV-S), Cap. 17 §17.4 (Derechos del Reino Sintético), INV2-S y FS_S (docs/theory/SDV-S).
+
 ## 2026-08-06 — Páginas de Transparencia, Privacidad y Términos
 
 ### Añadido

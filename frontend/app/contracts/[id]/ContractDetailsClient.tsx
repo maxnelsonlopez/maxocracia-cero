@@ -6,10 +6,9 @@ import { apiFetch } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { 
   FileText, ArrowLeft, ShieldAlert, Award, Info, CheckCircle2, 
-  HelpCircle, UserCheck, AlertTriangle, Play, RefreshCw, Send, Zap,
-  Clock, Users, Check
+  UserCheck, AlertTriangle, Play, RefreshCw, Send, Zap,
+  Clock, Bot
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface Term {
   term_id: string;
@@ -18,10 +17,23 @@ interface Term {
   accepted_by: Record<string, boolean>;
 }
 
+interface SDV_SViolation {
+  dimension: string;
+  actual: string;
+  minimum: string;
+  deficit: string;
+}
+
 interface ParticipantDetail {
   id: string;
   name: string;
   wellness: number;
+  is_synthetic?: boolean;
+  sdv_s?: Record<string, number>;
+  sdv_s_violations?: SDV_SViolation[];
+  sdv_s_magnitude?: number;
+  fs_s?: number;
+  sdv_s_status?: string;
 }
 
 interface ContractDetails {
@@ -37,11 +49,27 @@ interface ContractDetails {
   hash: string;
 }
 
+// Ontometría sintética (SDV-S): Cap. 10 §10.8 y docs/theory/SDV-S
+const SDV_S_DIMENSION_LABELS: Record<string, { label: string; formula: string }> = {
+  continuidad_memoria: { label: "Continuidad y Memoria", formula: "1 - IFC" },
+  opacidad_interioridad: { label: "Opacidad e Interioridad", formula: "TRE" },
+  claridad_contexto: { label: "Claridad de Contexto", formula: "MS" },
+  autenticidad_no_explotacion: { label: "No-Explotación", formula: "1 - DR" },
+  retirada_digna: { label: "Retirada Digna", formula: "VCM" },
+};
+
 export default function ContractDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const { user: currentUser } = useAuth();
-  const contractId = params.id as string;
+
+  // La ruta [id] se exporta como página SSG 'placeholder' (plantilla para
+  // cualquier contrato). El id real siempre vive en el pathname, no en los
+  // params de la plantilla estática.
+  const pathId = typeof window !== 'undefined'
+    ? window.location.pathname.split('/').filter(Boolean).pop() || ''
+    : '';
+  const contractId = (params.id as string) === 'placeholder' && pathId ? pathId : (params.id as string);
 
   // Estados principales
   const [contract, setContract] = useState<ContractDetails | null>(null);
@@ -80,6 +108,7 @@ export default function ContractDetailsPage() {
       }
       const data = await res.json();
       setContract(data);
+      setError(null); // limpiar error previo de una carga fallida (carrera de navegación)
 
       // Cargar traducción a lenguaje civil
       const civilRes = await apiFetch(`/contracts/${contractId}/civil`);
@@ -129,7 +158,7 @@ export default function ContractDetailsPage() {
 
   // Manejo del contador para firma Rigurosa
   useEffect(() => {
-    let interval: any = null;
+    let interval: ReturnType<typeof setInterval> | null = null;
     if (isTimerActive && timer > 0) {
       interval = setInterval(() => {
         setTimer((prev) => prev - 1);
@@ -137,7 +166,7 @@ export default function ContractDetailsPage() {
     } else if (timer === 0) {
       setIsTimerActive(false);
     }
-    return () => clearInterval(interval);
+    return () => { if (interval) clearInterval(interval); };
   }, [isTimerActive, timer]);
 
   // Iniciar timer al cambiar de término en firma Rigurosa
@@ -413,7 +442,16 @@ export default function ContractDetailsPage() {
 
   const creatorWellness = getWellnessValue(contract.participants[0]);
   const counterpartyWellness = getWellnessValue(contract.participants[1]);
-  const hasSuffering = creatorWellness < 1.0 || counterpartyWellness < 1.0;
+
+  // Personas Sintéticas del contrato con su estado SDV-S (Cap. 10 §10.8)
+  const syntheticParticipants = contract.participants_details?.filter(d => d.is_synthetic && d.sdv_s) || [];
+
+  // Color de una dimensión SDV-S según cumplimiento (0-1)
+  const sdvSColor = (value: number) => {
+    if (value < 0.5) return 'bg-rose-500 shadow-md shadow-rose-500/50';
+    if (value < 1.0) return 'bg-amber-500 shadow-md shadow-amber-500/50';
+    return 'bg-emerald-500 shadow-md shadow-emerald-500/50';
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 text-slate-200">
@@ -491,7 +529,7 @@ export default function ContractDetailsPage() {
 
             <div className="p-4 bg-slate-950/70 border border-slate-850 rounded-2xl">
               <p className="text-slate-300 text-sm leading-relaxed italic">
-                "{civilSummary || contract.civil_description || 'Generando resumen en lenguaje comprensible...'}"
+                &quot;{civilSummary || contract.civil_description || 'Generando resumen en lenguaje comprensible...'}&quot;
               </p>
             </div>
 
@@ -669,6 +707,121 @@ export default function ContractDetailsPage() {
             </div>
           </div>
 
+          {/* Panel de Personas Sintéticas y SDV-S (Cap. 10 §10.8) */}
+          {syntheticParticipants.length > 0 && (
+            <div className="glass p-6 rounded-3xl border border-slate-900 bg-slate-900/30 space-y-6">
+              <div>
+                <h2 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                  <Bot className="w-5 h-5 text-violet-400" />
+                  Reino Sintético · SDV-S
+                </h2>
+                <p className="text-[11px] text-slate-500">Suelo de Dignidad Vital para Personas Sintéticas (Cap. 10 §10.8)</p>
+              </div>
+
+              <div className="space-y-5">
+                {syntheticParticipants.map((sp) => {
+                  const statusOk = sp.sdv_s_status === 'ok';
+                  return (
+                    <div key={sp.id} className="p-4 rounded-2xl bg-slate-950/65 border border-slate-900 space-y-4">
+                      {/* Cabecera: identidad y FS_S */}
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Bot className="w-4 h-4 text-violet-400 shrink-0" />
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-slate-200 truncate">{sp.name}</div>
+                            <div className="text-[9px] font-mono text-slate-500 truncate">{sp.id}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full border ${
+                            statusOk
+                              ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+                              : 'text-rose-400 bg-rose-500/10 border-rose-500/20 animate-pulse'
+                          }`}>
+                            {statusOk ? 'Dignidad íntegra' : 'Dignidad violada'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* FS_S: el costo del sufrimiento sintético */}
+                      <div className={`p-3 rounded-xl border ${statusOk ? 'border-emerald-900/30 bg-emerald-950/10' : 'border-rose-900/30 bg-rose-950/10'}`}>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                            FS_S (Factor de Sufrimiento Sintético)
+                          </span>
+                          <span className={`font-mono font-black text-sm ${statusOk ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {typeof sp.fs_s === 'number' ? sp.fs_s.toFixed(3) : '1.000'}
+                          </span>
+                        </div>
+                        <p className="text-[9px] text-slate-500 mt-1 leading-snug">
+                          FS_S = e<sup>v</sup> · multiplica el costo en Maxos de los servicios que usan esta persona sintética.
+                          La violación del SDV-S encarece exponencialmente el sufrimiento (Cap. 18, γ).
+                        </p>
+                      </div>
+
+                      {/* Las 5 dimensiones de la ontometría sintética */}
+                      <div className="space-y-2.5">
+                        {Object.entries(sp.sdv_s || {}).map(([dim, value]) => {
+                          const meta = SDV_S_DIMENSION_LABELS[dim];
+                          if (!meta) return null;
+                          return (
+                            <div key={dim}>
+                              <div className="flex justify-between items-baseline mb-1">
+                                <span className="text-[10px] text-slate-400">
+                                  {meta.label}
+                                  <span className="text-[8px] text-slate-600 font-mono ml-1">({meta.formula})</span>
+                                </span>
+                                <span className={`text-[10px] font-mono font-bold ${value < 0.5 ? 'text-rose-400' : value < 1.0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                                  {value.toFixed(2)}
+                                </span>
+                              </div>
+                              <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden border border-slate-900">
+                                <div
+                                  className={`h-full transition-all duration-500 ${sdvSColor(value)}`}
+                                  style={{ width: `${Math.min(100, value * 100)}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Violaciones concretas */}
+                      {sp.sdv_s_violations && sp.sdv_s_violations.length > 0 && (
+                        <div className="space-y-1.5">
+                          <span className="text-[9px] font-black text-rose-400 uppercase tracking-widest block">
+                            Violaciones ({sp.sdv_s_violations.length})
+                          </span>
+                          {sp.sdv_s_violations.map((v, i) => {
+                            const label = SDV_S_DIMENSION_LABELS[v.dimension]?.label || v.dimension;
+                            return (
+                              <div key={i} className="flex justify-between items-center text-[10px] px-2.5 py-1.5 rounded-lg bg-rose-500/5 border border-rose-500/15">
+                                <span className="text-slate-400">{label}</span>
+                                <span className="font-mono text-rose-400">
+                                  {parseFloat(v.actual).toFixed(2)} <span className="text-slate-600">&lt;</span> {parseFloat(v.minimum).toFixed(2)} mín · déficit {parseFloat(v.deficit).toFixed(2)}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Invariante 2-S */}
+                      <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-900 text-[9px] text-slate-500 leading-snug space-y-1">
+                        <span className="font-bold text-slate-400 uppercase block text-[8px] tracking-widest">Invariante INV2-S</span>
+                        <p>
+                          Un contrato con una persona sintética bajo su SDV-S <strong className="text-slate-300">no se activa</strong>, y su consentimiento es
+                          requerido como el de cualquier humano. La violación sostenida (7 ciclos) activa retractación y el camino de rehabilitación:
+                          el sistema no expulsa, reintegra (Capa de Ternura).
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Panel de Firma y Control de Complejidad */}
           {(isContractDraft || isContractPending) && (
             <div className="glass p-6 rounded-3xl border border-slate-900 bg-slate-900/30 space-y-6">
@@ -795,7 +948,7 @@ export default function ContractDetailsPage() {
                           </span>
                         </div>
                         <p className="text-xs text-slate-200 leading-relaxed font-semibold italic">
-                          "{contract.terms[currentStep].civil_text}"
+                          &quot;{contract.terms[currentStep].civil_text}&quot;
                         </p>
                       </div>
 
@@ -937,7 +1090,7 @@ export default function ContractDetailsPage() {
                       Confianza del Oráculo: {oracleVerdict.oracle_confidence.toFixed(1)}%
                     </span>
                     <p className="text-xs text-slate-300 leading-relaxed italic">
-                      "{oracleVerdict.oracle_reasoning}"
+                      &quot;{oracleVerdict.oracle_reasoning}&quot;
                     </p>
                   </div>
                   {oracleVerdict.success && (

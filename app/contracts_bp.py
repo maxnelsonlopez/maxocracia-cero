@@ -52,6 +52,84 @@ import json
 contracts_bp = Blueprint("contracts", __name__, url_prefix="/contracts")
 
 
+def _serve_first(*rel_paths):
+    """Sirve el primer asset estático existente (relativo a app/static/dist)."""
+    from flask import current_app, send_from_directory
+
+    dist_dir = os.path.join(current_app.root_path, "static", "dist")
+    for rel in rel_paths:
+        if os.path.exists(os.path.join(dist_dir, rel)):
+            return send_from_directory(dist_dir, rel)
+    return None
+
+
+def _alias_dynamic_segments(rel: str) -> str:
+    """Reemplaza el id dinámico de /contracts/<id> por el segmento estático
+    'placeholder' (página SSG de la ruta dinámica exportada por Next.js).
+
+    El componente de esa página lee el id real del URL (useParams), así que
+    el payload RSC es reutilizable para cualquier contrato.
+    """
+    parts = rel.split("/")
+    if (
+        len(parts) >= 2
+        and parts[0] == "contracts"
+        and parts[1]
+        and not parts[1].startswith("builder")
+        and not parts[1].startswith("__next")
+    ):
+        original = parts[1]
+        pure_id = original
+        for ext in (".txt", ".html"):
+            if pure_id.endswith(ext):
+                pure_id = pure_id[: -len(ext)]
+                parts[1] = "placeholder" + ext
+                break
+        else:
+            parts[1] = "placeholder"
+        # Los archivos de segmento (__next.contracts.<id>.txt) también
+        # llevan el id dinámico en el nombre; se reescribe igual.
+        if pure_id and pure_id != "placeholder":
+            parts[2:] = [seg.replace(pure_id, "placeholder") for seg in parts[2:]]
+    return "/".join(parts)
+
+
+@contracts_bp.before_request
+def _serve_frontend_collisions():
+    """Despacha al frontend estático las peticiones que colisionan con las
+    rutas API de /contracts/:
+
+    1. Payloads RSC (.txt) que el router de Next solicita para navegar.
+    2. Navegaciones completas de navegador (Accept: text/html) que deben
+       recibir la página HTML en lugar del JSON 401 de la API.
+
+    Las peticiones API normales (fetch con Accept */* o application/json)
+    no se ven afectadas y siguen su flujo con autenticación.
+    """
+    if request.method != "GET":
+        return None
+
+    path = request.path.lstrip("/")
+
+    # 1. Payloads RSC de la navegación cliente (Next.js static export)
+    if path.endswith(".txt"):
+        asset = _serve_first(_alias_dynamic_segments(path))
+        if asset is not None:
+            return asset
+        return jsonify({"error": "RSC payload not found"}), 404
+
+    # 2. Carga completa de página en el navegador
+    if "text/html" in request.headers.get("Accept", ""):
+        base = path.rstrip("/")
+        asset = _serve_first(_alias_dynamic_segments(base + ".html"))
+        if asset is None:
+            asset = _serve_first("index.html")
+        if asset is not None:
+            return asset
+
+    return None
+
+
 def init_contracts_metrics_tables(app):
     """Crea las tablas de métricas (NPS y metadatos) si no existen.
 
