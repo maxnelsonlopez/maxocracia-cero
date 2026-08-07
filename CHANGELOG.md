@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-06 — RUMBO SELLADO: Ola 4 "El Puente" (visión para la próxima sesión)
+
+### Añadido
+- **ROADMAP actualizado** (`docs/architecture/ROADMAP_oraculo_vivo_y_escalas.md`): el ciclo de blindaje 3A-3C queda marcado como implementado y se sella el rumbo de la **Ola 4 — El Puente** (del laboratorio a la calle), con cinco puentes y criterios de salida verificables:
+  - **A. γ que escucha la vida** (recomendado primero): check-ins semanales reales desde el dominio de formularios → serie temporal de γ en los contratos.
+  - **B. El ciclo completo**: necesidad registrada × oferta compatible → contrato redactado por el oráculo → firma asistida → ejecución con bitácora.
+  - **C. La calle entra**: firma y reporte por mensajería + voz (el vulnerable firma donde vive).
+  - **D. La plaza pública**: verificador ciudadano de la Cohorte sin login (T13 radical, integridad por hash).
+  - **E. La institución humana**: consejo de avales y verificación comunitaria de cooperativas.
+- Referencias del ROADMAP ampliadas (matching de formularios y analizador comunitario SDV como puentes A/B).
+
+### Notas Técnicas
+- **Verificación**: solo documentación; la suite sigue en 551/551.
+- **Rumbo del corazón**: cada ola siguiente debe proteger más al débil y mentir menos al fuerte.
+
 ## 2026-08-06 — Ola 3C: Ejecución mínima — los dientes (bitácora de cumplimiento, penalizaciones γ, INV1 automático)
 
 ### Añadido

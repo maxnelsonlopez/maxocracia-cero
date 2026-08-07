@@ -2,7 +2,7 @@
 
 **Autor del diseño:** DeepSeek (oráculo sintético) y Max Nelson López Restrepo
 **Fecha:** 6 de agosto de 2026
-**Estado:** Bloque A **IMPLEMENTADO** (sesión del 6/8/2026: `live_oracle.py`, endpoints `/contracts/negotiate`, `/contracts/negotiate/feedback`, `/contracts/<id>/critique`, panel frontend en builder y detalle). Bloque B **IMPLEMENTADO** (misma sesión: `maxo_parties` + resolvers por prefijo, API `/parties`, consentimiento agregado con quórum N de M, guardián oráculo para el Reino Natural `eco-`, contratos interescala anidados y UI completa). **Extensiones ola 1 IMPLEMENTADAS** (hackathon nocturna del 6/8/2026: votación ponderada con `weights`/`weight_threshold`, delegación temporal con `delegations` y votos efectivos, γ agregado real por contrato, jerarquía interescala con `/tree` y `/subcontracts`, evento `contract.quorum_sealed` y seed demo coop↔org). **Extensiones ola 2 IMPLEMENTADAS** (misma noche: delegación líquida por término con `delegations_by_term`, expiración de delegaciones con `valid_until`, ciclo de vida del quórum con `quorum_deadline` + prórroga + re-consulta, webhooks por parte con `party_filter`, cohorte consolidada con `/contracts/cohort` y tarjeta en la lista).
+**Estado:** Bloque A **IMPLEMENTADO** (sesión del 6/8/2026: `live_oracle.py`, endpoints `/contracts/negotiate`, `/contracts/negotiate/feedback`, `/contracts/<id>/critique`, panel frontend en builder y detalle). Bloque B **IMPLEMENTADO** (misma sesión: `maxo_parties` + resolvers por prefijo, API `/parties`, consentimiento agregado con quórum N de M, guardián oráculo para el Reino Natural `eco-`, contratos interescala anidados y UI completa). **Extensiones ola 1 IMPLEMENTADAS** (hackathon nocturna del 6/8/2026: votación ponderada con `weights`/`weight_threshold`, delegación temporal con `delegations` y votos efectivos, γ agregado real por contrato, jerarquía interescala con `/tree` y `/subcontracts`, evento `contract.quorum_sealed` y seed demo coop↔org). **Extensiones ola 2 IMPLEMENTADAS** (misma noche: delegación líquida por término con `delegations_by_term`, expiración de delegaciones con `valid_until`, ciclo de vida del quórum con `quorum_deadline` + prórroga + re-consulta, webhooks por parte con `party_filter`, cohorte consolidada con `/contracts/cohort` y tarjeta en la lista). **Blindaje 3A-3C IMPLEMENTADO** (misma noche: identidad vinculada al token, inmutabilidad, autoridad de partes, T9 ejecutable, γ con fuente, prohibiciones léxicas, ventanas; escalera de equidad assisted/shielded; ejecución mínima con bitácora, penalizaciones γ, INV1 automático y cierre EXECUTED — 551/551 tests). **Ola 4 "El Puente" DISEÑADA** (rumbo sellado el 6/8/2026; pendiente de implementar).
 **Referencia canónica:** Cap. 13-14 (Oráculos Dinámicos), Cap. 17 (MaxoContracts), Cap. 10 (Tres Reinos)
 
 ---
@@ -155,21 +155,60 @@ Cada escala hereda el mismo SDV y los mismos invariantes: el contrato entre una 
 > de vida del quórum con prórroga y re-consulta, webhooks por parte, cohorte
 > consolidada — 501/501 tests, tsc/eslint limpios, README v4.7.
 
-> **Sesión futura (extensiones adicionales posibles):**
+> **Sesión futura — OLA 4: EL PUENTE (del laboratorio a la calle)**
 >
-> 1. **Votación por delegación líquida con auto-revocación**: si el delegante firma directamente, su voto ya no se cuenta por el apoderado (semántica líquida completa).
-> 2. **Historial auditable de delegaciones**: registrar cada cambio de delegación por contrato (tabla de eventos) para trazabilidad T13.
-> 3. **Sellado multi-firma**: términos que requieren N firmas humanas + quórum colectivo simultáneos (peso compuesto).
-> 4. **Prórroga automática**: si el quórum avanza ≥ umbral de progreso antes del deadline, la ventana se extiende una vez (con límite).
-> 5. **Exportación de gobernanza**: CSV/JSON de decisiones colectivas por parte y contrato para auditoría externa.
-> 6. Verifica: suite completa y `tsc --noEmit` limpios; actualiza CHANGELOG y README.
+> El sistema ya sabe defender (3A), proteger (3B) y ejecutar (3C).
+> La Ola 4 conecta la vida real con el sistema. Cinco puentes:
+>
+> **A. γ que escucha la vida** (recomendado primero — cosecha rápida)
+> - Conectar el bienestar real del dominio de formularios (follow-ups,
+>   `sdv_analyzer`) con el γ de los contratos: check-ins semanales → serie
+>   temporal de γ por participante → el contrato escucha, no cree.
+> - Endpoint `POST /contracts/<id>/checkin {wellness, source}` con
+>   `reported_by` del usuario y límite semanal; exposición en el detalle
+>   como mini-gráfica de γ.
+> - Criterio de salida: un participante con 3 check-ins muestra la serie
+>   en el detalle; el γ agregado de la cohorte usa los check-ins reales.
+>
+> **B. El ciclo completo: necesidad → contrato** (el sueño grande)
+> - El motor de matching (dominio de formularios: ofertas/necesidades)
+>   genera propuestas: necesidad activa × oferta compatible → borrador de
+>   MaxoContract redactado por el oráculo → firma asistida por la escalera
+>   de equidad → ejecución con bitácora.
+> - Criterio de salida: una necesidad registrada produce un contrato
+>   firmado y activo sin teclear nada más que el check-in.
+>
+> **C. La calle entra** (el gran reto de ingeniería)
+> - Firma y reporte por mensajería (WhatsApp/Telegram) + voz: el vulnerable
+>   firma donde vive, no donde vive el servidor. Bot que autentica,
+>   lee las cláusulas en voz alta, recibe la paráfrasis y firma con el
+>   mismo blindaje (identidad, ventanas, protección).
+>
+> **D. La plaza pública** (T13 radical, cosecha rápida)
+> - Verificador ciudadano de la Cohorte SIN login: auditar integridad de un
+>   contrato por hash, ver bienestar agregado del barrio y el estado de la
+>   economía de la vida. Endpoint público de solo lectura + página
+>   `/verificador`.
+> - Criterio de salida: un visitante sin cuenta verifica un contrato real
+>   por su hash y ve las métricas de la cohorte.
+>
+> **E. La institución humana**
+> - Consejo de avales: registro de personas verificadas por la comunidad;
+>   `verified: true` en `maxo_parties` tras acta comunitaria; los avales
+>   firman las asimetrías y certifican cooperativas reales.
+>
+> Verifica en cada puente: suite completa + `tsc --noEmit` limpios;
+> actualiza CHANGELOG y README. Micro-ideas de gobernanza (auto-revocación
+> líquida, historial de delegaciones, sellado multi-firma, prórroga
+> automática, exportación de gobernanza) siguen disponibles como postre.
 
 > **Diseño nuevo (6/8/2026): BLINDAJE ANTI-GAMIFICACIÓN Y EQUIDAD**
 > — ver `docs/architecture/blindaje_anti_gamificacion_equidad.md`.
 > Prioridad: 3A.1 identidad vinculada al token → 3A.2 inmutabilidad →
 > 3A.3 autoridad de partes → 3A.4 T9 ejecutable → 3A.5 γ con fuente →
 > 3A.6 prohibiciones léxicas → 3A.7 ventanas → 3B escalera de equidad
-> (vulnerables) → 3C ejecución mínima.
+> (vulnerables) → 3C ejecución mínima. **TODAS IMPLEMENTADAS (6/8/2026,
+> 551/551 tests)** — ver estado del documento.
 
 ---
 
@@ -179,3 +218,6 @@ Cada escala hereda el mismo SDV y los mismos invariantes: el contrato entre una 
 - `maxocontracts/core/axioms.py` — `AxiomValidator` (INV1, INV2, INV2-S, T9).
 - `app/contracts_bp.py` — API de contratos (creación, términos con `assigned_participant`, firma, retractación).
 - `scripts/seed_demo_contract.py` — contrato de ejemplo reutilizable por el oráculo.
+- `docs/architecture/blindaje_anti_gamificacion_equidad.md` — análisis de riesgos R1-R14 y las olas 3A/3B/3C (implementadas).
+- `app/forms_manager.py` — motor de ofertas/necesidades y matching (puente B de la Ola 4).
+- `app/sdv_analyzer.py` — bienestar comunitario real (puente A de la Ola 4).
