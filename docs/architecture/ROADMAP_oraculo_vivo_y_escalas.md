@@ -147,12 +147,11 @@ Cada escala hereda el mismo SDV y los mismos invariantes: el contrato entre una 
 
 > **Sesión futura — Escalas (Bloque B)**
 >
-> 1. Implementa `maxocontracts/oracles/live_oracle.py` (protocolo OpenAI-compatible) con lectura de `DEEPSEEK_API_KEY` desde `.env` (`config.example.env` actualizado), degradación elegante si no hay key, y endpoints `POST /contracts/negotiate`, `POST /contracts/<id>/critique` y `POST /contracts/negotiate/feedback` con sesiones de iteración. El prompt del sistema debe incluir T13, INV2/INV2-S, T9, γ≥1 y la Capa de Ternura, y devolver JSON con términos en lenguaje civil.
-> 2. Frontend: panel "Negociación Asistida por Oráculo" en `/contracts/builder` y en el detalle (chat que itera el borrador y botón "Materializar contrato" que llama a `POST /contracts/`).
-> 3. Pruebas: mocks sin red (key ausente → 503; cliente HTTP simulado → borrador validado por `AxiomValidator` y persistido).
-> 4. Escalas: generaliza `participant_id` a `party_id` con resolutores por prefijo (`society-`, `coop-`, `org-`, `eco-`), consentimiento agregado con quórum, y la tabla `maxo_parties` con anidación. Fase 1 del Bloque B como mínimo.
-> 5. Verifica con Playwright: negociación asistida que materializa el contrato de ejemplo (10h ↔ objeto/servicio) y contrato coop↔org firmado por delegados.
-> 6. Firma el CHANGELOG y actualiza README.
+> 1. **Fase 1 (mínimo viable)**: generaliza `participant_id` → `party_id` en el backend con resolutores por prefijo: `user-` (humano), `synthetic-` (reino sintético), `society-`, `coop-`, `org-`, `eco-`. Crea la tabla `maxo_parties` (party_id, party_type, display_name, parent_party_id, members_json) con migración automática en `init_contracts_metrics_tables` (mismo patrón que `assigned_participant`). Relaja la validación que exige `int(user_id)` en `_get_or_create_participant` sin romper los flujos existentes (regresión cubierta por tests).
+> 2. **Fase 2**: consentimiento agregado con quórum — `resolve_consent(party_id, term)` que sustituye `accepted_by[pid]` cuando el pid es colectivo (N de M configurable en `members_json`).
+> 3. **Fase 3 (UI)**: selector de tipo de parte en builder y detalle; crear contrato coop↔org desde la interfaz.
+> 4. **Fases 4-5**: Reino Natural (`eco-`) con representación por oráculo y contratos interescala anidados.
+> 5. Verifica: contrato entre 2 entidades colectivas creado y validado por API; firma delegada funcional con N de M; suite completa y `tsc --noEmit` limpios; actualiza CHANGELOG y README.
 
 ---
 
