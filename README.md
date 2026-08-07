@@ -2,7 +2,7 @@
 
 **Estado del Proyecto:** Fase 2 - Sostenibilidad Económica y MicroMaxocracia Doméstica (Agosto 2026)  
 **Última actualización:** 6 de agosto 2026  
-**Versión:** 4.8 - Blindaje anti-gamificación: identidad vinculada, inmutabilidad y T9 ejecutable (DeepSeek)
+**Versión:** 4.9 - Escalera de equidad: protección de personas vulnerables en los contratos (DeepSeek)
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 
@@ -43,11 +43,12 @@ La **Maxocracia** es un sistema ético-económico-político alternativo que prop
 - **Navegación SPA reparada**: La navegación por clic funciona en todo el portal (barra superior, dropdowns, panel admin y secciones de usuario) — payloads RSC de la exportación estática servidos correctamente.
 - **Escalas e Interescala (Bloque B)**: Un contrato ya no es solo persona↔persona — persona, micro-sociedad, cooperativa, institución, persona sintética y ecosistema son **Partes** con el mismo marco axiomático (`society-`, `coop-`, `org-`, `eco-`). Registro `maxo_parties` con API `/parties`, selector de partes colectivas en el builder, consentimiento agregado por **quórum delegado N de M**, guardián oráculo para el **Reino Natural** (`eco-`) y contratos interescala **anidados** (madre/hijos) con protección de ciclos.
 - **Gobernanza colectiva avanzada (hackathon)**: votación ponderada, delegación temporal y líquida por término, expiración de delegaciones, ciclo de vida del quórum (deadline, prórroga, re-consulta), webhooks por parte y vista de cohorte consolidada.
+- **Escalera de equidad (Ola 3B)**: perfiles `standard | assisted | shielded` — los vulnerables (o con necesidad Alta declarada) reciben protección automática y no negociable: paráfrasis obligatoria de cada cláusula con sus propias palabras (registrada, T13), revisión oracular en vivo pre-firma (sin degradación), co-testigo humano para blindados, topes de exposición VHV (8-20h/contrato, 15-40h/semana), enfriamiento forzado (24-72h) y lectura en voz alta del contrato.
 - **Blindaje anti-gamificación (Ola 3A)**: identidad siempre vinculada al token (nadie firma por otro), inmutabilidad de contratos (`creator_user_id` + 409), autoridad sobre las partes (`owner_user_id` + cambios de gobernanza por quórum de delegados), T9 ejecutable (asimetría >70% exige reconocimiento explícito antes de activar), γ con fuente y tope [0.5,1.5], cláusulas prohibidas bloqueadas server-side, lenguaje civil enforceable (≤40 palabras) y ventanas temporales de firma/reflexión. Detalle del análisis en `docs/architecture/blindaje_anti_gamificacion_equidad.md`.
 - **Oráculo en vivo (Bloque A)**: DeepSeek negocia contratos por chat (`/contracts/negotiate`), audita existentes (`critique`) y firma como guardián de ecosistemas. Activado con `DEEPSEEK_API_KEY` en `.env`; sin key, degradación elegante al oráculo heurístico.
 - **Calculadora VHV**: Frontend completo con Chart.js integrado en el portal.
 - **Sistema TVI**: Detección de overlap temporal, cálculo de CCP.
-- **524 tests** (524/524 pasando) ✅ (Backend Core + Blocks + Escalas + Quórum + Blindaje + Métricas + Ruteo SPA)
+- **538 tests** (538/538 pasando) ✅ (Backend Core + Blocks + Escalas + Quórum + Blindaje + Equidad + Métricas + Ruteo SPA)
 ---
 
 ## 🚀 CÓMO EMPEZAR

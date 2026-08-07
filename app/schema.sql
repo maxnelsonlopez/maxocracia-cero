@@ -423,9 +423,21 @@ CREATE TABLE IF NOT EXISTS maxo_contract_delegate_approvals (
     term_id TEXT NOT NULL,
     party_id TEXT NOT NULL,   -- parte colectiva (ej. 'coop-7')
     delegate_id TEXT NOT NULL, -- delegado humano (ej. 'user-2')
+    paraphrase TEXT, -- Derecho a la comprensión (Ola 3B): palabras del delegado
     approved_at TEXT DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
     UNIQUE(contract_id, term_id, party_id, delegate_id)
+);
+
+-- Perfil de protección de usuarios (Ola 3B, escalera de equidad):
+-- standard | assisted | shielded con acompañante humano opcional.
+CREATE TABLE IF NOT EXISTS maxo_user_protection (
+    user_id INTEGER PRIMARY KEY,
+    level TEXT NOT NULL DEFAULT 'standard' CHECK(level IN ('standard','assisted','shielded')),
+    companion_user_id INTEGER,
+    declared_age INTEGER,
+    declared_education TEXT,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS maxo_contract_terms (
@@ -460,6 +472,7 @@ CREATE TABLE IF NOT EXISTS maxo_contract_term_approvals (
     contract_id TEXT NOT NULL,
     term_id TEXT NOT NULL,
     participant_id TEXT NOT NULL,
+    paraphrase TEXT, -- Derecho a la comprensión (Ola 3B): palabras propias del firmante
     approved_at TEXT DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
     UNIQUE(contract_id, term_id, participant_id)

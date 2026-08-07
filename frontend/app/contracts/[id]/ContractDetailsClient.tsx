@@ -8,7 +8,7 @@ import OracleNegotiationPanel from '../../components/OracleNegotiationPanel';
 import { 
   FileText, ArrowLeft, ShieldAlert, Award, Info, CheckCircle2, 
   UserCheck, AlertTriangle, Play, RefreshCw, Send, Zap,
-  Clock, Bot, Landmark, Leaf
+  Clock, Bot, Landmark, Leaf, ShieldCheck, Volume2
 } from 'lucide-react';
 
 interface Term {
@@ -37,6 +37,7 @@ interface ParticipantDetail {
   wellness: number;
   party_type?: string;
   is_collective?: boolean;
+  protection_level?: string;
   members?: CollectiveMembers;
   is_synthetic?: boolean;
   sdv_s?: Record<string, number>;
@@ -172,6 +173,49 @@ export default function ContractDetailsPage() {
   const [guardianInfo, setGuardianInfo] = useState<{ mode: string; reasoning: string } | null>(null);
   // Vista jerárquica madre -> hijos (Ext. 4)
   const [contractTree, setContractTree] = useState<ContractTree | null>(null);
+  // Derecho a la comprensión (Ola 3B): paráfrasis del firmante protegido
+  const [paraphraseText, setParaphraseText] = useState('');
+  const [isWitnessed, setIsWitnessed] = useState(false);
+
+  // ¿El firmante activo tiene perfil de protección (assisted/shielded)?
+  const protectionLevelOf = (pid: string): string | null => {
+    const detail = contract?.participants_details?.find((d) => d.id === pid);
+    return detail?.protection_level && detail.protection_level !== 'standard'
+      ? detail.protection_level
+      : null;
+  };
+
+  const handleWitness = async () => {
+    try {
+      const res = await apiFetch(`/contracts/${contractId}/witness`, { method: 'POST' });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(`No pudiste ser testigo: ${err.error}`);
+        return;
+      }
+      alert('✅ Testimonio registrado: certificaste que el contrato fue leído y comprendido.');
+      setIsWitnessed(true);
+      loadContractData();
+    } catch (err) {
+      console.error(err);
+      alert('Error de conexión al registrar el testimonio.');
+    }
+  };
+
+  const handleListen = () => {
+    if (!contract || typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      alert('Tu navegador no soporta lectura en voz alta.');
+      return;
+    }
+    const text = [
+      contract.civil_description,
+      ...contract.terms.map((t, i) => `Cláusula ${i + 1}. ${t.civil_text}`),
+    ].join('. ');
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'es-ES';
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  };
 
   // Cargar detalles del contrato
   const loadContractData = useCallback(async () => {
@@ -294,13 +338,20 @@ export default function ContractDetailsPage() {
         alert('Selecciona un delegado de la parte colectiva para firmar.');
         return false;
       }
+      const delegateLevel = delegatePid ? protectionLevelOf(delegatePid) : null;
+      const paraphrase = paraphraseText.trim();
+      if (delegateLevel && paraphrase.length < 10) {
+        alert('Tu perfil de protección requiere que escribas con tus propias palabras qué promete esta cláusula (mínimo 10 caracteres).');
+        return false;
+      }
       try {
         const res = await apiFetch(`/contracts/${contractId}/accept`, {
           method: 'POST',
           body: JSON.stringify(
             isEco
-              ? { term_id: termId, party_id: pid }
-              : { term_id: termId, party_id: pid, delegate_id: delegatePid }
+              ? { term_id: termId, party_id: pid, comprehension: true, paraphrase }
+              : { term_id: termId, party_id: pid, delegate_id: delegatePid,
+                  comprehension: true, paraphrase }
           )
         });
         if (!res.ok) {
@@ -338,12 +389,22 @@ export default function ContractDetailsPage() {
 
     try {
       const isSynthetic = isSyntheticPid(pid);
+      // Derecho a la comprensión (Ola 3B): el perfil protegido escribe la
+      // cláusula con sus propias palabras antes de firmar.
+      const protectedLevel = protectionLevelOf(pid);
+      const paraphrase = paraphraseText.trim();
+      if (protectedLevel && paraphrase.length < 10) {
+        alert('Tu perfil de protección requiere que escribas con tus propias palabras qué promete esta cláusula (mínimo 10 caracteres).');
+        return false;
+      }
       const res = await apiFetch(`/contracts/${contractId}/accept`, {
         method: 'POST',
         body: JSON.stringify(
           isSynthetic
-            ? { term_id: termId, participant_id: pid.replace('synthetic-', '') }
-            : { term_id: termId, user_id: parseInt(pid.replace('user-', '')) }
+            ? { term_id: termId, participant_id: pid.replace('synthetic-', ''),
+                comprehension: true, paraphrase }
+            : { term_id: termId, user_id: parseInt(pid.replace('user-', '')),
+                comprehension: true, paraphrase }
         )
       });
 
@@ -679,6 +740,28 @@ export default function ContractDetailsPage() {
           <span className="text-[9px] text-slate-500 max-w-[320px] leading-snug">
             Misma información, dos lenguajes: bloques visuales o cláusulas declaratorias homologables a contrato tradicional.
           </span>
+        </div>
+
+        {/* Accesibilidad y equidad (Ola 3B): lectura en voz alta y co-testigo */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={handleListen}
+            className="flex items-center gap-1.5 text-[10px] font-bold text-slate-300 hover:text-white px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-800 transition-all"
+          >
+            <Volume2 className="w-3.5 h-3.5 text-blue-400" />
+            Escuchar contrato en voz alta
+          </button>
+          {contract.participants_details?.some(
+            (d) => d.protection_level === 'shielded'
+          ) && !isWitnessed && (
+            <button
+              onClick={handleWitness}
+              className="flex items-center gap-1.5 text-[10px] font-bold text-amber-300 hover:text-amber-200 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 transition-all"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              Ser co-testigo (participante blindado)
+            </button>
+          )}
         </div>
 
         {/* Selector de Firmante Activo (cualquier co-firmante) */}
@@ -1094,6 +1177,27 @@ export default function ContractDetailsPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {/* Derecho a la comprensión (Ola 3B): el perfil protegido
+                      escribe la cláusula con sus propias palabras */}
+                  {protectionLevelOf(activePidValue) && (
+                    <div className="p-3 rounded-xl bg-sky-950/20 border border-sky-900/40 space-y-2">
+                      <span className="text-[9px] font-black uppercase tracking-widest text-sky-300 flex items-center gap-1.5">
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        Perfil {protectionLevelOf(activePidValue)} — derecho a la comprensión
+                      </span>
+                      <p className="text-[10px] text-slate-400 leading-snug">
+                        Antes de firmar, escribe con tus propias palabras qué promete esta cláusula.
+                        Tu testimonio queda registrado junto a la firma (T13).
+                      </p>
+                      <textarea
+                        value={paraphraseText}
+                        onChange={(e) => setParaphraseText(e.target.value)}
+                        rows={3}
+                        placeholder="Con mis palabras: esta cláusula me pide..."
+                        className="w-full bg-slate-950 border border-slate-900 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500/50 placeholder:text-slate-700"
+                      />
+                    </div>
+                  )}
                   {/* FLUJO DE PARTES COLECTIVAS (ROADMAP Bloque B, Fases 2 y 4) */}
                   {isCollectivePid(activePidValue) ? (
                     <div className="space-y-4">

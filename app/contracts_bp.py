@@ -62,6 +62,11 @@ from .parties import (
     resolve_participant_by_pid,
     _synthetic_participant,
 )
+from .protection import (
+    caps_for,
+    exposure_check,
+    protection_level,
+)
 
 from decimal import Decimal
 import hashlib
@@ -178,6 +183,63 @@ def _can_act_for(pid: str, token_uid: Optional[int], contract=None) -> bool:
         # puede operar la firma sintética (el actor queda registrado).
         return contract is not None and f"user-{token_uid}" in contract.participant_ids
     return False
+
+
+def _protection_oracle_gate(contract, uid: int) -> Optional[dict]:
+    """
+    Ola 3B: revisión oracular pre-firma para perfiles protegidos. La
+    degradación elegante está PROHIBIDA para assisted/shielded: sin oráculo
+    en vivo, el firma se bloquea (503); con oráculo, la auditoría debe ser
+    válida.
+    """
+    from .protection import caps_for, protection_level
+    level = protection_level(uid)
+    if not caps_for(level).get("requires_oracle_review"):
+        return None
+    oracle = LiveOracle()
+    if not oracle.is_available():
+        return {
+            "error": "tu perfil de protección exige revisión oracular en vivo, "
+                     "y el oráculo no está disponible",
+            "code": "PROTECTION_ORACLE_REQUIRED",
+            "protection_level": level,
+        }
+    try:
+        critique = oracle.critique(contract.contract_id, _contract_snapshot(contract))
+    except (OracleAPIError, OracleUnavailableError):
+        return {
+            "error": "tu perfil de protección exige revisión oracular en vivo, "
+                     "y el oráculo falló",
+            "code": "PROTECTION_ORACLE_REQUIRED",
+            "protection_level": level,
+        }
+    if not critique.valid:
+        return {
+            "error": "el oráculo de protección no aprueba este contrato para tu perfil",
+            "code": "PROTECTION_ORACLE_DENIED",
+            "protection_level": level,
+            "reasoning": critique.reasoning,
+        }
+    return None
+
+
+def _paraphrase_check(data, level: str) -> Optional[dict]:
+    """
+    Ola 3B: derecho a la comprensión — el firmante protegido escribe con
+    sus propias palabras qué promete la cláusula antes de firmar.
+    """
+    from .protection import PARAPHRASE_MIN_LENGTH, caps_for
+    if not caps_for(level).get("requires_paraphrase"):
+        return None
+    if data.get("comprehension") is not True:
+        return {"error": "debes confirmar comprensión (comprehension: true)",
+                "code": "PROTECTION_PARAPHRASE_REQUIRED"}
+    paraphrase = (data.get("paraphrase") or "").strip()
+    if len(paraphrase) < PARAPHRASE_MIN_LENGTH:
+        return {"error": f"escribe con tus palabras qué promete esta cláusula "
+                         f"(mínimo {PARAPHRASE_MIN_LENGTH} caracteres)",
+                "code": "PROTECTION_PARAPHRASE_REQUIRED"}
+    return None
 
 
 def _contract_window_blocked(contract, db) -> Optional[dict]:
@@ -427,6 +489,30 @@ def init_contracts_metrics_tables(app):
                 cur.execute(
                     "ALTER TABLE maxo_contract_participants ADD COLUMN reported_at TEXT"
                 )
+        # Ola 3B: derecho a la comprensión (paráfrasis por término)
+        if "maxo_contract_term_approvals" in tables:
+            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_contract_term_approvals)").fetchall()]
+            if "paraphrase" not in cols:
+                cur.execute(
+                    "ALTER TABLE maxo_contract_term_approvals ADD COLUMN paraphrase TEXT"
+                )
+        if "maxo_contract_delegate_approvals" in tables:
+            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_contract_delegate_approvals)").fetchall()]
+            if "paraphrase" not in cols:
+                cur.execute(
+                    "ALTER TABLE maxo_contract_delegate_approvals ADD COLUMN paraphrase TEXT"
+                )
+        # Ola 3B: perfil de protección (escalera de equidad)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS maxo_user_protection (
+                user_id INTEGER PRIMARY KEY,
+                level TEXT NOT NULL DEFAULT 'standard',
+                companion_user_id INTEGER,
+                declared_age INTEGER,
+                declared_education TEXT,
+                updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
         # Migración: webhooks filtrados por parte (Ext. 4).
         if "maxo_webhooks" in tables:
             cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_webhooks)").fetchall()]
@@ -889,15 +975,49 @@ def create_contract(current_user):
     contract._asymmetry_flag = flag
     contract._asymmetry_report = report
     contract._signature_deadline = data.get("signature_deadline")
+
+    # Ola 3B: escalera de equidad (perfil de protección)
+    creator_level = protection_level(token_uid)
+    if caps_for(creator_level).get("oracle_required_for_creation") and not LiveOracle().is_available():
+        return jsonify({
+            "error": "tu perfil de protección exige el oráculo en vivo para crear contratos",
+            "code": "PROTECTION_ORACLE_REQUIRED",
+            "protection_level": creator_level,
+        }), 503
+
+    # Topes de exposición por humano obligado (contrato y semana)
+    assigned = {}
+    for t in contract._terms:
+        pid = getattr(t, "assigned_participant", None)
+        if pid:
+            assigned[pid] = assigned.get(pid, 0.0) + float(t.vhv_cost.T)
+    for pid, hours in assigned.items():
+        err = exposure_check(pid, hours)
+        if err:
+            return jsonify({"error": err, "code": "PROTECTION_CAP_EXCEEDED"}), 400
+
+    # Enfriamiento: piso del perfil más protegido entre los humanos
+    human_uids = [
+        int(p.id[len("user-"):]) for p in contract.participants if p.id.startswith("user-")
+    ]
+    reflection_floor = max(
+        [caps_for(protection_level(uid)).get("reflection_hours", 0) for uid in human_uids] or [0]
+    )
     reflection = data.get("min_reflection_hours")
     if reflection is None:
-        # La asimetría declarada exige reflexión por defecto (24h)
-        contract._min_reflection_hours = 24 if flag else 0
+        contract._min_reflection_hours = max(reflection_floor, 24 if flag else 0)
     else:
         try:
-            contract._min_reflection_hours = max(0.0, float(reflection))
+            value = float(reflection)
         except (ValueError, TypeError):
             return jsonify({"error": "invalid min_reflection_hours"}), 400
+        if value < reflection_floor:
+            return jsonify({
+                "error": f"tu perfil de protección exige al menos {reflection_floor:.0f}h "
+                         f"de reflexión (min_reflection_hours)",
+                "code": "PROTECTION_REFLECTION_FLOOR",
+            }), 400
+        contract._min_reflection_hours = value
 
     # Contratos interescala anidados (Fase 5): un contrato puede declararse
     # sub-contrato de un contrato madre existente.
@@ -1052,6 +1172,24 @@ def create_subcontract(current_user, contract_id: str):
     flag, report = _reciprocity_imbalance(contract)
     contract._asymmetry_flag = flag
     contract._asymmetry_report = report
+
+    # Ola 3B: escalera de equidad también para sub-contratos
+    if caps_for(protection_level(token_uid)).get("oracle_required_for_creation") and not LiveOracle().is_available():
+        return jsonify({
+            "error": "tu perfil de protección exige el oráculo en vivo para crear contratos",
+            "code": "PROTECTION_ORACLE_REQUIRED",
+            "protection_level": protection_level(token_uid),
+        }), 503
+    assigned = {}
+    for t in contract._terms:
+        pid = getattr(t, "assigned_participant", None)
+        if pid:
+            assigned[pid] = assigned.get(pid, 0.0) + float(t.vhv_cost.T)
+    for pid, hours in assigned.items():
+        err = exposure_check(pid, hours)
+        if err:
+            return jsonify({"error": err, "code": "PROTECTION_CAP_EXCEEDED"}), 400
+
     contract._min_reflection_hours = 24 if flag else 0
     err = _attach_parent(contract, contract_id)
     if err:
@@ -1641,6 +1779,10 @@ def get_contract(current_user, contract_id: str):
                 "name": p.name,
                 "party_type": party_type_of(p.id),
                 "is_collective": is_collective(p.id),
+                "protection_level": (
+                    protection_level(int(p.id[len("user-"):]))
+                    if p.id.startswith("user-") else None
+                ),
                 "wellness": float(p.wellness_current.value),
                 "is_synthetic": p.is_synthetic,
                 **(
@@ -1732,6 +1874,14 @@ def add_term(current_user, contract_id: str):
                      f"{ASSIGNED_REQUIRED_MIN_TOTAL}h",
             "code": "UNASSIGNED_OBLIGATION",
         }), 400
+
+    # Topes de exposición del perfil protegido (Ola 3B)
+    if assigned_participant and vhv.T > 0:
+        from .protection import assigned_hours
+        current = assigned_hours(contract_id).get(assigned_participant, 0.0)
+        err = exposure_check(assigned_participant, current + float(vhv.T))
+        if err:
+            return jsonify({"error": err, "code": "PROTECTION_CAP_EXCEEDED"}), 400
 
     term = ContractTerm(
         id=term_id,
@@ -1928,6 +2078,18 @@ def accept_term(current_user, contract_id: str):
             "code": "IDENTITY_MISMATCH",
         }), 403
 
+    # Ola 3B: derecho a la comprensión y revisión oracular pre-firma.
+    # El firmante protegido escribe la cláusula con sus propias palabras.
+    protected_level = protection_level(token_uid)
+    para_err = _paraphrase_check(data, protected_level)
+    if para_err:
+        return jsonify(para_err), 400
+    if party_type_of(pid) == "human" or is_collective(pid):
+        oracle_err = _protection_oracle_gate(contract, token_uid)
+        if oracle_err:
+            return jsonify(oracle_err), 503 if oracle_err.get("code") == "PROTECTION_ORACLE_REQUIRED" else 400
+    paraphrase = (data.get("paraphrase") or "").strip()
+
     # --- Ecosistema del Reino Natural: guardián oráculo (Fase 4) ---
     if party_type_of(pid) == "ecosystem":
         approved, reasoning = _guardian_approve_ecosystem(contract)
@@ -1966,10 +2128,10 @@ def accept_term(current_user, contract_id: str):
         db.execute(
             """
             INSERT OR IGNORE INTO maxo_contract_delegate_approvals
-                (contract_id, term_id, party_id, delegate_id)
-            VALUES (?, ?, ?, ?)
+                (contract_id, term_id, party_id, delegate_id, paraphrase)
+            VALUES (?, ?, ?, ?, ?)
             """,
-            (contract_id, term_id, pid, delegate_pid),
+            (contract_id, term_id, pid, delegate_pid, paraphrase or None),
         )
         db.commit()
 
@@ -2027,12 +2189,62 @@ def accept_term(current_user, contract_id: str):
     
     _audit(contract, "term_accept_signed", token_uid, term_id=term_id, party_id=pid)
     _save_contract(contract, actor_id=token_uid)
+    # Derecho a la comprensión (Ola 3B): guardar las palabras del firmante
+    if paraphrase:
+        db = get_db()
+        db.execute(
+            """
+            UPDATE maxo_contract_term_approvals SET paraphrase = ?
+            WHERE contract_id = ? AND term_id = ? AND participant_id = ?
+            """,
+            (paraphrase, contract_id, term_id, pid),
+        )
+        db.commit()
     
     return jsonify({
         "success": True,
         "term_id": term_id,
         "accepted_by": pid,
         "contract_state": contract.state.value
+    })
+
+
+@contracts_bp.route("/<contract_id>/witness", methods=["POST"])
+@token_required
+def witness_contract(current_user, contract_id: str):
+    """
+    Co-testigo humano (Ola 3B): un usuario ajeno a las partes certifica que
+    el contrato con participantes blindados fue leído y comprendido.
+
+    El testigo es el usuario del token (debe estar autenticado, no ser
+    participante ni creador del contrato).
+    """
+    contract = _load_contract(contract_id)
+    if contract is None:
+        return jsonify({"error": "contract not found"}), 404
+
+    token_uid = _token_uid(current_user)
+    witness_pid = f"user-{token_uid}"
+    if witness_pid in contract.participant_ids:
+        return jsonify({"error": "las partes del contrato no pueden ser testigos"}), 400
+    if getattr(contract, "_creator_user_id", None) == token_uid:
+        return jsonify({"error": "el creador del contrato no puede ser testigo"}), 400
+
+    db = get_db()
+    db.execute(
+        """
+        INSERT INTO maxo_contract_meta (contract_id, meta_key, meta_value)
+        VALUES (?, 'witnessed_by', ?)
+        ON CONFLICT(contract_id, meta_key) DO UPDATE SET meta_value = excluded.meta_value
+        """,
+        (contract_id, witness_pid),
+    )
+    _audit(contract, "contract_witnessed", token_uid)
+    db.commit()
+    return jsonify({
+        "success": True,
+        "contract_id": contract_id,
+        "witnessed_by": witness_pid,
     })
 
 
@@ -2114,11 +2326,12 @@ def activate_contract(current_user, contract_id: str):
 
     token_uid = _token_uid(current_user)
 
+    db = get_db()
+
     # T9 ejecutable (Ola 3A.4): la asimetría debe reconocerse explícitamente
     # por todas las partes obligadas + un aval antes de activar.
     if getattr(contract, "_asymmetry_flag", False):
         report = getattr(contract, "_asymmetry_report", {}) or {}
-        db = get_db()
         row = db.execute(
             "SELECT meta_value FROM maxo_contract_meta WHERE contract_id = ? AND meta_key = 'asymmetry_acknowledged'",
             (contract_id,),
@@ -2146,6 +2359,28 @@ def activate_contract(current_user, contract_id: str):
                 "acknowledged": acknowledged,
                 "asymmetry": report,
                 "hint": "POST /contracts/<id>/acknowledge-asymmetry con cada party_id",
+            }), 400
+    
+    # Ola 3B: co-testigo humano obligatorio para contratos con participantes
+    # blindados (el testigo es ajeno a las partes).
+    shielded_participants = [
+        p.id for p in contract.participants
+        if p.id.startswith("user-")
+        and caps_for(protection_level(int(p.id[len("user-"):]))).get("requires_witness")
+    ]
+    if shielded_participants:
+        row = db.execute(
+            "SELECT meta_value FROM maxo_contract_meta WHERE contract_id = ? AND meta_key = 'witnessed_by'",
+            (contract_id,),
+        ).fetchone()
+        witnessed_by = row["meta_value"] if row else None
+        if not witnessed_by:
+            return jsonify({
+                "error": "este contrato protege a participantes blindados: "
+                         "requiere co-testigo humano ajeno a las partes",
+                "code": "WITNESS_REQUIRED",
+                "shielded_participants": shielded_participants,
+                "hint": "POST /contracts/<id>/witness (el testigo firma con su token)",
             }), 400
     
     if contract.state == ContractState.DRAFT:

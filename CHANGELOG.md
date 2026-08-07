@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-06 — Ola 3B: Escalera de equidad — protección de personas vulnerables
+
+### Añadido
+- **Perfil de protección** (`app/protection.py` + tabla `maxo_user_protection` + API `/protection/profile`): `standard | assisted | shielded`, con acompañante humano, edad y escolaridad declaradas. Nivel efectivo = max(declarado, heurístico): una necesidad de urgencia Alta registrada en el dominio de formularios eleva el piso a `assisted` (T13: el sistema protege sin pedir permiso).
+- **Escalera de salvaguardas** (blindaje_anti_gamificacion_equidad.md §4.2):
+  - **Paráfrasis obligatoria** (assisted/shielded): el firmante escribe la cláusula con sus propias palabras (≥10 caracteres) antes de aceptar; queda registrada en la aprobación (humana y delegada) — derecho a la comprensión verificable.
+  - **Revisión oracular pre-firma** (assisted/shielded): sin oráculo en vivo → 503 `PROTECTION_ORACLE_REQUIRED` (la degradación elegante está PROHIBIDA para perfiles protegidos); con oráculo, la auditoría debe ser válida.
+  - **Co-testigo humano** (shielded): la activación exige `POST /contracts/<id>/witness` de un usuario ajeno a las partes y al creador (400 `WITNESS_REQUIRED`).
+  - **Topes de exposición**: 20h/contrato y 40h/semana (assisted); 8h/contrato y 15h/semana (shielded) — en creación, `add_term` y sub-contratos (400 `PROTECTION_CAP_EXCEEDED`).
+  - **Piso de reflexión**: 24h (assisted) y 72h (shielded) — no se puede declarar un enfriamiento menor (400 `PROTECTION_REFLECTION_FLOOR`).
+  - **Shielded + creación**: exige oráculo en vivo (503 si no está disponible).
+- **UI**: badge de perfil en el panel de firma con textarea de paráfrasis, botón "Ser co-testigo" cuando hay participantes blindados, y "Escuchar contrato en voz alta" (speechSynthesis — accesibilidad para analfabetas funcionales, §4.4). `protection_level` expuesto en `participants_details`.
+- **Tests**: `tests/test_maxocontracts/test_protection.py` — 14 pruebas (perfil, heurístico, bloqueos 503/400, topes, piso de reflexión, paráfrasis registrada, testigo).
+
+### Notas Técnicas
+- **Verificación**: suite completa 538/538 (14 nuevas); tsc/eslint limpios; build exportado; README v4.9.
+- **Referencia**: `docs/architecture/blindaje_anti_gamificacion_equidad.md` (Ola 3B marcada implementada; 3C dientes pendiente).
+
 ## 2026-08-06 — Ola 3A: Blindaje anti-gamificación (identidad, inmutabilidad, autoridad, T9, γ, civil, ventanas)
 
 ### Corregido (riesgos verificados del análisis `blindaje_anti_gamificacion_equidad.md`)

@@ -83,6 +83,7 @@ def create_app(db_path=None):
     from .forms_manager import init_multi_offers_needs_tables
     from .contracts_bp import init_contracts_metrics_tables
     from .parties_bp import parties_bp
+    from .protection_bp import protection_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
@@ -95,6 +96,7 @@ def create_app(db_path=None):
     app.register_blueprint(forms_bp)
     app.register_blueprint(contracts_bp)
     app.register_blueprint(parties_bp)
+    app.register_blueprint(protection_bp)
     app.register_blueprint(stripe_bp)
     app.register_blueprint(subscriptions_bp)
     app.register_blueprint(micromax_bp)
