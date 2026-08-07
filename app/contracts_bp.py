@@ -51,6 +51,7 @@ from maxocontracts.oracles.live_oracle import (
 
 from .webhooks import dispatch_event
 from .parties import (
+    aggregate_wellness,
     consent_status,
     get_party,
     get_human_participant,
@@ -273,6 +274,16 @@ def _save_contract(contract: MaxoContract):
     ))
     
     # 2. Update participants
+    # Primero: γ agregado real de las partes colectivas (Ext. 3) — media
+    # ponderada del bienestar de sus miembros presentes en este contrato.
+    wellness_map = {
+        p.id: p.wellness_current.value for p in contract.participants
+    }
+    for p in contract.participants:
+        if p.id.startswith(("society-", "coop-", "org-", "eco-")):
+            agg = aggregate_wellness(p.id, wellness_map)
+            if agg is not None:
+                p.update_wellness(agg)
     for p in contract.participants:
         # sdv_status: "ok" para humanos; JSON completo del estado SDV-S
         # para participantes sintéticos (T13: auditable en la base).
@@ -395,7 +406,17 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
             # desde la BD no es una mutación de diseño y el estado ya fue
             # restaurado (un contrato ACTIVE debe volver a cargarse igual).
             contract.participants.append(participant)
-            
+
+    # Auto-curación del γ agregado (Ext. 3): si los miembros están en el
+    # contrato, el bienestar de la parte colectiva es su media ponderada,
+    # aunque la fila se haya escrito antes de esta extensión.
+    wellness_map = {p.id: p.wellness_current.value for p in contract.participants}
+    for p in contract.participants:
+        if p.id.startswith(("society-", "coop-", "org-", "eco-")):
+            agg = aggregate_wellness(p.id, wellness_map)
+            if agg is not None:
+                p.update_wellness(agg)
+
     # 3. Load terms
     t_rows = db.execute("SELECT * FROM maxo_contract_terms WHERE contract_id = ?", (contract_id,)).fetchall()
     for t_row in t_rows:
@@ -578,7 +599,28 @@ def create_contract(current_user):
             continue
 
     # Batch creation support: add terms
-    terms_data = data.get("terms", [])
+    _attach_terms(contract, data.get("terms", []))
+
+    # Contratos interescala anidados (Fase 5): un contrato puede declararse
+    # sub-contrato de un contrato madre existente.
+    parent_id = data.get("parent_contract_id")
+    if parent_id:
+        err = _attach_parent(contract, parent_id)
+        if err:
+            return err
+
+    _save_contract(contract)
+    
+    return jsonify({
+        "success": True,
+        "contract_id": contract_id,
+        "state": contract.state.value,
+        "created_at": datetime.now().isoformat()
+    }), 201
+
+
+def _attach_terms(contract: MaxoContract, terms_data: List[Dict[str, Any]]) -> None:
+    """Añade los términos del payload a un contrato (creación batch)."""
     for t_data in terms_data:
         t_id = t_data.get("term_id")
         t_civil = t_data.get("civil_text", "")
@@ -596,39 +638,121 @@ def create_contract(current_user):
             except Exception:
                 pass
 
-    # Contratos interescala anidados (Fase 5): un contrato puede declararse
-    # sub-contrato de un contrato madre existente.
-    parent_id = data.get("parent_contract_id")
-    if parent_id:
-        db = get_db()
-        parent = db.execute(
-            "SELECT contract_id FROM maxo_contracts WHERE contract_id = ?", (parent_id,)
-        ).fetchone()
-        if parent is None:
-            return jsonify({"error": f"parent contract {parent_id} not found"}), 400
-        # Protección de ciclos: el padre no puede ser descendiente del nuevo.
-        node = parent_id
-        while node:
-            if node == contract_id:
-                return jsonify({"error": "parent_contract_id crearía un ciclo de contratos"}), 400
-            node = db.execute(
-                "SELECT parent_contract_id FROM maxo_contracts WHERE contract_id = ?", (node,)
-            ).fetchone()
-            node = node["parent_contract_id"] if node else None
-        contract._parent_contract_id = parent_id
-        contract._log_event("subcontract_created", {
-            "parent_contract_id": parent_id,
-            "child_contract_id": contract_id,
-        })
 
+def _attach_parent(contract: MaxoContract, parent_id: str):
+    """
+    Vincula un contrato a su contrato madre (Fase 5 / Ext. 4).
+    Devuelve un jsonify de error (para retornar) o None si todo va bien.
+    """
+    db = get_db()
+    parent = db.execute(
+        "SELECT contract_id FROM maxo_contracts WHERE contract_id = ?", (parent_id,)
+    ).fetchone()
+    if parent is None:
+        return jsonify({"error": f"parent contract {parent_id} not found"}), 400
+    # Protección de ciclos: el padre no puede ser descendiente del nuevo.
+    node = parent_id
+    while node:
+        if node == contract.contract_id:
+            return jsonify({"error": "parent_contract_id crearía un ciclo de contratos"}), 400
+        node = db.execute(
+            "SELECT parent_contract_id FROM maxo_contracts WHERE contract_id = ?", (node,)
+        ).fetchone()
+        node = node["parent_contract_id"] if node else None
+    contract._parent_contract_id = parent_id
+    contract._log_event("subcontract_created", {
+        "parent_contract_id": parent_id,
+        "child_contract_id": contract.contract_id,
+    })
+    return None
+
+
+def _build_contract_tree(cid: str, db, depth: int = 0) -> Dict[str, Any]:
+    """Árbol recursivo de sub-contratos (Ext. 4), con guarda de profundidad."""
+    if depth > 10:
+        return {"contract_id": cid, "truncated": True, "subcontracts": []}
+    children = [
+        r["contract_id"]
+        for r in db.execute(
+            "SELECT contract_id FROM maxo_contracts WHERE parent_contract_id = ? ORDER BY created_at",
+            (cid,),
+        ).fetchall()
+    ]
+    return {
+        "contract_id": cid,
+        "subcontracts": [_build_contract_tree(c, db, depth + 1) for c in children],
+    }
+
+
+@contracts_bp.route("/<contract_id>/subcontracts", methods=["POST"])
+@token_required
+def create_subcontract(current_user, contract_id: str):
+    """
+    Crear un sub-contrato bajo un contrato madre existente (Fase 5 / Ext. 4).
+
+    Body JSON: igual que POST /contracts/ pero sin parent_contract_id
+    (el padre es la URL). Conveniente para la vista jerárquica.
+    """
+    parent = _load_contract(contract_id)
+    if parent is None:
+        return jsonify({"error": "contract not found"}), 404
+
+    data = request.get_json() or {}
+    child_id = data.get("contract_id")
+    if not child_id:
+        return jsonify({"error": "contract_id is required"}), 400
+
+    contract = MaxoContract(
+        contract_id=child_id,
+        description=data.get("civil_description", ""),
+        civil_summary=data.get("civil_description", "")
+    )
+    for p_data in data.get("participants", []):
+        participant = _resolve_party_from_payload(p_data)
+        if participant:
+            _apply_wellness(participant, p_data)
+            contract.add_participant(participant)
+    _attach_terms(contract, data.get("terms", []))
+    err = _attach_parent(contract, contract_id)
+    if err:
+        return err
     _save_contract(contract)
-    
     return jsonify({
         "success": True,
-        "contract_id": contract_id,
+        "contract_id": child_id,
+        "parent_contract_id": contract_id,
         "state": contract.state.value,
-        "created_at": datetime.now().isoformat()
     }), 201
+
+
+@contracts_bp.route("/<contract_id>/tree", methods=["GET"])
+@token_required
+def get_contract_tree(current_user, contract_id: str):
+    """
+    Vista jerárquica del contrato (Ext. 4): ancestros (camino al tronco)
+    y árbol completo de sub-contratos (madre -> hijos -> nietos...).
+    """
+    contract = _load_contract(contract_id)
+    if contract is None:
+        return jsonify({"error": "contract not found"}), 404
+
+    db = get_db()
+    ancestors = []
+    node = getattr(contract, "_parent_contract_id", None)
+    while node:
+        ancestors.append(node)
+        row = db.execute(
+            "SELECT parent_contract_id FROM maxo_contracts WHERE contract_id = ?", (node,)
+        ).fetchone()
+        node = row["parent_contract_id"] if row else None
+        if len(ancestors) > 20:
+            break
+
+    return jsonify({
+        "contract_id": contract_id,
+        "ancestors": ancestors,
+        "tree": _build_contract_tree(contract_id, db),
+    })
 
 
 def _live_oracle_or_503():
@@ -1452,6 +1576,18 @@ def accept_term(current_user, contract_id: str):
         if consent.get("approved"):
             success = contract.accept_term(term_id, pid)
             _save_contract(contract)
+            # Evento de consentimiento agregado sellado (bonus de sesión):
+            # las partes colectivas pueden vigilarse vía webhooks.
+            dispatch_event("contract.quorum_sealed", {
+                "contract_id": contract_id,
+                "term_id": term_id,
+                "party_id": pid,
+                "delegates": consent.get("approved_delegates", []),
+                "effective_delegates": consent.get("effective_delegates", []),
+                "current_weight": consent.get("current_weight"),
+                "needed_weight": consent.get("needed_weight"),
+                "sealed_at": datetime.now().isoformat(),
+            })
         else:
             success = False
 

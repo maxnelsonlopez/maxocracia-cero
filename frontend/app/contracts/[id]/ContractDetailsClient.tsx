@@ -77,10 +77,42 @@ const isCollectivePid = (pid: string) => COLLECTIVE_PREFIXES.some((p) => pid.sta
 const isEcosystemPid = (pid: string) => pid.startsWith('eco-');
 const isSyntheticPid = (pid: string) => pid.startsWith('synthetic-');
 
+// Render recursivo del árbol de sub-contratos (Ext. 4)
+const renderTree = (
+  node: ContractTreeNode,
+  depth: number,
+  router: ReturnType<typeof useRouter>,
+): React.ReactNode => (
+  <div key={node.contract_id} style={{ paddingLeft: depth * 14 }}>
+    <button
+      onClick={() => router.push(`/contracts/${node.contract_id}`)}
+      className="text-[10px] font-mono text-emerald-400 hover:underline"
+    >
+      └ {node.contract_id}
+    </button>
+    {node.subcontracts?.map((child) => renderTree(child, depth + 1, router))}
+  </div>
+);
+
 interface ConsentProgress {
   current: number;
   needed: number | null;
   approved: boolean;
+  mode?: string;
+  current_weight?: number;
+  needed_weight?: number | null;
+  total_weight?: number;
+}
+
+interface ContractTreeNode {
+  contract_id: string;
+  subcontracts?: ContractTreeNode[];
+}
+
+interface ContractTree {
+  contract_id: string;
+  ancestors: string[];
+  tree: ContractTreeNode;
 }
 
 // Ontometría sintética (SDV-S): Cap. 10 §10.8 y docs/theory/SDV-S
@@ -136,6 +168,8 @@ export default function ContractDetailsPage() {
   const [delegatePid, setDelegatePid] = useState<string>('');
   const [consentProgress, setConsentProgress] = useState<Record<string, ConsentProgress>>({});
   const [guardianInfo, setGuardianInfo] = useState<{ mode: string; reasoning: string } | null>(null);
+  // Vista jerárquica madre -> hijos (Ext. 4)
+  const [contractTree, setContractTree] = useState<ContractTree | null>(null);
 
   // Cargar detalles del contrato
   const loadContractData = useCallback(async () => {
@@ -154,6 +188,12 @@ export default function ContractDetailsPage() {
       if (civilRes.ok) {
         const civilData = await civilRes.json();
         setCivilSummary(civilData.civil_summary);
+      }
+
+      // Vista jerárquica (Ext. 4): ancestros y árbol de sub-contratos
+      const treeRes = await apiFetch(`/contracts/${contractId}/tree`);
+      if (treeRes.ok) {
+        setContractTree(await treeRes.json());
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al conectar con la base de datos');
@@ -274,6 +314,10 @@ export default function ContractDetailsPage() {
               current: data.consent.current ?? 0,
               needed: data.consent.needed ?? null,
               approved: !!data.consent.approved,
+              mode: data.consent.mode,
+              current_weight: data.consent.current_weight ?? undefined,
+              needed_weight: data.consent.needed_weight ?? null,
+              total_weight: data.consent.total_weight ?? undefined,
             },
           }));
         }
@@ -581,21 +625,25 @@ export default function ContractDetailsPage() {
                 </button>
               </p>
             )}
-            {contract.subcontracts && contract.subcontracts.length > 0 && (
-              <p className="text-[10px] text-slate-500">
-                Sub-contratos:{' '}
-                {contract.subcontracts.map((sc, i) => (
-                  <span key={sc}>
-                    {i > 0 && ', '}
-                    <button
-                      onClick={() => router.push(`/contracts/${sc}`)}
-                      className="text-emerald-400 hover:underline font-bold"
-                    >
-                      {sc}
-                    </button>
-                  </span>
+            {contractTree && (contractTree.ancestors.length > 0 || (contractTree.tree.subcontracts || []).length > 0) && (
+              <div className="pt-1">
+                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1">
+                  Jerarquía interescala
+                </span>
+                {contractTree.ancestors.slice().reverse().map((anc) => (
+                  <button
+                    key={anc}
+                    onClick={() => router.push(`/contracts/${anc}`)}
+                    className="block text-[10px] text-slate-400 hover:text-emerald-400 hover:underline font-mono"
+                  >
+                    └ {anc}
+                  </button>
                 ))}
-              </p>
+                <div className="text-[10px] font-mono text-slate-300">
+                  └ <strong>{contract.contract_id}</strong> (este contrato)
+                </div>
+                {renderTree(contractTree.tree, 0, router)}
+              </div>
             )}
           </div>
         </div>
@@ -745,6 +793,7 @@ export default function ContractDetailsPage() {
                           const signed = term.accepted_by[pid] === true;
                           const shortName = participantName(pid).split(' ')[0] || pid;
                           const progress = consentProgress[`${pid}|${term.term_id}`];
+                          const weighted = progress?.mode?.startsWith('weighted') && progress.needed_weight != null;
                           return (
                             <div key={pid} className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-md bg-slate-900 border border-slate-800">
                               <span className="text-slate-500 max-w-[70px] truncate">{shortName}</span>
@@ -754,7 +803,9 @@ export default function ContractDetailsPage() {
                                 <span className={`text-[8px] font-mono font-bold ${
                                   progress.approved ? 'text-emerald-400' : 'text-amber-400'
                                 }`}>
-                                  {progress.current}/{progress.needed ?? '?'}
+                                  {weighted
+                                    ? `peso ${progress.current_weight}/${progress.needed_weight}`
+                                    : `${progress.current}/${progress.needed ?? '?'}`}
                                 </span>
                               ) : (
                                 <Clock className="w-3 h-3 text-amber-500" />
@@ -1093,6 +1144,7 @@ export default function ContractDetailsPage() {
                             {contract.terms.map((t) => {
                               const progress = consentProgress[`${activePidValue}|${t.term_id}`];
                               const sealed = t.accepted_by[activePidValue] === true;
+                              const weighted = progress?.mode?.startsWith('weighted') && progress.needed_weight != null;
                               return (
                                 <div key={t.term_id} className="flex justify-between items-center">
                                   <span className="truncate max-w-[60%]">{t.term_id}</span>
@@ -1102,7 +1154,9 @@ export default function ContractDetailsPage() {
                                     </span>
                                   ) : progress ? (
                                     <span className="font-mono font-bold text-amber-400">
-                                      {progress.current}/{progress.needed ?? '?'} firmas
+                                      {weighted
+                                        ? `peso ${progress.current_weight}/${progress.needed_weight}`
+                                        : `${progress.current}/${progress.needed ?? '?'} firmas`}
                                     </span>
                                   ) : (
                                     <span className="font-mono text-slate-600">sin firmas</span>

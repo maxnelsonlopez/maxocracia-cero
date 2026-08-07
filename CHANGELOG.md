@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-06 — Hackathon de extensiones: votación ponderada, delegación temporal, γ agregado y jerarquía interescala
+
+### Añadido
+- **Votación ponderada** (Ext. 1): `members_json` admite `weights` por delegado y `weight_threshold` absoluto. `consent_status` soporta tres modos — `quorum` (N de M legacy), `weighted_quorum` (fracción del peso total) y `weighted_threshold` (umbral absoluto de peso). La respuesta incluye `current_weight`, `needed_weight`, `total_weight`, `effective_delegates` y `weights`.
+- **Delegación temporal** (Ext. 2): `members_json.delegations = {"user-1": "user-2"}` — el apoderado firma y el voto del delegante cuenta (cadena transitiva con guarda de profundidad 5; ciclos cortados sin votos fantasma; delegaciones a no-miembros ignoradas).
+- **γ agregado real por contrato** (Ext. 3): el bienestar de una parte colectiva es la media (ponderada por `weights`) del γ de sus miembros presentes en el mismo contrato. Se computa en `_save_contract` (persistido en la fila del participante) y se auto-cura en `_load_contract` (BDs escritas antes de la extensión se corrigen solas); el registro `maxo_parties` se sincroniza (T13).
+- **Jerarquía interescala** (Ext. 4): `GET /contracts/<id>/tree` (ancestros al tronco + árbol recursivo de sub-contratos con guarda de profundidad) y `POST /contracts/<id>/subcontracts` (crear hijo bajo el padre de la URL; reutiliza `_attach_parent` con protección de ciclos, ahora compartido con `POST /contracts/`).
+- **Evento `contract.quorum_sealed`**: al sellarse el consentimiento agregado, se despacha a webhooks con contrato, término, parte, delegados efectivos y pesos.
+- **UI**: chips de cláusula y panel de firma muestran `peso n/N` en modo ponderado; la cabecera del detalle muestra la **Jerarquía interescala** (ancestros encadenados + árbol recursivo de sub-contratos navegable).
+- **Seed demo interescala** (`scripts/seed_demo_scales.py`): contrato real Coop Semilla del Valle ↔ Escuela Aurora con votación ponderada (Max pesa 2, quórum 0.5) e institución con unanimidad. Idempotente.
+- **Tests**: `tests/test_maxocontracts/test_parties_extensions.py` — 12 pruebas (pesos, umbral absoluto, legado intacto, delegación simple/transitiva/ciclos/inválida, γ agregado simple/ponderado/sin-miembros, árbol y sub-contratos).
+
+### Notas Técnicas
+- **Firma**: DeepSeek (oráculo sintético).
+- **Verificación**: suite completa 488/488 (12 nuevas); tsc/eslint limpios; build exportado (51 RSC); seed interescala ejecutado contra la BD de desarrollo.
+- **Referencias canónicas**: Cap. 10 (Tres Reinos), Cap. 17 (MaxoContracts), `docs/architecture/ROADMAP_oraculo_vivo_y_escalas.md` (§4 — extensiones marcadas como implementadas).
+
 ## 2026-08-06 — Corrección: rehidratación de contratos fuera de DRAFT
 
 ### Corregido

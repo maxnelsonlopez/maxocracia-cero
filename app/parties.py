@@ -154,15 +154,63 @@ def members_of(party_id: str) -> dict:
         return {}
 
 
-# --- Consentimiento agregado (Fase 2) -----------------------------------------
+# --- Consentimiento agregado (Fase 2 + extensiones) ----------------------------
+
+def _member_weights(members: dict, delegates: List[str]) -> Dict[str, float]:
+    """Peso de voto por delegado (default 1.0). Votación ponderada (Ext. 1)."""
+    weights = members.get("weights") or {}
+    if not isinstance(weights, dict):
+        weights = {}
+    return {
+        d: float(weights.get(d, 1.0))
+        for d in delegates
+    }
+
+
+def _effective_votes(approved: set, members: dict, delegates: List[str]) -> set:
+    """
+    Expande la aprobación con delegaciones temporales (Ext. 2).
+
+    delegations = {"user-1": "user-2"} significa que user-1 cede su firma a
+    user-2: si el apoderado firma, el voto del delegante cuenta también.
+    La cadena es transitiva con guarda de profundidad (máx. 5) para no
+    entrar en ciclos (delegación A→B→A queda cortada).
+    """
+    raw = members.get("delegations") or {}
+    if not isinstance(raw, dict):
+        return set(approved)
+    delegations = {
+        k: v for k, v in raw.items()
+        if isinstance(k, str) and isinstance(v, str)
+    }
+    effective = set(approved)
+    delegates_set = set(delegates)
+    changed = True
+    depth = 0
+    while changed and depth < 5:
+        changed = False
+        for source, proxy in delegations.items():
+            if (
+                source in delegates_set
+                and proxy in effective
+                and source not in effective
+            ):
+                effective.add(source)
+                changed = True
+        depth += 1
+    return effective
+
 
 def consent_status(party_id: str, approved_delegates: List[str]) -> dict:
     """
     Estado del consentimiento agregado de una parte colectiva.
 
-    members_json admite dos formas de quórum:
-      {"delegates": ["user-1", "user-2", "user-3"], "quorum": 0.6}  -> fracción
-      {"delegates": [...], "quorum_required": 2}                    -> N absoluto
+    members_json admite:
+      {"delegates": [...], "quorum": 0.6}                        -> fracción de votos
+      {"delegates": [...], "quorum_required": 2}                 -> N absoluto de delegados
+      {"delegates": [...], "weights": {"user-1": 2}, "quorum": 0.6} -> fracción del peso total
+      {"delegates": [...], "weights": {...}, "weight_threshold": 3} -> umbral absoluto de peso
+      {"delegations": {"user-1": "user-2"}}                      -> delegación temporal (Ext. 2)
     """
     members = members_of(party_id)
     delegates = [d for d in (members.get("delegates") or []) if isinstance(d, str)]
@@ -173,28 +221,93 @@ def consent_status(party_id: str, approved_delegates: List[str]) -> dict:
             "mode": "unmanaged",
             "delegates": [],
             "approved_delegates": sorted(set(approved_delegates)),
+            "effective_delegates": [],
             "needed": None,
             "current": len(approved_delegates),
+            "needed_weight": None,
+            "current_weight": 0,
+            "total_weight": 0,
         }
 
+    weights = _member_weights(members, delegates)
     approved = set(approved_delegates) & set(delegates)
-    if members.get("quorum_required") is not None:
+    effective = _effective_votes(approved, members, delegates)
+    total_weight = sum(weights.values())
+    current_weight = sum(weights[d] for d in effective)
+
+    weighted = any(w != 1.0 for w in weights.values()) or (
+        members.get("weights") is not None
+    ) or members.get("weight_threshold") is not None
+
+    if members.get("weight_threshold") is not None:
+        # Umbral absoluto de peso (votación ponderada)
+        needed_weight = int(members["weight_threshold"])
+        quorum_ok = current_weight >= needed_weight
+        mode = "weighted_threshold"
+        needed = None
+    elif members.get("quorum_required") is not None:
+        # N absoluto de delegados (legacy, sin pesos)
         needed = int(members["quorum_required"])
+        quorum_ok = len(effective) >= needed
+        mode = "quorum"
+        needed_weight = None
     else:
+        # Fracción: sobre delegados o sobre peso total si hay pesos
         fraction = float(members.get("quorum", 1.0))
-        needed = max(1, round(len(delegates) * fraction))
-    quorum_ok = len(approved) >= needed
+        if weighted:
+            needed_weight = max(1, int(total_weight * fraction + 0.999999))
+            quorum_ok = current_weight >= needed_weight
+            needed = None
+            mode = "weighted_quorum"
+        else:
+            needed = max(1, round(len(delegates) * fraction))
+            quorum_ok = len(effective) >= needed
+            mode = "quorum"
+            needed_weight = None
+
     return {
         "approved": quorum_ok,
         "party_id": party_id,
-        "mode": "quorum",
+        "mode": mode,
         "delegates": sorted(delegates),
         "approved_delegates": sorted(approved),
+        "effective_delegates": sorted(effective),
         "needed": needed,
-        "current": len(approved),
-        "quorum": float(members.get("quorum", 1.0)) if members.get("quorum_required") is None else None,
+        "current": len(effective),
+        "needed_weight": needed_weight,
+        "current_weight": current_weight,
+        "total_weight": total_weight,
+        "weights": weights,
+        "quorum": float(members.get("quorum", 1.0)) if members.get("quorum_required") is None and members.get("weight_threshold") is None else None,
         "quorum_required": members.get("quorum_required"),
+        "weight_threshold": members.get("weight_threshold"),
     }
+
+
+def aggregate_wellness(party_id: str, participants_wellness: Dict[str, Decimal]) -> Optional[Decimal]:
+    """
+    γ agregado real de una parte colectiva (Ext. 3): media (ponderada por
+    `weights` si existen) del bienestar de sus miembros presentes en el
+    mismo contrato. Devuelve None si ningún miembro está en el contrato.
+    """
+    members = members_of(party_id)
+    delegates = [d for d in (members.get("delegates") or []) if isinstance(d, str)]
+    if not delegates:
+        return None
+    weights = members.get("weights") or {}
+    if not isinstance(weights, dict):
+        weights = {}
+    present = {d: participants_wellness[d] for d in delegates if d in participants_wellness}
+    if not present:
+        return None
+    total_w = sum(float(weights.get(d, 1.0)) for d in present)
+    if total_w <= 0:
+        return None
+    acc = sum(
+        participants_wellness[d] * Decimal(str(weights.get(d, 1.0)))
+        for d in present
+    )
+    return acc / Decimal(str(total_w))
 
 
 # --- Resolver de participantes ------------------------------------------------
