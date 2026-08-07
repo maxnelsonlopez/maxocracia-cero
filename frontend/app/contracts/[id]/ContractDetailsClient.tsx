@@ -11,11 +11,21 @@ import {
   Clock, Bot, Landmark, Leaf, ShieldCheck, Volume2
 } from 'lucide-react';
 
+interface Fulfillment {
+  status: 'fulfilled' | 'partial' | 'violated' | 'appealed';
+  wellness_delta: number;
+  reported_by: string;
+  evidence?: string | null;
+  created_at: string;
+}
+
 interface Term {
   term_id: string;
   civil_text: string;
   vhv: { t: number; v: number; r: number };
   accepted_by: Record<string, boolean>;
+  penalty_gamma?: number;
+  fulfillments?: Fulfillment[];
 }
 
 interface SDV_SViolation {
@@ -215,6 +225,67 @@ export default function ContractDetailsPage() {
     utterance.lang = 'es-ES';
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
+  };
+
+  // --- Ola 3C: ejecución mínima (los dientes) ---
+  const latestFulfillment = (term: Term) =>
+    term.fulfillments && term.fulfillments.length > 0
+      ? term.fulfillments[term.fulfillments.length - 1]
+      : null;
+
+  const FULFILLMENT_META: Record<string, { label: string; cls: string }> = {
+    fulfilled: { label: 'Cumplido', cls: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+    partial: { label: 'Parcial', cls: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+    violated: { label: 'Violado', cls: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
+    appealed: { label: 'Apelado', cls: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
+  };
+
+  const reportFulfillment = async (term: Term, status: 'fulfilled' | 'violated') => {
+    const evidence = window.prompt(
+      status === 'fulfilled'
+        ? 'Describe cómo cumpliste esta cláusula (evidencia, T13):'
+        : 'Describe el incumplimiento que reportas (evidencia, T13):',
+      '',
+    );
+    if (evidence === null) return; // cancelado
+    try {
+      const res = await apiFetch(`/contracts/${contractId}/terms/${term.term_id}/fulfillment`, {
+        method: 'POST',
+        body: JSON.stringify({ status, evidence }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(`Error al reportar: ${err.error}`);
+        return;
+      }
+      const data = await res.json();
+      const delta = data.wellness_delta;
+      alert(
+        delta !== 0
+          ? `⚠️ Violación registrada: la parte obligada pierde γ ${Math.abs(delta).toFixed(2)} (INV1 vigila).`
+          : `✅ Reporte registrado (${status}).`,
+      );
+      loadContractData();
+    } catch (err) {
+      console.error(err);
+      alert('Error de conexión al reportar.');
+    }
+  };
+
+  const handleFinalize = async () => {
+    try {
+      const res = await apiFetch(`/contracts/${contractId}/finalize`, { method: 'POST' });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(`No se puede cerrar: ${err.error}`);
+        return;
+      }
+      alert('🚀 Contrato EXECUTED: ejecución cerrada con balance final registrado.');
+      loadContractData();
+    } catch (err) {
+      console.error(err);
+      alert('Error de conexión al cerrar la ejecución.');
+    }
   };
 
   // Cargar detalles del contrato
@@ -928,7 +999,51 @@ export default function ContractDetailsPage() {
                         <Award className="w-3 h-3 text-emerald-500" />
                         R (Recursos): <strong className="text-slate-300">{term.vhv.r.toFixed(2)}</strong>
                       </span>
+                      {term.penalty_gamma ? (
+                        <span className="flex items-center gap-1 text-rose-400">
+                          <ShieldAlert className="w-3 h-3" />
+                          Penalización γ: <strong>-{term.penalty_gamma.toFixed(2)}</strong>
+                        </span>
+                      ) : null}
                     </div>
+
+                    {/* Ola 3C: bitácora de cumplimiento */}
+                    {(term.fulfillments && term.fulfillments.length > 0 || isContractActive) && (
+                      <div className="pt-2 border-t border-slate-900/50 flex items-center gap-2 flex-wrap">
+                        {latestFulfillment(term) ? (
+                          <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
+                            FULFILLMENT_META[latestFulfillment(term)!.status]?.cls || 'text-slate-400 bg-slate-500/10 border-slate-500/20'
+                          }`}>
+                            {FULFILLMENT_META[latestFulfillment(term)!.status]?.label || latestFulfillment(term)!.status}
+                          </span>
+                        ) : (
+                          <span className="text-[9px] text-slate-500 uppercase tracking-widest px-2 py-0.5 rounded-full border border-slate-800">
+                            Pendiente de reporte
+                          </span>
+                        )}
+                        {latestFulfillment(term)?.wellness_delta ? (
+                          <span className="text-[9px] font-mono text-rose-400">
+                            Δγ {latestFulfillment(term)!.wellness_delta.toFixed(2)} (actor: {latestFulfillment(term)!.reported_by})
+                          </span>
+                        ) : null}
+                        {isContractActive && (
+                          <div className="flex gap-1.5 ml-auto">
+                            <button
+                              onClick={() => reportFulfillment(term, 'fulfilled')}
+                              className="text-[9px] font-bold text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 hover:border-emerald-500/40 rounded-lg px-2 py-1 transition-all"
+                            >
+                              ✓ Reportar cumplimiento
+                            </button>
+                            <button
+                              onClick={() => reportFulfillment(term, 'violated')}
+                              className="text-[9px] font-bold text-rose-400 hover:text-rose-300 border border-rose-500/20 hover:border-rose-500/40 rounded-lg px-2 py-1 transition-all"
+                            >
+                              ✗ Reportar violación
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -1437,6 +1552,29 @@ export default function ContractDetailsPage() {
                   )}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Ola 3C: Ejecución y cierre (los dientes) */}
+          {isContractActive && (
+            <div className="glass p-6 rounded-3xl border border-slate-900 bg-slate-900/30 space-y-4">
+              <div>
+                <h2 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-amber-400" />
+                  Ejecución y Cierre
+                </h2>
+                <p className="text-[11px] text-slate-500">
+                  Bitácora de cumplimiento en vivo: las violaciones descuentan γ a la parte obligada
+                  y si γ cae bajo 0.8 (INV1) la retractación es automática.
+                </p>
+              </div>
+              <button
+                onClick={handleFinalize}
+                className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                Cerrar Ejecución (EXECUTED)
+              </button>
             </div>
           )}
 

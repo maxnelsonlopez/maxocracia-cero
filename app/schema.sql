@@ -449,6 +449,7 @@ CREATE TABLE IF NOT EXISTS maxo_contract_terms (
     vhv_v REAL DEFAULT 0,
     vhv_h REAL DEFAULT 0,
     assigned_participant TEXT, -- Parte obligada del término (user-N o synthetic-X)
+    penalty_gamma REAL DEFAULT 0, -- Penalización γ por incumplimiento (Ola 3C)
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
     UNIQUE(contract_id, term_id)
@@ -476,6 +477,20 @@ CREATE TABLE IF NOT EXISTS maxo_contract_term_approvals (
     approved_at TEXT DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
     UNIQUE(contract_id, term_id, participant_id)
+);
+
+-- Bitácora de cumplimiento (Ola 3C, dientes): cada término reportado
+-- como cumplido/parcial/violado con evidencia, actor y penalización γ.
+CREATE TABLE IF NOT EXISTS maxo_contract_term_fulfillments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    contract_id TEXT NOT NULL,
+    term_id TEXT NOT NULL,
+    status TEXT NOT NULL CHECK(status IN ('fulfilled','partial','violated','appealed')),
+    evidence TEXT,
+    reported_by TEXT NOT NULL,
+    wellness_delta REAL DEFAULT 0,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS maxo_contract_events (

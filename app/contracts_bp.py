@@ -101,6 +101,25 @@ PROHIBITED_PATTERNS = [
 ]
 
 
+PENALTY_GAMMA_MAX = 0.5
+INV1_RETRACTION_THRESHOLD = Decimal("0.8")
+
+
+def _parse_penalty(value) -> Optional[float]:
+    """Penalización γ por incumplimiento (Ola 3C): [0, 0.5]. Devuelve None
+    si el valor es inválido (la penalización de retractación ya está
+    prohibida léxicamente, 3A.6)."""
+    if value is None:
+        return 0.0
+    try:
+        p = float(value)
+    except (TypeError, ValueError):
+        return None
+    if p < 0 or p > PENALTY_GAMMA_MAX:
+        return None
+    return p
+
+
 def _token_uid(current_user) -> Optional[int]:
     """El actor SIEMPRE deriva del token (Ola 3A.1, R1)."""
     uid = current_user.get("user_id") or current_user.get("id")
@@ -513,6 +532,26 @@ def init_contracts_metrics_tables(app):
                 updated_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        # Ola 3C: bitácora de cumplimiento (dientes) + penalización por término
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS maxo_contract_term_fulfillments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                contract_id TEXT NOT NULL,
+                term_id TEXT NOT NULL,
+                status TEXT NOT NULL,
+                evidence TEXT,
+                reported_by TEXT NOT NULL,
+                wellness_delta REAL DEFAULT 0,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE
+            )
+        """)
+        if "maxo_contract_terms" in tables:
+            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_contract_terms)").fetchall()]
+            if "penalty_gamma" not in cols:
+                cur.execute(
+                    "ALTER TABLE maxo_contract_terms ADD COLUMN penalty_gamma REAL DEFAULT 0"
+                )
         # Migración: webhooks filtrados por parte (Ext. 4).
         if "maxo_webhooks" in tables:
             cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_webhooks)").fetchall()]
@@ -626,14 +665,15 @@ def _save_contract(contract: MaxoContract, actor_id: Optional[int] = None):
     # 3. Update terms and approvals
     for term in contract._terms:
         db.execute("""
-            INSERT INTO maxo_contract_terms (contract_id, term_id, civil_text, vhv_t, vhv_v, vhv_h, assigned_participant)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO maxo_contract_terms (contract_id, term_id, civil_text, vhv_t, vhv_v, vhv_h, assigned_participant, penalty_gamma)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(contract_id, term_id) DO UPDATE SET
                 civil_text=excluded.civil_text,
                 vhv_t=excluded.vhv_t,
                 vhv_v=excluded.vhv_v,
                 vhv_h=excluded.vhv_h,
-                assigned_participant=excluded.assigned_participant
+                assigned_participant=excluded.assigned_participant,
+                penalty_gamma=excluded.penalty_gamma
         """, (
             contract.contract_id,
             term.id,
@@ -641,7 +681,8 @@ def _save_contract(contract: MaxoContract, actor_id: Optional[int] = None):
             float(term.vhv_cost.T),
             float(term.vhv_cost.V),
             float(term.vhv_cost.R),
-            getattr(term, "assigned_participant", None)
+            getattr(term, "assigned_participant", None),
+            float(getattr(term, "penalty_gamma", 0) or 0)
         ))
         
         for p_id, accepted in term.accepted_by.items():
@@ -741,6 +782,7 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
             )
         )
         term.assigned_participant = t_row["assigned_participant"]
+        term.penalty_gamma = float(t_row["penalty_gamma"] or 0)
         
         # Load approvals for this term
         a_rows = db.execute(
@@ -948,7 +990,9 @@ def create_contract(current_user):
             continue
 
     # Batch creation support: add terms
-    _attach_terms(contract, data.get("terms", []))
+    terms_err = _attach_terms(contract, data.get("terms", []))
+    if terms_err:
+        return jsonify({"error": terms_err}), 400
 
     # Lenguaje civil enforceable (Ola 3A.6, R8)
     desc_err = _validate_civil_text(civil_description)
@@ -1041,13 +1085,19 @@ def create_contract(current_user):
     }), 201
 
 
-def _attach_terms(contract: MaxoContract, terms_data: List[Dict[str, Any]]) -> None:
-    """Añade los términos del payload a un contrato (creación batch)."""
+def _attach_terms(contract: MaxoContract, terms_data: List[Dict[str, Any]]) -> Optional[str]:
+    """Añade los términos del payload a un contrato (creación batch).
+
+    Devuelve un mensaje de error si alguna penalización es inválida.
+    """
     for t_data in terms_data:
         t_id = t_data.get("term_id")
         t_civil = t_data.get("civil_text", "")
         t_vhv = t_data.get("vhv", {})
         if t_id:
+            penalty = _parse_penalty(t_data.get("penalty_gamma"))
+            if penalty is None:
+                return f"término {t_id}: penalty_gamma debe estar en [0, {PENALTY_GAMMA_MAX}]"
             try:
                 vhv = VHV(
                     T=Decimal(str(t_vhv.get("t", 0))),
@@ -1056,9 +1106,11 @@ def _attach_terms(contract: MaxoContract, terms_data: List[Dict[str, Any]]) -> N
                 )
                 term = ContractTerm(id=t_id, description=t_civil, vhv_cost=vhv)
                 term.assigned_participant = t_data.get("assigned_participant_id")
+                term.penalty_gamma = penalty
                 contract.add_term(term)
             except Exception:
                 pass
+    return None
 
 
 def _attach_parent(contract: MaxoContract, parent_id: str):
@@ -1156,7 +1208,9 @@ def create_subcontract(current_user, contract_id: str):
             if err:
                 return jsonify({"error": err}), 400
             contract.add_participant(participant)
-    _attach_terms(contract, data.get("terms", []))
+    terms_err = _attach_terms(contract, data.get("terms", []))
+    if terms_err:
+        return jsonify({"error": terms_err}), 400
     desc_err = _validate_civil_text(contract.civil_summary)
     if desc_err:
         return jsonify({"error": f"civil_description: {desc_err}"}), 400
@@ -1760,6 +1814,25 @@ def get_contract(current_user, contract_id: str):
         (contract.contract_id,),
     ).fetchall() if db is not None else []
     
+    # --- Ola 3C: bitácora de cumplimiento por término (dientes) ---
+    fulfillment_rows = db.execute(
+        """
+        SELECT term_id, status, wellness_delta, reported_by, evidence, created_at
+        FROM maxo_contract_term_fulfillments
+        WHERE contract_id = ? ORDER BY id
+        """,
+        (contract.contract_id,),
+    ).fetchall()
+    fulfillments_by_term = {}
+    for r in fulfillment_rows:
+        fulfillments_by_term.setdefault(r["term_id"], []).append({
+            "status": r["status"],
+            "wellness_delta": r["wellness_delta"],
+            "reported_by": r["reported_by"],
+            "evidence": r["evidence"],
+            "created_at": r["created_at"],
+        })
+
     return jsonify({
         "contract_id": contract.contract_id,
         "state": contract.state.value,
@@ -1807,7 +1880,9 @@ def get_contract(current_user, contract_id: str):
                     "r": float(t.vhv_cost.R)
                 },
                 "accepted_by": t.accepted_by,
-                "assigned_participant": t.assigned_participant
+                "assigned_participant": t.assigned_participant,
+                "penalty_gamma": float(getattr(t, "penalty_gamma", 0) or 0),
+                "fulfillments": fulfillments_by_term.get(t.id, []),
             }
             for t in contract._terms
         ],
@@ -1889,6 +1964,10 @@ def add_term(current_user, contract_id: str):
         vhv_cost=vhv
     )
     term.assigned_participant = assigned_participant
+    penalty = _parse_penalty(data.get("penalty_gamma"))
+    if penalty is None:
+        return jsonify({"error": f"penalty_gamma debe estar en [0, {PENALTY_GAMMA_MAX}]"}), 400
+    term.penalty_gamma = penalty
 
     contract.add_term(term)
     # Recalcular flag de asimetría (Ola 3A.4)
@@ -2248,6 +2327,246 @@ def witness_contract(current_user, contract_id: str):
     })
 
 
+@contracts_bp.route("/<contract_id>/terms/<term_id>/fulfillment", methods=["POST"])
+@token_required
+def report_fulfillment(current_user, contract_id: str, term_id: str):
+    """
+    Bitácora de cumplimiento (Ola 3C, dientes): reportar el estado real de
+    un término durante la ejecución.
+
+    Body JSON:
+    {
+        "status": "fulfilled" | "partial" | "violated",
+        "evidence": "Entrega realizada el 10/08"   # opcional (T13)
+    }
+
+    - fulfilled/partial: lo reporta la parte obligada (identidad del token).
+    - violated: lo reporta cualquier participante del contrato.
+    - Si el término tiene penalty_gamma, una violación/parcialidad descuenta
+      γ a la parte obligada (actor registrado: 'oracle') y dispara el evento
+      contract.violation. Si γ cae bajo 0.8 (INV1), la retractación es
+      automática.
+    """
+    contract = _load_contract(contract_id)
+    if contract is None:
+        return jsonify({"error": "contract not found"}), 404
+
+    token_uid = _token_uid(current_user)
+    if token_uid is None:
+        return jsonify({"error": "token sin identidad válida"}), 403
+
+    if contract.state != ContractState.ACTIVE:
+        return jsonify({"error": "solo se reporta cumplimiento durante la ejecución activa"}), 400
+
+    term = next((t for t in contract._terms if t.id == term_id), None)
+    if term is None:
+        return jsonify({"error": f"término {term_id} no encontrado"}), 404
+
+    obligated = getattr(term, "assigned_participant", None)
+    data = request.get_json() or {}
+    status = data.get("status")
+    if status not in ("fulfilled", "partial", "violated"):
+        return jsonify({"error": "status debe ser fulfilled, partial o violated"}), 400
+    evidence = (data.get("evidence") or "").strip()
+
+    # Identidad (Ola 3A.1): cumplido/parcial lo declara la parte obligada;
+    # violado puede reportarlo cualquier participante.
+    if status in ("fulfilled", "partial"):
+        if not obligated:
+            return jsonify({"error": "el término no tiene parte obligada"}), 400
+        if not _can_act_for(obligated, token_uid, contract):
+            return jsonify({"error": "solo la parte obligada reporta su cumplimiento",
+                            "code": "IDENTITY_MISMATCH"}), 403
+    else:
+        if f"user-{token_uid}" not in contract.participant_ids:
+            return jsonify({"error": "solo participantes del contrato reportan incumplimientos",
+                            "code": "IDENTITY_MISMATCH"}), 403
+
+    # Penalización γ ejecutable (actor: oráculo/sistema)
+    penalty = float(getattr(term, "penalty_gamma", 0) or 0)
+    wellness_delta = 0.0
+    if status in ("violated", "partial") and penalty > 0 and obligated:
+        target = next((p for p in contract.participants if p.id == obligated), None)
+        if target is not None:
+            current = target.wellness_current.value
+            new_val = max(Decimal("0.5"), current - Decimal(str(penalty)))
+            wellness_delta = float(new_val - current)
+            target.update_wellness(new_val)
+
+    db = get_db()
+    db.execute(
+        """
+        INSERT INTO maxo_contract_term_fulfillments
+            (contract_id, term_id, status, evidence, reported_by, wellness_delta)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (contract_id, term_id, status, evidence or None, f"user-{token_uid}", wellness_delta),
+    )
+    db.commit()
+
+    _audit(contract, "term_fulfillment", token_uid,
+           term_id=term_id, status=status, wellness_delta=wellness_delta)
+    _save_contract(contract, actor_id=token_uid)
+    if wellness_delta != 0 and obligated:
+        db.execute(
+            """
+            UPDATE maxo_contract_participants SET reported_by = 'oracle', reported_at = ?
+            WHERE contract_id = ? AND participant_id = ?
+            """,
+            (datetime.now().isoformat(), contract_id, obligated),
+        )
+        db.commit()
+
+    if status == "violated":
+        dispatch_event("contract.violation", {
+            "contract_id": contract_id,
+            "term_id": term_id,
+            "violated_by": obligated,
+            "penalty_gamma": wellness_delta,
+            "reported_by": f"user-{token_uid}",
+            "reported_at": datetime.now().isoformat(),
+        })
+
+    return jsonify({
+        "success": True,
+        "contract_id": contract_id,
+        "term_id": term_id,
+        "status": status,
+        "wellness_delta": wellness_delta,
+        "obligated": obligated,
+    })
+
+
+@contracts_bp.route("/<contract_id>/terms/<term_id>/appeal", methods=["POST"])
+@token_required
+def appeal_fulfillment(current_user, contract_id: str, term_id: str):
+    """
+    Apelación (Ola 3C): la parte obligada puede apelar una violación o
+    parcialidad; el γ descontado se restaura y la bitácora queda marcada
+    como 'appealed' (transparencia: el evento queda con actor y razón).
+    """
+    contract = _load_contract(contract_id)
+    if contract is None:
+        return jsonify({"error": "contract not found"}), 404
+
+    token_uid = _token_uid(current_user)
+    term = next((t for t in contract._terms if t.id == term_id), None)
+    if term is None:
+        return jsonify({"error": f"término {term_id} no encontrado"}), 404
+    obligated = getattr(term, "assigned_participant", None)
+    if not _can_act_for(obligated, token_uid, contract):
+        return jsonify({"error": "solo la parte obligada apela",
+                        "code": "IDENTITY_MISMATCH"}), 403
+
+    reason = (request.get_json() or {}).get("reason", "").strip()
+    if not reason:
+        return jsonify({"error": "reason es obligatoria (T13)"}), 400
+
+    db = get_db()
+    row = db.execute(
+        """
+        SELECT id, wellness_delta FROM maxo_contract_term_fulfillments
+        WHERE contract_id = ? AND term_id = ?
+        ORDER BY id DESC LIMIT 1
+        """,
+        (contract_id, term_id),
+    ).fetchone()
+    if row is None or row["wellness_delta"] == 0:
+        return jsonify({"error": "no hay penalización vigente que apelar"}), 400
+
+    # Restaurar el γ descontado (máx. 1.5)
+    target = next((p for p in contract.participants if p.id == obligated), None)
+    if target is not None:
+        restored = min(Decimal("1.5"), target.wellness_current.value - Decimal(str(row["wellness_delta"])))
+        target.update_wellness(restored)
+
+    db.execute(
+        "UPDATE maxo_contract_term_fulfillments SET status = 'appealed' WHERE id = ?",
+        (row["id"],),
+    )
+    db.commit()
+    _audit(contract, "term_fulfillment_appealed", token_uid,
+           term_id=term_id, reason=reason, restored_delta=row["wellness_delta"])
+    _save_contract(contract, actor_id=token_uid)
+    if obligated:
+        db.execute(
+            """
+            UPDATE maxo_contract_participants SET reported_by = 'oracle', reported_at = ?
+            WHERE contract_id = ? AND participant_id = ?
+            """,
+            (datetime.now().isoformat(), contract_id, obligated),
+        )
+        db.commit()
+
+    return jsonify({
+        "success": True,
+        "contract_id": contract_id,
+        "term_id": term_id,
+        "appealed": True,
+        "restored_gamma": -float(row["wellness_delta"]),
+        "reason": reason,
+    })
+
+
+@contracts_bp.route("/<contract_id>/finalize", methods=["POST"])
+@token_required
+def finalize_contract(current_user, contract_id: str):
+    """
+    Cierre de la ejecución (Ola 3C): ACTIVE -> EXECUTED con balance final.
+
+    Requiere que TODOS los términos tengan reporte de cumplimiento
+    (fulfilled/partial/violated/appealed); los pendientes bloquean el cierre
+    (400 EXECUTION_INCOMPLETE).
+    """
+    contract = _load_contract(contract_id)
+    if contract is None:
+        return jsonify({"error": "contract not found"}), 404
+
+    if contract.state != ContractState.ACTIVE:
+        return jsonify({"error": "solo un contrato activo puede finalizarse"}), 400
+
+    db = get_db()
+    reported = {
+        r["term_id"] for r in db.execute(
+            "SELECT DISTINCT term_id FROM maxo_contract_term_fulfillments WHERE contract_id = ?",
+            (contract_id,),
+        ).fetchall()
+    }
+    pending = [t.id for t in contract._terms if t.id not in reported]
+    if pending:
+        return jsonify({
+            "error": "hay términos sin reporte de cumplimiento",
+            "code": "EXECUTION_INCOMPLETE",
+            "pending_terms": pending,
+        }), 400
+
+    if not contract.complete():
+        return jsonify({"error": "no se pudo finalizar el contrato"}), 400
+
+    token_uid = _token_uid(current_user)
+    _audit(contract, "contract_executed", token_uid,
+           final_vhv={"t": float(contract.total_vhv.T),
+                      "v": float(contract.total_vhv.V),
+                      "r": float(contract.total_vhv.R)})
+    _save_contract(contract, actor_id=token_uid)
+    dispatch_event("contract.executed", {
+        "contract_id": contract_id,
+        "executed_at": datetime.now().isoformat(),
+        "final_vhv": {
+            "t": float(contract.total_vhv.T),
+            "v": float(contract.total_vhv.V),
+            "r": float(contract.total_vhv.R),
+        },
+    })
+
+    return jsonify({
+        "success": True,
+        "contract_id": contract_id,
+        "state": contract.state.value,
+        "executed_at": datetime.now().isoformat(),
+    })
+
+
 @contracts_bp.route("/<contract_id>/acknowledge-asymmetry", methods=["POST"])
 @token_required
 def acknowledge_asymmetry(current_user, contract_id: str):
@@ -2447,6 +2766,31 @@ def request_retraction(current_user, contract_id: str):
     if not _can_act_for(pid, token_uid, contract):
         return jsonify({"error": "no puedes solicitar retractación por esta parte",
                         "code": "IDENTITY_MISMATCH"}), 403
+
+    # Ola 3C (dientes, INV1): si el solicitante tiene γ < 0.8, la retractación
+    # es AUTOMÁTICA — el bienestar manda sobre el trámite oracular.
+    requester = next((p for p in contract.participants if p.id == pid), None)
+    if requester is not None and requester.wellness_current.value < INV1_RETRACTION_THRESHOLD:
+        success = contract.retract(reason=reason, actor_id=pid)
+        _audit(contract, "contract_retracted_inv1", token_uid, cause=cause)
+        _save_contract(contract, actor_id=token_uid)
+        dispatch_event("contract.retracted", {
+            "contract_id": contract_id,
+            "reason": reason,
+            "cause": cause,
+            "automatic": True,
+            "invariant": "INV1",
+            "gamma": float(requester.wellness_current.value),
+        })
+        return jsonify({
+            "success": success,
+            "contract_id": contract_id,
+            "state": contract.state.value,
+            "automatic": True,
+            "invariant": "INV1",
+            "reasoning": f"INV1: el bienestar de {pid} (γ={float(requester.wellness_current.value):.2f}) "
+                         f"está bajo 0.8 — la retractación es un derecho automático.",
+        })
     
     # Usar oráculo sintético para evaluar
     oracle = SyntheticOracle()

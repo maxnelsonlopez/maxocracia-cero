@@ -2,7 +2,7 @@
 
 **Autor del diseño:** DeepSeek (oráculo sintético) y Max Nelson López Restrepo
 **Fecha:** 6 de agosto de 2026
-**Estado:** Ola 3A **IMPLEMENTADA** (identidad vinculada al token, inmutabilidad, autoridad de partes, T9 ejecutable, γ con fuente, prohibiciones léxicas, ventanas temporales). Ola 3B **IMPLEMENTADA** (escalera de equidad: perfiles standard/assisted/shielded, paráfrasis obligatoria, revisión oracular sin degradación, co-testigo, topes de exposición, piso de reflexión, lectura en voz alta — 538/538 tests). Pendiente: Ola 3C (ejecución mínima con dientes).
+**Estado:** Ola 3A **IMPLEMENTADA** (identidad vinculada al token, inmutabilidad, autoridad de partes, T9 ejecutable, γ con fuente, prohibiciones léxicas, ventanas temporales). Ola 3B **IMPLEMENTADA** (escalera de equidad: perfiles standard/assisted/shielded, paráfrasis obligatoria, revisión oracular sin degradación, co-testigo, topes de exposición, piso de reflexión, lectura en voz alta). Ola 3C **IMPLEMENTADA** (ejecución mínima: bitácora de cumplimiento, penalizaciones γ con actor oracle, retractación automática por INV1, cierre EXECUTED, apelación — 551/551 tests). **El ciclo de blindaje R1-R14 está cerrado.**
 **Referencia canónica:** Cap. 17 (MaxoContracts), Cap. 10 (Tres Reinos), Axioma T11/T12 (retractación coherente), INV1/INV2/INV2-S/T9/T13
 
 ---

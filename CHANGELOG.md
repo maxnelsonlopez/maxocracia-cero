@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-06 — Ola 3C: Ejecución mínima — los dientes (bitácora de cumplimiento, penalizaciones γ, INV1 automático)
+
+### Añadido
+- **Bitácora de cumplimiento por término** (`maxo_contract_term_fulfillments`): `POST /contracts/<id>/terms/<term_id>/fulfillment` — `fulfilled`/`partial`/`violated` con evidencia y actor. Cumplido/parcial lo reporta la parte obligada (identidad del token); violado, cualquier participante.
+- **Penalización γ ejecutable**: los términos aceptan `penalty_gamma` ∈ [0, 0.5] (migración en términos; la penalización de retractación sigue prohibida léxicamente). Una violación/parcialidad descuenta γ a la parte obligada (piso 0.5), con `reported_by='oracle'` en el registro y evento `contract.violation` a webhooks.
+- **INV1 con dientes**: si el solicitante tiene γ < 0.8, la retractación es **AUTOMÁTICA** (sin trámite oracular) con `invariant: INV1` y evento. El bienestar manda sobre el procedimiento.
+- **Cierre de ejecución**: `POST /contracts/<id>/finalize` — ACTIVE → EXECUTED (método `complete()` del core) con balance VHV final y evento `contract.executed`; bloquea si hay términos sin reporte (400 `EXECUTION_INCOMPLETE`).
+- **Apelación transparente**: `POST /contracts/<id>/terms/<term_id>/appeal` — la parte obligada restaura el γ descontado y la bitácora queda `appealed` con razón (T13).
+- **UI**: chips de estado de cumplimiento por cláusula (Cumplido/Parcial/Violado/Apelado/Pendiente), penalización γ visible, botones "Reportar cumplimiento/violación" con evidencia, panel "Ejecución y Cierre" con el botón de cierre.
+- **Tests**: `tests/test_maxocontracts/test_execution.py` — 13 pruebas (validación de penalización, delta γ persistido con actor oracle, identidad de reportes, INV1 automático vs flujo oracular, cierre con pendientes, ejecución completa, apelación y restauración).
+
+### Notas Técnicas
+- **Verificación**: suite completa 551/551 (13 nuevas); tsc/eslint limpios; build exportado; README v5.0.
+- **Referencia**: `docs/architecture/blindaje_anti_gamificacion_equidad.md` (Ola 3C marcada implementada — el análisis completo de riesgos R1-R14 está cerrado).
+
 ## 2026-08-06 — Ola 3B: Escalera de equidad — protección de personas vulnerables
 
 ### Añadido
