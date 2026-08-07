@@ -2,7 +2,7 @@
 
 **Estado del Proyecto:** Fase 2 - Sostenibilidad Económica y MicroMaxocracia Doméstica (Agosto 2026)  
 **Última actualización:** 6 de agosto 2026  
-**Versión:** 5.0 - Ejecución mínima: los dientes del MaxoContract (penalizaciones γ, INV1 automático, cierre EXECUTED) (DeepSeek)
+**Versión:** 5.1 - Ola 4 · Puente A: γ que escucha la vida (check-ins semanales, serie temporal y cohorte con datos reales) (DeepSeek)
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 
@@ -47,9 +47,10 @@ La **Maxocracia** es un sistema ético-económico-político alternativo que prop
 - **Escalera de equidad (Ola 3B)**: perfiles `standard | assisted | shielded` — los vulnerables (o con necesidad Alta declarada) reciben protección automática y no negociable: paráfrasis obligatoria de cada cláusula con sus propias palabras (registrada, T13), revisión oracular en vivo pre-firma (sin degradación), co-testigo humano para blindados, topes de exposición VHV (8-20h/contrato, 15-40h/semana), enfriamiento forzado (24-72h) y lectura en voz alta del contrato.
 - **Blindaje anti-gamificación (Ola 3A)**: identidad siempre vinculada al token (nadie firma por otro), inmutabilidad de contratos (`creator_user_id` + 409), autoridad sobre las partes (`owner_user_id` + cambios de gobernanza por quórum de delegados), T9 ejecutable (asimetría >70% exige reconocimiento explícito antes de activar), γ con fuente y tope [0.5,1.5], cláusulas prohibidas bloqueadas server-side, lenguaje civil enforceable (≤40 palabras) y ventanas temporales de firma/reflexión. Detalle del análisis en `docs/architecture/blindaje_anti_gamificacion_equidad.md`.
 - **Oráculo en vivo (Bloque A)**: DeepSeek negocia contratos por chat (`/contracts/negotiate`), audita existentes (`critique`) y firma como guardián de ecosistemas. Activado con `DEEPSEEK_API_KEY` en `.env`; sin key, degradación elegante al oráculo heurístico.
+- **γ que escucha la vida (Ola 4 · Puente A)**: `POST /contracts/<id>/checkin` — cada parte reporta su bienestar real (`wellness` con fuente y actor, límite semanal de 1 por participante cada 7 días) y el contrato adopta ese latido como su γ (tabla `maxo_contract_checkins`). El detalle expone la **serie temporal de γ** por participante con mini-gráfica, y la **cohorte consolidada** agrega el γ desde los check-ins reales (último latido por contrato) con `wellness_source` explícito (T13: la fuente queda expuesta).
 - **Calculadora VHV**: Frontend completo con Chart.js integrado en el portal.
 - **Sistema TVI**: Detección de overlap temporal, cálculo de CCP.
-- **551 tests** (551/551 pasando) ✅ (Backend Core + Blocks + Escalas + Quórum + Blindaje + Equidad + Ejecución + Métricas + Ruteo SPA)
+- **563 tests** (563/563 pasando) ✅ (Backend Core + Blocks + Escalas + Quórum + Blindaje + Equidad + Ejecución + Métricas + Check-ins + Ruteo SPA)
 ---
 
 ## 🚀 CÓMO EMPEZAR

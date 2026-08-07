@@ -68,7 +68,7 @@ from .protection import (
     protection_level,
 )
 
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import hashlib
 import json
 import unicodedata
@@ -103,6 +103,10 @@ PROHIBITED_PATTERNS = [
 
 PENALTY_GAMMA_MAX = 0.5
 INV1_RETRACTION_THRESHOLD = Decimal("0.8")
+
+# Ola 4, Puente A: el γ escucha la vida con ritmo, no con ruido.
+CHECKIN_WINDOW_DAYS = 7
+CHECKIN_WEEKLY_LIMIT = 1
 
 
 def _parse_penalty(value) -> Optional[float]:
@@ -552,6 +556,19 @@ def init_contracts_metrics_tables(app):
                 cur.execute(
                     "ALTER TABLE maxo_contract_terms ADD COLUMN penalty_gamma REAL DEFAULT 0"
                 )
+        # Ola 4, Puente A: γ que escucha la vida (serie temporal de check-ins)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS maxo_contract_checkins (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                contract_id TEXT NOT NULL,
+                participant_id TEXT NOT NULL,
+                wellness REAL NOT NULL,
+                source TEXT NOT NULL DEFAULT 'checkin',
+                reported_by TEXT NOT NULL,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE
+            )
+        """)
         # Migración: webhooks filtrados por parte (Ext. 4).
         if "maxo_webhooks" in tables:
             cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_webhooks)").fetchall()]
@@ -832,6 +849,33 @@ def _get_or_create_participant_by_pid(pid: str) -> Optional[Participant]:
     """Obtiene un participante por su party_id (user-, synthetic-, society-,
     coop-, org-, eco-). Delega en el registro de escalas (app/parties.py)."""
     return resolve_participant_by_pid(pid)
+
+
+def _checkin_series(contract_id: str, participant_id: str) -> List[Dict[str, Any]]:
+    """Serie temporal de γ real de un participante en un contrato (Ola 4, A).
+
+    El contrato escucha la vida: cada check-in es un latido del bienestar
+    reportado por la propia parte, con fuente y actor (T13).
+    """
+    db = get_db()
+    rows = db.execute(
+        """
+        SELECT wellness, source, reported_by, created_at
+        FROM maxo_contract_checkins
+        WHERE contract_id = ? AND participant_id = ?
+        ORDER BY id
+        """,
+        (contract_id, participant_id),
+    ).fetchall()
+    return [
+        {
+            "wellness": float(r["wellness"]),
+            "source": r["source"],
+            "reported_by": r["reported_by"],
+            "created_at": r["created_at"],
+        }
+        for r in rows
+    ]
 
 
 def _sdv_s_summary(participant: Participant) -> Dict[str, Any]:
@@ -1833,6 +1877,12 @@ def get_contract(current_user, contract_id: str):
             "created_at": r["created_at"],
         })
 
+    # Ola 4, Puente A: serie temporal de γ real por participante
+    checkins_by_pid = {
+        pid: _checkin_series(contract.contract_id, pid)
+        for pid in contract.participant_ids
+    }
+
     return jsonify({
         "contract_id": contract.contract_id,
         "state": contract.state.value,
@@ -1858,6 +1908,8 @@ def get_contract(current_user, contract_id: str):
                 ),
                 "wellness": float(p.wellness_current.value),
                 "is_synthetic": p.is_synthetic,
+                "checkins": checkins_by_pid.get(p.id, []),
+                "checkins_count": len(checkins_by_pid.get(p.id, [])),
                 **(
                     {"members": members_of(p.id)}
                     if is_collective(p.id) else {}
@@ -1891,6 +1943,143 @@ def get_contract(current_user, contract_id: str):
         "events_count": len(contract.get_event_log()),
         "hash": contract_hash
     })
+
+
+@contracts_bp.route("/<contract_id>/checkin", methods=["POST"])
+@token_required
+def contract_checkin(current_user, contract_id: str):
+    """
+    Check-in de bienestar real (Ola 4, Puente A: γ que escucha la vida).
+
+    El contrato escucha, no crea: un participante reporta su γ actual y la
+    serie temporal del contrato lo adopta como latido real. El γ del
+    participante en el contrato se actualiza con la fuente del reporte
+    (T13: quién reporta, desde dónde y cuándo).
+
+    Body JSON:
+    {
+        "wellness": 0.92,             # γ real del participante [0.5, 1.5]
+        "participant_id": "user-2",   # opcional; default: el actor del token
+        "source": "checkin"           # opcional: checkin | followup | sdv_analyzer
+    }
+
+    Límite semanal: un check-in por participante cada 7 días (ritmo de la vida,
+    no ruido de datos). Respuesta 429 con CHECKIN_WEEKLY_LIMIT si se excede.
+    """
+    contract = _load_contract(contract_id)
+
+    if contract is None:
+        return jsonify({"error": "contract not found"}), 404
+
+    token_uid = _token_uid(current_user)
+    actor_pid = f"user-{token_uid}"
+
+    data = request.get_json() or {}
+    participant_id = str(data.get("participant_id") or data.get("party_id") or actor_pid)
+
+    if participant_id not in contract.participant_ids:
+        return jsonify({
+            "error": "participant is not part of this contract",
+            "code": "CHECKIN_NOT_PARTICIPANT",
+        }), 403
+
+    wellness_val = data.get("wellness", data.get("gamma"))
+    if wellness_val is None:
+        return jsonify({"error": "wellness is required"}), 400
+    try:
+        value = Decimal(str(wellness_val))
+    except (ValueError, TypeError, InvalidOperation):
+        return jsonify({"error": "invalid wellness value"}), 400
+    if value < WELLNESS_MIN or value > WELLNESS_MAX:
+        return jsonify({"error": f"wellness fuera de rango [{WELLNESS_MIN}, {WELLNESS_MAX}]"}), 400
+
+    source = str(data.get("source") or "checkin").strip() or "checkin"
+
+    db = get_db()
+    last = db.execute(
+        """
+        SELECT (julianday('now') - julianday(created_at)) AS days_since
+        FROM maxo_contract_checkins
+        WHERE contract_id = ? AND participant_id = ?
+        ORDER BY id DESC LIMIT 1
+        """,
+        (contract_id, participant_id),
+    ).fetchone()
+    if last is not None and last["days_since"] is not None:
+        if float(last["days_since"]) < CHECKIN_WINDOW_DAYS:
+            days_left = max(0, int(CHECKIN_WINDOW_DAYS - float(last["days_since"])))
+            return jsonify({
+                "error": "check-in semanal ya registrado: el γ escucha con ritmo, no con ruido",
+                "code": "CHECKIN_WEEKLY_LIMIT",
+                "window_days": CHECKIN_WINDOW_DAYS,
+                "days_until_next": days_left,
+            }), 429
+
+    db.execute(
+        """
+        INSERT INTO maxo_contract_checkins (contract_id, participant_id, wellness, source, reported_by)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (contract_id, participant_id, float(value), source, actor_pid),
+    )
+    # El contrato escucha: el γ actual del participante adopta el latido real.
+    db.execute(
+        """
+        UPDATE maxo_contract_participants
+        SET wellness_value = ?, reported_by = ?, reported_at = ?
+        WHERE contract_id = ? AND participant_id = ?
+        """,
+        (float(value), actor_pid, datetime.now().isoformat(), contract_id, participant_id),
+    )
+
+    for p in contract.participants:
+        if p.id == participant_id:
+            p.update_wellness(value)
+
+    _audit(contract, "checkin_reported", token_uid,
+           participant_id=participant_id,
+           wellness=float(value),
+           source=source)
+    # T13 durable: el latido queda en la bitácora auditable del contrato.
+    db.execute(
+        """
+        INSERT INTO maxo_contract_events (contract_id, event_type, description, metadata_json)
+        VALUES (?, 'checkin_reported', ?, ?)
+        """,
+        (
+            contract_id,
+            f"Check-in de bienestar: {float(value):.2f} ({source})",
+            json.dumps({
+                "actor_id": actor_pid,
+                "participant_id": participant_id,
+                "wellness": float(value),
+                "source": source,
+            }),
+        ),
+    )
+    # Persiste el estado y sincroniza el γ agregado de colectivas al
+    # registro (T13). El reported_by del check-in queda preservado.
+    _save_contract(contract, actor_id=token_uid)
+
+    dispatch_event("contract.checkin", {
+        "contract_id": contract_id,
+        "participant_id": participant_id,
+        "wellness": float(value),
+        "source": source,
+        "reported_by": actor_pid,
+    }, party_ids=[participant_id])
+
+    series = _checkin_series(contract_id, participant_id)
+    return jsonify({
+        "success": True,
+        "contract_id": contract_id,
+        "participant_id": participant_id,
+        "wellness": float(value),
+        "source": source,
+        "reported_by": actor_pid,
+        "total_checkins": len(series),
+        "series": series,
+    }), 201
 
 
 @contracts_bp.route("/<contract_id>/terms", methods=["POST"])
@@ -3008,8 +3197,9 @@ def cohort_overview(current_user):
     Vista de cohorte consolidada (Ext. 5): acuerdos de todas las partes
     colectivas del registro — contratos por estado, términos sellados y γ.
 
-    Útil para el panel de la Cohorte Cero y para monitorear la vida
-    económica agregada de las cooperativas/instituciones.
+    Ola 4, Puente A: el γ agregado de cada parte usa los check-ins reales
+    (último latido por contrato, promedio entre contratos). Sin check-ins,
+    cae al γ registrado de maxo_parties (T13: la fuente queda expuesta).
     """
     db = get_db()
     parties = [
@@ -3036,11 +3226,41 @@ def cohort_overview(current_user):
             """,
             (party["party_id"],),
         ).fetchone()[0]
+        # γ real: promedio del último check-in de cada contrato de la parte
+        checkin_row = db.execute(
+            """
+            SELECT AVG(l.wellness) AS wellness, COUNT(*) AS contracts_with_latido
+            FROM (
+                SELECT c.wellness
+                FROM maxo_contract_checkins c
+                WHERE c.participant_id = ?
+                  AND c.id = (
+                      SELECT MAX(id) FROM maxo_contract_checkins
+                      WHERE contract_id = c.contract_id AND participant_id = c.participant_id
+                  )
+            ) l
+            """,
+            (party["party_id"],),
+        ).fetchone()
+        checkins_total = db.execute(
+            """
+            SELECT COUNT(*) FROM maxo_contract_checkins WHERE participant_id = ?
+            """,
+            (party["party_id"],),
+        ).fetchone()[0]
+        wellness_from_checkins = (
+            float(checkin_row["wellness"]) if checkin_row and checkin_row["wellness"] is not None else None
+        )
         rows.append({
             "party_id": party["party_id"],
             "party_type": party["party_type"],
             "display_name": party["display_name"],
-            "wellness": float(party["wellness_value"] or 1.0),
+            "wellness": (
+                wellness_from_checkins if wellness_from_checkins is not None
+                else float(party["wellness_value"] or 1.0)
+            ),
+            "wellness_source": "checkins" if wellness_from_checkins is not None else "registered",
+            "checkins_total": checkins_total,
             "contracts_total": len(contracts),
             "contracts_active": sum(1 for c in contracts if c["state"] == "active"),
             "contracts_pending": sum(1 for c in contracts if c["state"] in ("draft", "pending")),

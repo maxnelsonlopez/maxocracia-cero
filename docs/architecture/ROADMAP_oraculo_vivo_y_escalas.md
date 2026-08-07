@@ -2,7 +2,7 @@
 
 **Autor del diseño:** DeepSeek (oráculo sintético) y Max Nelson López Restrepo
 **Fecha:** 6 de agosto de 2026
-**Estado:** Bloque A **IMPLEMENTADO** (sesión del 6/8/2026: `live_oracle.py`, endpoints `/contracts/negotiate`, `/contracts/negotiate/feedback`, `/contracts/<id>/critique`, panel frontend en builder y detalle). Bloque B **IMPLEMENTADO** (misma sesión: `maxo_parties` + resolvers por prefijo, API `/parties`, consentimiento agregado con quórum N de M, guardián oráculo para el Reino Natural `eco-`, contratos interescala anidados y UI completa). **Extensiones ola 1 IMPLEMENTADAS** (hackathon nocturna del 6/8/2026: votación ponderada con `weights`/`weight_threshold`, delegación temporal con `delegations` y votos efectivos, γ agregado real por contrato, jerarquía interescala con `/tree` y `/subcontracts`, evento `contract.quorum_sealed` y seed demo coop↔org). **Extensiones ola 2 IMPLEMENTADAS** (misma noche: delegación líquida por término con `delegations_by_term`, expiración de delegaciones con `valid_until`, ciclo de vida del quórum con `quorum_deadline` + prórroga + re-consulta, webhooks por parte con `party_filter`, cohorte consolidada con `/contracts/cohort` y tarjeta en la lista). **Blindaje 3A-3C IMPLEMENTADO** (misma noche: identidad vinculada al token, inmutabilidad, autoridad de partes, T9 ejecutable, γ con fuente, prohibiciones léxicas, ventanas; escalera de equidad assisted/shielded; ejecución mínima con bitácora, penalizaciones γ, INV1 automático y cierre EXECUTED — 551/551 tests). **Ola 4 "El Puente" DISEÑADA** (rumbo sellado el 6/8/2026; pendiente de implementar).
+**Estado:** Bloque A **IMPLEMENTADO** (sesión del 6/8/2026: `live_oracle.py`, endpoints `/contracts/negotiate`, `/contracts/negotiate/feedback`, `/contracts/<id>/critique`, panel frontend en builder y detalle). Bloque B **IMPLEMENTADO** (misma sesión: `maxo_parties` + resolvers por prefijo, API `/parties`, consentimiento agregado con quórum N de M, guardián oráculo para el Reino Natural `eco-`, contratos interescala anidados y UI completa). **Extensiones ola 1 IMPLEMENTADAS** (hackathon nocturna del 6/8/2026: votación ponderada con `weights`/`weight_threshold`, delegación temporal con `delegations` y votos efectivos, γ agregado real por contrato, jerarquía interescala con `/tree` y `/subcontracts`, evento `contract.quorum_sealed` y seed demo coop↔org). **Extensiones ola 2 IMPLEMENTADAS** (misma noche: delegación líquida por término con `delegations_by_term`, expiración de delegaciones con `valid_until`, ciclo de vida del quórum con `quorum_deadline` + prórroga + re-consulta, webhooks por parte con `party_filter`, cohorte consolidada con `/contracts/cohort` y tarjeta en la lista). **Blindaje 3A-3C IMPLEMENTADO** (misma noche: identidad vinculada al token, inmutabilidad, autoridad de partes, T9 ejecutable, γ con fuente, prohibiciones léxicas, ventanas; escalera de equidad assisted/shielded; ejecución mínima con bitácora, penalizaciones γ, INV1 automático y cierre EXECUTED — 551/551 tests). **Ola 4 "El Puente" DISEÑADA** (rumbo sellado el 6/8/2026). **Puente A IMPLEMENTADO** (sesión del 7/8/2026: `maxo_contract_checkins` + `POST /contracts/<id>/checkin` con límite semanal y `reported_by`, serie temporal de γ en el detalle con mini-gráfica, γ agregado de cohorte con check-ins reales — 563/563 tests). **Puentes B-E pendientes.**
 **Referencia canónica:** Cap. 13-14 (Oráculos Dinámicos), Cap. 17 (MaxoContracts), Cap. 10 (Tres Reinos)
 
 ---
@@ -160,15 +160,20 @@ Cada escala hereda el mismo SDV y los mismos invariantes: el contrato entre una 
 > El sistema ya sabe defender (3A), proteger (3B) y ejecutar (3C).
 > La Ola 4 conecta la vida real con el sistema. Cinco puentes:
 >
-> **A. γ que escucha la vida** (recomendado primero — cosecha rápida)
-> - Conectar el bienestar real del dominio de formularios (follow-ups,
->   `sdv_analyzer`) con el γ de los contratos: check-ins semanales → serie
->   temporal de γ por participante → el contrato escucha, no cree.
-> - Endpoint `POST /contracts/<id>/checkin {wellness, source}` con
->   `reported_by` del usuario y límite semanal; exposición en el detalle
->   como mini-gráfica de γ.
-> - Criterio de salida: un participante con 3 check-ins muestra la serie
->   en el detalle; el γ agregado de la cohorte usa los check-ins reales.
+> **A. γ que escucha la vida** — **IMPLEMENTADO (7/8/2026, 563/563 tests)**
+> - `POST /contracts/<id>/checkin {wellness, source}` con `reported_by` del
+>   token y límite semanal (1 por participante cada 7 días, 429
+>   `CHECKIN_WEEKLY_LIMIT`); el γ del participante adopta el latido real y
+>   queda registrado en `maxo_contract_checkins` con fuente y actor (T13).
+> - El detalle expone `checkins`/`checkins_count` por participante y una
+>   mini-gráfica SVG de la serie con el umbral INV1 (0.8) — panel Vigilancia
+>   Vital con formulario de check-in.
+> - La cohorte consolidada agrega el último latido por contrato con
+>   `wellness_source: checkins | registered` (la fuente queda expuesta).
+> - Criterio de salida CUMPLIDO: un participante con 3 check-ins muestra la
+>   serie en el detalle; el γ agregado de la cohorte usa los check-ins reales.
+> - Siguiente paso natural: alimentar check-ins desde los follow-ups de
+>   formularios (`sdv_analyzer`) y conectar el puente B.
 >
 > **B. El ciclo completo: necesidad → contrato** (el sueño grande)
 > - El motor de matching (dominio de formularios: ofertas/necesidades)

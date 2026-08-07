@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-07 — Ola 4 · Puente A: γ que escucha la vida (check-ins semanales)
+
+### Añadido
+- **Check-in de bienestar real** (`maxo_contract_checkins` + `POST /contracts/<id>/checkin`): cada parte reporta su γ con `wellness` [0.5, 1.5], `source` (checkin | followup | sdv_analyzer) y `reported_by` derivado del token (T13). Límite semanal: 1 latido por participante cada 7 días (429 `CHECKIN_WEEKLY_LIMIT` con `days_until_next`); rechazo 403 para quien no es parte. El γ del participante en el contrato adopta el latido real (el contrato escucha, no crea), evento `contract.checkin` a webhooks y auditoría `checkin_reported`.
+- **Serie temporal en el detalle**: `GET /contracts/<id>` expone `checkins` + `checkins_count` por participante; mini-gráfica SVG de la serie (con umbral INV1 0.8) y formulario de check-in en el panel Vigilancia Vital.
+- **γ agregado de cohorte real**: `GET /contracts/cohort` agrega el último latido por contrato (promedio entre contratos) con `wellness_source: checkins | registered` y `checkins_total` (T13: la fuente queda expuesta).
+- **Tests**: `tests/test_maxocontracts/test_contracts_checkins.py` — 12 pruebas (básico, actor por defecto, γ adoptado, límite semanal por participante, ventana vencida, validaciones, parte ajena, serie de 3 latidos, cohorte con check-ins).
+
+### Notas Técnicas
+- **Verificación**: suite completa 563/563 (12 nuevas); tsc/eslint limpios; README v5.1.
+- **Referencia**: `docs/architecture/ROADMAP_oraculo_vivo_y_escalas.md` (Puente A marcado implementado; B-E pendientes).
+
 ## 2026-08-06 — RUMBO SELLADO: Ola 4 "El Puente" (visión para la próxima sesión)
 
 ### Añadido

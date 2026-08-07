@@ -8,7 +8,7 @@ import OracleNegotiationPanel from '../../components/OracleNegotiationPanel';
 import { 
   FileText, ArrowLeft, ShieldAlert, Award, Info, CheckCircle2, 
   UserCheck, AlertTriangle, Play, RefreshCw, Send, Zap,
-  Clock, Bot, Landmark, Leaf, ShieldCheck, Volume2
+  Clock, Bot, Landmark, Leaf, ShieldCheck, Volume2, HeartPulse
 } from 'lucide-react';
 
 interface Fulfillment {
@@ -41,6 +41,14 @@ interface CollectiveMembers {
   quorum_required?: number;
 }
 
+// Ola 4, Puente A: latido de bienestar real reportado por la parte
+interface Checkin {
+  wellness: number;
+  source: string;
+  reported_by: string;
+  created_at: string;
+}
+
 interface ParticipantDetail {
   id: string;
   name: string;
@@ -55,6 +63,8 @@ interface ParticipantDetail {
   sdv_s_magnitude?: number;
   fs_s?: number;
   sdv_s_status?: string;
+  checkins?: Checkin[];
+  checkins_count?: number;
 }
 
 interface ContractDetails {
@@ -186,6 +196,89 @@ export default function ContractDetailsPage() {
   // Derecho a la comprensión (Ola 3B): paráfrasis del firmante protegido
   const [paraphraseText, setParaphraseText] = useState('');
   const [isWitnessed, setIsWitnessed] = useState(false);
+
+  // Ola 4, Puente A: check-in de bienestar real (γ que escucha la vida)
+  const [checkinValues, setCheckinValues] = useState<Record<string, string>>({});
+  const [checkinBusy, setCheckinBusy] = useState<Record<string, boolean>>({});
+  const [checkinMsg, setCheckinMsg] = useState<Record<string, { kind: 'ok' | 'err'; text: string }>>({});
+
+  const handleCheckin = async (pid: string) => {
+    const raw = checkinValues[pid];
+    const value = Number(raw);
+    if (!raw || Number.isNaN(value)) {
+      setCheckinMsg((m) => ({ ...m, [pid]: { kind: 'err', text: 'Escribe un γ entre 0.5 y 1.5' } }));
+      return;
+    }
+    setCheckinBusy((b) => ({ ...b, [pid]: true }));
+    try {
+      const res = await apiFetch(`/contracts/${contractId}/checkin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wellness: value, participant_id: pid, source: 'checkin' }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 429) {
+        setCheckinMsg((m) => ({ ...m, [pid]: { kind: 'err', text: data.error || 'Límite semanal alcanzado' } }));
+        return;
+      }
+      if (!res.ok) {
+        setCheckinMsg((m) => ({ ...m, [pid]: { kind: 'err', text: data.error || 'Error al registrar' } }));
+        return;
+      }
+      setCheckinMsg((m) => ({ ...m, [pid]: { kind: 'ok', text: `Latido ${data.total_checkins} registrado (γ=${data.wellness.toFixed(2)})` } }));
+      setCheckinValues((v) => ({ ...v, [pid]: '' }));
+      loadContractData();
+    } catch (err) {
+      console.error(err);
+      setCheckinMsg((m) => ({ ...m, [pid]: { kind: 'err', text: 'Error de conexión' } }));
+    } finally {
+      setCheckinBusy((b) => ({ ...b, [pid]: false }));
+    }
+  };
+
+  // Mini-gráfica de γ (serie temporal de check-ins reales)
+  const gammaSparkline = (checkins: Checkin[] | undefined): React.ReactNode => {
+    if (!checkins || checkins.length < 2) return null;
+    const points = checkins
+      .map((c, i, arr) => {
+        const x = (i / Math.max(1, arr.length - 1)) * 100;
+        const y = 26 - ((Math.min(Math.max(c.wellness, 0.5), 1.5) - 0.5) / 1.0) * 24;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(' ');
+    const belowThreshold = checkins[checkins.length - 1].wellness < 0.8;
+    return (
+      <div className="pt-1">
+        <svg
+          viewBox="0 0 100 28"
+          preserveAspectRatio="none"
+          className="w-full h-7 rounded-lg bg-slate-950/70 border border-slate-900"
+        >
+          <line x1="0" y1="6.8" x2="100" y2="6.8" stroke="#64748b" strokeWidth="0.5" strokeDasharray="2 2" />
+          <polyline
+            points={points}
+            fill="none"
+            stroke={belowThreshold ? '#f43f5e' : '#10b981'}
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+          {checkins.map((c, i) => (
+            <circle
+              key={i}
+              cx={((i / Math.max(1, checkins.length - 1)) * 100).toFixed(1)}
+              cy={(26 - ((Math.min(Math.max(c.wellness, 0.5), 1.5) - 0.5) / 1.0) * 24).toFixed(1)}
+              r="1.8"
+              fill={c.wellness < 0.8 ? '#f43f5e' : '#10b981'}
+            />
+          ))}
+        </svg>
+        <div className="flex justify-between text-[8px] font-mono text-slate-600 pt-0.5">
+          <span>{checkins[0].created_at?.slice(0, 10)}</span>
+          <span>{checkins[checkins.length - 1].created_at?.slice(0, 10)}</span>
+        </div>
+      </div>
+    );
+  };
 
   // ¿El firmante activo tiene perfil de protección (assisted/shielded)?
   const protectionLevelOf = (pid: string): string | null => {
@@ -1094,6 +1187,42 @@ export default function ContractDetailsPage() {
                         style={{ width: `${wellness * 100}%` }}
                       />
                     </div>
+
+                    {/* Ola 4, Puente A: la serie de γ real (el contrato escucha la vida) */}
+                    {gammaSparkline(detail?.checkins)}
+                    {detail?.checkins && detail.checkins.length > 0 && (
+                      <div className="flex items-center gap-2 text-[9px] font-mono text-slate-500">
+                        <HeartPulse className="w-3 h-3 text-emerald-500" />
+                        {detail.checkins.length} latido{detail.checkins.length === 1 ? '' : 's'} reportado{detail.checkins.length === 1 ? '' : 's'}
+                        <span className="text-slate-700">·</span>
+                        <span className="text-slate-600">{detail.checkins[detail.checkins.length - 1].source}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1.5 pt-0.5">
+                      <input
+                        type="number"
+                        min={0.5}
+                        max={1.5}
+                        step={0.01}
+                        value={checkinValues[pid] ?? ''}
+                        onChange={(e) => setCheckinValues((v) => ({ ...v, [pid]: e.target.value }))}
+                        placeholder="γ 0.5-1.5"
+                        className="w-20 px-2 py-1 bg-slate-950 border border-slate-800 rounded-lg text-[10px] font-mono text-slate-300 focus:outline-none focus:border-emerald-500/40"
+                      />
+                      <button
+                        onClick={() => handleCheckin(pid)}
+                        disabled={checkinBusy[pid]}
+                        className="flex-1 py-1 bg-slate-950 hover:bg-slate-900 border border-slate-800 text-slate-300 text-[10px] font-bold rounded-lg flex items-center justify-center gap-1.5 transition-all hover:border-emerald-500/30 disabled:opacity-50"
+                      >
+                        <HeartPulse className="w-3 h-3 text-emerald-500" />
+                        {checkinBusy[pid] ? 'Registrando...' : 'Check-in semanal'}
+                      </button>
+                    </div>
+                    {checkinMsg[pid] && (
+                      <div className={`text-[9px] font-mono ${checkinMsg[pid].kind === 'ok' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {checkinMsg[pid].text}
+                      </div>
+                    )}
                   </div>
                 );
               })}

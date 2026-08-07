@@ -503,6 +503,19 @@ CREATE TABLE IF NOT EXISTS maxo_contract_events (
     FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE
 );
 
+-- Check-ins de bienestar real (Ola 4, Puente A: γ que escucha la vida).
+-- Serie temporal de γ reportada por las partes: el contrato escucha, no crea.
+CREATE TABLE IF NOT EXISTS maxo_contract_checkins (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    contract_id TEXT NOT NULL,
+    participant_id TEXT NOT NULL,
+    wellness REAL NOT NULL,
+    source TEXT NOT NULL DEFAULT 'checkin',
+    reported_by TEXT NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE
+);
+
 -- Métricas de MaxoContracts (dashboard de Cohorte Cero: γ, SDV, NPS)
 CREATE TABLE IF NOT EXISTS maxo_contract_nps (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
