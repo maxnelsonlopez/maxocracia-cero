@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { apiFetch } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import LegalContractView from './LegalContractView';
+import OracleNegotiationPanel from '../../components/OracleNegotiationPanel';
 import { 
   FileText, ArrowLeft, ShieldAlert, Award, Info, CheckCircle2, 
   UserCheck, AlertTriangle, Play, RefreshCw, Send, Zap,
@@ -1145,6 +1146,13 @@ export default function ContractDetailsPage() {
               </div>
             </div>
           )}
+
+          {/* Negociación Asistida por Oráculo (ROADMAP Bloque A) */}
+          <OracleNegotiationPanel
+            contractId={contract.contract_id}
+            participants={contract.participants}
+            onMaterialized={() => loadContractData()}
+          />
         </div>
       </div>
       )}

@@ -1790,6 +1790,9 @@ Authorization: Bearer <token>
 |--------|----------|---------------|-------------|
 | GET | `/contracts/` | Sí | Listar todos los contratos |
 | POST | `/contracts/` | Sí | Crear nuevo contrato |
+| POST | `/contracts/negotiate` | Sí | Negociación asistida por oráculo en vivo (borrador + chequeo axiomático); 503 si no hay `DEEPSEEK_API_KEY` |
+| POST | `/contracts/negotiate/feedback` | Sí | Iterar una sesión de negociación `{session_id, feedback}` |
+| POST | `/contracts/<id>/critique` | Sí | Auditoría del oráculo sobre un contrato existente (T13, INV2/INV2-S, T9, γ, Ternura) |
 | GET | `/contracts/<id>` | Sí | Obtener detalles de contrato |
 | POST | `/contracts/<id>/terms` | Sí | Añadir término al contrato |
 | POST | `/contracts/<id>/participants` | Sí | Añadir participante |
@@ -1798,6 +1801,45 @@ Authorization: Bearer <token>
 | POST | `/contracts/<id>/activate` | Sí | Activar contrato |
 | POST | `/contracts/<id>/retract` | Sí | Solicitar retractación ética |
 | GET | `/contracts/<id>/civil` | Sí | Obtener resumen en lenguaje civil |
+
+---
+
+### Negociación Asistida por Oráculo (ROADMAP Bloque A)
+
+**POST `/contracts/negotiate`** — El oráculo en vivo (DeepSeek, protocolo OpenAI-compatible) genera un borrador de MaxoContract desde una instrucción en lenguaje natural:
+
+```json
+{
+  "instruction": "Max ofrece 10 horas de trabajo y quiere que Ana dé a cambio un objeto, un servicio o sus propias horas",
+  "participants": ["user-1", "user-2"],
+  "session_id": null
+}
+```
+
+Respuesta `200`:
+
+```json
+{
+  "session_id": "8b9067068dbe40f0",
+  "version": 1,
+  "instruction": "...",
+  "draft_terms": [
+    {"term_id": "term-1", "civil_text": "Max dará 10 horas de trabajo a Ana.", "vhv": {"t": 10, "v": 0, "h": 0}, "assigned_participant": "user-1"}
+  ],
+  "proposed_parties": ["user-1", "user-2"],
+  "axiom_check": {"valid": true, "violations": [], "warnings": [], "reciprocity_balance": {"user-1": 10.0, "user-2": 10.0}},
+  "reasoning": "Explicación en lenguaje civil del oráculo",
+  "suggested_contract_id": "oracle-...",
+  "oracle_id": "live-deepseek-chat",
+  "created_at": "..."
+}
+```
+
+- `503` con `code: ORACLE_UNAVAILABLE` si falta `DEEPSEEK_API_KEY` (degradación elegante).
+- `502` si el proveedor del oráculo falla.
+- `404` en `feedback` si la sesión expiró (TTL 30 min) o no existe.
+
+El borrador se materializa con `POST /contracts/` (misma API existente).
 
 ---
 

@@ -18,8 +18,10 @@ import ReactFlow, {
 import { apiFetch } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { Info, HelpCircle, Save, Settings, ShieldAlert, Award, FileText, User } from 'lucide-react';
+import { Info, Save, Settings, ShieldAlert, Award, FileText, User, Bot, Scale, Sparkles } from 'lucide-react';
 import 'reactflow/dist/style.css';
+import OracleNegotiationPanel from '../../components/OracleNegotiationPanel';
+import LegalContractView from '../[id]/LegalContractView';
 
 import { ActionNode, ConditionNode, OracleNode, SDVNode, ReciprocityNode } from './components/CustomNodes';
 
@@ -83,6 +85,7 @@ export default function ContractBuilder() {
     const [duration, setDuration] = useState<number>(30);
     const [usersList, setUsersList] = useState<UserProfile[]>([]);
     const [selectedCoSigners, setSelectedCoSigners] = useState<number[]>([]);
+    const [viewMode, setViewMode] = useState<'canvas' | 'legal' | 'oracle'>('canvas');
     const [validationReport, setValidationReport] = useState<{
         valid: boolean;
         results: AxiomResult[];
@@ -100,6 +103,66 @@ export default function ContractBuilder() {
     const injectOwners = useCallback((nds: Node[]) => {
         return nds.map((n) => ({ ...n, data: { ...n.data, owners: ownerOptions } }));
     }, [ownerOptions]);
+
+    // Contrato sintetizado desde el grafo para la vista de Documento Legal
+    const legalContract = React.useMemo(() => {
+        const me = currentUser ? { id: currentUser.id, name: currentUser.name || '' } : null;
+        const participantIds = [
+            ...(me ? [`user-${me.id}`] : ['user-1']),
+            ...selectedCoSigners.map((uid) => `user-${uid}`),
+        ];
+        const partyNames: Record<string, string> = {};
+        if (me) partyNames[`user-${me.id}`] = me.name;
+        usersList.forEach((u) => { partyNames[`user-${u.id}`] = u.name; });
+
+        const typeLabel: Record<string, string> = {
+            action: 'Acción (DO)',
+            reciprocity: 'Reciprocidad (GIVE)',
+            condition: 'Condición (IF)',
+            sdv: 'Suelo de Dignidad (SDV)',
+            oracle: 'Oráculo (VERDICT)',
+        };
+        const nodeTypes: string[] = ['action', 'reciprocity', 'condition', 'sdv', 'oracle'];
+
+        const terms = nodes
+            .filter((n) => nodeTypes.includes(n.type as string))
+            .map((n) => {
+                const data = (n.data || {}) as Record<string, unknown>;
+                const label = (data.label as string) || `Bloque ${n.type}`;
+                const vhvCost = typeof data.vhvCost === 'number' ? data.vhvCost : 0.5;
+                const owner = typeof data.ownerUserId === 'number' ? data.ownerUserId : undefined;
+                const penalty = (data.penaltyType as string) || 'Penalización γ (-0.2)';
+                const nodeType = (n.type as string) || '';
+                const civil = nodeType === 'reciprocity'
+                    ? `${label} (si no se cumple: ${penalty})`
+                    : label;
+                return {
+                    term_id: n.id,
+                    civil_text: `${typeLabel[nodeType] || nodeType}: ${civil}`,
+                    vhv: { t: nodeType === 'action' ? vhvCost : 0, v: 0, r: 0 },
+                    accepted_by: {} as Record<string, boolean>,
+                    assigned_participant: owner ? `user-${owner}` : undefined,
+                };
+            });
+
+        const totalT = terms.reduce((acc, t) => acc + t.vhv.t, 0);
+        return {
+            contract_id: 'builder-visual',
+            state: 'DRAFT',
+            civil_description: `Contrato diseñado visualmente en el Constructor MaxoContracts. Bloques: ${terms.length} · Duración: ${duration} días.`,
+            participants: participantIds,
+            participants_details: participantIds.map((pid) => ({
+                id: pid,
+                name: partyNames[pid] || pid,
+                wellness: 1.0,
+            })),
+            terms,
+            terms_count: terms.length,
+            total_vhv: { t: totalT, v: 0, r: 0 },
+            events_count: 0,
+            hash: 'BORRADOR-VISUAL',
+        };
+    }, [nodes, selectedCoSigners, currentUser, usersList, duration]);
 
     // Mantener la lista de partes disponible en los bloques al cambiar la selección
     useEffect(() => {
@@ -493,6 +556,63 @@ export default function ContractBuilder() {
                 </div>
             </header>
 
+            {/* Tabs de vista: Lienzo Visual | Documento Legal | Negociación */}
+            <div className="border-b border-slate-800 bg-slate-900/40 backdrop-blur-md px-8 py-2.5 flex items-center justify-between z-10 shrink-0">
+                <div className="flex gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                    <button
+                        onClick={() => setViewMode('canvas')}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                            viewMode === 'canvas'
+                                ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/10'
+                                : 'text-slate-400 hover:text-white'
+                        }`}
+                    >
+                        <Settings className="w-3.5 h-3.5" />
+                        Lienzo Visual
+                    </button>
+                    <button
+                        onClick={() => setViewMode('legal')}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                            viewMode === 'legal'
+                                ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/10'
+                                : 'text-slate-400 hover:text-white'
+                        }`}
+                    >
+                        <Scale className="w-3.5 h-3.5" />
+                        Documento Legal
+                    </button>
+                    <button
+                        onClick={() => setViewMode('oracle')}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                            viewMode === 'oracle'
+                                ? 'bg-violet-500 text-white shadow-md shadow-violet-500/10'
+                                : 'text-slate-400 hover:text-white'
+                        }`}
+                    >
+                        <Bot className="w-3.5 h-3.5" />
+                        Negociación con Oráculo
+                    </button>
+                </div>
+                {viewMode === 'legal' ? (
+                    <span className="text-[9px] text-slate-500 max-w-[420px] text-right leading-snug">
+                        Documento homologable generado en vivo desde el grafo: cada bloque del lienzo se convierte en una obligación con su parte responsable.
+                    </span>
+                ) : viewMode === 'oracle' ? (
+                    <button
+                        onClick={() => router.push('/contracts/negotiate')}
+                        className="flex items-center gap-1.5 text-[10px] font-bold text-violet-400 hover:text-violet-300 transition-colors"
+                    >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        Abrir chat en pantalla completa
+                    </button>
+                ) : (
+                    <span className="text-[9px] text-slate-500 max-w-[420px] text-right leading-snug">
+                        Traza la topología del acuerdo con bloques arrastrables; cada acción (DO) debe conectarse a una reciprocidad (GIVE).
+                    </span>
+                )}
+            </div>
+
+            {viewMode === 'canvas' && (
             <div className="flex-1 flex overflow-hidden" ref={reactFlowWrapper}>
                 {/* Sidebar Izquierdo: Configuración e Instrucciones */}
                 <aside className="w-80 border-r border-slate-800 bg-slate-900/40 p-6 flex flex-col gap-6 z-10 overflow-y-auto backdrop-blur-md">
@@ -900,8 +1020,59 @@ export default function ContractBuilder() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Negociación Asistida por Oráculo (ROADMAP Bloque A) */}
+                    <OracleNegotiationPanel
+                        participants={[
+                            ...(currentUser ? [`user-${currentUser.id}`] : []),
+                            ...selectedCoSigners.map((uid) => `user-${uid}`),
+                        ]}
+                        onMaterialized={(id) => router.push(`/contracts/${id}`)}
+                    />
                 </aside>
             </div>
+            )}
+
+            {/* Vista: Documento Legal (homologable a contrato civil) */}
+            {viewMode === 'legal' && (
+                <div className="flex-1 overflow-y-auto px-8 py-8 bg-slate-950">
+                    <LegalContractView
+                        contract={legalContract}
+                        civilSummary={legalContract.civil_description}
+                    />
+                </div>
+            )}
+
+            {/* Vista: Negociación con Oráculo (protagonista) */}
+            {viewMode === 'oracle' && (
+                <div className="flex-1 overflow-y-auto px-8 py-8 bg-slate-950">
+                    <div className="max-w-5xl mx-auto space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-2xl flex items-center justify-center shadow-xl shadow-violet-600/30">
+                                <Bot className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+                                    Conversa con el Oráculo
+                                    <span className="text-[9px] bg-violet-500/20 text-violet-300 border border-violet-500/30 px-2 py-0.5 rounded-full font-normal">
+                                        DeepSeek en vivo
+                                    </span>
+                                </h2>
+                                <p className="text-[11px] text-slate-500">
+                                    Descríbele el acuerdo a las partes que elegiste y materializa el borrador cuando estén de acuerdo.
+                                </p>
+                            </div>
+                        </div>
+                        <OracleNegotiationPanel
+                            participants={[
+                                ...(currentUser ? [`user-${currentUser.id}`] : []),
+                                ...selectedCoSigners.map((uid) => `user-${uid}`),
+                            ]}
+                            onMaterialized={(id) => router.push(`/contracts/${id}`)}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

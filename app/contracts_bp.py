@@ -43,6 +43,11 @@ from maxocontracts.core.contract import MaxoContract
 from maxocontracts.blocks.sdv_s_validator import SDV_SValidatorBlock
 from maxocontracts.core.axioms import AxiomValidator, ValidationResult
 from maxocontracts.oracles import SyntheticOracle
+from maxocontracts.oracles.live_oracle import (
+    LiveOracle,
+    OracleUnavailableError,
+    OracleAPIError,
+)
 
 from .webhooks import dispatch_event
 
@@ -76,6 +81,7 @@ def _alias_dynamic_segments(rel: str) -> str:
         and parts[0] == "contracts"
         and parts[1]
         and not parts[1].startswith("builder")
+        and not parts[1].startswith("negotiate")
         and not parts[1].startswith("__next")
     ):
         original = parts[1]
@@ -539,6 +545,156 @@ def create_contract(current_user):
         "state": contract.state.value,
         "created_at": datetime.now().isoformat()
     }), 201
+
+
+def _live_oracle_or_503():
+    """Instancia el oráculo en vivo; si no está disponible responde 503
+    con degradación elegante (el resto de la API sigue funcionando)."""
+    oracle = LiveOracle()
+    if not oracle.is_available():
+        return None, jsonify({
+            "error": "La negociación asistida por oráculo no está disponible.",
+            "code": "ORACLE_UNAVAILABLE",
+            "hint": "Configura DEEPSEEK_API_KEY en el .env para activarla.",
+        }), 503
+    return oracle, None, None
+
+
+@contracts_bp.route("/negotiate", methods=["POST"])
+@token_required
+def negotiate_with_oracle(current_user):
+    """
+    Negociación Asistida por Oráculo (ROADMAP Bloque A).
+    El oráculo en vivo (DeepSeek, protocolo OpenAI-compatible) genera un
+    borrador de MaxoContract desde una instrucción en lenguaje natural.
+
+    Body JSON:
+    {
+        "instruction": "Max ofrece 10 horas y quiere que Ana dé un objeto, un servicio o sus horas",
+        "participants": ["user-1", "user-2"],   # opcional
+        "session_id": "abc123"                   # opcional (para iterar)
+    }
+    """
+    oracle, error_response, status = _live_oracle_or_503()
+    if oracle is None:
+        return error_response, status
+
+    data = request.get_json() or {}
+    instruction = (data.get("instruction") or "").strip()
+    if not instruction:
+        return jsonify({"error": "instruction is required"}), 400
+
+    participants = data.get("participants") or []
+    session_id = data.get("session_id")
+
+    try:
+        result = oracle.negotiate(
+            instruction=instruction,
+            participants=[str(p) for p in participants],
+            session_id=session_id,
+        )
+    except OracleAPIError as e:
+        return jsonify({"error": f"El oráculo falló: {e}"}), 502
+    except OracleUnavailableError as e:
+        return jsonify({"error": str(e), "code": "ORACLE_UNAVAILABLE"}), 503
+
+    return jsonify(result.to_dict()), 200
+
+
+@contracts_bp.route("/negotiate/feedback", methods=["POST"])
+@token_required
+def negotiate_oracle_feedback(current_user):
+    """
+    Iteración de la negociación: la contraparte responde al borrador y el
+    oráculo produce una nueva versión (sesiones en memoria, TTL 30 min).
+
+    Body JSON:
+    {
+        "session_id": "abc123",
+        "feedback": "Ana no puede dar más de 5 horas; sugiere un servicio de diseño"
+    }
+    """
+    oracle, error_response, status = _live_oracle_or_503()
+    if oracle is None:
+        return error_response, status
+
+    data = request.get_json() or {}
+    session_id = (data.get("session_id") or "").strip()
+    feedback = (data.get("feedback") or "").strip()
+
+    if not session_id:
+        return jsonify({"error": "session_id is required"}), 400
+    if not feedback:
+        return jsonify({"error": "feedback is required"}), 400
+
+    try:
+        result = oracle.feedback(session_id, feedback)
+    except KeyError:
+        return jsonify({"error": f"session {session_id} not found"}), 404
+    except OracleAPIError as e:
+        return jsonify({"error": f"El oráculo falló: {e}"}), 502
+    except OracleUnavailableError as e:
+        return jsonify({"error": str(e), "code": "ORACLE_UNAVAILABLE"}), 503
+
+    return jsonify(result.to_dict()), 200
+
+
+@contracts_bp.route("/<contract_id>/critique", methods=["POST"])
+@token_required
+def critique_contract(current_user, contract_id: str):
+    """
+    Auditoría del oráculo: revisa un contrato existente contra T13, INV2/
+    INV2-S, T9, γ ≥ 1 y la Capa de Ternura, y propone mejoras.
+    """
+    oracle, error_response, status = _live_oracle_or_503()
+    if oracle is None:
+        return error_response, status
+
+    contract = _load_contract(contract_id)
+    if contract is None:
+        return jsonify({"error": "contract not found"}), 404
+
+    contract_data = {
+        "contract_id": contract.contract_id,
+        "state": contract.state.value,
+        "civil_description": contract.civil_summary,
+        "participants": [
+            {
+                "id": p.id,
+                "name": p.name,
+                "wellness": float(p.wellness_current.value),
+                "is_synthetic": p.is_synthetic,
+            }
+            for p in contract.participants
+        ],
+        "terms": [
+            {
+                "term_id": t.id,
+                "civil_text": t.description,
+                "vhv": {
+                    "t": float(t.vhv_cost.T),
+                    "v": float(t.vhv_cost.V),
+                    "r": float(t.vhv_cost.R),
+                },
+                "assigned_participant": t.assigned_participant,
+            }
+            for t in contract._terms
+        ],
+        "total_vhv": {
+            "t": float(contract.total_vhv.T),
+            "v": float(contract.total_vhv.V),
+            "r": float(contract.total_vhv.R),
+        },
+    }
+
+    try:
+        result = oracle.critique(contract_id, contract_data)
+    except OracleAPIError as e:
+        return jsonify({"error": f"El oráculo falló: {e}"}), 502
+    except OracleUnavailableError as e:
+        return jsonify({"error": str(e), "code": "ORACLE_UNAVAILABLE"}), 503
+
+    return jsonify(result.to_dict()), 200
 
 
 @contracts_bp.route("/stats", methods=["GET"])

@@ -14,7 +14,8 @@ import {
   Zap,
   Users,
   Info,
-  ShieldAlert
+  ShieldAlert,
+  Bot
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { apiFetch } from "../lib/api";
@@ -89,13 +90,22 @@ export default function ContractsPage() {
           </p>
         </div>
         
-        <Link 
-          href="/contracts/builder" 
-          className="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-emerald-500 text-slate-950 font-black hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20 active:scale-95 text-sm"
-        >
-          <Plus className="w-5 h-5 stroke-[3px]" />
-          Nuevo Contrato Visual
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Link 
+            href="/contracts/negotiate" 
+            className="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-violet-600 text-white font-black hover:bg-violet-500 transition-all shadow-xl shadow-violet-600/20 active:scale-95 text-sm"
+          >
+            <Bot className="w-5 h-5" />
+            Negociar con el Oráculo
+          </Link>
+          <Link 
+            href="/contracts/builder" 
+            className="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-emerald-500 text-slate-950 font-black hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20 active:scale-95 text-sm"
+          >
+            <Plus className="w-5 h-5 stroke-[3px]" />
+            Nuevo Contrato Visual
+          </Link>
+        </div>
       </div>
 
       {/* BANNER COMPARATIVO: ¿Qué es un MaxoContract? */}
@@ -127,7 +137,7 @@ export default function ContractsPage() {
           <div className="p-4 rounded-2xl bg-slate-950/40 border border-slate-950 space-y-2 text-xs text-slate-400">
             <span className="font-extrabold text-amber-400 uppercase text-[10px] block">Smart Contracts (Blockchain / Web3)</span>
             <p className="leading-relaxed">
-              <strong>Mecanismo:</strong> Ejecución irrevocable y automatizada mediante código autoejecutable ("Code is Law").
+              <strong>Mecanismo:</strong> Ejecución irrevocable y automatizada mediante código autoejecutable (&quot;Code is Law&quot;).
             </p>
             <p className="leading-relaxed">
               <strong>Ceguera Existencial:</strong> Son inmutables de forma absoluta. Carecen de empatía o noción de crisis vitales. Si una de las partes sufre un accidente o asimetría extrema, el código sigue ejecutando transferencias sin piedad.

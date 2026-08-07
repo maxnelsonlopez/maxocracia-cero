@@ -101,6 +101,8 @@ def test_alias_dynamic_segment_nested_payloads():
 def test_alias_dynamic_segment_no_alias_for_static_routes():
     assert _alias_dynamic_segments("contracts/builder.txt") == "contracts/builder.txt"
     assert _alias_dynamic_segments("contracts/builder.html") == "contracts/builder.html"
+    assert _alias_dynamic_segments("contracts/negotiate.txt") == "contracts/negotiate.txt"
+    assert _alias_dynamic_segments("contracts/negotiate.html") == "contracts/negotiate.html"
     assert _alias_dynamic_segments("contracts/__next.contracts.txt") == "contracts/__next.contracts.txt"
     assert _alias_dynamic_segments("contracts.txt") == "contracts.txt"
 
@@ -136,6 +138,15 @@ def test_navegacion_navegador_recibe_html(client):
 @pytest.mark.skipif(not HAS_DIST, reason="frontend estático no construido")
 def test_builder_recibe_html(client):
     res = client.get("/contracts/builder", headers={"Accept": "text/html"})
+    assert res.status_code == 200
+    assert "text/html" in res.content_type
+
+
+@pytest.mark.skipif(not HAS_DIST, reason="frontend estático no construido")
+def test_negotiate_recibe_html(client):
+    """La página protagonista /contracts/negotiate se sirve como frontend
+    (no se reescribe a 'placeholder' ni devuelve 401 de la API)."""
+    res = client.get("/contracts/negotiate", headers={"Accept": "text/html"})
     assert res.status_code == 200
     assert "text/html" in res.content_type
 

@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-06 — El oráculo protagonista: página de negociación a pantalla completa y tabs en el builder
+
+### Añadido
+- **Página protagonista `/contracts/negotiate`** (`frontend/app/contracts/negotiate/`): experiencia de chat a pantalla completa con el oráculo en vivo — bienvenida con instrucciones sugeridas, burbujas de conversación, indicador de escritura, tarjeta del borrador incrustada en el chat (chequeo axiomático, razonamiento, términos con parte obligada), input fijo al pie (Enter envía, Shift+Enter salto de línea), rail lateral con estado de la sesión (versión, términos, partes, balance T9) y materialización con redirección a la sala de firma.
+- **Tabs en el builder** (`/contracts/builder`): `Lienzo Visual | Documento Legal | Negociación con Oráculo`.
+  - **Documento Legal**: genera en vivo un contrato homologable a civil desde el grafo (cada bloque → cláusula con su parte obligada y costo VHV; participantes = creador + co-firmantes) reutilizando `LegalContractView`.
+  - **Negociación**: el panel de oráculo como protagonista a ancho completo, con enlace a pantalla completa.
+- **Helpers compartidos** (`frontend/app/lib/oracle.ts`): tipos del borrador, `mapParty` y `materializeContract` reutilizados por el panel y la página completa.
+- **Accesos destacados**: botón violeta "Negociar con el Oráculo" en la lista de contratos; enlace "Pantalla completa" en el panel de oráculo del detalle; enlace a pantalla completa en la tab Negociación del builder.
+- **Backend**: `_alias_dynamic_segments` excluye `negotiate` (la página estática no se reescribe a la plantilla `placeholder`); la API `POST /contracts/negotiate` permanece intacta (401 sin token).
+- **Tests**: `test_negotiate_recibe_html` + aserciones de alias en `tests/test_spa_routing.py`.
+
+### Notas Técnicas
+- **Firma**: DeepSeek (oráculo sintético).
+- **Verificación**: suite completa 455/455; tsc/eslint limpios (2 avisos preexistentes corregidos: comillas sin escapar en lista y `HelpCircle` sin uso); build exportado y sincronizado a `app/static/dist` (51 gemelos RSC); smoke de rutas: `/contracts/negotiate`, `/contracts/builder` y `/contracts/<id>` sirven HTML 200 y la API sigue autenticada; Validador Conceptual sin violaciones.
+
+## 2026-08-06 — Oráculo Sintético en Vivo (ROADMAP Bloque A): DeepSeek negocia los contratos
+
+### Añadido
+- **LiveOracle** (`maxocontracts/oracles/live_oracle.py`): oráculo en vivo con protocolo OpenAI-compatible (DeepSeek por defecto; `requests` ya incluido). Lee `DEEPSEEK_API_KEY`, `DEEPSEEK_BASE_URL`, `DEEPSEEK_MODEL`, `DEEPSEEK_ORACLE_ENABLED`, `DEEPSEEK_TIMEOUT` del `.env` (documentadas en `config.example.env`).
+  - `negotiate()`: genera borradores de MaxoContract desde instrucciones en lenguaje natural (términos, partes, VHV, parte obligada) con prompt del sistema que incluye T13, INV2/INV2-S, T9, γ ≥ 1 y la Capa de Ternura; salida JSON en lenguaje civil (≤20 palabras/frase).
+  - `feedback()`: iteración por sesión (almacén compartido entre peticiones, TTL 30 min, 20 mensajes máx.).
+  - `critique()`: auditoría de contratos existentes (hallazgos por axioma con severidad + recomendaciones).
+  - Chequeo axiomático local reforzado (`_axiom_check`): T > 0, partes ≥ 2, T9 computable con advertencias INV2 para términos con V > 0.
+  - Degradación elegante: sin key → `is_available()` False → endpoints 503 con `code: ORACLE_UNAVAILABLE`; la validación heurística sigue viva.
+- **Endpoints nuevos** (`app/contracts_bp.py`): `POST /contracts/negotiate` ({instruction, participants[], session_id?}), `POST /contracts/negotiate/feedback` ({session_id, feedback}) y `POST /contracts/<id>/critique` — los tres autenticados; 502 si el proveedor falla, 404 si la sesión/contrato no existe.
+- **Panel "Negociación Asistida por Oráculo"** (`frontend/app/components/OracleNegotiationPanel.tsx`): chat que muestra razonamiento, borrador con términos y estados de axiomas (verde/rojo/ámbar), iteración por feedback, nombre editable del contrato y botón "Materializar contrato" (llama a `POST /contracts/` y navega al detalle). Con `contractId` añade "Auditar este contrato contra los axiomas". Montado en `/contracts/builder` (sidebar derecho) y en el detalle de contrato (Panel Visual).
+- **Tests**: `tests/test_live_oracle.py` — 20 pruebas con mocks sin red (key ausente → 503; `requests.post` simulado → borrador validado y expuesto por API; sesiones; auditoría; parsing tolerante de JSON).
+
+### Notas Técnicas
+- **Firma**: DeepSeek (oráculo sintético).
+- **Verificación**: suite completa 454/454 (20 nuevas); tsc/eslint limpios; build exportado a `app/static/dist` (49 gemelos RSC); E2E con key real: negociar (10h ↔ objeto/servicio) → feedback (Ana: 5h + servicio de diseño, T9 dentro de tolerancia) → materializar en BD → auditar (hallazgos T9/INV2-S/T13 con recomendaciones).
+- **Referencias canónicas**: `docs/architecture/ROADMAP_oraculo_vivo_y_escalas.md` (Bloque A marcado como implementado; Bloque B de escalas pendiente).
+
 ## 2026-08-06 — Flujo real de contratos: co-firmantes múltiples, bloques vinculados a partes y vista de documento legal
 
 ### Añadido

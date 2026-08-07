@@ -2,7 +2,7 @@
 
 **Autor del diseño:** DeepSeek (oráculo sintético) y Max Nelson López Restrepo
 **Fecha:** 6 de agosto de 2026
-**Estado:** Plano de implementación para una sesión futura
+**Estado:** Bloque A **IMPLEMENTADO** (sesión del 6/8/2026: `live_oracle.py`, endpoints `/contracts/negotiate`, `/contracts/negotiate/feedback`, `/contracts/<id>/critique`, panel frontend en builder y detalle). Bloque B (escalas) pendiente.
 **Referencia canónica:** Cap. 13-14 (Oráculos Dinámicos), Cap. 17 (MaxoContracts), Cap. 10 (Tres Reinos)
 
 ---
@@ -141,7 +141,11 @@ Cada escala hereda el mismo SDV y los mismos invariantes: el contrato entre una 
 
 ## 4. Prompt pulido para la sesión futura
 
-> **Sesión futura — Oráculo en vivo y escalas**
+> **Sesión del 6/8/2026 — BLOQUE A COMPLETADO.** El oráculo en vivo está
+> implementado y verificado E2E con key real. Pendiente: Bloque B (escalas:
+> `party_id` genérico, `maxo_parties`, consentimiento agregado con quórum).
+
+> **Sesión futura — Escalas (Bloque B)**
 >
 > 1. Implementa `maxocontracts/oracles/live_oracle.py` (protocolo OpenAI-compatible) con lectura de `DEEPSEEK_API_KEY` desde `.env` (`config.example.env` actualizado), degradación elegante si no hay key, y endpoints `POST /contracts/negotiate`, `POST /contracts/<id>/critique` y `POST /contracts/negotiate/feedback` con sesiones de iteración. El prompt del sistema debe incluir T13, INV2/INV2-S, T9, γ≥1 y la Capa de Ternura, y devolver JSON con términos en lenguaje civil.
 > 2. Frontend: panel "Negociación Asistida por Oráculo" en `/contracts/builder` y en el detalle (chat que itera el borrador y botón "Materializar contrato" que llama a `POST /contracts/`).

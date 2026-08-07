@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-06 — Oráculo Sintético en Vivo (ROADMAP Bloque A)
+
+  ### Añadido
+  - **LiveOracle** (`maxocontracts/oracles/live_oracle.py`): oráculo en vivo con protocolo OpenAI-compatible (DeepSeek por defecto). Lee `DEEPSEEK_API_KEY`, `DEEPSEEK_BASE_URL`, `DEEPSEEK_MODEL`, `DEEPSEEK_ORACLE_ENABLED` y `DEEPSEEK_TIMEOUT` del `.env`.
+    - `negotiate()` genera borradores de MaxoContract desde instrucciones en lenguaje natural.
+    - `feedback()` itera la negociación con sesiones en memoria (TTL 30 min, compartidas entre peticiones).
+    - `critique()` audita contratos existentes contra T13, INV2/INV2-S, T9, γ ≥ 1 y la Capa de Ternura.
+    - Chequeo axiomático local reforzado (`_axiom_check`): T > 0, partes ≥ 2 y T9 computable.
+    - Degradación elegante: sin key los endpoints responden 503 y la validación heurística sigue activa.
+  - **Endpoints nuevos** en `app/contracts_bp.py`:
+    - `POST /contracts/negotiate` — borrador negociado + chequeo axiomático (autenticado).
+    - `POST /contracts/negotiate/feedback` — iteración por sesión (`{session_id, feedback}`).
+    - `POST /contracts/<id>/critique` — auditoría del oráculo sobre un contrato existente.
+  - **Frontend**: componente `OracleNegotiationPanel` (chat de negociación, borrador con estados de axiomas, iteración, botón "Materializar contrato" que llama a `POST /contracts/`, y auditoría por contrato). Montado en `/contracts/builder` (sidebar derecho) y en el detalle de contrato (Panel Visual).
+  - **Frontend (2ª tanda)**: página protagonista `/contracts/negotiate` a pantalla completa (burbujas, indicador de escritura, borrador incrustado en el chat, rail de estado, materialización con redirección) y tabs en el builder `Lienzo Visual | Documento Legal | Negociación con Oráculo` — el Documento Legal se genera en vivo desde el grafo reutilizando `LegalContractView`. Botón "Negociar con el Oráculo" en la lista de contratos y enlace "Pantalla completa" en el panel del detalle. Helpers compartidos en `frontend/app/lib/oracle.ts`.
+  - **Config**: variables `DEEPSEEK_*` documentadas en `config.example.env`.
+  - **Tests**: `tests/test_live_oracle.py` (20 pruebas con mocks sin red: key ausente → 503, cliente HTTP simulado → borrador validado y persistido, iteración de sesión, auditoría) y `tests/test_spa_routing.py` (ruta `/contracts/negotiate` servida como frontend).
+
+  ### Verificado
+  - Suite completa: 455 pruebas pasando.
+  - E2E manual con key real: negociación (10h ↔ objeto/servicio), feedback que ajusta a 5h + servicio de diseño, materialización en BD y auditoría con hallazgos T9/INV2-S/T13.
+  - tsc/eslint limpios, build exportado a `app/static/dist` (51 gemelos RSC), Validador Conceptual sin violaciones.
+
 ## 2026-01-22 — Consolidación Operativa y Proyecto Antigravity
 
   ### Añadido
