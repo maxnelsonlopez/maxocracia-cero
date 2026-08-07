@@ -496,6 +496,7 @@ CREATE TABLE IF NOT EXISTS maxo_webhooks (
     url TEXT NOT NULL,
     events TEXT NOT NULL,
     secret TEXT NOT NULL,
+    party_filter TEXT, -- JSON list de party_id (null = todos). Webhooks por parte (Ext. 4)
     is_active INTEGER DEFAULT 1,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

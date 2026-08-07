@@ -2,7 +2,7 @@
 
 **Autor del diseño:** DeepSeek (oráculo sintético) y Max Nelson López Restrepo
 **Fecha:** 6 de agosto de 2026
-**Estado:** Bloque A **IMPLEMENTADO** (sesión del 6/8/2026: `live_oracle.py`, endpoints `/contracts/negotiate`, `/contracts/negotiate/feedback`, `/contracts/<id>/critique`, panel frontend en builder y detalle). Bloque B **IMPLEMENTADO** (misma sesión: `maxo_parties` + resolvers por prefijo, API `/parties`, consentimiento agregado con quórum N de M, guardián oráculo para el Reino Natural `eco-`, contratos interescala anidados y UI completa). **Extensiones IMPLEMENTADAS** (hackathon nocturna del 6/8/2026: votación ponderada con `weights`/`weight_threshold`, delegación temporal con `delegations` y votos efectivos, γ agregado real por contrato, jerarquía interescala con `/tree` y `/subcontracts`, evento `contract.quorum_sealed` y seed demo coop↔org).
+**Estado:** Bloque A **IMPLEMENTADO** (sesión del 6/8/2026: `live_oracle.py`, endpoints `/contracts/negotiate`, `/contracts/negotiate/feedback`, `/contracts/<id>/critique`, panel frontend en builder y detalle). Bloque B **IMPLEMENTADO** (misma sesión: `maxo_parties` + resolvers por prefijo, API `/parties`, consentimiento agregado con quórum N de M, guardián oráculo para el Reino Natural `eco-`, contratos interescala anidados y UI completa). **Extensiones ola 1 IMPLEMENTADAS** (hackathon nocturna del 6/8/2026: votación ponderada con `weights`/`weight_threshold`, delegación temporal con `delegations` y votos efectivos, γ agregado real por contrato, jerarquía interescala con `/tree` y `/subcontracts`, evento `contract.quorum_sealed` y seed demo coop↔org). **Extensiones ola 2 IMPLEMENTADAS** (misma noche: delegación líquida por término con `delegations_by_term`, expiración de delegaciones con `valid_until`, ciclo de vida del quórum con `quorum_deadline` + prórroga + re-consulta, webhooks por parte con `party_filter`, cohorte consolidada con `/contracts/cohort` y tarjeta en la lista).
 **Referencia canónica:** Cap. 13-14 (Oráculos Dinámicos), Cap. 17 (MaxoContracts), Cap. 10 (Tres Reinos)
 
 ---
@@ -148,18 +148,20 @@ Cada escala hereda el mismo SDV y los mismos invariantes: el contrato entre una 
 > colectivas, Reino Natural con guardián oráculo, contratos anidados) —
 > 474/474 tests, tsc/eslint limpios, README v4.5.
 
-> **Hackathon del 6/8/2026 — EXTENSIONES COMPLETADAS** (votación ponderada,
-> delegación temporal, γ agregado real, jerarquía interescala, evento
-> `contract.quorum_sealed`, seed demo coop↔org) — 488/488 tests, tsc/eslint
-> limpios, README v4.6.
+> **Hackathon del 6/8/2026 — EXTENSIONES COMPLETADAS** (ola 1: votación
+> ponderada, delegación temporal, γ agregado real, jerarquía interescala,
+> evento `contract.quorum_sealed`, seed demo coop↔org — 488/488 tests.
+> Ola 2: delegación líquida por término, expiración de delegaciones, ciclo
+> de vida del quórum con prórroga y re-consulta, webhooks por parte, cohorte
+> consolidada — 501/501 tests, tsc/eslint limpios, README v4.7.
 
 > **Sesión futura (extensiones adicionales posibles):**
 >
-> 1. **Votación delegada líquida**: cada miembro puede delegar a personas distintas según el término (delegación por dominio), con registro auditable por contrato.
-> 2. **Expiración de delegaciones**: `delegations` con `valid_until` — la delegación temporal caduca y el voto vuelve al delegante.
-> 3. **Ciclo de vida del quórum**: ventana temporal para sellar (deadline), prórroga y re-consulta si cambian los miembros.
-> 4. **Webhooks por parte**: notificaciones dirigidas (no solo globales) cuando el quórum de una parte específica avanza.
-> 5. **Multi-contrato agregado**: vista de cohorte que consolida los acuerdos de todas las cooperativas del registro.
+> 1. **Votación por delegación líquida con auto-revocación**: si el delegante firma directamente, su voto ya no se cuenta por el apoderado (semántica líquida completa).
+> 2. **Historial auditable de delegaciones**: registrar cada cambio de delegación por contrato (tabla de eventos) para trazabilidad T13.
+> 3. **Sellado multi-firma**: términos que requieren N firmas humanas + quórum colectivo simultáneos (peso compuesto).
+> 4. **Prórroga automática**: si el quórum avanza ≥ umbral de progreso antes del deadline, la ventana se extiende una vez (con límite).
+> 5. **Exportación de gobernanza**: CSV/JSON de decisiones colectivas por parte y contrato para auditoría externa.
 > 6. Verifica: suite completa y `tsc --noEmit` limpios; actualiza CHANGELOG y README.
 
 ---

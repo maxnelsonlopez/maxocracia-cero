@@ -2,7 +2,7 @@
 
 **Estado del Proyecto:** Fase 2 - Sostenibilidad Económica y MicroMaxocracia Doméstica (Agosto 2026)  
 **Última actualización:** 6 de agosto 2026  
-**Versión:** 4.6 - Hackathon de extensiones: votación ponderada, delegación temporal, γ agregado y jerarquía interescala (DeepSeek)
+**Versión:** 4.7 - Gobernanza colectiva avanzada: delegación líquida, ciclo de vida del quórum y cohorte (DeepSeek)
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 
@@ -42,11 +42,11 @@ La **Maxocracia** es un sistema ético-económico-político alternativo que prop
 - **Portal de Transparencia Radical (T13)**: Páginas públicas `/transparency` (reporte vivo de costos e ingresos), `/privacy` (Opacidad Sagrada) y `/terms` (coherencia axiomática).
 - **Navegación SPA reparada**: La navegación por clic funciona en todo el portal (barra superior, dropdowns, panel admin y secciones de usuario) — payloads RSC de la exportación estática servidos correctamente.
 - **Escalas e Interescala (Bloque B)**: Un contrato ya no es solo persona↔persona — persona, micro-sociedad, cooperativa, institución, persona sintética y ecosistema son **Partes** con el mismo marco axiomático (`society-`, `coop-`, `org-`, `eco-`). Registro `maxo_parties` con API `/parties`, selector de partes colectivas en el builder, consentimiento agregado por **quórum delegado N de M**, guardián oráculo para el **Reino Natural** (`eco-`) y contratos interescala **anidados** (madre/hijos) con protección de ciclos.
-- **Gobernanza colectiva avanzada (hackathon)**: **votación ponderada** (pesos por delegado y umbral de peso), **delegación temporal** (ceder la firma a un apoderado, cadena auditable), **γ agregado real** (el bienestar de la parte colectiva es la media ponderada del γ de sus miembros en el contrato) y **jerarquía interescala** (árbol madre→hijos navegable en el detalle + endpoint `/tree`).
+- **Gobernanza colectiva avanzada (hackathon)**: **votación ponderada** (pesos por delegado y umbral de peso), **delegación temporal** (ceder la firma a un apoderado, cadena auditable), **γ agregado real** (el bienestar de la parte colectiva es la media ponderada del γ de sus miembros en el contrato), **jerarquía interescala** (árbol madre→hijos navegable en el detalle + endpoint `/tree`), **delegación líquida por término**, **expiración de delegaciones**, **ciclo de vida del quórum** (deadline, prórroga y re-consulta automática) y **vista de cohorte** consolidada de todas las partes colectivas.
 - **Oráculo en vivo (Bloque A)**: DeepSeek negocia contratos por chat (`/contracts/negotiate`), audita existentes (`critique`) y firma como guardián de ecosistemas. Activado con `DEEPSEEK_API_KEY` en `.env`; sin key, degradación elegante al oráculo heurístico.
 - **Calculadora VHV**: Frontend completo con Chart.js integrado en el portal.
 - **Sistema TVI**: Detección de overlap temporal, cálculo de CCP.
-- **488 tests** (488/488 pasando) ✅ (Backend Core + Blocks + Escalas + Quórum + Pesos + Delegación + Guardián + Anidamiento + Métricas + Ruteo SPA)
+- **501 tests** (501/501 pasando) ✅ (Backend Core + Blocks + Escalas + Quórum + Pesos + Delegación + Ciclo de vida + Cohorte + Métricas + Ruteo SPA)
 ---
 
 ## 🚀 CÓMO EMPEZAR

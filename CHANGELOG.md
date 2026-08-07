@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-06 — Segunda ola de la hackathon: delegación líquida, expiración, ciclo de vida del quórum, webhooks por parte y cohorte
+
+### Añadido
+- **Delegación líquida por término** (Ext. 1): `delegations_by_term` permite delegar a personas distintas según la cláusula (`{"term-a": {"user-1": "user-3"}}` sobreescribe la delegación base solo para ese término). `consent_status` ahora recibe `term_id` y la respuesta incluye `delegations_applied`.
+- **Expiración de delegaciones** (Ext. 2): formato extendido `{"user-1": {"proxy": "user-2", "valid_until": "2026-09-01T00:00:00"}}` — la delegación vencida deja de aplicar y el voto vuelve al delegante; la respuesta expone `expired_delegations`.
+- **Ciclo de vida del quórum** (Ext. 3): `quorum_deadline` en `members_json` — ventana de sellado; al vencer, `/accept` responde 409 `QUORUM_EXPIRED`. Prórroga vía `POST /parties/<id>/quorum-extension`. **Re-consulta automática**: si la configuración de miembros/pesos cambia y el quórum deja de cumplirse, el sello se revoca al recargar (T13: la verdad vigente).
+- **Webhooks por parte** (Ext. 4): columna `party_filter` en `maxo_webhooks` (migración automática) + `dispatch_event(..., party_ids=[...])`; el evento `contract.quorum_sealed` ahora viaja dirigido a la parte. Helper puro `webhook_matches_party` testeable.
+- **Vista de cohorte consolidada** (Ext. 5): `GET /contracts/cohort` — acuerdos agregados de todas las partes colectivas (contratos por estado, cláusulas selladas, γ). **UI**: tarjeta "Cohorte de Partes Colectivas" en la lista de contratos con totales y accesos directos.
+- **UI detalle**: el panel de firma colectiva muestra la ventana de quórum (deadline) y alerta si venció.
+- **Tests**: `tests/test_maxocontracts/test_parties_governance.py` — 13 pruebas (delegación por término sin fugas, expiración pasada/futura, ventana vencida + prórroga, re-consulta que des-sella, filtro de webhooks y cohorte).
+
+### Notas Técnicas
+- **Firma**: DeepSeek (oráculo sintético).
+- **Verificación**: suite completa 501/501 (13 nuevas); tsc/eslint limpios; build exportado (51 RSC).
+- **Referencias canónicas**: Cap. 10 (Tres Reinos), Cap. 17 (MaxoContracts), `docs/architecture/ROADMAP_oraculo_vivo_y_escalas.md` (§4 — segunda ola marcada como implementada).
+
 ## 2026-08-06 — Hackathon de extensiones: votación ponderada, delegación temporal, γ agregado y jerarquía interescala
 
 ### Añadido

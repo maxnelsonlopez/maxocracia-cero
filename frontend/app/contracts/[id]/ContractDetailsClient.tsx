@@ -102,6 +102,8 @@ interface ConsentProgress {
   current_weight?: number;
   needed_weight?: number | null;
   total_weight?: number;
+  deadline?: string | null;
+  deadline_expired?: boolean;
 }
 
 interface ContractTreeNode {
@@ -318,6 +320,8 @@ export default function ContractDetailsPage() {
               current_weight: data.consent.current_weight ?? undefined,
               needed_weight: data.consent.needed_weight ?? null,
               total_weight: data.consent.total_weight ?? undefined,
+              deadline: data.consent.deadline ?? null,
+              deadline_expired: data.consent.deadline_expired ?? false,
             },
           }));
         }
@@ -1164,6 +1168,24 @@ export default function ContractDetailsPage() {
                                 </div>
                               );
                             })}
+                            {contract.terms.some((t) => {
+                              const p = consentProgress[`${activePidValue}|${t.term_id}`];
+                              return p && p.deadline;
+                            }) && (
+                              <div className={`pt-1.5 border-t border-slate-900 text-[9px] ${
+                                contract.terms.some((t) => {
+                                  const p = consentProgress[`${activePidValue}|${t.term_id}`];
+                                  return p && p.deadline_expired;
+                                }) ? 'text-rose-400 font-bold' : 'text-slate-500'
+                              }`}>
+                                {contract.terms.some((t) => {
+                                  const p = consentProgress[`${activePidValue}|${t.term_id}`];
+                                  return p && p.deadline_expired;
+                                })
+                                  ? '⚠️ Ventana de quórum vencida: solicita prórroga para sellar.'
+                                  : `Ventana de quórum hasta: ${contract.terms[0] ? consentProgress[`${activePidValue}|${contract.terms[0].term_id}`]?.deadline : ''}`}
+                              </div>
+                            )}
                           </div>
                           <button
                             onClick={handleCollectiveSign}

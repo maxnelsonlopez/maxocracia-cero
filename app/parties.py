@@ -16,6 +16,7 @@ en `maxo_parties.members_json` (Fase 2: consentimiento agregado).
 
 import json
 import re
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
@@ -167,41 +168,95 @@ def _member_weights(members: dict, delegates: List[str]) -> Dict[str, float]:
     }
 
 
-def _effective_votes(approved: set, members: dict, delegates: List[str]) -> set:
+def _parse_delegation(raw) -> dict:
     """
-    Expande la aprobación con delegaciones temporales (Ext. 2).
+    Normaliza una delegación: "user-2" o {"proxy": "user-2", "valid_until": ISO}.
+    Devuelve {proxy, valid_until} o None si es inválida.
+    """
+    if isinstance(raw, str):
+        return {"proxy": raw, "valid_until": None}
+    if isinstance(raw, dict) and isinstance(raw.get("proxy"), str):
+        return {"proxy": raw["proxy"], "valid_until": raw.get("valid_until")}
+    return None
+
+
+def _delegation_map_for(members: dict, term_id: Optional[str] = None) -> Dict[str, dict]:
+    """
+    Resuelve el mapa de delegaciones aplicable al término (Ext. 1 líquida):
+    - delegations: base para todos los términos.
+    - delegations_by_term[term_id]: sobreescribe la base para ese término.
+    """
+    result: Dict[str, dict] = {}
+    base = members.get("delegations") or {}
+    if isinstance(base, dict):
+        for source, raw in base.items():
+            parsed = _parse_delegation(raw)
+            if parsed is not None and isinstance(source, str):
+                result[source] = parsed
+    if term_id is not None:
+        by_term = members.get("delegations_by_term") or {}
+        if isinstance(by_term, dict) and isinstance(by_term.get(term_id), dict):
+            for source, raw in by_term[term_id].items():
+                parsed = _parse_delegation(raw)
+                if parsed is not None and isinstance(source, str):
+                    result[source] = parsed
+    return result
+
+
+def _delegation_active(delegation: dict) -> bool:
+    """Una delegación con valid_until vencida deja de aplicar (Ext. 2)."""
+    valid_until = delegation.get("valid_until")
+    if not valid_until:
+        return True
+    try:
+        deadline = datetime.fromisoformat(str(valid_until))
+        if deadline.tzinfo is None:
+            deadline = deadline.replace(tzinfo=timezone.utc)
+        return datetime.now(timezone.utc) < deadline
+    except (ValueError, TypeError):
+        return False
+
+
+def _effective_votes(approved: set, members: dict, delegates: List[str],
+                     term_id: Optional[str] = None) -> tuple:
+    """
+    Expande la aprobación con delegaciones (Ext. 2 y líquida Ext. 1).
 
     delegations = {"user-1": "user-2"} significa que user-1 cede su firma a
     user-2: si el apoderado firma, el voto del delegante cuenta también.
+    Formato extendido: {"user-1": {"proxy": "user-2", "valid_until": ISO}}.
     La cadena es transitiva con guarda de profundidad (máx. 5) para no
-    entrar en ciclos (delegación A→B→A queda cortada).
+    entrar en ciclos. Devuelve (votos_efectivos, delegaciones_aplicadas,
+    delegaciones_expiradas).
     """
-    raw = members.get("delegations") or {}
-    if not isinstance(raw, dict):
-        return set(approved)
-    delegations = {
-        k: v for k, v in raw.items()
-        if isinstance(k, str) and isinstance(v, str)
-    }
+    delegations = _delegation_map_for(members, term_id)
     effective = set(approved)
     delegates_set = set(delegates)
+    applied: Dict[str, str] = {}
+    expired: List[str] = []
+
+    for source, delegation in delegations.items():
+        if not _delegation_active(delegation):
+            expired.append(source)
+            continue
+        proxy = delegation["proxy"]
+        if source in delegates_set and proxy in delegates_set:
+            applied[source] = proxy
+
     changed = True
     depth = 0
     while changed and depth < 5:
         changed = False
-        for source, proxy in delegations.items():
-            if (
-                source in delegates_set
-                and proxy in effective
-                and source not in effective
-            ):
+        for source, proxy in applied.items():
+            if proxy in effective and source not in effective:
                 effective.add(source)
                 changed = True
         depth += 1
-    return effective
+    return effective, applied, sorted(expired)
 
 
-def consent_status(party_id: str, approved_delegates: List[str]) -> dict:
+def consent_status(party_id: str, approved_delegates: List[str],
+                   term_id: Optional[str] = None) -> dict:
     """
     Estado del consentimiento agregado de una parte colectiva.
 
@@ -210,7 +265,11 @@ def consent_status(party_id: str, approved_delegates: List[str]) -> dict:
       {"delegates": [...], "quorum_required": 2}                 -> N absoluto de delegados
       {"delegates": [...], "weights": {"user-1": 2}, "quorum": 0.6} -> fracción del peso total
       {"delegates": [...], "weights": {...}, "weight_threshold": 3} -> umbral absoluto de peso
-      {"delegations": {"user-1": "user-2"}}                      -> delegación temporal (Ext. 2)
+      {"delegations": {"user-1": "user-2"}}                      -> delegación temporal
+      {"delegations_by_term": {"term-1": {"user-1": "user-3"}}}  -> delegación líquida por término
+      {"delegations": {"user-1": {"proxy": "user-2", "valid_until": "2026-09-01T00:00:00"}}}
+                                                                 -> delegación con expiración
+      {"quorum_deadline": "2026-09-01T00:00:00"}                 -> ventana de sellado
     """
     members = members_of(party_id)
     delegates = [d for d in (members.get("delegates") or []) if isinstance(d, str)]
@@ -227,11 +286,26 @@ def consent_status(party_id: str, approved_delegates: List[str]) -> dict:
             "needed_weight": None,
             "current_weight": 0,
             "total_weight": 0,
+            "deadline": members.get("quorum_deadline"),
         }
+
+    # Ciclo de vida del quórum (Ext. 3): ventana de sellado vencida
+    deadline_raw = members.get("quorum_deadline")
+    deadline_expired = False
+    if deadline_raw:
+        try:
+            deadline = datetime.fromisoformat(str(deadline_raw))
+            if deadline.tzinfo is None:
+                deadline = deadline.replace(tzinfo=timezone.utc)
+            deadline_expired = datetime.now(timezone.utc) >= deadline
+        except (ValueError, TypeError):
+            pass
 
     weights = _member_weights(members, delegates)
     approved = set(approved_delegates) & set(delegates)
-    effective = _effective_votes(approved, members, delegates)
+    effective, applied, expired = _effective_votes(
+        approved, members, delegates, term_id=term_id
+    )
     total_weight = sum(weights.values())
     current_weight = sum(weights[d] for d in effective)
 
@@ -265,13 +339,20 @@ def consent_status(party_id: str, approved_delegates: List[str]) -> dict:
             mode = "quorum"
             needed_weight = None
 
+    if deadline_expired and not quorum_ok:
+        mode = "expired"
+
     return {
-        "approved": quorum_ok,
+        "approved": quorum_ok and not deadline_expired,
         "party_id": party_id,
         "mode": mode,
         "delegates": sorted(delegates),
         "approved_delegates": sorted(approved),
         "effective_delegates": sorted(effective),
+        "delegations_applied": applied,
+        "expired_delegations": expired,
+        "deadline": deadline_raw,
+        "deadline_expired": deadline_expired,
         "needed": needed,
         "current": len(effective),
         "needed_weight": needed_weight,

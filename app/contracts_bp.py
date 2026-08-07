@@ -233,6 +233,13 @@ def init_contracts_metrics_tables(app):
                 cur.execute(
                     "ALTER TABLE maxo_contracts ADD COLUMN parent_contract_id TEXT"
                 )
+        # Migración: webhooks filtrados por parte (Ext. 4).
+        if "maxo_webhooks" in tables:
+            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_webhooks)").fetchall()]
+            if "party_filter" not in cols:
+                cur.execute(
+                    "ALTER TABLE maxo_webhooks ADD COLUMN party_filter TEXT"
+                )
         conn.commit()
     finally:
         conn.close()
@@ -439,8 +446,10 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
         for a_row in a_rows:
             term.accepted_by[a_row["participant_id"]] = True
 
-        # Rehidratar consentimiento agregado (Fase 2): si el quórum de una
-        # parte colectiva ya se cumplió, su aceptación sigue vigente.
+        # Rehidratar consentimiento agregado (Fase 2 + Ext. 3): si el quórum
+        # de una parte colectiva se cumplió, su aceptación sigue vigente;
+        # si la configuración cambió (miembros/pesos/deadline), el sello se
+        # revisa y se revoca automáticamente (re-consulta).
         d_rows = db.execute(
             """
             SELECT party_id, delegate_id FROM maxo_contract_delegate_approvals
@@ -452,8 +461,8 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
         for d_row in d_rows:
             delegated.setdefault(d_row["party_id"], []).append(d_row["delegate_id"])
         for party_pid, delegates in delegated.items():
-            if consent_status(party_pid, delegates).get("approved"):
-                term.accepted_by[party_pid] = True
+            status = consent_status(party_pid, delegates, term_id=term.id)
+            term.accepted_by[party_pid] = bool(status.get("approved"))
             
         contract._terms.append(term)
         # Note: add_term normally adds VHV, but we are rehydrating, so we just append
@@ -1571,23 +1580,32 @@ def accept_term(current_user, contract_id: str):
             """,
             (contract_id, term_id, pid),
         ).fetchall()
-        consent = consent_status(pid, [r["delegate_id"] for r in approved_rows])
+        consent = consent_status(pid, [r["delegate_id"] for r in approved_rows], term_id=term_id)
+
+        # Ciclo de vida del quórum (Ext. 3): ventana de sellado vencida
+        if consent.get("deadline_expired"):
+            return jsonify({
+                "error": "la ventana de quórum de esta parte venció; solicita una prórroga",
+                "code": "QUORUM_EXPIRED",
+                "consent": consent,
+            }), 409
 
         if consent.get("approved"):
             success = contract.accept_term(term_id, pid)
             _save_contract(contract)
-            # Evento de consentimiento agregado sellado (bonus de sesión):
-            # las partes colectivas pueden vigilarse vía webhooks.
+            # Evento de consentimiento agregado sellado: las partes
+            # colectivas pueden vigilarse vía webhooks (filtrados por parte).
             dispatch_event("contract.quorum_sealed", {
                 "contract_id": contract_id,
                 "term_id": term_id,
                 "party_id": pid,
                 "delegates": consent.get("approved_delegates", []),
                 "effective_delegates": consent.get("effective_delegates", []),
+                "delegations_applied": consent.get("delegations_applied", {}),
                 "current_weight": consent.get("current_weight"),
                 "needed_weight": consent.get("needed_weight"),
                 "sealed_at": datetime.now().isoformat(),
-            })
+            }, party_ids=[pid])
         else:
             success = False
 
@@ -1891,6 +1909,64 @@ def validate_graph(current_user):
             "v": float(temp_contract.total_vhv.V),
             "r": float(temp_contract.total_vhv.R)
         }
+    })
+
+
+@contracts_bp.route("/cohort", methods=["GET"])
+@token_required
+def cohort_overview(current_user):
+    """
+    Vista de cohorte consolidada (Ext. 5): acuerdos de todas las partes
+    colectivas del registro — contratos por estado, términos sellados y γ.
+
+    Útil para el panel de la Cohorte Cero y para monitorear la vida
+    económica agregada de las cooperativas/instituciones.
+    """
+    db = get_db()
+    parties = [
+        dict(r) for r in db.execute(
+            "SELECT * FROM maxo_parties WHERE party_type NOT IN ('human', 'synthetic') ORDER BY display_name"
+        ).fetchall()
+    ]
+    rows = []
+    for party in parties:
+        contracts = [dict(r) for r in db.execute(
+            """
+            SELECT c.contract_id, c.state FROM maxo_contracts c
+            JOIN maxo_contract_participants cp ON cp.contract_id = c.contract_id
+            WHERE cp.participant_id = ? ORDER BY c.created_at DESC
+            """,
+            (party["party_id"],),
+        ).fetchall()]
+        if not contracts:
+            continue
+        terms_sealed = db.execute(
+            """
+            SELECT COUNT(*) FROM maxo_contract_term_approvals
+            WHERE participant_id = ?
+            """,
+            (party["party_id"],),
+        ).fetchone()[0]
+        rows.append({
+            "party_id": party["party_id"],
+            "party_type": party["party_type"],
+            "display_name": party["display_name"],
+            "wellness": float(party["wellness_value"] or 1.0),
+            "contracts_total": len(contracts),
+            "contracts_active": sum(1 for c in contracts if c["state"] == "active"),
+            "contracts_pending": sum(1 for c in contracts if c["state"] in ("draft", "pending")),
+            "terms_sealed": terms_sealed,
+        })
+
+    return jsonify({
+        "parties": rows,
+        "totals": {
+            "parties": len(rows),
+            "total_contracts": sum(r["contracts_total"] for r in rows),
+            "active": sum(r["contracts_active"] for r in rows),
+            "pending": sum(r["contracts_pending"] for r in rows),
+            "terms_sealed": sum(r["terms_sealed"] for r in rows),
+        },
     })
 
 

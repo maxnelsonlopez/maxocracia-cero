@@ -194,3 +194,43 @@ def delete_party(current_user, party_id: str):
     db.execute("DELETE FROM maxo_parties WHERE party_id = ?", (party_id,))
     db.commit()
     return jsonify({"success": True, "party_id": party_id})
+
+
+@parties_bp.route("/<party_id>/quorum-extension", methods=["POST"])
+@token_required
+def extend_quorum_deadline(current_user, party_id: str):
+    """
+    Prórroga de la ventana de quórum (Ext. 3, ciclo de vida).
+
+    Body JSON:
+    {
+        "deadline": "2026-09-01T23:59:59"   # nueva fecha límite (ISO)
+    }
+
+    Cuando la ventana vence, la parte no puede sellar (409 QUORUM_EXPIRED
+    en /accept); este endpoint reabre la votación.
+    """
+    row = get_party(party_id)
+    if row is None:
+        return jsonify({"error": "party not found"}), 404
+
+    data = request.get_json() or {}
+    deadline = (data.get("deadline") or "").strip()
+    if not deadline:
+        return jsonify({"error": "deadline is required (ISO 8601)"}), 400
+
+    members = _parse_members(row.get("members_json"))
+    members["quorum_deadline"] = deadline
+    updated = upsert_party(
+        party_id=party_id,
+        party_type=row["party_type"],
+        display_name=row["display_name"],
+        parent_party_id=row.get("parent_party_id"),
+        members=members,
+        wellness=Decimal(str(row.get("wellness_value", 1.0) or 1.0)),
+    )
+    return jsonify({
+        "success": True,
+        "party": _party_payload(updated),
+        "quorum_deadline": deadline,
+    })

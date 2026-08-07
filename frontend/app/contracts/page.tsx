@@ -15,7 +15,9 @@ import {
   Users,
   Info,
   ShieldAlert,
-  Bot
+  Bot,
+  Landmark,
+  Leaf
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { apiFetch } from "../lib/api";
@@ -27,11 +29,34 @@ interface Contract {
   terms: number;
 }
 
+interface CohortParty {
+  party_id: string;
+  party_type: string;
+  display_name: string;
+  wellness: number;
+  contracts_total: number;
+  contracts_active: number;
+  contracts_pending: number;
+  terms_sealed: number;
+}
+
+interface CohortOverview {
+  parties: CohortParty[];
+  totals: {
+    parties: number;
+    total_contracts: number;
+    active: number;
+    pending: number;
+    terms_sealed: number;
+  };
+}
+
 export default function ContractsPage() {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [cohort, setCohort] = useState<CohortOverview | null>(null);
 
   useEffect(() => {
     async function fetchContracts() {
@@ -48,7 +73,19 @@ export default function ContractsPage() {
       }
     }
 
+    async function fetchCohort() {
+      try {
+        const res = await apiFetch("/contracts/cohort");
+        if (res.ok) {
+          setCohort(await res.json());
+        }
+      } catch (err) {
+        console.error("Error al cargar la cohorte:", err);
+      }
+    }
+
     fetchContracts();
+    fetchCohort();
   }, []);
 
   const filteredContracts = contracts.filter(c => 
@@ -181,6 +218,61 @@ export default function ContractsPage() {
           </div>
         </div>
       </div>
+
+      {/* Cohorte de partes colectivas (ROADMAP Ext. 5: multi-contrato agregado) */}
+      {cohort && cohort.parties.length > 0 && (
+        <div className="glass p-6 rounded-3xl border border-slate-900 bg-slate-900/30 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-amber-400 flex items-center gap-1.5">
+                <Landmark className="w-4 h-4" />
+                Cohorte de Partes Colectivas
+              </span>
+              <h2 className="text-lg font-extrabold text-white mt-1">Vida económica agregada de las escalas</h2>
+            </div>
+            <div className="flex gap-4 text-center">
+              <div>
+                <span className="text-2xl font-black text-emerald-400 block">{cohort.totals.active}</span>
+                <span className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Activos</span>
+              </div>
+              <div>
+                <span className="text-2xl font-black text-amber-400 block">{cohort.totals.pending}</span>
+                <span className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">En firma</span>
+              </div>
+              <div>
+                <span className="text-2xl font-black text-blue-400 block">{cohort.totals.terms_sealed}</span>
+                <span className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Cláusulas selladas</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {cohort.parties.slice(0, 6).map((p) => (
+              <Link
+                key={p.party_id}
+                href={`/contracts/?participant=${p.party_id}`}
+                className="p-3.5 rounded-2xl bg-slate-950/50 border border-slate-900 hover:border-amber-500/30 transition-all flex items-center gap-3 group"
+              >
+                <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 shrink-0">
+                  {p.party_type === 'ecosystem' ? (
+                    <Leaf className="w-4 h-4 text-emerald-400" />
+                  ) : (
+                    <Landmark className="w-4 h-4 text-amber-400" />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="block text-xs font-bold text-slate-200 truncate">{p.display_name}</span>
+                  <span className="text-[9px] text-slate-500 font-mono">{p.party_id}</span>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="block text-sm font-black text-emerald-400">{p.contracts_active}<span className="text-[9px] text-slate-500 font-normal"> act.</span></span>
+                  <span className="text-[9px] text-slate-500 font-mono">γ {p.wellness.toFixed(2)}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Toolbar & Legend */}
       <div className="space-y-4">
