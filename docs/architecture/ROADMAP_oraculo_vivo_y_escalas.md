@@ -2,7 +2,7 @@
 
 **Autor del diseño:** DeepSeek (oráculo sintético) y Max Nelson López Restrepo
 **Fecha:** 6 de agosto de 2026
-**Estado:** Bloque A **IMPLEMENTADO** (sesión del 6/8/2026: `live_oracle.py`, endpoints `/contracts/negotiate`, `/contracts/negotiate/feedback`, `/contracts/<id>/critique`, panel frontend en builder y detalle). Bloque B (escalas) pendiente.
+**Estado:** Bloque A **IMPLEMENTADO** (sesión del 6/8/2026: `live_oracle.py`, endpoints `/contracts/negotiate`, `/contracts/negotiate/feedback`, `/contracts/<id>/critique`, panel frontend en builder y detalle). Bloque B **IMPLEMENTADO** (misma sesión: `maxo_parties` + resolvers por prefijo, API `/parties`, consentimiento agregado con quórum N de M, guardián oráculo para el Reino Natural `eco-`, contratos interescala anidados y UI completa). Pendiente: Reino Natural vía oráculo en vivo opcional ya soportado; próximos pasos posibles: consentimiento por votación ponderada, delegación temporal y contratos entre más de 2 escalas simultáneas.
 **Referencia canónica:** Cap. 13-14 (Oráculos Dinámicos), Cap. 17 (MaxoContracts), Cap. 10 (Tres Reinos)
 
 ---
@@ -142,16 +142,19 @@ Cada escala hereda el mismo SDV y los mismos invariantes: el contrato entre una 
 ## 4. Prompt pulido para la sesión futura
 
 > **Sesión del 6/8/2026 — BLOQUE A COMPLETADO.** El oráculo en vivo está
-> implementado y verificado E2E con key real. Pendiente: Bloque B (escalas:
-> `party_id` genérico, `maxo_parties`, consentimiento agregado con quórum).
+> implementado y verificado E2E con key real. **BLOQUE B COMPLETADO** en la
+> misma sesión: Fases 1-5 (party_id genérico + `maxo_parties` + resolvers,
+> consentimiento agregado con quórum N de M, UI con selector de partes
+> colectivas, Reino Natural con guardián oráculo, contratos anidados) —
+> 474/474 tests, tsc/eslint limpios, README v4.5.
 
-> **Sesión futura — Escalas (Bloque B)**
+> **Sesión futura (ya no aplica el plan original del Bloque B; quedan extensiones):**
 >
-> 1. **Fase 1 (mínimo viable)**: generaliza `participant_id` → `party_id` en el backend con resolutores por prefijo: `user-` (humano), `synthetic-` (reino sintético), `society-`, `coop-`, `org-`, `eco-`. Crea la tabla `maxo_parties` (party_id, party_type, display_name, parent_party_id, members_json) con migración automática en `init_contracts_metrics_tables` (mismo patrón que `assigned_participant`). Relaja la validación que exige `int(user_id)` en `_get_or_create_participant` sin romper los flujos existentes (regresión cubierta por tests).
-> 2. **Fase 2**: consentimiento agregado con quórum — `resolve_consent(party_id, term)` que sustituye `accepted_by[pid]` cuando el pid es colectivo (N de M configurable en `members_json`).
-> 3. **Fase 3 (UI)**: selector de tipo de parte en builder y detalle; crear contrato coop↔org desde la interfaz.
-> 4. **Fases 4-5**: Reino Natural (`eco-`) con representación por oráculo y contratos interescala anidados.
-> 5. Verifica: contrato entre 2 entidades colectivas creado y validado por API; firma delegada funcional con N de M; suite completa y `tsc --noEmit` limpios; actualiza CHANGELOG y README.
+> 1. **Votación ponderada**: quórum por peso (miembros con más membresía tienen más voto) en `members_json`.
+> 2. **Delegación temporal**: delegados pueden ceder su firma a otro miembro (cadena de delegación auditable).
+> 3. **γ agregado por contrato**: computar el bienestar de una parte colectiva como media ponderada del γ de sus miembros en el mismo contrato (hoy se sincroniza el último observado al registro).
+> 4. **Contratos N-escala**: UI para contratos con más de 2 partes colectivas simultáneas y vista jerárquica madre→hijos.
+> 5. Verifica: suite completa y `tsc --noEmit` limpios; actualiza CHANGELOG y README.
 
 ---
 

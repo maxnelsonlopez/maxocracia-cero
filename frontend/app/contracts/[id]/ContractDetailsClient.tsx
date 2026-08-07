@@ -3,13 +3,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiFetch } from '../../lib/api';
-import { useAuth } from '../../context/AuthContext';
 import LegalContractView from './LegalContractView';
 import OracleNegotiationPanel from '../../components/OracleNegotiationPanel';
 import { 
   FileText, ArrowLeft, ShieldAlert, Award, Info, CheckCircle2, 
   UserCheck, AlertTriangle, Play, RefreshCw, Send, Zap,
-  Clock, Bot
+  Clock, Bot, Landmark, Leaf
 } from 'lucide-react';
 
 interface Term {
@@ -26,10 +25,19 @@ interface SDV_SViolation {
   deficit: string;
 }
 
+interface CollectiveMembers {
+  delegates?: string[];
+  quorum?: number;
+  quorum_required?: number;
+}
+
 interface ParticipantDetail {
   id: string;
   name: string;
   wellness: number;
+  party_type?: string;
+  is_collective?: boolean;
+  members?: CollectiveMembers;
   is_synthetic?: boolean;
   sdv_s?: Record<string, number>;
   sdv_s_violations?: SDV_SViolation[];
@@ -42,6 +50,8 @@ interface ContractDetails {
   contract_id: string;
   state: string;
   civil_description: string;
+  parent_contract_id?: string | null;
+  subcontracts?: string[];
   participants: string[];
   participants_details?: ParticipantDetail[];
   terms: Term[];
@@ -49,6 +59,28 @@ interface ContractDetails {
   total_vhv: { t: number; v: number; r: number };
   events_count: number;
   hash: string;
+}
+
+// Escalas de partes (ROADMAP Bloque B): prefijo -> etiqueta legible
+const PARTY_TYPE_LABELS: Record<string, string> = {
+  human: 'Persona',
+  synthetic: 'Sintética',
+  society: 'Micro-sociedad',
+  cooperative: 'Cooperativa',
+  institution: 'Institución',
+  ecosystem: 'Ecosistema',
+};
+
+const COLLECTIVE_PREFIXES = ['society-', 'coop-', 'org-', 'eco-'];
+
+const isCollectivePid = (pid: string) => COLLECTIVE_PREFIXES.some((p) => pid.startsWith(p));
+const isEcosystemPid = (pid: string) => pid.startsWith('eco-');
+const isSyntheticPid = (pid: string) => pid.startsWith('synthetic-');
+
+interface ConsentProgress {
+  current: number;
+  needed: number | null;
+  approved: boolean;
 }
 
 // Ontometría sintética (SDV-S): Cap. 10 §10.8 y docs/theory/SDV-S
@@ -63,7 +95,6 @@ const SDV_S_DIMENSION_LABELS: Record<string, { label: string; formula: string }>
 export default function ContractDetailsPage() {
   const params = useParams();
   const router = useRouter();
-  const { user: currentUser } = useAuth();
 
   // La ruta [id] se exporta como página SSG 'placeholder' (plantilla para
   // cualquier contrato). El id real siempre vive en el pathname, no en los
@@ -100,6 +131,11 @@ export default function ContractDetailsPage() {
     oracle_reasoning: string;
     error?: string;
   } | null>(null);
+
+  // Firma delegada de partes colectivas (ROADMAP Bloque B, Fase 2)
+  const [delegatePid, setDelegatePid] = useState<string>('');
+  const [consentProgress, setConsentProgress] = useState<Record<string, ConsentProgress>>({});
+  const [guardianInfo, setGuardianInfo] = useState<{ mode: string; reasoning: string } | null>(null);
 
   // Cargar detalles del contrato
   const loadContractData = useCallback(async () => {
@@ -204,13 +240,56 @@ export default function ContractDetailsPage() {
 
   const { weight, complexity } = getWeightAndComplexity();
 
-  // Acción: Aceptar un término vía API (humanos y personas sintéticas)
+  // Acción: Aceptar un término vía API (humanos, sintéticas y escalas colectivas)
   const handleAcceptTerm = async (termId: string) => {
     const pid = getActivePid();
-    if (!pid) return;
+    if (!pid) return false;
+
+    // Partes colectivas: firma delegada (quórum) o guardián (Reino Natural)
+    if (isCollectivePid(pid)) {
+      const isEco = isEcosystemPid(pid);
+      if (!isEco && !delegatePid) {
+        alert('Selecciona un delegado de la parte colectiva para firmar.');
+        return false;
+      }
+      try {
+        const res = await apiFetch(`/contracts/${contractId}/accept`, {
+          method: 'POST',
+          body: JSON.stringify(
+            isEco
+              ? { term_id: termId, party_id: pid }
+              : { term_id: termId, party_id: pid, delegate_id: delegatePid }
+          )
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          alert(`Error al aceptar término: ${err.error}${err.guardian_reasoning ? `\nGuardián: ${err.guardian_reasoning}` : ''}`);
+          return false;
+        }
+        const data = await res.json();
+        if (data.consent) {
+          setConsentProgress((prev) => ({
+            ...prev,
+            [`${pid}|${termId}`]: {
+              current: data.consent.current ?? 0,
+              needed: data.consent.needed ?? null,
+              approved: !!data.consent.approved,
+            },
+          }));
+        }
+        if (data.guardian) {
+          setGuardianInfo({ mode: data.guardian.mode, reasoning: data.guardian.reasoning });
+        }
+        return data.success === true;
+      } catch (err) {
+        console.error(err);
+        alert('Error de conexión al aceptar el término.');
+        return false;
+      }
+    }
 
     try {
-      const isSynthetic = pid.startsWith('synthetic-');
+      const isSynthetic = isSyntheticPid(pid);
       const res = await apiFetch(`/contracts/${contractId}/accept`, {
         method: 'POST',
         body: JSON.stringify(
@@ -287,6 +366,30 @@ export default function ContractDetailsPage() {
     if (successCount > 0) {
       alert('✅ Contrato firmado exitosamente (Modalidad Simple).');
       loadContractData();
+    }
+  };
+
+  // Firma delegada de una parte colectiva (quórum N de M, ROADMAP Bloque B)
+  const handleCollectiveSign = async () => {
+    if (!contract) return;
+    if (!isEcosystemPid(getActivePid()) && !delegatePid) {
+      alert('Selecciona un delegado de la parte colectiva.');
+      return;
+    }
+    let signedCount = 0;
+    let pendingCount = 0;
+    const pid = getActivePid();
+    for (const t of contract.terms) {
+      if (t.accepted_by[pid] === true) continue;
+      const ok = await handleAcceptTerm(t.term_id);
+      if (ok) signedCount++;
+      else pendingCount++;
+    }
+    if (signedCount > 0) {
+      alert(`✅ Firma delegada registrada: ${signedCount} cláusula(s). El quórum sella la parte cuando se cumpla N de M.`);
+      loadContractData();
+    } else if (pendingCount > 0) {
+      alert('No se registraron firmas nuevas en este intento.');
     }
   };
 
@@ -467,6 +570,33 @@ export default function ContractDetailsPage() {
               {contract.contract_id}
             </h1>
             <p className="text-xs text-slate-400 font-mono">HASH DE INTEGRIDAD: {contract.hash}</p>
+            {contract.parent_contract_id && (
+              <p className="text-[10px] text-slate-500">
+                Contrato madre:{' '}
+                <button
+                  onClick={() => router.push(`/contracts/${contract.parent_contract_id}`)}
+                  className="text-emerald-400 hover:underline font-bold"
+                >
+                  {contract.parent_contract_id}
+                </button>
+              </p>
+            )}
+            {contract.subcontracts && contract.subcontracts.length > 0 && (
+              <p className="text-[10px] text-slate-500">
+                Sub-contratos:{' '}
+                {contract.subcontracts.map((sc, i) => (
+                  <span key={sc}>
+                    {i > 0 && ', '}
+                    <button
+                      onClick={() => router.push(`/contracts/${sc}`)}
+                      className="text-emerald-400 hover:underline font-bold"
+                    >
+                      {sc}
+                    </button>
+                  </span>
+                ))}
+              </p>
+            )}
           </div>
         </div>
 
@@ -508,7 +638,9 @@ export default function ContractDetailsPage() {
           <div className="flex flex-wrap gap-2 bg-slate-950 p-1 rounded-xl border border-slate-850">
             {contract.participants.map((pid) => {
               const isActive = getActivePid() === pid;
-              const isSynth = pid.startsWith('synthetic-');
+              const isSynth = isSyntheticPid(pid);
+              const isEco = isEcosystemPid(pid);
+              const isCollective = isCollectivePid(pid);
               return (
                 <button
                   key={pid}
@@ -520,7 +652,9 @@ export default function ContractDetailsPage() {
                   }`}
                 >
                   {isSynth && <Bot className="w-3 h-3" />}
-                  {isSynth ? participantName(pid).split(' ')[0] : (participantName(pid).split(' ')[0] || pid)}
+                  {isEco && <Leaf className="w-3 h-3" />}
+                  {isCollective && !isEco && <Landmark className="w-3 h-3" />}
+                  {participantName(pid).split(' ')[0] || pid}
                   <span className={`text-[9px] ${isActive ? 'text-slate-800' : 'text-slate-600'}`}>
                     {hasParticipantSignedAll(pid) ? '✓' : ''}
                   </span>
@@ -610,11 +744,18 @@ export default function ContractDetailsPage() {
                         {contract.participants.map((pid) => {
                           const signed = term.accepted_by[pid] === true;
                           const shortName = participantName(pid).split(' ')[0] || pid;
+                          const progress = consentProgress[`${pid}|${term.term_id}`];
                           return (
                             <div key={pid} className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-md bg-slate-900 border border-slate-800">
                               <span className="text-slate-500 max-w-[70px] truncate">{shortName}</span>
                               {signed ? (
                                 <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                              ) : isCollectivePid(pid) && progress ? (
+                                <span className={`text-[8px] font-mono font-bold ${
+                                  progress.approved ? 'text-emerald-400' : 'text-amber-400'
+                                }`}>
+                                  {progress.current}/{progress.needed ?? '?'}
+                                </span>
                               ) : (
                                 <Clock className="w-3 h-3 text-amber-500" />
                               )}
@@ -674,12 +815,19 @@ export default function ContractDetailsPage() {
               {/* Vigilancia de bienestar por co-firmante */}
               {contract.participants.map((pid) => {
                 const wellness = getWellnessValue(pid);
+                const detail = contract.participants_details?.find((d) => d.id === pid);
+                const typeLabel = detail?.party_type ? PARTY_TYPE_LABELS[detail.party_type] : undefined;
                 return (
                   <div key={pid} className="space-y-2">
                     <div className="flex justify-between text-xs font-bold">
                       <span className="text-slate-300 truncate">
                         {participantName(pid).split(' ')[0]}
-                        {pid.startsWith('synthetic-') && <Bot className="inline w-3 h-3 text-violet-400 ml-1" />}
+                        {isSyntheticPid(pid) && <Bot className="inline w-3 h-3 text-violet-400 ml-1" />}
+                        {isCollectivePid(pid) && <Landmark className="inline w-3 h-3 text-amber-400 ml-1" />}
+                        {isEcosystemPid(pid) && <Leaf className="inline w-3 h-3 text-emerald-400 ml-1" />}
+                        {typeLabel && (
+                          <span className="ml-1 text-[8px] font-mono text-slate-500">{typeLabel}</span>
+                        )}
                       </span>
                       <span className={wellness < 0.8 ? 'text-rose-400 font-mono' : 'text-emerald-400 font-mono'}>
                         γ = {wellness.toFixed(2)}
@@ -891,6 +1039,90 @@ export default function ContractDetailsPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {/* FLUJO DE PARTES COLECTIVAS (ROADMAP Bloque B, Fases 2 y 4) */}
+                  {isCollectivePid(activePidValue) ? (
+                    <div className="space-y-4">
+                      {isEcosystemPid(activePidValue) ? (
+                        <>
+                          <p className="text-xs text-slate-400 leading-relaxed">
+                            El <strong className="text-emerald-400">Reino Natural</strong> es representado por un guardián
+                            oráculo que audita este contrato contra los invariantes (γ, SDV, T9) antes de otorgar su consentimiento.
+                          </p>
+                          {guardianInfo && (
+                            <div className="p-3 rounded-xl bg-violet-950/20 border border-violet-900/40 text-[10px] text-slate-300 leading-relaxed">
+                              <span className="font-black text-violet-300 uppercase block text-[9px] tracking-widest mb-1">
+                                Veredicto del Guardián ({guardianInfo.mode})
+                              </span>
+                              {guardianInfo.reasoning}
+                            </div>
+                          )}
+                          <button
+                            onClick={handleCollectiveSign}
+                            className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2"
+                          >
+                            <Leaf className="w-4 h-4" />
+                            Firmar por el Ecosistema (Guardián)
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-xs text-slate-400 leading-relaxed">
+                            <strong className="text-amber-400">{participantName(activePidValue)}</strong> es una parte
+                            colectiva: firma mediante delegados con quórum (N de M). El consentimiento se sella cuando
+                            el número de delegados alcanza el quórum configurado.
+                          </p>
+                          <div className="space-y-2">
+                            <label className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
+                              Delegado que firma
+                            </label>
+                            <select
+                              value={delegatePid}
+                              onChange={(e) => setDelegatePid(e.target.value)}
+                              className="w-full bg-slate-950 border border-slate-900 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                            >
+                              {!delegatePid && <option value="">Selecciona un delegado...</option>}
+                              {(contract.participants_details?.find((d) => d.id === activePidValue)?.members?.delegates || []).map((d) => (
+                                <option key={d} value={d}>{d}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-900 space-y-2 text-[10px] text-slate-400">
+                            <span className="font-bold text-slate-300 uppercase block text-[9px] tracking-widest">
+                              Progreso de quórum
+                            </span>
+                            {contract.terms.map((t) => {
+                              const progress = consentProgress[`${activePidValue}|${t.term_id}`];
+                              const sealed = t.accepted_by[activePidValue] === true;
+                              return (
+                                <div key={t.term_id} className="flex justify-between items-center">
+                                  <span className="truncate max-w-[60%]">{t.term_id}</span>
+                                  {sealed ? (
+                                    <span className="text-emerald-400 font-mono font-bold flex items-center gap-1">
+                                      <CheckCircle2 className="w-3 h-3" /> Sellado
+                                    </span>
+                                  ) : progress ? (
+                                    <span className="font-mono font-bold text-amber-400">
+                                      {progress.current}/{progress.needed ?? '?'} firmas
+                                    </span>
+                                  ) : (
+                                    <span className="font-mono text-slate-600">sin firmas</span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                          <button
+                            onClick={handleCollectiveSign}
+                            className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2"
+                          >
+                            <Landmark className="w-4 h-4" />
+                            Registrar Firma Delegada
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                  <>
                   {/* WIZARD SIMPLE */}
                   {complexity === 'simple' && (
                     <div className="space-y-4">
@@ -1020,6 +1252,8 @@ export default function ContractDetailsPage() {
                         </button>
                       </div>
                     </div>
+                  )}
+                  </>
                   )}
                 </div>
               )}

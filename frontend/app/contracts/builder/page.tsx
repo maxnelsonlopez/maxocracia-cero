@@ -38,6 +38,16 @@ interface UserProfile {
     alias?: string;
 }
 
+// Parte de cualquier escala (ROADMAP Bloque B): micro-sociedad, cooperativa,
+// institución o ecosistema del Reino Natural.
+interface CollectiveParty {
+    party_id: string;
+    party_type: string;
+    party_type_label: string;
+    display_name: string;
+    members?: { delegates?: string[]; quorum?: number; quorum_required?: number };
+}
+
 // Definición de tipos de nodos personalizados
 const nodeTypes = {
     action: ActionNode,
@@ -94,6 +104,15 @@ export default function ContractBuilder() {
         total_vhv: { t: number; v: number; r: number };
     } | null>(null);
 
+    // Partes colectivas de cualquier escala (ROADMAP Bloque B, Fase 3)
+    const [partiesList, setPartiesList] = useState<CollectiveParty[]>([]);
+    const [selectedParties, setSelectedParties] = useState<string[]>([]);
+    const [showPartyForm, setShowPartyForm] = useState<boolean>(false);
+    const [newPartyType, setNewPartyType] = useState<'society' | 'cooperative' | 'institution' | 'ecosystem'>('cooperative');
+    const [newPartyName, setNewPartyName] = useState('');
+    const [newPartyDelegates, setNewPartyDelegates] = useState('');
+    const [newPartyQuorum, setNewPartyQuorum] = useState('0.6');
+
     // Opciones de parte obligada para los bloques (creador + co-firmantes)
     const ownerOptions = React.useMemo(() => [
         ...(currentUser ? [{ id: currentUser.id, label: `Yo (${currentUser.name.split(' ')[0]})` }] : []),
@@ -110,10 +129,12 @@ export default function ContractBuilder() {
         const participantIds = [
             ...(me ? [`user-${me.id}`] : ['user-1']),
             ...selectedCoSigners.map((uid) => `user-${uid}`),
+            ...selectedParties,
         ];
         const partyNames: Record<string, string> = {};
         if (me) partyNames[`user-${me.id}`] = me.name;
         usersList.forEach((u) => { partyNames[`user-${u.id}`] = u.name; });
+        partiesList.forEach((p) => { partyNames[p.party_id] = p.display_name; });
 
         const typeLabel: Record<string, string> = {
             action: 'Acción (DO)',
@@ -162,7 +183,7 @@ export default function ContractBuilder() {
             events_count: 0,
             hash: 'BORRADOR-VISUAL',
         };
-    }, [nodes, selectedCoSigners, currentUser, usersList, duration]);
+    }, [nodes, selectedCoSigners, currentUser, usersList, duration, partiesList, selectedParties]);
 
     // Mantener la lista de partes disponible en los bloques al cambiar la selección
     useEffect(() => {
@@ -338,8 +359,64 @@ export default function ContractBuilder() {
                 console.error("Error al cargar usuarios:", err);
             }
         };
+
+        // Cargar partes colectivas del registro (Bloque B, Fase 3)
+        const fetchParties = async () => {
+            try {
+                const response = await apiFetch('/parties');
+                if (response.ok) {
+                    const data = await response.json();
+                    const collectives = (data.parties || []).filter(
+                        (p: CollectiveParty) => p.party_type !== 'human' && p.party_type !== 'synthetic'
+                    );
+                    setPartiesList(collectives);
+                }
+            } catch (err) {
+                console.error("Error al cargar partes:", err);
+            }
+        };
         fetchUsers();
+        fetchParties();
     }, [currentUser]);
+
+    // Crear una parte colectiva en el registro y asociarla al contrato
+    const handleCreateParty = async () => {
+        if (!newPartyName.trim()) {
+            alert('El nombre de la parte es obligatorio.');
+            return;
+        }
+        try {
+            const delegates = newPartyDelegates
+                .split(',')
+                .map((s) => s.trim())
+                .filter(Boolean);
+            const res = await apiFetch('/parties/', {
+                method: 'POST',
+                body: JSON.stringify({
+                    party_type: newPartyType,
+                    display_name: newPartyName.trim(),
+                    members: { delegates, quorum: parseFloat(newPartyQuorum) || 1 },
+                }),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                alert(`Error al crear la parte: ${err.error}`);
+                return;
+            }
+            const data = await res.json();
+            setPartiesList((prev) => [
+                ...prev.filter((p) => p.party_id !== data.party.party_id),
+                data.party,
+            ]);
+            setSelectedParties((prev) => [...prev, data.party.party_id]);
+            setNewPartyName('');
+            setNewPartyDelegates('');
+            setShowPartyForm(false);
+        } catch (err) {
+            console.error(err);
+            alert('Error de conexión al crear la parte.');
+        }
+    };
 
     const onNodesChange: OnNodesChange = useCallback(
         (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -478,6 +555,7 @@ export default function ContractBuilder() {
             const participants = [
                 { user_id: currentUser?.id, wellness: 1.0 },
                 ...selectedCoSigners.map((uid) => ({ user_id: uid, wellness: 1.0 })),
+                ...selectedParties.map((pid) => ({ party_id: pid })),
             ];
 
             const createRes = await apiFetch('/contracts/', {
@@ -665,6 +743,116 @@ export default function ContractBuilder() {
                         <p className="text-[10px] text-slate-500 leading-normal">
                             Personas de la cohorte que compartirán las obligaciones vitales de este acuerdo.
                             Cada bloque del lienzo puede asignarse a una parte distinta (selector en el nodo).
+                        </p>
+                    </div>
+
+                    {/* Partes Colectivas de cualquier escala (ROADMAP Bloque B, Fase 3) */}
+                    <div className="space-y-2 pt-2 border-t border-slate-800/60">
+                        <div className="flex justify-between items-center">
+                            <label className="text-xs font-bold text-slate-300 block uppercase tracking-wider">
+                                Partes Colectivas ({selectedParties.length} seleccionad{selectedParties.length === 1 ? 'a' : 'as'})
+                            </label>
+                            <button
+                                onClick={() => setShowPartyForm((v) => !v)}
+                                className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
+                            >
+                                {showPartyForm ? 'Cerrar' : '+ Nueva'}
+                            </button>
+                        </div>
+                        <div className="max-h-40 overflow-y-auto space-y-1.5 pr-1 border border-slate-800 rounded-xl p-2 bg-slate-950/40">
+                            {partiesList.length === 0 && !showPartyForm && (
+                                <p className="text-[10px] text-slate-500 p-2">
+                                    No hay partes colectivas registradas. Crea una cooperativa, institución, micro-sociedad o ecosistema.
+                                </p>
+                            )}
+                            {partiesList.map((p) => {
+                                const checked = selectedParties.includes(p.party_id);
+                                const delegates = p.members?.delegates?.length || 0;
+                                return (
+                                    <label
+                                        key={p.party_id}
+                                        className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg cursor-pointer border transition-all text-xs ${
+                                            checked
+                                                ? 'bg-amber-500/10 border-amber-500/30 text-slate-200'
+                                                : 'bg-slate-900/40 border-slate-800 text-slate-400 hover:border-slate-700'
+                                        }`}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={checked}
+                                            onChange={(e) => {
+                                                setSelectedParties((prev) =>
+                                                    e.target.checked
+                                                        ? [...prev, p.party_id]
+                                                        : prev.filter((id) => id !== p.party_id)
+                                                );
+                                            }}
+                                            className="accent-amber-500 rounded"
+                                        />
+                                        <span className="font-bold truncate">{p.display_name}</span>
+                                        <span className="text-[9px] text-slate-500 ml-auto">
+                                            {p.party_type_label}
+                                            {delegates > 0 && ` · ${delegates} deleg.`}
+                                        </span>
+                                    </label>
+                                );
+                            })}
+                        </div>
+
+                        {showPartyForm && (
+                            <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2.5">
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Tipo de parte</label>
+                                    <select
+                                        value={newPartyType}
+                                        onChange={(e) => setNewPartyType(e.target.value as typeof newPartyType)}
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                                    >
+                                        <option value="society">Micro-sociedad (society-)</option>
+                                        <option value="cooperative">Cooperativa (coop-)</option>
+                                        <option value="institution">Institución (org-)</option>
+                                        <option value="ecosystem">Ecosistema · Reino Natural (eco-)</option>
+                                    </select>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={newPartyName}
+                                    onChange={(e) => setNewPartyName(e.target.value)}
+                                    placeholder="Nombre (ej. Coop del Barrio)"
+                                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500/50 placeholder:text-slate-700"
+                                />
+                                <input
+                                    type="text"
+                                    value={newPartyDelegates}
+                                    onChange={(e) => setNewPartyDelegates(e.target.value)}
+                                    placeholder="Delegados (user-2, user-3, ...)"
+                                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500/50 placeholder:text-slate-700"
+                                />
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="1"
+                                        step="0.1"
+                                        value={newPartyQuorum}
+                                        onChange={(e) => setNewPartyQuorum(e.target.value)}
+                                        className="w-20 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                                    />
+                                    <span className="text-[9px] text-slate-500">
+                                        Quórum (fracción de delegados para firmar)
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={handleCreateParty}
+                                    className="w-full py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-lg text-[10px] uppercase tracking-wider transition-all"
+                                >
+                                    Registrar Parte
+                                </button>
+                            </div>
+                        )}
+                        <p className="text-[10px] text-slate-500 leading-normal">
+                            Micro-sociedades, cooperativas, instituciones y ecosistemas contratan con el mismo marco axiomático.
+                            Las colectivas firman por delegados con quórum (N de M); los ecosistemas por guardián oráculo.
                         </p>
                     </div>
 
@@ -1026,6 +1214,7 @@ export default function ContractBuilder() {
                         participants={[
                             ...(currentUser ? [`user-${currentUser.id}`] : []),
                             ...selectedCoSigners.map((uid) => `user-${uid}`),
+                            ...selectedParties,
                         ]}
                         onMaterialized={(id) => router.push(`/contracts/${id}`)}
                     />
@@ -1067,6 +1256,7 @@ export default function ContractBuilder() {
                             participants={[
                                 ...(currentUser ? [`user-${currentUser.id}`] : []),
                                 ...selectedCoSigners.map((uid) => `user-${uid}`),
+                                ...selectedParties,
                             ]}
                             onMaterialized={(id) => router.push(`/contracts/${id}`)}
                         />

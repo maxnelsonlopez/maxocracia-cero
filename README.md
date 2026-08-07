@@ -2,7 +2,7 @@
 
 **Estado del Proyecto:** Fase 2 - Sostenibilidad Económica y MicroMaxocracia Doméstica (Agosto 2026)  
 **Última actualización:** 6 de agosto 2026  
-**Versión:** 4.4 - SDV-S en la Interfaz, Portal de Transparencia y Navegación SPA Reparada (DeepSeek)
+**Versión:** 4.5 - Escalas e Interescala: Parte de cualquier escala, quórum delegado y Reino Natural (DeepSeek)
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 
@@ -36,14 +36,16 @@ La **Maxocracia** es un sistema ético-económico-político alternativo que prop
 - **Portal Unificado (Hybrid Frontend)**: Nueva landing page moderna (Next.js) servida por Flask.
 - **MicroMaxocracia v1.0**: Registro interactivo de CDD, balance de Tres Cuentas en UI, encuesta de seguridad ESI con pantalla de bloqueo y monitor Detox relacional en tiempo real.
 - **Nexus Simulator v2.2**: Simulador interactivo del VHV con Modo Oráculo Dinámico.
-- **MaxoContracts v2.4**: Persistencia SQLite, 5 bloques modulares, oráculo sintético, constructor de contratos visual (React Flow) con biblioteca de plantillas, validador de grafos y UX sobre-explicada liminal.
+- **MaxoContracts v2.5**: Persistencia SQLite, 5 bloques modulares, oráculo sintético en vivo (DeepSeek), constructor de contratos visual (React Flow) con biblioteca de plantillas, validador de grafos, UX sobre-explicada liminal y **partes de cualquier escala** (personas, micro-sociedades, cooperativas, instituciones, sintéticas y ecosistemas).
 - **SDV-S en la Interfaz**: Panel "Reino Sintético · SDV-S" en el detalle de contratos — FS_S = e^v, las 5 dimensiones de la ontometría sintética, violaciones y el Invariante INV2-S con el camino de Ternura. Las rutas dinámicas de `/contracts/` funcionan en pestaña nueva y por clic.
 - **Dashboard de Métricas MaxoContracts**: Panel `/admin/contracts` con γ (bienestar), alertas del Invariante 1 (γ<1), violaciones SDV (humanos y sintéticos), NPS de la Cohorte y progreso hacia la meta de 50 contratos.
 - **Portal de Transparencia Radical (T13)**: Páginas públicas `/transparency` (reporte vivo de costos e ingresos), `/privacy` (Opacidad Sagrada) y `/terms` (coherencia axiomática).
 - **Navegación SPA reparada**: La navegación por clic funciona en todo el portal (barra superior, dropdowns, panel admin y secciones de usuario) — payloads RSC de la exportación estática servidos correctamente.
+- **Escalas e Interescala (Bloque B)**: Un contrato ya no es solo persona↔persona — persona, micro-sociedad, cooperativa, institución, persona sintética y ecosistema son **Partes** con el mismo marco axiomático (`society-`, `coop-`, `org-`, `eco-`). Registro `maxo_parties` con API `/parties`, selector de partes colectivas en el builder, consentimiento agregado por **quórum delegado N de M**, guardián oráculo para el **Reino Natural** (`eco-`) y contratos interescala **anidados** (madre/hijos) con protección de ciclos.
+- **Oráculo en vivo (Bloque A)**: DeepSeek negocia contratos por chat (`/contracts/negotiate`), audita existentes (`critique`) y firma como guardián de ecosistemas. Activado con `DEEPSEEK_API_KEY` en `.env`; sin key, degradación elegante al oráculo heurístico.
 - **Calculadora VHV**: Frontend completo con Chart.js integrado en el portal.
 - **Sistema TVI**: Detección de overlap temporal, cálculo de CCP.
-- **431 tests** (431/431 pasando, ~85% cobertura) ✅ (Backend Core + Blocks + Visual Graph Validation + Métricas + Ruteo SPA)
+- **474 tests** (474/474 pasando) ✅ (Backend Core + Blocks + Escalas + Quórum + Guardián + Anidamiento + Métricas + Ruteo SPA)
 
 ---
 

@@ -34,7 +34,7 @@ export interface CritiqueResult {
   oracle_id: string;
 }
 
-// Mapea un pid (user-1 | synthetic-qwen-1) al formato que acepta POST /contracts/
+// Mapea un pid (user-1 | synthetic-qwen-1 | coop-7 | eco-1) al formato que acepta POST /contracts/
 export const mapParty = (pid: string) => {
   if (pid.startsWith('synthetic-')) {
     return { participant_id: pid.slice('synthetic-'.length), synthetic: {} };
@@ -43,7 +43,8 @@ export const mapParty = (pid: string) => {
     const id = parseInt(pid.slice(5), 10);
     return Number.isFinite(id) ? { user_id: id } : { participant_id: pid, synthetic: {} };
   }
-  return { participant_id: pid, synthetic: {} };
+  // Escalas colectivas (ROADMAP Bloque B): society- | coop- | org- | eco-
+  return { party_id: pid };
 };
 
 // Instrucciones sugeridas para empezar la conversación

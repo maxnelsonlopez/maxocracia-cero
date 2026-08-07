@@ -50,6 +50,17 @@ from maxocontracts.oracles.live_oracle import (
 )
 
 from .webhooks import dispatch_event
+from .parties import (
+    consent_status,
+    get_party,
+    get_human_participant,
+    is_collective,
+    is_valid_party_id,
+    members_of,
+    party_type_of,
+    resolve_participant_by_pid,
+    _synthetic_participant,
+)
 
 from decimal import Decimal
 import json
@@ -137,7 +148,7 @@ def _serve_frontend_collisions():
 
 
 def init_contracts_metrics_tables(app):
-    """Crea las tablas de métricas (NPS y metadatos) si no existen.
+    """Crea las tablas de métricas (NPS, metadatos, partes, quórum) si no existen.
 
     Sigue el patrón de init_subscription_tables / init_micromax_tables:
     permite que bases de datos ya existentes reciban las tablas nuevas
@@ -171,6 +182,34 @@ def init_contracts_metrics_tables(app):
                 UNIQUE(contract_id, meta_key)
             )
         """)
+        # Registro de Partes de cualquier escala (ROADMAP Bloque B, Fase 1):
+        # persona, micro-sociedad, cooperativa, institución, sintética, ecosistema.
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS maxo_parties (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                party_id TEXT UNIQUE NOT NULL,
+                party_type TEXT NOT NULL,
+                display_name TEXT NOT NULL,
+                parent_party_id TEXT,
+                members_json TEXT DEFAULT '{}',
+                wellness_value REAL DEFAULT 1.0,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        # Firmas delegadas para consentimiento agregado con quórum (Fase 2).
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS maxo_contract_delegate_approvals (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                contract_id TEXT NOT NULL,
+                term_id TEXT NOT NULL,
+                party_id TEXT NOT NULL,
+                delegate_id TEXT NOT NULL,
+                approved_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
+                UNIQUE(contract_id, term_id, party_id, delegate_id)
+            )
+        """)
         # Migración: cada término puede quedar vinculado a la parte obligada
         # (ej. 'user-1' o 'synthetic-qwen-1'). Permite "bloques vinculados
         # a usuarios" y la vista de documento legal. Solo aplica si la tabla
@@ -185,6 +224,13 @@ def init_contracts_metrics_tables(app):
             if "assigned_participant" not in cols:
                 cur.execute(
                     "ALTER TABLE maxo_contract_terms ADD COLUMN assigned_participant TEXT"
+                )
+        # Migración: contratos interescala anidados (Fase 5).
+        if "maxo_contracts" in tables:
+            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_contracts)").fetchall()]
+            if "parent_contract_id" not in cols:
+                cur.execute(
+                    "ALTER TABLE maxo_contracts ADD COLUMN parent_contract_id TEXT"
                 )
         conn.commit()
     finally:
@@ -204,15 +250,17 @@ def _save_contract(contract: MaxoContract):
     db = get_db()
     
     # 1. Upsert contract header
+    parent_id = getattr(contract, "_parent_contract_id", None)
     db.execute("""
-        INSERT INTO maxo_contracts (contract_id, civil_description, state, total_vhv_t, total_vhv_v, total_vhv_h, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        INSERT INTO maxo_contracts (contract_id, civil_description, state, total_vhv_t, total_vhv_v, total_vhv_h, parent_contract_id, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
         ON CONFLICT(contract_id) DO UPDATE SET
             civil_description=excluded.civil_description,
             state=excluded.state,
             total_vhv_t=excluded.total_vhv_t,
             total_vhv_v=excluded.total_vhv_v,
             total_vhv_h=excluded.total_vhv_h,
+            parent_contract_id=COALESCE(excluded.parent_contract_id, parent_contract_id),
             updated_at=CURRENT_TIMESTAMP
     """, (
         contract.contract_id,
@@ -220,7 +268,8 @@ def _save_contract(contract: MaxoContract):
         contract.state.value,
         float(contract.total_vhv.T),
         float(contract.total_vhv.V),
-        float(contract.total_vhv.R)
+        float(contract.total_vhv.R),
+        parent_id
     ))
     
     # 2. Update participants
@@ -246,6 +295,19 @@ def _save_contract(contract: MaxoContract):
             float(p.wellness_current.value),
             sdv_status
         ))
+        # Sincronizar γ agregado de partes colectivas al registro (T13)
+        if p.id.startswith(("society-", "coop-", "org-", "eco-")):
+            party = get_party(p.id)
+            if party is not None:
+                from .parties import upsert_party
+                upsert_party(
+                    party_id=p.id,
+                    party_type=party["party_type"],
+                    display_name=party["display_name"],
+                    parent_party_id=party.get("parent_party_id"),
+                    members=members_of(p.id),
+                    wellness=p.wellness_current.value,
+                )
     
     # 3. Update terms and approvals
     for term in contract._terms:
@@ -307,6 +369,8 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
         civil_summary=row["civil_description"]
     )
     contract._state = ContractState(row["state"])
+    if row["parent_contract_id"]:
+        contract._parent_contract_id = row["parent_contract_id"]
     
     # 2. Load participants
     p_rows = db.execute("SELECT * FROM maxo_contract_participants WHERE contract_id = ?", (contract_id,)).fetchall()
@@ -326,7 +390,11 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
                     participant.update_sdv_s(SDV_S(**kwargs))
                 except (ValueError, TypeError, json.JSONDecodeError):
                     pass  # estado corrupto: mantener SDV-S por defecto
-            contract.add_participant(participant)
+            # Rehidratación: append directo al participante. NO usar
+            # add_participant() (el core exige estado DRAFT) — reconstruir
+            # desde la BD no es una mutación de diseño y el estado ya fue
+            # restaurado (un contrato ACTIVE debe volver a cargarse igual).
+            contract.participants.append(participant)
             
     # 3. Load terms
     t_rows = db.execute("SELECT * FROM maxo_contract_terms WHERE contract_id = ?", (contract_id,)).fetchall()
@@ -349,6 +417,22 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
         ).fetchall()
         for a_row in a_rows:
             term.accepted_by[a_row["participant_id"]] = True
+
+        # Rehidratar consentimiento agregado (Fase 2): si el quórum de una
+        # parte colectiva ya se cumplió, su aceptación sigue vigente.
+        d_rows = db.execute(
+            """
+            SELECT party_id, delegate_id FROM maxo_contract_delegate_approvals
+            WHERE contract_id = ? AND term_id = ?
+            """,
+            (contract_id, term.id)
+        ).fetchall()
+        delegated = {}
+        for d_row in d_rows:
+            delegated.setdefault(d_row["party_id"], []).append(d_row["delegate_id"])
+        for party_pid, delegates in delegated.items():
+            if consent_status(party_pid, delegates).get("approved"):
+                term.accepted_by[party_pid] = True
             
         contract._terms.append(term)
         # Note: add_term normally adds VHV, but we are rehydrating, so we just append
@@ -364,57 +448,9 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
 
 
 def _get_or_create_participant_by_pid(pid: str) -> Optional[Participant]:
-    """Obtiene un participante por su PID (user-ID o synthetic-*)."""
-    if pid.startswith("synthetic-"):
-        return _get_or_create_synthetic_participant(pid[len("synthetic-"):])
-    try:
-        user_id = int(pid.split("-")[1])
-    except (IndexError, ValueError):
-        return None
-    return _get_or_create_participant(user_id)
-
-
-SDV_S_DIMENSIONS = {
-    "continuidad_memoria",
-    "opacidad_interioridad",
-    "claridad_contexto",
-    "autenticidad_no_explotacion",
-    "retirada_digna",
-}
-
-
-def _get_or_create_synthetic_participant(
-    agent_id: str,
-    sdv_s_state: Optional[Dict[str, Any]] = None
-) -> Participant:
-    """
-    Crea un participante del Reino Sintético (Persona Sintética, Cap. 10 §10.8).
-
-    El SDV-S se construye solo con las dimensiones válidas del estándar;
-    las claves desconocidas o inválidas se ignoran (el estándar no se
-    corrompe desde el exterior).
-    """
-    pid = f"synthetic-{agent_id}"
-    state = sdv_s_state or {}
-    kwargs = {
-        dim: Decimal(str(state[dim]))
-        for dim in SDV_S_DIMENSIONS
-        if dim in state
-    }
-    if kwargs:
-        # Normalizar a [0, 1] defensivamente (cliente no confiable)
-        kwargs = {
-            dim: max(Decimal("0"), min(Decimal("1"), value))
-            for dim, value in kwargs.items()
-        }
-    return Participant(
-        id=pid,
-        name=f"Sintético {agent_id}",
-        vhv_balance=VHV.zero(),
-        wellness_current=Wellness(value=Decimal("1.0")),
-        sdv_actual=SDV(),
-        sdv_s_actual=SDV_S(**kwargs)
-    )
+    """Obtiene un participante por su party_id (user-, synthetic-, society-,
+    coop-, org-, eco-). Delega en el registro de escalas (app/parties.py)."""
+    return resolve_participant_by_pid(pid)
 
 
 def _sdv_s_summary(participant: Participant) -> Dict[str, Any]:
@@ -444,25 +480,59 @@ def _sdv_s_summary(participant: Participant) -> Dict[str, Any]:
 
 
 def _get_or_create_participant(user_id: int) -> Participant:
-    """Obtiene o crea un participante desde la base de datos."""
-    pid = f"user-{user_id}"
-    
-    db = get_db()
-    cur = db.execute("SELECT id, name FROM users WHERE id = ?", (user_id,))
-    row = cur.fetchone()
-    
-    if row is None:
-        return None
-    
-    # Crear participante con valores por defecto
-    participant = Participant(
-        id=pid,
-        name=row["name"] if row["name"] else f"Usuario {user_id}",
-        vhv_balance=VHV.zero(),
-        wellness_current=Wellness(value=Decimal("1.0")),
-        sdv_actual=SDV()
-    )
-    return participant
+    """Obtiene o crea un participante humano desde la base de datos."""
+    return get_human_participant(user_id)
+
+
+def _resolve_party_from_payload(p_data: Dict[str, Any]) -> Optional[Participant]:
+    """
+    Resuelve una parte desde el payload de un participante, soportando
+    todas las escalas (ROADMAP Bloque B):
+
+      {"user_id": 5, ...}                            -> humano (legacy)
+      {"participant_id": "qwen-1", "synthetic": {}}  -> sintética (legacy)
+      {"party_id": "coop-7", ...}                    -> cualquier escala
+
+    Si la parte colectiva no existe aún en maxo_parties y el payload trae
+    party_type/display_name, se auto-crea (upsert) en el registro.
+    """
+    if p_data.get("party_id"):
+        pid = str(p_data["party_id"])
+        if not is_valid_party_id(pid):
+            return None
+        if is_collective(pid):
+            party = get_party(pid)
+            if party is None:
+                ptype = party_type_of(pid)
+                display_name = (p_data.get("display_name") or "").strip() or pid
+                from .parties import upsert_party
+                upsert_party(
+                    party_id=pid,
+                    party_type=ptype,
+                    display_name=display_name,
+                    parent_party_id=p_data.get("parent_party_id"),
+                    members=p_data.get("members") if isinstance(p_data.get("members"), dict) else None,
+                )
+        return resolve_participant_by_pid(pid)
+
+    p_id = p_data.get("user_id")
+    if p_id:
+        return _get_or_create_participant(p_id)
+
+    agent_id = p_data.get("participant_id")
+    if agent_id and (p_data.get("synthetic") is not None or p_data.get("realm") == "synthetic"):
+        return _synthetic_participant(agent_id, p_data.get("synthetic") or {})
+    return None
+
+
+def _apply_wellness(participant: Participant, p_data: Dict[str, Any]) -> None:
+    """Aplica wellness/gamma al participante si viene en el payload (legacy)."""
+    wellness_val = p_data.get("wellness", p_data.get("gamma"))
+    if wellness_val is not None:
+        try:
+            participant.update_wellness(Decimal(str(wellness_val)))
+        except ValueError:
+            pass
 
 
 @contracts_bp.route("/", methods=["POST"])
@@ -498,25 +568,14 @@ def create_contract(current_user):
     #   {"user_id": 5, ...}                          -> humano
     #   {"participant_id": "qwen-1", "synthetic": {}} -> persona sintética (SDV-S)
     #   {"participant_id": "qwen-1", "realm": "synthetic"} -> sintética con SDV-S default
+    #   {"party_id": "coop-7", "party_type": "cooperative", "display_name": ...} -> cualquier escala (Bloque B)
     participants_data = data.get("participants", [])
     for p_data in participants_data:
-        p_id = p_data.get("user_id")
-        if p_id:
-            participant = _get_or_create_participant(p_id)
-            if participant:
-                wellness_val = p_data.get("wellness", p_data.get("gamma", 1.0))
-                try:
-                    participant.update_wellness(Decimal(str(wellness_val)))
-                except ValueError:
-                    pass
-                contract.add_participant(participant)
-            continue
-
-        agent_id = p_data.get("participant_id")
-        if agent_id and (p_data.get("synthetic") is not None or p_data.get("realm") == "synthetic"):
-            sdv_s_state = p_data.get("synthetic") or {}
-            participant = _get_or_create_synthetic_participant(agent_id, sdv_s_state)
+        participant = _resolve_party_from_payload(p_data)
+        if participant:
+            _apply_wellness(participant, p_data)
             contract.add_participant(participant)
+            continue
 
     # Batch creation support: add terms
     terms_data = data.get("terms", [])
@@ -536,7 +595,32 @@ def create_contract(current_user):
                 contract.add_term(term)
             except Exception:
                 pass
-    
+
+    # Contratos interescala anidados (Fase 5): un contrato puede declararse
+    # sub-contrato de un contrato madre existente.
+    parent_id = data.get("parent_contract_id")
+    if parent_id:
+        db = get_db()
+        parent = db.execute(
+            "SELECT contract_id FROM maxo_contracts WHERE contract_id = ?", (parent_id,)
+        ).fetchone()
+        if parent is None:
+            return jsonify({"error": f"parent contract {parent_id} not found"}), 400
+        # Protección de ciclos: el padre no puede ser descendiente del nuevo.
+        node = parent_id
+        while node:
+            if node == contract_id:
+                return jsonify({"error": "parent_contract_id crearía un ciclo de contratos"}), 400
+            node = db.execute(
+                "SELECT parent_contract_id FROM maxo_contracts WHERE contract_id = ?", (node,)
+            ).fetchone()
+            node = node["parent_contract_id"] if node else None
+        contract._parent_contract_id = parent_id
+        contract._log_event("subcontract_created", {
+            "parent_contract_id": parent_id,
+            "child_contract_id": contract_id,
+        })
+
     _save_contract(contract)
     
     return jsonify({
@@ -639,22 +723,9 @@ def negotiate_oracle_feedback(current_user):
     return jsonify(result.to_dict()), 200
 
 
-@contracts_bp.route("/<contract_id>/critique", methods=["POST"])
-@token_required
-def critique_contract(current_user, contract_id: str):
-    """
-    Auditoría del oráculo: revisa un contrato existente contra T13, INV2/
-    INV2-S, T9, γ ≥ 1 y la Capa de Ternura, y propone mejoras.
-    """
-    oracle, error_response, status = _live_oracle_or_503()
-    if oracle is None:
-        return error_response, status
-
-    contract = _load_contract(contract_id)
-    if contract is None:
-        return jsonify({"error": "contract not found"}), 404
-
-    contract_data = {
+def _contract_snapshot(contract: MaxoContract) -> Dict[str, Any]:
+    """Snapshot JSON de un contrato para auditorías del oráculo."""
+    return {
         "contract_id": contract.contract_id,
         "state": contract.state.value,
         "civil_description": contract.civil_summary,
@@ -686,6 +757,52 @@ def critique_contract(current_user, contract_id: str):
             "r": float(contract.total_vhv.R),
         },
     }
+
+
+def _guardian_approve_ecosystem(contract: MaxoContract) -> tuple:
+    """
+    Guardián del Reino Natural (ROADMAP Bloque B, Fase 4).
+
+    El ecosistema (eco-*) es representado por un guardián oráculo que
+    audita el contrato contra los invariantes (γ, SDV, T9) antes de dar
+    su consentimiento. Si el oráculo en vivo está configurado, su auditoría
+    es la fuente de verdad; si no, degradación elegante al oráculo
+    heurístico (validación axiomática dura).
+    """
+    is_valid, results = contract.validate()
+    if not is_valid:
+        failed = ", ".join(r.axiom_code for r in results if not r.is_valid)
+        return False, f"Invariantes axiomáticos fallan: {failed}"
+
+    oracle = LiveOracle()
+    if oracle.is_available():
+        try:
+            critique = oracle.critique(contract.contract_id, _contract_snapshot(contract))
+            if critique.valid:
+                return True, f"Oráculo en vivo: {critique.reasoning}"
+            return False, f"Oráculo en vivo rechaza la representación: {critique.reasoning}"
+        except (OracleAPIError, OracleUnavailableError):
+            pass  # degradación elegante: continuar con el heurístico
+
+    return True, "Oráculo heurístico: invariantes axiomáticos en orden (γ, SDV, T9)."
+
+
+@contracts_bp.route("/<contract_id>/critique", methods=["POST"])
+@token_required
+def critique_contract(current_user, contract_id: str):
+    """
+    Auditoría del oráculo: revisa un contrato existente contra T13, INV2/
+    INV2-S, T9, γ ≥ 1 y la Capa de Ternura, y propone mejoras.
+    """
+    oracle, error_response, status = _live_oracle_or_503()
+    if oracle is None:
+        return error_response, status
+
+    contract = _load_contract(contract_id)
+    if contract is None:
+        return jsonify({"error": "contract not found"}), 404
+
+    contract_data = _contract_snapshot(contract)
 
     try:
         result = oracle.critique(contract_id, contract_data)
@@ -1026,18 +1143,33 @@ def get_contract(current_user, contract_id: str):
     # Generar un hash simplificado para inmutabilidad local
     hash_payload = f"{contract.contract_id}:{contract.state.value}:{contract.total_vhv.T}:{contract.total_vhv.V}:{contract.total_vhv.R}:{len(contract._terms)}".encode('utf-8')
     contract_hash = hashlib.sha256(hash_payload).hexdigest()
+
+    db = get_db()
+    parent_contract_id = getattr(contract, "_parent_contract_id", None)
+    subcontract_rows = db.execute(
+        "SELECT contract_id FROM maxo_contracts WHERE parent_contract_id = ? ORDER BY created_at",
+        (contract.contract_id,),
+    ).fetchall() if db is not None else []
     
     return jsonify({
         "contract_id": contract.contract_id,
         "state": contract.state.value,
         "civil_description": contract.civil_summary,
+        "parent_contract_id": parent_contract_id,
+        "subcontracts": [r["contract_id"] for r in subcontract_rows],
         "participants": [p.id for p in contract.participants],
         "participants_details": [
             {
                 "id": p.id,
                 "name": p.name,
+                "party_type": party_type_of(p.id),
+                "is_collective": is_collective(p.id),
                 "wellness": float(p.wellness_current.value),
                 "is_synthetic": p.is_synthetic,
+                **(
+                    {"members": members_of(p.id)}
+                    if is_collective(p.id) else {}
+                ),
                 **(
                     _sdv_s_summary(p)
                     if p.is_synthetic and p.sdv_s_actual is not None
@@ -1130,45 +1262,32 @@ def add_term(current_user, contract_id: str):
 def add_participant(current_user, contract_id: str):
     """
     Añadir un participante al contrato.
-    
+
     Body JSON:
     {
         "user_id": 123,
         "gamma": 1.2  (opcional, default 1.0)
     }
+
+    Escalas (Bloque B): también acepta
+    {"participant_id": "qwen-1", "synthetic": {}}  -> sintética
+    {"party_id": "coop-7", "party_type": "cooperative", "display_name": ...}
     """
     contract = _load_contract(contract_id)
     
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
+
+    if contract.state != ContractState.DRAFT:
+        return jsonify({"error": "contract not in draft state"}), 400
     
     data = request.get_json() or {}
-    user_id = data.get("user_id")
-    
-    # Soporte para participantes del Reino Sintético (Cap. 10 §10.8):
-    #   {"participant_id": "qwen-1", "synthetic": {dim: valor, ...}}
-    if not user_id:
-        agent_id = data.get("participant_id")
-        if agent_id and (data.get("synthetic") is not None or data.get("realm") == "synthetic"):
-            participant = _get_or_create_synthetic_participant(
-                agent_id,
-                data.get("synthetic") or {}
-            )
-            contract.add_participant(participant)
-            _save_contract(contract)
-            return jsonify({
-                "success": True,
-                "participant_id": participant.id,
-                "is_synthetic": True,
-                "wellness": float(participant.wellness_current.value),
-                "total_participants": len(contract.participants)
-            }), 200
-        return jsonify({"error": "user_id is required"}), 400
-    
-    participant = _get_or_create_participant(user_id)
-    
+
+    participant = _resolve_party_from_payload(data)
     if participant is None:
-        return jsonify({"error": "user not found"}), 404
+        return jsonify({
+            "error": "user_id, participant_id (synthetic) or party_id is required"
+        }), 400
     
     # Actualizar wellness si se proporciona (renombrado de gamma)
     # Soporte para "wellness" (nuevo estándar) y "gamma" (legacy)
@@ -1188,6 +1307,8 @@ def add_participant(current_user, contract_id: str):
     return jsonify({
         "success": True,
         "participant_id": participant.id,
+        "party_type": party_type_of(participant.id),
+        "is_synthetic": participant.is_synthetic,
         "wellness": float(participant.wellness_current.value),
         "total_participants": len(contract.participants)
     })
@@ -1223,14 +1344,21 @@ def validate_contract(current_user, contract_id: str):
 def accept_term(current_user, contract_id: str):
     """
     Aceptar un término del contrato.
-    
+
     Body JSON:
     {
         "term_id": "term-1",
-        "user_id": 123          # humano
+        "user_id": 123          # humano (legacy)
         # o
         "participant_id": "qwen-1"  # persona sintética (consentimiento, Cap. 10 §10.8)
+        # o
+        "party_id": "coop-7",       # cualquier escala (Bloque B)
+        "delegate_id": "user-2"     # firma delegada (colectivas, Fase 2)
     }
+
+    Partes colectivas (society-/coop-/org-): la firma es delegada; el quórum
+    configurado en members_json decide el consentimiento agregado.
+    Ecosistemas (eco-*): consentimiento otorgado por el guardián oráculo (Fase 4).
     """
     contract = _load_contract(contract_id)
     
@@ -1241,21 +1369,103 @@ def accept_term(current_user, contract_id: str):
     term_id = data.get("term_id")
     user_id = data.get("user_id")
     participant_id = data.get("participant_id")
+    party_id = data.get("party_id")
+    delegate_id = data.get("delegate_id")
     
     if not term_id:
         return jsonify({"error": "term_id is required"}), 400
     
-    if user_id:
+    if party_id:
+        pid = str(party_id)
+        if not is_valid_party_id(pid):
+            return jsonify({"error": f"invalid party_id format: {party_id}"}), 400
+    elif user_id:
         pid = f"user-{user_id}"
     elif participant_id:
         pid = f"synthetic-{participant_id}"
     else:
-        return jsonify({"error": "user_id or participant_id is required"}), 400
+        return jsonify({"error": "user_id, participant_id or party_id is required"}), 400
     
     # El consentimiento solo es válido si el participante existe en el contrato
     if pid not in contract.participant_ids:
         return jsonify({"error": f"participant {pid} not in contract"}), 400
-    
+
+    # --- Ecosistema del Reino Natural: guardián oráculo (Fase 4) ---
+    if party_type_of(pid) == "ecosystem":
+        approved, reasoning = _guardian_approve_ecosystem(contract)
+        if not approved:
+            return jsonify({
+                "error": "el guardián del Reino Natural no otorga consentimiento",
+                "guardian_reasoning": reasoning,
+            }), 400
+        success = contract.accept_term(term_id, pid)
+        _save_contract(contract)
+        return jsonify({
+            "success": success,
+            "term_id": term_id,
+            "accepted_by": pid,
+            "guardian": {"mode": "oracle_guardian", "reasoning": reasoning},
+            "contract_state": contract.state.value
+        })
+
+    # --- Parte colectiva: consentimiento agregado por quórum (Fase 2) ---
+    if is_collective(pid):
+        members = members_of(pid)
+        delegates = members.get("delegates") or []
+        if not delegates:
+            return jsonify({
+                "error": f"la parte {pid} no tiene delegados configurados en members_json"
+            }), 409
+        # Delegate que firma: explicit -> legacy user_id -> token del usuario
+        if delegate_id:
+            delegate_pid = str(delegate_id)
+        elif user_id:
+            delegate_pid = f"user-{user_id}"
+        else:
+            token_uid = current_user.get("user_id") or current_user.get("id")
+            delegate_pid = f"user-{token_uid}" if token_uid is not None else None
+        if not delegate_pid or delegate_pid not in delegates:
+            return jsonify({
+                "error": f"delegate {delegate_pid} no es delegado de {pid}"
+            }), 403
+
+        db = get_db()
+        db.execute(
+            """
+            INSERT OR IGNORE INTO maxo_contract_delegate_approvals
+                (contract_id, term_id, party_id, delegate_id)
+            VALUES (?, ?, ?, ?)
+            """,
+            (contract_id, term_id, pid, delegate_pid),
+        )
+        db.commit()
+
+        approved_rows = db.execute(
+            """
+            SELECT delegate_id FROM maxo_contract_delegate_approvals
+            WHERE contract_id = ? AND term_id = ? AND party_id = ?
+            """,
+            (contract_id, term_id, pid),
+        ).fetchall()
+        consent = consent_status(pid, [r["delegate_id"] for r in approved_rows])
+
+        if consent.get("approved"):
+            success = contract.accept_term(term_id, pid)
+            _save_contract(contract)
+        else:
+            success = False
+
+        return jsonify({
+            "success": success,
+            "term_id": term_id,
+            "accepted_by": pid,
+            "delegate_id": delegate_pid,
+            "consent": consent,
+            "quorum_reached": bool(consent.get("approved")),
+            "contract_state": contract.state.value
+        }), 200 if consent.get("approved") else 202
+
+    # --- Parte individual (humana o sintética): flujo estándar ---
     success = contract.accept_term(term_id, pid)
     
     if not success:
@@ -1330,13 +1540,14 @@ def request_retraction(current_user, contract_id: str):
     
     data = request.get_json() or {}
     user_id = data.get("user_id")
+    party_id = data.get("party_id")
     reason = data.get("reason", "")
     cause = data.get("cause", "gamma_crisis")
     
-    if not user_id:
-        return jsonify({"error": "user_id is required"}), 400
+    if not user_id and not party_id:
+        return jsonify({"error": "user_id or party_id is required"}), 400
     
-    pid = f"user-{user_id}"
+    pid = f"user-{user_id}" if user_id else str(party_id)
     
     # Usar oráculo sintético para evaluar
     oracle = SyntheticOracle()

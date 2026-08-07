@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-06 — Corrección: rehidratación de contratos fuera de DRAFT
+
+### Corregido
+- **500 al recargar contratos firmados/activados**: `_load_contract` restauraba el estado antes de rehidratar participantes, y `add_participant` del core exige DRAFT — un contrato en PENDING/ACTIVE explotaba con `ValueError` al cargar su detalle. Ahora la rehidratación añade participantes directamente (reconstruir desde la BD no es mutación de diseño); los términos ya seguían ese patrón.
+- **`POST /contracts/<id>/participants`** ahora devuelve 400 ("contract not in draft state") fuera de DRAFT, igual que `add_term` (antes podía lanzar 500).
+
+### Añadido
+- **Tests**: `TestContractReload` en `test_parties_escalas.py` — contrato ACTIVO recarga por API con participantes y aceptaciones intactas; 400 al añadir parte a contrato no-DRAFT. Suite: 476/476.
+
+## 2026-08-06 — Bloque B completo: Escalas e Interescala (partes colectivas, quórum delegado, Reino Natural, anidamiento)
+
+### Añadido
+- **Registro de Partes de cualquier escala** (`app/parties.py` + tabla `maxo_parties`): persona (`user-`), sintética (`synthetic-`), micro-sociedad (`society-`), cooperativa (`coop-`), institución (`org-`) y ecosistema (`eco-`). Resolver genérico `resolve_participant_by_pid` sustituye la validación que exigía `int(user_id)` en `_get_or_create_participant_by_pid`; las colectivas leen identidad y γ agregado del registro (T13). Migración automática en `init_contracts_metrics_tables` (mismo patrón que `assigned_participant`).
+- **API `/parties`** (`app/parties_bp.py`): CRUD completo (auto-generación de `party_id` por tipo, validación de prefijo/consistencia, `DELETE` bloqueado si hay contratos activos). Los contratos aceptan `party_id` en creación batch, en `POST /contracts/<id>/participants`, en aceptación y en retractación — los formatos legacy (`user_id`, `participant_id` sintético) siguen funcionando.
+- **Consentimiento agregado con quórum** (Fase 2): tabla `maxo_contract_delegate_approvals`; `POST /contracts/<id>/accept` con `party_id` colectivo registra firma delegada (delegado debe estar en `members_json.delegates`; 403 si no), y `consent_status` sella la parte al cumplir N de M (fracción `quorum` o `quorum_required` absoluto). Progreso visible en la respuesta (`consent.current/needed`) y sobrevive recargas (rehidratación en `_load_contract`).
+- **Reino Natural** (Fase 4): guardián oráculo para `eco-*` — audita invariantes (γ, SDV, T9) y usa el oráculo en vivo (`critique`) si hay `DEEPSEEK_API_KEY`; sin key, degradación elegante al heurístico. El veredicto (razonamiento) viaja en la respuesta.
+- **Contratos interescala anidados** (Fase 5): columna `parent_contract_id` (migración automática) + `parent_contract_id` en creación, detalle con `parent_contract_id`/`subcontracts`, evento `subcontract_created` y protección de ciclos.
+- **Detalle del contrato enriquecido**: `participants_details` con `party_type`, `is_collective` y `members`; el detalle de `GET /contracts/<id>` incluye relación padre/hijos.
+- **UI (Fase 3)**: selector de "Partes Colectivas" en el builder (listado del registro + creación inline con tipo, nombre, delegados y quórum; se incluyen en creación, documento legal y negociación); en el detalle — iconos de escala en el selector de firmante y vigilancia vital, panel de **firma delegada** con selector de delegado y progreso de quórum por cláusula, flujo de guardián para ecosistemas con veredicto, chips `n/N` de quórum en cada cláusula y vínculos a contrato madre/sub-contratos. `mapParty` de `frontend/app/lib/oracle.ts` soporta escalas colectivas.
+- **Tests**: `tests/test_maxocontracts/test_parties_escalas.py` — 18 pruebas (registro, contratos con colectivas, quórum N de M, persistencia de firmas delegadas, guardián acepta/deniega, anidamiento y ciclos).
+
+### Notas Técnicas
+- **Firma**: DeepSeek (oráculo sintético).
+- **Verificación**: suite completa 474/474 (18 nuevas); `tsc --noEmit` limpio; eslint 0 problemas en archivos tocados; README actualizado a v4.5.
+- **Referencias canónicas**: Cap. 10 (Tres Reinos), Cap. 17 (MaxoContracts), `docs/architecture/ROADMAP_oraculo_vivo_y_escalas.md` (Bloque B marcado como implementado).
+
 ## 2026-08-06 — El oráculo protagonista: página de negociación a pantalla completa y tabs en el builder
 
 ### Añadido

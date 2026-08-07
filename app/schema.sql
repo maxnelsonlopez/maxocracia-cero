@@ -379,8 +379,37 @@ CREATE TABLE IF NOT EXISTS maxo_contracts (
     total_vhv_t REAL DEFAULT 0,
     total_vhv_v REAL DEFAULT 0,
     total_vhv_h REAL DEFAULT 0,
+    parent_contract_id TEXT, -- Contratos interescala anidados (ROADMAP Bloque B, Fase 5)
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Registro de Partes de cualquier escala (ROADMAP Bloque B, Fase 1):
+-- persona (user-), micro-sociedad (society-), cooperativa (coop-),
+-- institución (org-), sintética (synthetic-) y ecosistema del Reino Natural (eco-).
+CREATE TABLE IF NOT EXISTS maxo_parties (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    party_id TEXT UNIQUE NOT NULL,
+    party_type TEXT NOT NULL CHECK(party_type IN ('human','society','cooperative','institution','synthetic','ecosystem')),
+    display_name TEXT NOT NULL,
+    parent_party_id TEXT, -- anidación: una cooperativa contiene personas
+    members_json TEXT DEFAULT '{}', -- resolución de miembros/consentimiento (quórum)
+    wellness_value REAL DEFAULT 1.0,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Firmas delegadas de partes colectivas (ROADMAP Bloque B, Fase 2):
+-- cada delegado firma un término; el quórum decide el consentimiento agregado.
+CREATE TABLE IF NOT EXISTS maxo_contract_delegate_approvals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    contract_id TEXT NOT NULL,
+    term_id TEXT NOT NULL,
+    party_id TEXT NOT NULL,   -- parte colectiva (ej. 'coop-7')
+    delegate_id TEXT NOT NULL, -- delegado humano (ej. 'user-2')
+    approved_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
+    UNIQUE(contract_id, term_id, party_id, delegate_id)
 );
 
 CREATE TABLE IF NOT EXISTS maxo_contract_terms (
