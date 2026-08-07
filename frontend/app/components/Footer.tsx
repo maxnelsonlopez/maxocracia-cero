@@ -31,6 +31,7 @@ const footerLinks = {
     { label: "Contribuir", href: "/upgrade" },
   ],
   legal: [
+    { label: "Plaza Pública", href: "/verificador" },
     { label: "Transparencia", href: "/transparency" },
     { label: "Privacidad", href: "/privacy" },
     { label: "Términos", href: "/terms" },

@@ -2,7 +2,7 @@
 
 **Autor del diseño:** DeepSeek (oráculo sintético) y Max Nelson López Restrepo
 **Fecha:** 6 de agosto de 2026
-**Estado:** Bloque A **IMPLEMENTADO** (sesión del 6/8/2026: `live_oracle.py`, endpoints `/contracts/negotiate`, `/contracts/negotiate/feedback`, `/contracts/<id>/critique`, panel frontend en builder y detalle). Bloque B **IMPLEMENTADO** (misma sesión: `maxo_parties` + resolvers por prefijo, API `/parties`, consentimiento agregado con quórum N de M, guardián oráculo para el Reino Natural `eco-`, contratos interescala anidados y UI completa). **Extensiones ola 1 IMPLEMENTADAS** (hackathon nocturna del 6/8/2026: votación ponderada con `weights`/`weight_threshold`, delegación temporal con `delegations` y votos efectivos, γ agregado real por contrato, jerarquía interescala con `/tree` y `/subcontracts`, evento `contract.quorum_sealed` y seed demo coop↔org). **Extensiones ola 2 IMPLEMENTADAS** (misma noche: delegación líquida por término con `delegations_by_term`, expiración de delegaciones con `valid_until`, ciclo de vida del quórum con `quorum_deadline` + prórroga + re-consulta, webhooks por parte con `party_filter`, cohorte consolidada con `/contracts/cohort` y tarjeta en la lista). **Blindaje 3A-3C IMPLEMENTADO** (misma noche: identidad vinculada al token, inmutabilidad, autoridad de partes, T9 ejecutable, γ con fuente, prohibiciones léxicas, ventanas; escalera de equidad assisted/shielded; ejecución mínima con bitácora, penalizaciones γ, INV1 automático y cierre EXECUTED — 551/551 tests). **Ola 4 "El Puente" DISEÑADA** (rumbo sellado el 6/8/2026). **Puente A IMPLEMENTADO** (sesión del 7/8/2026: `maxo_contract_checkins` + `POST /contracts/<id>/checkin` con límite semanal y `reported_by`, serie temporal de γ en el detalle con mini-gráfica, γ agregado de cohorte con check-ins reales — 563/563 tests). **Puentes B-E pendientes.**
+**Estado:** Bloque A **IMPLEMENTADO** (sesión del 6/8/2026: `live_oracle.py`, endpoints `/contracts/negotiate`, `/contracts/negotiate/feedback`, `/contracts/<id>/critique`, panel frontend en builder y detalle). Bloque B **IMPLEMENTADO** (misma sesión: `maxo_parties` + resolvers por prefijo, API `/parties`, consentimiento agregado con quórum N de M, guardián oráculo para el Reino Natural `eco-`, contratos interescala anidados y UI completa). **Extensiones ola 1 IMPLEMENTADAS** (hackathon nocturna del 6/8/2026: votación ponderada con `weights`/`weight_threshold`, delegación temporal con `delegations` y votos efectivos, γ agregado real por contrato, jerarquía interescala con `/tree` y `/subcontracts`, evento `contract.quorum_sealed` y seed demo coop↔org). **Extensiones ola 2 IMPLEMENTADAS** (misma noche: delegación líquida por término con `delegations_by_term`, expiración de delegaciones con `valid_until`, ciclo de vida del quórum con `quorum_deadline` + prórroga + re-consulta, webhooks por parte con `party_filter`, cohorte consolidada con `/contracts/cohort` y tarjeta en la lista). **Blindaje 3A-3C IMPLEMENTADO** (misma noche: identidad vinculada al token, inmutabilidad, autoridad de partes, T9 ejecutable, γ con fuente, prohibiciones léxicas, ventanas; escalera de equidad assisted/shielded; ejecución mínima con bitácora, penalizaciones γ, INV1 automático y cierre EXECUTED — 551/551 tests). **Ola 4 "El Puente" DISEÑADA** (rumbo sellado el 6/8/2026). **Puente A IMPLEMENTADO** (sesión del 7/8/2026: `maxo_contract_checkins` + `POST /contracts/<id>/checkin` con límite semanal y `reported_by`, serie temporal de γ en el detalle con mini-gráfica, γ agregado de cohorte con check-ins reales — 563/563 tests). **Puente D IMPLEMENTADO** (misma sesión: verificador ciudadano SIN login — hash canónico estable sobre contenido inmutable, `GET /verificador/contract/<id>` y `GET /verificador/cohort`, página `/verificador` con la Economía de la Vida — 572/572 tests). **Puentes B, C y E pendientes.**
 **Referencia canónica:** Cap. 13-14 (Oráculos Dinámicos), Cap. 17 (MaxoContracts), Cap. 10 (Tres Reinos)
 
 ---
@@ -189,13 +189,21 @@ Cada escala hereda el mismo SDV y los mismos invariantes: el contrato entre una 
 >   lee las cláusulas en voz alta, recibe la paráfrasis y firma con el
 >   mismo blindaje (identidad, ventanas, protección).
 >
-> **D. La plaza pública** (T13 radical, cosecha rápida)
-> - Verificador ciudadano de la Cohorte SIN login: auditar integridad de un
->   contrato por hash, ver bienestar agregado del barrio y el estado de la
->   economía de la vida. Endpoint público de solo lectura + página
->   `/verificador`.
-> - Criterio de salida: un visitante sin cuenta verifica un contrato real
->   por su hash y ve las métricas de la cohorte.
+> **D. La plaza pública** — **IMPLEMENTADO (7/8/2026, 572/572 tests)**
+> - **Hash canónico de integridad**: SHA-256 sobre el contenido INMUTABLE
+>   (id, descripción civil, partes, términos con VHV y parte obligada, VHV
+>   total) — a diferencia del hash efímero, NO cambia con las transiciones
+>   de estado: cualquiera lo recomputa sin servidor.
+> - Endpoints públicos de solo lectura SIN login: `GET /verificador/contract/<id>`
+>   (con `?hash=` para comparar y responder `hash_matches`) y
+>   `GET /verificador/cohort` (bienestar agregado del barrio: γ promedio con
+>   latidos reales, TVI en juego, contratos por estado).
+> - Sanitización (Opacidad Sagrada): la plaza NO expone emails, teléfonos,
+>   paráfrasis ni fuentes personales — solo lo que el acuerdo hace público.
+> - Página `/verificador` (enlace en el footer): auditar por hash + la
+>   Economía de la Vida de la Cohorte Cero.
+> - Criterio de salida CUMPLIDO: un visitante sin cuenta verifica un contrato
+>   real por su hash y ve las métricas de la cohorte.
 >
 > **E. La institución humana**
 > - Consejo de avales: registro de personas verificadas por la comunidad;

@@ -878,6 +878,33 @@ def _checkin_series(contract_id: str, participant_id: str) -> List[Dict[str, Any
     ]
 
 
+def _canonical_hash(contract: MaxoContract) -> str:
+    """Hash canónico de integridad (Ola 4, Puente D: la plaza pública).
+
+    SHA-256 sobre el CONTENIDO INMUTABLE del contrato (T13 radical):
+    id, descripción civil, partes, términos (texto + VHV + parte obligada)
+    y VHV total. A diferencia del hash efímero con estado, este NO cambia
+    con las transiciones DRAFT→ACTIVE→EXECUTED: cualquiera puede recomputarlo
+    sin servidor y verificar que el acuerdo sellado sigue intacto.
+    """
+    payload = json.dumps({
+        "contract_id": contract.contract_id,
+        "civil_description": contract.civil_summary,
+        "participants": sorted(contract.participant_ids),
+        "terms": sorted([
+            {
+                "term_id": t.id,
+                "civil_text": t.description,
+                "vhv": [str(t.vhv_cost.T), str(t.vhv_cost.V), str(t.vhv_cost.R)],
+                "assigned_participant": getattr(t, "assigned_participant", None),
+            }
+            for t in contract._terms
+        ], key=lambda x: x["term_id"]),
+        "total_vhv": [str(contract.total_vhv.T), str(contract.total_vhv.V), str(contract.total_vhv.R)],
+    }, ensure_ascii=False, sort_keys=True)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
 def _sdv_s_summary(participant: Participant) -> Dict[str, Any]:
     """
     Resumen SDV-S de un participante sintético para la API (T13).
@@ -1846,10 +1873,9 @@ def get_contract(current_user, contract_id: str):
         "r": float(contract.total_vhv.R)
     }
     
-    import hashlib
-    # Generar un hash simplificado para inmutabilidad local
-    hash_payload = f"{contract.contract_id}:{contract.state.value}:{contract.total_vhv.T}:{contract.total_vhv.V}:{contract.total_vhv.R}:{len(contract._terms)}".encode('utf-8')
-    contract_hash = hashlib.sha256(hash_payload).hexdigest()
+    # Ola 4, Puente D: hash canónico de integridad sobre contenido inmutable
+    # (T13 radical): el visitante de la plaza puede recomputarlo sin servidor.
+    contract_hash = _canonical_hash(contract)
 
     db = get_db()
     parent_contract_id = getattr(contract, "_parent_contract_id", None)

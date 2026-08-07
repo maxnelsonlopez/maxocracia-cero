@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-07 — Ola 4 · Puente D: la plaza pública (verificador ciudadano sin login)
+
+### Añadido
+- **Hash canónico de integridad** (`_canonical_hash` en `contracts_bp.py`): SHA-256 sobre el contenido **inmutable** del contrato (id, descripción civil, partes, términos con VHV y parte obligada, VHV total). A diferencia del hash anterior (que incluía `state` y cambiaba con cada transición), este NO cambia DRAFT→ACTIVE→EXECUTED: cualquiera puede recomputarlo sin servidor (T13 radical). `GET /contracts/<id>` ahora expone este hash estable.
+- **Verificador Ciudadano** (`app/verifier_bp.py`, prefijo `/verificador`, SOLO LECTURA y SIN login):
+  - `GET /verificador/contract/<contract_id>` — audita un contrato real: estado, cláusulas civiles, partes con su γ y latidos, VHV total, `canonical_hash` y `hash_matches` (comparado contra `?hash=<sha256>`).
+  - `GET /verificador/cohort` — bienestar agregado del barrio: γ promedio (último latido real por participante), TVI en juego (h), contratos por estado, cláusulas, latidos y partes colectivas.
+  - **Sanitización (Opacidad Sagrada)**: sin emails, teléfonos, paráfrasis ni `reported_by` — la plaza expone solo lo que el acuerdo hace público por naturaleza.
+- **Página `/verificador`** (Next.js, sin login, enlace en el footer "Plaza Pública"): formulario de auditoría por id + hash con veredicto visual (integridad confirmada / hash no coincide) y panel de la Economía de la Vida de la Cohorte Cero.
+- **Tests**: `tests/test_maxocontracts/test_verifier_public.py` — 9 pruebas (acceso público sin login, match/mismatch de hash, estabilidad del hash a través de activación, huellas distintas para contratos distintos, sanitización sin datos personales, cohorte pública, plaza vacía).
+
+### Notas Técnicas
+- **Verificación**: suite completa 572/572 (9 nuevas); tsc/eslint limpios; build exportado; README v5.2.
+- **Referencia**: `docs/architecture/ROADMAP_oraculo_vivo_y_escalas.md` (Puente D marcado implementado; B, C y E pendientes).
+
 ## 2026-08-07 — Ola 4 · Puente A: γ que escucha la vida (check-ins semanales)
 
 ### Añadido
