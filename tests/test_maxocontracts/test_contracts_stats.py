@@ -57,6 +57,14 @@ def auth_header(client):
     return {'Authorization': f'Bearer {token}'}
 
 
+def user_headers(client, uid):
+    """Token del usuario real: la identidad SIEMPRE deriva del JWT (Ola 3A.1)."""
+    from app.jwt_utils import create_token
+
+    token = create_token({'user_id': uid})
+    return {'Authorization': f'Bearer {token}'}
+
+
 def _create_contract(client, auth_header, contract_id, description="Contrato"):
     return client.post('/contracts/', headers=auth_header, json={
         'contract_id': contract_id,
@@ -79,7 +87,7 @@ def _add_terms_and_activate(client, auth_header, contract_id, participants=(1, 2
             'vhv': {'t': 0.5, 'v': 0, 'h': 0},
         })
     for u in participants:
-        client.post(f'/contracts/{contract_id}/accept', headers=auth_header, json={
+        client.post(f'/contracts/{contract_id}/accept', headers=user_headers(client, u), json={
             'term_id': f'term-{u}',
             'user_id': u,
         })
@@ -175,13 +183,13 @@ def test_stats_nps_and_recording(client, auth_header):
     _add_participant(client, auth_header, "c-nps-1", 3)
 
     # 2 promotores (9, 10), 1 detractor (5) -> NPS = (2-1)/3*100 = 33.3
-    assert client.post('/contracts/c-nps-1/nps', headers=auth_header, json={
+    assert client.post('/contracts/c-nps-1/nps', headers=user_headers(client, 1), json={
         'participant_id': 'user-1', 'score': 9, 'comment': 'Excelente'
     }).status_code == 201
-    assert client.post('/contracts/c-nps-1/nps', headers=auth_header, json={
+    assert client.post('/contracts/c-nps-1/nps', headers=user_headers(client, 2), json={
         'participant_id': 'user-2', 'score': 10
     }).status_code == 201
-    assert client.post('/contracts/c-nps-1/nps', headers=auth_header, json={
+    assert client.post('/contracts/c-nps-1/nps', headers=user_headers(client, 3), json={
         'participant_id': 'user-3', 'score': 5
     }).status_code == 201
 

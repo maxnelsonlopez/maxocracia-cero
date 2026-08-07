@@ -109,8 +109,12 @@ def upsert_party(
     parent_party_id: Optional[str] = None,
     members: Optional[dict] = None,
     wellness: Optional[Decimal] = None,
+    owner: Optional[int] = None,
 ) -> dict:
-    """Crea o actualiza una parte colectiva en maxo_parties (upsert por party_id)."""
+    """Crea o actualiza una parte colectiva en maxo_parties (upsert por party_id).
+
+    owner (Ola 3A.3): user_id que gobierna la parte; se conserva si existe.
+    """
     members_json = json.dumps(members or {}, ensure_ascii=False)
     db = get_db()
     existing = get_party(party_id)
@@ -123,21 +127,22 @@ def upsert_party(
                 parent_party_id = COALESCE(?, parent_party_id),
                 members_json = ?,
                 wellness_value = COALESCE(?, wellness_value),
+                owner_user_id = COALESCE(?, owner_user_id),
                 updated_at = CURRENT_TIMESTAMP
             WHERE party_id = ?
             """,
             (party_type, display_name or None, parent_party_id, members_json,
-             float(wellness) if wellness is not None else None, party_id),
+             float(wellness) if wellness is not None else None, owner, party_id),
         )
     else:
         db.execute(
             """
             INSERT INTO maxo_parties
-                (party_id, party_type, display_name, parent_party_id, members_json, wellness_value)
-            VALUES (?, ?, ?, ?, ?, ?)
+                (party_id, party_type, display_name, parent_party_id, members_json, wellness_value, owner_user_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (party_id, party_type, display_name, parent_party_id, members_json,
-             float(wellness) if wellness is not None else 1.0),
+             float(wellness) if wellness is not None else 1.0, owner),
         )
     db.commit()
     return get_party(party_id)

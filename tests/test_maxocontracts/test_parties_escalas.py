@@ -52,6 +52,14 @@ def auth_header(client):
     return {'Authorization': f'Bearer {token}'}
 
 
+def user_headers(client, uid):
+    """Token del usuario real: la identidad SIEMPRE deriva del JWT (Ola 3A.1)."""
+    from app.jwt_utils import create_token
+
+    token = create_token({'user_id': uid})
+    return {'Authorization': f'Bearer {token}'}
+
+
 def make_party(client, auth_header, party_id, party_type, name, members=None):
     res = client.post('/parties/', headers=auth_header, json={
         'party_id': party_id,
@@ -216,9 +224,8 @@ class TestQuorumConsent:
         """N de M: con quorum 0.6 (2 de 3), la segunda firma sella el término."""
         self._create_contract_with_coop(client, auth_header)
 
-        res = client.post('/contracts/ctr-quorum-1/accept', headers=auth_header,
-                          json={'term_id': 'term-1', 'party_id': 'coop-7',
-                                'delegate_id': 'user-1'})
+        res = client.post('/contracts/ctr-quorum-1/accept', headers=user_headers(client, 1),
+                          json={'term_id': 'term-1', 'party_id': 'coop-7'})
         assert res.status_code == 202
         data = res.get_json()
         assert data['success'] is False
@@ -226,9 +233,8 @@ class TestQuorumConsent:
         assert data['consent']['current'] == 1
         assert data['consent']['needed'] == 2
 
-        res = client.post('/contracts/ctr-quorum-1/accept', headers=auth_header,
-                          json={'term_id': 'term-1', 'party_id': 'coop-7',
-                                'delegate_id': 'user-2'})
+        res = client.post('/contracts/ctr-quorum-1/accept', headers=user_headers(client, 2),
+                          json={'term_id': 'term-1', 'party_id': 'coop-7'})
         assert res.status_code == 200
         data = res.get_json()
         assert data['success'] is True
@@ -237,7 +243,7 @@ class TestQuorumConsent:
 
         # Los demás participantes humanos aceptan el término
         for uid in (1, 2, 3):
-            res = client.post('/contracts/ctr-quorum-1/accept', headers=auth_header,
+            res = client.post('/contracts/ctr-quorum-1/accept', headers=user_headers(client, uid),
                               json={'term_id': 'term-1', 'user_id': uid})
             assert res.status_code == 200
 
@@ -248,9 +254,8 @@ class TestQuorumConsent:
 
     def test_non_delegate_rejected(self, client, auth_header):
         self._create_contract_with_coop(client, auth_header)
-        res = client.post('/contracts/ctr-quorum-1/accept', headers=auth_header,
-                          json={'term_id': 'term-1', 'party_id': 'coop-7',
-                                'delegate_id': 'user-4'})
+        res = client.post('/contracts/ctr-quorum-1/accept', headers=user_headers(client, 4),
+                          json={'term_id': 'term-1', 'party_id': 'coop-7'})
         assert res.status_code == 403
 
     def test_collective_without_delegates_conflict(self, client, auth_header):
@@ -258,9 +263,8 @@ class TestQuorumConsent:
         create_contract(client, auth_header, 'ctr-quorum-2', [
             {'user_id': 1}, {'party_id': 'society-2'},
         ])
-        res = client.post('/contracts/ctr-quorum-2/accept', headers=auth_header,
-                          json={'term_id': 'term-1', 'party_id': 'society-2',
-                                'delegate_id': 'user-1'})
+        res = client.post('/contracts/ctr-quorum-2/accept', headers=user_headers(client, 1),
+                          json={'term_id': 'term-1', 'party_id': 'society-2'})
         assert res.status_code == 409
 
     def test_quorum_survives_reload(self, client, auth_header):
@@ -272,9 +276,9 @@ class TestQuorumConsent:
         ])
 
         for delegate in ['user-1', 'user-2']:
-            res = client.post('/contracts/ctr-quorum-3/accept', headers=auth_header,
-                              json={'term_id': 'term-1', 'party_id': 'coop-7',
-                                    'delegate_id': delegate})
+            res = client.post('/contracts/ctr-quorum-3/accept',
+                              headers=user_headers(client, int(delegate.split('-')[1])),
+                              json={'term_id': 'term-1', 'party_id': 'coop-7'})
             assert res.status_code == 202
 
         # Recarga: 2/3, aún sin sello
@@ -283,9 +287,8 @@ class TestQuorumConsent:
         assert term['accepted_by'].get('coop-7') is not True
 
         # Tercera firma: quórum cumplido y persistido
-        res = client.post('/contracts/ctr-quorum-3/accept', headers=auth_header,
-                          json={'term_id': 'term-1', 'party_id': 'coop-7',
-                                'delegate_id': 'user-3'})
+        res = client.post('/contracts/ctr-quorum-3/accept', headers=user_headers(client, 3),
+                          json={'term_id': 'term-1', 'party_id': 'coop-7'})
         assert res.status_code == 200
         assert res.get_json()['quorum_reached'] is True
 
@@ -323,11 +326,11 @@ class TestEcosystemGuardian:
 
     def test_guardian_denies_axiom_violating_contract(self, client, auth_header):
         make_party(client, auth_header, 'eco-1', 'ecosystem', 'Humedal del Valle')
-        # γ < 1 viola el invariante de bienestar (el ecosistema no puede
-        # contratar en estado de sufrimiento sostenido).
+        # γ < 1 (dentro del rango permitido [0.5, 1.5]) viola el invariante
+        # de bienestar: el ecosistema no puede contratar en sufrimiento.
         create_contract(client, auth_header, 'ctr-eco-2', [
             {'user_id': 1},
-            {'party_id': 'eco-1', 'wellness': 0.4},
+            {'party_id': 'eco-1', 'wellness': 0.6},
         ])
 
         res = client.post('/contracts/ctr-eco-2/accept', headers=auth_header,
@@ -409,7 +412,7 @@ class TestContractReload:
             {'user_id': 1}, {'user_id': 2},
         ])
         for uid in (1, 2):
-            res = client.post('/contracts/ctr-reload-1/accept', headers=auth_header,
+            res = client.post('/contracts/ctr-reload-1/accept', headers=user_headers(client, uid),
                               json={'term_id': 'term-1', 'user_id': uid})
             assert res.status_code == 200
         res = client.post('/contracts/ctr-reload-1/activate', headers=auth_header)
@@ -428,7 +431,7 @@ class TestContractReload:
             {'user_id': 1}, {'user_id': 2},
         ])
         for uid in (1, 2):
-            client.post('/contracts/ctr-reload-2/accept', headers=auth_header,
+            client.post('/contracts/ctr-reload-2/accept', headers=user_headers(client, uid),
                         json={'term_id': 'term-1', 'user_id': uid})
         res = client.post('/contracts/ctr-reload-2/activate', headers=auth_header)
         assert res.status_code == 200

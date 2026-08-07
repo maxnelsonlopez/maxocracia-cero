@@ -64,7 +64,159 @@ from .parties import (
 )
 
 from decimal import Decimal
+import hashlib
 import json
+import unicodedata
+
+# --- Blindaje anti-gamificación (Ola 3A) --------------------------------------
+# Límites y umbrales configurables del sistema (diseño: blindaje_anti_gamificacion_equidad.md)
+
+CIVIL_MAX_WORDS = 40
+CIVIL_MAX_SENTENCES = 2
+WELLNESS_MIN = Decimal("0.5")
+WELLNESS_MAX = Decimal("1.5")
+ASYMMETRY_MAX_SHARE = 0.7
+ASYMMETRY_MIN_TOTAL_H = 8.0
+ASSIGNED_REQUIRED_MIN_TOTAL = Decimal("10")
+
+PROHIBITED_PATTERNS = [
+    "sin derecho a retractarse",
+    "sin derecho a retractacion",
+    "renuncia a la retractacion",
+    "no podra retractarse",
+    "renuncia a retractarse",
+    "exclusividad",
+    "renovacion automatica",
+    "penalizacion por retractarse",
+    "retractacion penalizada",
+    "renuncia a la dignidad",
+    "renuncia a mi sdv",
+    "esclavitud",
+    "sin limite de tiempo",
+]
+
+
+def _token_uid(current_user) -> Optional[int]:
+    """El actor SIEMPRE deriva del token (Ola 3A.1, R1)."""
+    uid = current_user.get("user_id") or current_user.get("id")
+    return int(uid) if uid is not None else None
+
+
+def _normalize_civil(text: str) -> str:
+    """Minúsculas y sin acentos para comparación de patrones."""
+    text = (text or "").lower()
+    return "".join(
+        c for c in unicodedata.normalize("NFD", text)
+        if unicodedata.category(c) != "Mn"
+    )
+
+
+def _validate_civil_text(text: str) -> Optional[str]:
+    """Lenguaje civil enforceable (Ola 3A.6, R8): palabras, oraciones y
+    patrones explotativos prohibidos (R7)."""
+    t = text or ""
+    if len(t.split()) > CIVIL_MAX_WORDS:
+        return f"civil_text excede {CIVIL_MAX_WORDS} palabras (lenguaje civil, grado 8º)"
+    if t.count(".") > CIVIL_MAX_SENTENCES:
+        return f"civil_text excede {CIVIL_MAX_SENTENCES} oraciones (lenguaje civil)"
+    norm = _normalize_civil(t)
+    for pattern in PROHIBITED_PATTERNS:
+        if pattern in norm:
+            return f"cláusula prohibida detectada: '{pattern}' (viola T11/T12)"
+    return None
+
+
+def _reciprocity_imbalance(contract) -> tuple:
+    """
+    T9 ejecutable con tolerancia declarada (Ola 3A.4, R6).
+
+    Devuelve (flag, report): flag True si una sola parte carga más del 70%
+    del TVI total asignado, con ≥ 2 partes obligadas y total ≥ 8h.
+    La asimetría NO bloquea la creación: bloquea la ACTIVACIÓN hasta que
+    todas las partes obligadas (y un aval) la reconozcan explícitamente.
+    """
+    by_party = {}
+    for t in contract._terms:
+        pid = getattr(t, "assigned_participant", None)
+        if pid and float(t.vhv_cost.T) > 0:
+            by_party[pid] = by_party.get(pid, 0.0) + float(t.vhv_cost.T)
+    total = sum(by_party.values())
+    if not by_party or total < ASYMMETRY_MIN_TOTAL_H or len(by_party) < 2:
+        return False, {"obligations": by_party, "total": round(total, 2)}
+    max_party = max(by_party, key=by_party.get)
+    max_share = by_party[max_party] / total
+    return max_share > ASYMMETRY_MAX_SHARE, {
+        "obligations": by_party,
+        "total": round(total, 2),
+        "max_party": max_party,
+        "max_share": round(max_share, 3),
+        "threshold": ASYMMETRY_MAX_SHARE,
+    }
+
+
+def _audit(contract: MaxoContract, action: str, actor_id: Optional[int], **extra) -> None:
+    """Registro auditable de acciones de la API (Ola 3A.2, T13)."""
+    data = {"actor_id": f"user-{actor_id}" if actor_id else None}
+    data.update(extra)
+    contract._log_event(action, data)
+
+
+def _can_act_for(pid: str, token_uid: Optional[int], contract=None) -> bool:
+    """¿Puede el actor del token actuar por el pid? (Ola 3A.1, R1/R4)"""
+    if token_uid is None:
+        return False
+    if pid == f"user-{token_uid}":
+        return True
+    if party_type_of(pid) == "ecosystem":
+        # El guardián del Reino Natural es invocado por un participante
+        # humano del contrato (el actor queda registrado).
+        return contract is not None and f"user-{token_uid}" in contract.participant_ids
+    if is_collective(pid):
+        return f"user-{token_uid}" in (members_of(pid).get("delegates") or [])
+    if party_type_of(pid) == "synthetic":
+        # Operación asistida: cualquier participante humano del contrato
+        # puede operar la firma sintética (el actor queda registrado).
+        return contract is not None and f"user-{token_uid}" in contract.participant_ids
+    return False
+
+
+def _contract_window_blocked(contract, db) -> Optional[dict]:
+    """
+    Ventanas temporales server-side (Ola 3A.7, R10/R11): deadline de firma
+    y enfriamiento mínimo entre creación y primera firma.
+    Devuelve un payload de error (423) o None.
+    """
+    from datetime import timedelta
+    created_at = getattr(contract, "_created_at", None)
+    if created_at:
+        try:
+            created_dt = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+        except (ValueError, TypeError):
+            created_dt = None
+    else:
+        created_dt = None
+
+    deadline = getattr(contract, "_signature_deadline", None)
+    if deadline:
+        try:
+            dl = datetime.fromisoformat(str(deadline).replace("Z", "+00:00"))
+            if datetime.now() > dl:
+                return {"error": "la ventana de firma del contrato venció",
+                        "code": "SIGNATURE_DEADLINE_EXPIRED"}
+        except (ValueError, TypeError):
+            pass
+
+    hours = float(getattr(contract, "_min_reflection_hours", 0) or 0)
+    if hours > 0 and created_dt:
+        ready_at = created_dt + timedelta(hours=hours)
+        now = datetime.now()
+        if now < ready_at:
+            remaining = (ready_at - now).total_seconds() / 3600
+            return {"error": f"periodo de reflexión obligatorio en curso "
+                             f"({hours:.0f}h desde la creación)",
+                    "code": "REFLECTION_PENDING",
+                    "remaining_hours": round(remaining, 1)}
+    return None
 
 contracts_bp = Blueprint("contracts", __name__, url_prefix="/contracts")
 
@@ -233,6 +385,48 @@ def init_contracts_metrics_tables(app):
                 cur.execute(
                     "ALTER TABLE maxo_contracts ADD COLUMN parent_contract_id TEXT"
                 )
+            # Ola 3A: inmutabilidad (creador) y ventanas temporales
+            if "creator_user_id" not in cols:
+                cur.execute(
+                    "ALTER TABLE maxo_contracts ADD COLUMN creator_user_id INTEGER"
+                )
+            if "signature_deadline" not in cols:
+                cur.execute(
+                    "ALTER TABLE maxo_contracts ADD COLUMN signature_deadline TEXT"
+                )
+            if "min_reflection_hours" not in cols:
+                cur.execute(
+                    "ALTER TABLE maxo_contracts ADD COLUMN min_reflection_hours REAL DEFAULT 0"
+                )
+        # Ola 3A.3: autoridad sobre las partes + votos de gobernanza
+        if "maxo_parties" in tables:
+            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_parties)").fetchall()]
+            if "owner_user_id" not in cols:
+                cur.execute(
+                    "ALTER TABLE maxo_parties ADD COLUMN owner_user_id INTEGER"
+                )
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS maxo_party_governance_votes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                party_id TEXT NOT NULL,
+                proposal_hash TEXT NOT NULL,
+                delegate_id TEXT NOT NULL,
+                approved INTEGER DEFAULT 1,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(party_id, proposal_hash, delegate_id)
+            )
+        """)
+        # Ola 3A.5: γ con fuente (actor y timestamp del reporte)
+        if "maxo_contract_participants" in tables:
+            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_contract_participants)").fetchall()]
+            if "reported_by" not in cols:
+                cur.execute(
+                    "ALTER TABLE maxo_contract_participants ADD COLUMN reported_by TEXT"
+                )
+            if "reported_at" not in cols:
+                cur.execute(
+                    "ALTER TABLE maxo_contract_participants ADD COLUMN reported_at TEXT"
+                )
         # Migración: webhooks filtrados por parte (Ext. 4).
         if "maxo_webhooks" in tables:
             cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_webhooks)").fetchall()]
@@ -253,15 +447,21 @@ def serve_builder():
 
 # Helper functions for persistence
 
-def _save_contract(contract: MaxoContract):
-    """Guarda un objeto MaxoContract en la base de datos."""
+def _save_contract(contract: MaxoContract, actor_id: Optional[int] = None):
+    """Guarda un objeto MaxoContract en la base de datos.
+
+    actor_id (Ola 3A.5): quién reporta el γ al escribir participantes.
+    """
     db = get_db()
     
     # 1. Upsert contract header
     parent_id = getattr(contract, "_parent_contract_id", None)
+    creator_id = getattr(contract, "_creator_user_id", None)
+    deadline = getattr(contract, "_signature_deadline", None)
+    reflection = float(getattr(contract, "_min_reflection_hours", 0) or 0)
     db.execute("""
-        INSERT INTO maxo_contracts (contract_id, civil_description, state, total_vhv_t, total_vhv_v, total_vhv_h, parent_contract_id, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        INSERT INTO maxo_contracts (contract_id, civil_description, state, total_vhv_t, total_vhv_v, total_vhv_h, parent_contract_id, creator_user_id, signature_deadline, min_reflection_hours, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
         ON CONFLICT(contract_id) DO UPDATE SET
             civil_description=excluded.civil_description,
             state=excluded.state,
@@ -269,6 +469,9 @@ def _save_contract(contract: MaxoContract):
             total_vhv_v=excluded.total_vhv_v,
             total_vhv_h=excluded.total_vhv_h,
             parent_contract_id=COALESCE(excluded.parent_contract_id, parent_contract_id),
+            creator_user_id=COALESCE(excluded.creator_user_id, creator_user_id),
+            signature_deadline=COALESCE(excluded.signature_deadline, signature_deadline),
+            min_reflection_hours=COALESCE(excluded.min_reflection_hours, min_reflection_hours),
             updated_at=CURRENT_TIMESTAMP
     """, (
         contract.contract_id,
@@ -277,7 +480,10 @@ def _save_contract(contract: MaxoContract):
         float(contract.total_vhv.T),
         float(contract.total_vhv.V),
         float(contract.total_vhv.R),
-        parent_id
+        parent_id,
+        creator_id,
+        deadline,
+        reflection
     ))
     
     # 2. Update participants
@@ -302,16 +508,20 @@ def _save_contract(contract: MaxoContract):
         else:
             sdv_status = "ok"
         db.execute("""
-            INSERT INTO maxo_contract_participants (contract_id, participant_id, wellness_value, sdv_status)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO maxo_contract_participants (contract_id, participant_id, wellness_value, sdv_status, reported_by, reported_at)
+            VALUES (?, ?, ?, ?, ?, ?)
             ON CONFLICT(contract_id, participant_id) DO UPDATE SET
                 wellness_value=excluded.wellness_value,
-                sdv_status=excluded.sdv_status
+                sdv_status=excluded.sdv_status,
+                reported_by=COALESCE(maxo_contract_participants.reported_by, excluded.reported_by),
+                reported_at=COALESCE(maxo_contract_participants.reported_at, excluded.reported_at)
         """, (
             contract.contract_id,
             p.id,
             float(p.wellness_current.value),
-            sdv_status
+            sdv_status,
+            f"user-{actor_id}" if actor_id is not None else None,
+            datetime.now().isoformat()
         ))
         # Sincronizar γ agregado de partes colectivas al registro (T13)
         if p.id.startswith(("society-", "coop-", "org-", "eco-")):
@@ -389,6 +599,14 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
     contract._state = ContractState(row["state"])
     if row["parent_contract_id"]:
         contract._parent_contract_id = row["parent_contract_id"]
+    if row["creator_user_id"]:
+        contract._creator_user_id = row["creator_user_id"]
+    if row["signature_deadline"]:
+        contract._signature_deadline = row["signature_deadline"]
+    if row["min_reflection_hours"]:
+        contract._min_reflection_hours = row["min_reflection_hours"]
+    if row["created_at"]:
+        contract._created_at = row["created_at"]
     
     # 2. Load participants
     p_rows = db.execute("SELECT * FROM maxo_contract_participants WHERE contract_id = ?", (contract_id,)).fetchall()
@@ -473,6 +691,11 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
         V=Decimal(str(row["total_vhv_v"])),
         R=Decimal(str(row["total_vhv_h"]))
     )
+
+    # T9 ejecutable (Ola 3A.4): el flag de asimetría condiciona la activación.
+    flag, report = _reciprocity_imbalance(contract)
+    contract._asymmetry_flag = flag
+    contract._asymmetry_report = report
     
     return contract
 
@@ -514,7 +737,7 @@ def _get_or_create_participant(user_id: int) -> Participant:
     return get_human_participant(user_id)
 
 
-def _resolve_party_from_payload(p_data: Dict[str, Any]) -> Optional[Participant]:
+def _resolve_party_from_payload(p_data: Dict[str, Any], owner: Optional[int] = None) -> Optional[Participant]:
     """
     Resuelve una parte desde el payload de un participante, soportando
     todas las escalas (ROADMAP Bloque B):
@@ -524,7 +747,8 @@ def _resolve_party_from_payload(p_data: Dict[str, Any]) -> Optional[Participant]
       {"party_id": "coop-7", ...}                    -> cualquier escala
 
     Si la parte colectiva no existe aún en maxo_parties y el payload trae
-    party_type/display_name, se auto-crea (upsert) en el registro.
+    party_type/display_name, se auto-crea (upsert) en el registro con el
+    actor del token como owner (Ola 3A.3).
     """
     if p_data.get("party_id"):
         pid = str(p_data["party_id"])
@@ -542,6 +766,7 @@ def _resolve_party_from_payload(p_data: Dict[str, Any]) -> Optional[Participant]
                     display_name=display_name,
                     parent_party_id=p_data.get("parent_party_id"),
                     members=p_data.get("members") if isinstance(p_data.get("members"), dict) else None,
+                    owner=owner,
                 )
         return resolve_participant_by_pid(pid)
 
@@ -555,14 +780,22 @@ def _resolve_party_from_payload(p_data: Dict[str, Any]) -> Optional[Participant]
     return None
 
 
-def _apply_wellness(participant: Participant, p_data: Dict[str, Any]) -> None:
-    """Aplica wellness/gamma al participante si viene en el payload (legacy)."""
+def _apply_wellness(participant: Participant, p_data: Dict[str, Any]) -> Optional[str]:
+    """Aplica wellness/gamma al participante con tope defensivo (Ola 3A.5).
+
+    γ ∈ [0.5, 1.5]; fuera de rango -> mensaje de error (400 en la API).
+    """
     wellness_val = p_data.get("wellness", p_data.get("gamma"))
-    if wellness_val is not None:
-        try:
-            participant.update_wellness(Decimal(str(wellness_val)))
-        except ValueError:
-            pass
+    if wellness_val is None:
+        return None
+    try:
+        value = Decimal(str(wellness_val))
+    except (ValueError, TypeError):
+        return "invalid wellness value"
+    if value < WELLNESS_MIN or value > WELLNESS_MAX:
+        return f"wellness fuera de rango [{WELLNESS_MIN}, {WELLNESS_MAX}]"
+    participant.update_wellness(value)
+    return None
 
 
 @contracts_bp.route("/", methods=["POST"])
@@ -570,29 +803,48 @@ def _apply_wellness(participant: Participant, p_data: Dict[str, Any]) -> None:
 def create_contract(current_user):
     """
     Crear un nuevo MaxoContract.
-    
+
     Body JSON:
     {
         "contract_id": "loan-001",
-        "civil_description": "Préstamo de 10 Maxos entre amigos"
+        "civil_description": "Préstamo de 10 Maxos entre amigos",
+        "signature_deadline": "2026-09-01T23:59:59",   # opcional (Ola 3A.7)
+        "min_reflection_hours": 24                      # opcional (Ola 3A.7)
     }
+
+    Blindaje (Ola 3A): el creador queda registrado (3A.2) y un contract_id
+    existente fuera de DRAFT del mismo creador se rechaza con 409 (R2).
     """
     data = request.get_json() or {}
-    
+    token_uid = _token_uid(current_user)
+
     contract_id = data.get("contract_id")
     if not contract_id:
         return jsonify({"error": "contract_id is required"}), 400
-        
+
     civil_description = data.get("civil_description", "")
-    
-    civil_description = data.get("civil_description", "")
-    
+
+    # Inmutabilidad (Ola 3A.2, R2): re-crear un contrato ajeno/activo = 409
+    db = get_db()
+    existing = db.execute(
+        "SELECT state, creator_user_id FROM maxo_contracts WHERE contract_id = ?",
+        (contract_id,),
+    ).fetchone()
+    if existing is not None:
+        creator = existing["creator_user_id"]
+        if existing["state"] != "draft" or (creator is not None and creator != token_uid):
+            return jsonify({
+                "error": "el contrato ya existe y no es un borrador editable del mismo creador",
+                "code": "CONTRACT_CONFLICT",
+            }), 409
+
     contract = MaxoContract(
         contract_id=contract_id,
         description=civil_description,
         civil_summary=civil_description
     )
-    
+    contract._creator_user_id = token_uid
+
     # Batch creation support: add participants
     # Formas aceptadas por participante:
     #   {"user_id": 5, ...}                          -> humano
@@ -601,14 +853,51 @@ def create_contract(current_user):
     #   {"party_id": "coop-7", "party_type": "cooperative", "display_name": ...} -> cualquier escala (Bloque B)
     participants_data = data.get("participants", [])
     for p_data in participants_data:
-        participant = _resolve_party_from_payload(p_data)
+        participant = _resolve_party_from_payload(p_data, owner=token_uid)
         if participant:
-            _apply_wellness(participant, p_data)
+            err = _apply_wellness(participant, p_data)
+            if err:
+                return jsonify({"error": err}), 400
             contract.add_participant(participant)
             continue
 
     # Batch creation support: add terms
     _attach_terms(contract, data.get("terms", []))
+
+    # Lenguaje civil enforceable (Ola 3A.6, R8)
+    desc_err = _validate_civil_text(civil_description)
+    if desc_err:
+        return jsonify({"error": f"civil_description: {desc_err}"}), 400
+    for term in contract._terms:
+        term_err = _validate_civil_text(term.description)
+        if term_err:
+            return jsonify({"error": f"término {term.id}: {term_err}"}), 400
+
+    # Obligaciones sin parte responsable (Ola 3A.6, R9): si el contrato pesa
+    # ≥ 10h, cada término con costo T > 0 debe tener parte obligada.
+    if contract.total_vhv.T >= ASSIGNED_REQUIRED_MIN_TOTAL:
+        for term in contract._terms:
+            if term.vhv_cost.T > 0 and not getattr(term, "assigned_participant", None):
+                return jsonify({
+                    "error": f"término {term.id} sin parte obligada (assigned_participant_id) "
+                             f"en contrato de ≥ {ASSIGNED_REQUIRED_MIN_TOTAL}h",
+                    "code": "UNASSIGNED_OBLIGATION",
+                }), 400
+
+    # T9: flag de asimetría (Ola 3A.4) + ventana de reflexión por defecto
+    flag, report = _reciprocity_imbalance(contract)
+    contract._asymmetry_flag = flag
+    contract._asymmetry_report = report
+    contract._signature_deadline = data.get("signature_deadline")
+    reflection = data.get("min_reflection_hours")
+    if reflection is None:
+        # La asimetría declarada exige reflexión por defecto (24h)
+        contract._min_reflection_hours = 24 if flag else 0
+    else:
+        try:
+            contract._min_reflection_hours = max(0.0, float(reflection))
+        except (ValueError, TypeError):
+            return jsonify({"error": "invalid min_reflection_hours"}), 400
 
     # Contratos interescala anidados (Fase 5): un contrato puede declararse
     # sub-contrato de un contrato madre existente.
@@ -618,13 +907,17 @@ def create_contract(current_user):
         if err:
             return err
 
-    _save_contract(contract)
+    _audit(contract, "contract_created", token_uid, asymmetry=report)
+    _save_contract(contract, actor_id=token_uid)
     
     return jsonify({
         "success": True,
         "contract_id": contract_id,
         "state": contract.state.value,
-        "created_at": datetime.now().isoformat()
+        "created_at": datetime.now().isoformat(),
+        "asymmetry": report,
+        "requires_asymmetry_acknowledgment": flag,
+        "min_reflection_hours": contract._min_reflection_hours,
     }), 201
 
 
@@ -693,6 +986,24 @@ def _build_contract_tree(cid: str, db, depth: int = 0) -> Dict[str, Any]:
     }
 
 
+def _asymmetry_acknowledged(contract_id: str) -> List[str]:
+    """Reconocimientos de asimetría registrados del contrato (Ola 3A.4)."""
+    try:
+        row = get_db().execute(
+            "SELECT meta_value FROM maxo_contract_meta WHERE contract_id = ? AND meta_key = 'asymmetry_acknowledged'",
+            (contract_id,),
+        ).fetchone()
+    except Exception:
+        return []
+    if not row or not row["meta_value"]:
+        return []
+    try:
+        parsed = json.loads(row["meta_value"])
+        return parsed if isinstance(parsed, list) else []
+    except (ValueError, TypeError):
+        return []
+
+
 @contracts_bp.route("/<contract_id>/subcontracts", methods=["POST"])
 @token_required
 def create_subcontract(current_user, contract_id: str):
@@ -706,6 +1017,7 @@ def create_subcontract(current_user, contract_id: str):
     if parent is None:
         return jsonify({"error": "contract not found"}), 404
 
+    token_uid = _token_uid(current_user)
     data = request.get_json() or {}
     child_id = data.get("contract_id")
     if not child_id:
@@ -716,16 +1028,36 @@ def create_subcontract(current_user, contract_id: str):
         description=data.get("civil_description", ""),
         civil_summary=data.get("civil_description", "")
     )
+    contract._creator_user_id = token_uid
     for p_data in data.get("participants", []):
-        participant = _resolve_party_from_payload(p_data)
+        participant = _resolve_party_from_payload(p_data, owner=token_uid)
         if participant:
-            _apply_wellness(participant, p_data)
+            err = _apply_wellness(participant, p_data)
+            if err:
+                return jsonify({"error": err}), 400
             contract.add_participant(participant)
     _attach_terms(contract, data.get("terms", []))
+    desc_err = _validate_civil_text(contract.civil_summary)
+    if desc_err:
+        return jsonify({"error": f"civil_description: {desc_err}"}), 400
+    for term in contract._terms:
+        term_err = _validate_civil_text(term.description)
+        if term_err:
+            return jsonify({"error": f"término {term.id}: {term_err}"}), 400
+    if contract.total_vhv.T >= ASSIGNED_REQUIRED_MIN_TOTAL:
+        for term in contract._terms:
+            if term.vhv_cost.T > 0 and not getattr(term, "assigned_participant", None):
+                return jsonify({"error": f"término {term.id} sin parte obligada",
+                                "code": "UNASSIGNED_OBLIGATION"}), 400
+    flag, report = _reciprocity_imbalance(contract)
+    contract._asymmetry_flag = flag
+    contract._asymmetry_report = report
+    contract._min_reflection_hours = 24 if flag else 0
     err = _attach_parent(contract, contract_id)
     if err:
         return err
-    _save_contract(contract)
+    _audit(contract, "contract_created", token_uid, parent=contract_id, asymmetry=report)
+    _save_contract(contract, actor_id=token_uid)
     return jsonify({
         "success": True,
         "contract_id": child_id,
@@ -1180,6 +1512,12 @@ def record_nps(current_user, contract_id: str):
     if participant_id not in contract.participant_ids:
         return jsonify({"error": f"participant {participant_id} not in contract"}), 400
 
+    # Identidad vinculada (Ola 3A.1): el NPS solo se reporta por sí mismo,
+    # como delegado de su colectiva o como operador de una sintética.
+    if not _can_act_for(participant_id, _token_uid(current_user), contract):
+        return jsonify({"error": "no puedes reportar NPS por esta parte",
+                        "code": "IDENTITY_MISMATCH"}), 403
+
     try:
         score_int = int(score)
     except (TypeError, ValueError):
@@ -1290,6 +1628,12 @@ def get_contract(current_user, contract_id: str):
         "civil_description": contract.civil_summary,
         "parent_contract_id": parent_contract_id,
         "subcontracts": [r["contract_id"] for r in subcontract_rows],
+        "creator_user_id": getattr(contract, "_creator_user_id", None),
+        "signature_deadline": getattr(contract, "_signature_deadline", None),
+        "min_reflection_hours": getattr(contract, "_min_reflection_hours", 0),
+        "asymmetry": getattr(contract, "_asymmetry_report", None),
+        "requires_asymmetry_acknowledgment": bool(getattr(contract, "_asymmetry_flag", False)),
+        "asymmetry_acknowledged": _asymmetry_acknowledged(contract_id),
         "participants": [p.id for p in contract.participants],
         "participants_details": [
             {
@@ -1363,6 +1707,11 @@ def add_term(current_user, contract_id: str):
     vhv_data = data.get("vhv", {})
     assigned_participant = data.get("assigned_participant_id")
 
+    # Lenguaje civil enforceable (Ola 3A.6)
+    text_err = _validate_civil_text(civil_text)
+    if text_err:
+        return jsonify({"error": f"civil_text: {text_err}"}), 400
+
     try:
         vhv = VHV(
             T=Decimal(str(vhv_data.get("t", 0))),
@@ -1372,6 +1721,18 @@ def add_term(current_user, contract_id: str):
     except (ValueError, TypeError) as e:
         return jsonify({"error": f"invalid vhv format: {e}"}), 400
 
+    # Obligaciones sin parte responsable (Ola 3A.6, R9)
+    if (
+        vhv.T > 0
+        and contract.total_vhv.T + vhv.T >= ASSIGNED_REQUIRED_MIN_TOTAL
+        and not assigned_participant
+    ):
+        return jsonify({
+            "error": "término sin parte obligada (assigned_participant_id) en contrato de ≥ "
+                     f"{ASSIGNED_REQUIRED_MIN_TOTAL}h",
+            "code": "UNASSIGNED_OBLIGATION",
+        }), 400
+
     term = ContractTerm(
         id=term_id,
         description=civil_text,
@@ -1380,7 +1741,12 @@ def add_term(current_user, contract_id: str):
     term.assigned_participant = assigned_participant
 
     contract.add_term(term)
-    _save_contract(contract)
+    # Recalcular flag de asimetría (Ola 3A.4)
+    flag, report = _reciprocity_imbalance(contract)
+    contract._asymmetry_flag = flag
+    contract._asymmetry_report = report
+    _audit(contract, "term_added", _token_uid(current_user), term_id=term_id)
+    _save_contract(contract, actor_id=_token_uid(current_user))
     
     return jsonify({
         "success": True,
@@ -1415,8 +1781,9 @@ def add_participant(current_user, contract_id: str):
         return jsonify({"error": "contract not in draft state"}), 400
     
     data = request.get_json() or {}
+    token_uid = _token_uid(current_user)
 
-    participant = _resolve_party_from_payload(data)
+    participant = _resolve_party_from_payload(data, owner=token_uid)
     if participant is None:
         return jsonify({
             "error": "user_id, participant_id (synthetic) or party_id is required"
@@ -1429,13 +1796,26 @@ def add_participant(current_user, contract_id: str):
         wellness_val = data.get("gamma")
 
     if wellness_val is not None:
-        try:
-            participant.update_wellness(Decimal(str(wellness_val)))
-        except ValueError as e:
-            return jsonify({"error": f"invalid wellness value: {e}"}), 400
+        err = _apply_wellness(participant, {"wellness": wellness_val})
+        if err:
+            return jsonify({"error": err}), 400
     
     contract.add_participant(participant)
-    _save_contract(contract)
+    _audit(contract, "participant_added", token_uid, participant_id=participant.id)
+    _save_contract(contract, actor_id=token_uid)
+    # Fuente del γ (Ola 3A.5): el reporte queda atribuido al actor
+    if wellness_val is not None:
+        db = get_db()
+        db.execute(
+            """
+            UPDATE maxo_contract_participants
+            SET reported_by = ?, reported_at = ?
+            WHERE contract_id = ? AND participant_id = ?
+            """,
+            (f"user-{token_uid}", datetime.now().isoformat(),
+             contract_id, participant.id),
+        )
+        db.commit()
     
     return jsonify({
         "success": True,
@@ -1497,6 +1877,15 @@ def accept_term(current_user, contract_id: str):
     
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
+
+    token_uid = _token_uid(current_user)
+    if token_uid is None:
+        return jsonify({"error": "token sin identidad válida"}), 403
+    
+    # Ventanas temporales server-side (Ola 3A.7, R10/R11)
+    window_blocked = _contract_window_blocked(contract, get_db())
+    if window_blocked:
+        return jsonify(window_blocked), 423
     
     data = request.get_json() or {}
     term_id = data.get("term_id")
@@ -1523,6 +1912,22 @@ def accept_term(current_user, contract_id: str):
     if pid not in contract.participant_ids:
         return jsonify({"error": f"participant {pid} not in contract"}), 400
 
+    # --- Identidad vinculada al token (Ola 3A.1, R1): el actor nunca se
+    #     toma del cuerpo de la petición; solo puede firmar por sí mismo,
+    #     como delegado de su colectiva, o como operador asistido de una
+    #     sintética/ecosistema del que es participante. ---
+    if party_type_of(pid) == "human" and pid != f"user-{token_uid}":
+        return jsonify({"error": "solo puedes firmar por ti mismo", "code": "IDENTITY_MISMATCH"}), 403
+    if is_collective(pid) and party_type_of(pid) != "ecosystem" and not members_of(pid).get("delegates"):
+        return jsonify({
+            "error": f"la parte {pid} no tiene delegados configurados en members_json"
+        }), 409
+    if not _can_act_for(pid, token_uid, contract):
+        return jsonify({
+            "error": "no puedes actuar por esta parte",
+            "code": "IDENTITY_MISMATCH",
+        }), 403
+
     # --- Ecosistema del Reino Natural: guardián oráculo (Fase 4) ---
     if party_type_of(pid) == "ecosystem":
         approved, reasoning = _guardian_approve_ecosystem(contract)
@@ -1532,7 +1937,8 @@ def accept_term(current_user, contract_id: str):
                 "guardian_reasoning": reasoning,
             }), 400
         success = contract.accept_term(term_id, pid)
-        _save_contract(contract)
+        _audit(contract, "term_accept_guardian", token_uid, term_id=term_id, party_id=pid)
+        _save_contract(contract, actor_id=token_uid)
         return jsonify({
             "success": success,
             "term_id": term_id,
@@ -1549,15 +1955,9 @@ def accept_term(current_user, contract_id: str):
             return jsonify({
                 "error": f"la parte {pid} no tiene delegados configurados en members_json"
             }), 409
-        # Delegate que firma: explicit -> legacy user_id -> token del usuario
-        if delegate_id:
-            delegate_pid = str(delegate_id)
-        elif user_id:
-            delegate_pid = f"user-{user_id}"
-        else:
-            token_uid = current_user.get("user_id") or current_user.get("id")
-            delegate_pid = f"user-{token_uid}" if token_uid is not None else None
-        if not delegate_pid or delegate_pid not in delegates:
+        # El delegado que firma es SIEMPRE el actor del token (Ola 3A.1)
+        delegate_pid = f"user-{token_uid}"
+        if delegate_pid not in delegates:
             return jsonify({
                 "error": f"delegate {delegate_pid} no es delegado de {pid}"
             }), 403
@@ -1625,13 +2025,81 @@ def accept_term(current_user, contract_id: str):
     if not success:
         return jsonify({"error": f"failed to accept term {term_id} for {pid}"}), 400
     
-    _save_contract(contract)
+    _audit(contract, "term_accept_signed", token_uid, term_id=term_id, party_id=pid)
+    _save_contract(contract, actor_id=token_uid)
     
     return jsonify({
         "success": True,
         "term_id": term_id,
         "accepted_by": pid,
         "contract_state": contract.state.value
+    })
+
+
+@contracts_bp.route("/<contract_id>/acknowledge-asymmetry", methods=["POST"])
+@token_required
+def acknowledge_asymmetry(current_user, contract_id: str):
+    """
+    T9 ejecutable (Ola 3A.4, R6): reconocimiento explícito de la asimetría
+    del contrato. Solo las partes obligadas y un aval pueden reconocer, y
+    cada reconocimiento es firma vinculada al token.
+
+    Body JSON:
+    {
+        "party_id": "user-2"
+    }
+
+    La activación de un contrato asimétrico exige el reconocimiento de TODAS
+    las partes obligadas (+ un aval de los participantes no obligados).
+    """
+    contract = _load_contract(contract_id)
+    if contract is None:
+        return jsonify({"error": "contract not found"}), 404
+
+    token_uid = _token_uid(current_user)
+    if token_uid is None:
+        return jsonify({"error": "token sin identidad válida"}), 403
+
+    if not getattr(contract, "_asymmetry_flag", False):
+        return jsonify({"error": "este contrato no tiene asimetría declarada"}), 400
+
+    data = request.get_json() or {}
+    pid = str(data.get("party_id") or "")
+    if pid not in contract.participant_ids:
+        return jsonify({"error": f"participant {pid} not in contract"}), 400
+    if not _can_act_for(pid, token_uid, contract):
+        return jsonify({"error": "no puedes reconocer por esta parte",
+                        "code": "IDENTITY_MISMATCH"}), 403
+
+    db = get_db()
+    row = db.execute(
+        "SELECT meta_value FROM maxo_contract_meta WHERE contract_id = ? AND meta_key = 'asymmetry_acknowledged'",
+        (contract_id,),
+    ).fetchone()
+    acknowledged = []
+    if row and row["meta_value"]:
+        try:
+            acknowledged = json.loads(row["meta_value"])
+        except (ValueError, TypeError):
+            acknowledged = []
+    if pid not in acknowledged:
+        acknowledged.append(pid)
+    db.execute(
+        """
+        INSERT INTO maxo_contract_meta (contract_id, meta_key, meta_value)
+        VALUES (?, 'asymmetry_acknowledged', ?)
+        ON CONFLICT(contract_id, meta_key) DO UPDATE SET meta_value = excluded.meta_value
+        """,
+        (contract_id, json.dumps(acknowledged)),
+    )
+    _audit(contract, "asymmetry_acknowledged", token_uid, party_id=pid)
+    db.commit()
+
+    return jsonify({
+        "success": True,
+        "contract_id": contract_id,
+        "party_id": pid,
+        "acknowledged": acknowledged,
     })
 
 
@@ -1643,6 +2111,42 @@ def activate_contract(current_user, contract_id: str):
     
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
+
+    token_uid = _token_uid(current_user)
+
+    # T9 ejecutable (Ola 3A.4): la asimetría debe reconocerse explícitamente
+    # por todas las partes obligadas + un aval antes de activar.
+    if getattr(contract, "_asymmetry_flag", False):
+        report = getattr(contract, "_asymmetry_report", {}) or {}
+        db = get_db()
+        row = db.execute(
+            "SELECT meta_value FROM maxo_contract_meta WHERE contract_id = ? AND meta_key = 'asymmetry_acknowledged'",
+            (contract_id,),
+        ).fetchone()
+        acknowledged = []
+        if row and row["meta_value"]:
+            try:
+                acknowledged = json.loads(row["meta_value"])
+            except (ValueError, TypeError):
+                acknowledged = []
+        obligated = [pid for pid in report.get("obligations", {})]
+        aval = next(
+            (pid for pid in contract.participant_ids if pid not in obligated),
+            None,
+        )
+        needed = set(obligated)
+        if aval:
+            needed.add(aval)
+        missing = sorted(needed - set(acknowledged))
+        if missing:
+            return jsonify({
+                "error": "asimetría no reconocida: faltan partes que acepten la asimetría",
+                "code": "ASYMMETRY_UNACKNOWLEDGED",
+                "missing": missing,
+                "acknowledged": acknowledged,
+                "asymmetry": report,
+                "hint": "POST /contracts/<id>/acknowledge-asymmetry con cada party_id",
+            }), 400
     
     if contract.state == ContractState.DRAFT:
         # Intentar pasar a PENDING primero (validación axiomática)
@@ -1658,7 +2162,8 @@ def activate_contract(current_user, contract_id: str):
             "hint": "ensure all terms are accepted and contract is in PENDING state"
         }), 400
     
-    _save_contract(contract)
+    _audit(contract, "contract_activated", token_uid)
+    _save_contract(contract, actor_id=token_uid)
     
     # Despachar evento
     dispatch_event("contract.activated", {
@@ -1701,7 +2206,12 @@ def request_retraction(current_user, contract_id: str):
     if not user_id and not party_id:
         return jsonify({"error": "user_id or party_id is required"}), 400
     
+    token_uid = _token_uid(current_user)
     pid = f"user-{user_id}" if user_id else str(party_id)
+    # Identidad vinculada (Ola 3A.1): solo por ti mismo o como delegado/operador
+    if not _can_act_for(pid, token_uid, contract):
+        return jsonify({"error": "no puedes solicitar retractación por esta parte",
+                        "code": "IDENTITY_MISMATCH"}), 403
     
     # Usar oráculo sintético para evaluar
     oracle = SyntheticOracle()

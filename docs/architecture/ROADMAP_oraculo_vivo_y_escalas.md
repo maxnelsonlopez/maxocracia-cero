@@ -164,6 +164,13 @@ Cada escala hereda el mismo SDV y los mismos invariantes: el contrato entre una 
 > 5. **Exportación de gobernanza**: CSV/JSON de decisiones colectivas por parte y contrato para auditoría externa.
 > 6. Verifica: suite completa y `tsc --noEmit` limpios; actualiza CHANGELOG y README.
 
+> **Diseño nuevo (6/8/2026): BLINDAJE ANTI-GAMIFICACIÓN Y EQUIDAD**
+> — ver `docs/architecture/blindaje_anti_gamificacion_equidad.md`.
+> Prioridad: 3A.1 identidad vinculada al token → 3A.2 inmutabilidad →
+> 3A.3 autoridad de partes → 3A.4 T9 ejecutable → 3A.5 γ con fuente →
+> 3A.6 prohibiciones léxicas → 3A.7 ventanas → 3B escalera de equidad
+> (vulnerables) → 3C ejecución mínima.
+
 ---
 
 ## 5. Referencias

@@ -380,6 +380,9 @@ CREATE TABLE IF NOT EXISTS maxo_contracts (
     total_vhv_v REAL DEFAULT 0,
     total_vhv_h REAL DEFAULT 0,
     parent_contract_id TEXT, -- Contratos interescala anidados (ROADMAP Bloque B, Fase 5)
+    creator_user_id INTEGER, -- Inmutabilidad (Ola 3A.2): quién creó el contrato
+    signature_deadline TEXT, -- Ventana de firma (Ola 3A.7)
+    min_reflection_hours REAL DEFAULT 0, -- Enfriamiento server-side (Ola 3A.7)
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
@@ -395,8 +398,21 @@ CREATE TABLE IF NOT EXISTS maxo_parties (
     parent_party_id TEXT, -- anidación: una cooperativa contiene personas
     members_json TEXT DEFAULT '{}', -- resolución de miembros/consentimiento (quórum)
     wellness_value REAL DEFAULT 1.0,
+    owner_user_id INTEGER, -- Autoridad (Ola 3A.3): quién gobierna la parte
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Votos de cambio de gobernanza (Ola 3A.3): los delegados aprueban por
+-- quórum una propuesta de cambio de membresía cuando el owner no actúa.
+CREATE TABLE IF NOT EXISTS maxo_party_governance_votes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    party_id TEXT NOT NULL,
+    proposal_hash TEXT NOT NULL,
+    delegate_id TEXT NOT NULL,
+    approved INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(party_id, proposal_hash, delegate_id)
 );
 
 -- Firmas delegadas de partes colectivas (ROADMAP Bloque B, Fase 2):
@@ -432,6 +448,8 @@ CREATE TABLE IF NOT EXISTS maxo_contract_participants (
     participant_id TEXT NOT NULL, -- Format: user-ID
     wellness_value REAL DEFAULT 1.0,
     sdv_status TEXT DEFAULT 'ok',
+    reported_by TEXT, -- Actor que reportó el γ (Ola 3A.5, T13)
+    reported_at TEXT, -- Timestamp del reporte (Ola 3A.5)
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
     UNIQUE(contract_id, participant_id)

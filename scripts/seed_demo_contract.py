@@ -131,6 +131,9 @@ def main():
                 "Intercambio ético: Max ofrece 10 horas de trabajo; "
                 "Ana ofrece a cambio un objeto, 10 horas de trabajo o un servicio."
             ),
+            # Blindaje (Ola 3A): el demo es asimétrico (10h vs 3h) y declara
+            # la asimetría explícitamente; sin reflexión forzada para demo.
+            "min_reflection_hours": 0,
             "participants": [
                 {"user_id": user_ids["Max"], "wellness": 1.0},
                 {"user_id": user_ids["Ana"], "wellness": 1.0},
@@ -143,6 +146,19 @@ def main():
         if res.status_code != 201:
             print(f"ERROR al crear el contrato: {res.status_code} {res.get_json()}")
             sys.exit(1)
+
+        # Reconocimiento explícito de la asimetría (Ola 3A.4, T9 ejecutable):
+        # cada parte obligada (y el aval) firma la asimetría con su token.
+        for u in DEMO_USERS:
+            login = client.post("/auth/login", json={"email": u["email"], "password": u["password"]})
+            uid = user_ids[u["name"]]
+            ack = client.post(
+                f"/contracts/{CONTRACT_ID}/acknowledge-asymmetry",
+                headers={"Authorization": f"Bearer {login.get_json()['access_token']}"},
+                json={"party_id": f"user-{uid}"},
+            )
+            if ack.status_code != 200:
+                print(f"  ! {u['name']}: no pudo reconocer la asimetría ({ack.status_code})")
 
         print("=" * 60)
         print(f"OK: Contrato demo creado: {CONTRACT_ID}")

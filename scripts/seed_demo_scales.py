@@ -132,6 +132,7 @@ def main():
                 "La Coop Semilla del Valle ofrece cuidado comunitario (12 horas/semana); "
                 "la Escuela Aurora ofrece a cambio el salón de usos múltiples y la huerta escolar."
             ),
+            "min_reflection_hours": 0,  # demo sin reflexión forzada
             "participants": [
                 {"user_id": user_ids["Max"], "wellness": 1.0},
                 {"party_id": COOP_ID},

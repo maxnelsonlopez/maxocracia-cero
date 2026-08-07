@@ -50,11 +50,21 @@ def auth_header(client):
     return {'Authorization': f'Bearer {token}'}
 
 
+def user_headers(client, uid):
+    """Token del usuario real: la identidad SIEMPRE deriva del JWT (Ola 3A.1)."""
+    from app.jwt_utils import create_token
+    token = create_token({'user_id': uid})
+    return {'Authorization': f'Bearer {token}'}
+
+
 def create_contract_with_synthetic(client, auth_header, agent_id="qwen-1", sdv_s=None, contract_id="sdvs-api-001"):
+    # user-1 participa como operador asistido de la persona sintética
+    # (Ola 3A.1: la firma sintética la opera un participante humano).
     res = client.post('/contracts/', headers=auth_header, json={
         'contract_id': contract_id,
         'civil_description': 'Contrato con persona sintética',
         'participants': [
+            {'user_id': 1},
             {'user_id': 2},
             {'participant_id': agent_id, 'synthetic': sdv_s or {}}
         ]
@@ -204,7 +214,7 @@ class TestINV2SActivation:
             'vhv': {'t': 1, 'v': 0, 'h': 0}
         })
         # Consentimiento de todos los participantes (incluida la persona sintética)
-        client.post('/contracts/sdvs-api-005/accept', headers=auth_header,
+        client.post('/contracts/sdvs-api-005/accept', headers=user_headers(client, 2),
                     json={'term_id': 't1', 'user_id': 2})
         client.post('/contracts/sdvs-api-005/accept', headers=auth_header,
                     json={'term_id': 't1', 'user_id': 1})
@@ -224,7 +234,7 @@ class TestINV2SActivation:
             'civil_text': 'Soporte de oráculo sintético sano',
             'vhv': {'t': 1, 'v': 0, 'h': 0}
         })
-        client.post('/contracts/sdvs-api-006/accept', headers=auth_header,
+        client.post('/contracts/sdvs-api-006/accept', headers=user_headers(client, 2),
                     json={'term_id': 't1', 'user_id': 2})
         client.post('/contracts/sdvs-api-006/accept', headers=auth_header,
                     json={'term_id': 't1', 'user_id': 1})

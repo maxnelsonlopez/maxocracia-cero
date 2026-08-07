@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-06 — Ola 3A: Blindaje anti-gamificación (identidad, inmutabilidad, autoridad, T9, γ, civil, ventanas)
+
+### Corregido (riesgos verificados del análisis `blindaje_anti_gamificacion_equidad.md`)
+- **R1 — Firma por suplantación**: `accept`/`delegate`/`retract`/`nps` ahora derivan SIEMPRE la identidad del token JWT (`_can_act_for`). Nadie firma por otro humano (403 `IDENTITY_MISMATCH`); el delegado de una colectiva es el actor del token (el campo `delegate_id` se ignora — el spoofing no tiene efecto); las sintéticas las opera un participante humano del contrato; el guardián del Reino Natural lo invoca un participante. Todo con `actor_id` en el evento.
+- **R2 — Reescritura de contratos**: columna `creator_user_id` + guarda 409 `CONTRACT_CONFLICT` — re-crear un contrato fuera de DRAFT, o un DRAFT ajeno, se rechaza. Auditoría de acciones de la API en `maxo_contract_events` (creación, términos, aceptación, activación, asimetría).
+- **R3 — Secuestro de gobernanza**: `maxo_parties.owner_user_id`; `PUT/DELETE /parties/<id>` solo para el owner (delegados en partes legacy); los delegados de partes con owner votan los cambios por quórum en `POST /parties/<id>/governance-change` (tabla `maxo_party_governance_votes`). Prórroga de quórum también requiere autoridad.
+- **R5 — γ con fuente**: `reported_by`/`reported_at` en participantes + tope [0.5, 1.5] (400 fuera de rango).
+- **R6 — T9 ejecutable**: `_reciprocity_imbalance` — si una parte carga >70% del TVI asignado (≥2 partes obligadas, ≥8h), el contrato queda marcado y la ACTIVACIÓN exige `POST /contracts/<id>/acknowledge-asymmetry` de todas las partes obligadas + un aval (400 `ASYMMETRY_UNACKNOWLEDGED`). La creación no se bloquea (la asimetría se declara, no se oculta).
+- **R7/R8 — Cláusulas prohibidas y lenguaje civil**: bloqueo léxico server-side (renuncia a retractación, exclusividad, renovación automática, penalización por retractarse, etc.) + `civil_text` ≤ 40 palabras / ≤ 2 oraciones (400).
+- **R9 — Obligaciones sin responsable**: con total ≥ 10h, cada término con T>0 exige `assigned_participant_id` (400 `UNASSIGNED_OBLIGATION`).
+- **R10/R11 — Ventanas temporales**: `signature_deadline` y `min_reflection_hours` por contrato (423 `SIGNATURE_DEADLINE_EXPIRED`/`REFLECTION_PENDING`); la asimetría exige 24h de reflexión por defecto.
+
+### Tests
+- `tests/test_maxocontracts/test_blindaje.py` — 23 pruebas de seguridad (suplantación, reescritura, takeover de partes, quórum de gobernanza, γ, asimetría, prohibiciones, ventanas).
+- Tests existentes actualizados al modelo de identidad (tokens por usuario en accepts/delegados/NPS; el operador sintético es participante).
+
+### Notas Técnicas
+- **Verificación**: suite completa 524/524 (23 nuevas); seeds actualizados (demo con asimetría reconocida por token, sin reflexión forzada); README v4.8.
+- **Referencia**: `docs/architecture/blindaje_anti_gamificacion_equidad.md` (Ola 3A marcada implementada; 3B equidad y 3C dientes pendientes).
+
 ## 2026-08-06 — Segunda ola de la hackathon: delegación líquida, expiración, ciclo de vida del quórum, webhooks por parte y cohorte
 
 ### Añadido

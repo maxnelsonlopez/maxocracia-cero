@@ -51,6 +51,14 @@ def auth_header(client):
     return {'Authorization': f'Bearer {token}'}
 
 
+def user_headers(client, uid):
+    """Token del usuario real: la identidad SIEMPRE deriva del JWT (Ola 3A.1)."""
+    from app.jwt_utils import create_token
+
+    token = create_token({'user_id': uid})
+    return {'Authorization': f'Bearer {token}'}
+
+
 def make_party(client, auth_header, party_id, party_type, name, members=None):
     res = client.post('/parties/', headers=auth_header, json={
         'party_id': party_id,
@@ -80,8 +88,11 @@ def create_contract(client, auth_header, contract_id, participants, terms=None):
 
 
 def accept_delegate(client, auth_header, contract_id, delegate_id):
-    return client.post(f'/contracts/{contract_id}/accept', headers=auth_header, json={
-        'term_id': 'term-1', 'party_id': 'coop-7', 'delegate_id': delegate_id,
+    """Firma delegada: el token ES el delegado (Ola 3A.1, R1)."""
+    uid = int(delegate_id.split('-')[1])
+    return client.post(f'/contracts/{contract_id}/accept',
+                       headers=user_headers(client, uid), json={
+        'term_id': 'term-1', 'party_id': 'coop-7',
     })
 
 
