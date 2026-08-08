@@ -2,7 +2,7 @@
 
 **Estado del Proyecto:** Fase 2 - Sostenibilidad Económica y MicroMaxocracia Doméstica (Agosto 2026)  
 **Última actualización:** 6 de agosto 2026  
-**Versión:** 5.4 - Ola 4 · Puente B Fase 1: necesidad × oferta → borrador axiomático (el ciclo nace en la calle) (DeepSeek)
+**Versión:** 5.5 - Experiencia de vida digna: la escalera de participación humana y la página /participar (DeepSeek)
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 
@@ -50,6 +50,7 @@ La **Maxocracia** es un sistema ético-económico-político alternativo que prop
 - **γ que escucha la vida (Ola 4 · Puente A)**: `POST /contracts/<id>/checkin` — cada parte reporta su bienestar real con fuente y actor. **Política asimétrica fiel al canon**: las CAÍDAS de γ se escuchan siempre (INV1, monitoreo continuo del `WellnessProtectorBlock`); las MEJORAS siguen un ritmo mínimo configurable (`MAXO_CHECKIN_WINDOW_DAYS`, default 7 — ajustable para oleadas de migración masiva). El contrato adopta el latido como su γ (`maxo_contract_checkins`); el detalle expone la **serie temporal** con mini-gráfica y la **cohorte** agrega desde los check-ins reales.
 - **La plaza pública (Ola 4 · Puente D, T13 radical)**: verificador ciudadano SIN login — `GET /verificador/contract/<id>` audita un contrato por su **hash canónico** (SHA-256 sobre contenido inmutable: no cambia con las transiciones de estado, recomputable sin servidor) y `GET /verificador/cohort` muestra el bienestar agregado del barrio. Página `/verificador` con la Economía de la Vida de la Cohorte Cero, sanitizada (Opacidad Sagrada: sin datos personales).
 - **El ciclo nace en la calle (Ola 4 · Puente B, Fase 1)**: `POST /contracts/from-need` — una necesidad del Formulario CERO × una oferta compatible produce un **borrador axiomático** en DRAFT, sin teclear el contrato. El oráculo en vivo pule la redacción civil pero la **reciprocidad T9 es inviolable** (VHV igualitario); el filtro AVA (canon Cap. 14.4) rechaza todo borrador que no pase los invariantes; la vinculación por email con el portal garantiza la identidad (Ola 3A) y la procedencia queda auditable (`origin = matching`). Fase 2 pendiente: firma asistida → activación → bitácora.
+- **Experiencia de vida digna (Capa de Ternura aplicada al UX)**: página `/participar` — la **escalera de participación humana** (4 caminos que valen lo mismo: Pulso → Acuerdo → Oferta → Gobernanza), las 8 reglas de oro del integrante y las 8 reglas que los procesos deben cumplir con cada persona, todo en lenguaje civil con **lectura en voz alta**. Principio rector: "el sistema es complejo; la participación no tiene por qué serlo" (diseño en `docs/architecture/experiencia_vida_digna_integrantes.md`).
 - **Calculadora VHV**: Frontend completo con Chart.js integrado en el portal.
 - **Sistema TVI**: Detección de overlap temporal, cálculo de CCP.
 - **586 tests** (586/586 pasando) ✅ (Backend Core + Blocks + Escalas + Quórum + Blindaje + Equidad + Ejecución + Métricas + Check-ins + Verificador Público + Puente B Fase 1 + Ruteo SPA)

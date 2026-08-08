@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-07 — Experiencia de vida digna: instrucciones para procesos e integrantes humanos
+
+### Añadido
+- **Diseño documentado** (`docs/architecture/experiencia_vida_digna_integrantes.md`): el principio rector ("el sistema es complejo; la participación no tiene por qué serlo"), la **escalera de participación** (4 caminos que valen lo mismo: Pulso → Acuerdo → Oferta → Gobernanza), las **8 reglas de oro del integrante humano** en lenguaje civil y las **8 reglas que los procesos deben cumplir con cada persona** — cada regla con su ancla técnica verificable (check-ins asimétricos, paráfrasis, AVA, INV1, plaza pública, apelaciones).
+- **Página `/participar`** (frontend, enlace en el footer "Cómo Participar"): la guía completa legible en lenguaje civil, con **lectura en voz alta** (speechSynthesis es-ES) para quienes leen con dificultad — la accesibilidad es el diseño, no un extra.
+
+### Notas Técnicas
+- **Verificación**: suite 586/586 (sin cambios de backend); tsc/eslint limpios; build exportado (53 payloads RSC).
+- **Referencia**: `docs/architecture/experiencia_vida_digna_integrantes.md` — criterios de salida futuros: onboarding por pasos y check-in simplificado por camino.
+
 ## 2026-08-07 — Ola 4 · Puente B, Fase 1: del matching al borrador (el ciclo nace en la calle)
 
 ### Añadido
