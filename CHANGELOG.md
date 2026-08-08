@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-07 — Ola 4 · Puente A (rediseño): política asimétrica de check-ins (fiel al canon)
+
+### Cambiado
+- **Las CAÍDAS de γ se escuchan SIEMPRE**: un check-in que reporta bienestar menor al actual se acepta sin importar la ventana — el dolor no espera (canon Cap. 17: el `WellnessProtectorBlock` "monitorea continuamente"; INV1; Capa de Ternura). Respuesta `201` con `policy.accepted: decline_urgent`.
+- **Las MEJORAS de γ mantienen ritmo**: un latido por participante cada `MAXO_CHECKIN_WINDOW_DAYS` (default 7, antes constante fija). Un γ idéntico no aporta información y también aplica la ventana (anti-ruido, anti-gamificación).
+- **Ventana configurable por despliegue** (`MAXO_CHECKIN_WINDOW_DAYS` en `.env`, documentado en `config.example.env`): una oleada de migración masiva de ciudadanos puede exigir un ritmo más denso sin tocar código. El 429 `CHECKIN_WEEKLY_LIMIT` ahora reporta la ventana efectiva y `days_until_next` con redondeo correcto.
+- **Justificación canónica**: la semanalidad de los 7 días no está prescrita en el canon (el "check-in semanal" del Cap. 16 es el ritual doméstico de MicroMaxocracia, no una tasa de muestreo de γ); el canon exige monitoreo continuo y "γ < 1.0 sostenido >14 días" (el sistema debe oír la caída para poder contarla). La política asimétrica reconcilia el ritmo con la vigilancia.
+- **Tests**: 3 nuevos en `tests/test_maxocontracts/test_contracts_checkins.py` (caída dentro de la ventana escuchada, γ idéntico = ruido, ventana configurable) y ajustes a los existentes.
+
+### Notas Técnicas
+- **Verificación**: suite completa 575/575; tsc/eslint limpios; README v5.3.
+- **Referencia**: `docs/architecture/ROADMAP_oraculo_vivo_y_escalas.md` (Puente A); lectura del canon: caps. 10, 13-17 del libro + 7 documentos de teoría.
+
 ## 2026-08-07 — Ola 4 · Puente D: la plaza pública (verificador ciudadano sin login)
 
 ### Añadido

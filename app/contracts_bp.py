@@ -71,6 +71,7 @@ from .protection import (
 from decimal import Decimal, InvalidOperation
 import hashlib
 import json
+import math
 import unicodedata
 
 # --- Blindaje anti-gamificación (Ola 3A) --------------------------------------
@@ -107,6 +108,19 @@ INV1_RETRACTION_THRESHOLD = Decimal("0.8")
 # Ola 4, Puente A: el γ escucha la vida con ritmo, no con ruido.
 CHECKIN_WINDOW_DAYS = 7
 CHECKIN_WEEKLY_LIMIT = 1
+
+
+def _checkin_window_days() -> int:
+    """Ventana del check-in, configurable por entorno (migraciones masivas).
+
+    `MAXO_CHECKIN_WINDOW_DAYS` (default 7). Una oleada de ciudadanos puede
+    requerir un ritmo más denso: ajustar por despliegue sin tocar código.
+    """
+    raw = os.environ.get("MAXO_CHECKIN_WINDOW_DAYS", "")
+    try:
+        return max(1, int(raw))
+    except (ValueError, TypeError):
+        return CHECKIN_WINDOW_DAYS
 
 
 def _parse_penalty(value) -> Optional[float]:
@@ -1989,8 +2003,12 @@ def contract_checkin(current_user, contract_id: str):
         "source": "checkin"           # opcional: checkin | followup | sdv_analyzer
     }
 
-    Límite semanal: un check-in por participante cada 7 días (ritmo de la vida,
-    no ruido de datos). Respuesta 429 con CHECKIN_WEEKLY_LIMIT si se excede.
+    Política asimétrica (fiel al canon Cap. 17, WellnessProtectorBlock
+    "monitorea continuamente"):
+    - CAÍDA de γ: siempre se escucha (el dolor no espera — INV1, Ternura).
+    - MEJORA de γ: un latido por participante cada `MAXO_CHECKIN_WINDOW_DAYS`
+      (default 7). 429 CHECKIN_WEEKLY_LIMIT si se excede; la ventana es
+      configurable por despliegue para oleadas de migración masiva.
     """
     contract = _load_contract(contract_id)
 
@@ -2022,24 +2040,46 @@ def contract_checkin(current_user, contract_id: str):
     source = str(data.get("source") or "checkin").strip() or "checkin"
 
     db = get_db()
-    last = db.execute(
+    window_days = _checkin_window_days()
+
+    # Política asimétrica (Ola 4, A, rediseño 7/8/2026, fiel al canon):
+    # - CAÍDA de γ: se escucha SIEMPRE. El WellnessProtectorBlock del canon
+    #   es "Vigilante: monitorea continuamente" — el dolor no espera la ventana
+    #   (INV1, Capa de Ternura, γ < 1.0 sostenido >14 días exige oír la caída).
+    # - MEJORA de γ: ritmo semanal (anti-ruido y anti-gamificación: nadie
+    #   infla su bienestar artificialmente con latidos frecuentes).
+    current_row = db.execute(
         """
-        SELECT (julianday('now') - julianday(created_at)) AS days_since
-        FROM maxo_contract_checkins
+        SELECT wellness_value FROM maxo_contract_participants
         WHERE contract_id = ? AND participant_id = ?
-        ORDER BY id DESC LIMIT 1
         """,
         (contract_id, participant_id),
     ).fetchone()
-    if last is not None and last["days_since"] is not None:
-        if float(last["days_since"]) < CHECKIN_WINDOW_DAYS:
-            days_left = max(0, int(CHECKIN_WINDOW_DAYS - float(last["days_since"])))
-            return jsonify({
-                "error": "check-in semanal ya registrado: el γ escucha con ritmo, no con ruido",
-                "code": "CHECKIN_WEEKLY_LIMIT",
-                "window_days": CHECKIN_WINDOW_DAYS,
-                "days_until_next": days_left,
-            }), 429
+    current_wellness = (
+        Decimal(str(current_row["wellness_value"])) if current_row is not None else value
+    )
+    is_decline = value < current_wellness
+
+    if not is_decline:
+        last = db.execute(
+            """
+            SELECT (julianday('now') - julianday(created_at)) AS days_since
+            FROM maxo_contract_checkins
+            WHERE contract_id = ? AND participant_id = ?
+            ORDER BY id DESC LIMIT 1
+            """,
+            (contract_id, participant_id),
+        ).fetchone()
+        if last is not None and last["days_since"] is not None:
+            if float(last["days_since"]) < window_days:
+                days_left = max(0, math.ceil(window_days - float(last["days_since"])))
+                return jsonify({
+                    "error": "check-in semanal ya registrado: el γ escucha con ritmo, no con ruido",
+                    "code": "CHECKIN_WEEKLY_LIMIT",
+                    "window_days": window_days,
+                    "days_until_next": days_left,
+                    "policy": "asymmetric: declines always heard, improvements weekly",
+                }), 429
 
     db.execute(
         """
@@ -2105,6 +2145,11 @@ def contract_checkin(current_user, contract_id: str):
         "reported_by": actor_pid,
         "total_checkins": len(series),
         "series": series,
+        "policy": {
+            "mode": "asymmetric",
+            "window_days": window_days,
+            "accepted": "decline_urgent" if is_decline else ("first_latido" if len(series) == 1 else "window_open"),
+        },
     }), 201
 
 

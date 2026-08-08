@@ -163,7 +163,7 @@ def test_checkin_updates_contract_gamma(client):
 
 
 def test_checkin_weekly_limit(client):
-    """Límite semanal: el segundo check-in del mismo participante es 429."""
+    """Mejora de γ dentro de la ventana: límite semanal (429)."""
     h = _create_ready_contract(client)
 
     assert client.post('/contracts/checkin-contract/checkin', headers=h, json={
@@ -172,13 +172,91 @@ def test_checkin_weekly_limit(client):
     }).status_code == 201
 
     res = client.post('/contracts/checkin-contract/checkin', headers=h, json={
-        'wellness': 0.9,
+        'wellness': 1.1,
         'participant_id': 'user-2',
     })
     assert res.status_code == 429
     data = res.get_json()
     assert data['code'] == 'CHECKIN_WEEKLY_LIMIT'
     assert data['window_days'] == 7
+
+
+def test_checkin_decline_always_heard(client):
+    """Política asimétrica: una CAÍDA de γ se escucha siempre, sin esperar
+    la ventana (el WellnessProtectorBlock monitorea continuamente, INV1)."""
+    h = _create_ready_contract(client)
+
+    assert client.post('/contracts/checkin-contract/checkin', headers=h, json={
+        'wellness': 1.0,
+        'participant_id': 'user-2',
+    }).status_code == 201
+
+    res = client.post('/contracts/checkin-contract/checkin', headers=h, json={
+        'wellness': 0.7,
+        'participant_id': 'user-2',
+    })
+    assert res.status_code == 201
+    data = res.get_json()
+    assert data['policy']['accepted'] == 'decline_urgent'
+    assert data['total_checkins'] == 2
+
+    # El contrato adoptó el latido de la caída
+    detail = client.get('/contracts/checkin-contract', headers=h).get_json()
+    bob = next(d for d in detail['participants_details'] if d['id'] == 'user-2')
+    assert abs(bob['wellness'] - 0.7) < 1e-9
+
+    # Otra caída al día siguiente también se escucha (crisis sostenida)
+    res = client.post('/contracts/checkin-contract/checkin', headers=h, json={
+        'wellness': 0.6,
+        'participant_id': 'user-2',
+    })
+    assert res.status_code == 201
+    assert res.get_json()['total_checkins'] == 3
+
+
+def test_checkin_equal_value_counts_as_noise(client):
+    """Un γ idéntico no aporta información: aplica el ritmo semanal."""
+    h = _create_ready_contract(client)
+
+    assert client.post('/contracts/checkin-contract/checkin', headers=h, json={
+        'wellness': 1.0,
+        'participant_id': 'user-2',
+    }).status_code == 201
+    res = client.post('/contracts/checkin-contract/checkin', headers=h, json={
+        'wellness': 1.0,
+        'participant_id': 'user-2',
+    })
+    assert res.status_code == 429
+
+
+def test_checkin_configurable_window(client):
+    """La ventana es configurable por despliegue (migración masiva):
+    MAXO_CHECKIN_WINDOW_DAYS define el ritmo de las mejoras."""
+    os.environ['MAXO_CHECKIN_WINDOW_DAYS'] = '3'
+    try:
+        h = _create_ready_contract(client)
+        _force_old_checkin(client, 'checkin-contract', 'user-2', 0.9, days_ago=2)
+
+        # Mejora a los 2 días: dentro de la ventana de 3 -> 429
+        res = client.post('/contracts/checkin-contract/checkin', headers=h, json={
+            'wellness': 1.1,
+            'participant_id': 'user-2',
+        })
+        assert res.status_code == 429
+        assert res.get_json()['window_days'] == 3
+        assert res.get_json()['days_until_next'] == 1
+    finally:
+        del os.environ['MAXO_CHECKIN_WINDOW_DAYS']
+
+    # Fuera de la ventana (9 días > 7), la mejora fluye
+    h = _create_ready_contract(client)
+    _force_old_checkin(client, 'checkin-contract', 'user-2', 0.9, days_ago=9)
+    res = client.post('/contracts/checkin-contract/checkin', headers=h, json={
+        'wellness': 1.1,
+        'participant_id': 'user-2',
+    })
+    assert res.status_code == 201
+    assert res.get_json()['policy']['accepted'] == 'window_open'
 
 
 def test_checkin_weekly_limit_respects_per_participant(client):
