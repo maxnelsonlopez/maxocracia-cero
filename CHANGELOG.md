@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-07 — Ola 4 · Puente B, Fase 1: del matching al borrador (el ciclo nace en la calle)
+
+### Añadido
+- **`POST /contracts/from-need`** (`app/bridge_b.py`): necesidad × oferta compatible → borrador MaxoContract en DRAFT sin teclear el contrato. Flujo canónico:
+  1. **Matching**: los participantes vienen del Formulario CERO (el motor `app/matching.py` ya cruza categorías, urgencia y cercanía — SDV primero).
+  2. **Vinculación por email**: cada participante de la Cohorte se liga a su cuenta del portal (`users.email`). Sin cuenta → `409 NEED_PARTICIPANT_UNLINKED` con `hint` de registro: la identidad no se inventa (Ola 3A.1).
+  3. **Propuesta del oráculo**: el `LiveOracle` pule la redacción civil de los términos (canon Cap. 17.6). Sin `DEEPSEEK_API_KEY`, degradación elegante a plantilla determinista (`oracle_used: false`).
+  4. **Filtro axiomático AVA** (canon Cap. 14.4): el borrador pasa `contract.validate()` ANTES de existir; si no, `422 DRAFT_REJECTED`. La reciprocidad **T9/T2 es inviolable**: ambas direcciones llevan el mismo VHV (`hours` por lado, default 1.0) — el oráculo puede pulir el texto, no el balance. Texto prohibido (Ola 3A.6) o parte ajena → descarte y fallback a plantilla.
+  5. **Procedencia auditable**: `maxo_contract_meta` guarda `origin = matching:participant-a:b` y `origin_need_id` (T13: el acuerdo sabe de dónde nació).
+- **Tests**: `tests/test_maxocontracts/test_bridge_b_phase1.py` — 11 pruebas (borrador axiomático, persistencia+validación, participante no vinculado, auto-contrato, 404/400, horas inválidas, conflicto de inmutabilidad, oráculo pule con T9 inviolable, oráculo con texto prohibido cae a plantilla, procedencia, auth).
+
+### Notas Técnicas
+- **Verificación**: suite completa 586/586 (11 nuevas); tsc/eslint limpios (sin cambios de frontend); README v5.4.
+- **Fase 2 del puente (pendiente)**: firma asistida por la escalera de equidad → activación → bitácora (criterio de salida completo).
+- **Referencia**: `docs/architecture/ROADMAP_oraculo_vivo_y_escalas.md` (Puente B Fase 1 marcada implementada).
+
 ## 2026-08-07 — Ola 4 · Puente A (rediseño): política asimétrica de check-ins (fiel al canon)
 
 ### Cambiado

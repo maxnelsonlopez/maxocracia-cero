@@ -2,7 +2,7 @@
 
 **Autor del diseño:** DeepSeek (oráculo sintético) y Max Nelson López Restrepo
 **Fecha:** 6 de agosto de 2026
-**Estado:** Bloque A **IMPLEMENTADO** (sesión del 6/8/2026: `live_oracle.py`, endpoints `/contracts/negotiate`, `/contracts/negotiate/feedback`, `/contracts/<id>/critique`, panel frontend en builder y detalle). Bloque B **IMPLEMENTADO** (misma sesión: `maxo_parties` + resolvers por prefijo, API `/parties`, consentimiento agregado con quórum N de M, guardián oráculo para el Reino Natural `eco-`, contratos interescala anidados y UI completa). **Extensiones ola 1 IMPLEMENTADAS** (hackathon nocturna del 6/8/2026: votación ponderada con `weights`/`weight_threshold`, delegación temporal con `delegations` y votos efectivos, γ agregado real por contrato, jerarquía interescala con `/tree` y `/subcontracts`, evento `contract.quorum_sealed` y seed demo coop↔org). **Extensiones ola 2 IMPLEMENTADAS** (misma noche: delegación líquida por término con `delegations_by_term`, expiración de delegaciones con `valid_until`, ciclo de vida del quórum con `quorum_deadline` + prórroga + re-consulta, webhooks por parte con `party_filter`, cohorte consolidada con `/contracts/cohort` y tarjeta en la lista). **Blindaje 3A-3C IMPLEMENTADO** (misma noche: identidad vinculada al token, inmutabilidad, autoridad de partes, T9 ejecutable, γ con fuente, prohibiciones léxicas, ventanas; escalera de equidad assisted/shielded; ejecución mínima con bitácora, penalizaciones γ, INV1 automático y cierre EXECUTED — 551/551 tests). **Ola 4 "El Puente" DISEÑADA** (rumbo sellado el 6/8/2026). **Puente A IMPLEMENTADO** (sesión del 7/8/2026: `maxo_contract_checkins` + `POST /contracts/<id>/checkin` con política asimétrica — caídas siempre escuchadas, mejoras con ventana configurable `MAXO_CHECKIN_WINDOW_DAYS` — serie temporal de γ en el detalle, γ agregado de cohorte real — 575/575 tests). **Puente D IMPLEMENTADO** (misma sesión: verificador ciudadano SIN login — hash canónico estable sobre contenido inmutable, `GET /verificador/contract/<id>` y `GET /verificador/cohort`, página `/verificador` con la Economía de la Vida). **Puentes B, C y E pendientes.**
+**Estado:** Bloque A **IMPLEMENTADO** (sesión del 6/8/2026: `live_oracle.py`, endpoints `/contracts/negotiate`, `/contracts/negotiate/feedback`, `/contracts/<id>/critique`, panel frontend en builder y detalle). Bloque B **IMPLEMENTADO** (misma sesión: `maxo_parties` + resolvers por prefijo, API `/parties`, consentimiento agregado con quórum N de M, guardián oráculo para el Reino Natural `eco-`, contratos interescala anidados y UI completa). **Extensiones ola 1 IMPLEMENTADAS** (hackathon nocturna del 6/8/2026: votación ponderada con `weights`/`weight_threshold`, delegación temporal con `delegations` y votos efectivos, γ agregado real por contrato, jerarquía interescala con `/tree` y `/subcontracts`, evento `contract.quorum_sealed` y seed demo coop↔org). **Extensiones ola 2 IMPLEMENTADAS** (misma noche: delegación líquida por término con `delegations_by_term`, expiración de delegaciones con `valid_until`, ciclo de vida del quórum con `quorum_deadline` + prórroga + re-consulta, webhooks por parte con `party_filter`, cohorte consolidada con `/contracts/cohort` y tarjeta en la lista). **Blindaje 3A-3C IMPLEMENTADO** (misma noche: identidad vinculada al token, inmutabilidad, autoridad de partes, T9 ejecutable, γ con fuente, prohibiciones léxicas, ventanas; escalera de equidad assisted/shielded; ejecución mínima con bitácora, penalizaciones γ, INV1 automático y cierre EXECUTED — 551/551 tests). **Ola 4 "El Puente" DISEÑADA** (rumbo sellado el 6/8/2026). **Puente A IMPLEMENTADO** (sesión del 7/8/2026: `maxo_contract_checkins` + `POST /contracts/<id>/checkin` con política asimétrica — caídas siempre escuchadas, mejoras con ventana configurable `MAXO_CHECKIN_WINDOW_DAYS` — serie temporal de γ en el detalle, γ agregado de cohorte real — 586/586 tests). **Puente D IMPLEMENTADO** (misma sesión: verificador ciudadano SIN login — hash canónico estable sobre contenido inmutable, `GET /verificador/contract/<id>` y `GET /verificador/cohort`, página `/verificador` con la Economía de la Vida). **Puente B FASE 1 IMPLEMENTADA** (misma sesión: `POST /contracts/from-need` — necesidad × oferta → borrador DRAFT axiomático con filtro AVA, oráculo pule la redacción civil con T9 inviolable, procedencia auditable en meta; firma asistida pendiente). **Puentes C y E pendientes.**
 **Referencia canónica:** Cap. 13-14 (Oráculos Dinámicos), Cap. 17 (MaxoContracts), Cap. 10 (Tres Reinos)
 
 ---
@@ -180,13 +180,21 @@ Cada escala hereda el mismo SDV y los mismos invariantes: el contrato entre una 
 > - Siguiente paso natural: alimentar check-ins desde los follow-ups de
 >   formularios (`sdv_analyzer`) y conectar el puente B.
 >
-> **B. El ciclo completo: necesidad → contrato** (el sueño grande)
-> - El motor de matching (dominio de formularios: ofertas/necesidades)
->   genera propuestas: necesidad activa × oferta compatible → borrador de
->   MaxoContract redactado por el oráculo → firma asistida por la escalera
->   de equidad → ejecución con bitácora.
-> - Criterio de salida: una necesidad registrada produce un contrato
->   firmado y activo sin teclear nada más que el check-in.
+> **B. El ciclo completo: necesidad → contrato** — **FASE 1 IMPLEMENTADA (7/8/2026, 586/586 tests)**
+> - `POST /contracts/from-need {seeker_participant_id, offerer_participant_id, hours?}`:
+>   necesidad × oferta compatible → borrador DRAFT axiomático, sin teclear el contrato.
+> - Flujo canónico: MATCHING (categorías/urgencia/cercanía) → VINCULACIÓN por
+>   email con el portal (409 `NEED_PARTICIPANT_UNLINKED` si falta la cuenta:
+>   la identidad no se inventa, Ola 3A) → PROPUESTA del oráculo en vivo
+>   (pule la redacción civil; sin API key, plantilla determinista) → FILTRO
+>   AXIOMÁTICO AVA (nada roto cruza la puerta; T9/T2 inviolables: el VHV es
+>   igualitario en ambas direcciones) → PERSISTENCIA en DRAFT con procedencia
+>   auditable (`maxo_contract_meta: origin = matching:participant-a:b`, T13).
+> - Criterio de la fase CUMPLIDO: una necesidad registrada produce un borrador
+>   que pasa los invariantes sin teclear el contrato.
+> - **Fase 2 (pendiente)**: firma asistida por la escalera de equidad →
+>   activación → bitácora (criterio de salida completo del puente: contrato
+>   firmado y activo alimentado solo por el check-in).
 >
 > **C. La calle entra** (el gran reto de ingeniería)
 > - Firma y reporte por mensajería (WhatsApp/Telegram) + voz: el vulnerable
