@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-07 — Ola 4 · Puente B, Fase 2: el camino de firma guiado (el ciclo se cierra)
+
+### Añadido
+- **`GET /contracts/<id>/cycle`**: el camino de firma — estado, firma por término y por participante, perfil de protección de cada parte (paráfrasis/testigo requeridos), asimetría reconocida, ventanas temporales y bloqueos de activación. La firma guiada no oculta la complejidad: la ordena.
+- **`POST /contracts/<id>/cycle`**: paso guiado del actor del token — 1) DRAFT → PENDING con validación axiomática (AVA); 2) firma de TODOS sus términos pendientes con identidad del token (Ola 3A.1) y la escalera de equidad (oráculo pre-firma 503 sin degradación para assisted/shielded, paráfrasis obligatoria `PROTECTION_PARAPHRASE_REQUIRED`); 3) activación automática cuando no quedan bloqueos (asimetría T9, co-testigo). Sin la firma de todas las partes, responde `202` con `TERMS_UNACCEPTED` y el mapa de faltantes.
+- **CRITERIO DE SALIDA DEL PUENTE CUMPLIDO**: una necesidad del Formulario CERO produce un contrato **firmado y ACTIVO** sin teclear el contrato — `POST /contracts/from-need` + un `POST /contracts/<id>/cycle` por parte.
+- **Procedencia expuesta**: `GET /contracts/<id>` ahora incluye `origin` (T13: el acuerdo sabe de dónde nació).
+- **Tests**: `tests/test_maxocontracts/test_bridge_b_phase2.py` — 7 pruebas (ciclo completo necesidad→activo, roadmap de firma, identidad ajena 403, paráfrasis obligatoria con oráculo disponible, oráculo requerido 503, activación bloqueada por firmas faltantes, auth).
+
+### Corregido
+- **Test TVI frágil a la medianoche** (`test_tvi_vhv_integration.py`): el test del filtro de fechas fallaba entre 00:00 y 01:00 (la entrada "de hoy" caía en el día anterior). Ahora inserta entradas ancladas a las 00:00 del día local por SQL directo: el cálculo con filtro es el objetivo, no la validación de `log_tvi`.
+
+### Notas Técnicas
+- **Verificación**: suite completa 593/593 (7 nuevas); README v5.6.
+- **Siguiente (Puente C)**: la calle entra — firma y reporte por mensajería/voz. **Puente E**: consejo de avales.
+
 ## 2026-08-07 — Experiencia de vida digna: instrucciones para procesos e integrantes humanos
 
 ### Añadido

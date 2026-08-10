@@ -1923,10 +1923,18 @@ def get_contract(current_user, contract_id: str):
         for pid in contract.participant_ids
     }
 
+    # T13: procedencia del contrato (Puente B: origin = matching:participant-a:b)
+    origin_row = db.execute(
+        "SELECT meta_value FROM maxo_contract_meta WHERE contract_id = ? AND meta_key = 'origin'",
+        (contract.contract_id,),
+    ).fetchone()
+    origin = origin_row["meta_value"] if origin_row else None
+
     return jsonify({
         "contract_id": contract.contract_id,
         "state": contract.state.value,
         "civil_description": contract.civil_summary,
+        "origin": origin,
         "parent_contract_id": parent_contract_id,
         "subcontracts": [r["contract_id"] for r in subcontract_rows],
         "creator_user_id": getattr(contract, "_creator_user_id", None),

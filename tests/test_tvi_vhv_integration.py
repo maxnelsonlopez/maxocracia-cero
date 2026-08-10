@@ -133,33 +133,36 @@ def test_calculate_ttvi_from_tvis_with_investment(app, db_path):
 
 def test_calculate_ttvi_from_tvis_with_date_filter(app, db_path):
     """Test calculating TTVI with date range filter."""
+    from app.utils import get_db
+
     with app.app_context():
+        # Entradas ancladas a las 00:00 del día local: el test no puede
+        # depender de la hora del reloj en que se ejecute (cruce de
+        # medianoche) ni registrar tiempo futuro. Inserto directo por SQL:
+        # el propósito es el cálculo con filtro, no log_tvi.
+        db = get_db()
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        yesterday = today - timedelta(days=1)
+        db.execute(
+            """
+            INSERT INTO tvi_entries (user_id, start_time, end_time, duration_seconds, category, description)
+            VALUES (1, ?, ?, 3600, 'WORK', 'Old work')
+            """,
+            ((yesterday - timedelta(hours=1)).isoformat(), yesterday.isoformat()),
+        )
+        db.execute(
+            """
+            INSERT INTO tvi_entries (user_id, start_time, end_time, duration_seconds, category, description)
+            VALUES (1, ?, ?, 3600, 'WORK', 'Today work')
+            """,
+            (today.isoformat(), (today + timedelta(hours=1)).isoformat()),
+        )
+        db.commit()
+
         manager = TVIManager()
-
-        now = datetime.now()
-        yesterday = now - timedelta(days=1)
-
-        # Add entry from yesterday
-        manager.log_tvi(
-            user_id=1,
-            start_time=(yesterday - timedelta(hours=1)).isoformat(),
-            end_time=yesterday.isoformat(),
-            category="WORK",
-            description="Old work",
-        )
-
-        # Add entry from today
-        manager.log_tvi(
-            user_id=1,
-            start_time=(now - timedelta(hours=1)).isoformat(),
-            end_time=now.isoformat(),
-            category="WORK",
-            description="Today work",
-        )
-
         # Filter only today
         result = manager.calculate_ttvi_from_tvis(
-            user_id=1, start_date=now.date().isoformat()
+            user_id=1, start_date=today.date().isoformat()
         )
 
     assert result["direct_hours"] == 1.0  # Only today's entry

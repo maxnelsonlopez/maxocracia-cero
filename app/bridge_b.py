@@ -24,6 +24,7 @@ teclear el contrato. El flujo respeta el canon:
    puente completo).
 """
 
+from datetime import datetime
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
@@ -31,6 +32,7 @@ from flask import Blueprint, jsonify, request
 
 from .jwt_utils import token_required
 from .utils import get_db
+from maxocontracts.core.types import ContractState
 from maxocontracts.oracles.live_oracle import LiveOracle
 
 bridge_bp = Blueprint("bridge_b", __name__, url_prefix="/contracts")
@@ -382,3 +384,274 @@ def contract_from_need(current_user):
         ],
         "total_vhv_h": hours * 2,
     }), 201
+
+
+# ──────────────────────────────────────────────────────────────────
+# FASE 2: el camino de firma guiado (el ciclo se cierra)
+# ──────────────────────────────────────────────────────────────────
+
+def _activation_blockers(contract, db) -> List[Dict[str, Any]]:
+    """Qué falta para activar el contrato, según las protecciones (Ola 3A/3B).
+
+    Replica los chequeos de activate_contract sin mutar estado: asimetría
+    T9 reconocida por obligados + aval, co-testigo para blindados,
+    aceptación completa de términos.
+    """
+    from .contracts_bp import _asymmetry_acknowledged
+    from .protection import caps_for, protection_level
+
+    blockers: List[Dict[str, Any]] = []
+
+    if contract.state == ContractState.DRAFT:
+        blockers.append({"code": "DRAFT_NOT_SUBMITTED", "message": "el contrato aún no entra a la ronda de firma"})
+        return blockers
+
+    if not contract.all_terms_accepted():
+        missing = [
+            {"term_id": t.id, "missing": [p for p in contract.participant_ids if not t.accepted_by.get(p)]}
+            for t in contract._terms if not t.is_accepted_by_all(contract.participant_ids)
+        ]
+        blockers.append({"code": "TERMS_UNACCEPTED", "message": "faltan firmas", "terms": missing})
+
+    if getattr(contract, "_asymmetry_flag", False):
+        report = getattr(contract, "_asymmetry_report", {}) or {}
+        acknowledged = _asymmetry_acknowledged(contract.contract_id)
+        obligated = [pid for pid in report.get("obligations", {})]
+        aval = next(
+            (pid for pid in contract.participant_ids if pid not in obligated),
+            None,
+        )
+        needed = set(obligated)
+        if aval:
+            needed.add(aval)
+        missing = sorted(needed - set(acknowledged))
+        if missing:
+            blockers.append({
+                "code": "ASYMMETRY_UNACKNOWLEDGED",
+                "message": "las partes obligadas y un aval deben reconocer la asimetría",
+                "missing": missing,
+                "hint": "POST /contracts/<id>/acknowledge-asymmetry con cada party_id",
+            })
+
+    shielded = [
+        p.id for p in contract.participants
+        if p.id.startswith("user-")
+        and caps_for(protection_level(int(p.id[len("user-"):]))).get("requires_witness")
+    ]
+    if shielded:
+        row = db.execute(
+            "SELECT meta_value FROM maxo_contract_meta WHERE contract_id = ? AND meta_key = 'witnessed_by'",
+            (contract.contract_id,),
+        ).fetchone()
+        if not (row and row["meta_value"]):
+            blockers.append({
+                "code": "WITNESS_REQUIRED",
+                "message": "participantes blindados exigen co-testigo humano ajeno a las partes",
+                "shielded_participants": shielded,
+                "hint": "POST /contracts/<id>/witness",
+            })
+
+    return blockers
+
+
+@bridge_bp.route("/<contract_id>/cycle", methods=["GET"])
+@token_required
+def cycle_status(current_user, contract_id: str):
+    """
+    Fase 2: el camino de firma — qué falta, quién debe actuar, qué protecciones
+    aplican. La firma guiada no oculta la complejidad: la ordena.
+    """
+    from .contracts_bp import _asymmetry_acknowledged, _contract_window_blocked, _load_contract
+    from .protection import caps_for, protection_level
+
+    contract = _load_contract(contract_id)
+    if contract is None:
+        return jsonify({"error": "contract not found"}), 404
+
+    db = get_db()
+    origin_row = db.execute(
+        "SELECT meta_value FROM maxo_contract_meta WHERE contract_id = ? AND meta_key = 'origin'",
+        (contract_id,),
+    ).fetchone()
+
+    terms_status = []
+    for t in contract._terms:
+        terms_status.append({
+            "term_id": t.id,
+            "civil_text": t.description,
+            "assigned_participant": getattr(t, "assigned_participant", None),
+            "accepted_by": t.accepted_by,
+            "signed_by_all": t.is_accepted_by_all(contract.participant_ids),
+        })
+
+    participants_status = []
+    for p in contract.participants:
+        level = (
+            protection_level(int(p.id[len("user-"):]))
+            if p.id.startswith("user-") else None
+        )
+        participants_status.append({
+            "participant_id": p.id,
+            "protection_level": level,
+            "requires_paraphrase": bool(caps_for(level).get("requires_paraphrase")) if level else False,
+            "requires_witness": bool(caps_for(level).get("requires_witness")) if level else False,
+            "signed_all_terms": all(t.accepted_by.get(p.id) for t in contract._terms),
+        })
+
+    blockers = _activation_blockers(contract, db)
+    window = _contract_window_blocked(contract, db)
+
+    return jsonify({
+        "contract_id": contract.contract_id,
+        "state": contract.state.value,
+        "origin": origin_row["meta_value"] if origin_row else None,
+        "terms": terms_status,
+        "participants": participants_status,
+        "asymmetry_acknowledged": _asymmetry_acknowledged(contract_id),
+        "blockers": blockers,
+        "window": window,
+        "can_activate": not blockers and window is None and contract.state != ContractState.DRAFT,
+    })
+
+
+@bridge_bp.route("/<contract_id>/cycle", methods=["POST"])
+@token_required
+def cycle_step(current_user, contract_id: str):
+    """
+    Fase 2: paso guiado del ciclo — el actor del token hace HOY lo que le toca:
+
+    1. Si el contrato está en DRAFT, entra a la ronda de firma (PENDING),
+       previa validación axiomática (AVA).
+    2. Firma todos sus términos pendientes (identidad del token, Ola 3A.1),
+       con paráfrasis cuando su perfil de protección lo exige (Ola 3B).
+    3. Si todo quedó firmado y no hay bloqueos (asimetría, co-testigo),
+       el contrato se ACTIVA.
+
+    Body JSON:
+    {
+        "paraphrase": "yo prometo ayudar a Luis con su trámite"   # opcional
+    }
+
+    La firma nunca es automática para otro: cada parte camina su tramo.
+    """
+    from .contracts_bp import (
+        _audit,
+        _contract_window_blocked,
+        _load_contract,
+        _paraphrase_check,
+        _protection_oracle_gate,
+        _save_contract,
+        _token_uid,
+    )
+    from .protection import caps_for, protection_level
+
+    contract = _load_contract(contract_id)
+    if contract is None:
+        return jsonify({"error": "contract not found"}), 404
+
+    token_uid = _token_uid(current_user)
+    if token_uid is None:
+        return jsonify({"error": "token sin identidad válida"}), 403
+    pid = f"user-{token_uid}"
+    if pid not in contract.participant_ids:
+        return jsonify({
+            "error": "solo las partes del contrato caminan su ciclo",
+            "code": "CYCLE_NOT_PARTICIPANT",
+        }), 403
+
+    db = get_db()
+
+    # Ventanas temporales server-side (Ola 3A.7)
+    window_blocked = _contract_window_blocked(contract, db)
+    if window_blocked:
+        return jsonify(window_blocked), 423
+
+    data = request.get_json() or {}
+    paraphrase = (data.get("paraphrase") or "").strip()
+    actions: List[Dict[str, Any]] = []
+
+    # 1. DRAFT → PENDING: validación axiomática antes de la ronda de firma
+    if contract.state == ContractState.DRAFT:
+        if not contract.submit_for_acceptance():
+            return jsonify({
+                "error": "el borrador no pasa los invariantes y no entra a firma",
+                "code": "DRAFT_REJECTED",
+            }), 422
+        _save_contract(contract, actor_id=token_uid)
+        actions.append({"action": "submitted", "from": "draft", "to": "pending"})
+
+    if contract.state not in (ContractState.PENDING, ContractState.DRAFT):
+        return jsonify({
+            "error": f"el ciclo de firma no aplica en estado {contract.state.value}",
+        }), 400
+
+    # 2. Firmar los términos pendientes de ESTE participante (asistido)
+    level = protection_level(token_uid)
+    oracle_err = _protection_oracle_gate(contract, token_uid)
+    if oracle_err:
+        code = oracle_err.get("code")
+        return jsonify(oracle_err), 503 if code == "PROTECTION_ORACLE_REQUIRED" else 400
+    para_err = _paraphrase_check({"comprehension": data.get("comprehension", True),
+                                  "paraphrase": paraphrase}, level)
+    if para_err:
+        return jsonify(para_err), 400
+
+    signed_terms = []
+    for term in contract._terms:
+        if term.accepted_by.get(pid):
+            continue
+        term.accepted_by[pid] = True
+        signed_terms.append(term.id)
+        db.execute(
+            """
+            INSERT INTO maxo_contract_term_approvals (contract_id, term_id, participant_id, paraphrase)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(contract_id, term_id, participant_id) DO UPDATE SET
+                paraphrase = COALESCE(excluded.paraphrase, maxo_contract_term_approvals.paraphrase)
+            """,
+            (contract_id, term.id, pid, paraphrase or None),
+        )
+    if signed_terms:
+        _audit(contract, "cycle_terms_signed", token_uid,
+               terms=signed_terms, assisted=True)
+        actions.append({"action": "signed", "party": pid, "terms": signed_terms})
+    db.commit()
+
+    # 3. Si todo quedó firmado y sin bloqueos → activar
+    activated = False
+    activation_blocked: Optional[Dict[str, Any]] = None
+    if not contract.all_terms_accepted():
+        activation_blocked = {
+            "code": "TERMS_UNACCEPTED",
+            "message": "faltan firmas de otras partes",
+            "missing": [
+                {"term_id": t.id, "missing": [p for p in contract.participant_ids if not t.accepted_by.get(p)]}
+                for t in contract._terms if not t.is_accepted_by_all(contract.participant_ids)
+            ],
+        }
+    else:
+        blockers = _activation_blockers(contract, db)
+        if not blockers:
+            if contract.activate():
+                _save_contract(contract, actor_id=token_uid)
+                from .webhooks import dispatch_event
+
+                dispatch_event("contract.activated", {
+                    "contract_id": contract_id,
+                    "activated_at": datetime.now().isoformat(),
+                })
+                activated = True
+        else:
+            activation_blocked = blockers[0]
+
+    return jsonify({
+        "success": True,
+        "contract_id": contract_id,
+        "party": pid,
+        "state": contract.state.value,
+        "actions": actions,
+        "signed_terms": signed_terms,
+        "activated": activated,
+        "activation_blocked": activation_blocked,
+        "hint": "GET /contracts/<id>/cycle para ver el camino restante",
+    }), 200 if not activation_blocked else 202
