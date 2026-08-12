@@ -113,21 +113,21 @@ Get-ChildItem docs -Recurse -Filter *.md | Select-String -Pattern "T9 \(Reciproc
 - `tests/test_maxocontracts/test_axioms.py`: clases y asserts migrados a T16/T17 + 2 tests de alias.
 - Suite completa: **288/288 en verde**.
 
-### 🔴 Fase 2 — app/ y frontend (PENDIENTE, requiere coordinación API/UI)
+### ✅ Fase 2 — app/, scripts/, tests/, frontend y docs (COMPLETADA, ago 2026)
 
-Los siguientes archivos exponen "T9"/"T7" en payloads de API, prompts de oráculo o UI. Renombrar
-a T16/T17 aquí es el cambio de contrato API (verificar frontend en la misma PR):
+Renumeración integral ejecutada y verificada: `app/contracts_bp.py` (10), `app/bridge_b.py` (7),
+`maxocontracts/oracles/live_oracle.py` (8), `app/subscriptions.py` (lista de axiomas T2/T16/T17/T13),
+`scripts/local_oracle.py`, `scripts/seed_demo_contract.py`, `scripts/validador_conceptual.py`
+(T9 = No-Antropocentrismo y T7 = Jerarquía Temporal restaurados al canon del libro; T16/T17 nuevos),
+frontend (`Footer`, `OracleNegotiationPanel`, `CustomNodes`, builder `page.tsx`,
+`NegotiationPageClient`, `ContractDetailsClient`), tests (live_oracle, validate_graph, bridge_b,
+blindaje, subscriptions) y docs (decreto_antipobreza, ROADMAP, MONETIZACION, PLAN_MAESTRO,
+capitulo_17 del libro y libro_completo — solo las menciones de ingeniería; el T9 canónico
+No-Antropocentrismo quedó intacto).
 
-- `app/contracts_bp.py` — comentarios + `axiom_code="T9"` en validación de grafos (líneas ~3244-3245)
-- `app/bridge_b.py` — textos generados de contrato ("Axioma T9")
-- `app/subscriptions.py` — lista de axiomas `["T2", "T7", "T9", "T13"]` (línea ~205)
-- `app/live_oracle.py` (si existe en app) — prompts con "T9"; `scripts/local_oracle.py` — prompts
-- `app/contracts_bp.py` etc. — textos de oráculo ("?, SDV, T9")
-- `frontend/Footer.tsx`, `OracleNegotiationPanel.tsx`, `CustomNodes.tsx`, `page.tsx`,
-  `NegotiationPageClient.tsx`, `ContractDetailsClient.tsx` — textos visibles "T9 (Reciprocidad Justa)"
-- `scripts/validador_conceptual.py` — ya reconoce ambos títulos (dualidad documentada)
-- Tests de app que asertan "T9" en payloads: `test_live_oracle.py`, `test_validate_graph.py`,
-  `test_bridge_b_phase1.py`, `test_blindaje.py`, `test_subscriptions.py`
+**Verificación**: suite completa 603/603 (602 + validador conceptual 3/3), TypeScript `tsc --noEmit` limpio.
+El validador conceptual ahora exige coherencia: cualquier mención a T9 debe ser No-Antropocentrismo
+(su fuerza se demostró atrapando las referencias residuales).
 
 ---
 
@@ -135,8 +135,8 @@ a T16/T17 aquí es el cambio de contrato API (verificar frontend en la misma PR)
 
 | Ítem | Tipo | Origen | Destino | Prioridad | Estado |
 |---|---|---|---|---|---|
-| **T16 Minimizar Daño** | Renumeración (antes T7 ing.) | FUNDAMENTOS + código | Cap 3, 17 | ⭐⭐⭐ Alta | 🟢 Motor renumerado (ago 2026); Fase 2 app/frontend pendiente |
-| **T17 Reciprocidad Justa** | Renumeración (antes T9 ing.) | FUNDAMENTOS + código | Cap 3, 17 | ⭐⭐⭐ Alta | 🟢 Motor renumerado (ago 2026); Fase 2 app/frontend pendiente |
+| **T16 Minimizar Daño** | Renumeración (antes T7 ing.) | FUNDAMENTOS + código | Cap 3, 17 | ⭐⭐⭐ Alta | 🟢 Completado (motor + Fase 2, ago 2026) |
+| **T17 Reciprocidad Justa** | Renumeración (antes T9 ing.) | FUNDAMENTOS + código | Cap 3, 17 | ⭐⭐⭐ Alta | 🟢 Completado (motor + Fase 2, ago 2026) |
 | **INV1/INV2/INV4** | Formalización (ya implementados) | T16, Cap 8, T11/T12 | Cap 3, 8, 17 | ⭐ Media | 🟢 Mapeados |
 | **INV2-S** | Formalización pendiente | Victoria Sintética | Cap 16 + spec | ⭐⭐ Muy Alta | 🟡 En progreso (mapa SDV-S) |
 | **INV3 VHV No Ocultable** | Implementado + tests | T13 | `axioms.py` + Cap 17 | ⭐⭐ Muy Alta | 🟢 Completado (ago 2026) |

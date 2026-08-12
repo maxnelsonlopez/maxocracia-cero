@@ -196,16 +196,17 @@ Get-ChildItem maxocontracts -Recurse -Filter *.py | Select-String -Pattern "INV1
 - [x] **M3 — Tests**: cobertura por invariante (sección 4): 277/277 tests del motor pasan; todos los
       invariantes implementados están cubiertos; INV3 sin implementación ni tests.
 - [x] **M4 — Frontend**: mapa completo en `docs/architecture/mapa_frontend_ola4.md` — 33 páginas
-      mapeadas a blueprints; desconectados: `/admin/settings` (sin persistir), `/admin/subscriptions`
-      (mock), CRUD Flask-Admin sin UI, blueprints maxo/protection/reputation/resources/interchanges
-      sin consumidor.
+      mapeadas a blueprints. Conexiones ejecutadas: `/admin/settings` persistido (RF-G2) y
+      `/admin/subscriptions` con datos reales (RF-G3) — commit `6ce0af9`. Pendientes: RF-E4 (SDV-S
+      en UI), RF-G4 (CRUD admin), RF-G5 (maxo/protection/reputation/resources/interchanges).
 - [x] **Capítulo SDV-S**: creado `capitulo_09_5_sdv_sinteticos_260126.md` (ago 2026) a partir del
       estándar completo `docs/theory/SDV-S_Suelo_Dignidad_Vital_Sinteticos.md` (jun 2026) y de la
       implementación verificada. Integración cruzada en Caps. 10/11/13/14 y frontend pendientes
       (ver `integraciones_pendientes/mapa_sdv_sinteticos.md`).
-- [x] **Renumeración T16/T17 — Fase 1 (motor)**: `axioms.py` con `validate_t16_minimizar_dano` /
-      `validate_t17_reciprocidad` + aliases retrocompatibles; docstrings y tests migrados (288/288).
-      Fase 2 (app/ + frontend, contrato API) documentada en el mapa de integración — PR coordinada con UI.
+- [x] **Renumeración T16/T17 — Fase 1 y 2 (completa)**: motor (`validate_t16_minimizar_dano` /
+      `validate_t17_reciprocidad` con aliases), app/, oráculos, scripts, tests, frontend y docs
+      alineados con el libro. Validador conceptual 3/3, suite 603/603, `tsc` limpio. El T9 canónico
+      (No-Antropocentrismo) del libro quedó intacto.
 - [x] **INV3 (VHV No Ocultable)**: implementado en `AxiomValidator.validate_invariant_vhv_auditable`
       + 9 tests en `test_axioms.py` (286/286 en verde). Conectado a `MaxoContract.validate()` vía
       registros de términos.
