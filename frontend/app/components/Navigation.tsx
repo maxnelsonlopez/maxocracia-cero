@@ -35,7 +35,8 @@ import {
   Activity,
   BarChart3,
   ChevronDown,
-  Vote
+  Vote,
+  Compass
 } from "lucide-react";
 import { ContributorBadge } from "./ContributorBadge";
 import { useAuth } from "../context/AuthContext";
@@ -127,6 +128,13 @@ export function Navigation() {
               {isAuthenticated && (
                 <Link href="/votaciones" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/20 transition-all border border-emerald-500/20 mr-1 shadow-lg shadow-emerald-500/5">
                   Votaciones
+                </Link>
+              )}
+
+              {isAuthenticated && (
+                <Link href="/guia" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-violet-400 hover:text-violet-300 hover:bg-violet-950/20 transition-all border border-violet-500/20 mr-1 shadow-lg shadow-violet-500/5">
+                  <Compass className="w-3.5 h-3.5" />
+                  Guía
                 </Link>
               )}
 
@@ -247,6 +255,7 @@ export function Navigation() {
                   <MobileNavLink href="/pulso" label="Pulso Vital" icon={Activity} onClick={() => setIsOpen(false)} />
                   <MobileNavLink href="/matching" label="Plaza de Apoyo" icon={Handshake} onClick={() => setIsOpen(false)} />
                   <MobileNavLink href="/votaciones" label="Votaciones" icon={Vote} onClick={() => setIsOpen(false)} />
+                  <MobileNavLink href="/guia" label="Guía de la Maxocracia" icon={Compass} onClick={() => setIsOpen(false)} />
                   <MobileNavLink href="/perfil" label="Perfil Vital" icon={Heart} onClick={() => setIsOpen(false)} />
                 </div>
               )}

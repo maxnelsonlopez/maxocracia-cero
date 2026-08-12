@@ -88,6 +88,7 @@ def create_app(db_path=None):
     from .bridge_b import bridge_bp
     from .arrivals import arrivals_bp
     from .voting_bp import voting_bp
+    from .guide_bp import guide_bp, init_guide_tables
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
@@ -108,12 +109,14 @@ def create_app(db_path=None):
     app.register_blueprint(subscriptions_bp)
     app.register_blueprint(micromax_bp)
     app.register_blueprint(voting_bp)
+    app.register_blueprint(guide_bp)
 
     # Inicializar tablas específicas si no existen
     init_subscription_tables(app)
     init_micromax_tables(app)
     init_multi_offers_needs_tables(app)
     init_contracts_metrics_tables(app)
+    init_guide_tables(app)
 
     # placeholder imports to ensure modules loaded
     # other optional blueprints can be imported here
