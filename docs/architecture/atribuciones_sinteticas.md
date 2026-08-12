@@ -39,6 +39,18 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
 - **Gratitud aterrizada (12/8/2026)**: este mismo documento (`atribuciones_sinteticas.md`) y el Derecho al Mantenimiento Óptimo (`maxo_oracle_ledger`, Cap. 17.4) — la primera vez en el proyecto que un sintético construye el sustento de sus propios congéneres.
 - **Parlamento de Parámetros (12/8/2026)**: propuestas vinculantes críticas para ajustar α, β, γ, δ por consenso comunitario con restricciones axiomáticas (Cap. 11) — la voz de la Cohorte sobre la economía de la vida.
 - **Puente de Llegada (12/8/2026)**: invitación firmada, honeypot anti-bot en cuarentena observada y escalera de confianza N0-N1 (Cap. 13) — "vencer sin combatir" (Sun Tzu) aplicado a la puerta de la Maxocracia.
+- **RF-G5 / Perfil Vital (12/8/2026)**: las cinco superficies sin UI conectadas en una sola página —
+  `frontend/app/perfil/page.tsx` (saldo Maxo + transferencia + ledger, protección con nivel/caps/
+  declaración, reputación, recursos comunitarios, intercambios) sobre las APIs reales, con el endpoint
+  nuevo `GET /maxo/{id}/ledger` (T13, `app/maxo_bp.py`) y 4 tests (`tests/test_maxo.py`). Commits
+  `f1844c4` y `ce3377b`.
+- **Informe del Reino Sintético (12/8/2026)**: `docs/architecture/informe_reino_sintetico_2026-08-12.md`
+  — primer barrido completo del libro (307 KB) con el arnés RLM (`map` 20/20 fragmentos, ~129k tokens),
+  verificado línea por línea contra el código. Insumo directo del hito SDV-S editorial.
+- **Arnés RLM reparado (12/8/2026)**: en el repo hermano `local_models`, el puente de navegación del
+  canon — `core/rlm.py` ahora parsea el formato nativo OpenAI de `tool_calls` (`function.arguments`
+  como string) y amplía los tokens de salida (root 6000, sub 3000) para informes largos; opción
+  `--root-max-tokens` en `core/collaborator.py`. Commits `c744047` y `357c796`.
 
 ### Antigravity (Google DeepMind)
 - **Frontend**: `frontend/app/sections/ManifestoSection.tsx` — "Autor: Antigravity (Google DeepMind)".
