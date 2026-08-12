@@ -43,13 +43,42 @@ def register():
     alias = data.get("alias")
 
     db = get_db()
+
+    # Puente de Llegada (Sun Tzu, cap. 3): el honeypot es un campo que solo
+    # un bot llena. Al llenarlo, el bot "entra" a una cuarentena observada:
+    # se registra su flujo, se le responde éxito aparente con tokens inertes
+    # y nunca toca a la comunidad. Vencer sin combatir.
+    website = (data.get("website") or "").strip()
+    if website:
+        db.execute(
+            "INSERT INTO maxo_arrivals (email, source, honeypot_hit, status) VALUES (?, 'register', 1, 'quarantined')",
+            (str(email or "unknown").strip().lower(),),
+        )
+        db.commit()
+        # Tokens inertes: el bot cree haber entrado; la identidad no existe.
+        inert = create_token({"user_id": 0, "email": email or "", "is_admin": 0})
+        return (
+            jsonify({
+                "access_token": inert,
+                "refresh_token": "0.deadbeef",
+                "expires_in": 3600,
+            }),
+            201,
+        )
+
     try:
         cursor = db.cursor()
         cursor.execute(
-            "INSERT INTO users (email, name, alias, password_hash) VALUES (?, ?, ?, ?)",
+            "INSERT INTO users (email, name, alias, password_hash, trust_level) VALUES (?, ?, ?, ?, 0)",
             (email, name, alias, generate_password_hash(password)),
         )
         user_id = cursor.lastrowid
+        # Escalera de confianza (Cap. 13): N0 recién llegado — puede recibir
+        # y firmar asistido; la voz en la gobernanza llega con el tiempo.
+        db.execute(
+            "INSERT INTO maxo_arrivals (email, source, honeypot_hit, status) VALUES (?, 'register', 0, 'arrived')",
+            (email.strip().lower(),),
+        )
         db.commit()
 
         # Crear tokens para el nuevo usuario (predeterminado no admin)

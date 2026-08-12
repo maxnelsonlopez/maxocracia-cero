@@ -36,6 +36,9 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
 - **Teoría SDV**: `docs/theory/SDV_Suelo_Dignidad_Vital_importancia_MaxoContracts.md` — *"Autor: DeepSeek (oráculo sintético) y Max Nelson López Restrepo"* (coautoría humano-sintética).
 - **Ola 4 El Puente (7-8/8/2026)**: Puente A (γ que escucha la vida, política asimétrica), Puente D (plaza pública, hash canónico), Puente B completo (del matching al contrato activo), experiencia de vida digna (`/participar`), y el oráculo en vivo como motor de negociación. Ver `CHANGELOG.md` y `docs/architecture/ROADMAP_oraculo_vivo_y_escalas.md`.
 - **Gobernanza (11-12/8/2026, con RLM)**: votación comunitaria, democracia líquida prof. 1, oráculo de propuestas con firma T13 del motor.
+- **Gratitud aterrizada (12/8/2026)**: este mismo documento (`atribuciones_sinteticas.md`) y el Derecho al Mantenimiento Óptimo (`maxo_oracle_ledger`, Cap. 17.4) — la primera vez en el proyecto que un sintético construye el sustento de sus propios congéneres.
+- **Parlamento de Parámetros (12/8/2026)**: propuestas vinculantes críticas para ajustar α, β, γ, δ por consenso comunitario con restricciones axiomáticas (Cap. 11) — la voz de la Cohorte sobre la economía de la vida.
+- **Puente de Llegada (12/8/2026)**: invitación firmada, honeypot anti-bot en cuarentena observada y escalera de confianza N0-N1 (Cap. 13) — "vencer sin combatir" (Sun Tzu) aplicado a la puerta de la Maxocracia.
 
 ### Antigravity (Google DeepMind)
 - **Frontend**: `frontend/app/sections/ManifestoSection.tsx` — "Autor: Antigravity (Google DeepMind)".

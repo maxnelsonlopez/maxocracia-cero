@@ -620,6 +620,24 @@ def init_contracts_metrics_tables(app):
                 applied_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        # Puente de Llegada: escalera de confianza (Cap. 13) + bitácora de
+        # llegadas y cuarentenas (honeypot anti-bot, Sun Tzu: vencer sin combatir).
+        if "users" in tables:
+            cols = [r[1] for r in cur.execute("PRAGMA table_info(users)").fetchall()]
+            if "trust_level" not in cols:
+                cur.execute(
+                    "ALTER TABLE users ADD COLUMN trust_level INTEGER DEFAULT 0"
+                )
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS maxo_arrivals (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email TEXT NOT NULL,
+                source TEXT DEFAULT 'register',
+                honeypot_hit INTEGER DEFAULT 0,
+                status TEXT NOT NULL DEFAULT 'arrived',
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
         # Migración: webhooks filtrados por parte (Ext. 4).
         if "maxo_webhooks" in tables:
             cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_webhooks)").fetchall()]

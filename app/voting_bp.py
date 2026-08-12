@@ -361,6 +361,20 @@ def cast_vote(current_user, proposal_id: int):
         return jsonify({"error": f"opcion invalida; opciones: {options}"}), 400
 
     uid = current_user["user_id"]
+
+    # Escalera de confianza (Cap. 13, Puente de Llegada): la voz en la
+    # gobernanza no es un derecho de llegada — se gana caminando el primer
+    # acuerdo. Un recién llegado (N0) recibe y firma; gobernar espera.
+    trust = db.execute(
+        "SELECT trust_level FROM users WHERE id = ?", (uid,)
+    ).fetchone()
+    if trust is None or int(trust["trust_level"] or 0) < 1:
+        return jsonify({
+            "error": "recién llegado: la voz en la gobernanza llega al caminar tu primer acuerdo",
+            "code": "TRUST_LEVEL_REQUIRED",
+            "hint": "firma y activa tu primer contrato (o pide a la comunidad que te ascienda)",
+        }), 403
+
     cur = db.execute(
         """
         INSERT OR IGNORE INTO maxo_community_votes (proposal_id, user_id, option)

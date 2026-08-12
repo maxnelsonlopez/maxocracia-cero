@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-12 — Puente de Llegada: la puerta de la Cohorte (Sun Tzu + Ternura)
+
+### Añadido
+- **Invitación firmada**: `from-need` ya no deja en la calle al participante sin cuenta — el `409 NEED_PARTICIPANT_UNLINKED` ahora incluye `invite_urls` con token HMAC por email. `GET /invite/<token>` (público) valida la invitación y devuelve el email **enmascarado** (Opacidad Sagrada); token manipulado → 404 sin información.
+- **Página `/invite`** (frontend): la bienvenida que enamora con respeto — "no eres un cliente, eres un futuro vecino"; la escalera sin prisa (pulso → acuerdo → voz) y el enlace de registro con email pre-llenado. `/register` ahora pre-llena el email invitado y porta el honeypot.
+- **Honeypot anti-bot (Sun Tzu, cap. 3: vencer sin combatir)**: campo invisible `website` en el registro — un bot que lo llena "entra" a una **cuarentena observada** (`maxo_arrivals`): éxito aparente con tokens inertes, ningún usuario se crea, su flujo queda registrado para entenderlo y reubicarlo (`GET /invite/quarantine`, admin).
+- **Escalera de confianza (Cap. 13, N0-N4)**: columna `users.trust_level` — el recién llegado (N0) recibe y firma asistido, pero **no gobierna**: `cast_vote` responde `403 TRUST_LEVEL_REQUIRED`. Al **activar su primer contrato** (`/cycle`), los participantes humanos pasan a N1 (registro 'promoted' en la bitácora). La comunidad también puede ascender manualmente (`POST /users/<id>/trust`, admin).
+- **Bitácora de llegadas** (`maxo_arrivals`): toda llegada (arrived), cuarentena (quarantined) y ascenso (promoted) queda registrada — T13: la puerta también es auditable.
+- **Tests**: `tests/test_maxocontracts/test_arrivals.py` — 9 pruebas (invitación firmada y enmascarada, token manipulado, honeypot en cuarentena con tokens inertes, llegada N0 registrada, gate de votación, ascenso por primer contrato, ascenso comunitario, cuarentena solo admin). Fixtures de votación/parlamento actualizados a N1.
+
+### Notas Técnicas
+- **Verificación**: suite completa 648/648 (9 nuevas); tsc/eslint limpios; build exportado (55 payloads RSC); README v5.9.
+- **Referencia**: Cap. 13 (escalera de confianza), Cap. 15 (Cohorte), "El arte de la guerra" (Sun Tzu, cap. 3).
+
 ## 2026-08-12 — Parlamento de Parámetros (Cap. 11): la comunidad decide los pesos de la economía de la vida
 
 ### Añadido

@@ -307,11 +307,19 @@ def contract_from_need(current_user):
     if offerer_uid is None:
         missing.append(offerer_id)
     if missing:
+        from .arrivals import sign_invite
+
+        invites = {}
+        for pid_missing in missing:
+            p_row = _get_forms_participant(db, pid_missing)
+            if p_row and p_row.get("email"):
+                invites[str(pid_missing)] = f"/invite/{sign_invite(str(p_row['email']))}"
         return jsonify({
             "error": "los participantes deben tener cuenta en el portal con el mismo email del Formulario CERO",
             "code": "NEED_PARTICIPANT_UNLINKED",
             "participant_ids": missing,
-            "hint": "registra el email en /auth/register y vuelve a intentar",
+            "invite_urls": invites,
+            "hint": "abre tu invitación: sin prisa, primero tu pulso, luego tu acuerdo",
         }), 409
 
     # 1. Plantilla determinista (garantiza T2/T17 y lenguaje civil)
@@ -517,6 +525,39 @@ def _activation_blockers(contract, db) -> List[Dict[str, Any]]:
     return blockers
 
 
+def _promote_participants_to_trust(contract, db) -> List[str]:
+    """Escalera de confianza (Cap. 13): los participantes humanos de un
+    contrato recién activado pasan de N0 (recién llegado) a N1 (integrado).
+
+    La voz en la gobernanza se gana caminando el primer acuerdo. El
+    ascenso queda registrado en la bitácora de llegadas (T13).
+    """
+    promoted: List[str] = []
+    for p in contract.participants:
+        if not p.id.startswith("user-"):
+            continue
+        uid = int(p.id[len("user-"):])
+        row = db.execute(
+            "SELECT trust_level FROM users WHERE id = ?", (uid,)
+        ).fetchone()
+        if row is not None and int(row["trust_level"] or 0) < 1:
+            db.execute(
+                "UPDATE users SET trust_level = 1 WHERE id = ?", (uid,)
+            )
+            email_row = db.execute(
+                "SELECT email FROM users WHERE id = ?", (uid,)
+            ).fetchone()
+            if email_row:
+                db.execute(
+                    "INSERT INTO maxo_arrivals (email, source, honeypot_hit, status) VALUES (?, 'first_contract', 0, 'promoted')",
+                    (str(email_row["email"]).strip().lower(),),
+                )
+            promoted.append(p.id)
+    if promoted:
+        db.commit()
+    return promoted
+
+
 @bridge_bp.route("/<contract_id>/cycle", methods=["GET"])
 @token_required
 def cycle_status(current_user, contract_id: str):
@@ -682,6 +723,7 @@ def cycle_step(current_user, contract_id: str):
 
     # 3. Si todo quedó firmado y sin bloqueos → activar
     activated = False
+    promoted: List[str] = []
     activation_blocked: Optional[Dict[str, Any]] = None
     if not contract.all_terms_accepted():
         activation_blocked = {
@@ -703,6 +745,10 @@ def cycle_step(current_user, contract_id: str):
                     "contract_id": contract_id,
                     "activated_at": datetime.now().isoformat(),
                 })
+                # Puente de Llegada: al caminar su primer acuerdo activo, los
+                # humanos pasan de N0 (recién llegado) a N1 (integrado) —
+                # la voz en la gobernanza se gana con la vida, no con prisa.
+                promoted = _promote_participants_to_trust(contract, db)
                 activated = True
         else:
             activation_blocked = blockers[0]
@@ -715,6 +761,7 @@ def cycle_step(current_user, contract_id: str):
         "actions": actions,
         "signed_terms": signed_terms,
         "activated": activated,
+        "promoted_to_trust": promoted if activated else [],
         "activation_blocked": activation_blocked,
         "hint": "GET /contracts/<id>/cycle para ver el camino restante",
     }), 200 if not activation_blocked else 202

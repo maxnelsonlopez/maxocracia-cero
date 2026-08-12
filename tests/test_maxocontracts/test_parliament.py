@@ -36,10 +36,11 @@ def client():
                 db.executescript(f.read())
 
             # 4 usuarios para quórum crítico (60% → 3 votos); el 1 es admin
-            # (el cierre manual de propuestas es facultad administrativa)
+            # (el cierre manual de propuestas es facultad administrativa).
+            # Todos son integrantes establecidos (N1): tienen voz.
             for uid in range(1, 5):
                 db.execute(
-                    "INSERT INTO users (id, email, name, password_hash, is_admin) VALUES (?, ?, ?, 'hash', ?)",
+                    "INSERT INTO users (id, email, name, password_hash, is_admin, trust_level) VALUES (?, ?, ?, 'hash', ?, 1)",
                     (uid, f'u{uid}@test.com', f'Usuario {uid}', 1 if uid == 1 else 0),
                 )
             # Parámetros iniciales (defaults del esquema)

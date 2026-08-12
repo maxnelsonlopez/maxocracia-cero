@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 
+from .jwt_utils import admin_required
 from .utils import get_db
 
 bp = Blueprint("users", __name__, url_prefix="/users")
@@ -25,6 +26,32 @@ def get_user(user_id):
     if not row:
         return jsonify({"error": "not found"}), 404
     return jsonify(dict(row))
+
+
+@bp.route("/<int:user_id>/trust", methods=["POST"])
+@admin_required
+def promote_trust(current_user, user_id):
+    """
+    Escalera de confianza (Cap. 13): asciende a un integrante de N0
+    (recién llegado) a N1 (integrado) — la comunidad decide cuándo alguien
+    tiene voz en la gobernanza. Registro auditable (T13).
+    """
+    db = get_db()
+    row = db.execute(
+        "SELECT id, email, trust_level FROM users WHERE id = ?", (user_id,)
+    ).fetchone()
+    if row is None:
+        return jsonify({"error": "not found"}), 404
+    if int(row["trust_level"] or 0) >= 1:
+        return jsonify({"success": True, "user_id": user_id, "trust_level": row["trust_level"]})
+
+    db.execute("UPDATE users SET trust_level = 1 WHERE id = ?", (user_id,))
+    db.execute(
+        "INSERT INTO maxo_arrivals (email, source, honeypot_hit, status) VALUES (?, 'community_ascension', 0, 'promoted')",
+        (str(row["email"]).strip().lower(),),
+    )
+    db.commit()
+    return jsonify({"success": True, "user_id": user_id, "trust_level": 1})
 
 
 @bp.route("", methods=["POST"])

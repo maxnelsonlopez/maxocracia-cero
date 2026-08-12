@@ -86,6 +86,7 @@ def create_app(db_path=None):
     from .protection_bp import protection_bp
     from .verifier_bp import verifier_bp
     from .bridge_b import bridge_bp
+    from .arrivals import arrivals_bp
     from .voting_bp import voting_bp
 
     app.register_blueprint(auth_bp)
@@ -102,6 +103,7 @@ def create_app(db_path=None):
     app.register_blueprint(protection_bp)
     app.register_blueprint(verifier_bp)
     app.register_blueprint(bridge_bp)
+    app.register_blueprint(arrivals_bp)
     app.register_blueprint(stripe_bp)
     app.register_blueprint(subscriptions_bp)
     app.register_blueprint(micromax_bp)

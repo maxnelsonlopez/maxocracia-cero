@@ -33,8 +33,10 @@ def client():
             with open("app/schema.sql", "r", encoding="utf-8") as f:
                 db.executescript(f.read())
             for uid, name in [(1, "Max"), (2, "Ana"), (3, "Luis"), (4, "Sara")]:
+                # Integrantes establecidos de la Cohorte (N1): tienen voz
+                # en la gobernanza (Puente de Llegada, Cap. 13)
                 db.execute(
-                    "INSERT INTO users (id, email, name, password_hash) VALUES (?, ?, ?, 'hash')",
+                    "INSERT INTO users (id, email, name, password_hash, trust_level) VALUES (?, ?, ?, 'hash', 1)",
                     (uid, f"{name.lower()}@test.com", name),
                 )
             db.commit()

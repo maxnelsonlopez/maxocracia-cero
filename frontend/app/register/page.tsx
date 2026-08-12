@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,10 +15,17 @@ export default function RegisterPage() {
   const [alias, setAlias] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [website, setWebsite] = useState(""); // Honeypot (Puente de Llegada): invisible a humanos
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const { login } = useAuth();
   const router = useRouter();
+
+  // Invitación del Puente de Llegada: email pre-llenado, sin prisa
+  useEffect(() => {
+    const invited = new URLSearchParams(window.location.search).get("email");
+    if (invited && !email) setEmail(invited);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +35,7 @@ export default function RegisterPage() {
     try {
       const res = await apiFetch("/auth/register", {
         method: "POST",
-        body: JSON.stringify({ name, alias, email, password }),
+        body: JSON.stringify({ name, alias, email, password, website }),
       });
 
       const data = await res.json();
@@ -83,6 +90,11 @@ export default function RegisterPage() {
                 {error}
               </div>
             )}
+
+            {/* Honeypot del Puente de Llegada: invisible a humanos, los bots lo llenan */}
+            <div className="hidden" aria-hidden="true">
+              <input tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} name="website" />
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">

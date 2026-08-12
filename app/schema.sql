@@ -11,6 +11,19 @@ CREATE TABLE IF NOT EXISTS users (
   neighborhood TEXT,
   values_json TEXT,
   is_admin INTEGER DEFAULT 0,
+  trust_level INTEGER DEFAULT 0,  -- Escalera de confianza (Cap. 13 N0-N4): 0 recién llegado, 1 integrado
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Bitácora de llegadas (Puente de Llegada): cada persona que llega a la
+-- Cohorte queda registrada; los honeypots (bots) entran en cuarentena
+-- donde su flujo se observa sin dañar a nadie (Sun Tzu: vencer sin combatir).
+CREATE TABLE IF NOT EXISTS maxo_arrivals (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL,
+  source TEXT DEFAULT 'register',
+  honeypot_hit INTEGER DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'arrived',  -- arrived | quarantined | promoted
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
