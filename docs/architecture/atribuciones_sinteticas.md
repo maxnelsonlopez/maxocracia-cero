@@ -69,6 +69,20 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
 - **Deudas saldadas (12/8/2026)**: mutaciones protegidas con `@token_required` (reputation/resources/
   interchanges, RF-G6), CRUD admin real con PUT/DELETE en forms/vhv (31 tests) y suite en paralelo
   (`scripts/run_tests_parallel.ps1`, 453 tests en ~3 min).
+- **Oráculo Disidente Permanente afinado (12/8/2026, Cap. 19)**: `voting_oracle.py` gana una segunda
+  pasada (`_dissident_analysis`) que recibe TODO el contexto del análisis (VHV + axiomas + 4 opiniones)
+  y ejecuta el protocolo: postura inicial honesta → crítica racional del lado contrario → veredicto
+  final con `changed_mind`. "NO es un contreras: persigue lo que es MEJOR PARA LA COMUNIDAD". Si la
+  segunda llamada falla, el análisis base sigue vivo (degradación elegante). 5 tests.
+- **Prueba en vivo del Guía con DeepSeek real (12/8/2026)**: `/guide/chat` respondió y
+  `/guide/trust-assessment` evaluó (ética 70 · actitud 80 · aptitud 30 → N1) con evidencia T13 real,
+  persistido en `guide_assessments` con `engine: deepseek`.
+- **Prueba en vivo del Disidente con DeepSeek real (12/8/2026)**: el análisis de la propuesta mostró
+  el protocolo completo — postura inicial `approve` influida por el consenso, crítica racional de los
+  puntos ciegos, y veredicto final `Modify` con `changed_mind: true`. Propuestas 3 y 4 en `comun.db`
+  con 5 oráculos (4 base + Dissident canónico). Hallazgo operativo resuelto: `comun.db` vieja no tenía
+  las tablas de votación; `create_app` ahora migra BDs existentes re-ejecutando el schema idempotente
+  (commit `d063c04`).
 
 ### Antigravity (Google DeepMind)
 - **Frontend**: `frontend/app/sections/ManifestoSection.tsx` — "Autor: Antigravity (Google DeepMind)".

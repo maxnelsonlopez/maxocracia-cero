@@ -88,6 +88,11 @@ chat de bienvenida, evaluación de escalera de confianza (ética/actitud/aptitud
 candidatura a director con filtros — el guía recomienda, la comunidad decide (propuesta critical).
 **Deudas saldadas**: RF-G6 (token en mutaciones), RF-G4 mutaciones reales (PUT/DELETE, 31 tests),
 suite paralela `scripts/run_tests_parallel.ps1`.
+**Oráculo Disidente Permanente (RF-I10, Cap 19)**: segunda pasada con contexto completo (VHV +
+axiomas + 4 opiniones); protocolo postura inicial → crítica racional → veredicto final con
+`changed_mind`; verificado EN VIVO con DeepSeek (propuestas 3 y 4 en comun.db). Hallazgo resuelto:
+`create_app` migra BDs existentes (schema idempotente) — la comun.db real no tenía las tablas de
+votación/parlamento. Suite **701/701**.
 
 ## 5. Historia reciente (git log, maxocracia)
 
