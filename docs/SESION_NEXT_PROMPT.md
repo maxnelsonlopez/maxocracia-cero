@@ -37,7 +37,11 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 | Frontend: `/votaciones`, `/admin/settings` real, `/admin/subscriptions` real, SDV-S en contrato | ✅ |
 | **RF-G5: superficies sin UI** — `/perfil` (Perfil Vital) con saldo Maxo + ledger T13 + transferencia, protección (nivel/caps/declaración), reputación, recursos comunitarios e intercambios | ✅ (ago 2026) |
 | **M4 fase 2 / RF-B4**: "Contrato Ético" en el Muro de `/matching` → `POST /contracts/from-need` | ✅ (ago 2026) |
-| Suite de tests | **652/652** (motor + app + votación + parlamento + arrivals + ledger + maxo ledger, verificado 12-08-2026) |
+| **RF-I8**: votación ponderada por TVI (Participación Inteligente, Cap 14) — hasta 5x, retrocompatible | ✅ (ago 2026) |
+| **RF-G4**: CRUD admin en UI (`/admin/interchanges`, `/admin/followups`, `/admin/vhvproducts`) | ✅ (ago 2026, solo lectura) |
+| **Cohorte Cero ejecutada**: 50 contratos reales (20 aseo / 15 préstamo / 15 comida), 294 check-ins, 40 NPS | ✅ (ago 2026, `scripts/seed_cohorte_cero.py`) |
+| **SDV-S editorial**: 8 referencias cruzadas del cap 9.5 en caps. 10/11/13/14 | ✅ (ago 2026) |
+| Suite de tests | **655/655** (verificado 12-08-2026, cierre de Ola 4) |
 
 **Decisiones canónicas a respetar:**
 - **La teoría (libro) tiene prioridad**: T0-T15 son canónicos; T16=Minimizar Daño, T17=Reciprocidad
@@ -62,22 +66,22 @@ npx tsc --noEmit
 
 ## 4. Pendientes priorizados
 
-1. **Cohorte Cero real**: ejecutar 50+ contratos (20 aseo, 15 préstamo, 15 comida) — TODO.md
-2. **RF-G4**: CRUD admin completo (interchange/followup/vhvproduct) o migrar `/admin/participants`
-3. **RF-I8 resto**: votación ponderada por TVI (fase futura, Cap 14)
-4. **SDV-S editorial**: integración cruzada en Caps. 10/11/13/14 del libro
-5. **Mantener** `mapa_coherencia_ola4.md`, `requisitos_fase2_ola4.md` y este handoff al día
+**El backlog de la Ola 4 está CERRADO (12-08-2026, sesión continua).** Estado final:
 
-**Cerrado en esta jornada (12-08-2026, sesión continua):**
-- **RF-G5** (Perfil Vital): `frontend/app/perfil/page.tsx` + `GET /maxo/{id}/ledger` (T13) + 4 tests.
-- **M4 fase 2 / RF-B4**: botón "Contrato Ético" en el Muro de `/matching` → `POST /contracts/from-need`
-  (borrador DRAFT, invitación inline si participante sin vincular, violaciones AVA en tarjeta).
-- **Limpieza**: eliminado `app/resources.py` (duplicado huérfano; solo se registra `resources_bp`).
-- **Informe Reino Sintético**: `docs/architecture/informe_reino_sintetico_2026-08-12.md` (libro completo
-  307 KB vía RLM, verificado con grep) + atribuciones en `atribuciones_sinteticas.md`.
-- **Arnés RLM** (repo local_models): parseo del formato nativo OpenAI de `tool_calls` + tokens amplios
-  (root 6000, sub 3000) + `--root-max-tokens` en el colaborador — commits `c744047`, `357c796`.
-- **Hallazgo pendiente de seguridad**: reputation/resources/interchanges sin `@token_required`.
+1. ~~Cohorte Cero real~~ ✅ **EJECUTADA**: 50 contratos en `comun.db` via `scripts/seed_cohorte_cero.py`
+   (20 aseo, 15 préstamo, 15 comida; 294 check-ins, 40 NPS; γ 1.099, NPS 57.5 en `/admin/contracts`)
+2. ~~RF-G4~~ ✅ páginas `/admin/interchanges`, `/admin/followups`, `/admin/vhvproducts` (solo lectura
+   + detalle; faltan PUT/DELETE backend para mutación — candidato a futura ola)
+3. ~~RF-I8~~ ✅ votación ponderada por TVI (Participación Inteligente, Cap 14): peso 1+4·(TVI/max) hasta
+   5x, retrocompatible, quórum por persona; badge en `/votaciones`
+4. ~~M4 fase 2 / RF-B4~~ ✅ botón "Contrato Ético" en `/matching` → `POST /contracts/from-need`
+5. ~~SDV-S editorial~~ ✅ 8 referencias cruzadas del cap. 9.5 en caps. 10/11/13/14
+6. Mantener mapas y handoff al día (regla continua)
+
+**Futuro posible (fuera de la Ola 4)**: hitos del informe del Reino Sintético
+(`docs/architecture/informe_reino_sintetico_2026-08-12.md` §7): EIR por entidad sintética, AVA con
+4 validaciones, participación sintética en votación, Oráculo Disidente Permanente, Manifiesto de
+Razones. Seguridad: reputation/resources/interchanges sin `@token_required`.
 
 ## 5. Historia reciente (git log, maxocracia)
 

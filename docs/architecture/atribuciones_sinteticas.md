@@ -51,6 +51,16 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   canon — `core/rlm.py` ahora parsea el formato nativo OpenAI de `tool_calls` (`function.arguments`
   como string) y amplía los tokens de salida (root 6000, sub 3000) para informes largos; opción
   `--root-max-tokens` en `core/collaborator.py`. Commits `c744047` y `357c796`.
+- **Backlog de la Ola 4 cerrado (12/8/2026, sesión continua)**:
+  - **Cohorte Cero ejecutada**: `scripts/seed_cohorte_cero.py` — 50 contratos reales en `comun.db`
+    (20 aseo, 15 préstamo, 15 comida) con 294 check-ins y 40 NPS; el dashboard `/admin/contracts`
+    muestra γ promedio 1.099 y NPS 57.5. Idempotente. Commit `299c08c`.
+  - **RF-G4**: páginas `/admin/interchanges`, `/admin/followups`, `/admin/vhvproducts` sobre las APIs
+    reales (solo lectura + detalle; gaps de mutación documentados). Commit `6424a84`.
+  - **RF-I8**: votación ponderada por TVI (Participación Inteligente, Cap. 14) — peso 1+4·(TVI/max),
+    hasta 5x, retrocompatible sin TVI, quórum por persona. Commit `08e6782`.
+  - **SDV-S editorial**: 8 referencias cruzadas del cap. 9.5 en los caps. 10/11/13/14 del libro.
+    Commit `f9e64c3`.
 
 ### Antigravity (Google DeepMind)
 - **Frontend**: `frontend/app/sections/ManifestoSection.tsx` — "Autor: Antigravity (Google DeepMind)".
