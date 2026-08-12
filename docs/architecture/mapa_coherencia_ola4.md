@@ -66,7 +66,75 @@ Resumen de contratos (RLM sobre `contracts_bp.py`, resumen de la sesión anterio
 (crear, términos, accept, activate, retract, finalize), validación de axiomas, blindaje anti-gamificación,
 check-ins de bienestar y resúmenes en lenguaje civil.
 
-## 3. Notas de verificación (lecciones del flujo RLM)
+## 3. M2 — Teoría ↔ Código: axiomas T0–T15 vs implementación (verificado 11-08-2026)
+
+Fuente teórica: `docs/book/edicion_3_dinamica/libro_completo_310126.md` (sección "Grupos A/B/C",
+chars 57006–60753). Fuente de implementación: `maxocontracts/core/axioms.py` + greps de docs/architecture.
+
+### 3.1 Los 16 axiomas del libro (T0–T15)
+
+| Axioma | Grupo | Enunciado (resumen) | Traza en código |
+|---|---|---|---|
+| **T0** Unicidad Existencial | A | La vida es secuencia ordenada de instantes únicos (TVI) | — (teórico) |
+| **T1** Finitud Absoluta | A | El tiempo vital no se ahorra, solo se gasta | — (teórico) |
+| **T2** Igualdad Temporal Fundamental | A | 1 hora de vida = mismo valor existencial para todos | `reciprocity.py` lo referencia ✓ |
+| **T3** No-Fungibilidad | A | No compensar TVI presente con promesas futuras | — (teórico) |
+| **T4** Materialización Temporal | A | Todo objeto es tiempo cristalizado | — (teórico) |
+| **T5** Interdependencia Temporal | A | Nadie es autosuficiente; consumimos TVI ajenos | — (teórico) |
+| **T6** Irreversibilidad Asimétrica | B | Valor real solo retrospectivo | — (teórico) |
+| **T7** Jerarquía Temporal | B | Escalas Absoluto / TVI / TPI deben armonizarse | — (teórico) |
+| **T8** Encadenamiento Temporal | B | Costo real = Directo + Heredado + Futuro | — (teórico; EVV usa la descomposición) |
+| **T9** No-Antropocentrismo | B | El tiempo existe independiente de la percepción humana | ⚠️ **colisión de numeración** (ver 3.3) |
+| **T10** Responsabilidad Temporal Colectiva | B | Quien consume TVI ajenos genera deuda verificable | — (teórico) |
+| **T11** Inversión Temporal Legítima | C | Consumir tiempo presente exige retorno futuro colectivo | Base conceptual de INV4 (retractación) |
+| **T12** Derecho a la Ineficiencia | C | Disidencia/contemplación exentas de "desperdicio" | Base conceptual de INV4 (retractación) |
+| **T13** Transparencia de Cálculo | C | Todo cálculo de costo vital debe ser auditable | `live_oracle.py` (prompts de validación) ✓ |
+| **T14** Precaución Intergeneracional | C | Menor irreversibilidad ante no-consentientes | — (teórico) |
+| **T15** Protocolo de Disenso Evolutivo | C | Ruido Evolutivo vs Ruido Entrópico | — (teórico) |
+
+### 3.2 Familia INV (definida en specs de ingeniería, no en el libro)
+
+Los invariantes operativos se documentan en `docs/architecture/blindaje_anti_gamificacion_equidad.md`
+(referencia canónica: "Cap. 17, Cap. 10, Axioma T11/T12, INV1/INV2/INV2-S/T9/T13") y se implementan en
+`core/axioms.py` (`AxiomValidator`):
+
+| Invariante | Regla | Spec de origen | Implementación |
+|---|---|---|---|
+| INV1 | Wellness no-negativo (γ ≥ 1) | `FUNDAMENTOS_CONCEPTUALES.md` §III-1 | `axioms.validate_invariant_gamma` ✓ |
+| INV2 | SDV humano respetado | `FUNDAMENTOS_CONCEPTUALES.md` §III-2 | `axioms.validate_invariant_sdv` ✓ |
+| INV2-S | SDV-S sintético respetado | specs SDV-S (no está en §III) | `axioms.validate_invariant_sdv_s` ✓ |
+| INV3 | **VHV No Ocultable** (auditable) | `FUNDAMENTOS_CONCEPTUALES.md` §III-3 | ⚠️ **NO implementado en código** |
+| INV4 | Retractabilidad garantizada | `FUNDAMENTOS_CONCEPTUALES.md` §III-4 | `axioms.validate_invariant_retractability` ✓ |
+
+El canon de ingeniería (`docs/architecture/maxocontracts/FUNDAMENTOS_CONCEPTUALES.md`, §II) usa su
+propia tabla de axiomas temporales: **T1, T2, T4, T7, T9, T10, T13, T14, T15** + axiomas de verdad
+**V3, V4, V6**. Coinciden con el libro en T1/T2/T4/T13/T14/T15; **T7 y T9 están redefinidos** en
+ingeniería (ver 3.3).
+
+### 3.3 Hallazgos del contraste (brechas y colisiones)
+
+1. **Colisión de numeración T7 y T9**: el libro define **T7 = Jerarquía Temporal** y **T9 =
+   No-Antropocentrismo**; el canon de ingeniería y el código redefinen **T7 = Minimizar Daño**
+   (`gamma_protector`) y **T9 = Reciprocidad Justa** (`reciprocity.py`, `axioms.validate_t9_reciprocidad`,
+   `live_oracle.py`). T13/T14/T15 sí coinciden. **Decisión pendiente del equipo**: renumerar o
+   documentar la redefinición. Mientras tanto, **no usar T7/T9 sin aclarar el contexto** (libro vs ingeniería).
+2. **INV3 (VHV No Ocultable) no está en el código**: el spec §III-3 exige que todo VHV quede registrado
+   y auditable; `AxiomValidator` no lo valida. Candidato directo para la próxima Ola.
+3. **INV2-S no tiene contraparte en el spec §III**: el código lo añadió (extensión sintética, consistente
+   con SDV-S y la Victoria Sintética), pero no está formalizado en FUNDAMENTOS_CONCEPTUALES.
+4. **La reciprocidad no tiene axioma propio en el libro**: es un axioma de ingeniería (origen:
+   docs de contratos/API), adscrito al número T9 por convención interna.
+5. **12 de 16 axiomas teóricos no tienen traza en código** (T0–T8, T10–T12, T14, T15 del libro).
+   Esperado: el libro es filosofía de sistema completo; el software cubre contratos/matching. Estos
+   axiomas son **piso teórico de futuras Olas**, no deuda técnica.
+6. **Método**: el primer intento RLM sobre el libro entero (300 KB) entró en bucle de llamadas
+   idénticas (25/25 iteraciones gastadas). Correcciones aplicadas al arnés:
+   - **Guard de repetición** (`rlm.py`, `repeat_guard=3`): corta bucles con mensaje correctivo.
+   - **Recorte determinístico del contexto**: el director (sesión) localizó la sección de axiomas
+     por greps y la aisló (3.7 KB) antes de la extracción semántica — patrón recomendado: *recortar
+     con greps lo que es estructural, dejar al RLM lo que es semántico*.
+
+### 3.4 Notas de verificación del flujo RLM (M1)
 
 El análisis RLM del motor acertó en clases, oráculos y composición, pero produjo **3 errores que la
 verificación determinista corrigió**:
@@ -96,8 +164,11 @@ Get-ChildItem maxocontracts -Recurse -Filter *.py | Select-String -Pattern "INV1
 
 ## 5. Próximos hitos del Puente de Coherencia
 
-- [ ] **M2 — Teoría ↔ código**: extraer del libro (`docs/book/libro_completo_310126.md`, 300 KB) los
-      axiomas/reglas y contrastarlos con este mapa (RLM sobre el libro + verificación).
-- [ ] **M3 — Tests**: inventario de qué invariante cubre cada test (`tests/`, ~40 archivos).
+- [x] **M2 — Teoría ↔ código**: axiomas T0–T15 del libro contrastados con código y specs de
+      ingeniería (sección 3). Hallazgos: colisión T7/T9, INV3 no implementado, INV2-S sin formalizar.
+- [ ] **M3 — Tests**: inventario de qué invariante cubre cada test (`tests/`, ~40 archivos) y
+      detección de invariantes sin cobertura.
 - [ ] **M4 — Frontend**: mapear páginas Next.js → blueprints consumidos.
+- [ ] Decisión de equipo: renumerar T7/T9 de ingeniería o documentar la redefinición formalmente.
+- [ ] Implementar INV3 (VHV No Ocultable) en `AxiomValidator`.
 - [ ] Mantener este documento actualizado en cada Ola.
