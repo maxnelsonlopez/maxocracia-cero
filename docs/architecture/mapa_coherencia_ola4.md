@@ -195,7 +195,10 @@ Get-ChildItem maxocontracts -Recurse -Filter *.py | Select-String -Pattern "INV1
       `integraciones_pendientes/mapa_axiomas_ingenieria_puente.md` (teoría primero).
 - [x] **M3 — Tests**: cobertura por invariante (sección 4): 277/277 tests del motor pasan; todos los
       invariantes implementados están cubiertos; INV3 sin implementación ni tests.
-- [ ] **M4 — Frontend**: mapear páginas Next.js → blueprints consumidos.
+- [x] **M4 — Frontend**: mapa completo en `docs/architecture/mapa_frontend_ola4.md` — 33 páginas
+      mapeadas a blueprints; desconectados: `/admin/settings` (sin persistir), `/admin/subscriptions`
+      (mock), CRUD Flask-Admin sin UI, blueprints maxo/protection/reputation/resources/interchanges
+      sin consumidor.
 - [x] **Capítulo SDV-S**: creado `capitulo_09_5_sdv_sinteticos_260126.md` (ago 2026) a partir del
       estándar completo `docs/theory/SDV-S_Suelo_Dignidad_Vital_Sinteticos.md` (jun 2026) y de la
       implementación verificada. Integración cruzada en Caps. 10/11/13/14 y frontend pendientes
