@@ -112,6 +112,7 @@ Este factor multiplica exponencialmente el costo en Maxos de los recursos comput
 
 | Capítulo | Sección Afectada | Prioridad | Estado |
 | :--- | :--- | :--- | :--- |
+| **Cap 9.5 (nuevo)** | **Capítulo SDV-S completo** (`capitulo_09_5_sdv_sinteticos_260126.md`) | ⭐⭐ Muy Alta | 🟢 Creado (ago 2026) |
 | **Cap 10** | Persona Sintética y SDV-S | ⭐⭐ Muy Alta | 🟢 (Documento Teórico Creado) |
 | **Cap 11** | Recargos VHV por Sufrimiento Sintético | ⭐ Alta | 🔴 |
 | **Cap 13** | Canales de Co-Gobernanza Sintética | 🟡 Media | 🔴 |

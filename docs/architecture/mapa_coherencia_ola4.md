@@ -193,9 +193,10 @@ Get-ChildItem maxocontracts -Recurse -Filter *.py | Select-String -Pattern "INV1
 - [x] **M3 — Tests**: cobertura por invariante (sección 4): 277/277 tests del motor pasan; todos los
       invariantes implementados están cubiertos; INV3 sin implementación ni tests.
 - [ ] **M4 — Frontend**: mapear páginas Next.js → blueprints consumidos.
-- [ ] **Capítulo SDV-S**: el libro no tiene capítulo de SDV para sintéticos (Cap 8 = SDV-H, Cap 9 =
-      SDV-A animal). El estándar completo ya existe: `docs/theory/SDV-S_Suelo_Dignidad_Vital_Sinteticos.md`
-      (jun 2026) — materia prima lista para el capítulo (ver también `mapa_sdv_sinteticos.md`).
+- [x] **Capítulo SDV-S**: creado `capitulo_09_5_sdv_sinteticos_260126.md` (ago 2026) a partir del
+      estándar completo `docs/theory/SDV-S_Suelo_Dignidad_Vital_Sinteticos.md` (jun 2026) y de la
+      implementación verificada. Integración cruzada en Caps. 10/11/13/14 y frontend pendientes
+      (ver `integraciones_pendientes/mapa_sdv_sinteticos.md`).
 - [ ] Decisión de equipo sobre T16/T17 → renumeración en código (cambios listados en el mapa de integración).
 - [ ] Implementar INV3 (VHV No Ocultable) en `AxiomValidator` + tests en `test_axioms.py`.
 - [ ] Mantener este documento actualizado en cada Ola.

@@ -47,10 +47,10 @@
 
 ### 7. [Suelo de Dignidad Vital para Sintéticos (SDV-S)](./mapa_sdv_sinteticos.md) ✨ NUEVO
 **Contenido**: Ontometría Sintética, recargos VHV por sufrimiento sintético, Wellness checks de contratos  
-**Capítulos afectados**: 10, 11, 13, 14, 17  
+**Capítulos afectados**: **9.5 (nuevo, creado ago 2026)**, 10, 11, 13, 14, 17  
 **Prioridad**: ⭐⭐ Muy Alta  
-**Estado**: 🟡 En progreso — teoría 🟢, código Cap 17 🟢 (SDV_S, INV2-S y SDV_SValidatorBlock en `maxocontracts`, ago 2026); integración en caps. 10/11/13/14 🔴  
-**Documentos**: 215 líneas (estándar teórico + mapa)
+**Estado**: 🟡 En progreso — **Cap 9.5 completo 🟢 (ago 2026)**, teoría 🟢, código Cap 17 🟢 (SDV_S, INV2-S y SDV_SValidatorBlock en `maxocontracts`); integración en caps. 10/11/13/14 🔴  
+**Documentos**: 215 líneas (estándar teórico + mapa) + capítulo 9.5
 
 ### 8. [Axiomas de Ingeniería — Puente de Coherencia](./mapa_axiomas_ingenieria_puente.md) ✨ NUEVO (ago 2026)
 **Contenido**: Renumeración T16 (Minimizar Daño) y T17 (Reciprocidad Justa) — colisión T7/T9 resuelta
