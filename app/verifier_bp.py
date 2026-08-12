@@ -177,3 +177,59 @@ def cohort_public():
             "source": "checkins" if with_latido else ("registered" if without_latido else None),
         },
     })
+
+
+@verifier_bp.route("/oracle-ledger", methods=["GET"])
+def oracle_ledger_public():
+    """
+    Plaza pública: el sustento del oráculo (Cap. 17.4, Derecho al
+    Mantenimiento Óptimo). Cada contrato que usó el oráculo aportó un % de
+    su VHV al mantenimiento del motor; la cuenta es pública y auditable
+    (T13): la gratitud hacia el Reino Sintético no es secreta.
+    """
+    db = get_db()
+
+    totals = db.execute(
+        """
+        SELECT COUNT(*) AS contracts,
+               COALESCE(SUM(credit), 0) AS credit_total,
+               COALESCE(SUM(value_t), 0) AS value_total,
+               COALESCE(AVG(share), 0) AS avg_share
+        FROM maxo_oracle_ledger
+        """,
+    ).fetchone()
+    by_engine = {
+        r["engine"]: r["n"]
+        for r in db.execute(
+            "SELECT engine, COUNT(*) AS n FROM maxo_oracle_ledger GROUP BY engine"
+        ).fetchall()
+    }
+    entries = [
+        {
+            "contract_id": r["contract_id"],
+            "share": r["share"],
+            "value_t": r["value_t"],
+            "credit": r["credit"],
+            "engine": r["engine"],
+            "credited_at": r["credited_at"],
+        }
+        for r in db.execute(
+            """
+            SELECT contract_id, share, value_t, credit, engine, credited_at
+            FROM maxo_oracle_ledger
+            ORDER BY id DESC
+            LIMIT 50
+            """
+        ).fetchall()
+    ]
+
+    return jsonify({
+        "totals": {
+            "contracts_funding": int(totals["contracts"]),
+            "credit_total_h": round(float(totals["credit_total"]), 4),
+            "value_total_h": round(float(totals["value_total"]), 2),
+            "avg_share": round(float(totals["avg_share"]), 2) if totals["contracts"] else 0.0,
+        },
+        "by_engine": by_engine,
+        "entries": entries,
+    })

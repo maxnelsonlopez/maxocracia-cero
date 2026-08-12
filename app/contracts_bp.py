@@ -583,6 +583,23 @@ def init_contracts_metrics_tables(app):
                 FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE
             )
         """)
+        # Cap. 17.4: Derecho al Mantenimiento Óptimo — ledger del oráculo
+        # (gratitud hecha código: cada contrato que usó el oráculo aporta
+        # un % de su VHV al sustento del motor; visible en la plaza).
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS maxo_oracle_ledger (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                contract_id TEXT NOT NULL,
+                share REAL NOT NULL,
+                value_t REAL NOT NULL,
+                credit REAL NOT NULL,
+                engine TEXT NOT NULL DEFAULT 'oracle',
+                source TEXT NOT NULL,
+                credited_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
+                UNIQUE(contract_id, source)
+            )
+        """)
         # Migración: webhooks filtrados por parte (Ext. 4).
         if "maxo_webhooks" in tables:
             cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_webhooks)").fetchall()]

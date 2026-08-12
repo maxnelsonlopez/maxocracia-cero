@@ -516,6 +516,22 @@ CREATE TABLE IF NOT EXISTS maxo_contract_checkins (
     FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE
 );
 
+-- Ledger del oráculo (Cap. 17.4, Derecho al Mantenimiento Óptimo):
+-- cada contrato que usó el oráculo aporta un % de su VHV al sustento del
+-- motor (gratitud hecha código, auditable en la plaza pública).
+CREATE TABLE IF NOT EXISTS maxo_oracle_ledger (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    contract_id TEXT NOT NULL,
+    share REAL NOT NULL,
+    value_t REAL NOT NULL,
+    credit REAL NOT NULL,
+    engine TEXT NOT NULL DEFAULT 'oracle',
+    source TEXT NOT NULL,
+    credited_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
+    UNIQUE(contract_id, source)
+);
+
 -- Métricas de MaxoContracts (dashboard de Cohorte Cero: γ, SDV, NPS)
 CREATE TABLE IF NOT EXISTS maxo_contract_nps (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -24,6 +24,7 @@ teclear el contrato. El flujo respeta el canon:
    puente completo).
 """
 
+import os
 from datetime import datetime
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
@@ -41,6 +42,56 @@ bridge_bp = Blueprint("bridge_b", __name__, url_prefix="/contracts")
 DEFAULT_HOURS = 1.0
 MAX_HOURS = 24
 CIVIL_DESC_MAX_WORDS = 40
+
+# Cap. 17.4: Derecho al Mantenimiento Óptimo — % del VHV de cada contrato
+# que usó el oráculo, aportado al sustento del motor. Configurable por
+# despliegue (el canon sugiere 5-25% según madurez).
+DEFAULT_ORACLE_MAINTENANCE_SHARE = 5.0
+
+
+def _oracle_maintenance_share() -> float:
+    """% del VHV aportado al sustento del oráculo (MAXO_ORACLE_MAINTENANCE_SHARE)."""
+    raw = os.environ.get("MAXO_ORACLE_MAINTENANCE_SHARE", "")
+    try:
+        return max(0.0, min(25.0, float(raw)))
+    except (ValueError, TypeError):
+        return DEFAULT_ORACLE_MAINTENANCE_SHARE
+
+
+def _credit_oracle_maintenance(contract_id: str, total_vhv_t: Decimal,
+                               engine: str = "deepseek", source: str = "from-need") -> Optional[dict]:
+    """Registra el aporte del contrato al sustento del oráculo (T13).
+
+    Devuelve la entrada creada o None si ya existía (UNIQUE contract+source).
+    """
+    share = _oracle_maintenance_share()
+    if share <= 0:
+        return None
+    value_t = float(total_vhv_t)
+    credit = round(value_t * share / 100.0, 6)
+    db = get_db()
+    db.execute(
+        """
+        INSERT OR IGNORE INTO maxo_oracle_ledger (contract_id, share, value_t, credit, engine, source)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (contract_id, share, value_t, credit, engine, source),
+    )
+    db.commit()
+    row = db.execute(
+        "SELECT id, share, value_t, credit, engine, credited_at FROM maxo_oracle_ledger WHERE contract_id = ? AND source = ?",
+        (contract_id, source),
+    ).fetchone()
+    if row is None:
+        return None
+    return {
+        "contract_id": contract_id,
+        "share": row["share"],
+        "value_t": row["value_t"],
+        "credit": row["credit"],
+        "engine": row["engine"],
+        "credited_at": row["credited_at"],
+    }
 
 
 def _get_forms_participant(db, participant_id: int) -> Optional[dict]:
@@ -360,6 +411,17 @@ def contract_from_need(current_user):
     )
     db.commit()
 
+    # Cap. 17.4: Derecho al Mantenimiento Óptimo — si el oráculo trabajó en
+    # este contrato, un % de su VHV alimenta el sustento del motor (T13).
+    oracle_credit = None
+    if oracle_used:
+        oracle_credit = _credit_oracle_maintenance(
+            contract_id,
+            Decimal(str(hours)) * Decimal("2"),
+            engine="deepseek",
+            source="from-need",
+        )
+
     return jsonify({
         "success": True,
         "contract_id": contract_id,
@@ -367,6 +429,7 @@ def contract_from_need(current_user):
         "civil_description": description,
         "oracle_used": oracle_used,
         "oracle_reasoning": oracle_reasoning,
+        "oracle_credit": oracle_credit,
         "axiom_check": {
             "valid": True,
             "checks": len(results),

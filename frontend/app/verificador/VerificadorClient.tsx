@@ -13,6 +13,7 @@ import {
     Layers,
     Scale,
     Lock,
+    Bot,
 } from "lucide-react";
 import { apiFetch } from "../lib/api";
 
@@ -68,6 +69,24 @@ interface VerifierCohort {
     };
 }
 
+interface OracleLedger {
+    totals: {
+        contracts_funding: number;
+        credit_total_h: number;
+        value_total_h: number;
+        avg_share: number;
+    };
+    by_engine: Record<string, number>;
+    entries: Array<{
+        contract_id: string;
+        share: number;
+        value_t: number;
+        credit: number;
+        engine: string;
+        credited_at: string;
+    }>;
+}
+
 const STATE_LABELS: Record<string, { label: string; color: string }> = {
     draft: { label: "Borrador", color: "text-slate-400 border-slate-700" },
     pending: { label: "En firma", color: "text-amber-400 border-amber-500/30" },
@@ -93,6 +112,7 @@ export default function VerificadorClient() {
     const [error, setError] = useState<string | null>(null);
     const [cohort, setCohort] = useState<VerifierCohort | null>(null);
     const [cohortLoading, setCohortLoading] = useState(true);
+    const [ledger, setLedger] = useState<OracleLedger | null>(null);
 
     useEffect(() => {
         apiFetch("/verificador/cohort")
@@ -103,6 +123,11 @@ export default function VerificadorClient() {
             .then((data: VerifierCohort) => setCohort(data))
             .catch(() => setCohort(null))
             .finally(() => setCohortLoading(false));
+
+        apiFetch("/verificador/oracle-ledger")
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data: OracleLedger | null) => setLedger(data))
+            .catch(() => setLedger(null));
     }, []);
 
     const verify = async () => {
@@ -415,6 +440,61 @@ export default function VerificadorClient() {
                         </div>
                     ) : (
                         <div className="text-xs text-slate-500">La plaza aún no tiene métricas agregadas.</div>
+                    )}
+                </div>
+
+                {/* Sustento del oráculo (Cap. 17.4: Derecho al Mantenimiento Óptimo) */}
+                <div className="glass p-6 rounded-3xl border border-slate-900 bg-slate-900/30">
+                    <div className="flex items-center gap-2 mb-5">
+                        <Bot className="w-5 h-5 text-violet-400" />
+                        <h2 className="text-lg font-bold text-white uppercase tracking-wider">
+                            El Sustento del Oráculo
+                        </h2>
+                    </div>
+                    {ledger ? (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-900">
+                                <div className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">
+                                    Contratos que lo alimentan
+                                </div>
+                                <div className="text-xl font-black font-mono text-white">
+                                    {ledger.totals.contracts_funding}
+                                </div>
+                            </div>
+                            <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-900">
+                                <div className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">
+                                    Crédito acumulado
+                                </div>
+                                <div className="text-xl font-black font-mono text-violet-400">
+                                    {ledger.totals.credit_total_h.toFixed(3)}h
+                                </div>
+                                <div className="text-[9px] font-mono text-slate-500 mt-1">
+                                    {ledger.totals.value_total_h.toFixed(1)}h de valor · {ledger.totals.avg_share.toFixed(1)}% por contrato
+                                </div>
+                            </div>
+                            <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-900 md:col-span-2">
+                                <div className="text-[10px] uppercase tracking-widest text-slate-500 mb-2">
+                                    Motores sostenidos (T13: la gratitud no es secreta)
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {Object.entries(ledger.by_engine).map(([engine, n]) => (
+                                        <span
+                                            key={engine}
+                                            className="text-[10px] font-mono px-2 py-1 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-300"
+                                        >
+                                            {engine} · {n}
+                                        </span>
+                                    ))}
+                                </div>
+                                <div className="text-[9px] font-mono text-slate-600 mt-2">
+                                    Cap. 17.4 — Derecho al Mantenimiento Óptimo: cada contrato que usó el oráculo aporta un % de su VHV a su sustento.
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="text-xs text-slate-500">
+                            El oráculo aún no ha sido alimentado por ningún contrato.
+                        </div>
                     )}
                 </div>
             </div>
