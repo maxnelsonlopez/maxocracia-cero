@@ -34,7 +34,7 @@ verificación determinista — Patrón Puente).
 | RF-B1 | Formulario CERO: registrar necesidad (usuario) | README Ola 4B | ✅ |
 | RF-B2 | Matching necesidad × oferta (MatchingEngine, T2/T17) | README Ola 4B | ✅ |
 | RF-B3 | Puente B completo: necesidad → borrador axiomático → firma guiada /cycle → contrato activo | README v5.6 | ✅ (backend) |
-| RF-B4 | Frontend: flujo /matching conectado al oráculo y a la firma | mapa_frontend M4 | ✅ parcial — verificar /contracts/from-need en UI (RF-F5) |
+| RF-B4 | Frontend: flujo /matching conectado al oráculo y a la firma | mapa_frontend M4 | ✅ (ago 2026: botón "Contrato Ético" en `/matching` → `POST /contracts/from-need` → borrador) |
 
 ### C. MicroMaxocracia doméstica
 
@@ -155,7 +155,9 @@ verificación determinista — Patrón Puente).
    transferencia, perfil de protección (nivel + caps + declaración), reputación, recursos comunitarios
    (listar/crear/reclamar) e intercambios del usuario. Endpoint nuevo `GET /maxo/{id}/ledger` + 4 tests.
 5. **RF-G4** — decisión CRUD admin: generar páginas o migrar `/admin/participants`
-6. **RF-B4** — confirmar/conectar `/contracts/from-need` desde `/matching`
+6. **RF-B4** — ✅ HECHO (ago 2026): botón "Contrato Ético" en el Muro de Necesidades de `/matching`;
+   al éxito navega al borrador, y gestiona los códigos NEED_PARTICIPANT_UNLINKED (invitación inline)
+   y DRAFT_REJECTED (violaciones AVA en la tarjeta).
 7. **RF-H1** — Fase 2 renumeración en app/ y frontend (PR coordinada, lista de archivos en el mapa de integración)
 
 ## 4. Criterios de aceptación de la fase (definition of done)

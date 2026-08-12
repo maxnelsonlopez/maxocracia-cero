@@ -24,7 +24,9 @@ import {
   Bot,
   Plus,
   Trash2,
-  X
+  X,
+  Handshake,
+  Loader2
 } from "lucide-react";
 
 // Types
@@ -169,6 +171,10 @@ export default function PlazaDeApoyoPage() {
   // Profile edit modal state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"general" | "needs" | "offers">("general");
+
+  // Bridge B: creación de contrato ético desde una necesidad (M4 fase 2)
+  const [contractingNeedId, setContractingNeedId] = useState<number | null>(null);
+  const [contractMsg, setContractMsg] = useState<{ needId: number; kind: "ok" | "error"; text: string; invites?: Record<string, string> } | null>(null);
 
   // Form states for general info
   const [editName, setEditName] = useState("");
@@ -663,6 +669,59 @@ export default function PlazaDeApoyoPage() {
     return "#";
   };
 
+  const createContractFromNeed = async (need: UrgentNeed) => {
+    if (!myProfile) return;
+    setContractingNeedId(need.participant_id);
+    setContractMsg(null);
+    try {
+      const res = await apiFetch("/contracts/from-need", {
+        method: "POST",
+        body: JSON.stringify({
+          seeker_participant_id: need.participant_id,
+          offerer_participant_id: myProfile.id,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 201 && data.contract_id) {
+        window.location.href = `/contracts/${data.contract_id}`;
+        return;
+      }
+      if (data.code === "NEED_PARTICIPANT_UNLINKED") {
+        setContractMsg({
+          needId: need.participant_id,
+          kind: "error",
+          text: "El participante aún no tiene cuenta vinculada en el portal (debe abrir su invitación con el mismo email del Formulario CERO).",
+          invites: data.invite_urls || {},
+        });
+        return;
+      }
+      if (data.code === "DRAFT_REJECTED") {
+        const violations = (data.violations || [])
+          .map((v: { axiom: string; message: string }) => `[${v.axiom}] ${v.message}`)
+          .join(" · ");
+        setContractMsg({
+          needId: need.participant_id,
+          kind: "error",
+          text: `El borrador no pasó los invariantes (AVA): ${violations}`,
+        });
+        return;
+      }
+      setContractMsg({
+        needId: need.participant_id,
+        kind: "error",
+        text: data.error || "No se pudo crear el contrato desde esta necesidad.",
+      });
+    } catch {
+      setContractMsg({
+        needId: need.participant_id,
+        kind: "error",
+        text: "Error de conexión con el backend. Inténtalo de nuevo.",
+      });
+    } finally {
+      setContractingNeedId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6">
@@ -1000,7 +1059,40 @@ export default function PlazaDeApoyoPage() {
                               <Zap className="w-3 h-3 text-slate-950 fill-slate-950" />
                               Ofrecer Ayuda
                             </Link>
+
+                            {/* Crear Contrato Ético (Bridge B, M4) */}
+                            <button
+                              onClick={() => createContractFromNeed(need)}
+                              disabled={contractingNeedId === need.participant_id}
+                              className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-bold rounded-lg transition-all flex items-center gap-1 active:scale-95 border border-amber-500/20 disabled:opacity-50"
+                              title="Genera un borrador de contrato ético (T17 reciprocidad) desde esta necesidad"
+                            >
+                              {contractingNeedId === need.participant_id ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <Handshake className="w-3 h-3" />
+                              )}
+                              {contractingNeedId === need.participant_id ? "Creando..." : "Contrato Ético"}
+                            </button>
                           </>
+                        )}
+                        {contractMsg && contractMsg.needId === need.participant_id && (
+                          <div className={`mt-3 pt-3 border-t border-slate-900/60 text-xs ${contractMsg.kind === "error" ? "text-amber-400" : "text-emerald-400"}`}>
+                            {contractMsg.text}
+                            {contractMsg.invites && Object.entries(contractMsg.invites).length > 0 && (
+                              <span className="flex flex-wrap gap-2 mt-2">
+                                {Object.entries(contractMsg.invites).map(([pid, url]) => (
+                                  <a
+                                    key={pid}
+                                    href={url}
+                                    className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
+                                  >
+                                    Abrir invitación (participante {pid})
+                                  </a>
+                                ))}
+                              </span>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>

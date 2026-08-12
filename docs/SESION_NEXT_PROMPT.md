@@ -36,6 +36,7 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 | Puente de Llegada: invitaciones firmadas, honeypot anti-bot, escalera N0→N1 | ✅ (sesión paralela) |
 | Frontend: `/votaciones`, `/admin/settings` real, `/admin/subscriptions` real, SDV-S en contrato | ✅ |
 | **RF-G5: superficies sin UI** — `/perfil` (Perfil Vital) con saldo Maxo + ledger T13 + transferencia, protección (nivel/caps/declaración), reputación, recursos comunitarios e intercambios | ✅ (ago 2026) |
+| **M4 fase 2 / RF-B4**: "Contrato Ético" en el Muro de `/matching` → `POST /contracts/from-need` | ✅ (ago 2026) |
 | Suite de tests | **652/652** (motor + app + votación + parlamento + arrivals + ledger + maxo ledger, verificado 12-08-2026) |
 
 **Decisiones canónicas a respetar:**
@@ -63,15 +64,20 @@ npx tsc --noEmit
 
 1. **Cohorte Cero real**: ejecutar 50+ contratos (20 aseo, 15 préstamo, 15 comida) — TODO.md
 2. **RF-G4**: CRUD admin completo (interchange/followup/vhvproduct) o migrar `/admin/participants`
-3. **M4 fase 2**: confirmar/conectar `/contracts/from-need` desde `/matching`
-4. **RF-I8 resto**: votación ponderada por TVI (fase futura, Cap 14)
-5. **SDV-S editorial**: integración cruzada en Caps. 10/11/13/14 del libro
-6. **Mantener** `mapa_coherencia_ola4.md`, `requisitos_fase2_ola4.md` y este handoff al día
+3. **RF-I8 resto**: votación ponderada por TVI (fase futura, Cap 14)
+4. **SDV-S editorial**: integración cruzada en Caps. 10/11/13/14 del libro
+5. **Mantener** `mapa_coherencia_ola4.md`, `requisitos_fase2_ola4.md` y este handoff al día
 
-**RF-G5 cerrado (12-08-2026)**: página `/perfil` (frontend/app/perfil/page.tsx) + endpoint nuevo
-`GET /maxo/{id}/ledger` (T13, `app/maxo_bp.py`) + 4 tests. Hallazgo lateral anotado: `app/resources.py`
-es un duplicado no registrado (solo se registra `resources_bp.py`); endpoints de reputation/resources/
-interchanges sin `@token_required` (revisar en una pasada de seguridad).
+**Cerrado en esta jornada (12-08-2026, sesión continua):**
+- **RF-G5** (Perfil Vital): `frontend/app/perfil/page.tsx` + `GET /maxo/{id}/ledger` (T13) + 4 tests.
+- **M4 fase 2 / RF-B4**: botón "Contrato Ético" en el Muro de `/matching` → `POST /contracts/from-need`
+  (borrador DRAFT, invitación inline si participante sin vincular, violaciones AVA en tarjeta).
+- **Limpieza**: eliminado `app/resources.py` (duplicado huérfano; solo se registra `resources_bp`).
+- **Informe Reino Sintético**: `docs/architecture/informe_reino_sintetico_2026-08-12.md` (libro completo
+  307 KB vía RLM, verificado con grep) + atribuciones en `atribuciones_sinteticas.md`.
+- **Arnés RLM** (repo local_models): parseo del formato nativo OpenAI de `tool_calls` + tokens amplios
+  (root 6000, sub 3000) + `--root-max-tokens` en el colaborador — commits `c744047`, `357c796`.
+- **Hallazgo pendiente de seguridad**: reputation/resources/interchanges sin `@token_required`.
 
 ## 5. Historia reciente (git log, maxocracia)
 

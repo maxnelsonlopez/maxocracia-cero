@@ -19,7 +19,7 @@ las secciones desconectadas**. Generado el 11-08-2026 con verificación determin
 | `/forms/cero` | 304 | `/forms/participant` | forms |
 | `/forms/exchange` | 413 | `/forms/exchange` | forms |
 | `/forms/follow-up` | 406 | `/forms/follow-up` | forms |
-| `/matching` | 2118 | `/forms/exchange`, `/forms/matching/me`, `/forms/matching/gaps`, `/forms/matching/urgent`, `/forms/oracle/chat` | forms + oráculo |
+| `/matching` | 2118 | `/forms/exchange`, `/forms/matching/me`, `/forms/matching/gaps`, `/forms/matching/urgent`, `/forms/oracle/chat`, `/contracts/from-need` | forms + oráculo + bridge_b |
 | `/micromax` | 1553 | `/api/micromax/*` (household, join, config, cdd, safety-survey, audit, audits, dashboard) | micromax (hub completo) |
 | `/pulso` | 1036 | `/forms/pulse` | forms |
 | `/vhv/calculator` | 210 | `/vhv/calculate`, `/vhv/case-studies` | vhv |
@@ -58,7 +58,7 @@ las secciones desconectadas**. Generado el 11-08-2026 con verificación determin
 | `/reputation/{id}` | reputation | ✅ Conectado (`/perfil` — RF-G5, ago 2026) |
 | `/resources` (GET/POST) y `/resources/{id}/claim` | resources | ✅ Conectado (`/perfil` — RF-G5, ago 2026) |
 | `/interchanges` (GET) | interchanges | ✅ Conectado (`/perfil` — RF-G5, ago 2026; `POST` y `create_interchange` siguen sin UI, se usa el blueprint forms) |
-| `/contracts/from-need`, `/contracts/from-need/...` (3) | bridge_b | 🟡 Sin llamada directa del frontend (orquestación probablemente backend-interna del matching→borrador) |
+| `/contracts/from-need`, `/contracts/from-need/...` (3) | bridge_b | ✅ Conectado (ago 2026): botón "Contrato Ético" en cada necesidad del Muro de `/matching` → borrador DRAFT → `/contracts/{id}`; maneja NEED_PARTICIPANT_UNLINKED (invitación) y DRAFT_REJECTED (AVA) |
 | `/tvi` (raíz), `/vhv` (raíz) | tvi, vhv | 🟡 Solo existen páginas hijas (`/tvi/stats`, `/vhv/calculator`) |
 | `/admin/user`, `/admin/interchange`, `/admin/followup`, `/admin/vhvproduct` (CRUD 9 c/u) | Flask-Admin | 🔴 CRUD solo parcialmente expuesto: `/admin/participants` usa `/forms/participants` (no `/admin/participant`); el resto sin página |
 
@@ -76,8 +76,10 @@ las secciones desconectadas**. Generado el 11-08-2026 con verificación determin
    `/maxo/{id}/balance` + `/maxo/{id}/ledger` (endpoint nuevo, T13) + transferencia, `/protection/profile`
    (nivel efectivo + caps + declaración), `/reputation/{id}`, `/resources` (listar/crear/reclamar) e
    `/interchanges` filtrado por usuario. Enlace en Navigation (desktop + móvil).
-6. **`/contracts/from-need`**: confirmar si el matching usa el flujo bridge por backend; si no, conectarlo
-   desde `/matching` (el oráculo de chat ya existe ahí).
+6. **`/contracts/from-need`**: ✅ CERRADO (ago 2026, M4 fase 2): el Muro de Necesidades de `/matching`
+   tiene ahora el botón "Contrato Ético" que llama al bridge (`POST /contracts/from-need`), navega al
+   borrador al éxito y muestra la invitación (NEED_PARTICIPANT_UNLINKED) o las violaciones AVA
+   (DRAFT_REJECTED) en la propia tarjeta.
 
 ## 5. Verificación (cómo se regeneró este mapa)
 
