@@ -22,7 +22,8 @@ Conceptos clave: **VHV** (Vector de Huella Vital [T,V,R]), **TVI** (Tiempo Vital
 - `frontend/` — Next.js (App Router). Páginas: `contracts/` (builder, negotiate, [id]), `matching/`,
   `vhv/`, `tvi/`, `micromax/`, `verificador/`, `pulso/`, `participar/`, `forms/`, `admin/`, `dashboard/`...
 - `docs/` — teoría (`theory/`), libro (`book/libro_completo_310126.md`, 300 KB), specs (`specs/`),
-  arquitectura (`architecture/`), guides, API.
+  arquitectura (`architecture/`), guides, API. **`architecture/mapa_coherencia_ola4.md`**: mapa vivo
+  teoría↔implementación (motor `maxocontracts/`, invariantes, blueprints) — actualizarlo en cada Ola.
 - `tests/` — ~40 archivos pytest con `conftest.py` y `INSTRUCCIONES_TESTS.md`.
 - `scripts/` — migraciones, seeds, `list_routes.py`, `local_oracle.py`, `verify_setup.py`.
 - `simulator/` — Nexus Simulator (VHV interactivo). `seeds/`, `migrations/`, `data-model/`, `dashboard-spec/`.
