@@ -172,10 +172,18 @@ class MaxoContract:
         Returns:
             (is_valid: bool, results: List[ValidationResult])
         """
+        vhv_records = [
+            {"vhv": term.vhv_cost, "source": f"term:{term.id}", "audit_ref": term.id}
+            for term in self._terms
+        ]
+        vhv_records.append(
+            {"vhv": self._total_vhv, "source": "total_vhv", "audit_ref": "event_log"}
+        )
         is_valid, results = AxiomValidator.validate_all(
             vhv=self._total_vhv,
             participants=self.participants,
-            minimum_sdv=self.minimum_sdv
+            minimum_sdv=self.minimum_sdv,
+            vhv_records=vhv_records
         )
         
         self._validation_results = results

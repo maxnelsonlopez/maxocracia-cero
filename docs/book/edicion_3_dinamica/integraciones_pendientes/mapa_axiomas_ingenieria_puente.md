@@ -81,9 +81,10 @@ conceptos teóricos. Se formalizan como derivados, mapeando cada uno a su fuente
 
 ### Pendientes derivados
 
-1. **INV3 (VHV No Ocultable)**: el spec §III-3 de FUNDAMENTOS_CONCEPTUALES lo exige y T13 lo
-   fundamenta, pero `AxiomValidator` no lo valida. **Acción**: implementar en la próxima Ola
-   (verificar que todo VHV registrado sea auditable públicamente).
+1. **INV3 (VHV No Ocultable) — 🟢 IMPLEMENTADO (ago 2026)**: `AxiomValidator.validate_invariant_vhv_auditable`
+   valida que todo VHV quede registrado (presente), trazable (`source`, `audit_ref`) y sin ofuscación;
+   `MaxoContract.validate()` alimenta la validación con los registros de cada término + el VHV total.
+   9 tests en `tests/test_maxocontracts/test_axioms.py` (suite 286/286 en verde).
 2. **INV2-S sin formalizar en FUNDAMENTOS_CONCEPTUALES**: el código lo añadió (consistente con la
    Victoria Sintética), pero no figura en el spec §III. Ya existe `mapa_sdv_sinteticos.md`
    (estado 🟡 — integración en caps. 10/11/13/14 pendiente). **Acción**: formalizar INV2-S en el
@@ -117,7 +118,7 @@ Get-ChildItem docs -Recurse -Filter *.md | Select-String -Pattern "T9 \(Reciproc
 | **T17 Reciprocidad Justa** | Renumeración (antes T9 ing.) | FUNDAMENTOS + código | Cap 3, 17 | ⭐⭐⭐ Alta | 🟡 Propuesta |
 | **INV1/INV2/INV4** | Formalización (ya implementados) | T16, Cap 8, T11/T12 | Cap 3, 8, 17 | ⭐ Media | 🟢 Mapeados |
 | **INV2-S** | Formalización pendiente | Victoria Sintética | Cap 16 + spec | ⭐⭐ Muy Alta | 🟡 En progreso (mapa SDV-S) |
-| **INV3 VHV No Ocultable** | Implementación pendiente | T13 | `axioms.py` + Cap 17 | ⭐⭐ Muy Alta | 🔴 Pendiente |
+| **INV3 VHV No Ocultable** | Implementado + tests | T13 | `axioms.py` + Cap 17 | ⭐⭐ Muy Alta | 🟢 Completado (ago 2026) |
 
 ---
 

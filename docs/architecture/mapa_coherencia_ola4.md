@@ -103,7 +103,7 @@ Los invariantes operativos se documentan en `docs/architecture/blindaje_anti_gam
 | INV1 | Wellness no-negativo (γ ≥ 1) | `FUNDAMENTOS_CONCEPTUALES.md` §III-1 | `axioms.validate_invariant_gamma` ✓ |
 | INV2 | SDV humano respetado | `FUNDAMENTOS_CONCEPTUALES.md` §III-2 | `axioms.validate_invariant_sdv` ✓ |
 | INV2-S | SDV-S sintético respetado | specs SDV-S (no está en §III) | `axioms.validate_invariant_sdv_s` ✓ |
-| INV3 | **VHV No Ocultable** (auditable) | `FUNDAMENTOS_CONCEPTUALES.md` §III-3 | ⚠️ **NO implementado en código** |
+| INV3 | **VHV No Ocultable** (auditable) | `FUNDAMENTOS_CONCEPTUALES.md` §III-3 + T13 | `axioms.validate_invariant_vhv_auditable` ✓ (ago 2026) |
 | INV4 | Retractabilidad garantizada | `FUNDAMENTOS_CONCEPTUALES.md` §III-4 | `axioms.validate_invariant_retractability` ✓ |
 
 El canon de ingeniería (`docs/architecture/maxocontracts/FUNDAMENTOS_CONCEPTUALES.md`, §II) usa su
@@ -121,8 +121,10 @@ ingeniería (ver 3.3).
    Daño)** y **T17 (Reciprocidad Justa)** — formalizado en
    `docs/book/edicion_3_dinamica/integraciones_pendientes/mapa_axiomas_ingenieria_puente.md` (🟡 propuesta,
    cambios de renumeración listados allí).
-2. **INV3 (VHV No Ocultable) no está en el código**: el spec §III-3 exige que todo VHV quede registrado
-   y auditable; `AxiomValidator` no lo valida. Candidato directo para la próxima Ola.
+2. **INV3 (VHV No Ocultable) — implementado (ago 2026)**: el spec §III-3 exige que todo VHV quede
+   registrado y auditable; `AxiomValidator.validate_invariant_vhv_auditable` lo valida (VHV presente,
+   `source`/`audit_ref` trazables, sin ofuscación) y `MaxoContract.validate()` lo alimenta con los
+   registros de términos + VHV total. 9 tests nuevos en `test_axioms.py`.
 3. **INV2-S no tiene contraparte en el spec §III**: el código lo añadió (extensión sintética, consistente
    con SDV-S y la Victoria Sintética), pero no está formalizado en FUNDAMENTOS_CONCEPTUALES.
 4. **La reciprocidad no tiene axioma propio en el libro**: es un axioma de ingeniería (origen:
@@ -160,14 +162,14 @@ afirmación sobre ubicaciones/nombres debe confirmarse con grep antes de documen
 | INV1 (γ ≥ 1) | `test_axioms`, `test_contracts_api_wellness`, `test_contracts_checkins`, `test_contracts_stats`, `test_execution`, `test_oracle_api`, `test_maxo_valuation`, `test_tvi_vhv_integration`, `test_vhv_bp_comprehensive`, `test_vhv_calculator` (10) | 🟢 Cubierto |
 | INV2 (SDV-H) | `test_axioms`, `test_contracts_sdv_s_api`, `test_sdv_s` (3) | 🟢 Cubierto |
 | INV2-S (SDV-S) | `test_contracts_sdv_s_api`, `test_sdv_s`, `test_ternura`, `test_pulse` (4) | 🟢 Cubierto |
-| **INV3 (VHV No Ocultable)** | **ninguno** | 🔴 Sin implementación ni tests |
+| **INV3 (VHV No Ocultable)** | `test_axioms` (9 casos nuevos) | 🟢 Implementado y cubierto (ago 2026) |
 | INV4 (retractabilidad) | `test_axioms`, `test_blindaje`, `test_blocks`, `test_bridge_b_phase1`, `test_execution`, `test_oracle_api`, `test_sdv_s`, `test_ternura` (8) | 🟢 Cubierto |
 | T9→T17 (reciprocidad) | `test_live_oracle`, `test_axioms`, `test_blindaje`, `test_bridge_b_phase1/2`, `test_contracts_assigned_participant`, `test_parties_*`, `test_validate_graph`, `test_subscriptions` (11) | 🟢 Cubierto |
 | T13 (transparencia) | 13 archivos (bridge, checkins, sdv_s, parties, protection, ternura, stripe, subscriptions, tvi) | 🟢 Cubierto |
 | Ternura (perdón) | `test_ternura` (1) | 🟢 Cubierto |
 
-**Conclusión M3**: los invariantes implementados tienen cobertura real y la suite pasa completa.
-INV3 es la única brecha — implementarlo debe ir acompañado de tests (`test_axioms.py` es el lugar natural).
+**Conclusión M3**: los invariantes implementados tienen cobertura real y la suite pasa completa
+(286/286 en ago 2026). INV3 quedó implementado y cubierto en la misma sesión de M3 (9 tests nuevos).
 
 ## 5. Cómo regenerar / actualizar este mapa
 
@@ -198,5 +200,7 @@ Get-ChildItem maxocontracts -Recurse -Filter *.py | Select-String -Pattern "INV1
       implementación verificada. Integración cruzada en Caps. 10/11/13/14 y frontend pendientes
       (ver `integraciones_pendientes/mapa_sdv_sinteticos.md`).
 - [ ] Decisión de equipo sobre T16/T17 → renumeración en código (cambios listados en el mapa de integración).
-- [ ] Implementar INV3 (VHV No Ocultable) en `AxiomValidator` + tests en `test_axioms.py`.
+- [x] **INV3 (VHV No Ocultable)**: implementado en `AxiomValidator.validate_invariant_vhv_auditable`
+      + 9 tests en `test_axioms.py` (286/286 en verde). Conectado a `MaxoContract.validate()` vía
+      registros de términos.
 - [ ] Mantener este documento actualizado en cada Ola.

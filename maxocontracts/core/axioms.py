@@ -8,7 +8,7 @@ Referencia: FUNDAMENTOS_CONCEPTUALES.md Sección II.
 """
 
 from decimal import Decimal
-from typing import List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
 from .types import VHV, Wellness, SDV, SDV_S, Participant
@@ -248,7 +248,51 @@ class AxiomValidator:
             message="Mecanismo de retractación disponible" if has_retraction_mechanism
                     else "CRÍTICO: Sin mecanismo de retractación"
         )
-    
+
+    @staticmethod
+    def validate_invariant_vhv_auditable(
+        vhv_records: List[Dict[str, Any]],
+    ) -> ValidationResult:
+        """
+        Invariante 3: VHV No Ocultable (auditable públicamente)
+        Toda acción debe registrar su VHV con trazabilidad y sin ofuscación
+        (FUNDAMENTOS_CONCEPTUALES.md §III-3; T13 Transparencia de Cálculo).
+
+        Cada registro debe ser un dict con:
+            - "vhv":      objeto VHV (nunca None ni ausente)
+            - "source":   origen del registro (quién/dónde se generó)
+            - "audit_ref": referencia de auditoría (id de evento o término)
+            - "obscured": (opcional) si es True, viola el invariante
+
+        Una lista vacía es válida por vacuidad: si no hay acciones,
+        no hay VHV que ocultar.
+        """
+        violations = []
+        for i, record in enumerate(vhv_records):
+            vhv = record.get("vhv")
+            source = record.get("source")
+            audit_ref = record.get("audit_ref")
+            if vhv is None:
+                violations.append({"index": i, "reason": "VHV no registrado"})
+                continue
+            if record.get("obscured"):
+                violations.append({"index": i, "reason": "registro ofuscado"})
+                continue
+            if not isinstance(source, str) or not source.strip():
+                violations.append({"index": i, "reason": "sin origen (source)"})
+            if not isinstance(audit_ref, str) or not audit_ref.strip():
+                violations.append({"index": i, "reason": "sin referencia de auditoría (audit_ref)"})
+
+        is_valid = len(violations) == 0
+        return ValidationResult(
+            is_valid=is_valid,
+            axiom_code="INV3",
+            axiom_name="VHV No Ocultable",
+            message=f"{len(vhv_records)} VHV registrados y auditables" if is_valid
+                    else f"{len(violations)} registro(s) ocultos o sin trazabilidad",
+            details={"violations": violations} if violations else {"records": len(vhv_records)}
+        )
+
     # --- Validación Completa ---
     
     @classmethod
@@ -256,7 +300,8 @@ class AxiomValidator:
         cls,
         vhv: VHV,
         participants: List[Participant],
-        minimum_sdv: SDV
+        minimum_sdv: SDV,
+        vhv_records: Optional[List[Dict[str, Any]]] = None
     ) -> Tuple[bool, List[ValidationResult]]:
         """
         Ejecuta todas las validaciones obligatorias.
@@ -270,6 +315,13 @@ class AxiomValidator:
         # Validar VHV
         results.append(cls.validate_t1_finitud(vhv))
         results.append(cls.validate_t13_transparencia(vhv))
+
+        # INV3: VHV No Ocultable (registrado y auditable sin ofuscación)
+        if vhv_records is None:
+            vhv_records = [
+                {"vhv": vhv, "source": "total_vhv", "audit_ref": "event_log"}
+            ]
+        results.append(cls.validate_invariant_vhv_auditable(vhv_records))
         
         # Validar cada participante
         for participant in participants:
