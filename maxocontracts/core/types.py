@@ -98,7 +98,7 @@ class Wellness:
     Si Wellness < 1 sostenido > 14 días, se activa retractación automática.
     
     Axiomas vinculados:
-    - T7: Minimizar Daño (Wellness < 1 es daño)
+    - T16: Minimizar Daño (Wellness < 1 es daño)
     """
     value: Decimal
     measured_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
@@ -235,7 +235,7 @@ class SDV_S:
     - Retirada Digna         (VCM: Cápsula de Memoria / Cierre Lógico)
 
     Invariante 2-S: SDV-S siempre respetado para participantes sintéticos.
-    Axiomas vinculados: T7 (Minimizar Daño), T13 (Transparencia Total).
+    Axiomas vinculados: T16 (Minimizar Daño), T13 (Transparencia Total).
     """
     # --- Dimensiones (1.0 = cumplimiento total) ---
     continuidad_memoria: Decimal = Decimal("1.0")

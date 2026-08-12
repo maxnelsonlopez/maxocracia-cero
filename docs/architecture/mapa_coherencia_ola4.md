@@ -113,14 +113,15 @@ ingeniería (ver 3.3).
 
 ### 3.3 Hallazgos del contraste (brechas y colisiones)
 
-1. **Colisión de numeración T7 y T9**: el libro define **T7 = Jerarquía Temporal** y **T9 =
-   No-Antropocentrismo**; el canon de ingeniería y el código redefinen **T7 = Minimizar Daño**
-   (`gamma_protector`) y **T9 = Reciprocidad Justa** (`reciprocity.py`, `axioms.validate_t9_reciprocidad`,
-   `live_oracle.py`). T13/T14/T15 sí coinciden. **Resolución (decisión de Max, teoría primero)**:
-   los axiomas del libro conservan T0–T15; los conceptos de ingeniería pasan a **T16 (Minimizar
-   Daño)** y **T17 (Reciprocidad Justa)** — formalizado en
-   `docs/book/edicion_3_dinamica/integraciones_pendientes/mapa_axiomas_ingenieria_puente.md` (🟡 propuesta,
-   cambios de renumeración listados allí).
+1. **Colisión de numeración T7 y T9 — RESUELTA en el motor (ago 2026)**: el libro define **T7 =
+   Jerarquía Temporal** y **T9 = No-Antropocentrismo**; el canon de ingeniería redefinía **T7 =
+   Minimizar Daño** y **T9 = Reciprocidad Justa**. Resolución (decisión de Max, teoría primero):
+   los axiomas del libro conservan T0–T15; los conceptos de ingeniería son **T16 (Minimizar Daño)**
+   y **T17 (Reciprocidad Justa)**. Fase 1 ejecutada: `axioms.py` con `validate_t16_minimizar_dano` /
+   `validate_t17_reciprocidad` (+ aliases retrocompatibles `validate_t7_*`/`validate_t9_*`),
+   docstrings de bloques actualizados, tests migrados — 288/288 en verde. Fase 2 (app/ y frontend,
+   contratos API visibles) pendiente: ver
+   `integraciones_pendientes/mapa_axiomas_ingenieria_puente.md` (lista exacta de archivos).
 2. **INV3 (VHV No Ocultable) — implementado (ago 2026)**: el spec §III-3 exige que todo VHV quede
    registrado y auditable; `AxiomValidator.validate_invariant_vhv_auditable` lo valida (VHV presente,
    `source`/`audit_ref` trazables, sin ofuscación) y `MaxoContract.validate()` lo alimenta con los
@@ -199,7 +200,9 @@ Get-ChildItem maxocontracts -Recurse -Filter *.py | Select-String -Pattern "INV1
       estándar completo `docs/theory/SDV-S_Suelo_Dignidad_Vital_Sinteticos.md` (jun 2026) y de la
       implementación verificada. Integración cruzada en Caps. 10/11/13/14 y frontend pendientes
       (ver `integraciones_pendientes/mapa_sdv_sinteticos.md`).
-- [ ] Decisión de equipo sobre T16/T17 → renumeración en código (cambios listados en el mapa de integración).
+- [x] **Renumeración T16/T17 — Fase 1 (motor)**: `axioms.py` con `validate_t16_minimizar_dano` /
+      `validate_t17_reciprocidad` + aliases retrocompatibles; docstrings y tests migrados (288/288).
+      Fase 2 (app/ + frontend, contrato API) documentada en el mapa de integración — PR coordinada con UI.
 - [x] **INV3 (VHV No Ocultable)**: implementado en `AxiomValidator.validate_invariant_vhv_auditable`
       + 9 tests en `test_axioms.py` (286/286 en verde). Conectado a `MaxoContract.validate()` vía
       registros de términos.

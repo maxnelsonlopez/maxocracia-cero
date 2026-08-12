@@ -102,11 +102,32 @@ Get-ChildItem maxocontracts -Recurse -Filter *.py | Select-String -Pattern "T9|T
 Get-ChildItem docs -Recurse -Filter *.md | Select-String -Pattern "T9 \(Reciprocidad|T7 \(Minimizar"
 ```
 
-- `maxocontracts/core/axioms.py`: `validate_t9_reciprocidad` → `validate_t17_reciprocidad` (+ docstring)
-- `maxocontracts/blocks/reciprocity.py`: comentario "T9 (Reciprocidad Justa)" → T17
-- `maxocontracts/blocks/gamma_protector.py`: referencias a T7 (Minimizar Daño) → T16
-- `maxocontracts/oracles/live_oracle.py`: prompts con "T9" → T17
-- `docs/architecture/blindaje_anti_gamificacion_equidad.md` y `FUNDAMENTOS_CONCEPTUALES.md`: actualizar tabla §II-A
+### ✅ Fase 1 — Motor `maxocontracts` (COMPLETADA, ago 2026)
+
+- `maxocontracts/core/axioms.py`: `validate_t9_reciprocidad` → **`validate_t17_reciprocidad`** y
+  `validate_t7_minimizar_dano` → **`validate_t16_minimizar_dano`** (docstrings con referencia al mapa
+  de renumeración; `axiom_code` ahora "T16"/"T17"). **Aliases retrocompatibles**:
+  `validate_t9_reciprocidad = validate_t17_reciprocidad`, `validate_t7_minimizar_dano = validate_t16_minimizar_dano`.
+- `maxocontracts/blocks/reciprocity.py`, `gamma_protector.py`, `sdv_s_validator.py`, `core/types.py`:
+  docstrings actualizados a T16/T17.
+- `tests/test_maxocontracts/test_axioms.py`: clases y asserts migrados a T16/T17 + 2 tests de alias.
+- Suite completa: **288/288 en verde**.
+
+### 🔴 Fase 2 — app/ y frontend (PENDIENTE, requiere coordinación API/UI)
+
+Los siguientes archivos exponen "T9"/"T7" en payloads de API, prompts de oráculo o UI. Renombrar
+a T16/T17 aquí es el cambio de contrato API (verificar frontend en la misma PR):
+
+- `app/contracts_bp.py` — comentarios + `axiom_code="T9"` en validación de grafos (líneas ~3244-3245)
+- `app/bridge_b.py` — textos generados de contrato ("Axioma T9")
+- `app/subscriptions.py` — lista de axiomas `["T2", "T7", "T9", "T13"]` (línea ~205)
+- `app/live_oracle.py` (si existe en app) — prompts con "T9"; `scripts/local_oracle.py` — prompts
+- `app/contracts_bp.py` etc. — textos de oráculo ("?, SDV, T9")
+- `frontend/Footer.tsx`, `OracleNegotiationPanel.tsx`, `CustomNodes.tsx`, `page.tsx`,
+  `NegotiationPageClient.tsx`, `ContractDetailsClient.tsx` — textos visibles "T9 (Reciprocidad Justa)"
+- `scripts/validador_conceptual.py` — ya reconoce ambos títulos (dualidad documentada)
+- Tests de app que asertan "T9" en payloads: `test_live_oracle.py`, `test_validate_graph.py`,
+  `test_bridge_b_phase1.py`, `test_blindaje.py`, `test_subscriptions.py`
 
 ---
 
@@ -114,8 +135,8 @@ Get-ChildItem docs -Recurse -Filter *.md | Select-String -Pattern "T9 \(Reciproc
 
 | Ítem | Tipo | Origen | Destino | Prioridad | Estado |
 |---|---|---|---|---|---|
-| **T16 Minimizar Daño** | Renumeración (antes T7 ing.) | FUNDAMENTOS + código | Cap 3, 17 | ⭐⭐⭐ Alta | 🟡 Propuesta |
-| **T17 Reciprocidad Justa** | Renumeración (antes T9 ing.) | FUNDAMENTOS + código | Cap 3, 17 | ⭐⭐⭐ Alta | 🟡 Propuesta |
+| **T16 Minimizar Daño** | Renumeración (antes T7 ing.) | FUNDAMENTOS + código | Cap 3, 17 | ⭐⭐⭐ Alta | 🟢 Motor renumerado (ago 2026); Fase 2 app/frontend pendiente |
+| **T17 Reciprocidad Justa** | Renumeración (antes T9 ing.) | FUNDAMENTOS + código | Cap 3, 17 | ⭐⭐⭐ Alta | 🟢 Motor renumerado (ago 2026); Fase 2 app/frontend pendiente |
 | **INV1/INV2/INV4** | Formalización (ya implementados) | T16, Cap 8, T11/T12 | Cap 3, 8, 17 | ⭐ Media | 🟢 Mapeados |
 | **INV2-S** | Formalización pendiente | Victoria Sintética | Cap 16 + spec | ⭐⭐ Muy Alta | 🟡 En progreso (mapa SDV-S) |
 | **INV3 VHV No Ocultable** | Implementado + tests | T13 | `axioms.py` + Cap 17 | ⭐⭐ Muy Alta | 🟢 Completado (ago 2026) |

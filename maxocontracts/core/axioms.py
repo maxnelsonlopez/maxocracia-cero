@@ -84,12 +84,13 @@ class AxiomValidator:
         )
     
     @staticmethod
-    def validate_t7_minimizar_dano(
+    def validate_t16_minimizar_dano(
         vhv_before: VHV,
         vhv_after: VHV
     ) -> ValidationResult:
         """
-        T7: Minimizar Daño
+        T16: Minimizar Daño (antes "T7" de ingeniería; el libro reserva T7 para
+        Jerarquía Temporal — ver mapa_axiomas_ingenieria_puente.md)
         La acción no debe generar sufrimiento innecesario.
         
         Verifica que V (vidas afectadas) no aumente sin justificación.
@@ -99,21 +100,25 @@ class AxiomValidator:
         
         return ValidationResult(
             is_valid=is_valid,
-            axiom_code="T7",
+            axiom_code="T16",
             axiom_name="Minimizar Daño",
             message="No hay aumento de vidas afectadas" if is_valid
                     else f"Aumento de {delta_v} UVC detectado",
             details={"delta_V": str(delta_v)}
         )
     
+    # Alias retrocompatible (renumeración T7 → T16)
+    validate_t7_minimizar_dano = validate_t16_minimizar_dano
+    
     @staticmethod
-    def validate_t9_reciprocidad(
+    def validate_t17_reciprocidad(
         vhv_giver: VHV,
         vhv_receiver: VHV,
         tolerance: Decimal = Decimal("0.2")
     ) -> ValidationResult:
         """
-        T9: Reciprocidad Justa
+        T17: Reciprocidad Justa (antes "T9" de ingeniería; el libro reserva T9
+        para No-Antropocentrismo — ver mapa_axiomas_ingenieria_puente.md)
         El intercambio VHV debe estar balanceado dentro de tolerancia.
         """
         # Calculamos el desbalance relativo en cada dimensión
@@ -123,7 +128,7 @@ class AxiomValidator:
         if total_giver == Decimal("0") and total_receiver == Decimal("0"):
             return ValidationResult(
                 is_valid=True,
-                axiom_code="T9",
+                axiom_code="T17",
                 axiom_name="Reciprocidad Justa",
                 message="Intercambio nulo - recíproco por defecto"
             )
@@ -136,7 +141,7 @@ class AxiomValidator:
         
         return ValidationResult(
             is_valid=is_valid,
-            axiom_code="T9",
+            axiom_code="T17",
             axiom_name="Reciprocidad Justa",
             message=f"Desbalance {imbalance:.1%} dentro de tolerancia" if is_valid
                     else f"Desbalance {imbalance:.1%} viola reciprocidad",
@@ -147,6 +152,9 @@ class AxiomValidator:
                 "receiver_total": str(total_receiver)
             }
         )
+    
+    # Alias retrocompatible (renumeración T9 → T17)
+    validate_t9_reciprocidad = validate_t17_reciprocidad
     
     @staticmethod
     def validate_t13_transparencia(
@@ -356,7 +364,7 @@ class AxiomValidator:
         
         # Axiomas de intercambio
         results.append(cls.validate_t2_igualdad_temporal(vhv_giver, vhv_receiver))
-        results.append(cls.validate_t9_reciprocidad(vhv_giver, vhv_receiver))
+        results.append(cls.validate_t17_reciprocidad(vhv_giver, vhv_receiver))
         
         # Estado de participantes
         results.append(cls.validate_invariant_gamma(giver.wellness_current))

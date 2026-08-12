@@ -8,7 +8,7 @@ Propiedades formales (de FUNDAMENTOS_CONCEPTUALES.md):
 - TOLERANTE: Permite desbalance dentro de un umbral aceptable
 - CALCULADORA: Produce métrica cuantitativa de balance
 
-Axiomas vinculados: T9 (Reciprocidad Justa), T2 (Igualdad Temporal)
+Axiomas vinculados: T17 (Reciprocidad Justa), T2 (Igualdad Temporal)
 """
 
 from dataclasses import dataclass, field
@@ -51,7 +51,7 @@ class ReciprocityBlock:
     """
     Bloque de reciprocidad para MaxoContracts.
     
-    Evalúa si un intercambio entre dos partes respeta el axioma T9
+    Evalúa si un intercambio entre dos partes respeta el axioma T17
     (reciprocidad justa) verificando que los VHV estén balanceados.
     
     Ejemplo de uso:

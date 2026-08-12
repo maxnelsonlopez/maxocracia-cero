@@ -8,7 +8,7 @@ Propiedades formales (de FUNDAMENTOS_CONCEPTUALES.md):
 - PREVENTIVA: Alerta antes de violación, no solo después
 - ACTIVADORA: Puede triggear retractación automática
 
-Axiomas vinculados: T7 (Minimizar Daño), Invariante 1 (Wellness ≥ 1)
+Axiomas vinculados: T16 (Minimizar Daño), Invariante 1 (Wellness ≥ 1)
 """
 
 from dataclasses import dataclass, field

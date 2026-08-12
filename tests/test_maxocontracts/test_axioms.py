@@ -56,70 +56,88 @@ class TestAxiomValidatorT2:
         assert result.is_valid is False
 
 
-class TestAxiomValidatorT7:
-    """Tests para T7: Minimizar Daño."""
+class TestAxiomValidatorT16:
+    """Tests para T16: Minimizar Daño (renumerado desde "T7" de ingeniería)."""
     
-    def test_t7_no_increase_in_v(self):
-        """Sin aumento en V pasa T7."""
+    def test_t16_no_increase_in_v(self):
+        """Sin aumento en V pasa T16."""
         before = VHV(T=Decimal("5"), V=Decimal("1"), R=Decimal("2"))
         after = VHV(T=Decimal("6"), V=Decimal("1"), R=Decimal("3"))  # V igual
         
-        result = AxiomValidator.validate_t7_minimizar_dano(before, after)
+        result = AxiomValidator.validate_t16_minimizar_dano(before, after)
         
         assert result.is_valid is True
+        assert result.axiom_code == "T16"
     
-    def test_t7_decreased_v_passes(self):
-        """Disminución en V pasa T7."""
+    def test_t16_decreased_v_passes(self):
+        """Disminución en V pasa T16."""
         before = VHV(T=Decimal("5"), V=Decimal("2"), R=Decimal("2"))
         after = VHV(T=Decimal("5"), V=Decimal("1"), R=Decimal("2"))  # V bajó
         
-        result = AxiomValidator.validate_t7_minimizar_dano(before, after)
+        result = AxiomValidator.validate_t16_minimizar_dano(before, after)
         
         assert result.is_valid is True
     
-    def test_t7_increased_v_fails(self):
-        """Aumento en V falla T7."""
+    def test_t16_increased_v_fails(self):
+        """Aumento en V falla T16."""
         before = VHV(T=Decimal("5"), V=Decimal("1"), R=Decimal("2"))
         after = VHV(T=Decimal("5"), V=Decimal("2"), R=Decimal("2"))  # V subió
         
-        result = AxiomValidator.validate_t7_minimizar_dano(before, after)
+        result = AxiomValidator.validate_t16_minimizar_dano(before, after)
         
         assert result.is_valid is False
 
+    def test_t7_alias_retrocompatible(self):
+        """El alias T7 sigue disponible y reporta código T16."""
+        before = VHV(T=Decimal("5"), V=Decimal("1"), R=Decimal("2"))
+        after = VHV(T=Decimal("5"), V=Decimal("2"), R=Decimal("2"))
+        result = AxiomValidator.validate_t7_minimizar_dano(before, after)
+        assert result.is_valid is False
+        assert result.axiom_code == "T16"
 
-class TestAxiomValidatorT9:
-    """Tests para T9: Reciprocidad Justa."""
+
+class TestAxiomValidatorT17:
+    """Tests para T17: Reciprocidad Justa (renumerado desde "T9" de ingeniería)."""
     
-    def test_t9_balanced_reciprocity(self):
-        """Reciprocidad balanceada pasa T9."""
+    def test_t17_balanced_reciprocity(self):
+        """Reciprocidad balanceada pasa T17."""
         giver = VHV(T=Decimal("10"), V=Decimal("0"), R=Decimal("5"))
         receiver = VHV(T=Decimal("10"), V=Decimal("0"), R=Decimal("5"))
         
-        result = AxiomValidator.validate_t9_reciprocidad(giver, receiver)
+        result = AxiomValidator.validate_t17_reciprocidad(giver, receiver)
         
         assert result.is_valid is True
+        assert result.axiom_code == "T17"
     
-    def test_t9_within_tolerance(self):
+    def test_t17_within_tolerance(self):
         """Desbalance dentro de tolerancia pasa."""
         giver = VHV(T=Decimal("10"), V=Decimal("0"), R=Decimal("5"))
         receiver = VHV(T=Decimal("12"), V=Decimal("0"), R=Decimal("5"))  # ~10% más
         
-        result = AxiomValidator.validate_t9_reciprocidad(
+        result = AxiomValidator.validate_t17_reciprocidad(
             giver, receiver, tolerance=Decimal("0.2")
         )
         
         assert result.is_valid is True
     
-    def test_t9_high_imbalance_fails(self):
-        """Gran desbalance falla T9."""
+    def test_t17_high_imbalance_fails(self):
+        """Gran desbalance falla T17."""
         giver = VHV(T=Decimal("10"), V=Decimal("0"), R=Decimal("5"))
         receiver = VHV(T=Decimal("2"), V=Decimal("0"), R=Decimal("1"))  # Muy bajo
         
-        result = AxiomValidator.validate_t9_reciprocidad(
+        result = AxiomValidator.validate_t17_reciprocidad(
             giver, receiver, tolerance=Decimal("0.2")
         )
         
         assert result.is_valid is False
+
+    def test_t9_alias_retrocompatible(self):
+        """El alias T9 sigue disponible y reporta código T17."""
+        giver = VHV(T=Decimal("10"), V=Decimal("0"), R=Decimal("5"))
+        receiver = VHV(T=Decimal("2"), V=Decimal("0"), R=Decimal("1"))
+        result = AxiomValidator.validate_t9_reciprocidad(giver, receiver)
+        assert result.is_valid is False
+        assert result.axiom_code == "T17"
 
 
 class TestAxiomValidatorInvariants:

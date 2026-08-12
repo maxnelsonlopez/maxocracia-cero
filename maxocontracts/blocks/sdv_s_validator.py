@@ -9,7 +9,7 @@ Propiedades formales (de FUNDAMENTOS_CONCEPTUALES.md y docs/theory/SDV-S):
 - EXPONENCIAL: La violación encarece el servicio vía FS_S = e^v (Cap. 18, γ)
 - VIGILANTE: Detecta violación sostenida por ciclos consecutivos → retractación
 
-Axiomas vinculados: T7 (Minimizar Daño), T13 (Transparencia Total),
+Axiomas vinculados: T16 (Minimizar Daño), T13 (Transparencia Total),
 Cap. 10 §10.8 (Persona Sintética), Cap. 17 §17.4 (Derechos del Reino Sintético).
 """
 
