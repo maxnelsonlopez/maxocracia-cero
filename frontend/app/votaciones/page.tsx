@@ -517,6 +517,11 @@ function ClosedProposalCard({ proposal: p }: { proposal: Proposal }) {
             {detail && typeof detail.winner === "string" && (
               <span className="flex items-center gap-1 text-emerald-400"><CheckCircle2 className="w-3 h-3" /> ganadora: {detail.winner}</span>
             )}
+            {detail && typeof detail.weighted_fraction === "number" && detail.weighted_fraction !== detail.winner_fraction && (
+              <span className="flex items-center gap-1 text-amber-400" title="Participación Inteligente (Cap. 14): el peso del voto crece con el TVI registrado">
+                <Sparkles className="w-3 h-3" /> consenso ponderado {(detail.weighted_fraction as number * 100).toFixed(0)}%
+              </span>
+            )}
             <span className="flex items-center gap-1 text-slate-600"><Hash className="w-3 h-3" /> {p.closed_at ? new Date(p.closed_at).toLocaleDateString() : "—"}</span>
           </div>
         </div>

@@ -22,7 +22,7 @@ app/parties_bp.py (patrón de quórum de gobernanza de Partes, Ola 3A.3).
 import hashlib
 import json
 from datetime import datetime, timedelta, timezone
-from typing import Optional
+from typing import Dict, Optional
 
 from flask import Blueprint, jsonify, request
 
@@ -40,6 +40,12 @@ VALID_CATEGORIES = set(CATEGORY_DEFAULTS.keys())
 MAX_OPTIONS = 8
 MAX_TITLE = 200
 MAX_DESCRIPTION = 4000
+
+# Participación Inteligente (Cap. 14): la voz crece con la vida consciente
+# invertida (TVI). Cada voto pesa 1 + TVI_WEIGHT_FACTOR * (horas / max_horas
+# de la propuesta); sin TVI registrado todos pesan 1 (retrocompatible).
+# El quórum sigue siendo de personas (un voto por persona, T13).
+TVI_WEIGHT_FACTOR = 4.0
 
 
 def _now_iso() -> str:
@@ -165,6 +171,15 @@ def _vote_payload(row) -> dict:
     }
 
 
+def _tvi_hours(db, user_id: int) -> float:
+    """Horas de vida consciente registrada (TVI) de un usuario."""
+    row = db.execute(
+        "SELECT COALESCE(SUM(duration_seconds), 0) AS s FROM tvi_entries WHERE user_id = ?",
+        (user_id,),
+    ).fetchone()
+    return float(row["s"]) / 3600.0
+
+
 def _close_proposal(db, proposal_id: int) -> dict:
     """Cierra la propuesta si el plazo venció o es invocada manualmente."""
     row = db.execute(
@@ -187,31 +202,50 @@ def _close_proposal(db, proposal_id: int) -> dict:
         d["delegator_user_id"]: d["delegatee_user_id"]
         for d in db.execute("SELECT * FROM maxo_vote_delegations").fetchall()
     }
-    effective_options = list(direct.values())
+    effective = [(uid, direct[uid]) for uid in direct]
     delegated_extra = 0
     for delegator, delegatee in delegations.items():
         if delegator in direct:
             continue
         if delegatee in direct:
-            effective_options.append(direct[delegatee])
+            effective.append((delegatee, direct[delegatee]))
             delegated_extra += 1
 
     quorum = votes_cast / total_users if total_users else 0.0
     detail = {"total_users": total_users, "votes_cast": votes_cast,
               "delegated_votes": delegated_extra,
-              "effective_votes": len(effective_options),
+              "effective_votes": len(effective),
               "quorum_ratio": row["quorum_ratio"], "quorum_actual": round(quorum, 4)}
+
+    # Participación Inteligente (Cap. 14): el peso de cada voto crece con el
+    # TVI registrado (vida consciente invertida), normalizado al mayor emisor
+    # de la propuesta. Sin TVI, todos pesan 1 (retrocompatible).
+    tvi_hours = {uid: _tvi_hours(db, uid) for uid, _ in effective}
+    max_h = max(tvi_hours.values()) if tvi_hours else 0.0
+    weights = {uid: 1.0 for uid in tvi_hours}
+    if max_h > 0:
+        for uid in tvi_hours:
+            weights[uid] = 1.0 + TVI_WEIGHT_FACTOR * (tvi_hours[uid] / max_h)
+    detail["tvi_weighting"] = "participation_intelligence"
+    detail["tvi_hours"] = {str(uid): round(h, 2) for uid, h in tvi_hours.items()}
+
+    option_weight: Dict[str, float] = {}
+    for uid, option in effective:
+        option_weight[option] = option_weight.get(option, 0.0) + weights[uid]
 
     if quorum < row["quorum_ratio"]:
         result = "quorum_not_met"
     else:
         from collections import Counter
-        counts = Counter(effective_options)
-        winner, winner_n = counts.most_common(1)[0]
-        fraction = winner_n / len(effective_options) if effective_options else 0.0
+        simple_counts = Counter(o for _, o in effective)
+        total_weight = sum(option_weight.values()) if option_weight else 0.0
+        winner = max(option_weight, key=lambda o: (option_weight[o], simple_counts[o]))
+        weighted_fraction = option_weight[winner] / total_weight if total_weight else 0.0
         detail["winner"] = winner
-        detail["winner_fraction"] = round(fraction, 4)
-        if fraction >= row["majority_ratio"]:
+        detail["winner_fraction"] = round(simple_counts[winner] / len(effective), 4) if effective else 0.0
+        detail["weighted_fraction"] = round(weighted_fraction, 4)
+        detail["option_weights"] = {k: round(v, 4) for k, v in option_weight.items()}
+        if weighted_fraction >= row["majority_ratio"]:
             result = "passed"
         else:
             result = "rejected"

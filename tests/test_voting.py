@@ -302,3 +302,68 @@ def test_revocar_delegacion(client, auth):
     assert resp.status_code == 200
     assert resp.get_json()["revoked"] is True
     assert client.get("/voting/delegations").get_json() == []
+
+
+def _seed_tvi(client, uid, hours, tag=0):
+    """Registra TVI (vida consciente) para un usuario con fechas únicas."""
+    from datetime import datetime, timedelta
+    start = datetime(2026, 8, 1, 8, 0) + timedelta(hours=tag)
+    end = start + timedelta(hours=hours)
+    with client.application.app_context():
+        db = get_db()
+        db.execute(
+            "INSERT INTO tvi_entries (user_id, start_time, end_time, duration_seconds, category) "
+            "VALUES (?, ?, ?, ?, 'WORK')",
+            (uid, start.isoformat(), end.isoformat(), int(hours * 3600)),
+        )
+        db.commit()
+
+
+def test_ponderacion_tvi_cambia_resultado(client, auth):
+    """Participación Inteligente (Cap. 14): la voz del que más vida consciente
+    ha invertido pesa más. Sin ponderar el resultado sería rejected (66%);
+    con TVI (5x) el consenso crítico se alcanza (85%)."""
+    _seed_tvi(client, 2, 40.0, tag=1)  # Ana: 40h registradas
+    pid = _create(client, auth, category="critical").get_json()["proposal"]["id"]
+    client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(1))
+    client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(2))
+    client.post(f"/voting/proposals/{pid}/vote", json={"option": "No"}, headers=auth(3))
+
+    resp = client.post(f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True))
+    data = resp.get_json()["proposal"]
+    detail = data["result_detail"]
+    assert data["result"] == "passed"  # con pesos: Si = 1 + 5 = 6/7 = 85.7%
+    assert detail["tvi_weighting"] == "participation_intelligence"
+    assert detail["winner_fraction"] == round(2 / 3, 4)  # conteo simple sigue siendo 66%
+    assert detail["weighted_fraction"] == round(6 / 7, 4)
+    assert detail["option_weights"] == {"Si": 6.0, "No": 1.0}
+    assert detail["tvi_hours"] == {"1": 0.0, "2": 40.0, "3": 0.0}
+
+
+def test_ponderacion_sin_tvi_retrocompatible(client, auth):
+    """Sin TVI registrado, todos pesan 1: el resultado no cambia (comportamiento previo)."""
+    pid = _create(client, auth, category="critical").get_json()["proposal"]["id"]
+    client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(1))
+    client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(2))
+    client.post(f"/voting/proposals/{pid}/vote", json={"option": "No"}, headers=auth(3))
+
+    resp = client.post(f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True))
+    data = resp.get_json()["proposal"]
+    detail = data["result_detail"]
+    assert data["result"] == "rejected"  # 66% < 75%, igual que sin ponderación
+    assert detail["winner_fraction"] == detail["weighted_fraction"] == round(2 / 3, 4)
+    assert detail["option_weights"] == {"Si": 2.0, "No": 1.0}
+
+
+def test_ponderacion_normalizada_al_mayor_tvi(client, auth):
+    """El peso se normaliza al mayor TVI de la propuesta: 40h -> 5x, 10h -> 2x."""
+    _seed_tvi(client, 2, 40.0, tag=1)
+    _seed_tvi(client, 4, 10.0, tag=2)
+    pid = _create(client, auth, category="operational").get_json()["proposal"]["id"]
+    for uid in (2, 4):
+        client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(uid))
+
+    resp = client.post(f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True))
+    detail = resp.get_json()["proposal"]["result_detail"]
+    assert detail["option_weights"] == {"Si": 7.0}  # 5 + 2
+    assert detail["tvi_hours"] == {"2": 40.0, "4": 10.0}
