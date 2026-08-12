@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { 
   Settings, 
   Sliders, 
@@ -9,33 +9,76 @@ import {
   Save, 
   RefreshCw,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  History,
+  AlertTriangle,
+  CheckCircle2
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { api } from "../../lib/api";
+
+interface VHVParams {
+  alpha: number;
+  beta: number;
+  gamma: number;
+  delta: number;
+  updated_at?: string;
+  notes?: string;
+}
 
 export default function AdminSettings() {
-  // Configuración de Pesos Axiomáticos
+  // Configuración de Pesos Axiomáticos (persistida en /vhv/parameters)
   const [alpha, setAlpha] = useState(0.25);
   const [beta, setBeta] = useState(0.50);
   const [gamma, setGamma] = useState(1.8);
   const [delta, setDelta] = useState(0.20);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
 
-  // Configuración de Sistema
+  // Configuración de Sistema (local por ahora: sin endpoint aún)
   const [tolerance, setTolerance] = useState(0.15);
   const [matchingLimit, setMatchingLimit] = useState(10);
   const [useOracles, setUseOracles] = useState(true);
   const [strictValidation, setStrictValidation] = useState(true);
+
+  // Estado de persistencia (T13: cada cambio deja nota auditable)
+  const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleSave = () => {
+  useEffect(() => {
+    api.getVHVParameters()
+      .then((p: VHVParams) => {
+        setAlpha(p.alpha);
+        setBeta(p.beta);
+        setGamma(p.gamma);
+        setDelta(p.delta);
+        setUpdatedAt(p.updated_at || null);
+      })
+      .catch(() => setError("No se pudieron cargar los parámetros VHV (¿backend disponible?)."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleSave = async () => {
     setSaving(true);
     setSaved(false);
-    setTimeout(() => {
-      setSaving(false);
+    setError(null);
+    try {
+      await api.updateVHVParameters({
+        alpha, beta, gamma, delta,
+        notes: notes.trim() || `Ajuste de pesos axiomáticos desde panel admin (${new Date().toISOString()})`,
+      });
       setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    }, 1200);
+      setNotes("");
+      const p = await api.getVHVParameters();
+      setUpdatedAt(p.updated_at || null);
+      setTimeout(() => setSaved(false), 4000);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Error al guardar parámetros.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -47,18 +90,37 @@ export default function AdminSettings() {
           Configuración Global de Gobernanza
         </h3>
         <p className="text-xs text-slate-400 leading-relaxed">
-          Calibración del Sistema Operativo Maxocracia. Estos parámetros configuran los pesos del motor de cálculo VHV,
-          el umbral de tolerancia para el emparejamiento de necesidades y los mecanismos de validación de contratos en el grafo de reputación.
+          Calibración del Sistema Operativo Maxocracia. Los pesos del motor VHV se persisten vía
+          <code className="text-emerald-400 mx-1">/vhv/parameters</code> y cada cambio exige una nota
+          auditable (T13 — Transparencia de Cálculo).
         </p>
+        {updatedAt && (
+          <p className="text-[10px] text-slate-500 mt-2 flex items-center gap-1.5">
+            <History className="w-3 h-3" />
+            Última actualización persistida: {new Date(updatedAt).toLocaleString()}
+          </p>
+        )}
       </div>
+
+      {error && (
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4" />
+          {error}
+        </div>
+      )}
 
       <div className="grid md:grid-cols-2 gap-8">
         
-        {/* Pesos VHV */}
+        {/* Pesos VHV (persistidos) */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 space-y-6">
-          <div className="flex items-center gap-2 pb-4 border-b border-slate-800">
-            <Sliders className="w-4 h-4 text-emerald-400" />
-            <h4 className="font-semibold text-white">Pesos de la Ecuación VHV</h4>
+          <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+            <div className="flex items-center gap-2">
+              <Sliders className="w-4 h-4 text-emerald-400" />
+              <h4 className="font-semibold text-white">Pesos de la Ecuación VHV</h4>
+            </div>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              {loading ? "Cargando..." : "Conectado al motor"}
+            </span>
           </div>
 
           <div className="space-y-5">
@@ -99,13 +161,32 @@ export default function AdminSettings() {
               description="Peso del impacto ecológico y consumo de materias primas"
             />
           </div>
+
+          {/* Nota auditable (T13) */}
+          <div className="space-y-2 pt-2 border-t border-slate-800">
+            <label className="block text-xs font-semibold text-slate-300">
+              Nota del cambio (obligatoria — queda registrada)
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Ej: Rebalanceo tras observaciones de la Cohorte Cero..."
+              rows={2}
+              className="w-full px-3 py-2 text-xs rounded-lg bg-slate-950 border border-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-white placeholder:text-slate-600"
+            />
+          </div>
         </div>
 
-        {/* Parámetros del Motor de Matching */}
+        {/* Parámetros del Motor de Matching (locales) */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 space-y-6">
-          <div className="flex items-center gap-2 pb-4 border-b border-slate-800">
-            <ShieldAlert className="w-4 h-4 text-emerald-400" />
-            <h4 className="font-semibold text-white">Límites y Tolerancia Operativa</h4>
+          <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-emerald-400" />
+              <h4 className="font-semibold text-white">Límites y Tolerancia Operativa</h4>
+            </div>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-700/30 text-slate-400 border border-slate-700">
+              local (sin endpoint aún)
+            </span>
           </div>
 
           <div className="space-y-6">
@@ -161,7 +242,7 @@ export default function AdminSettings() {
             <h4 className="font-semibold text-white">Integración con Stripe & Pasarelas</h4>
           </div>
           <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            Conexión Segura Activa
+            Configurada en deploy
           </span>
         </div>
 
@@ -171,7 +252,7 @@ export default function AdminSettings() {
             <div className="flex gap-2">
               <input 
                 type="password" 
-                value="whsec_mock_secret_key_placeholder" 
+                value="••••••••••••••••" 
                 disabled 
                 className="flex-1 px-3 py-2 text-xs rounded-lg bg-slate-950 border border-slate-800 text-slate-500 font-mono"
               />
@@ -179,7 +260,7 @@ export default function AdminSettings() {
                 Rotar
               </button>
             </div>
-            <span className="text-[10px] text-slate-500 block">Firma y verificación de eventos Stripe Checkout.</span>
+            <span className="text-[10px] text-slate-500 block">Firma y verificación de eventos Stripe Checkout (gestionado por variables de entorno).</span>
           </div>
 
           <div className="space-y-2">
@@ -197,13 +278,13 @@ export default function AdminSettings() {
       <div className="flex justify-end gap-4">
         <button 
           onClick={handleSave}
-          disabled={saving}
+          disabled={saving || loading}
           className="flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold transition-all hover:scale-102 hover:shadow-lg disabled:opacity-50"
         >
           {saving ? (
             <>
               <RefreshCw className="w-4 h-4 animate-spin" />
-              Guardando Parámetros...
+              Persistiendo Parámetros...
             </>
           ) : (
             <>
@@ -219,9 +300,10 @@ export default function AdminSettings() {
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold text-center"
+          className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold text-center flex items-center justify-center gap-2"
         >
-          ✅ Configuración guardada e inyectada exitosamente en el Motor de Gobernanza Maxo OS.
+          <CheckCircle2 className="w-4 h-4" />
+          Parámetros persistidos en el motor VHV con nota auditable (T13).
         </motion.div>
       )}
     </div>

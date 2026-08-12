@@ -63,7 +63,10 @@ export default function VHVParametersPage() {
     }
 
     try {
-      await api.updateVHVParameters(params);
+      await api.updateVHVParameters({
+        ...params,
+        notes: `Ajuste desde panel de parámetros (${new Date().toISOString()})`,
+      });
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {

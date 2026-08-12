@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { 
   CreditCard, 
   TrendingUp, 
@@ -8,224 +8,197 @@ import {
   DollarSign, 
   AlertCircle, 
   Search,
-  Sparkles
+  Sparkles,
+  RefreshCw
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { apiFetch } from "../../lib/api";
 
-// Datos simulados premium
-const MOCK_TRANSACTIONS = [
-  { id: "tx_1001", user: "Sophia Kovalevsky", email: "sophia.k@maxo.org", tier: "Enterprise", amount: 200, country: "DE", date: "Hace 2 horas" },
-  { id: "tx_1002", user: "Alexander Grothendieck", email: "al.groth@coherence.net", tier: "Contributor", amount: 8.75, country: "FR", date: "Hace 4 horas" },
-  { id: "tx_1003", user: "Hypatia of Alexandria", email: "hypatia@libres.org", tier: "Contributor", amount: 6.25, country: "MX", date: "Hace 1 día" },
-  { id: "tx_1004", user: "Alan Turing", email: "enigma@decoders.io", tier: "Enterprise", amount: 200, country: "GB", date: "Hace 2 días" },
-  { id: "tx_1005", user: "Ada Lovelace", email: "ada@poeticalscience.com", tier: "Contributor", amount: 25, country: "US", date: "Hace 3 días" },
-];
+interface SubUser {
+  id: number;
+  email: string;
+  name: string;
+  alias?: string;
+  tier: string;
+  sub_status?: string;
+  expires_at?: string | null;
+  payment_method?: string;
+}
+
+interface AdminStats {
+  total_users: number;
+  active_contributors: number;
+  mrr_usd_estimated: number;
+  tiers_breakdown: { tier: string; count: number }[];
+  operational_costs: number;
+  surplus: number;
+}
 
 export default function AdminSubscriptions() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [users, setUsers] = useState<SubUser[]>([]);
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredTransactions = MOCK_TRANSACTIONS.filter(tx => 
-    tx.user.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    tx.tier.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tx.id.toLowerCase().includes(searchTerm.toLowerCase())
+  const load = () => {
+    setLoading(true);
+    setError(null);
+    Promise.all([
+      apiFetch("/subscriptions/admin/users").then((r) => {
+        if (!r.ok) throw new Error(`users: ${r.status}`);
+        return r.json();
+      }),
+      apiFetch("/subscriptions/admin/stats").then((r) => {
+        if (!r.ok) throw new Error(`stats: ${r.status}`);
+        return r.json();
+      }),
+    ])
+      .then(([u, s]) => {
+        setUsers(u);
+        setStats(s);
+      })
+      .catch((e: unknown) => {
+        setError(e instanceof Error ? e.message : "Error al cargar suscripciones.");
+      })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(load, []);
+
+  const filtered = users.filter((u) =>
+    (u.name || "").toLowerCase().includes(query.toLowerCase()) ||
+    (u.email || "").toLowerCase().includes(query.toLowerCase())
   );
 
-  return (
-    <div className="space-y-8">
-      {/* Aviso de Calibración Axiomática */}
-      <motion.div 
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 flex items-start gap-3"
-      >
-        <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 animate-pulse" />
-        <div>
-          <h4 className="font-semibold text-sm">Calibración Axiomática en Progreso</h4>
-          <p className="text-xs text-amber-400/80 mt-1">
-            Los flujos financieros y de suscripción se están sincronizando con el oráculo de Stripe en modo seguro. 
-            El cálculo en tiempo real del factor de paridad de poder adquisitivo (PPP) está activo y auditado.
-          </p>
-        </div>
-      </motion.div>
+  const tierColor: Record<string, string> = {
+    enterprise: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    contributor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    free: "bg-slate-700/20 text-slate-400 border-slate-700",
+  };
 
-      {/* Tarjetas de Métricas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard 
-          title="MRR Estimado" 
-          value="$2,450.00" 
-          change="+12.4%" 
-          description="Ingreso mensual recurrente" 
-          icon={<DollarSign className="w-5 h-5 text-emerald-400" />} 
-        />
-        <MetricCard 
-          title="Contribuyentes Activos" 
-          value="182" 
-          change="+8.3%" 
-          description="Suscripciones premium activas" 
-          icon={<Users className="w-5 h-5 text-emerald-400" />} 
-        />
-        <MetricCard 
-          title="Tasa de Retención" 
-          value="98.4%" 
-          change="+1.2%" 
-          description="Retención de contribuyentes" 
-          icon={<TrendingUp className="w-5 h-5 text-emerald-400" />} 
-        />
-        <MetricCard 
-          title="Fondo de Reserva Coherente" 
-          value="$12,840" 
-          change="+15.8%" 
-          description="Sostenibilidad pública" 
-          icon={<CreditCard className="w-5 h-5 text-emerald-400" />} 
-        />
+  const mrr = stats?.mrr_usd_estimated ?? 0;
+  const surplus = stats?.surplus ?? 0;
+
+  return (
+    <div className="space-y-8 max-w-6xl">
+      {/* Encabezado */}
+      <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
+        <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+          <CreditCard className="w-5 h-5 text-emerald-400" />
+          Sostenibilidad Económica — Suscripciones
+        </h3>
+        <p className="text-xs text-slate-400 leading-relaxed">
+          Datos reales de la Fase 2 (Sostenibilidad Económica): contribuidores activos por tier,
+          MRR estimado y excedente sobre costos operativos. Todo cálculo auditable (T13).
+        </p>
       </div>
 
-      {/* Sección Principal */}
-      <div className="grid lg:grid-cols-3 gap-8">
-        
-        {/* Distribución de Tiers */}
-        <div className="lg:col-span-1 bg-slate-900/50 border border-slate-800 rounded-2xl p-6 space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-white">Distribución de Tiers</h3>
-            <Sparkles className="w-4 h-4 text-emerald-400" />
-          </div>
+      {error && (
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold flex items-center gap-2">
+          <AlertCircle className="w-4 h-4" />
+          {error} — verifica que el backend esté activo y que la sesión sea de administrador.
+        </div>
+      )}
 
-          <div className="space-y-4">
-            <TierProgress label="Enterprise (Aporte Máximo)" count={12} percentage={10} color="bg-amber-500" value="$2,400" />
-            <TierProgress label="Contributor (Aporte Coherente)" count={118} percentage={70} color="bg-emerald-500" value="$1,050" />
-            <TierProgress label="Free (Aporte Básico)" count={450} percentage={20} color="bg-slate-500" value="$0" />
-          </div>
+      {/* KPIs reales */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <KpiCard icon={<Users className="w-5 h-5" />} label="Usuarios totales" value={stats ? String(stats.total_users) : "—"} sub="registrados en el sistema" />
+        <KpiCard icon={<Sparkles className="w-5 h-5" />} label="Contribuidores activos" value={stats ? String(stats.active_contributors) : "—"} sub="suscripciones vigentes" />
+        <KpiCard icon={<DollarSign className="w-5 h-5" />} label="MRR estimado" value={stats ? `$${mrr.toFixed(2)}` : "—"} sub="ingreso mensual recurrente" />
+        <KpiCard icon={<TrendingUp className="w-5 h-5" />} label="Excedente" value={stats ? `$${surplus.toFixed(2)}` : "—"} sub={stats ? `costos operativos $${stats.operational_costs.toFixed(2)}` : "—"} positive={surplus >= 0} />
+      </div>
 
-          <div className="pt-4 border-t border-slate-800">
-            <div className="flex items-center justify-between text-sm text-slate-400">
-              <span>Sostenibilidad Alcanzada</span>
-              <span className="text-emerald-400 font-mono font-semibold">120%</span>
+      {/* Desglose por tier */}
+      {stats && stats.tiers_breakdown.length > 0 && (
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
+          <h4 className="font-semibold text-white text-sm mb-4">Desglose por tier</h4>
+          <div className="flex flex-wrap gap-3">
+            {stats.tiers_breakdown.map((t) => (
+              <span key={t.tier} className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${tierColor[t.tier] || "bg-slate-700/20 text-slate-400 border-slate-700"}`}>
+                {t.tier}: {t.count}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tabla de usuarios */}
+      <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h4 className="font-semibold text-white text-sm">Usuarios y estado de suscripción</h4>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Buscar..."
+                className="pl-9 pr-3 py-2 text-xs rounded-lg bg-slate-950 border border-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-white placeholder:text-slate-600"
+              />
             </div>
-            <div className="w-full bg-slate-800 h-2 rounded-full mt-2 overflow-hidden">
-              <div className="bg-emerald-500 h-full rounded-full" style={{ width: "100%" }} />
-            </div>
+            <button onClick={load} disabled={loading} className="p-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition-colors">
+              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            </button>
           </div>
         </div>
 
-        {/* Historial de Transacciones */}
-        <div className="lg:col-span-2 bg-slate-900/50 border border-slate-800 rounded-2xl p-6 space-y-6">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h3 className="font-semibold text-white">Últimas Contribuciones</h3>
-              <p className="text-xs text-slate-400 mt-1">Transacciones procesadas en las últimas 72 horas</p>
-            </div>
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
-              <input 
-                type="text" 
-                placeholder="Buscar contribuidor..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 pr-4 py-2 text-xs rounded-xl bg-slate-950 border border-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-300 w-56"
-              />
-            </div>
+        {loading ? (
+          <div className="text-center py-12 text-xs text-slate-500">Cargando datos reales...</div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-12 text-xs text-slate-500">
+            {users.length === 0 ? "Sin usuarios con suscripciones registradas." : "Sin resultados para la búsqueda."}
           </div>
-
-          <div className="overflow-x-auto">
+        ) : (
+          <div className="overflow-x-auto rounded-xl border border-slate-800">
             <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-800 text-slate-400 font-medium">
-                  <th className="py-3 px-4">ID Transacción</th>
-                  <th className="py-3 px-4">Usuario</th>
-                  <th className="py-3 px-4">Nivel</th>
-                  <th className="py-3 px-4 text-right">Monto (USD)</th>
-                  <th className="py-3 px-4">Fecha</th>
+              <thead className="bg-slate-950/60 text-slate-500">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">Nombre</th>
+                  <th className="px-4 py-3 font-semibold">Email</th>
+                  <th className="px-4 py-3 font-semibold">Tier</th>
+                  <th className="px-4 py-3 font-semibold">Estado</th>
+                  <th className="px-4 py-3 font-semibold">Vence</th>
+                  <th className="px-4 py-3 font-semibold">Método</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/50">
-                {filteredTransactions.map((tx) => (
-                  <tr key={tx.id} className="text-slate-300 hover:bg-slate-800/20 transition-colors">
-                    <td className="py-4 px-4 font-mono text-[10px] text-slate-500">{tx.id}</td>
-                    <td className="py-4 px-4">
-                      <div>
-                        <p className="font-semibold text-white">{tx.user}</p>
-                        <p className="text-[10px] text-slate-500">{tx.email}</p>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                        tx.tier === "Enterprise" 
-                          ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" 
-                          : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                      }`}>
-                        {tx.tier}
+              <tbody className="divide-y divide-slate-800/60">
+                {filtered.map((u) => (
+                  <tr key={u.id} className="hover:bg-slate-900/40">
+                    <td className="px-4 py-3 text-slate-300 font-medium">{u.name || u.alias || "—"}</td>
+                    <td className="px-4 py-3 text-slate-400">{u.email}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${tierColor[u.tier] || "bg-slate-700/20 text-slate-400 border-slate-700"}`}>
+                        {u.tier || "free"}
                       </span>
                     </td>
-                    <td className="py-4 px-4 text-right font-mono font-semibold text-white">
-                      ${tx.amount.toFixed(2)}
-                      <span className="text-[10px] text-slate-500 block">({tx.country} PPP)</span>
-                    </td>
-                    <td className="py-4 px-4 text-slate-400">{tx.date}</td>
+                    <td className="px-4 py-3 text-slate-400">{u.sub_status || "sin suscripción"}</td>
+                    <td className="px-4 py-3 text-slate-400">{u.expires_at ? new Date(u.expires_at).toLocaleDateString() : "—"}</td>
+                    <td className="px-4 py-3 text-slate-500">{u.payment_method || "—"}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </div>
-
+        )}
       </div>
     </div>
   );
 }
 
-// Componentes internos de soporte
-interface MetricCardProps {
-  title: string;
-  value: string;
-  change: string;
-  description: string;
-  icon: React.ReactNode;
-}
-
-function MetricCard({ title, value, change, description, icon }: MetricCardProps) {
+function KpiCard({ icon, label, value, sub, positive = true }: { icon: React.ReactNode; label: string; value: string; sub: string; positive?: boolean }) {
   return (
-    <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 space-y-4 hover:border-slate-700/60 transition-colors">
-      <div className="flex justify-between items-start">
-        <span className="text-xs font-semibold text-slate-400 tracking-wide uppercase">{title}</span>
-        <div className="p-2 bg-slate-850 rounded-lg border border-slate-850">
-          {icon}
-        </div>
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5"
+    >
+      <div className="flex items-center gap-2 text-slate-500 mb-3">
+        <span className="text-emerald-400">{icon}</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wider">{label}</span>
       </div>
-      <div>
-        <p className="text-2xl font-bold text-white tracking-tight">{value}</p>
-        <div className="flex items-center gap-1.5 mt-1">
-          <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
-            {change}
-          </span>
-          <span className="text-[10px] text-slate-500">{description}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface TierProgressProps {
-  label: string;
-  count: number;
-  percentage: number;
-  color: string;
-  value: string;
-}
-
-function TierProgress({ label, count, percentage, color, value }: TierProgressProps) {
-  return (
-    <div className="space-y-2">
-      <div className="flex justify-between text-xs text-slate-300">
-        <span>{label}</span>
-        <span className="font-semibold text-white">{count} ({percentage}%)</span>
-      </div>
-      <div className="w-full bg-slate-850 h-1.5 rounded-full overflow-hidden">
-        <div className={`${color} h-full rounded-full`} style={{ width: `${percentage}%` }} />
-      </div>
-      <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-        <span>Aporte</span>
-        <span>{value}/mes</span>
-      </div>
-    </div>
+      <p className={`text-2xl font-bold ${positive ? "text-white" : "text-red-400"}`}>{value}</p>
+      <p className="text-[10px] text-slate-500 mt-1">{sub}</p>
+    </motion.div>
   );
 }

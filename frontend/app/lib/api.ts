@@ -64,12 +64,15 @@ export const api = {
     return res.json();
   },
 
-  updateVHVParameters: async (data: VHVParametersInput) => {
+  updateVHVParameters: async (data: VHVParametersInput & { notes: string }) => {
     const res = await apiFetch("/vhv/parameters", {
       method: "PUT",
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error("Error updating VHV parameters");
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Error updating VHV parameters");
+    }
     return res.json();
   },
 
