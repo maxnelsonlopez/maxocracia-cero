@@ -674,3 +674,8 @@ CREATE TABLE IF NOT EXISTS maxo_community_analysis (
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+CREATE TABLE IF NOT EXISTS maxo_vote_delegations (
+    delegator_user_id INTEGER PRIMARY KEY,
+    delegatee_user_id INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);

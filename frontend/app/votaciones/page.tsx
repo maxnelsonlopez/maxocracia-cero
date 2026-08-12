@@ -65,6 +65,43 @@ export default function VotacionesPage() {
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [myVotes, setMyVotes] = useState<Record<number, string>>({});
+  const [delegations, setDelegations] = useState<{ delegator_user_id: number; delegatee_user_id: number }[]>([]);
+  const [delegateInput, setDelegateInput] = useState("");
+
+  const loadDelegations = useCallback(async () => {
+    try {
+      const res = await apiFetch("/voting/delegations");
+      if (res.ok) setDelegations(await res.json());
+    } catch {
+      // silencioso: la delegación es auxiliar
+    }
+  }, []);
+
+  useEffect(() => {
+    loadDelegations();
+  }, [loadDelegations]);
+
+  const setDelegation = async () => {
+    const uid = parseInt(delegateInput);
+    if (!uid) return;
+    setError(null);
+    const res = await apiFetch("/voting/delegations", {
+      method: "POST",
+      body: JSON.stringify({ delegatee_user_id: uid }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      setError(err.error || "Error al delegar");
+      return;
+    }
+    setDelegateInput("");
+    loadDelegations();
+  };
+
+  const revokeDelegation = async () => {
+    await apiFetch("/voting/delegations", { method: "DELETE" });
+    loadDelegations();
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -139,6 +176,43 @@ export default function VotacionesPage() {
               <Plus className="w-4 h-4" />
               Nueva Propuesta
             </button>
+          </div>
+        </div>
+
+        {/* Delegación de voto (democracia líquida, T13) */}
+        <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-emerald-400" />
+              Delegación de voto (democracia líquida)
+            </p>
+            <p className="text-[10px] text-slate-500 mt-0.5">
+              Si no votas, tu voto sigue la opción de tu delegatario. El voto directo siempre manda. Registro público (T13).
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {delegations.length > 0 ? (
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono text-slate-400">
+                  Delegado: usuario #{delegations[0].delegatee_user_id}
+                </span>
+                <button onClick={revokeDelegation} className="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all">
+                  Revocar
+                </button>
+              </div>
+            ) : (
+              <>
+                <input
+                  value={delegateInput}
+                  onChange={(e) => setDelegateInput(e.target.value)}
+                  placeholder="ID de usuario delegatario"
+                  className="w-40 px-3 py-1.5 text-xs rounded-lg bg-slate-950 border border-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-white font-mono placeholder:text-slate-600"
+                />
+                <button onClick={setDelegation} className="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 transition-all">
+                  Delegar
+                </button>
+              </>
+            )}
           </div>
         </div>
 

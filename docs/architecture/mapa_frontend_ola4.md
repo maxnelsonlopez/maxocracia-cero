@@ -63,17 +63,18 @@ las secciones desconectadas**. Generado el 11-08-2026 con verificación determin
 
 ## 4. Hallazgos y recomendaciones (por prioridad)
 
-1. **Conectar `/admin/settings`** a `/vhv/parameters` (PUT) — el hub ya lo expone; es trabajo de un componente.
-2. **Reemplazar el MOCK de `/admin/subscriptions`** por `/subscriptions/admin/users` + `/subscriptions/admin/stats`
-   (ambos existen y `/admin/users` ya los usa — copiar el patrón).
-3. **Exponer el CRUD real** (Flask-Admin): decidir entre generar páginas para interchange/followup/vhvproduct
+1. **Conectar `/admin/settings`** a `/vhv/parameters` (PUT) — ✅ HECHO (ago 2026): pesos persistidos con nota auditable T13.
+2. **Reemplazar el MOCK de `/admin/subscriptions`** — ✅ HECHO (ago 2026): KPIs y tabla reales vía `/subscriptions/admin/*`.
+3. **SDV-S en UI** — ✅ **ya existía**: el panel "Reino Sintético · SDV-S" está en `ContractDetailsClient.tsx`
+   (dimensiones, FS_S = e^v, violaciones, badge de dignidad). *Corrección M4: la primera versión de este
+   mapa lo marcó pendiente porque el script de rastreo solo detectaba llamadas API directas, no datos
+   renderizados desde `participants_details` del contrato.*
+4. **Exponer el CRUD real** (Flask-Admin): decidir entre generar páginas para interchange/followup/vhvproduct
    o migrar `/admin/participants` al CRUD `/admin/participant` (hoy usa `/forms/participants`).
-4. **Superficies sin UI**: `maxo` (saldo del participante — natural en el detalle de contrato o perfil),
+5. **Superficies sin UI**: `maxo` (saldo del participante — natural en el detalle de contrato o perfil),
    `protection` (perfil de protección), `reputation`, `resources`, `interchanges`.
-5. **`/contracts/from-need`**: confirmar si el matching usa el flujo bridge por backend; si no, conectarlo
+6. **`/contracts/from-need`**: confirmar si el matching usa el flujo bridge por backend; si no, conectarlo
    desde `/matching` (el oráculo de chat ya existe ahí).
-6. **Frontend SDV-S** (hito pendiente del mapa SDV-S): el detalle de contrato (`ContractDetailsClient`) es
-   el lugar natural para exponer `sdv_s_actual` y el wellness check sintético.
 
 ## 5. Verificación (cómo se regeneró este mapa)
 

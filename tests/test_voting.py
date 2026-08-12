@@ -242,3 +242,61 @@ def test_analisis_fallback_local_cuando_deepseek_falla(client, auth, monkeypatch
 def test_analisis_propuesta_inexistente(client, auth):
     resp = client.post("/voting/proposals/9999/analyze", json={}, headers=auth(1))
     assert resp.status_code == 404
+
+
+def test_delegacion_arrastra_voto(client, auth):
+    """El delegatario vota y arrastra al delegante que no votó (democracia líquida)."""
+    pid = _create(client, auth, category="critical").get_json()["proposal"]["id"]
+
+    resp = client.post("/voting/delegations", json={"delegatee_user_id": 2}, headers=auth(1))
+    assert resp.status_code == 200
+
+    client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(2))
+    client.post(f"/voting/proposals/{pid}/vote", json={"option": "No"}, headers=auth(3))
+    client.post(f"/voting/proposals/{pid}/vote", json={"option": "No"}, headers=auth(4))
+
+    resp = client.post(f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True))
+    data = resp.get_json()["proposal"]
+    # 3 votos directos (quorum 3/4) + 1 delegado (usuario 1 -> usuario 2, votó Si)
+    # efectivos: Si=2, No=2 -> empate 50% < 75% (crítica), rechazada
+    assert data["result_detail"]["votes_cast"] == 3
+    assert data["result_detail"]["delegated_votes"] == 1
+    assert data["result_detail"]["effective_votes"] == 4
+    assert data["result"] == "rejected"
+
+
+def test_voto_directo_anula_delegacion(client, auth):
+    """Si el delegante vota directamente, su voto manda sobre la delegación."""
+    pid = _create(client, auth).get_json()["proposal"]["id"]
+    client.post("/voting/delegations", json={"delegatee_user_id": 2}, headers=auth(1))
+    client.post(f"/voting/proposals/{pid}/vote", json={"option": "No"}, headers=auth(1))
+    client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(2))
+    client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(3))
+
+    resp = client.post(f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True))
+    data = resp.get_json()["proposal"]
+    # directos: No(1), Si(2), Si(3) -> Si=2/3 aprobada; el voto No de 1 anula la delegación
+    assert data["result_detail"]["delegated_votes"] == 0
+    assert data["result"] == "passed"
+
+
+def test_delegacion_a_si_mismo_rechazada(client, auth):
+    resp = client.post("/voting/delegations", json={"delegatee_user_id": 1}, headers=auth(1))
+    assert resp.status_code == 400
+
+
+def test_delegacion_publica_t13(client, auth):
+    client.post("/voting/delegations", json={"delegatee_user_id": 2}, headers=auth(1))
+    resp = client.get("/voting/delegations")
+    data = resp.get_json()
+    assert len(data) == 1
+    assert data[0]["delegator_user_id"] == 1
+    assert data[0]["delegatee_user_id"] == 2
+
+
+def test_revocar_delegacion(client, auth):
+    client.post("/voting/delegations", json={"delegatee_user_id": 2}, headers=auth(1))
+    resp = client.delete("/voting/delegations", headers=auth(1))
+    assert resp.status_code == 200
+    assert resp.get_json()["revoked"] is True
+    assert client.get("/voting/delegations").get_json() == []

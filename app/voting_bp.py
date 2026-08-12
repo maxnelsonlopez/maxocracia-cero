@@ -84,30 +84,47 @@ def _close_proposal(db, proposal_id: int) -> dict:
         return _proposal_payload(row) if row else {}
 
     total_users = db.execute("SELECT COUNT(*) FROM users").fetchone()[0]
-    votes = db.execute(
-        "SELECT option, COUNT(*) as n FROM maxo_community_votes WHERE proposal_id = ? GROUP BY option",
+    vote_rows = db.execute(
+        "SELECT user_id, option FROM maxo_community_votes WHERE proposal_id = ?",
         (proposal_id,),
     ).fetchall()
-    votes_cast = sum(v["n"] for v in votes)
+    direct = {v["user_id"]: v["option"] for v in vote_rows}
+    votes_cast = len(direct)
+
+    # Democracia líquida (profundidad 1): el voto del delegatario arrastra
+    # a quienes le delegaron y NO votaron directamente.
+    delegations = {
+        d["delegator_user_id"]: d["delegatee_user_id"]
+        for d in db.execute("SELECT * FROM maxo_vote_delegations").fetchall()
+    }
+    effective_options = list(direct.values())
+    delegated_extra = 0
+    for delegator, delegatee in delegations.items():
+        if delegator in direct:
+            continue
+        if delegatee in direct:
+            effective_options.append(direct[delegatee])
+            delegated_extra += 1
 
     quorum = votes_cast / total_users if total_users else 0.0
     detail = {"total_users": total_users, "votes_cast": votes_cast,
+              "delegated_votes": delegated_extra,
+              "effective_votes": len(effective_options),
               "quorum_ratio": row["quorum_ratio"], "quorum_actual": round(quorum, 4)}
 
     if quorum < row["quorum_ratio"]:
         result = "quorum_not_met"
     else:
-        winner = max(votes, key=lambda v: v["n"], default=None)
-        if winner is None:
-            result = "quorum_not_met"
+        from collections import Counter
+        counts = Counter(effective_options)
+        winner, winner_n = counts.most_common(1)[0]
+        fraction = winner_n / len(effective_options) if effective_options else 0.0
+        detail["winner"] = winner
+        detail["winner_fraction"] = round(fraction, 4)
+        if fraction >= row["majority_ratio"]:
+            result = "passed"
         else:
-            fraction = winner["n"] / votes_cast if votes_cast else 0.0
-            detail["winner"] = winner["option"]
-            detail["winner_fraction"] = round(fraction, 4)
-            if fraction >= row["majority_ratio"]:
-                result = "passed"
-            else:
-                result = "rejected"
+            result = "rejected"
 
     db.execute(
         "UPDATE maxo_community_proposals SET status='closed', result=?, result_detail=?, closed_at=? WHERE id=?",
@@ -327,6 +344,70 @@ def analyze_proposal(current_user, proposal_id: int):
         "SELECT * FROM maxo_community_analysis WHERE proposal_id = ?", (proposal_id,)
     ).fetchone()
     return jsonify({"success": True, "oracle_analysis": _analysis_payload(stored)})
+
+
+@voting_bp.route("/delegations", methods=["POST"])
+@token_required
+def set_delegation(current_user):
+    """
+    Delega el voto comunitario a otro usuario (democracia líquida, profundidad 1).
+
+    Body JSON: {"delegatee_user_id": int}
+    El delegatario debe existir y no puede ser uno mismo. El voto directo
+    siempre manda sobre la delegación. Registro público (T13).
+    """
+    delegatee = (request.get_json() or {}).get("delegatee_user_id")
+    if not isinstance(delegatee, int) or delegatee <= 0:
+        return jsonify({"error": "delegatee_user_id (int) obligatorio"}), 400
+    delegator = current_user["user_id"]
+    if delegatee == delegator:
+        return jsonify({"error": "no puedes delegar tu voto a ti mismo"}), 400
+
+    db = get_db()
+    exists = db.execute("SELECT id FROM users WHERE id = ?", (delegatee,)).fetchone()
+    if exists is None:
+        return jsonify({"error": "el delegatario no existe"}), 404
+
+    db.execute(
+        """
+        INSERT INTO maxo_vote_delegations (delegator_user_id, delegatee_user_id)
+        VALUES (?, ?)
+        ON CONFLICT(delegator_user_id) DO UPDATE SET
+            delegatee_user_id = excluded.delegatee_user_id,
+            created_at = datetime('now')
+        """,
+        (delegator, delegatee),
+    )
+    db.commit()
+    return jsonify({"success": True, "delegator_user_id": delegator, "delegatee_user_id": delegatee})
+
+
+@voting_bp.route("/delegations", methods=["GET"])
+def list_delegations():
+    """Lista pública de delegaciones de voto (T13)."""
+    db = get_db()
+    rows = db.execute(
+        "SELECT * FROM maxo_vote_delegations ORDER BY created_at"
+    ).fetchall()
+    return jsonify([
+        {"delegator_user_id": r["delegator_user_id"],
+         "delegatee_user_id": r["delegatee_user_id"],
+         "created_at": r["created_at"]}
+        for r in rows
+    ])
+
+
+@voting_bp.route("/delegations", methods=["DELETE"])
+@token_required
+def revoke_delegation(current_user):
+    """Revoca la delegación de voto propia."""
+    db = get_db()
+    cur = db.execute(
+        "DELETE FROM maxo_vote_delegations WHERE delegator_user_id = ?",
+        (current_user["user_id"],),
+    )
+    db.commit()
+    return jsonify({"success": True, "revoked": cur.rowcount > 0})
 
 
 @voting_bp.route("/stats", methods=["GET"])

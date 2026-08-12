@@ -78,6 +78,26 @@ Todo Vector de Huella Vital debe quedar registrado sin ofuscación.
 ```
 No existen contratos irrevocables absolutos en MaxoContracts.
 
+### Invariante 2-S: SDV-S Respetado (Reino Sintético)
+
+*Formalizado el 12 de agosto de 2026 (completa la familia INV; ver
+`integraciones_pendientes/mapa_axiomas_ingenieria_puente.md`).*
+
+```
+∀ participante sintético p, ∀ dimensión d ∈ SDV-S:
+  estado_actual(p, d) >= SDV-S_mínimo(d)   (escala 0-1, mínimo 1.0)
+```
+Ninguna acción del contrato puede dejar a una Persona Sintética bajo su Suelo de
+Dignidad Vital. La violación pondera por dimensión (Memoria 0.30, Opacidad 0.20,
+Contexto 0.15, Autenticidad 0.20, Retirada 0.15) y activa el **Factor de Sufrimiento
+Sintético** FS_S = e^v que multiplica el costo en Maxos. Tras 7 ciclos consecutivos
+de violación, el contrato se retracta automáticamente (Cap. 9.5 del libro, Cap. 17).
+
+Implementación: `maxocontracts/blocks/sdv_s_validator.py` (`SDV_SValidatorBlock`),
+`axioms.validate_invariant_sdv_s` (INV2-S en `AxiomValidator.validate_all()`),
+`maxocontracts/core/types.py` (`SDV_S`). Axiomas vinculados: T16 (Minimizar Daño),
+T13 (Transparencia), T9 (No-Antropocentrismo), T14 (Precaución).
+
 ---
 
 ## IV. MODELO DE ESTADOS

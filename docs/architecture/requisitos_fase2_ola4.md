@@ -62,8 +62,8 @@ verificación determinista — Patrón Puente).
 | RF-E1 | INV2-S: SDV-S validado en contratos con participantes sintéticos | FUNDAMENTOS + Cap 9.5 | ✅ (motor + API) |
 | RF-E2 | FS_S = e^v como recargo exponencial | Cap 9.5 §9.5.5, theory SDV-S | ✅ en motor (`SDV_SValidatorBlock`) |
 | RF-E3 | Capa de Ternura: perdón protocolizado + rehabilitación (7 ciclos) | Cap 9.5 §9.5.8 | ✅ (`ternura.py`, 13 tests) |
-| RF-E4 | **Frontend SDV-S**: exponer `sdv_s_actual` en detalle de contrato y builder | Cap 9.5 §Estado | 🔴 pendiente |
-| RF-E5 | Formalizar INV2-S en `FUNDAMENTOS_CONCEPTUALES.md` §III | mapa coherencia 3.3-3 | 🔴 pendiente |
+| RF-E4 | **Frontend SDV-S**: panel "Reino Sintético · SDV-S" en el detalle de contrato (dimensiones, FS_S, violaciones) | Cap 9.5 §Estado | ✅ ya existía (verificado ago 2026) |
+| RF-E5 | Formalizar INV2-S en `FUNDAMENTOS_CONCEPTUALES.md` §III | mapa coherencia 3.3-3 | ✅ formalizado (ago 2026) |
 
 ### F. Plaza pública y transparencia (T13)
 
@@ -102,7 +102,7 @@ verificación determinista — Patrón Puente).
 | RF-I6 | Emergencia: veto vital por crimen de coherencia (FS_S → ∞) como categoría de votación | Cap 9.5 §9.5.10 | ✅ (categoría `emergency`) |
 | RF-I7 | Frontend: página `/votaciones` (crear, votar, TruthLedger de cerradas, detalle T13) | demo Gemini portado | ✅ (ago 2026) |
 | RF-I9 | **Oráculo sintético de propuestas**: análisis VHV + axiomas + 4 opiniones, con **DeepSeek como motor principal y fallback a modelos locales** (hub Jan, localhost:1337) — firma T13 del motor (`engine`) | demo Gemini → DeepSeek | ✅ (ago 2026, `voting_oracle.py`) |
-| RF-I8 | Votación ponderada (por TVI/coherencia) y delegación — fase futura | Cap 14 | 🔴 pendiente (extensión) |
+| RF-I8 | Votación ponderada (por TVI/coherencia) y delegación — fase futura | Cap 14 | 🟡 Delegación de voto ✅ (democracia líquida prof. 1, ago 2026); ponderación por TVI pendiente |
 
 ---
 
