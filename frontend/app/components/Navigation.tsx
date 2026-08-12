@@ -34,7 +34,8 @@ import {
   Handshake,
   Activity,
   BarChart3,
-  ChevronDown
+  ChevronDown,
+  Vote
 } from "lucide-react";
 import { ContributorBadge } from "./ContributorBadge";
 import { useAuth } from "../context/AuthContext";
@@ -120,6 +121,12 @@ export function Navigation() {
               {isAuthenticated && (
                 <Link href="/matching" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/20 transition-all border border-emerald-500/20 mr-1 shadow-lg shadow-emerald-500/5">
                   Plaza de Apoyo
+                </Link>
+              )}
+
+              {isAuthenticated && (
+                <Link href="/votaciones" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/20 transition-all border border-emerald-500/20 mr-1 shadow-lg shadow-emerald-500/5">
+                  Votaciones
                 </Link>
               )}
 
@@ -233,6 +240,7 @@ export function Navigation() {
                   </h3>
                   <MobileNavLink href="/pulso" label="Pulso Vital" icon={Activity} onClick={() => setIsOpen(false)} />
                   <MobileNavLink href="/matching" label="Plaza de Apoyo" icon={Handshake} onClick={() => setIsOpen(false)} />
+                  <MobileNavLink href="/votaciones" label="Votaciones" icon={Vote} onClick={() => setIsOpen(false)} />
                 </div>
               )}
 

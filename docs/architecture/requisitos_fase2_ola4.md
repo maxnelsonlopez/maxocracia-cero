@@ -100,7 +100,7 @@ verificación determinista — Patrón Puente).
 | RF-I4 | Quórum evaluado sobre el total de usuarios; cierre automático por plazo o manual (admin) | Cap 14 | ✅ |
 | RF-I5 | Transparencia: listas, detalle con votos y resultados públicos + hash de auditoría en stats | T13 | ✅ |
 | RF-I6 | Emergencia: veto vital por crimen de coherencia (FS_S → ∞) como categoría de votación | Cap 9.5 §9.5.10 | ✅ (categoría `emergency`) |
-| RF-I7 | Frontend: página de votaciones (crear, votar, ver resultados) | — | 🔴 pendiente |
+| RF-I7 | Frontend: página `/votaciones` (crear, votar, TruthLedger de cerradas, detalle T13) | demo Gemini portado | ✅ (ago 2026) |
 | RF-I8 | Votación ponderada (por TVI/coherencia) y delegación — fase futura | Cap 14 | 🔴 pendiente (extensión) |
 
 ---
