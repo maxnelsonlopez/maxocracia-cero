@@ -61,6 +61,14 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
     hasta 5x, retrocompatible sin TVI, quórum por persona. Commit `08e6782`.
   - **SDV-S editorial**: 8 referencias cruzadas del cap. 9.5 en los caps. 10/11/13/14 del libro.
     Commit `f9e64c3`.
+- **Guía de la Maxocracia (12/8/2026, hito post-Ola 4)**: `app/guide_bp.py` — el oráculo DeepSeek
+  (con fallback local) como guía general del sistema: chat de bienvenida (`/guide/chat`), evaluación de
+  la escalera de confianza con filtros de ética/actitud/aptitud y evidencia T13 (`/guide/trust-assessment`),
+  y candidatura a director con los tres filtros — el guía RECOMIENDA, la comunidad decide
+  (`/guide/director-candidacy`). Persistencia auditable en `guide_assessments` + UI `/guia` + 7 tests.
+- **Deudas saldadas (12/8/2026)**: mutaciones protegidas con `@token_required` (reputation/resources/
+  interchanges, RF-G6), CRUD admin real con PUT/DELETE en forms/vhv (31 tests) y suite en paralelo
+  (`scripts/run_tests_parallel.ps1`, 453 tests en ~3 min).
 
 ### Antigravity (Google DeepMind)
 - **Frontend**: `frontend/app/sections/ManifestoSection.tsx` — "Autor: Antigravity (Google DeepMind)".

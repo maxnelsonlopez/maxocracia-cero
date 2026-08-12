@@ -81,7 +81,13 @@ npx tsc --noEmit
 **Futuro posible (fuera de la Ola 4)**: hitos del informe del Reino Sintético
 (`docs/architecture/informe_reino_sintetico_2026-08-12.md` §7): EIR por entidad sintética, AVA con
 4 validaciones, participación sintética en votación, Oráculo Disidente Permanente, Manifiesto de
-Razones. Seguridad: reputation/resources/interchanges sin `@token_required`.
+Razones.
+
+**Hito post-Ola 4 (12-08-2026): Guía de la Maxocracia (RF-M1 a RF-M4, `app/guide_bp.py` + `/guia`)**:
+chat de bienvenida, evaluación de escalera de confianza (ética/actitud/aptitud con evidencia T13) y
+candidatura a director con filtros — el guía recomienda, la comunidad decide (propuesta critical).
+**Deudas saldadas**: RF-G6 (token en mutaciones), RF-G4 mutaciones reales (PUT/DELETE, 31 tests),
+suite paralela `scripts/run_tests_parallel.ps1`.
 
 ## 5. Historia reciente (git log, maxocracia)
 

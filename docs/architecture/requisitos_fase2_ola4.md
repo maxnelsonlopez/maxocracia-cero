@@ -81,8 +81,9 @@ verificación determinista — Patrón Puente).
 | RF-G1 | Dashboard de métricas (γ, SDV, NPS, tendencias) | TODO.md | ✅ (`/admin/contracts`) |
 | RF-G2 | **Settings reales**: pesos axiomáticos persistidos vía `/vhv/parameters` PUT | mapa_frontend M4 | 🔴 `/admin/settings` hoy es UI local sin persistencia |
 | RF-G3 | **Suscripciones reales**: reemplazar MOCK por `/subscriptions/admin/*` | mapa_frontend M4 | 🔴 |
-| RF-G4 | CRUD admin completo en UI (interchange, followup, vhvproduct) o decisión de migrar | mapa_frontend M4 | 🔴 |
+| RF-G4 | CRUD admin completo en UI (interchange, followup, vhvproduct) o decisión de migrar | mapa_frontend M4 | ✅ (ago 2026: páginas + **PUT/DELETE reales** en `/forms/exchanges`, `/forms/follow-ups`, `/vhv/products` con autorización admin/propietario; 31 tests) |
 | RF-G5 | Superficies sin UI: maxo (saldo), protection, reputation, resources, interchanges | mapa_frontend M4 | ✅ (ago 2026: `/perfil` consume las 5 APIs; endpoint nuevo `/maxo/{id}/ledger` T13) |
+| RF-G6 | **Seguridad de mutaciones**: reputation/review, resources, interchanges con `@token_required` (GETs públicos por T13) | hallazgo jornada | ✅ (ago 2026) |
 
 ### H. Renumeración y coherencia de la numeración axiomática
 
@@ -128,6 +129,15 @@ verificación determinista — Patrón Puente).
 | RF-L1 | Invitación firmada con email enmascarado | Cap 15 (Cohorte Cero) | ✅ (`app/arrivals.py`, `/invite`) |
 | RF-L2 | Honeypot anti-bot en cuarentena observada (Sun Tzu: vencer sin combatir) | seguridad | ✅ |
 | RF-L3 | Escalera de confianza N0→N1 con gate de gobernanza | Cap 14/15 | ✅ |
+
+### M. Guía de la Maxocracia ✨ (hito post-Ola 4, ago 2026)
+
+| ID | Requisito | Fuente | Estado |
+|---|---|---|---|
+| RF-M1 | **Guía conversacional** para recién llegados (DeepSeek principal + fallback local) | Cap 13/15 | ✅ (`POST /guide/chat`) |
+| RF-M2 | **Evaluación de escalera de confianza**: ética/actitud/aptitud (0-100) + nivel sugerido, con evidencia T13 | Cap 13/15 | ✅ (`POST /guide/trust-assessment`) |
+| RF-M3 | **Candidatura a director**: filtros éticos, de actitud y aptitud; el guía RECOMIENDA, la comunidad decide (propuesta critical) | Cap 14.9 | ✅ (`POST /guide/director-candidacy`) |
+| RF-M4 | Persistencia auditable (T13) con procedencia del motor + UI `/guia` | T13 | ✅ (`guide_assessments`, 7 tests) |
 
 ---
 
