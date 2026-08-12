@@ -83,6 +83,11 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   con 5 oráculos (4 base + Dissident canónico). Hallazgo operativo resuelto: `comun.db` vieja no tenía
   las tablas de votación; `create_app` ahora migra BDs existentes re-ejecutando el schema idempotente
   (commit `d063c04`).
+- **Informe de Hallazgos v1.0 de la Cohorte Cero (12/8/2026)**: `docs/reports/INFORME_HALLAZGOS_COHORTE_CERO_v1.md`
+  — primer corte de datos reales (análisis determinista SQL + marco teórico RLM de los Caps. 17/15/12):
+  γ cohorte 1.1223, NPS 8.80, 294 check-ins, VHV 115 h; hallazgos: 0 retractaciones, 0 cumplimientos,
+  oráculo sin sustento en la cohorte y gobernanza aún sin votos. Recomendaciones para la cohorte
+  humana real (ciclo completo, oráculo en vivo, gobernanza activa).
 
 ### Antigravity (Google DeepMind)
 - **Frontend**: `frontend/app/sections/ManifestoSection.tsx` — "Autor: Antigravity (Google DeepMind)".

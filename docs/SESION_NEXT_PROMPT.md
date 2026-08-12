@@ -93,6 +93,11 @@ axiomas + 4 opiniones); protocolo postura inicial → crítica racional → vere
 `changed_mind`; verificado EN VIVO con DeepSeek (propuestas 3 y 4 en comun.db). Hallazgo resuelto:
 `create_app` migra BDs existentes (schema idempotente) — la comun.db real no tenía las tablas de
 votación/parlamento. Suite **701/701**.
+**Informe de Hallazgos v1.0 — Cohorte Cero** (12-08-2026): `docs/reports/INFORME_HALLAZGOS_COHORTE_CERO_v1.md`
+— datos reales deterministas + marco teórico RLM (Caps 17/15/12). γ 1.1223, NPS 8.80, 294 check-ins,
+VHV 115 h. **Hallazgos que definen la siguiente cohorte**: 0 retractaciones (INV4 sin ejercitar),
+0 cumplimientos/intercambios, oráculo sin sustento (ledger 0), gobernanza sin votos (4 propuestas
+open), 3 violaciones INV1 sin alerta. TODO.md actualizado (Semana 9-12 parcial).
 
 ## 5. Historia reciente (git log, maxocracia)
 

@@ -52,8 +52,8 @@
     - [ ] 15 contratos de comidas colaborativas
 
 - [ ] **Semana 9-12: Análisis (Marzo 20 - Abril 16)**
-  - [ ] Analizar 50+ casos (patrones, γ promedio, retractaciones)
-  - [ ] Generar **Informe de Hallazgos v1.0**
+  - [x] Analizar 50+ casos (patrones, γ promedio, retractaciones) — **Informe de Hallazgos v1.0** (12-08-2026): `docs/reports/INFORME_HALLAZGOS_COHORTE_CERO_v1.md` (γ cohorte 1.1223, NPS 8.80, 294 check-ins; hallazgos: 0 retractaciones, 0 cumplimientos, oráculo sin sustento)
+  - [ ] Analizar datos de la cohorte humana real (90 días) → Informe v2.0
   - [ ] Publicar kit open-source en GitHub
   - **Entregables**: Informe 30-50 páginas, repo público, 3 casos de estudio
 
