@@ -113,3 +113,102 @@ def test_balance_and_transfer(client):
     row = cur.fetchone()
     assert row[0] == 5.0
     conn.close()
+
+
+def _login(client, email, password="Password1"):
+    resp = client.post(
+        "/auth/login", json={"email": email, "password": password}
+    )
+    assert resp.status_code == 200
+    return resp.get_json()["access_token"]
+
+
+def test_ledger_propio(client):
+    db_path = client.application.config["DATABASE"]
+    a = seed_user(db_path, "ledger_a@example.test", "LedgerA")
+    token = _login(client, "ledger_a@example.test")
+
+    # sin movimientos: ledger vacío
+    resp = client.get(
+        f"/maxo/{a}/ledger", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["user_id"] == a
+    assert data["count"] == 0
+    assert data["entries"] == []
+
+    # crédito + transferencia para generar movimientos
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO maxo_ledger (user_id, change_amount, reason) VALUES (?, ?, ?)",
+        (a, 10.0, "seed credit"),
+    )
+    conn.commit()
+    conn.close()
+
+    resp = client.get(
+        f"/maxo/{a}/ledger", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["count"] == 1
+    entry = data["entries"][0]
+    assert entry["change_amount"] == 10.0
+    assert entry["reason"] == "seed credit"
+    assert "created_at" in entry
+    assert "id" in entry
+
+    # el orden es de más reciente a más antiguo
+    conn = sqlite3.connect(db_path)
+    conn.execute(
+        "INSERT INTO maxo_ledger (user_id, change_amount, reason) VALUES (?, ?, ?)",
+        (a, -3.0, "otro movimiento"),
+    )
+    conn.commit()
+    conn.close()
+    resp = client.get(
+        f"/maxo/{a}/ledger", headers={"Authorization": f"Bearer {token}"}
+    )
+    data = resp.get_json()
+    assert data["count"] == 2
+    assert data["entries"][0]["change_amount"] == -3.0
+    assert data["entries"][1]["change_amount"] == 10.0
+
+
+def test_ledger_ajeno_forbidden(client):
+    db_path = client.application.config["DATABASE"]
+    a = seed_user(db_path, "ledger_owner@example.test", "Owner")
+    b = seed_user(db_path, "ledger_intruder@example.test", "Intruder")
+    token_b = _login(client, "ledger_intruder@example.test")
+
+    resp = client.get(
+        f"/maxo/{a}/ledger", headers={"Authorization": f"Bearer {token_b}"}
+    )
+    assert resp.status_code == 403
+    assert resp.get_json()["error"].startswith("forbidden")
+
+
+def test_ledger_admin_ve_ajeno(client):
+    db_path = client.application.config["DATABASE"]
+    a = seed_user(db_path, "ledger_victim@example.test", "Victim")
+    admin_id = seed_user(db_path, "ledger_admin@example.test", "Admin")
+    conn = sqlite3.connect(db_path)
+    conn.execute("UPDATE users SET is_admin = 1 WHERE id = ?", (admin_id,))
+    conn.commit()
+    conn.close()
+    token_admin = _login(client, "ledger_admin@example.test")
+
+    resp = client.get(
+        f"/maxo/{a}/ledger", headers={"Authorization": f"Bearer {token_admin}"}
+    )
+    assert resp.status_code == 200
+    assert resp.get_json()["user_id"] == a
+
+
+def test_ledger_sin_auth(client):
+    db_path = client.application.config["DATABASE"]
+    a = seed_user(db_path, "ledger_anon@example.test", "Anon")
+    resp = client.get(f"/maxo/{a}/ledger")
+    assert resp.status_code == 401

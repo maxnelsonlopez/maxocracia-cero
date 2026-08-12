@@ -18,6 +18,27 @@ def balance(current_user, user_id):
     return jsonify({"user_id": user_id, "balance": bal})
 
 
+@bp.route("/<int:user_id>/ledger", methods=["GET"])
+@token_required
+def ledger(current_user, user_id):
+    """Ledger de movimientos Maxo del usuario (T13: transparencia radical).
+
+    Solo el propio usuario (o un admin) puede ver el ledger ajeno.
+    Devuelve los movimientos ordenados de más reciente a más antiguo.
+    """
+    if current_user.get("user_id") != user_id and not current_user.get("is_admin"):
+        return jsonify({"error": "forbidden: cannot view other user's ledger"}), 403
+
+    db = get_db()
+    cur = db.execute(
+        "SELECT id, change_amount, reason, created_at FROM maxo_ledger "
+        "WHERE user_id = ? ORDER BY id DESC",
+        (user_id,),
+    )
+    rows = [dict(r) for r in cur.fetchall()]
+    return jsonify({"user_id": user_id, "entries": rows, "count": len(rows)})
+
+
 @bp.route("/transfer", methods=["POST"])
 @token_required
 def transfer(current_user):
