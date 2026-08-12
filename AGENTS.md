@@ -24,6 +24,8 @@ Conceptos clave: **VHV** (Vector de Huella Vital [T,V,R]), **TVI** (Tiempo Vital
 - `docs/` — teoría (`theory/`), libro (`book/libro_completo_310126.md`, 300 KB), specs (`specs/`),
   arquitectura (`architecture/`), guides, API. **`architecture/mapa_coherencia_ola4.md`**: mapa vivo
   teoría↔implementación (motor `maxocontracts/`, invariantes, blueprints) — actualizarlo en cada Ola.
+  **`architecture/requisitos_fase2_ola4.md`**: re-lista de RF/NFR de la fase con backlog de conexión.
+  **`architecture/mapa_frontend_ola4.md`**: páginas → blueprints + secciones desconectadas.
 - `tests/` — ~40 archivos pytest con `conftest.py` y `INSTRUCCIONES_TESTS.md`.
 - `scripts/` — migraciones, seeds, `list_routes.py`, `local_oracle.py`, `verify_setup.py`.
 - `simulator/` — Nexus Simulator (VHV interactivo). `seeds/`, `migrations/`, `data-model/`, `dashboard-spec/`.
