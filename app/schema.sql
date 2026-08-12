@@ -673,7 +673,8 @@ CREATE TABLE IF NOT EXISTS maxo_community_proposals (
     reason TEXT DEFAULT '',
     deadline TEXT,
     closed_at TEXT,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    action_json TEXT  -- Parlamento: acción vinculante si la propuesta pasa
 );
 CREATE TABLE IF NOT EXISTS maxo_community_votes (
     proposal_id INTEGER NOT NULL,
@@ -694,4 +695,17 @@ CREATE TABLE IF NOT EXISTS maxo_vote_delegations (
     delegator_user_id INTEGER PRIMARY KEY,
     delegatee_user_id INTEGER NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Parlamento de Parámetros: historial de resoluciones vinculantes
+-- (propuestas aprobadas que ajustaron α, β, γ, δ — Cap. 11/14, T13).
+CREATE TABLE IF NOT EXISTS maxo_parameter_resolutions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    proposal_id INTEGER NOT NULL UNIQUE,
+    alpha REAL NOT NULL,
+    beta REAL NOT NULL,
+    gamma REAL NOT NULL,
+    delta REAL NOT NULL,
+    applied_by INTEGER,
+    applied_at TEXT DEFAULT CURRENT_TIMESTAMP
 );

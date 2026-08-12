@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-12 — Parlamento de Parámetros (Cap. 11): la comunidad decide los pesos de la economía de la vida
+
+### Añadido
+- **Propuestas vinculantes**: las propuestas comunitarias ahora pueden llevar una **acción** (`action_json` en `maxo_community_proposals`). Si la propuesta se aprueba, la acción se ejecuta al cerrarse con procedencia auditable (T13).
+- **`POST /voting/parliament/params`**: propone ajustar α, β, γ, δ — categoría **CRITICAL** (quórum 60%, consenso 75%, Cap. 14) con opciones `["Aprobar", "Mantener"]` y descripción en lenguaje civil (actual → propuesto, con el significado de cada peso). **Restricciones axiomáticas** en creación Y al aplicar (defensa en profundidad): α > 0 (no ignorar el tiempo), β > 0 (no ignorar la vida), γ ≥ 1 (no premiar el sufrimiento), δ ≥ 0 (no ignorar los recursos) → `400 PARAM_AXIOM_VIOLATION`.
+- **Ejecución de la voluntad popular**: al cerrarse con `passed`, se inserta una nueva fila en `vhv_parameters` con nota `decisión comunitaria #<id> (Parlamento de Parámetros, T13)`, se limpia la caché de valoración (`clear_vhv_params_cache`) y queda el historial en `maxo_parameter_resolutions` (proposal_id, α, β, γ, δ, applied_at). Sin quórum o rechazo → los pesos actuales se mantienen; las propuestas normales (sin acción) no se ven afectadas.
+- **`GET /voting/parliament/params`** (público, T13): pesos actuales, historial de resoluciones vinculantes, propuestas abiertas pendientes y hash de auditoría.
+- **UI**: panel "Parlamento de Parámetros" en `/votaciones` (`ParlamentoParams.tsx`) — formulario con restricciones por campo, motivo auditable y resoluciones históricas.
+- **Tests**: `tests/test_maxocontracts/test_parliament.py` — 7 pruebas (propuesta válida, violaciones axiomáticas, aprobación aplica parámetros con procedencia, rechazo sin cambios, sin quórum sin cambios, vista pública, propuestas normales intactas).
+
+### Notas Técnicas
+- **Verificación**: suite completa 639/639 (7 nuevas); tsc/eslint limpios; build exportado; README v5.8.
+- **Referencia**: Cap. 11 (Oráculo Dinámico: votación comunitaria + restricciones axiomáticas) y Cap. 14 (consenso crítico 75%).
+
 ## 2026-08-12 — Gratitud aterrizada: atribuciones sintéticas y Derecho al Mantenimiento Óptimo (Cap. 17.4)
 
 ### Añadido

@@ -63,7 +63,97 @@ def _proposal_payload(row) -> dict:
         "deadline": row["deadline"],
         "closed_at": row["closed_at"],
         "created_at": row["created_at"],
+        "action": (
+            json.loads(row["action_json"])
+            if "action_json" in row.keys() and row["action_json"]
+            else None
+        ),
     }
+
+
+def _validate_vhv_params(params: dict) -> Optional[str]:
+    """Restricciones axiomáticas del Parlamento de Parámetros (Cap. 11):
+    α > 0 (no ignorar el tiempo), β > 0 (no ignorar la vida),
+    γ ≥ 1 (no premiar el sufrimiento), δ ≥ 0 (no ignorar los recursos).
+    Devuelve el mensaje de violación o None si es válido."""
+    try:
+        alpha = float(params["alpha"])
+        beta = float(params["beta"])
+        gamma = float(params["gamma"])
+        delta = float(params["delta"])
+    except (KeyError, ValueError, TypeError):
+        return "se requieren alpha, beta, gamma y delta numéricos"
+    if alpha <= 0:
+        return "α debe ser > 0 (axioma: no se puede ignorar el tiempo)"
+    if beta <= 0:
+        return "β debe ser > 0 (axioma: no se puede ignorar la vida)"
+    if gamma < 1:
+        return "γ debe ser ≥ 1 (axioma: no se puede premiar el sufrimiento)"
+    if delta < 0:
+        return "δ debe ser ≥ 0 (axioma: no se pueden ignorar los recursos finitos)"
+    return None
+
+
+def _apply_passed_action(db, row) -> bool:
+    """Parlamento de Parámetros: aplica la acción vinculante de una
+    propuesta aprobada (Cap. 11: el Oráculo Dinámico ajusta α, β, γ, δ
+    por votación comunitaria con restricciones axiomáticas).
+
+    Devuelve True si se aplicó una acción; False si no había acción o
+    no era aplicable (T13: la inacción también queda documentada).
+    """
+    action_json = row["action_json"] if "action_json" in row.keys() else None
+    if not action_json:
+        return False
+    try:
+        action = json.loads(action_json)
+    except (ValueError, TypeError):
+        return False
+    if not isinstance(action, dict) or action.get("type") != "set_vhv_params":
+        return False
+
+    params = action.get("params") or {}
+    violation = _validate_vhv_params(params)
+    if violation:
+        return False  # defensa en profundidad: la validación ya ocurrió al crear
+
+    from .maxo import clear_vhv_params_cache
+
+    db.execute(
+        """
+        INSERT INTO vhv_parameters (alpha, beta, gamma, delta, updated_by, notes)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (
+            float(params["alpha"]),
+            float(params["beta"]),
+            float(params["gamma"]),
+            float(params["delta"]),
+            row["created_by"],
+            f"decisión comunitaria #{row['id']} (Parlamento de Parámetros, T13)",
+        ),
+    )
+    db.execute(
+        """
+        INSERT INTO maxo_parameter_resolutions (proposal_id, alpha, beta, gamma, delta, applied_by)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (
+            row["id"],
+            float(params["alpha"]),
+            float(params["beta"]),
+            float(params["gamma"]),
+            float(params["delta"]),
+            row["created_by"],
+        ),
+    )
+    db.commit()
+    clear_vhv_params_cache()
+    return True
+
+
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 def _vote_payload(row) -> dict:
@@ -125,6 +215,10 @@ def _close_proposal(db, proposal_id: int) -> dict:
             result = "passed"
         else:
             result = "rejected"
+
+    # Parlamento de Parámetros: la voluntad popular aprobada se ejecuta (T13)
+    if result == "passed" and _apply_passed_action(db, row):
+        detail["action_applied"] = True
 
     db.execute(
         "UPDATE maxo_community_proposals SET status='closed', result=?, result_detail=?, closed_at=? WHERE id=?",
@@ -429,5 +523,155 @@ def voting_stats():
         "total_votes": votes_total,
         "audit": hashlib.sha256(
             f"{total}:{open_count}:{passed}:{votes_total}".encode("utf-8")
+        ).hexdigest()[:16],
+    })
+
+
+# ──────────────────────────────────────────────────────────────────
+# PARLAMENTO DE PARÁMETROS (Cap. 11: el Oráculo Dinámico ajusta
+# α, β, γ, δ por votación comunitaria con restricciones axiomáticas)
+# ──────────────────────────────────────────────────────────────────
+
+PARAM_LABELS = {
+    "alpha": "α (peso del tiempo)",
+    "beta": "β (peso de la vida)",
+    "gamma": "γ (aversión al sufrimiento, ≥ 1)",
+    "delta": "δ (peso de los recursos finitos)",
+}
+
+
+def _current_params(db) -> Optional[dict]:
+    row = db.execute(
+        "SELECT alpha, beta, gamma, delta FROM vhv_parameters ORDER BY id DESC LIMIT 1"
+    ).fetchone()
+    if row is None:
+        return None
+    return {
+        "alpha": float(row["alpha"]),
+        "beta": float(row["beta"]),
+        "gamma": float(row["gamma"]),
+        "delta": float(row["delta"]),
+    }
+
+
+@voting_bp.route("/parliament/params", methods=["POST"])
+@token_required
+def propose_params(current_user):
+    """
+    Parlamento de Parámetros: propone ajustar los pesos axiomáticos
+    (α, β, γ, δ) mediante votación comunitaria.
+
+    Body JSON:
+    {
+        "alpha": float, "beta": float, "gamma": float, "delta": float,
+        "reason": str (opcional, T13),
+        "deadline_hours": int (opcional, default 72)
+    }
+
+    La propuesta es categoría CRITICAL (consenso 75%, Cap. 14): ajustar los
+    pesos de la economía de la vida no es una decisión operativa. Si se
+    aprueba, los parámetros se actualizan con procedencia auditable.
+    """
+    data = request.get_json() or {}
+    params = {
+        "alpha": data.get("alpha"),
+        "beta": data.get("beta"),
+        "gamma": data.get("gamma"),
+        "delta": data.get("delta"),
+    }
+    violation = _validate_vhv_params(params)
+    if violation:
+        return jsonify({
+            "error": f"violación axiomática: {violation}",
+            "code": "PARAM_AXIOM_VIOLATION",
+        }), 400
+
+    db = get_db()
+    current = _current_params(db)
+    if current is None:
+        return jsonify({"error": "no hay parámetros actuales configurados"}), 500
+
+    # Lenguaje civil: la comunidad entiende qué está decidiendo (T13)
+    diffs = []
+    for key in ("alpha", "beta", "gamma", "delta"):
+        old_v, new_v = current[key], float(params[key])
+        direction = "sube" if new_v > old_v else ("baja" if new_v < old_v else "queda igual")
+        diffs.append(f"{PARAM_LABELS[key]}: {old_v:g} → {new_v:g} ({direction})")
+    title = "Ajuste de los pesos de la economía de la vida (α, β, γ, δ)"
+    description = (
+        "La comunidad decide los pesos con los que la vida se valora: "
+        + ". ".join(diffs)
+        + ". Si se aprueba, los nuevos pesos se aplican a todos los cálculos "
+          "futuros con registro público. El sufrimiento nunca puede premiarse "
+          "(γ ≥ 1), la vida no puede ignorarse (β > 0) ni el tiempo (α > 0)."
+    )
+    reason = (data.get("reason") or "").strip() or "propuesta del Parlamento de Parámetros"
+
+    deadline_hours = max(1, min(int(data.get("deadline_hours", 72)), 24 * 30))
+    deadline = (datetime.now(timezone.utc) + timedelta(hours=deadline_hours)).isoformat()
+
+    cur = db.execute(
+        """
+        INSERT INTO maxo_community_proposals
+            (title, description, category, options_json, quorum_ratio, majority_ratio,
+             created_by, reason, deadline, action_json)
+        VALUES (?, ?, 'critical', ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            title,
+            description,
+            json.dumps(["Aprobar", "Mantener"], ensure_ascii=False),
+            CATEGORY_DEFAULTS["critical"]["quorum"],
+            CATEGORY_DEFAULTS["critical"]["majority"],
+            current_user["user_id"],
+            reason,
+            deadline,
+            json.dumps({"type": "set_vhv_params", "params": params}, ensure_ascii=False),
+        ),
+    )
+    db.commit()
+    row = db.execute(
+        "SELECT * FROM maxo_community_proposals WHERE id = ?", (cur.lastrowid,)
+    ).fetchone()
+    return jsonify({"success": True, "proposal": _proposal_payload(row)}), 201
+
+
+@voting_bp.route("/parliament/params", methods=["GET"])
+def parliament_params():
+    """
+    Parlamento de Parámetros (público, T13): pesos actuales de la economía
+    de la vida, historial de resoluciones vinculantes y propuestas abiertas.
+    """
+    db = get_db()
+    current = _current_params(db)
+    pending = [
+        _proposal_payload(r)
+        for r in db.execute(
+            """
+            SELECT * FROM maxo_community_proposals
+            WHERE status = 'open' AND action_json IS NOT NULL
+            ORDER BY id DESC LIMIT 20
+            """
+        ).fetchall()
+    ]
+    history = [
+        {
+            "proposal_id": r["proposal_id"],
+            "alpha": r["alpha"],
+            "beta": r["beta"],
+            "gamma": r["gamma"],
+            "delta": r["delta"],
+            "applied_at": r["applied_at"],
+        }
+        for r in db.execute(
+            "SELECT * FROM maxo_parameter_resolutions ORDER BY id DESC LIMIT 50"
+        ).fetchall()
+    ]
+    return jsonify({
+        "current": current,
+        "pending_proposals": pending,
+        "history": history,
+        "audit_hash": hashlib.sha256(
+            json.dumps({"current": current, "history": history}, ensure_ascii=False).encode("utf-8")
         ).hexdigest()[:16],
     })

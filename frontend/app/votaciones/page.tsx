@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { apiFetch } from "../lib/api";
+import ParlamentoParams from "./ParlamentoParams";
 
 interface Proposal {
   id: number;
@@ -215,6 +216,9 @@ export default function VotacionesPage() {
             )}
           </div>
         </div>
+
+        {/* Parlamento de Parámetros (Cap. 11: la comunidad ajusta α, β, γ, δ) */}
+        <ParlamentoParams />
 
         {error && (
           <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold flex items-center gap-2">

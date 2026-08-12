@@ -600,6 +600,26 @@ def init_contracts_metrics_tables(app):
                 UNIQUE(contract_id, source)
             )
         """)
+        # Parlamento de Parámetros: acción vinculante en propuestas (Cap. 11/14)
+        # + historial de resoluciones que ajustaron α, β, γ, δ por consenso.
+        if "maxo_community_proposals" in tables:
+            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_community_proposals)").fetchall()]
+            if "action_json" not in cols:
+                cur.execute(
+                    "ALTER TABLE maxo_community_proposals ADD COLUMN action_json TEXT"
+                )
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS maxo_parameter_resolutions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                proposal_id INTEGER NOT NULL UNIQUE,
+                alpha REAL NOT NULL,
+                beta REAL NOT NULL,
+                gamma REAL NOT NULL,
+                delta REAL NOT NULL,
+                applied_by INTEGER,
+                applied_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
         # Migración: webhooks filtrados por parte (Ext. 4).
         if "maxo_webhooks" in tables:
             cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_webhooks)").fetchall()]
