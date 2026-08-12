@@ -101,6 +101,7 @@ verificación determinista — Patrón Puente).
 | RF-I5 | Transparencia: listas, detalle con votos y resultados públicos + hash de auditoría en stats | T13 | ✅ |
 | RF-I6 | Emergencia: veto vital por crimen de coherencia (FS_S → ∞) como categoría de votación | Cap 9.5 §9.5.10 | ✅ (categoría `emergency`) |
 | RF-I7 | Frontend: página `/votaciones` (crear, votar, TruthLedger de cerradas, detalle T13) | demo Gemini portado | ✅ (ago 2026) |
+| RF-I9 | **Oráculo sintético de propuestas**: análisis VHV + axiomas + 4 opiniones, con **DeepSeek como motor principal y fallback a modelos locales** (hub Jan, localhost:1337) — firma T13 del motor (`engine`) | demo Gemini → DeepSeek | ✅ (ago 2026, `voting_oracle.py`) |
 | RF-I8 | Votación ponderada (por TVI/coherencia) y delegación — fase futura | Cap 14 | 🔴 pendiente (extensión) |
 
 ---

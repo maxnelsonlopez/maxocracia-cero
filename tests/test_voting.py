@@ -175,3 +175,70 @@ def test_stats_publicas(client, auth):
     resp = client.get("/voting/stats")
     assert resp.status_code == 200
     assert "audit" in resp.get_json()
+
+
+FAKE_ANALYSIS = {
+    "vhv": {"vitalTime": 100, "affectedLives": 5, "finiteResources": 300,
+            "timeFactor": 1.2, "confidence": 0.8},
+    "axiomReport": [
+        {"type": "TRUTH", "passed": True, "score": 90, "reasoning": "Datos verificables"},
+        {"type": "TIME", "passed": True, "score": 75, "reasoning": "Respeta T2"},
+        {"type": "LIFE", "passed": False, "score": 40, "reasoning": "Aumenta sufrimiento"},
+    ],
+    "oracleOpinions": [
+        {"role": "Economic", "verdict": "Approve", "analysis": "Rentable", "confidence": 0.8},
+        {"role": "Social", "verdict": "Reject", "analysis": "Desplaza comunidad", "confidence": 0.9},
+    ],
+}
+
+
+def test_analisis_oraculo_persiste_y_expone(client, auth, monkeypatch):
+    """El análisis DeepSeek se persiste (T13) y aparece en el detalle público."""
+    import app.voting_bp as voting_bp
+    from app import voting_oracle
+
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "test-key")
+    monkeypatch.setattr(voting_oracle, "_call_deepseek", lambda messages, temperature=0.2: FAKE_ANALYSIS)
+
+    pid = _create(client, auth).get_json()["proposal"]["id"]
+    resp = client.post(f"/voting/proposals/{pid}/analyze", json={}, headers=auth(1))
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["oracle_analysis"]["analysis"]["vhv"]["vitalTime"] == 100
+    assert data["oracle_analysis"]["analysis"]["vhv"]["totalScore"] == 180000  # (100*5*300)*1.2
+    assert len(data["oracle_analysis"]["analysis"]["axiomReport"]) == 3
+    assert len(data["oracle_analysis"]["analysis"]["oracleOpinions"]) == 2
+
+    detail = client.get(f"/voting/proposals/{pid}").get_json()
+    assert detail["oracle_analysis"]["analysis"]["oracleOpinions"][1]["verdict"] == "Reject"
+
+
+def test_analisis_sin_fuentes_devuelve_503(client, auth, monkeypatch):
+    """Sin API key de DeepSeek y con el fallback local deshabilitado -> 503."""
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    monkeypatch.setenv("LOCAL_ORACLE_ENABLED", "false")
+    pid = _create(client, auth).get_json()["proposal"]["id"]
+    resp = client.post(f"/voting/proposals/{pid}/analyze", json={}, headers=auth(1))
+    assert resp.status_code == 503
+
+
+def test_analisis_fallback_local_cuando_deepseek_falla(client, auth, monkeypatch):
+    """Si DeepSeek falla, el oráculo local (Jan) produce el análisis (engine=local)."""
+    import app.voting_bp as voting_bp
+    from app import voting_oracle
+
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "test-key")
+    monkeypatch.setattr(voting_oracle, "_call_deepseek", lambda m, temperature=0.2: (_ for _ in ()).throw(RuntimeError("nube caída")))
+    monkeypatch.setattr(voting_oracle, "_call_local", lambda m, temperature=0.2: FAKE_ANALYSIS)
+
+    pid = _create(client, auth).get_json()["proposal"]["id"]
+    resp = client.post(f"/voting/proposals/{pid}/analyze", json={}, headers=auth(1))
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["oracle_analysis"]["analysis"]["engine"] == "local"
+    assert data["oracle_analysis"]["analysis"]["model"] == "Qwen3-8B-Q4_K_M"
+
+
+def test_analisis_propuesta_inexistente(client, auth):
+    resp = client.post("/voting/proposals/9999/analyze", json={}, headers=auth(1))
+    assert resp.status_code == 404

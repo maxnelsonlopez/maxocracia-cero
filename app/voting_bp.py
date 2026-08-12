@@ -22,6 +22,7 @@ app/parties_bp.py (patrón de quórum de gobernanza de Partes, Ola 3A.3).
 import hashlib
 import json
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 from flask import Blueprint, jsonify, request
 
@@ -119,6 +120,17 @@ def _close_proposal(db, proposal_id: int) -> dict:
     return _proposal_payload(row)
 
 
+def _analysis_payload(row) -> Optional[dict]:
+    if row is None:
+        return None
+    return {
+        "analysis": json.loads(row["analysis_json"]),
+        "model": row["model"],
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+    }
+
+
 @voting_bp.route("/proposals", methods=["POST"])
 @token_required
 def create_proposal(current_user):
@@ -208,6 +220,10 @@ def get_proposal(proposal_id: int):
     ).fetchall()
     payload = _proposal_payload(row)
     payload["votes"] = [_vote_payload(v) for v in votes]
+    analysis = db.execute(
+        "SELECT * FROM maxo_community_analysis WHERE proposal_id = ?", (proposal_id,)
+    ).fetchone()
+    payload["oracle_analysis"] = _analysis_payload(analysis)
     return jsonify(payload)
 
 
@@ -264,6 +280,53 @@ def close_proposal(current_user, proposal_id: int):
         return jsonify({"error": "proposal not found"}), 404
     payload = _close_proposal(db, proposal_id)
     return jsonify({"success": True, "proposal": payload})
+
+
+@voting_bp.route("/proposals/<int:proposal_id>/analyze", methods=["POST"])
+@token_required
+def analyze_proposal(current_user, proposal_id: int):
+    """
+    Analiza la propuesta con el Oráculo Sintético (DeepSeek): estima el VHV,
+    valida axiomas (TRUTH/TIME/LIFE) y recoge opiniones de 4 oráculos.
+    El resultado se persiste (T13) y se expone en el detalle público.
+
+    Sin API key configurada, devuelve 503 (oráculo deshabilitado).
+    """
+    from . import voting_oracle
+
+    db = get_db()
+    row = db.execute(
+        "SELECT * FROM maxo_community_proposals WHERE id = ?", (proposal_id,)
+    ).fetchone()
+    if row is None:
+        return jsonify({"error": "proposal not found"}), 404
+
+    if not voting_oracle.is_available():
+        return jsonify({"error": "oracle_disabled",
+                        "hint": "configura DEEPSEEK_API_KEY o habilita el oráculo local (LOCAL_ORACLE_ENABLED)"}), 503
+
+    try:
+        analysis = voting_oracle.analyze_proposal(row["title"], row["description"])
+    except Exception as e:
+        return jsonify({"error": "oracle_failure", "detail": str(e)[:300]}), 502
+
+    db.execute(
+        """
+        INSERT INTO maxo_community_analysis (proposal_id, analysis_json, model, updated_at)
+        VALUES (?, ?, ?, datetime('now'))
+        ON CONFLICT(proposal_id) DO UPDATE SET
+            analysis_json = excluded.analysis_json,
+            model = excluded.model,
+            updated_at = datetime('now')
+        """,
+        (proposal_id, json.dumps(analysis, ensure_ascii=False), analysis.get("model", "")),
+    )
+    db.commit()
+
+    stored = db.execute(
+        "SELECT * FROM maxo_community_analysis WHERE proposal_id = ?", (proposal_id,)
+    ).fetchone()
+    return jsonify({"success": True, "oracle_analysis": _analysis_payload(stored)})
 
 
 @voting_bp.route("/stats", methods=["GET"])

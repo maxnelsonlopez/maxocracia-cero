@@ -667,3 +667,10 @@ CREATE TABLE IF NOT EXISTS maxo_community_votes (
     PRIMARY KEY (proposal_id, user_id)
 );
 CREATE INDEX IF NOT EXISTS idx_community_votes_proposal ON maxo_community_votes(proposal_id);
+CREATE TABLE IF NOT EXISTS maxo_community_analysis (
+    proposal_id INTEGER PRIMARY KEY,
+    analysis_json TEXT NOT NULL,
+    model TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);

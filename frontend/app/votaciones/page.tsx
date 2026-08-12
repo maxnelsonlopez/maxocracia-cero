@@ -14,6 +14,8 @@ import {
   Users,
   Loader2,
   RefreshCw,
+  Cpu,
+  Sparkles,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { apiFetch } from "../lib/api";
@@ -35,6 +37,18 @@ interface Proposal {
   closed_at: string | null;
   created_at: string;
   votes?: { user_id: number; option: string; created_at: string }[];
+  oracle_analysis?: {
+    analysis: {
+      vhv: { vitalTime: number; affectedLives: number; finiteResources: number; timeFactor: number; totalScore: number; confidence: number };
+      axiomReport: { type: "TRUTH" | "TIME" | "LIFE"; passed: boolean; score: number; reasoning: string }[];
+      oracleOpinions: { role: string; verdict: string; analysis: string; confidence: number }[];
+      model: string;
+      engine: string;
+    };
+    model: string;
+    created_at: string;
+    updated_at: string;
+  } | null;
 }
 
 const CATEGORY_META: Record<string, { label: string; color: string; quorum: number; majority: number; hint: string }> = {
@@ -190,6 +204,23 @@ function EmptyState({ text }: { text: string }) {
   );
 }
 
+function formatNum(n: number): string {
+  return n >= 1000000 ? `${(n / 1000000).toFixed(1)}M` : n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(Math.round(n));
+}
+
+function formatBig(n: number): string {
+  return n >= 1000000000 ? `${(n / 1000000000).toFixed(1)}B` : `${(n / 1000000).toFixed(1)}M`;
+}
+
+function Metric({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div className={`p-2.5 rounded-lg border ${accent ? "border-cyan-500/30 bg-cyan-500/5" : "border-slate-800 bg-slate-900/40"}`}>
+      <p className="text-[9px] uppercase tracking-wider text-slate-500">{label}</p>
+      <p className={`font-mono font-bold text-sm ${accent ? "text-cyan-400" : "text-slate-200"}`}>{value}</p>
+    </div>
+  );
+}
+
 function CategoryBadge({ category }: { category: Proposal["category"] }) {
   const meta = CATEGORY_META[category];
   return (
@@ -202,10 +233,31 @@ function CategoryBadge({ category }: { category: Proposal["category"] }) {
 
 function OpenProposalCard({ proposal: p, myVote, onVote }: { proposal: Proposal; myVote?: string; onVote: (opt: string) => void }) {
   const [detail, setDetail] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysis, setAnalysis] = useState<Proposal["oracle_analysis"] | undefined>(undefined);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   const votes = p.votes || [];
   const counts: Record<string, number> = {};
   for (const v of votes) counts[v.option] = (counts[v.option] || 0) + 1;
   const totalVotes = votes.length;
+
+  const runAnalysis = async () => {
+    setAnalyzing(true);
+    setAnalysisError(null);
+    try {
+      const res = await apiFetch(`/voting/proposals/${p.id}/analyze`, { method: "POST", body: "{}" });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error === "oracle_disabled" ? "Oráculo deshabilitado: configura DeepSeek o habilita el modelo local" : err.error || "Error del oráculo");
+      }
+      const data = await res.json();
+      setAnalysis(data.oracle_analysis);
+    } catch (e: unknown) {
+      setAnalysisError(e instanceof Error ? e.message : "Error del oráculo");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-slate-900/50 border border-slate-800 hover:border-emerald-500/40 rounded-2xl p-5 transition-all">
@@ -260,8 +312,85 @@ function OpenProposalCard({ proposal: p, myVote, onVote }: { proposal: Proposal;
 
       <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[10px] font-mono text-slate-500">
         <span>Quórum: {totalVotes} votos emitidos</span>
-        <span>Mayoría requerida: {(p.majority_ratio * 100).toFixed(0)}% · Quórum: {(p.quorum_ratio * 100).toFixed(0)}%</span>
+        <span className="flex items-center gap-3">
+          <button
+            onClick={runAnalysis}
+            disabled={analyzing}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border transition-all ${
+              analysis
+                ? "text-slate-500 border-slate-800 cursor-default"
+                : "text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10"
+            }`}
+          >
+            {analyzing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Cpu className="w-3 h-3" />}
+            {analysis ? "Analizada" : "Analizar con Oráculo"}
+          </button>
+          Mayoría: {(p.majority_ratio * 100).toFixed(0)}% · Quórum: {(p.quorum_ratio * 100).toFixed(0)}%
+        </span>
       </div>
+
+      {analysisError && <p className="mt-2 text-[10px] text-red-400 font-semibold">{analysisError}</p>}
+
+      {analysis && (
+        <div className="mt-4 p-4 bg-slate-950/60 border border-cyan-500/20 rounded-xl space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-black uppercase tracking-widest text-cyan-400 flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3" /> Informe del Oráculo Sintético
+            </p>
+            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase border ${
+              analysis.analysis.engine === "deepseek"
+                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
+            }`}>
+              {analysis.analysis.engine === "deepseek" ? "Nube · DeepSeek" : "Local · Hub"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+            <Metric label="TV (horas)" value={formatNum(analysis.analysis.vhv.vitalTime)} />
+            <Metric label="VA (vidas)" value={formatNum(analysis.analysis.vhv.affectedLives)} />
+            <Metric label="RF (0-1000)" value={formatNum(analysis.analysis.vhv.finiteResources)} />
+            <Metric label="T-Factor" value={analysis.analysis.vhv.timeFactor.toFixed(1)} />
+            <Metric label="VHV total" value={formatBig(analysis.analysis.vhv.totalScore)} accent />
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {analysis.analysis.axiomReport.map((a) => (
+              <span
+                key={a.type}
+                title={a.reasoning}
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border ${
+                  a.passed
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                    : "bg-red-500/10 text-red-400 border-red-500/20"
+                }`}
+              >
+                {a.type} {a.score}/100 {a.passed ? "✓" : "✗"}
+              </span>
+            ))}
+          </div>
+
+          <div className="space-y-2">
+            {analysis.analysis.oracleOpinions.map((o) => (
+              <div key={o.role} className="flex items-start justify-between gap-3 text-xs">
+                <div>
+                  <p className="font-bold text-slate-300">{o.role}</p>
+                  <p className="text-[10px] text-slate-500 leading-relaxed">{o.analysis}</p>
+                </div>
+                <span className={`shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase border ${
+                  o.verdict === "Approve"
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                    : o.verdict === "Reject"
+                    ? "bg-red-500/10 text-red-400 border-red-500/20"
+                    : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                }`}>
+                  {o.verdict} · {(o.confidence * 100).toFixed(0)}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {detail && (
         <div className="mt-4 p-4 bg-slate-950/60 border border-slate-800 rounded-xl space-y-2">
