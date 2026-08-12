@@ -52,6 +52,14 @@
 **Estado**: 🟡 En progreso — teoría 🟢, código Cap 17 🟢 (SDV_S, INV2-S y SDV_SValidatorBlock en `maxocontracts`, ago 2026); integración en caps. 10/11/13/14 🔴  
 **Documentos**: 215 líneas (estándar teórico + mapa)
 
+### 8. [Axiomas de Ingeniería — Puente de Coherencia](./mapa_axiomas_ingenieria_puente.md) ✨ NUEVO (ago 2026)
+**Contenido**: Renumeración T16 (Minimizar Daño) y T17 (Reciprocidad Justa) — colisión T7/T9 resuelta
+a favor de la teoría — y formalización de la familia INV (INV1/INV2/INV4 mapeados a la teoría;
+INV3 VHV No Ocultable pendiente de implementación; INV2-S enlazado al mapa SDV-S)  
+**Capítulos afectados**: 3, 8, 16, 17, 18 + código (`axioms.py`, `reciprocity.py`, `gamma_protector.py`, `live_oracle.py`)  
+**Prioridad**: ⭐⭐⭐ Alta  
+**Estado**: 🟡 Propuesta — decisión de equipo pendiente antes de renumerar en código
+
 ---
 
 ## 📊 Resumen por Capítulo

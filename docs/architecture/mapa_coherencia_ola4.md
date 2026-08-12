@@ -116,8 +116,11 @@ ingeniería (ver 3.3).
 1. **Colisión de numeración T7 y T9**: el libro define **T7 = Jerarquía Temporal** y **T9 =
    No-Antropocentrismo**; el canon de ingeniería y el código redefinen **T7 = Minimizar Daño**
    (`gamma_protector`) y **T9 = Reciprocidad Justa** (`reciprocity.py`, `axioms.validate_t9_reciprocidad`,
-   `live_oracle.py`). T13/T14/T15 sí coinciden. **Decisión pendiente del equipo**: renumerar o
-   documentar la redefinición. Mientras tanto, **no usar T7/T9 sin aclarar el contexto** (libro vs ingeniería).
+   `live_oracle.py`). T13/T14/T15 sí coinciden. **Resolución (decisión de Max, teoría primero)**:
+   los axiomas del libro conservan T0–T15; los conceptos de ingeniería pasan a **T16 (Minimizar
+   Daño)** y **T17 (Reciprocidad Justa)** — formalizado en
+   `docs/book/edicion_3_dinamica/integraciones_pendientes/mapa_axiomas_ingenieria_puente.md` (🟡 propuesta,
+   cambios de renumeración listados allí).
 2. **INV3 (VHV No Ocultable) no está en el código**: el spec §III-3 exige que todo VHV quede registrado
    y auditable; `AxiomValidator` no lo valida. Candidato directo para la próxima Ola.
 3. **INV2-S no tiene contraparte en el spec §III**: el código lo añadió (extensión sintética, consistente
@@ -166,9 +169,11 @@ Get-ChildItem maxocontracts -Recurse -Filter *.py | Select-String -Pattern "INV1
 
 - [x] **M2 — Teoría ↔ código**: axiomas T0–T15 del libro contrastados con código y specs de
       ingeniería (sección 3). Hallazgos: colisión T7/T9, INV3 no implementado, INV2-S sin formalizar.
+- [x] **Resolución de colisión T7/T9**: propuesta T16/T17 formalizada en
+      `integraciones_pendientes/mapa_axiomas_ingenieria_puente.md` (teoría primero).
 - [ ] **M3 — Tests**: inventario de qué invariante cubre cada test (`tests/`, ~40 archivos) y
       detección de invariantes sin cobertura.
 - [ ] **M4 — Frontend**: mapear páginas Next.js → blueprints consumidos.
-- [ ] Decisión de equipo: renumerar T7/T9 de ingeniería o documentar la redefinición formalmente.
+- [ ] Decisión de equipo sobre T16/T17 → renumeración en código (cambios listados en el mapa de integración).
 - [ ] Implementar INV3 (VHV No Ocultable) en `AxiomValidator`.
 - [ ] Mantener este documento actualizado en cada Ola.
