@@ -90,6 +90,19 @@ verificación determinista — Patrón Puente).
 |---|---|---|---|
 | RF-H1 | T16 (Minimizar Daño) y T17 (Reciprocidad Justa) como índices canónicos | libro T0–T15 + resolución | ✅ motor (aliases) / 🔴 Fase 2 app+frontend |
 
+### I. Gobernanza Comunitaria — Votación (Cap 14, Consenso Diverso) ✨ NUEVO (ago 2026)
+
+| ID | Requisito | Fuente | Estado |
+|---|---|---|---|
+| RF-I1 | Crear propuestas comunitarias con categorías (operational/critical/emergency), opciones y plazo | Cap 14 | ✅ (`POST /voting/proposals`) |
+| RF-I2 | Votación abierta: un voto por persona, registro inmutable (T13) | Cap 14 | ✅ (`POST .../vote`, PK doble) |
+| RF-I3 | Umbrales por categoría: operativa 50%, **crítica 75%** (consenso, Cap 14), emergencia 60% | Cap 14 §14.3 | ✅ |
+| RF-I4 | Quórum evaluado sobre el total de usuarios; cierre automático por plazo o manual (admin) | Cap 14 | ✅ |
+| RF-I5 | Transparencia: listas, detalle con votos y resultados públicos + hash de auditoría en stats | T13 | ✅ |
+| RF-I6 | Emergencia: veto vital por crimen de coherencia (FS_S → ∞) como categoría de votación | Cap 9.5 §9.5.10 | ✅ (categoría `emergency`) |
+| RF-I7 | Frontend: página de votaciones (crear, votar, ver resultados) | — | 🔴 pendiente |
+| RF-I8 | Votación ponderada (por TVI/coherencia) y delegación — fase futura | Cap 14 | 🔴 pendiente (extensión) |
+
 ---
 
 ## 2. Requisitos no funcionales

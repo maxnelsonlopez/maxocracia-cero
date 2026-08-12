@@ -86,6 +86,7 @@ def create_app(db_path=None):
     from .protection_bp import protection_bp
     from .verifier_bp import verifier_bp
     from .bridge_b import bridge_bp
+    from .voting_bp import voting_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
@@ -104,6 +105,7 @@ def create_app(db_path=None):
     app.register_blueprint(stripe_bp)
     app.register_blueprint(subscriptions_bp)
     app.register_blueprint(micromax_bp)
+    app.register_blueprint(voting_bp)
 
     # Inicializar tablas específicas si no existen
     init_subscription_tables(app)

@@ -638,3 +638,32 @@ CREATE INDEX IF NOT EXISTS idx_micromax_cdd_member ON micromax_cdd_logs(member_i
 CREATE INDEX IF NOT EXISTS idx_micromax_cdd_date ON micromax_cdd_logs(logged_date);
 CREATE INDEX IF NOT EXISTS idx_micromax_audits_household ON micromax_audits(household_id);
 
+
+-- ============================================================================
+-- Votación Comunitaria (Gobernanza Operativa - Cap 14 Consenso Diverso)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS maxo_community_proposals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    category TEXT NOT NULL DEFAULT 'operational',
+    options_json TEXT NOT NULL,
+    quorum_ratio REAL NOT NULL DEFAULT 0.5,
+    majority_ratio REAL NOT NULL DEFAULT 0.5,
+    status TEXT NOT NULL DEFAULT 'open',
+    result TEXT,
+    result_detail TEXT,
+    created_by INTEGER NOT NULL,
+    reason TEXT DEFAULT '',
+    deadline TEXT,
+    closed_at TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS maxo_community_votes (
+    proposal_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    option TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (proposal_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS idx_community_votes_proposal ON maxo_community_votes(proposal_id);
