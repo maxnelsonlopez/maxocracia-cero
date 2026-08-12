@@ -383,6 +383,149 @@ def get_product(product_id):
     return jsonify(product), 200
 
 
+@vhv_bp.route("/products/<int:product_id>", methods=["PUT"])
+@token_required
+def update_product(current_user, product_id):
+    """
+    Actualiza un producto VHV.
+
+    Autorización: admin o el creador del producto (created_by).
+    Si se modifican componentes, se recalcula el vector VHV y el precio Maxo
+    con los parámetros vigentes y se persisten los nuevos valores.
+    """
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No se proporcionaron datos"}), 400
+
+    db = get_db()
+    row = db.execute("SELECT * FROM vhv_products WHERE id = ?", (product_id,)).fetchone()
+    if not row:
+        return jsonify({"error": "Product not found"}), 404
+
+    product = dict(row)
+    if not current_user.get("is_admin") and product.get("created_by") != current_user.get("user_id"):
+        return jsonify({"error": "No tienes autorización para realizar esta acción"}), 403
+
+    editable_fields = [
+        "name", "category", "description",
+        "t_direct_hours", "t_inherited_hours", "t_future_hours",
+        "v_organisms_affected", "v_consciousness_factor", "v_suffering_factor",
+        "v_abundance_factor", "v_rarity_factor",
+        "r_minerals_kg", "r_water_m3", "r_petroleum_l", "r_land_hectares",
+        "r_frg_factor", "r_cs_factor",
+    ]
+
+    updates = {k: v for k, v in data.items() if k in editable_fields}
+    if not updates:
+        return jsonify({"error": "No se proporcionaron campos válidos"}), 400
+
+    component_fields = [f for f in editable_fields if f not in ("name", "category", "description")]
+
+    try:
+        for field in component_fields:
+            if field not in updates:
+                continue
+            if field in ("t_direct_hours", "t_inherited_hours", "t_future_hours",
+                         "v_organisms_affected", "r_minerals_kg", "r_water_m3",
+                         "r_petroleum_l", "r_land_hectares"):
+                if float(updates[field]) < 0:
+                    return jsonify({"error": f"{field} cannot be negative"}), 400
+            elif field == "v_consciousness_factor":
+                cv = float(updates[field])
+                if cv < 0 or cv > 1:
+                    return jsonify({"error": "v_consciousness_factor must be between 0 and 1"}), 400
+            elif field == "v_suffering_factor":
+                if float(updates[field]) < 1:
+                    return jsonify({"error": "v_suffering_factor must be >= 1 (Axiom: cannot reward suffering)"}), 400
+            elif field == "v_abundance_factor":
+                if float(updates[field]) <= 0:
+                    return jsonify({"error": "v_abundance_factor must be greater than 0"}), 400
+            elif field in ("r_frg_factor", "r_cs_factor"):
+                if float(updates[field]) <= 0:
+                    return jsonify({"error": "Resource factors (FRG, CS) must be greater than 0"}), 400
+    except (ValueError, TypeError):
+        return jsonify({"error": "Invalid numeric values provided"}), 400
+
+    try:
+        set_clause = ", ".join(f"{field} = ?" for field in updates)
+        db.execute(
+            f"UPDATE vhv_products SET {set_clause} WHERE id = ?",
+            list(updates.values()) + [product_id],
+        )
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": f"Failed to update product: {str(e)}"}), 500
+
+    if any(field in updates for field in component_fields):
+        updated = db.execute(
+            "SELECT * FROM vhv_products WHERE id = ?", (product_id,)
+        ).fetchone()
+        updated_product = dict(updated)
+
+        params_row = db.execute(
+            "SELECT alpha, beta, gamma, delta FROM vhv_parameters ORDER BY id DESC LIMIT 1"
+        ).fetchone()
+        if not params_row:
+            return jsonify({"error": "No VHV parameters configured"}), 500
+        alpha, beta, gamma, delta = params_row
+
+        try:
+            result = calculator.calculate_vhv(
+                t_direct_hours=float(updated_product["t_direct_hours"]),
+                t_inherited_hours=float(updated_product["t_inherited_hours"]),
+                t_future_hours=float(updated_product["t_future_hours"]),
+                v_organisms_affected=float(updated_product["v_organisms_affected"]),
+                v_consciousness_factor=float(updated_product["v_consciousness_factor"]),
+                v_suffering_factor=float(updated_product["v_suffering_factor"]),
+                v_abundance_factor=float(updated_product["v_abundance_factor"]),
+                v_rarity_factor=float(updated_product["v_rarity_factor"]),
+                r_minerals_kg=float(updated_product["r_minerals_kg"]),
+                r_water_m3=float(updated_product["r_water_m3"]),
+                r_petroleum_l=float(updated_product["r_petroleum_l"]),
+                r_land_hectares=float(updated_product["r_land_hectares"]),
+                r_frg_factor=float(updated_product["r_frg_factor"]),
+                r_cs_factor=float(updated_product["r_cs_factor"]),
+                alpha=alpha,
+                beta=beta,
+                gamma=gamma,
+                delta=delta,
+            )
+            db.execute(
+                "UPDATE vhv_products SET vhv_json = ?, maxo_price = ? WHERE id = ?",
+                (json.dumps(result["vhv"]), result["maxo_price"], product_id),
+            )
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            return jsonify({"error": f"Recalculation error: {str(e)}"}), 500
+
+    return jsonify({"success": True, "message": "Product updated successfully"}), 200
+
+
+@vhv_bp.route("/products/<int:product_id>", methods=["DELETE"])
+@token_required
+def delete_product(current_user, product_id):
+    """
+    Elimina un producto VHV.
+
+    Autorización: admin o el creador del producto (created_by).
+    Los registros de cálculo asociados se eliminan en cascada.
+    """
+    db = get_db()
+    row = db.execute("SELECT created_by FROM vhv_products WHERE id = ?", (product_id,)).fetchone()
+    if not row:
+        return jsonify({"error": "Product not found"}), 404
+
+    created_by = row["created_by"]
+    if not current_user.get("is_admin") and created_by != current_user.get("user_id"):
+        return jsonify({"error": "No tienes autorización para realizar esta acción"}), 403
+
+    db.execute("DELETE FROM vhv_products WHERE id = ?", (product_id,))
+    db.commit()
+    return jsonify({"success": True, "message": "Product deleted successfully"}), 200
+
+
 @vhv_bp.route("/compare", methods=["GET"])
 def compare_products():
     """

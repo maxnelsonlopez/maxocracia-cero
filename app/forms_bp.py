@@ -9,6 +9,8 @@ Provides REST API for:
 - Matching Engine (Motor de Emparejamiento SDV)
 """
 
+import sqlite3
+
 from flask import Blueprint, jsonify, request
 
 from .auth import token_required
@@ -18,6 +20,28 @@ from .sdv_analyzer import SDVAnalyzer
 from .utils import get_db
 
 forms_bp = Blueprint("forms", __name__, url_prefix="/forms")
+
+FOLLOW_UP_TYPES = (
+    "verification_completed",
+    "update_in_progress",
+    "situation_evolution",
+    "new_urgent_need",
+    "need_resolved",
+    "spontaneous_feedback",
+    "routine_check",
+)
+FOLLOW_UP_PRIORITIES = ("high", "medium", "low", "closed")
+SITUATION_CHANGES = (
+    "improved_significantly",
+    "improved_slightly",
+    "same",
+    "worsened_slightly",
+    "worsened_significantly",
+    "first_evaluation",
+)
+ACTIVE_INTERCHANGES_STATUSES = ("receiving_help", "giving_help", "both", "none", "paused")
+INTERCHANGES_WORKING_WELL = ("very_well", "minor_difficulties", "significant_problems", "needs_adjustment")
+EMOTIONAL_STATES = ("very_good", "good", "neutral", "worried", "bad", "alert_signs", "could_not_evaluate")
 
 
 # ==================== FORMULARIO CERO ====================
@@ -479,6 +503,97 @@ def get_exchange(current_user, exchange_id):
     return jsonify(exchange), 200
 
 
+@forms_bp.route("/exchanges/<int:exchange_id>", methods=["PUT"])
+@token_required
+def update_exchange(current_user, exchange_id):
+    """
+    Actualiza un intercambio.
+
+    Solo permite modificar campos existentes en la tabla `interchange`.
+    Autorización: admin o alguna de las partes del intercambio (giver/receiver).
+    """
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute("SELECT * FROM interchange WHERE id = ?", (exchange_id,))
+    row = cursor.fetchone()
+    if not row:
+        return jsonify({"error": "Intercambio no encontrado"}), 404
+
+    exchange = dict(zip([d[0] for d in cursor.description], row))
+    if not current_user.get("is_admin"):
+        user_id = current_user.get("user_id")
+        if user_id not in (exchange.get("giver_id"), exchange.get("receiver_id")):
+            return jsonify({"error": "No tienes autorización para realizar esta acción"}), 403
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No se proporcionaron datos"}), 400
+
+    editable_fields = [
+        "date", "giver_id", "receiver_id", "type", "description", "urgency",
+        "uth_hours", "uvc_score", "urf_units", "urf_description",
+        "economic_value_approx", "vhv_time_seconds", "vhv_lives",
+        "vhv_resources_json", "impact_resolution_score", "reciprocity_status",
+        "human_dimension_attended", "coordination_method",
+        "requires_followup", "followup_scheduled_date", "facilitator_notes",
+    ]
+
+    updates = {k: v for k, v in data.items() if k in editable_fields}
+    if not updates:
+        return jsonify({"error": "No se proporcionaron campos válidos"}), 400
+
+    if "urgency" in updates and updates["urgency"] not in ("Alta", "Media", "Baja"):
+        return jsonify({"error": "Urgencia inválida"}), 400
+
+    if "coordination_method" in updates and updates["coordination_method"] not in (
+        "max_direct", "participants_alone", "intermediary", "other"
+    ):
+        return jsonify({"error": "Método de coordinación inválido"}), 400
+
+    try:
+        set_clause = ", ".join(f"{field} = ?" for field in updates)
+        cursor.execute(
+            f"UPDATE interchange SET {set_clause} WHERE id = ?",
+            list(updates.values()) + [exchange_id],
+        )
+        db.commit()
+        return jsonify({"success": True, "message": "Intercambio actualizado exitosamente"}), 200
+    except sqlite3.Error as e:
+        return jsonify({"success": False, "error": f"Error de base de datos: {e}"}), 400
+
+
+@forms_bp.route("/exchanges/<int:exchange_id>", methods=["DELETE"])
+@token_required
+def delete_exchange(current_user, exchange_id):
+    """
+    Elimina un intercambio.
+
+    Autorización: admin o alguna de las partes del intercambio (giver/receiver).
+    Los seguimientos asociados conservan su `related_interchange_id` en NULL
+    (ON DELETE SET NULL en el esquema).
+    """
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute(
+        "SELECT giver_id, receiver_id FROM interchange WHERE id = ?", (exchange_id,)
+    )
+    row = cursor.fetchone()
+    if not row:
+        return jsonify({"error": "Intercambio no encontrado"}), 404
+
+    giver_id, receiver_id = row
+    if not current_user.get("is_admin"):
+        user_id = current_user.get("user_id")
+        if user_id not in (giver_id, receiver_id):
+            return jsonify({"error": "No tienes autorización para realizar esta acción"}), 403
+
+    cursor.execute("DELETE FROM interchange WHERE id = ?", (exchange_id,))
+    db.commit()
+    return jsonify({"success": True, "message": "Intercambio eliminado exitosamente"}), 200
+
+
 # ==================== FORMULARIO B (FOLLOW-UPS) ====================
 
 
@@ -608,6 +723,141 @@ def get_participant_followups(current_user, participant_id):
         ),
         200,
     )
+
+
+@forms_bp.route("/follow-ups/<int:followup_id>", methods=["PUT"])
+@token_required
+def update_followup(current_user, followup_id):
+    """
+    Actualiza un seguimiento.
+
+    Solo permite modificar campos existentes en la tabla `follow_ups`.
+    Autorización: admin o el participante asociado al seguimiento.
+    """
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute(
+        """
+        SELECT fu.*, p.email AS participant_email
+        FROM follow_ups fu
+        LEFT JOIN participants p ON p.id = fu.participant_id
+        WHERE fu.id = ?
+        """,
+        (followup_id,),
+    )
+    row = cursor.fetchone()
+    if not row:
+        return jsonify({"error": "Seguimiento no encontrado"}), 404
+
+    followup = dict(zip([d[0] for d in cursor.description], row))
+    if not current_user.get("is_admin"):
+        email = current_user.get("email")
+        if not email or followup.get("participant_email") != email:
+            return jsonify({"error": "No tienes autorización para realizar esta acción"}), 403
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No se proporcionaron datos"}), 400
+
+    editable_fields = [
+        "follow_up_date", "participant_id", "related_interchange_id",
+        "follow_up_type", "current_situation", "need_level", "situation_change",
+        "active_interchanges_status", "interchanges_working_well",
+        "new_needs_detected", "new_offers_detected", "emotional_state",
+        "community_connection", "actions_required", "follow_up_priority",
+        "next_follow_up_date", "facilitator_notes", "learnings",
+    ]
+
+    updates = {k: v for k, v in data.items() if k in editable_fields}
+    if not updates:
+        return jsonify({"error": "No se proporcionaron campos válidos"}), 400
+
+    if "follow_up_type" in updates and updates["follow_up_type"] not in FOLLOW_UP_TYPES:
+        return jsonify({"error": "Tipo de seguimiento inválido"}), 400
+
+    if "follow_up_priority" in updates and updates["follow_up_priority"] not in FOLLOW_UP_PRIORITIES:
+        return jsonify({"error": "Prioridad de seguimiento inválida"}), 400
+
+    if "situation_change" in updates and updates["situation_change"] not in SITUATION_CHANGES:
+        return jsonify({"error": "Cambio de situación inválido"}), 400
+
+    if "active_interchanges_status" in updates and updates["active_interchanges_status"] not in ACTIVE_INTERCHANGES_STATUSES:
+        return jsonify({"error": "Estado de intercambios activos inválido"}), 400
+
+    if "interchanges_working_well" in updates and updates["interchanges_working_well"] not in INTERCHANGES_WORKING_WELL:
+        return jsonify({"error": "Valor de funcionamiento de intercambios inválido"}), 400
+
+    if "emotional_state" in updates and updates["emotional_state"] not in EMOTIONAL_STATES:
+        return jsonify({"error": "Estado emocional inválido"}), 400
+
+    if "need_level" in updates and updates["need_level"] is not None:
+        try:
+            need_level = int(updates["need_level"])
+            if need_level < 1 or need_level > 5:
+                return jsonify({"error": "Nivel de necesidad inválido"}), 400
+            updates["need_level"] = need_level
+        except (ValueError, TypeError):
+            return jsonify({"error": "Nivel de necesidad inválido"}), 400
+
+    if "community_connection" in updates and updates["community_connection"] is not None:
+        try:
+            connection = int(updates["community_connection"])
+            if connection < 1 or connection > 5:
+                return jsonify({"error": "Conexión comunitaria inválida"}), 400
+            updates["community_connection"] = connection
+        except (ValueError, TypeError):
+            return jsonify({"error": "Conexión comunitaria inválida"}), 400
+
+    for field in ("new_needs_detected", "new_offers_detected", "actions_required"):
+        if field in updates and updates[field] is not None:
+            updates[field] = FormsManager._safe_json_dump(updates[field])
+
+    try:
+        set_clause = ", ".join(f"{field} = ?" for field in updates)
+        cursor.execute(
+            f"UPDATE follow_ups SET {set_clause} WHERE id = ?",
+            list(updates.values()) + [followup_id],
+        )
+        db.commit()
+        return jsonify({"success": True, "message": "Seguimiento actualizado exitosamente"}), 200
+    except sqlite3.Error as e:
+        return jsonify({"success": False, "error": f"Error de base de datos: {e}"}), 400
+
+
+@forms_bp.route("/follow-ups/<int:followup_id>", methods=["DELETE"])
+@token_required
+def delete_followup(current_user, followup_id):
+    """
+    Elimina un seguimiento.
+
+    Autorización: admin o el participante asociado al seguimiento.
+    """
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute(
+        """
+        SELECT fu.participant_id, p.email AS participant_email
+        FROM follow_ups fu
+        LEFT JOIN participants p ON p.id = fu.participant_id
+        WHERE fu.id = ?
+        """,
+        (followup_id,),
+    )
+    row = cursor.fetchone()
+    if not row:
+        return jsonify({"error": "Seguimiento no encontrado"}), 404
+
+    participant_id, participant_email = row
+    if not current_user.get("is_admin"):
+        email = current_user.get("email")
+        if not email or participant_email != email:
+            return jsonify({"error": "No tienes autorización para realizar esta acción"}), 403
+
+    cursor.execute("DELETE FROM follow_ups WHERE id = ?", (followup_id,))
+    db.commit()
+    return jsonify({"success": True, "message": "Seguimiento eliminado exitosamente"}), 200
 
 
 # ==================== DASHBOARD ====================
