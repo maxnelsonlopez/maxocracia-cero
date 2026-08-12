@@ -301,7 +301,7 @@ export default function OracleNegotiationPanel({
               <span className={`text-xs font-black uppercase tracking-wider ${
                 draft.axiom_check.valid ? 'text-emerald-400' : 'text-rose-400'
               }`}>
-                {draft.axiom_check.valid ? 'Axiomas cumplidos (T>0 · Partes · T9)' : 'Violaciones axiomáticas detectadas'}
+                {draft.axiom_check.valid ? 'Axiomas cumplidos (T>0 · Partes · T17)' : 'Violaciones axiomáticas detectadas'}
               </span>
             </div>
             {draft.axiom_check.violations.length > 0 && (

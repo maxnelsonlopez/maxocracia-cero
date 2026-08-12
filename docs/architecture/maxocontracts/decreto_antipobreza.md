@@ -34,7 +34,7 @@ La Maxocracia **prohíbe explícitamente** las siguientes prácticas cuando oper
 - Extrae valor vital indefinidamente sin crear abundancia nueva
 - Convierte necesidades básicas (vivienda, herramientas) en fuentes de extracción perpetua
 - Imposibilita acumulación de capital para el arrendatario
-- Viola axioma T9 (reciprocidad justa) al romper balance VHV
+- Viola axioma T17 (reciprocidad justa) al romper balance VHV
 
 **ALTERNATIVA MAXOCRÁTICA**:
 - **Leasing con Transferencia**: Todo arriendo acumula hacia propiedad

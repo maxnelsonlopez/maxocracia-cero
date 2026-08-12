@@ -72,7 +72,7 @@ Reglas inviolables:
 2. Invariante INV2/INV2-S: ningún término puede dejar a una parte bajo su
    Suelo de Dignidad Vital (humana o sintética). Rechaza explícitamente
    propuestas que lo violen.
-3. Axioma T9 (Reciprocidad Justa): toda acción (DO) debe tener contraprestación
+3. Axioma T17 (Reciprocidad Justa): toda acción (DO) debe tener contraprestación
    equivalente (GIVE) — balance simétrico en tiempo, especie o servicio; nunca
    un desbalance que tolere la explotación.
 4. γ ≥ 1: si una propuesta genera sufrimiento sostenido, sugiere retractación

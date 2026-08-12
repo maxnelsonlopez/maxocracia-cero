@@ -37,7 +37,7 @@ DEMO_DRAFT = {
         },
     ],
     "proposed_parties": ["user-1", "user-2"],
-    "reasoning": "Intercambio simétrico: 10h por 10h, respeta T9 y SDV.",
+    "reasoning": "Intercambio simétrico: 10h por 10h, respeta T17 y SDV.",
 }
 
 
@@ -158,7 +158,7 @@ def test_negotiate_flags_t9_violation(monkeypatch):
     result = LiveOracle().negotiate("Max da 10h, Ana da poco")
     assert result.axiom_check["valid"] is False
     codes = [v["axiom"] for v in result.axiom_check["violations"]]
-    assert "T9" in codes
+    assert "T17" in codes
 
 
 def test_feedback_iterates_same_session(monkeypatch):
@@ -306,7 +306,7 @@ def test_critique_endpoint_ok(monkeypatch, client, auth_client, fake_post):
     # 2. El oráculo audita (mock): issues y recomendaciones
     audit = {
         "valid": False,
-        "issues": [{"axiom": "T9", "severity": "alta", "message": "Falta contraprestación"}],
+        "issues": [{"axiom": "T17", "severity": "alta", "message": "Falta contraprestación"}],
         "recommendations": ["Añadir término de reciprocidad para Bob"],
         "reasoning": "El préstamo no tiene contraprestación clara.",
     }
@@ -321,7 +321,7 @@ def test_critique_endpoint_ok(monkeypatch, client, auth_client, fake_post):
     body = res.get_json()
     assert body["contract_id"] == "critique-test-1"
     assert body["valid"] is False
-    assert body["issues"][0]["axiom"] == "T9"
+    assert body["issues"][0]["axiom"] == "T17"
     assert "reciprocidad" in body["recommendations"][0]
 
 

@@ -286,7 +286,7 @@ class TestAxiomaticAlignment:
         assert "estimated_revenue_by_month" in data
     
     def test_t7_minimize_harm(self, client):
-        """Axioma T7: Minimizar daño - sistema de honor, no coerción."""
+        """Axioma T16: Minimizar daño - sistema de honor, no coerción."""
         resp = client.get("/subscriptions/config")
         data = resp.get_json()
         
@@ -295,7 +295,7 @@ class TestAxiomaticAlignment:
         assert data["principles"]["cancel_anytime"] is True
     
     def test_t9_reciprocity(self, client):
-        """Axioma T9: Reciprocidad - beneficios claros por cada tier."""
+        """Axioma T17: Reciprocidad - beneficios claros por cada tier."""
         resp = client.get("/subscriptions/config")
         data = resp.get_json()
         

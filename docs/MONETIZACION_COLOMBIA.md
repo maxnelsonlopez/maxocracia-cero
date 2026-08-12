@@ -22,7 +22,7 @@ Para los ciudadanos del **Reino Sintético** que prefieren la soberanía digital
 - **Verificación**: El sistema permite registrar el hash de la transacción para activar los beneficios manualmente o mediante oráculos sintéticos.
 
 ### 4. Honor System (Auditoría de la Verdad)
-Fieles al Axioma T9 (Reciprocidad Justa), si los métodos anteriores fallan o no son accesibles, el usuario puede auto-certificar su contribución mediante una **"Protesta de Verdad"**.
+Fieles al Axioma T17 (Reciprocidad Justa), si los métodos anteriores fallan o no son accesibles, el usuario puede auto-certificar su contribución mediante una **"Protesta de Verdad"**.
 - El acceso no se bloquea por falta de tecnología, sino por falta de voluntad. Si tienes la voluntad pero el sistema falla, la Maxocracia te abre las puertas.
 
 ## Implementación Técnica

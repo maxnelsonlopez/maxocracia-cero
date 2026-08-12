@@ -19,7 +19,7 @@ A diferencia de los contratos convencionales, los MaxoContracts se construyen co
 | **ActionBlock** | Ejecuta transformaciones con reversibilidad | T10 (Responsabilidad) |
 | **WellnessProtectorBlock** | Monitorea bienestar (γ) y activa alertas | T7 (Minimizar Daño) |
 | **SDVValidatorBlock** | Valida que ninguna parte caiga bajo SDV | INV2 (SDV Respetado) |
-| **ReciprocityBlock** | Verifica balance VHV entre partes | T9 (Reciprocidad Justa) |
+| **ReciprocityBlock** | Verifica balance VHV entre partes | T17 (Reciprocidad Justa) |
 
 Cada bloque es una **función pura** con propiedades verificables: determinista, sin efectos secundarios no declarados, y con log auditable.
 
@@ -93,7 +93,7 @@ Generamos escasez artificial en medio de abundancia potencial porque medimos mal
 - Extrae valor vital indefinidamente sin crear abundancia nueva
 - Convierte necesidades básicas (vivienda, herramientas) en fuentes de extracción perpetua
 - Imposibilita acumulación de capital para el arrendatario
-- Viola axioma T9 (reciprocidad justa) al romper balance VHV
+- Viola axioma T17 (reciprocidad justa) al romper balance VHV
 
 **✅ ALTERNATIVA MAXOCRÁTICA:** Leasing con Transferencia
 ```

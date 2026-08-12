@@ -212,7 +212,7 @@ export const ReciprocityNode = memo(({ id, data }: CustomNodeProps) => {
                 <OwnerSelect id={id} data={data} />
             </div>
             <div className="text-[8px] text-slate-400 mt-1.5 leading-tight">
-                <strong>Axioma T9 (Reciprocidad Justa):</strong> Toda acción de costo vital (DO) requiere una contraprestación equivalente (GIVE) — horas, objeto o servicio — evitando la explotación.
+                <strong>Axioma T17 (Reciprocidad Justa):</strong> Toda acción de costo vital (DO) requiere una contraprestación equivalente (GIVE) — horas, objeto o servicio — evitando la explotación.
             </div>
             <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-rose-400 border-2 border-white" />
         </div>

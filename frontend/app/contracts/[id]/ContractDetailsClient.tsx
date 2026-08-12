@@ -1449,7 +1449,7 @@ export default function ContractDetailsPage() {
                         <>
                           <p className="text-xs text-slate-400 leading-relaxed">
                             El <strong className="text-emerald-400">Reino Natural</strong> es representado por un guardián
-                            oráculo que audita este contrato contra los invariantes (γ, SDV, T9) antes de otorgar su consentimiento.
+                            oráculo que audita este contrato contra los invariantes (γ, SDV, T17) antes de otorgar su consentimiento.
                           </p>
                           {guardianInfo && (
                             <div className="p-3 rounded-xl bg-violet-950/20 border border-violet-900/40 text-[10px] text-slate-300 leading-relaxed">

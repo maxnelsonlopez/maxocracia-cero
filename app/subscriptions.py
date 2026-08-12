@@ -202,7 +202,7 @@ def get_config():
             "cancel_anytime": True
         },
         "currency": "USD",
-        "axioms": ["T2", "T7", "T9", "T13"],
+        "axioms": ["T2", "T16", "T17", "T13"],
         "last_updated": datetime.now(timezone.utc).isoformat()
     })
 

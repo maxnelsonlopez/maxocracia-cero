@@ -356,4 +356,4 @@ Formulario base:
 ---
 
 *"La sostenibilidad económica no es traición a los principios cuando los principios guían la economía."*  
-— Maxocracia Axioma T9 (Reciprocidad Justa)
+— Maxocracia Axioma T17 (Reciprocidad Justa)

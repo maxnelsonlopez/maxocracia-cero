@@ -63,7 +63,7 @@ def test_validate_graph_valid_simple(client, auth_header):
     assert data["total_vhv"]["t"] == 1.5
 
 def test_validate_graph_invalid_axiom_t9(client, auth_header):
-    """Test validador de grafo violando el axioma T9 de Reciprocidad Justa."""
+    """Test validador de grafo violando el axioma T17 de Reciprocidad Justa."""
     payload = {
         "nodes": [
             {"id": "start", "type": "input", "data": {"label": "Start"}},
@@ -80,8 +80,8 @@ def test_validate_graph_invalid_axiom_t9(client, auth_header):
     data = res.get_json()
     
     assert data["valid"] is False
-    # Debería contener un resultado que indique el fallo en T9
-    t9_failures = [r for r in data["results"] if r["axiom"] == "T9" and not r["is_valid"]]
+    # Debería contener un resultado que indique el fallo en T17
+    t9_failures = [r for r in data["results"] if r["axiom"] == "T17" and not r["is_valid"]]
     assert len(t9_failures) == 1
     assert "no está conectada a ningún bloque de Reciprocidad" in t9_failures[0]["message"]
 

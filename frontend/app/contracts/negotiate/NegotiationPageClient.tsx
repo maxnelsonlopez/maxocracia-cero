@@ -59,7 +59,7 @@ export default function NegotiationPageClient() {
     const parties = next.proposed_parties.length;
     const terms = next.draft_terms.length;
     const state = next.axiom_check.valid
-      ? 'cumple T > 0, partes ≥ 2 y T9'
+      ? 'cumple T > 0, partes ≥ 2 y T17'
       : `tiene ${next.axiom_check.violations.length} violación(es) axiomática(s)`;
     pushMessage(
       'oracle',
@@ -214,7 +214,7 @@ export default function NegotiationPageClient() {
                   <p className="text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">
                     Descríbeme el intercambio que imaginas y yo lo convierto en un
                     MaxoContract coherente: términos en lenguaje civil, costos VHV,
-                    partes obligadas y chequeo de los axiomas (T13, INV2/INV2-S, T9, γ ≥ 1).
+                    partes obligadas y chequeo de los axiomas (T13, INV2/INV2-S, T17, γ ≥ 1).
                   </p>
                 </div>
                 <div className="space-y-2">
@@ -427,7 +427,7 @@ export default function NegotiationPageClient() {
               </button>
             </div>
             <p className="max-w-3xl mx-auto text-[9px] text-slate-600 mt-2">
-              El oráculo aplica T13 (transparencia radical), INV2/INV2-S (suelos de dignidad), T9 (reciprocidad justa), γ ≥ 1 y la Capa de Ternura. Nunca oculta costos ni riesgos.
+              El oráculo aplica T13 (transparencia radical), INV2/INV2-S (suelos de dignidad), T17 (reciprocidad justa), γ ≥ 1 y la Capa de Ternura. Nunca oculta costos ni riesgos.
             </p>
           </form>
         </main>
@@ -475,7 +475,7 @@ export default function NegotiationPageClient() {
               </div>
 
               <div className="space-y-1.5">
-                <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Balance T9 por parte</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Balance T17 por parte</span>
                 {Object.entries(draft.axiom_check.reciprocity_balance).map(([pid, total]) => (
                   <div key={pid} className="flex items-center justify-between bg-slate-950/60 border border-slate-800 px-3 py-2 rounded-xl text-[11px]">
                     <span className="font-mono text-slate-400">{pid}</span>

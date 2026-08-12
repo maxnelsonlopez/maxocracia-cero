@@ -170,7 +170,7 @@ def _validate_civil_text(text: str) -> Optional[str]:
 
 def _reciprocity_imbalance(contract) -> tuple:
     """
-    T9 ejecutable con tolerancia declarada (Ola 3A.4, R6).
+    T17 ejecutable con tolerancia declarada (Ola 3A.4, R6).
 
     Devuelve (flag, report): flag True si una sola parte carga más del 70%
     del TVI total asignado, con ≥ 2 partes obligadas y total ≥ 8h.
@@ -851,7 +851,7 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
         R=Decimal(str(row["total_vhv_h"]))
     )
 
-    # T9 ejecutable (Ola 3A.4): el flag de asimetría condiciona la activación.
+    # T17 ejecutable (Ola 3A.4): el flag de asimetría condiciona la activación.
     flag, report = _reciprocity_imbalance(contract)
     contract._asymmetry_flag = flag
     contract._asymmetry_report = report
@@ -1099,7 +1099,7 @@ def create_contract(current_user):
                     "code": "UNASSIGNED_OBLIGATION",
                 }), 400
 
-    # T9: flag de asimetría (Ola 3A.4) + ventana de reflexión por defecto
+    # T17: flag de asimetría (Ola 3A.4) + ventana de reflexión por defecto
     flag, report = _reciprocity_imbalance(contract)
     contract._asymmetry_flag = flag
     contract._asymmetry_report = report
@@ -1506,7 +1506,7 @@ def _guardian_approve_ecosystem(contract: MaxoContract) -> tuple:
     Guardián del Reino Natural (ROADMAP Bloque B, Fase 4).
 
     El ecosistema (eco-*) es representado por un guardián oráculo que
-    audita el contrato contra los invariantes (γ, SDV, T9) antes de dar
+    audita el contrato contra los invariantes (γ, SDV, T17) antes de dar
     su consentimiento. Si el oráculo en vivo está configurado, su auditoría
     es la fuente de verdad; si no, degradación elegante al oráculo
     heurístico (validación axiomática dura).
@@ -1526,7 +1526,7 @@ def _guardian_approve_ecosystem(contract: MaxoContract) -> tuple:
         except (OracleAPIError, OracleUnavailableError):
             pass  # degradación elegante: continuar con el heurístico
 
-    return True, "Oráculo heurístico: invariantes axiomáticos en orden (γ, SDV, T9)."
+    return True, "Oráculo heurístico: invariantes axiomáticos en orden (γ, SDV, T17)."
 
 
 @contracts_bp.route("/<contract_id>/critique", methods=["POST"])
@@ -1534,7 +1534,7 @@ def _guardian_approve_ecosystem(contract: MaxoContract) -> tuple:
 def critique_contract(current_user, contract_id: str):
     """
     Auditoría del oráculo: revisa un contrato existente contra T13, INV2/
-    INV2-S, T9, γ ≥ 1 y la Capa de Ternura, y propone mejoras.
+    INV2-S, T17, γ ≥ 1 y la Capa de Ternura, y propone mejoras.
     """
     oracle, error_response, status = _live_oracle_or_503()
     if oracle is None:
@@ -2839,7 +2839,7 @@ def finalize_contract(current_user, contract_id: str):
 @token_required
 def acknowledge_asymmetry(current_user, contract_id: str):
     """
-    T9 ejecutable (Ola 3A.4, R6): reconocimiento explícito de la asimetría
+    T17 ejecutable (Ola 3A.4, R6): reconocimiento explícito de la asimetría
     del contrato. Solo las partes obligadas y un aval pueden reconocer, y
     cada reconocimiento es firma vinculada al token.
 
@@ -2915,7 +2915,7 @@ def activate_contract(current_user, contract_id: str):
 
     db = get_db()
 
-    # T9 ejecutable (Ola 3A.4): la asimetría debe reconocerse explícitamente
+    # T17 ejecutable (Ola 3A.4): la asimetría debe reconocerse explícitamente
     # por todas las partes obligadas + un aval antes de activar.
     if getattr(contract, "_asymmetry_flag", False):
         report = getattr(contract, "_asymmetry_report", {}) or {}
@@ -3231,7 +3231,7 @@ def validate_graph(current_user):
                     queue.append(neighbor)
         return False
         
-    # Validar que cada nodo de acción tenga una reciprocidad conectada (Axioma T9)
+    # Validar que cada nodo de acción tenga una reciprocidad conectada (Axioma T17)
     connections_valid = True
     for node in nodes:
         if node.get("type") == "action":
@@ -3241,7 +3241,7 @@ def validate_graph(current_user):
                 connections_valid = False
                 results.append(ValidationResult(
                     is_valid=False,
-                    axiom_code="T9",
+                    axiom_code="T17",
                     axiom_name="Reciprocidad Justa",
                     message=f"La acción '{label}' ({node_id}) no está conectada a ningún bloque de Reciprocidad."
                 ))

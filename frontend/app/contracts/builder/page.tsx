@@ -1006,7 +1006,7 @@ export default function ContractBuilder() {
                                 </div>
                                 <div className="flex gap-2">
                                     <span className="text-blue-500 font-bold shrink-0">3.</span>
-                                    <span>Toda <strong>Acción (DO)</strong> debe conectarse eventualmente a un bloque de <strong>Reciprocidad (GIVE)</strong> (Axioma T9).</span>
+                                    <span>Toda <strong>Acción (DO)</strong> debe conectarse eventualmente a un bloque de <strong>Reciprocidad (GIVE)</strong> (Axioma T17).</span>
                                 </div>
                                 <div className="flex gap-2">
                                     <span className="text-purple-500 font-bold shrink-0">4.</span>
@@ -1184,7 +1184,7 @@ export default function ContractBuilder() {
                             </div>
 
                             <div className="p-2.5 rounded-xl bg-slate-950/50 border border-slate-900 space-y-1">
-                                <span className="font-bold text-slate-200 block">Axioma T9 (Reciprocidad Justa)</span>
+                                <span className="font-bold text-slate-200 block">Axioma T17 (Reciprocidad Justa)</span>
                                 <p className="text-[10px]">
                                     Establece que toda acción de costo vital (DO) en el contrato debe estar equilibrada con un bloque de reciprocidad (GIVE). Esto previene la explotación unilateral asegurando relaciones socioeconómicas simétricas.
                                 </p>

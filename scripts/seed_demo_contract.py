@@ -62,7 +62,7 @@ TERMS = [
     },
     {
         "term_id": "aval-luis",
-        "civil_text": "Luis avala la simetría del intercambio (Axioma T9)",
+        "civil_text": "Luis avala la simetría del intercambio (Axioma T17)",
         "vhv": {"t": 0.5, "v": 0, "h": 0},
         "assigned_participant_id": None,
     },
@@ -147,7 +147,7 @@ def main():
             print(f"ERROR al crear el contrato: {res.status_code} {res.get_json()}")
             sys.exit(1)
 
-        # Reconocimiento explícito de la asimetría (Ola 3A.4, T9 ejecutable):
+        # Reconocimiento explícito de la asimetría (Ola 3A.4, T17 ejecutable):
         # cada parte obligada (y el aval) firma la asimetría con su token.
         for u in DEMO_USERS:
             login = client.post("/auth/login", json={"email": u["email"], "password": u["password"]})

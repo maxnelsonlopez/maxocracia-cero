@@ -138,7 +138,7 @@ class WellnessProtectorBlock:
                 )
             return None  # Sobre threshold y warning, todo bien
         
-        # Bienestar debajo del threshold - hay sufrimiento (T7)
+            # Bienestar debajo del threshold - hay sufrimiento (T16)
         if value >= self.critical_threshold:
             return WellnessAlert(
                 level=AlertLevel.WARNING,

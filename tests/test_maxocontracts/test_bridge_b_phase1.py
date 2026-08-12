@@ -3,12 +3,12 @@ Tests del Puente B de la Ola 4, FASE 1: del matching al borrador.
 
 Cubre:
 - POST /contracts/from-need: necesidad × oferta → borrador DRAFT coherente.
-- Filtro axiomático (AVA): el borrador pasa los invariantes (T9/T2) y la
+- Filtro axiomático (AVA): el borrador pasa los invariantes (T17/T2) y la
   reciprocidad es igualitaria.
 - Vinculación por email: participante sin cuenta en el portal → 409
   NEED_PARTICIPANT_UNLINKED.
 - Degradación elegante sin API key: plantilla determinista (oracle_used=False).
-- Con oráculo simulado: pule la redacción pero T9 es inviolable.
+- Con oráculo simulado: pule la redacción pero T17 es inviolable.
 - Procedencia auditable (maxo_contract_meta origin = matching).
 """
 
@@ -111,7 +111,7 @@ def test_from_need_creates_axiomatic_draft(client):
     assert data['axiom_check']['valid'] is True
     assert data['total_vhv_h'] == 4.0
 
-    # T9/T2: reciprocidad igualitaria — mismo VHV en ambas direcciones
+    # T17/T2: reciprocidad igualitaria — mismo VHV en ambas direcciones
     vhvs = {t['vhv']['t'] for t in data['terms']}
     assert vhvs == {2.0}
     assert {t['assigned_participant'] for t in data['terms']} == {'user-1', 'user-2'}
@@ -202,7 +202,7 @@ def test_from_need_contract_id_conflict(client):
 
 
 def test_from_need_oracle_refines_but_t9_inviolable(client, monkeypatch):
-    """Con oráculo: pule la redacción civil; la reciprocidad T9 no se negocia.
+    """Con oráculo: pule la redacción civil; la reciprocidad T17 no se negocia.
 
     El oráculo propone un desbalance (3h vs 1h): el filtro normaliza el VHV
     al valor igualitario (la redacción se adopta, la reciprocidad se impone).
@@ -254,7 +254,7 @@ def test_from_need_oracle_refines_but_t9_inviolable(client, monkeypatch):
     # Redacción del oráculo adoptada...
     texts = [t['civil_text'] for t in data['terms']]
     assert any('trámites con paciencia' in t for t in texts)
-    # ...pero la reciprocidad es igualitaria (T9/T2 inviolables)
+    # ...pero la reciprocidad es igualitaria (T17/T2 inviolables)
     assert {t['vhv']['t'] for t in data['terms']} == {1.0}
     assert fake.calls == 1
 

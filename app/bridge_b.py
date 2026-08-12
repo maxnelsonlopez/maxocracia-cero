@@ -15,7 +15,7 @@ teclear el contrato. El flujo respeta el canon:
    términos (canon Cap. 17.6: el oráculo simula y propone). Sin API key,
    degradación elegante a la plantilla determinista.
 4. FILTRO AXIOMÁTICO (AVA, canon Cap. 14.4): el borrador debe pasar los
-   invariantes ANTES de existir. La reciprocidad T9 es inviolable: ambas
+   invariantes ANTES de existir. La reciprocidad T17 es inviolable: ambas
    direcciones llevan el mismo VHV (T2: una hora vale igual). Si el oráculo
    propone algo desbalanceado, el sistema lo rechaza y cae a la plantilla.
 5. PERSISTENCIA: el borrador queda en DRAFT con procedencia auditable
@@ -37,7 +37,7 @@ from maxocontracts.oracles.live_oracle import LiveOracle
 
 bridge_bp = Blueprint("bridge_b", __name__, url_prefix="/contracts")
 
-# La reciprocidad mínima razonable para un intercambio simple (T2/T9).
+# La reciprocidad mínima razonable para un intercambio simple (T2/T17).
 DEFAULT_HOURS = 1.0
 MAX_HOURS = 24
 CIVIL_DESC_MAX_WORDS = 40
@@ -86,7 +86,7 @@ def _template_terms(
     offerer_uid: int,
     hours: float,
 ) -> List[Dict[str, Any]]:
-    """Plantilla determinista del borrador: reciprocidad equivalente (T9).
+    """Plantilla determinista del borrador: reciprocidad equivalente (T17).
 
     El offerer entrega lo que ofrece; el seeker corresponde con tiempo,
     servicio u objeto equivalente. Ambos términos llevan el MISMO VHV:
@@ -124,7 +124,7 @@ def _normalize_oracle_terms(
 ) -> Optional[List[Dict[str, Any]]]:
     """Toma la propuesta del oráculo SOLO si es redacción civil válida.
 
-    El oráculo pule el texto; la reciprocidad T9 es inviolable: cualquier
+    El oráculo pule el texto; la reciprocidad T17 es inviolable: cualquier
     propuesta se normaliza al mismo VHV en ambas direcciones. Si el texto
     no pasa lenguaje civil, se descarta (el AVA no propone contratos rotos).
     """
@@ -208,7 +208,7 @@ def contract_from_need(current_user):
     {
         "seeker_participant_id": 3,     # participante de Formulario CERO con la necesidad
         "offerer_participant_id": 7,    # participante de Formulario CERO con la oferta
-        "hours": 1.0,                   # opcional: horas de cada dirección (T9 igualitario)
+        "hours": 1.0,                   # opcional: horas de cada dirección (T17 igualitario)
         "contract_id": "from-need-3-7"  # opcional
     }
 
@@ -263,7 +263,7 @@ def contract_from_need(current_user):
             "hint": "registra el email en /auth/register y vuelve a intentar",
         }), 409
 
-    # 1. Plantilla determinista (garantiza T2/T9 y lenguaje civil)
+    # 1. Plantilla determinista (garantiza T2/T17 y lenguaje civil)
     draft = _template_terms(seeker, offerer, seeker_uid, offerer_uid, hours)
 
     # 2. El oráculo pule la redacción civil (canon 17.6); el AVA decide.
@@ -394,7 +394,7 @@ def _activation_blockers(contract, db) -> List[Dict[str, Any]]:
     """Qué falta para activar el contrato, según las protecciones (Ola 3A/3B).
 
     Replica los chequeos de activate_contract sin mutar estado: asimetría
-    T9 reconocida por obligados + aval, co-testigo para blindados,
+    T17 reconocida por obligados + aval, co-testigo para blindados,
     aceptación completa de términos.
     """
     from .contracts_bp import _asymmetry_acknowledged

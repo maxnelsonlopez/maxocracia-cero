@@ -6,7 +6,7 @@ Cubre los vectores del análisis de riesgo (blindaje_anti_gamificacion_equidad.m
 - R2  Reescritura de contratos -> 409 CONTRACT_CONFLICT
 - R3  Secuestro de gobernanza -> 403 GOVERNANCE_FORBIDDEN / quórum de delegados
 - R5  γ fuera de rango [0.5, 1.5] -> 400 + fuente del reporte (reported_by)
-- R6  T9: asimetría declarada -> activación bloqueada hasta reconocimiento
+- R6  T17: asimetría declarada -> activación bloqueada hasta reconocimiento
 - R7/R8 Cláusulas prohibidas y lenguaje civil -> 400
 - R9  Obligaciones sin parte responsable -> 400 UNASSIGNED_OBLIGATION
 - R10/R11 Ventanas temporales (deadline y reflexión) -> 423
@@ -242,7 +242,7 @@ class TestWellnessSource:
 
 
 # ---------------------------------------------------------------------------
-# R6 — T9 ejecutable: asimetría declarada
+# R6 — T17 ejecutable: asimetría declarada
 # ---------------------------------------------------------------------------
 
 class TestAsymmetry:

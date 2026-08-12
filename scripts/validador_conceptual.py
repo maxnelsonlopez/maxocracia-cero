@@ -110,16 +110,24 @@ AXIOMS_REGISTRY: Dict[str, Dict[str, Any]] = {
         "keywords": ["irreversibilidad asimétrica", "verdadero retorno", "retrospectivamente", "inversión temporal"],
     },
     "T7": {
-        "titles": ["Jerarquía Temporal", "Minimizar Daño"],
-        "keywords": ["jerarquía temporal", "escalas temporales", "ta", "tvi", "tpi", "minimizar daño", "sufrimiento", "uvc", "afectadas"],
+        "titles": ["Jerarquía Temporal"],
+        "keywords": ["jerarquía temporal", "escalas temporales", "ta", "tvi", "tpi"],
     },
     "T8": {
         "titles": ["Encadenamiento Temporal"],
         "keywords": ["encadenamiento temporal", "tiempo encadenado", "directo", "heredado", "futuro"],
     },
     "T9": {
-        "titles": ["No-Antropocentrismo Temporal", "Reciprocidad Justa"],
-        "keywords": ["no-antropocentrismo", "tiempo absoluto", "independientemente de la perspectiva humana", "reciprocidad justa", "balance", "desbalance", "tolerancia", "reciprocidad"],
+        "titles": ["No-Antropocentrismo Temporal"],
+        "keywords": ["no-antropocentrismo", "tiempo absoluto", "independientemente de la perspectiva humana"],
+    },
+    "T16": {
+        "titles": ["Minimizar Daño"],
+        "keywords": ["minimizar daño", "sufrimiento", "uvc", "afectadas", "wellness"],
+    },
+    "T17": {
+        "titles": ["Reciprocidad Justa"],
+        "keywords": ["reciprocidad justa", "balance", "desbalance", "tolerancia", "reciprocidad", "contraprestación", "contraprestacion", "give"],
     },
     "T10": {
         "titles": ["Responsabilidad Temporal Colectiva"],

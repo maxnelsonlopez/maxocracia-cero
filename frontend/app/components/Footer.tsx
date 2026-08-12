@@ -41,8 +41,8 @@ const footerLinks = {
 
 const axioms = [
   { id: "T2", text: "Igualdad Temporal" },
-  { id: "T7", text: "Minimizar Daño" },
-  { id: "T9", text: "Reciprocidad Justa" },
+  { id: "T16", text: "Minimizar Daño" },
+  { id: "T17", text: "Reciprocidad Justa" },
   { id: "T13", text: "Transparencia Radical" },
 ];
 

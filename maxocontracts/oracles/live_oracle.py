@@ -46,7 +46,7 @@ Reglas inviolables:
 2. Invariante INV2/INV2-S: ningún término puede dejar a una parte bajo su
    Suelo de Dignidad Vital (humana o sintética). Rechaza explícitamente
    propuestas que lo violen.
-3. Axioma T9 (Reciprocidad Justa): toda acción (DO) debe tener contraprestación
+3. Axioma T17 (Reciprocidad Justa): toda acción (DO) debe tener contraprestación
    equivalente (GIVE) — balance simétrico en tiempo, especie o servicio; nunca
    un desbalance que tolere la explotación.
 4. γ ≥ 1: si una propuesta genera sufrimiento sostenido, sugiere retractación
@@ -66,7 +66,7 @@ Reglas inviolables:
      ],
      "proposed_parties": ["user-1", "user-2"],
      "reasoning": "Explicación breve y honesta en español de por qué este
-                   borrador respeta T13, INV2/INV2-S, T9 y γ ≥ 1"
+                   borrador respeta T13, INV2/INV2-S, T17 y γ ≥ 1"
    }
 Usa los ids de partes que se te den en el contexto. No inventes ids: si el
 contexto no trae partes, usa etiquetas genéricas como "parte-a" y "parte-b"
@@ -334,7 +334,7 @@ class LiveOracle:
         parties: List[str],
     ) -> Dict[str, Any]:
         """Chequeo local (heurístico) del borrador contra T > 0, partes ≥ 2
-        y T9 (reciprocidad). El oráculo también aplica INV2/INV2-S y γ en el
+        y T17 (reciprocidad). El oráculo también aplica INV2/INV2-S y γ en el
         prompt; aquí se refuerza lo computable sin datos de SDV."""
         violations: List[Dict[str, Any]] = []
         warnings: List[Dict[str, Any]] = []
@@ -350,7 +350,7 @@ class LiveOracle:
                 "message": "Se requieren al menos 2 partes para un intercambio",
             })
 
-        # T9: balance por parte usando el valor total (t + v + h)
+        # T17: balance por parte usando el valor total (t + v + h)
         per_party: Dict[str, float] = {}
         for term in terms:
             vhv = term.get("vhv", {})
@@ -367,7 +367,7 @@ class LiveOracle:
             imbalance = (max_val - min_val) / max_val if max_val > 0 else 0.0
             if imbalance > 0.2:
                 violations.append({
-                    "axiom": "T9",
+                    "axiom": "T17",
                     "message": (
                         f"Desbalance {imbalance:.0%} entre partes "
                         f"({min_val:.1f} vs {max_val:.1f}) viola la Reciprocidad Justa"
@@ -376,7 +376,7 @@ class LiveOracle:
                 })
         elif len(parties_with_cost) == 1 and terms:
             warnings.append({
-                "axiom": "T9",
+                "axiom": "T17",
                 "message": "Solo una parte asume costo: revisar contraprestación",
                 "details": per_party,
             })
@@ -513,12 +513,12 @@ class LiveOracle:
         summary = json.dumps(contract_data, ensure_ascii=False, indent=2, default=str)
         prompt = (
             "Eres el auditor del Oráculo Sintético. Revisa este contrato contra "
-            "T13 (transparencia), INV2/INV2-S (suelos de dignidad), T9 "
+            "T13 (transparencia), INV2/INV2-S (suelos de dignidad), T17 "
             "(reciprocidad), γ ≥ 1 y la Capa de Ternura.\n"
             "Devuelve SOLO JSON con este esquema:\n"
             "{\n"
             '  "valid": true/false,\n'
-            '  "issues": [{"axiom": "T9", "severity": "alta|media|baja", "message": "..."}],\n'
+            '  "issues": [{"axiom": "T17", "severity": "alta|media|baja", "message": "..."}],\n'
             '  "recommendations": ["Mejora 1", "Mejora 2"],\n'
             '  "reasoning": "Explicación breve en español"\n'
             "}\n\n"
