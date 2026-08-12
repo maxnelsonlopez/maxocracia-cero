@@ -71,19 +71,6 @@ Responde ÚNICAMENTE con el objeto JSON.
 """
 
 
-def load_dotenv_quiet():
-    """Carga .env si python-dotenv está disponible (compatibilidad con run.py)."""
-    try:
-        from dotenv import load_dotenv
-
-        load_dotenv(encoding="utf-8")
-    except Exception:
-        pass
-
-
-load_dotenv_quiet()
-
-
 def _base_url() -> str:
     return os.environ.get("DEEPSEEK_BASE_URL", DEFAULT_BASE_URL).rstrip("/")
 

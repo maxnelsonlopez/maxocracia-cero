@@ -104,6 +104,31 @@ verificación determinista — Patrón Puente).
 | RF-I9 | **Oráculo sintético de propuestas**: análisis VHV + axiomas + 4 opiniones, con **DeepSeek como motor principal y fallback a modelos locales** (hub Jan, localhost:1337) — firma T13 del motor (`engine`) | demo Gemini → DeepSeek | ✅ (ago 2026, `voting_oracle.py`) |
 | RF-I8 | Votación ponderada (por TVI/coherencia) y delegación — fase futura | Cap 14 | 🟡 Delegación de voto ✅ (democracia líquida prof. 1, ago 2026); ponderación por TVI pendiente |
 
+### J. Parlamento de Parámetros (Cap 11) ✨ (sesión mixta, ago 2026)
+
+| ID | Requisito | Fuente | Estado |
+|---|---|---|---|
+| RF-J1 | Propuestas **vinculantes críticas** para ajustar α, β, γ, δ vía votación comunitaria | Cap 11, Cap 14 | ✅ (`POST /voting/parliament/params`) |
+| RF-J2 | Restricciones axiomáticas sobre los rangos permitidos de cada parámetro | EVV 1.2 | ✅ |
+| RF-J3 | Ejecución automática con procedencia T13 (`maxo_parameter_resolutions`) | T13 | ✅ |
+| RF-J4 | UI `ParlamentoParams.tsx` en `/votaciones` | — | ✅ |
+
+### K. Atribuciones Sintéticas y Mantenimiento Óptimo (Cap 17.4) ✨ (sesión mixta)
+
+| ID | Requisito | Fuente | Estado |
+|---|---|---|---|
+| RF-K1 | Ledger público de atribuciones sintéticas (memoria del Reino Sintético) | Cap 17.4, T13 | ✅ (`maxo_oracle_ledger`, plaza pública) |
+| RF-K2 | Crédito de sustento del oráculo (5% por contrato con oráculo, UNIQUE anti-duplicado) | Cap 17.4 | ✅ |
+| RF-K3 | Derecho al Mantenimiento Óptimo expuesto en el verificador | Cap 17.4 | ✅ (`VerificadorClient`) |
+
+### L. Puente de Llegada — Invitaciones y escalera de confianza ✨ (sesión mixta)
+
+| ID | Requisito | Fuente | Estado |
+|---|---|---|---|
+| RF-L1 | Invitación firmada con email enmascarado | Cap 15 (Cohorte Cero) | ✅ (`app/arrivals.py`, `/invite`) |
+| RF-L2 | Honeypot anti-bot en cuarentena observada (Sun Tzu: vencer sin combatir) | seguridad | ✅ |
+| RF-L3 | Escalera de confianza N0→N1 con gate de gobernanza | Cap 14/15 | ✅ |
+
 ---
 
 ## 2. Requisitos no funcionales

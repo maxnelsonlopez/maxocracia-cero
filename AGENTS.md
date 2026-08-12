@@ -15,8 +15,14 @@ Conceptos clave: **VHV** (Vector de Huella Vital [T,V,R]), **TVI** (Tiempo Vital
 
 - `app/` — Backend Flask. Blueprints por dominio: `contracts_bp.py` (131 KB, el más grande), `matching.py`
   (necesidad x oferta → borrador), `vhv_bp.py`, `tvi_bp.py`, `micromax_bp.py`, `maxo_bp.py`, `forms_bp.py`,
-  `parties_bp.py`, `protection_bp.py`, `reputation_bp.py`, `resources_bp.py`, `verifier_bp.py`, `auth.py`.
-  Modelos SQLAlchemy en `models.py` (User, Participant, Interchange, FollowUp, VHVProduct). `create_app()` en `app/__init__.py`.
+  `parties_bp.py`, `protection_bp.py`, `reputation_bp.py`, `resources_bp.py`, `verifier_bp.py`, `auth.py`,
+  **`voting_bp.py`** (gobernanza comunitaria: propuestas, votos, delegación, parlamento de parámetros),
+  **`arrivals.py`** (invitaciones y escalera de confianza N0-N1). Modelos SQLAlchemy en `models.py`
+  (User, Participant, Interchange, FollowUp, VHVProduct). `create_app()` en `app/__init__.py`.
+- **`app/voting_oracle.py`** — oráculo de análisis de propuestas: DeepSeek (nube) con **fallback a modelos
+  locales** (hub Jan `localhost:1337`, `LOCAL_ORACLE_*`); produce VHV + axiomas + 4 opiniones, firmado
+  con `engine` (T13). **No carga .env al importar** (lo hace run.py) — NO reintroducir load_dotenv ahí
+  (contamina los tests).
 - `maxocontracts/` — **Motor de dominio puro** (sin Flask): `action.py`, `condition.py`, `gamma_protector.py`,
   `reciprocity.py`, `sdv_validator.py`, `sdv_s_validator.py`, `ternura.py`. Lógica de contratos validable por tests.
 - `frontend/` — Next.js (App Router). Páginas: `contracts/` (builder, negotiate, [id]), `matching/`,
@@ -24,8 +30,10 @@ Conceptos clave: **VHV** (Vector de Huella Vital [T,V,R]), **TVI** (Tiempo Vital
 - `docs/` — teoría (`theory/`), libro (`book/libro_completo_310126.md`, 300 KB), specs (`specs/`),
   arquitectura (`architecture/`), guides, API. **`architecture/mapa_coherencia_ola4.md`**: mapa vivo
   teoría↔implementación (motor `maxocontracts/`, invariantes, blueprints) — actualizarlo en cada Ola.
-  **`architecture/requisitos_fase2_ola4.md`**: re-lista de RF/NFR de la fase con backlog de conexión.
+  **`architecture/requisitos_fase2_ola4.md`**: re-lista de RF/NFR de la fase con backlog de conexión
+  (pilares A-L, incluye votación, parlamento, atribuciones sintéticas e invitaciones).
   **`architecture/mapa_frontend_ola4.md`**: páginas → blueprints + secciones desconectadas.
+  **`SESION_NEXT_PROMPT.md`**: handoff entre sesiones (estado, pendientes, prompt de continuidad).
 - `tests/` — ~40 archivos pytest con `conftest.py` y `INSTRUCCIONES_TESTS.md`.
 - `scripts/` — migraciones, seeds, `list_routes.py`, `local_oracle.py`, `verify_setup.py`.
 - `simulator/` — Nexus Simulator (VHV interactivo). `seeds/`, `migrations/`, `data-model/`, `dashboard-spec/`.

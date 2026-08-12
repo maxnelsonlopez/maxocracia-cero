@@ -13,6 +13,7 @@ import os
 import tempfile
 
 os.environ['SECRET_KEY'] = 'test-secret'
+os.environ.pop('DEEPSEEK_API_KEY', None)
 
 import pytest
 
