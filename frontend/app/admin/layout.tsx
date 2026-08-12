@@ -17,6 +17,9 @@ import {
     ShieldAlert,
     Heart,
     FileCheck2,
+    Repeat,
+    ClipboardList,
+    Package,
 } from "lucide-react";
 import { apiFetch } from "../lib/api";
 
@@ -26,6 +29,9 @@ const sidebarLinks = [
     { href: "/admin/participants", label: "Participantes Red", icon: Heart },
     { href: "/admin/matching", label: "Motor de Matching", icon: GitMerge, alertKey: "matching" },
     { href: "/admin/network", label: "Red de Intercambio", icon: Network },
+    { href: "/admin/interchanges", label: "Intercambios", icon: Repeat },
+    { href: "/admin/followups", label: "Seguimientos", icon: ClipboardList },
+    { href: "/admin/vhvproducts", label: "Productos VHV", icon: Package },
     { href: "/admin/contracts", label: "MaxoContracts", icon: FileCheck2, alertKey: "contracts" },
     { href: "/admin/reports", label: "Informes e Impacto", icon: FileBarChart },
     { href: "/admin/users", label: "Usuarios", icon: Users },
