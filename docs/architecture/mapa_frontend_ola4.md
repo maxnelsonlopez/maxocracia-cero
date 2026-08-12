@@ -27,6 +27,7 @@ las secciones desconectadas**. Generado el 11-08-2026 con verificación determin
 | `/vhv/parameters` | 209 | `/vhv/parameters` (GET/PUT) | vhv |
 | `/tvi/stats` | 204 | `/tvi/stats`, `/tvi/community-stats` | tvi |
 | `/login` · `/register` | 127/158 | `/auth/login`, `/auth/register` (+`/auth/me`, `/auth/logout` vía AuthContext) | auth |
+| `/perfil` | 660 | `/maxo/{id}/balance`, `/maxo/{id}/ledger`, `/maxo/transfer`, `/protection/profile`, `/reputation/{id}`, `/resources`, `/resources/{id}/claim`, `/interchanges` | maxo, protection, reputation, resources, interchanges |
 | `/upgrade` | 24+client | `/stripe/config`, `/stripe/create-checkout-session` | stripe |
 | `/transparency` | 12+client | `/subscriptions/transparency-report` | subscriptions |
 | `/verificador` | 12+client | `/verificador/cohort` | verifier |
@@ -52,11 +53,11 @@ las secciones desconectadas**. Generado el 11-08-2026 con verificación determin
 
 | Endpoints backend | Blueprint | Estado |
 |---|---|---|
-| `/maxo/{id}/balance`, `/maxo/{id}/...` (2) | maxo | 🔴 Sin UI (el saldo Maxo no se muestra en ninguna página) |
-| `/protection/profile`, `/protection/...` (2) | protection | 🔴 Sin UI |
-| `/reputation/{id}` (2) | reputation | 🔴 Sin UI |
-| `/resources`, `/resources/...` (3) | resources | 🔴 Sin UI |
-| `/interchanges`, `/interchanges/...` (2) | interchanges | 🔴 Sin UI (la página `/forms/exchange` usa el blueprint forms, no este) |
+| `/maxo/{id}/balance`, `/maxo/{id}/ledger`, `/maxo/transfer` | maxo | ✅ Conectado (`/perfil` — RF-G5, ago 2026) |
+| `/protection/profile` | protection | ✅ Conectado (`/perfil` — RF-G5, ago 2026) |
+| `/reputation/{id}` | reputation | ✅ Conectado (`/perfil` — RF-G5, ago 2026) |
+| `/resources` (GET/POST) y `/resources/{id}/claim` | resources | ✅ Conectado (`/perfil` — RF-G5, ago 2026) |
+| `/interchanges` (GET) | interchanges | ✅ Conectado (`/perfil` — RF-G5, ago 2026; `POST` y `create_interchange` siguen sin UI, se usa el blueprint forms) |
 | `/contracts/from-need`, `/contracts/from-need/...` (3) | bridge_b | 🟡 Sin llamada directa del frontend (orquestación probablemente backend-interna del matching→borrador) |
 | `/tvi` (raíz), `/vhv` (raíz) | tvi, vhv | 🟡 Solo existen páginas hijas (`/tvi/stats`, `/vhv/calculator`) |
 | `/admin/user`, `/admin/interchange`, `/admin/followup`, `/admin/vhvproduct` (CRUD 9 c/u) | Flask-Admin | 🔴 CRUD solo parcialmente expuesto: `/admin/participants` usa `/forms/participants` (no `/admin/participant`); el resto sin página |
@@ -71,8 +72,10 @@ las secciones desconectadas**. Generado el 11-08-2026 con verificación determin
    renderizados desde `participants_details` del contrato.*
 4. **Exponer el CRUD real** (Flask-Admin): decidir entre generar páginas para interchange/followup/vhvproduct
    o migrar `/admin/participants` al CRUD `/admin/participant` (hoy usa `/forms/participants`).
-5. **Superficies sin UI**: `maxo` (saldo del participante — natural en el detalle de contrato o perfil),
-   `protection` (perfil de protección), `reputation`, `resources`, `interchanges`.
+5. **Superficies sin UI**: ✅ **CERRADO (ago 2026, RF-G5)**: página `/perfil` (Perfil Vital) consume
+   `/maxo/{id}/balance` + `/maxo/{id}/ledger` (endpoint nuevo, T13) + transferencia, `/protection/profile`
+   (nivel efectivo + caps + declaración), `/reputation/{id}`, `/resources` (listar/crear/reclamar) e
+   `/interchanges` filtrado por usuario. Enlace en Navigation (desktop + móvil).
 6. **`/contracts/from-need`**: confirmar si el matching usa el flujo bridge por backend; si no, conectarlo
    desde `/matching` (el oráculo de chat ya existe ahí).
 
@@ -89,4 +92,4 @@ Get-Content frontend\app\lib\api.ts
 ```
 
 ---
-**Última actualización**: 11-08-2026 · **Método**: RLM + verificación determinista (Patrón Puente)
+**Última actualización**: 12-08-2026 · **Método**: RLM + verificación determinista (Patrón Puente)

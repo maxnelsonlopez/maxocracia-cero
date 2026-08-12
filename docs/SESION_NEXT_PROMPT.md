@@ -35,7 +35,8 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 | Atribuciones sintéticas + Mantenimiento Óptimo (Cap 17.4, ledger T13 en la plaza) | ✅ (sesión paralela) |
 | Puente de Llegada: invitaciones firmadas, honeypot anti-bot, escalera N0→N1 | ✅ (sesión paralela) |
 | Frontend: `/votaciones`, `/admin/settings` real, `/admin/subscriptions` real, SDV-S en contrato | ✅ |
-| Suite de tests | **647/647** (motor + app + votación + parlamento + arrivals + ledger, verificado 12-08-2026) |
+| **RF-G5: superficies sin UI** — `/perfil` (Perfil Vital) con saldo Maxo + ledger T13 + transferencia, protección (nivel/caps/declaración), reputación, recursos comunitarios e intercambios | ✅ (ago 2026) |
+| Suite de tests | **652/652** (motor + app + votación + parlamento + arrivals + ledger + maxo ledger, verificado 12-08-2026) |
 
 **Decisiones canónicas a respetar:**
 - **La teoría (libro) tiene prioridad**: T0-T15 son canónicos; T16=Minimizar Daño, T17=Reciprocidad
@@ -61,12 +62,16 @@ npx tsc --noEmit
 ## 4. Pendientes priorizados
 
 1. **Cohorte Cero real**: ejecutar 50+ contratos (20 aseo, 15 préstamo, 15 comida) — TODO.md
-2. **RF-G5**: superficies sin UI — maxo (saldo), protection, reputation, resources, interchanges
-3. **RF-G4**: CRUD admin completo (interchange/followup/vhvproduct) o migrar `/admin/participants`
-4. **M4 fase 2**: confirmar/conectar `/contracts/from-need` desde `/matching`
-5. **RF-I8 resto**: votación ponderada por TVI (fase futura, Cap 14)
-6. **SDV-S editorial**: integración cruzada en Caps. 10/11/13/14 del libro
-7. **Mantener** `mapa_coherencia_ola4.md`, `requisitos_fase2_ola4.md` y este handoff al día
+2. **RF-G4**: CRUD admin completo (interchange/followup/vhvproduct) o migrar `/admin/participants`
+3. **M4 fase 2**: confirmar/conectar `/contracts/from-need` desde `/matching`
+4. **RF-I8 resto**: votación ponderada por TVI (fase futura, Cap 14)
+5. **SDV-S editorial**: integración cruzada en Caps. 10/11/13/14 del libro
+6. **Mantener** `mapa_coherencia_ola4.md`, `requisitos_fase2_ola4.md` y este handoff al día
+
+**RF-G5 cerrado (12-08-2026)**: página `/perfil` (frontend/app/perfil/page.tsx) + endpoint nuevo
+`GET /maxo/{id}/ledger` (T13, `app/maxo_bp.py`) + 4 tests. Hallazgo lateral anotado: `app/resources.py`
+es un duplicado no registrado (solo se registra `resources_bp.py`); endpoints de reputation/resources/
+interchanges sin `@token_required` (revisar en una pasada de seguridad).
 
 ## 5. Historia reciente (git log, maxocracia)
 

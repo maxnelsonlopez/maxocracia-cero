@@ -131,6 +131,12 @@ export function Navigation() {
               )}
 
               {isAuthenticated && (
+                <Link href="/perfil" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-amber-400 hover:text-amber-300 hover:bg-amber-950/20 transition-all border border-amber-500/20 mr-1 shadow-lg shadow-amber-500/5">
+                  Perfil Vital
+                </Link>
+              )}
+
+              {isAuthenticated && (
                 <Link href="/admin/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
                   Admin
                 </Link>
@@ -241,6 +247,7 @@ export function Navigation() {
                   <MobileNavLink href="/pulso" label="Pulso Vital" icon={Activity} onClick={() => setIsOpen(false)} />
                   <MobileNavLink href="/matching" label="Plaza de Apoyo" icon={Handshake} onClick={() => setIsOpen(false)} />
                   <MobileNavLink href="/votaciones" label="Votaciones" icon={Vote} onClick={() => setIsOpen(false)} />
+                  <MobileNavLink href="/perfil" label="Perfil Vital" icon={Heart} onClick={() => setIsOpen(false)} />
                 </div>
               )}
 

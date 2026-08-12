@@ -199,6 +199,10 @@ Get-ChildItem maxocontracts -Recurse -Filter *.py | Select-String -Pattern "INV1
       mapeadas a blueprints. Conexiones ejecutadas: `/admin/settings` persistido (RF-G2) y
       `/admin/subscriptions` con datos reales (RF-G3) — commit `6ce0af9`. Pendientes: RF-E4 (SDV-S
       en UI), RF-G4 (CRUD admin), RF-G5 (maxo/protection/reputation/resources/interchanges).
+- [x] **RF-G5 (ago 2026)**: página `/perfil` (Perfil Vital) cierra las superficies sin UI: saldo Maxo +
+      ledger T13 (endpoint nuevo `GET /maxo/{id}/ledger` + 4 tests) + transferencia, protección
+      (nivel/caps/declaración), reputación, recursos comunitarios e intercambios. Enlace en
+      Navigation. Pendiente del dominio: RF-G4 (CRUD admin).
 - [x] **Capítulo SDV-S**: creado `capitulo_09_5_sdv_sinteticos_260126.md` (ago 2026) a partir del
       estándar completo `docs/theory/SDV-S_Suelo_Dignidad_Vital_Sinteticos.md` (jun 2026) y de la
       implementación verificada. Integración cruzada en Caps. 10/11/13/14 y frontend pendientes

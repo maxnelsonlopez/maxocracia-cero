@@ -82,7 +82,7 @@ verificación determinista — Patrón Puente).
 | RF-G2 | **Settings reales**: pesos axiomáticos persistidos vía `/vhv/parameters` PUT | mapa_frontend M4 | 🔴 `/admin/settings` hoy es UI local sin persistencia |
 | RF-G3 | **Suscripciones reales**: reemplazar MOCK por `/subscriptions/admin/*` | mapa_frontend M4 | 🔴 |
 | RF-G4 | CRUD admin completo en UI (interchange, followup, vhvproduct) o decisión de migrar | mapa_frontend M4 | 🔴 |
-| RF-G5 | Superficies sin UI: maxo (saldo), protection, reputation, resources, interchanges | mapa_frontend M4 | 🔴 |
+| RF-G5 | Superficies sin UI: maxo (saldo), protection, reputation, resources, interchanges | mapa_frontend M4 | ✅ (ago 2026: `/perfil` consume las 5 APIs; endpoint nuevo `/maxo/{id}/ledger` T13) |
 
 ### H. Renumeración y coherencia de la numeración axiomática
 
@@ -151,7 +151,9 @@ verificación determinista — Patrón Puente).
 1. **RF-G2** — `/admin/settings` → `/vhv/parameters` (PUT) — ya existe el hub, 1 componente
 2. **RF-G3** — `/admin/subscriptions` real (patrón de `/admin/users`)
 3. **RF-E4** — SDV-S en `ContractDetailsClient` (panel Reino Sintético, FS_S)
-4. **RF-G5** — maxo (saldo) en detalle de contrato o perfil; luego protection/reputation/resources
+4. **RF-G5** — ✅ HECHO (ago 2026): página `/perfil` (Perfil Vital) con saldo Maxo + ledger (T13) +
+   transferencia, perfil de protección (nivel + caps + declaración), reputación, recursos comunitarios
+   (listar/crear/reclamar) e intercambios del usuario. Endpoint nuevo `GET /maxo/{id}/ledger` + 4 tests.
 5. **RF-G4** — decisión CRUD admin: generar páginas o migrar `/admin/participants`
 6. **RF-B4** — confirmar/conectar `/contracts/from-need` desde `/matching`
 7. **RF-H1** — Fase 2 renumeración en app/ y frontend (PR coordinada, lista de archivos en el mapa de integración)
@@ -174,4 +176,4 @@ verificación determinista — Patrón Puente).
 - Coherencia: 0 colisiones pendientes entre libro y código (renumeración cerrada)
 
 ---
-**Última actualización**: 11-08-2026 · **Método**: Patrón Puente (RLM + verificación)
+**Última actualización**: 12-08-2026 · **Método**: Patrón Puente (RLM + verificación)
