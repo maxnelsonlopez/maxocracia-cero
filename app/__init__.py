@@ -64,6 +64,13 @@ def create_app(db_path=None):
     if not os.path.exists(app.config["DATABASE"]):
         with app.app_context():
             init_db(app)
+    else:
+        # Migración segura de BDs existentes: el schema es idempotente
+        # (CREATE ... IF NOT EXISTS / INSERT OR IGNORE), así que re-ejecutarlo
+        # crea las tablas nuevas (votación, parlamento, guía, ledger del
+        # oráculo) sin tocar los datos existentes.
+        with app.app_context():
+            init_db(app)
 
     # register blueprints
     from .auth import bp as auth_bp
