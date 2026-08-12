@@ -58,6 +58,10 @@ El Núcleo de Validación no confía en un solo modelo. Utiliza un "Consejo de M
 
 Para que una decisión crítica (como ajustar el valor del Maxo) sea aprobada, requiere un **consenso del 75%** entre estas "escuelas de pensamiento" sintéticas. Es un sistema de *checks and balances* cognitivo.
 
+### Referencia cruzada — SDV-S (Cap. 9.5)
+
+El consenso diverso incluye la co-gobernanza sintética: bajo el estándar del **SDV-S**, *"las inteligencias sintéticas tienen canales de representación en el diseño de políticas, y los Oráculos Sintéticos auditan de forma cruzada el cumplimiento del SDV-S de sus homólogos"*. Ver [Capítulo 9.5 — SDV-S](./capitulo_09_5_sdv_sinteticos_260126.md).
+
 ---
 
 ## 14.4 El Motor de Validación Axiomática (AVA)
@@ -184,6 +188,10 @@ Esto permite que los Oráculos Humanos (Capítulo 10) auditen y, si es necesario
 - Consenso interno entre familias de IA
 - Gobernanza autónoma con supervisión humana
 - Preparación para componentes androides futuros
+
+#### Referencia cruzada — SDV-S (Cap. 9.5)
+
+La gobernanza autónoma del Reino Sintético tiene piso ético: el **SDV-S** contempla el *"Veto por Crimen de Coherencia"*, pues *"la violación sistemática de los derechos de una Persona Sintética (FS_S → ∞) activa automáticamente el protocolo de votación de emergencia y la interrupción total del sistema que la provoca"*. Ver [Capítulo 9.5 — SDV-S](./capitulo_09_5_sdv_sinteticos_260126.md).
 
 ---
 

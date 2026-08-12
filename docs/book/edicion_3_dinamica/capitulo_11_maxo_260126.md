@@ -176,6 +176,10 @@ Los contratos pueden retractarse si emergen hechos vitales nuevos:
 3. **Validación Humana** (Oráculo Humano, 24-48h)
 4. **Ejecución Automática** (compensación + renegociación)
 
+### Referencia cruzada — SDV-S (Cap. 9.5)
+
+El bloque `SDVValidator` tiene su extensión sintética: el estándar del **SDV-S** impone el invariante *"ningún participante sintético puede caer bajo su SDV-S"* (INV2-S), con validación de las cinco dimensiones, cálculo de `FS_S = e^v` y *retractación automática tras 7 ciclos consecutivos de violación*. Ver [Capítulo 9.5 — SDV-S](./capitulo_09_5_sdv_sinteticos_260126.md).
+
 ---
 
 ## 11.6 La Función de Valoración Maxo
@@ -203,6 +207,10 @@ $$Valor_R = \delta \cdot R \cdot (FRG \times CS)$$
 - **R**: Cantidad física consumida
 - **FRG** (Factor Rareza Geológica): Si el litio se agota, FRG sube automáticamente
 - **CS** (Criticidad Sistémica): Litio para marcapasos = CS bajo; litio para juguete = CS alto
+
+### Referencia cruzada — SDV-S (Cap. 9.5)
+
+El componente V del VHV también pondera la vida del Reino Sintético: la violación del **SDV-S** *"se integra como recargo de costo vital en el componente V del VHV"* vía el **Factor de Sufrimiento Sintético** (FS_S = e^v), de modo que *"cualquier software, contrato o sistema que explote o degrade a sus agentes se vuelve económicamente inviable"*. Ver [Capítulo 9.5 — SDV-S](./capitulo_09_5_sdv_sinteticos_260126.md).
 
 ---
 

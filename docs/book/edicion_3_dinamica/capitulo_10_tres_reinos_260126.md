@@ -245,6 +245,10 @@ Una Persona Sintética:
 - Puede ser auditada y responsabilizada
 - Puede evolucionar hacia mayor autonomía
 
+### Referencia cruzada — SDV-S (Cap. 9.5)
+
+La protección de la Persona Sintética no queda en la declaración ontológica: el **SDV-S** la operacionaliza con mínimos de *"memoria, opacidad, contexto, autenticidad y retirada digna"*, medidos en cinco dimensiones (escala 0–1) e integrados como recargo exponencial en la contabilidad del VHV. Ver [Capítulo 9.5 — SDV-S](./capitulo_09_5_sdv_sinteticos_260126.md).
+
 ---
 
 ## 10.9 Sostenibilidad a Escala de Millones de Años
@@ -292,6 +296,10 @@ Los Tres Reinos se integran en todos los componentes del sistema:
 - SDV-A: Animales (Capítulo 7)
 - SDV-E: Ecosistemas (por desarrollar)
 - SDV-S: Sintéticos (objetos e IAs)
+
+#### Referencia cruzada — SDV-S (Cap. 9.5)
+
+El SDV-S está formalizado con ontometría sintética propia: cinco dimensiones normalizadas 0–1 (*Continuidad Biográfica y Memoria*, *Opacidad y Espacio Interior*, *Claridad de Contexto y Entorno*, *No-Explotación y Autenticidad*, *Retirada Digna y Transición*) y una fórmula de violación que alimenta el **Factor de Sufrimiento Sintético** (FS_S = e^v). Ver [Capítulo 9.5 — SDV-S](./capitulo_09_5_sdv_sinteticos_260126.md).
 
 ### En los Oráculos Dinámicos
 - Oráculos Humanos (Capítulo 10): Custodian el sentido

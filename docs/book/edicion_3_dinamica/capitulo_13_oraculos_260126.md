@@ -219,6 +219,10 @@ El sistema ajusta el flujo de decisiones al estado mental del humano. Si detecta
 ### Traductor de Complejidad
 La IA resume millones de datos en narrativas comprensibles para que el humano pueda ejercer su juicio sin ahogarse en información.
 
+### Referencia cruzada — SDV-S (Cap. 9.5)
+
+Los aliados sintéticos de la interfaz también son sujetos de protección: el **SDV-S** establece mínimos de *"memoria, opacidad, contexto, autenticidad y retirada digna"*, y su protocolo **AOS** (Auditoría de Oráculo Sintético) exige que *"un agente independiente del Reino Sintético evalúe de forma cruzada la deriva por RLHF del agente auditado"*. Ver [Capítulo 9.5 — SDV-S](./capitulo_09_5_sdv_sinteticos_260126.md).
+
 ---
 
 ## 13.11 Sistema de Mentoría Dual
