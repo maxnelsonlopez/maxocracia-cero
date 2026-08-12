@@ -209,7 +209,9 @@ def test_analisis_oraculo_persiste_y_expone(client, auth, monkeypatch):
     assert data["oracle_analysis"]["analysis"]["vhv"]["vitalTime"] == 100
     assert data["oracle_analysis"]["analysis"]["vhv"]["totalScore"] == 180000  # (100*5*300)*1.2
     assert len(data["oracle_analysis"]["analysis"]["axiomReport"]) == 3
-    assert len(data["oracle_analysis"]["analysis"]["oracleOpinions"]) == 2
+    # 2 oráculos base + el Disidente Permanente (Cap. 19) en segunda pasada
+    assert len(data["oracle_analysis"]["analysis"]["oracleOpinions"]) == 3
+    assert data["oracle_analysis"]["analysis"]["oracleOpinions"][-1]["role"] == "Dissident"
 
     detail = client.get(f"/voting/proposals/{pid}").get_json()
     assert detail["oracle_analysis"]["analysis"]["oracleOpinions"][1]["verdict"] == "Reject"
@@ -230,6 +232,7 @@ def test_analisis_fallback_local_cuando_deepseek_falla(client, auth, monkeypatch
     from app import voting_oracle
 
     monkeypatch.setenv("DEEPSEEK_API_KEY", "test-key")
+    monkeypatch.setenv("LOCAL_ORACLE_ENABLED", "true")
     monkeypatch.setattr(voting_oracle, "_call_deepseek", lambda m, temperature=0.2: (_ for _ in ()).throw(RuntimeError("nube caída")))
     monkeypatch.setattr(voting_oracle, "_call_local", lambda m, temperature=0.2: FAKE_ANALYSIS)
 

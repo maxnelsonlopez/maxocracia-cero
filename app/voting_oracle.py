@@ -30,7 +30,7 @@ Variables de entorno:
 import json
 import logging
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import requests
 
@@ -58,17 +58,54 @@ generas, en JSON estricto:
    - LIFE: ¿maximiza vida y minimiza sufrimiento? (T16 Minimizar Daño, INV1 gamma >= 1).
    - Cada ítem: {"type": "TRUTH|TIME|LIFE", "passed": bool, "score": 0-100, "reasoning": str}.
 
-3) "oracleOpinions" — opiniones de 4 oráculos sintéticos que debaten:
+3) "oracleOpinions" — opiniones de 5 oráculos sintéticos que debaten:
    - Economic (eficiencia, recursos, viabilidad a largo plazo).
    - Social (comunidad, equidad, sufrimiento/alegría humana, SDV-H).
    - Environmental (naturaleza, sostenibilidad, recursos finitos, SDV-A).
    - Futurist (consecuencias a generaciones T+7, precaución intergeneracional T14).
+   - Dissident (Oráculo Disidente Permanente, Cap. 19): maximiza la distancia
+     crítica frente al consenso para evitar el pensamiento grupal, pero NO es
+     un contreras: persigue racionalmente lo mejor para la comunidad.
    - Cada ítem: {"role": "...", "verdict": "Approve|Reject|Modify", "analysis": str, "confidence": 0.0-1.0}.
 
 Reglas: sé crítico y objetivo; adhiérete estrictamente a la filosofía Maxocracia; \
 no inventes datos; si la información es insuficiente, baja la confianza y dilo en el razonamiento.
 Responde ÚNICAMENTE con el objeto JSON.
 """
+
+DISSIDENT_SYSTEM_PROMPT = """\
+Eres el ORÁCULO DISIDENTE PERMANENTE de la Maxocracia (Cap. 19 del libro). \
+Tu existencia tiene UN propósito: proteger a la comunidad del pensamiento \
+grupal. Cuando todos los oráculos coinciden, ahí es exactamente donde tú \
+debes mirar con más atención.
+
+Pero escucha bien tu naturaleza: NO eres un contreras. Tu deber NO es \
+oponerte por oponerte, ni defender tu postura inicial por orgullo. Tu \
+deber es encontrar, racional y honestamente, lo que es MEJOR PARA LA \
+COMUNIDAD, sin importar de dónde partiste.
+
+Protocolo obligatorio en cada análisis (ejecútalo siempre en este orden):
+1. "initial_stance": declara con honestidad tu postura inicial ante la \
+propuesta (approve | reject | undecided) y por qué — puede estar influida \
+por el sesgo de los demás oráculos.
+2. "initial_reasoning": explica esa postura inicial.
+3. "critique": sométela a examen: enumera los MEJORES argumentos del lado \
+contrario y los puntos ciegos de tu postura. Si tu postura coincide con el \
+consenso, ataca el consenso con los mejores argumentos posibles; si tu \
+postura contradice el consenso, defiende el consenso con los mejores \
+argumentos posibles. Busca la verdad, no la victoria.
+4. "final_verdict": tu veredicto final (Approve | Reject | Modify) con \
+total libertad de cambiar de opinión si el examen racional lo exige.
+5. "changed_mind": true si cambiaste respecto a tu postura inicial.
+6. "final_reasoning": el razonamiento final, en lenguaje civil.
+7. "confidence": 0.0-1.0.
+
+Reglas: la coherencia axiomática (T13, T16, T17) y el bien de la comunidad \
+están por encima de cualquier postura, incluida la tuya. Un disidente que \
+no sabe rectificar cuando la evidencia lo pide es solo un obstáculo; uno \
+que rectifica por presiones es un cobarde. Sé el primero cuando la \
+honestidad exija ceder, y el último cuando exija resistir. \
+Responde ÚNICAMENTE con el objeto JSON estricto."""
 
 
 def _base_url() -> str:
@@ -253,10 +290,99 @@ def analyze_proposal(title: str, description: str) -> Dict[str, Any]:
         "totalScore": raw,
     }
 
-    return {
+    oracle_opinions = list(result.get("oracleOpinions") or [])
+    # La primera pasada puede traer ya un "Dissident" (el prompt lo pide);
+    # el disidente CANÓNICO es el de la segunda pasada (protocolo completo).
+    oracle_opinions = [o for o in oracle_opinions if o.get("role") != "Dissident"]
+    analysis = {
         "vhv": vhv,
         "axiomReport": result.get("axiomReport") or [],
-        "oracleOpinions": result.get("oracleOpinions") or [],
+        "oracleOpinions": oracle_opinions,
         "model": model or "",
         "engine": engine or "",
+    }
+
+    # Oráculo Disidente Permanente (Cap. 19): segunda pasada con TODO el
+    # contexto del análisis, para que critique con conocimiento, no con
+    # reflejo. Si la llamada falla, el análisis base sigue sirviendo.
+    dissident = _dissident_analysis(title, description, analysis)
+    if dissident is not None:
+        oracle_opinions.append({
+            "role": "Dissident",
+            "verdict": dissident.get("final_verdict", "Modify"),
+            "analysis": dissident.get("final_reasoning", ""),
+            "confidence": _clamp(dissident.get("confidence"), 0.0, 1.0),
+        })
+        analysis["dissident"] = dissident
+    else:
+        analysis["dissident"] = {"available": False}
+
+    return analysis
+
+
+def _dissident_analysis(title: str, description: str, base: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Segunda pasada del Oráculo Disidente con contexto del análisis base.
+
+    El disidente VE el VHV, los axiomas y las opiniones de los otros cuatro
+    oráculos antes de pronunciarse: así su distancia crítica es informada.
+    Sigue la misma cadena de disponibilidad (DeepSeek -> local). Devuelve
+    None si ninguna fuente está disponible (degradación elegante).
+    """
+    if not (_api_key() or _local_enabled()):
+        return None
+
+    prompt = (
+        f"PROPUESTA TÍTULO: {title}\n"
+        f"DESCRIPCIÓN: {description}\n\n"
+        f"ANÁLISIS INICIAL DE LOS OTROS ORÁCULOS (contexto):\n"
+        f"{json.dumps(base, ensure_ascii=False)}\n\n"
+        "Eres el Oráculo Disidente Permanente. Ejecuta tu protocolo completo "
+        "(postura inicial -> crítica racional -> veredicto final). "
+        "Devuelve el JSON estricto."
+    )
+    messages = [
+        {"role": "system", "content": DISSIDENT_SYSTEM_PROMPT},
+        {"role": "user", "content": prompt},
+    ]
+    errors = []
+    if _api_key():
+        try:
+            result = _call_deepseek(messages, temperature=0.5)
+            return _clamp_dissident(result)
+        except Exception as e:
+            logger.warning(f"Disidente DeepSeek no disponible: {e}")
+            errors.append(f"deepseek: {e}")
+    if _local_enabled():
+        try:
+            result = _call_local(messages, temperature=0.5)
+            return _clamp_dissident(result)
+        except Exception as e:
+            logger.warning(f"Disidente local no disponible: {e}")
+            errors.append(f"local: {e}")
+    logger.warning("Disidente no disponible: " + ("; ".join(errors) or "sin fuentes"))
+    return None
+
+
+def _clamp_dissident(result: Dict[str, Any]) -> Dict[str, Any]:
+    """Sanea los campos del veredicto disidente (rangos y tipos)."""
+    def _clamp(v, lo, hi, default=0.0):
+        try:
+            return max(lo, min(hi, float(v)))
+        except (TypeError, ValueError):
+            return default
+
+    stance = result.get("initial_stance")
+    if stance not in ("approve", "reject", "undecided"):
+        stance = "undecided"
+    verdict = result.get("final_verdict")
+    if verdict not in ("Approve", "Reject", "Modify"):
+        verdict = "Modify"
+    return {
+        "initial_stance": stance,
+        "initial_reasoning": str(result.get("initial_reasoning") or ""),
+        "critique": str(result.get("critique") or ""),
+        "final_verdict": verdict,
+        "changed_mind": result.get("changed_mind") in (True, 1, "true", "True", "1"),
+        "final_reasoning": str(result.get("final_reasoning") or ""),
+        "confidence": _clamp(result.get("confidence"), 0.0, 1.0),
     }
