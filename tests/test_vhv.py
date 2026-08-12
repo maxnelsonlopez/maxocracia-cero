@@ -46,10 +46,10 @@ def test_interchange_vhv_fields(client):
     db_path = client.application.config["DATABASE"]
     giver_id = seed_user(db_path, "a@example.test")
     receiver_id = seed_user(db_path, "b@example.test")
+    token = _login(client, "a@example.test")
 
     payload = {
         "interchange_id": "VHV-TEST-001",
-        "giver_id": giver_id,
         "receiver_id": receiver_id,
         "description": "ethical egg production",
         "uth_hours": 1.5,
@@ -61,7 +61,8 @@ def test_interchange_vhv_fields(client):
         "vhv_resources": {"energia_kwh": 1.8, "agua_l": 0.12, "co2_kg": 0.9},
     }
 
-    resp = client.post("/interchanges", json=payload)
+    resp = client.post("/interchanges", json=payload,
+                       headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 201, resp.data
 
     conn = sqlite3.connect(db_path)
@@ -79,3 +80,9 @@ def test_interchange_vhv_fields(client):
     assert data["energia_kwh"] == 1.8
     assert data["agua_l"] == 0.12
     assert data["co2_kg"] == 0.9
+
+
+def _login(client, email, password="Password1"):
+    resp = client.post("/auth/login", json={"email": email, "password": password})
+    assert resp.status_code == 200
+    return resp.get_json()["access_token"]

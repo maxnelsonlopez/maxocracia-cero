@@ -49,18 +49,19 @@ def test_create_interchange_and_credit(client):
     db_path = client.application.config["DATABASE"]
     giver_id = seed_user(db_path, "giver@example.test", "Giver")
     receiver_id = seed_user(db_path, "receiver@example.test", "Receiver")
+    token = _login(client, "giver@example.test")
 
     payload = {
         "interchange_id": "TEST-INT-001",
-        "giver_id": giver_id,
         "receiver_id": receiver_id,
         "description": "Helping with gardening",
         "uth_hours": 2.0,
         "impact_resolution_score": 4,
     }
 
-    # POST interchange
-    resp = client.post("/interchanges", json=payload)
+    # POST interchange (el giver sale del token)
+    resp = client.post("/interchanges", json=payload,
+                       headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 201
     data = resp.get_json()
     assert "credit" in data
@@ -76,3 +77,22 @@ def test_create_interchange_and_credit(client):
     conn.close()
     assert row is not None
     assert row[0] == pytest.approx(credit_amount)
+
+
+def test_create_interchange_requiere_token(client):
+    db_path = client.application.config["DATABASE"]
+    giver_id = seed_user(db_path, "anon_giver@example.test", "Anon")
+    receiver_id = seed_user(db_path, "anon_receiver@example.test", "AnonR")
+    resp = client.post("/interchanges", json={
+        "interchange_id": "TEST-INT-002",
+        "giver_id": giver_id,
+        "receiver_id": receiver_id,
+        "description": "x",
+    })
+    assert resp.status_code == 401
+
+
+def _login(client, email, password="Password1"):
+    resp = client.post("/auth/login", json={"email": email, "password": password})
+    assert resp.status_code == 200
+    return resp.get_json()["access_token"]

@@ -1,20 +1,24 @@
 from flask import Blueprint, jsonify, request
 
+from .jwt_utils import token_required
 from .utils import get_db
 
 bp = Blueprint("resources", __name__, url_prefix="/resources")
 
 
 @bp.route("", methods=["POST"])
-def create_resource():
+@token_required
+def create_resource(current_user):
     data = request.get_json() or {}
-    user_id = data.get("user_id")
+    uid = current_user.get("user_id")
     title = data.get("title")
     description = data.get("description")
+    if uid is None or not title:
+        return jsonify({"error": "título es requerido"}), 400
     db = get_db()
     db.execute(
         "INSERT INTO resources (user_id, title, description, category, available) VALUES (?, ?, ?, ?, 1)",
-        (user_id, title, description, data.get("category")),
+        (uid, title, description, data.get("category")),
     )
     db.commit()
     return jsonify({"message": "resource created"}), 201
@@ -31,9 +35,15 @@ def list_resources():
 
 
 @bp.route("/<int:res_id>/claim", methods=["POST"])
-def claim_resource(res_id):
+@token_required
+def claim_resource(current_user, res_id):
     data = request.get_json() or {}
-    data.get("user_id")
+    requester_id = current_user.get("user_id")
+    if requester_id is None:
+        return jsonify({"error": "autenticación requerida"}), 401
+    requester_id = int(requester_id)
+    if data.get("requester_id") is not None and int(data.get("requester_id")) != requester_id:
+        return jsonify({"error": "no puedes reclamar en nombre de otro usuario"}), 403
     db = get_db()
     cur = db.execute(
         "SELECT available FROM resources WHERE id = ?", (res_id,)

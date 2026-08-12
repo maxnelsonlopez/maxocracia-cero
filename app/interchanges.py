@@ -2,6 +2,7 @@ import json
 
 from flask import Blueprint, jsonify, request
 
+from .jwt_utils import token_required
 from .maxo import calculate_credit, credit_user
 from .utils import get_db
 
@@ -17,11 +18,18 @@ def list_interchanges():
 
 
 @bp.route("", methods=["POST"])
-def create_interchange():
+@token_required
+def create_interchange(current_user):
     data = request.get_json() or {}
     interchange_id = data.get("interchange_id")
-    giver_id = data.get("giver_id")
+    giver_id = current_user.get("user_id")
     receiver_id = data.get("receiver_id")
+    if giver_id is None or receiver_id is None:
+        return jsonify({"error": "receiver_id es requerido"}), 400
+    giver_id = int(giver_id)
+    receiver_id = int(receiver_id)
+    if giver_id == receiver_id:
+        return jsonify({"error": "no puedes intercambiar contigo mismo"}), 400
     description = data.get("description")
     uth_hours = float(data.get("uth_hours") or 0)
     impact_score = int(data.get("impact_resolution_score") or 0)

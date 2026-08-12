@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 
+from .jwt_utils import token_required
 from .utils import get_db
 
 bp = Blueprint("reputation", __name__, url_prefix="/reputation")
@@ -23,10 +24,17 @@ def get_reputation(user_id):
 
 
 @bp.route("/review", methods=["POST"])
-def add_review():
+@token_required
+def add_review(current_user):
     data = request.get_json() or {}
     user_id = data.get("user_id")
     score = float(data.get("score") or 0)
+    reviewer_uid = current_user.get("user_id")
+    if user_id is None:
+        return jsonify({"error": "user_id es requerido"}), 400
+    user_id = int(user_id)
+    if reviewer_uid is not None and user_id == reviewer_uid:
+        return jsonify({"error": "no puedes reseñarte a ti mismo (la reputación la construyen los demás)"}), 400
     db = get_db()
     cur = db.execute(
         "SELECT id, score, reviews_count FROM reputation WHERE user_id = ?", (user_id,)
