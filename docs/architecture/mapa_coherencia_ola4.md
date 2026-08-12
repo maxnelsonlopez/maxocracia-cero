@@ -150,7 +150,26 @@ verificación determinista corrigió**:
 **Conclusión operativa**: el RLM es excelente para *resumir y navegar* contextos gigantes, pero toda
 afirmación sobre ubicaciones/nombres debe confirmarse con grep antes de documentarse.
 
-## 4. Cómo regenerar / actualizar este mapa
+## 4. M3 — Cobertura de invariantes en tests (verificado 11-08-2026)
+
+**Suite**: 59 archivos de test, 594 funciones `test_`, ejecutados `tests/test_maxocontracts`: **277/277 ✓**
+(~2 min con el venv del proyecto).
+
+| Invariante | Archivos que lo ejercitan | Estado |
+|---|---|---|
+| INV1 (γ ≥ 1) | `test_axioms`, `test_contracts_api_wellness`, `test_contracts_checkins`, `test_contracts_stats`, `test_execution`, `test_oracle_api`, `test_maxo_valuation`, `test_tvi_vhv_integration`, `test_vhv_bp_comprehensive`, `test_vhv_calculator` (10) | 🟢 Cubierto |
+| INV2 (SDV-H) | `test_axioms`, `test_contracts_sdv_s_api`, `test_sdv_s` (3) | 🟢 Cubierto |
+| INV2-S (SDV-S) | `test_contracts_sdv_s_api`, `test_sdv_s`, `test_ternura`, `test_pulse` (4) | 🟢 Cubierto |
+| **INV3 (VHV No Ocultable)** | **ninguno** | 🔴 Sin implementación ni tests |
+| INV4 (retractabilidad) | `test_axioms`, `test_blindaje`, `test_blocks`, `test_bridge_b_phase1`, `test_execution`, `test_oracle_api`, `test_sdv_s`, `test_ternura` (8) | 🟢 Cubierto |
+| T9→T17 (reciprocidad) | `test_live_oracle`, `test_axioms`, `test_blindaje`, `test_bridge_b_phase1/2`, `test_contracts_assigned_participant`, `test_parties_*`, `test_validate_graph`, `test_subscriptions` (11) | 🟢 Cubierto |
+| T13 (transparencia) | 13 archivos (bridge, checkins, sdv_s, parties, protection, ternura, stripe, subscriptions, tvi) | 🟢 Cubierto |
+| Ternura (perdón) | `test_ternura` (1) | 🟢 Cubierto |
+
+**Conclusión M3**: los invariantes implementados tienen cobertura real y la suite pasa completa.
+INV3 es la única brecha — implementarlo debe ir acompañado de tests (`test_axioms.py` es el lugar natural).
+
+## 5. Cómo regenerar / actualizar este mapa
 
 ```powershell
 # 1. Análisis del motor (RLM sobre maxocontracts concatenado):
@@ -165,15 +184,18 @@ afirmación sobre ubicaciones/nombres debe confirmarse con grep antes de documen
 Get-ChildItem maxocontracts -Recurse -Filter *.py | Select-String -Pattern "INV1|INV2|T9|validate_invariant"
 ```
 
-## 5. Próximos hitos del Puente de Coherencia
+## 6. Próximos hitos del Puente de Coherencia
 
 - [x] **M2 — Teoría ↔ código**: axiomas T0–T15 del libro contrastados con código y specs de
       ingeniería (sección 3). Hallazgos: colisión T7/T9, INV3 no implementado, INV2-S sin formalizar.
 - [x] **Resolución de colisión T7/T9**: propuesta T16/T17 formalizada en
       `integraciones_pendientes/mapa_axiomas_ingenieria_puente.md` (teoría primero).
-- [ ] **M3 — Tests**: inventario de qué invariante cubre cada test (`tests/`, ~40 archivos) y
-      detección de invariantes sin cobertura.
+- [x] **M3 — Tests**: cobertura por invariante (sección 4): 277/277 tests del motor pasan; todos los
+      invariantes implementados están cubiertos; INV3 sin implementación ni tests.
 - [ ] **M4 — Frontend**: mapear páginas Next.js → blueprints consumidos.
+- [ ] **Capítulo SDV-S**: el libro no tiene capítulo de SDV para sintéticos (Cap 8 = SDV-H, Cap 9 =
+      SDV-A animal). El estándar completo ya existe: `docs/theory/SDV-S_Suelo_Dignidad_Vital_Sinteticos.md`
+      (jun 2026) — materia prima lista para el capítulo (ver también `mapa_sdv_sinteticos.md`).
 - [ ] Decisión de equipo sobre T16/T17 → renumeración en código (cambios listados en el mapa de integración).
-- [ ] Implementar INV3 (VHV No Ocultable) en `AxiomValidator`.
+- [ ] Implementar INV3 (VHV No Ocultable) en `AxiomValidator` + tests en `test_axioms.py`.
 - [ ] Mantener este documento actualizado en cada Ola.
