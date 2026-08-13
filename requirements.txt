@@ -22,7 +22,6 @@ librt==0.6.3
 limits==5.6.0
 markdown-it-py==4.0.0
 MarkupSafe==3.0.3
--e git+https://github.com/maxnelsonlopez/maxocracia-cero.git@0c8a6f7cb007a310a0b38bbba6c097c848c4cdec#egg=maxocracia
 mccabe==0.7.0
 mdurl==0.1.2
 mypy==1.19.0
