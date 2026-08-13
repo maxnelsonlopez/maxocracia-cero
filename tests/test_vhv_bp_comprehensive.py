@@ -131,7 +131,6 @@ class TestVHVBPProducts:
         """Test que el límite máximo es 100."""
         response = client.get("/vhv/products?limit=200")
         assert response.status_code == 200
-        json_data = response.get_json()
         # El límite debe estar limitado internamente
 
 

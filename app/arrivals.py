@@ -26,7 +26,7 @@ import hmac
 import os
 from typing import Optional
 
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, current_app, jsonify
 
 from .jwt_utils import admin_required
 from .utils import get_db
@@ -52,8 +52,14 @@ def sign_invite(email: str) -> str:
     El token no revela información a quien lo intercepte (base64 no es
     cifrado, pero el HMAC impide forjar invitaciones).
     """
-    raw = base64.urlsafe_b64encode(email.lower().encode("utf-8")).decode("ascii").rstrip("=")
-    sig = hmac.new(_secret().encode("utf-8"), email.lower().encode("utf-8"), hashlib.sha256).hexdigest()[:16]
+    raw = (
+        base64.urlsafe_b64encode(email.lower().encode("utf-8"))
+        .decode("ascii")
+        .rstrip("=")
+    )
+    sig = hmac.new(
+        _secret().encode("utf-8"), email.lower().encode("utf-8"), hashlib.sha256
+    ).hexdigest()[:16]
     return f"{raw}.{sig}"
 
 
@@ -65,7 +71,9 @@ def verify_invite(token: str) -> Optional[str]:
         email = base64.urlsafe_b64decode(padded.encode("ascii")).decode("utf-8").lower()
     except Exception:
         return None
-    expected = hmac.new(_secret().encode("utf-8"), email.encode("utf-8"), hashlib.sha256).hexdigest()[:16]
+    expected = hmac.new(
+        _secret().encode("utf-8"), email.encode("utf-8"), hashlib.sha256
+    ).hexdigest()[:16]
     if not hmac.compare_digest(sig, expected):
         return None
     return email
@@ -93,16 +101,18 @@ def invite(token: str):
 
     db = get_db()
     row = db.execute("SELECT id FROM users WHERE lower(email) = ?", (email,)).fetchone()
-    return jsonify({
-        "valid": True,
-        "email_masked": mask_email(email),
-        "already_registered": row is not None,
-        "welcome": (
-            "Bienvenido a la Cohorte. No hay prisa: primero tu pulso, luego tu acuerdo. "
-            "La voz en la gobernanza llega con el tiempo, no con prisa."
-        ),
-        "register_url": f"/register?email={email}",
-    })
+    return jsonify(
+        {
+            "valid": True,
+            "email_masked": mask_email(email),
+            "already_registered": row is not None,
+            "welcome": (
+                "Bienvenido a la Cohorte. No hay prisa: primero tu pulso, luego tu acuerdo. "
+                "La voz en la gobernanza llega con el tiempo, no con prisa."
+            ),
+            "register_url": f"/register?email={email}",
+        }
+    )
 
 
 @arrivals_bp.route("/quarantine", methods=["GET"])
@@ -113,14 +123,16 @@ def quarantine_list(current_user):
     rows = db.execute(
         "SELECT id, email, source, honeypot_hit, status, created_at FROM maxo_arrivals ORDER BY id DESC LIMIT 200"
     ).fetchall()
-    return jsonify([
-        {
-            "id": r["id"],
-            "email": r["email"],
-            "source": r["source"],
-            "honeypot_hit": bool(r["honeypot_hit"]),
-            "status": r["status"],
-            "created_at": r["created_at"],
-        }
-        for r in rows
-    ])
+    return jsonify(
+        [
+            {
+                "id": r["id"],
+                "email": r["email"],
+                "source": r["source"],
+                "honeypot_hit": bool(r["honeypot_hit"]),
+                "status": r["status"],
+                "created_at": r["created_at"],
+            }
+            for r in rows
+        ]
+    )

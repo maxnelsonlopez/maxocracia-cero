@@ -47,7 +47,7 @@ def seed_user(db_path, email, name="Test User"):
 def test_reputation_flow(client):
     db_path = client.application.config["DATABASE"]
     u = seed_user(db_path, "rep@example.test", "Rep")
-    reviewer = seed_user(db_path, "reviewer@example.test", "Reviewer")
+    seed_user(db_path, "reviewer@example.test", "Reviewer")
     token = _login(client, "reviewer@example.test")
 
     resp = client.get(f"/reputation/{u}")
@@ -55,8 +55,11 @@ def test_reputation_flow(client):
     data = resp.get_json()
     assert data["score"] == 0.0
 
-    resp = client.post("/reputation/review", json={"user_id": u, "score": 4.0},
-                       headers={"Authorization": f"Bearer {token}"})
+    resp = client.post(
+        "/reputation/review",
+        json={"user_id": u, "score": 4.0},
+        headers={"Authorization": f"Bearer {token}"},
+    )
     assert resp.status_code == 201
     resp = client.get(f"/reputation/{u}")
     assert resp.status_code == 200
@@ -72,15 +75,18 @@ def test_review_requiere_token_y_no_autoresena(client):
     resp = client.post("/reputation/review", json={"user_id": u, "score": 5.0})
     assert resp.status_code == 401
 
-    resp = client.post("/reputation/review", json={"user_id": u, "score": 5.0},
-                       headers={"Authorization": f"Bearer {token}"})
+    resp = client.post(
+        "/reputation/review",
+        json={"user_id": u, "score": 5.0},
+        headers={"Authorization": f"Bearer {token}"},
+    )
     assert resp.status_code == 400
     assert "a ti mismo" in resp.get_json()["error"]
 
 
 def test_resources_flow(client):
     db_path = client.application.config["DATABASE"]
-    u = seed_user(db_path, "res@example.test", "Res")
+    seed_user(db_path, "res@example.test", "Res")
     token = _login(client, "res@example.test")
     headers = {"Authorization": f"Bearer {token}"}
 

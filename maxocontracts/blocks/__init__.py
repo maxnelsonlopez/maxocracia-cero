@@ -1,12 +1,11 @@
 # Blocks subpackage for MaxoContracts
-from .condition import ConditionBlock
 from .action import ActionBlock
-from .gamma_protector import WellnessProtectorBlock
-from .gamma_protector import GammaProtectorBlock
-from .sdv_validator import SDVValidatorBlock
-from .sdv_s_validator import SDV_SValidatorBlock
+from .condition import ConditionBlock
+from .gamma_protector import GammaProtectorBlock, WellnessProtectorBlock
 from .reciprocity import ReciprocityBlock
-from .ternura import TernuraLayer, ForgivenessRecord, RehabilitationStatus
+from .sdv_s_validator import SDV_SValidatorBlock
+from .sdv_validator import SDVValidatorBlock
+from .ternura import ForgivenessRecord, RehabilitationStatus, TernuraLayer
 
 __all__ = [
     "ConditionBlock",
@@ -18,5 +17,5 @@ __all__ = [
     "ReciprocityBlock",
     "TernuraLayer",
     "ForgivenessRecord",
-    "RehabilitationStatus"
+    "RehabilitationStatus",
 ]

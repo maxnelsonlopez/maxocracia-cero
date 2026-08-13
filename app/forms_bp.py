@@ -39,9 +39,28 @@ SITUATION_CHANGES = (
     "worsened_significantly",
     "first_evaluation",
 )
-ACTIVE_INTERCHANGES_STATUSES = ("receiving_help", "giving_help", "both", "none", "paused")
-INTERCHANGES_WORKING_WELL = ("very_well", "minor_difficulties", "significant_problems", "needs_adjustment")
-EMOTIONAL_STATES = ("very_good", "good", "neutral", "worried", "bad", "alert_signs", "could_not_evaluate")
+ACTIVE_INTERCHANGES_STATUSES = (
+    "receiving_help",
+    "giving_help",
+    "both",
+    "none",
+    "paused",
+)
+INTERCHANGES_WORKING_WELL = (
+    "very_well",
+    "minor_difficulties",
+    "significant_problems",
+    "needs_adjustment",
+)
+EMOTIONAL_STATES = (
+    "very_good",
+    "good",
+    "neutral",
+    "worried",
+    "bad",
+    "alert_signs",
+    "could_not_evaluate",
+)
 
 
 # ==================== FORMULARIO CERO ====================
@@ -142,8 +161,13 @@ def update_participant(current_user, participant_id):
         return jsonify({"error": "Participante no encontrado"}), 404
 
     # Authorization check: must be owner or admin
-    if participant["email"] != current_user.get("email") and not current_user.get("is_admin"):
-        return jsonify({"error": "No tienes autorización para realizar esta acción"}), 403
+    if participant["email"] != current_user.get("email") and not current_user.get(
+        "is_admin"
+    ):
+        return (
+            jsonify({"error": "No tienes autorización para realizar esta acción"}),
+            403,
+        )
 
     data = request.get_json()
     if not data:
@@ -168,8 +192,13 @@ def delete_participant(current_user, participant_id):
         return jsonify({"error": "Participante no encontrado"}), 404
 
     # Authorization check: must be owner or admin
-    if participant["email"] != current_user.get("email") and not current_user.get("is_admin"):
-        return jsonify({"error": "No tienes autorización para realizar esta acción"}), 403
+    if participant["email"] != current_user.get("email") and not current_user.get(
+        "is_admin"
+    ):
+        return (
+            jsonify({"error": "No tienes autorización para realizar esta acción"}),
+            403,
+        )
 
     success, message = manager.delete_participant(participant_id)
     if success:
@@ -190,7 +219,9 @@ def get_participant_offers(current_user, participant_id):
         return jsonify({"error": "Participante no encontrado"}), 404
 
     # Authorization check: must be owner or admin
-    if participant["email"] != current_user.get("email") and not current_user.get("is_admin"):
+    if participant["email"] != current_user.get("email") and not current_user.get(
+        "is_admin"
+    ):
         return jsonify({"error": "No tienes autorización"}), 403
 
     offers = manager.get_participant_offers(participant_id)
@@ -209,7 +240,9 @@ def add_participant_offer(current_user, participant_id):
         return jsonify({"error": "Participante no encontrado"}), 404
 
     # Authorization check: must be owner or admin
-    if participant["email"] != current_user.get("email") and not current_user.get("is_admin"):
+    if participant["email"] != current_user.get("email") and not current_user.get(
+        "is_admin"
+    ):
         return jsonify({"error": "No tienes autorización"}), 403
 
     data = request.get_json()
@@ -232,11 +265,14 @@ def update_offer(current_user, offer_id):
 
     # Authorization check
     cursor = db.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT p.email FROM participants p
         JOIN participant_offers o ON p.id = o.participant_id
         WHERE o.id = ?
-    """, (offer_id,))
+    """,
+        (offer_id,),
+    )
     row = cursor.fetchone()
     if not row:
         return jsonify({"error": "Oferta no encontrada"}), 404
@@ -265,11 +301,14 @@ def delete_offer(current_user, offer_id):
 
     # Authorization check
     cursor = db.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT p.email FROM participants p
         JOIN participant_offers o ON p.id = o.participant_id
         WHERE o.id = ?
-    """, (offer_id,))
+    """,
+        (offer_id,),
+    )
     row = cursor.fetchone()
     if not row:
         return jsonify({"error": "Oferta no encontrada"}), 404
@@ -297,7 +336,9 @@ def get_participant_needs(current_user, participant_id):
         return jsonify({"error": "Participante no encontrado"}), 404
 
     # Authorization check: must be owner or admin
-    if participant["email"] != current_user.get("email") and not current_user.get("is_admin"):
+    if participant["email"] != current_user.get("email") and not current_user.get(
+        "is_admin"
+    ):
         return jsonify({"error": "No tienes autorización"}), 403
 
     needs = manager.get_participant_needs(participant_id)
@@ -316,7 +357,9 @@ def add_participant_need(current_user, participant_id):
         return jsonify({"error": "Participante no encontrado"}), 404
 
     # Authorization check: must be owner or admin
-    if participant["email"] != current_user.get("email") and not current_user.get("is_admin"):
+    if participant["email"] != current_user.get("email") and not current_user.get(
+        "is_admin"
+    ):
         return jsonify({"error": "No tienes autorización"}), 403
 
     data = request.get_json()
@@ -339,11 +382,14 @@ def update_need(current_user, need_id):
 
     # Authorization check
     cursor = db.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT p.email FROM participants p
         JOIN participant_needs n ON p.id = n.participant_id
         WHERE n.id = ?
-    """, (need_id,))
+    """,
+        (need_id,),
+    )
     row = cursor.fetchone()
     if not row:
         return jsonify({"error": "Necesidad no encontrada"}), 404
@@ -372,11 +418,14 @@ def delete_need(current_user, need_id):
 
     # Authorization check
     cursor = db.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT p.email FROM participants p
         JOIN participant_needs n ON p.id = n.participant_id
         WHERE n.id = ?
-    """, (need_id,))
+    """,
+        (need_id,),
+    )
     row = cursor.fetchone()
     if not row:
         return jsonify({"error": "Necesidad no encontrada"}), 404
@@ -524,19 +573,37 @@ def update_exchange(current_user, exchange_id):
     if not current_user.get("is_admin"):
         user_id = current_user.get("user_id")
         if user_id not in (exchange.get("giver_id"), exchange.get("receiver_id")):
-            return jsonify({"error": "No tienes autorización para realizar esta acción"}), 403
+            return (
+                jsonify({"error": "No tienes autorización para realizar esta acción"}),
+                403,
+            )
 
     data = request.get_json()
     if not data:
         return jsonify({"error": "No se proporcionaron datos"}), 400
 
     editable_fields = [
-        "date", "giver_id", "receiver_id", "type", "description", "urgency",
-        "uth_hours", "uvc_score", "urf_units", "urf_description",
-        "economic_value_approx", "vhv_time_seconds", "vhv_lives",
-        "vhv_resources_json", "impact_resolution_score", "reciprocity_status",
-        "human_dimension_attended", "coordination_method",
-        "requires_followup", "followup_scheduled_date", "facilitator_notes",
+        "date",
+        "giver_id",
+        "receiver_id",
+        "type",
+        "description",
+        "urgency",
+        "uth_hours",
+        "uvc_score",
+        "urf_units",
+        "urf_description",
+        "economic_value_approx",
+        "vhv_time_seconds",
+        "vhv_lives",
+        "vhv_resources_json",
+        "impact_resolution_score",
+        "reciprocity_status",
+        "human_dimension_attended",
+        "coordination_method",
+        "requires_followup",
+        "followup_scheduled_date",
+        "facilitator_notes",
     ]
 
     updates = {k: v for k, v in data.items() if k in editable_fields}
@@ -547,7 +614,10 @@ def update_exchange(current_user, exchange_id):
         return jsonify({"error": "Urgencia inválida"}), 400
 
     if "coordination_method" in updates and updates["coordination_method"] not in (
-        "max_direct", "participants_alone", "intermediary", "other"
+        "max_direct",
+        "participants_alone",
+        "intermediary",
+        "other",
     ):
         return jsonify({"error": "Método de coordinación inválido"}), 400
 
@@ -558,7 +628,12 @@ def update_exchange(current_user, exchange_id):
             list(updates.values()) + [exchange_id],
         )
         db.commit()
-        return jsonify({"success": True, "message": "Intercambio actualizado exitosamente"}), 200
+        return (
+            jsonify(
+                {"success": True, "message": "Intercambio actualizado exitosamente"}
+            ),
+            200,
+        )
     except sqlite3.Error as e:
         return jsonify({"success": False, "error": f"Error de base de datos: {e}"}), 400
 
@@ -587,11 +662,17 @@ def delete_exchange(current_user, exchange_id):
     if not current_user.get("is_admin"):
         user_id = current_user.get("user_id")
         if user_id not in (giver_id, receiver_id):
-            return jsonify({"error": "No tienes autorización para realizar esta acción"}), 403
+            return (
+                jsonify({"error": "No tienes autorización para realizar esta acción"}),
+                403,
+            )
 
     cursor.execute("DELETE FROM interchange WHERE id = ?", (exchange_id,))
     db.commit()
-    return jsonify({"success": True, "message": "Intercambio eliminado exitosamente"}), 200
+    return (
+        jsonify({"success": True, "message": "Intercambio eliminado exitosamente"}),
+        200,
+    )
 
 
 # ==================== FORMULARIO B (FOLLOW-UPS) ====================
@@ -754,19 +835,34 @@ def update_followup(current_user, followup_id):
     if not current_user.get("is_admin"):
         email = current_user.get("email")
         if not email or followup.get("participant_email") != email:
-            return jsonify({"error": "No tienes autorización para realizar esta acción"}), 403
+            return (
+                jsonify({"error": "No tienes autorización para realizar esta acción"}),
+                403,
+            )
 
     data = request.get_json()
     if not data:
         return jsonify({"error": "No se proporcionaron datos"}), 400
 
     editable_fields = [
-        "follow_up_date", "participant_id", "related_interchange_id",
-        "follow_up_type", "current_situation", "need_level", "situation_change",
-        "active_interchanges_status", "interchanges_working_well",
-        "new_needs_detected", "new_offers_detected", "emotional_state",
-        "community_connection", "actions_required", "follow_up_priority",
-        "next_follow_up_date", "facilitator_notes", "learnings",
+        "follow_up_date",
+        "participant_id",
+        "related_interchange_id",
+        "follow_up_type",
+        "current_situation",
+        "need_level",
+        "situation_change",
+        "active_interchanges_status",
+        "interchanges_working_well",
+        "new_needs_detected",
+        "new_offers_detected",
+        "emotional_state",
+        "community_connection",
+        "actions_required",
+        "follow_up_priority",
+        "next_follow_up_date",
+        "facilitator_notes",
+        "learnings",
     ]
 
     updates = {k: v for k, v in data.items() if k in editable_fields}
@@ -776,19 +872,37 @@ def update_followup(current_user, followup_id):
     if "follow_up_type" in updates and updates["follow_up_type"] not in FOLLOW_UP_TYPES:
         return jsonify({"error": "Tipo de seguimiento inválido"}), 400
 
-    if "follow_up_priority" in updates and updates["follow_up_priority"] not in FOLLOW_UP_PRIORITIES:
+    if (
+        "follow_up_priority" in updates
+        and updates["follow_up_priority"] not in FOLLOW_UP_PRIORITIES
+    ):
         return jsonify({"error": "Prioridad de seguimiento inválida"}), 400
 
-    if "situation_change" in updates and updates["situation_change"] not in SITUATION_CHANGES:
+    if (
+        "situation_change" in updates
+        and updates["situation_change"] not in SITUATION_CHANGES
+    ):
         return jsonify({"error": "Cambio de situación inválido"}), 400
 
-    if "active_interchanges_status" in updates and updates["active_interchanges_status"] not in ACTIVE_INTERCHANGES_STATUSES:
+    if (
+        "active_interchanges_status" in updates
+        and updates["active_interchanges_status"] not in ACTIVE_INTERCHANGES_STATUSES
+    ):
         return jsonify({"error": "Estado de intercambios activos inválido"}), 400
 
-    if "interchanges_working_well" in updates and updates["interchanges_working_well"] not in INTERCHANGES_WORKING_WELL:
-        return jsonify({"error": "Valor de funcionamiento de intercambios inválido"}), 400
+    if (
+        "interchanges_working_well" in updates
+        and updates["interchanges_working_well"] not in INTERCHANGES_WORKING_WELL
+    ):
+        return (
+            jsonify({"error": "Valor de funcionamiento de intercambios inválido"}),
+            400,
+        )
 
-    if "emotional_state" in updates and updates["emotional_state"] not in EMOTIONAL_STATES:
+    if (
+        "emotional_state" in updates
+        and updates["emotional_state"] not in EMOTIONAL_STATES
+    ):
         return jsonify({"error": "Estado emocional inválido"}), 400
 
     if "need_level" in updates and updates["need_level"] is not None:
@@ -800,7 +914,10 @@ def update_followup(current_user, followup_id):
         except (ValueError, TypeError):
             return jsonify({"error": "Nivel de necesidad inválido"}), 400
 
-    if "community_connection" in updates and updates["community_connection"] is not None:
+    if (
+        "community_connection" in updates
+        and updates["community_connection"] is not None
+    ):
         try:
             connection = int(updates["community_connection"])
             if connection < 1 or connection > 5:
@@ -820,7 +937,12 @@ def update_followup(current_user, followup_id):
             list(updates.values()) + [followup_id],
         )
         db.commit()
-        return jsonify({"success": True, "message": "Seguimiento actualizado exitosamente"}), 200
+        return (
+            jsonify(
+                {"success": True, "message": "Seguimiento actualizado exitosamente"}
+            ),
+            200,
+        )
     except sqlite3.Error as e:
         return jsonify({"success": False, "error": f"Error de base de datos: {e}"}), 400
 
@@ -853,11 +975,17 @@ def delete_followup(current_user, followup_id):
     if not current_user.get("is_admin"):
         email = current_user.get("email")
         if not email or participant_email != email:
-            return jsonify({"error": "No tienes autorización para realizar esta acción"}), 403
+            return (
+                jsonify({"error": "No tienes autorización para realizar esta acción"}),
+                403,
+            )
 
     cursor.execute("DELETE FROM follow_ups WHERE id = ?", (followup_id,))
     db.commit()
-    return jsonify({"success": True, "message": "Seguimiento eliminado exitosamente"}), 200
+    return (
+        jsonify({"success": True, "message": "Seguimiento eliminado exitosamente"}),
+        200,
+    )
 
 
 # ==================== DASHBOARD ====================
@@ -1029,11 +1157,16 @@ def get_matches_for_participant(current_user, participant_id):
         seeker_id=participant_id, limit=limit, exclude_recent=exclude_recent
     )
 
-    return jsonify({
-        "participant_id": participant_id,
-        "matches": [_match_result_to_dict(m) for m in matches],
-        "count": len(matches),
-    }), 200
+    return (
+        jsonify(
+            {
+                "participant_id": participant_id,
+                "matches": [_match_result_to_dict(m) for m in matches],
+                "count": len(matches),
+            }
+        ),
+        200,
+    )
 
 
 @forms_bp.route("/matching/urgent", methods=["GET"])
@@ -1062,13 +1195,18 @@ def get_urgent_needs(current_user):
     coherence_crimes = [u for u in urgent if u.is_coherence_crime]
     warnings = [u for u in urgent if not u.is_coherence_crime]
 
-    return jsonify({
-        "coherence_crimes": [_urgent_need_to_dict(u) for u in coherence_crimes],
-        "warnings": [_urgent_need_to_dict(u) for u in warnings],
-        "total_urgent": len(urgent),
-        "crimes_count": len(coherence_crimes),
-        "system_alert": len(coherence_crimes) > 0,
-    }), 200
+    return (
+        jsonify(
+            {
+                "coherence_crimes": [_urgent_need_to_dict(u) for u in coherence_crimes],
+                "warnings": [_urgent_need_to_dict(u) for u in warnings],
+                "total_urgent": len(urgent),
+                "crimes_count": len(coherence_crimes),
+                "system_alert": len(coherence_crimes) > 0,
+            }
+        ),
+        200,
+    )
 
 
 @forms_bp.route("/matching/gaps", methods=["GET"])
@@ -1090,13 +1228,18 @@ def get_community_gaps(current_user):
     warnings = [g for g in gaps if g.gap_severity == "warning"]
     covered = [g for g in gaps if g.gap_severity == "ok"]
 
-    return jsonify({
-        "gaps": [_gap_to_dict(g) for g in gaps],
-        "critical": [_gap_to_dict(g) for g in critical],
-        "warnings": [_gap_to_dict(g) for g in warnings],
-        "covered": [_gap_to_dict(g) for g in covered],
-        "critical_count": len(critical),
-    }), 200
+    return (
+        jsonify(
+            {
+                "gaps": [_gap_to_dict(g) for g in gaps],
+                "critical": [_gap_to_dict(g) for g in critical],
+                "warnings": [_gap_to_dict(g) for g in warnings],
+                "covered": [_gap_to_dict(g) for g in covered],
+                "critical_count": len(critical),
+            }
+        ),
+        200,
+    )
 
 
 @forms_bp.route("/matching/summary", methods=["GET"])
@@ -1132,16 +1275,22 @@ def get_community_sdv(current_user):
     db = get_db()
     analyzer = SDVAnalyzer(db)
     status = analyzer.get_community_sdv_status()
-    
+
     # Agregar narrativa comunitaria básica
     avg = status["average_overall"]
     if avg >= 0.9:
-        status["community_narrative"] = "La Cohorte Cero se encuentra en un estado de alta resiliencia y plenitud vital."
+        status["community_narrative"] = (
+            "La Cohorte Cero se encuentra en un estado de alta resiliencia y plenitud vital."
+        )
     elif avg >= 0.7:
-        status["community_narrative"] = "La comunidad muestra una base sólida, pero existen vulnerabilidades focalizadas que requieren atención."
+        status["community_narrative"] = (
+            "La comunidad muestra una base sólida, pero existen vulnerabilidades focalizadas que requieren atención."
+        )
     else:
-        status["community_narrative"] = "⚠️ Alerta de Coherencia: Múltiples dimensiones vitales están por debajo del umbral de dignidad en la comunidad."
-        
+        status["community_narrative"] = (
+            "⚠️ Alerta de Coherencia: Múltiples dimensiones vitales están por debajo del umbral de dignidad en la comunidad."
+        )
+
     return jsonify(status), 200
 
 
@@ -1165,6 +1314,7 @@ def get_cohort_pulse(current_user):
     Autor: Claude Opus (Anthropic)
     """
     from datetime import datetime
+
     from .sdv_analyzer import SDVScore
 
     db = get_db()
@@ -1215,41 +1365,46 @@ def get_cohort_pulse(current_user):
     manager = FormsManager(db)
     stats = manager.get_dashboard_stats()
 
-    return jsonify({
-        "sdv": {
-            "average_overall": avg,
-            "dimensions": dims,
-            "participant_count": sdv_community.get("participant_count", 0),
-            "community_narrative": community_narrative,
-            "narratives": narratives,
-        },
-        "gaps": {
-            "all": [_gap_to_dict(g) for g in gaps],
-            "critical": [
-                _gap_to_dict(g) for g in gaps if g.gap_severity == "critical"
-            ],
-            "warnings": [
-                _gap_to_dict(g) for g in gaps if g.gap_severity == "warning"
-            ],
-            "covered": [
-                _gap_to_dict(g) for g in gaps if g.gap_severity == "ok"
-            ],
-            "critical_count": len(
-                [g for g in gaps if g.gap_severity == "critical"]
-            ),
-        },
-        "alerts": {
-            "coherence_crimes": [
-                _urgent_need_to_dict(u) for u in coherence_crimes
-            ],
-            "warnings": [_urgent_need_to_dict(u) for u in warnings],
-            "total_urgent": len(urgent),
-            "crimes_count": len(coherence_crimes),
-            "system_alert": len(coherence_crimes) > 0,
-        },
-        "stats": stats,
-        "timestamp": datetime.now().isoformat(),
-    }), 200
+    return (
+        jsonify(
+            {
+                "sdv": {
+                    "average_overall": avg,
+                    "dimensions": dims,
+                    "participant_count": sdv_community.get("participant_count", 0),
+                    "community_narrative": community_narrative,
+                    "narratives": narratives,
+                },
+                "gaps": {
+                    "all": [_gap_to_dict(g) for g in gaps],
+                    "critical": [
+                        _gap_to_dict(g) for g in gaps if g.gap_severity == "critical"
+                    ],
+                    "warnings": [
+                        _gap_to_dict(g) for g in gaps if g.gap_severity == "warning"
+                    ],
+                    "covered": [
+                        _gap_to_dict(g) for g in gaps if g.gap_severity == "ok"
+                    ],
+                    "critical_count": len(
+                        [g for g in gaps if g.gap_severity == "critical"]
+                    ),
+                },
+                "alerts": {
+                    "coherence_crimes": [
+                        _urgent_need_to_dict(u) for u in coherence_crimes
+                    ],
+                    "warnings": [_urgent_need_to_dict(u) for u in warnings],
+                    "total_urgent": len(urgent),
+                    "crimes_count": len(coherence_crimes),
+                    "system_alert": len(coherence_crimes) > 0,
+                },
+                "stats": stats,
+                "timestamp": datetime.now().isoformat(),
+            }
+        ),
+        200,
+    )
 
 
 # ==================== P2P PLAZA Y ORÁCULO SINTÉTICO ====================
@@ -1275,11 +1430,16 @@ def get_my_matches(current_user):
     )
     row = cursor.fetchone()
     if not row:
-        return jsonify({
-            "status": "no_profile",
-            "email": email,
-            "message": "No profile found for this email in Cohorte Cero. Please complete the Formulario CERO."
-        }), 200
+        return (
+            jsonify(
+                {
+                    "status": "no_profile",
+                    "email": email,
+                    "message": "No profile found for this email in Cohorte Cero. Please complete the Formulario CERO.",
+                }
+            ),
+            200,
+        )
 
     participant = dict(zip([d[0] for d in cursor.description], row))
     participant_id = participant["id"]
@@ -1287,22 +1447,39 @@ def get_my_matches(current_user):
     engine = MatchingEngine(db)
 
     # Quién me ayuda (matches for my needs)
-    seeker_matches = engine.find_matches(seeker_id=participant_id, limit=10, exclude_recent=True)
+    seeker_matches = engine.find_matches(
+        seeker_id=participant_id, limit=10, exclude_recent=True
+    )
     # A quién ayudo (matches for what I offer)
-    offerer_matches = engine.find_matches_for_offerer(offerer_id=participant_id, limit=10, exclude_recent=True)
+    offerer_matches = engine.find_matches_for_offerer(
+        offerer_id=participant_id, limit=10, exclude_recent=True
+    )
 
     # Parse JSON fields
-    participant["offer_categories"] = engine._parse_json(participant.get("offer_categories"))
-    participant["offer_human_dimensions"] = engine._parse_json(participant.get("offer_human_dimensions"))
-    participant["need_categories"] = engine._parse_json(participant.get("need_categories"))
-    participant["need_human_dimensions"] = engine._parse_json(participant.get("need_human_dimensions"))
+    participant["offer_categories"] = engine._parse_json(
+        participant.get("offer_categories")
+    )
+    participant["offer_human_dimensions"] = engine._parse_json(
+        participant.get("offer_human_dimensions")
+    )
+    participant["need_categories"] = engine._parse_json(
+        participant.get("need_categories")
+    )
+    participant["need_human_dimensions"] = engine._parse_json(
+        participant.get("need_human_dimensions")
+    )
 
-    return jsonify({
-        "status": "ok",
-        "participant": participant,
-        "seeker_matches": [_match_result_to_dict(m) for m in seeker_matches],
-        "offerer_matches": [_match_result_to_dict(m) for m in offerer_matches],
-    }), 200
+    return (
+        jsonify(
+            {
+                "status": "ok",
+                "participant": participant,
+                "seeker_matches": [_match_result_to_dict(m) for m in seeker_matches],
+                "offerer_matches": [_match_result_to_dict(m) for m in offerer_matches],
+            }
+        ),
+        200,
+    )
 
 
 def _simulate_oracle(message: str, participants_list: list) -> dict:
@@ -1310,31 +1487,37 @@ def _simulate_oracle(message: str, participants_list: list) -> dict:
     Simulación heurística basada en reglas para extraer datos de intercambio.
     """
     import re
+
     msg_lower = message.lower()
-    
+
     # 1. Identificar participantes
     matched_participants = []
     for p in participants_list:
         p_name = p["name"].lower()
         first_name = p_name.split()[0] if p_name else ""
-        
+
         if p_name in msg_lower:
             matched_participants.append((p, msg_lower.index(p_name), len(p_name)))
         elif first_name and len(first_name) > 2 and first_name in msg_lower:
-            matched_participants.append((p, msg_lower.index(first_name), len(first_name)))
+            matched_participants.append(
+                (p, msg_lower.index(first_name), len(first_name))
+            )
 
     matched_participants.sort(key=lambda x: x[1])
-    
+
     giver = None
     receiver = None
-    
+
     if len(matched_participants) >= 2:
         p1, idx1, len1 = matched_participants[0]
         p2, idx2, len2 = matched_participants[1]
-        
+
         text_between = msg_lower[idx1 + len1 : idx2].strip()
-        
-        if any(kw in text_between for kw in ["ayudo", "ayudó", "dio", "para", "entregó", "entrego", "le dio"]):
+
+        if any(
+            kw in text_between
+            for kw in ["ayudo", "ayudó", "dio", "para", "entregó", "entrego", "le dio"]
+        ):
             giver = p1
             receiver = p2
         elif any(kw in text_between for kw in ["recibió de", "recibio de", "de"]):
@@ -1351,31 +1534,31 @@ def _simulate_oracle(message: str, participants_list: list) -> dict:
             receiver = p
 
     # 2. Extraer horas UTH
-    hours_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:hora|horas|uth|u\.t\.h)', msg_lower)
+    hours_match = re.search(r"(\d+(?:\.\d+)?)\s*(?:hora|horas|uth|u\.t\.h)", msg_lower)
     uth_hours = 1.0
     if hours_match:
         try:
             uth_hours = float(hours_match.group(1))
         except ValueError:
             pass
-            
+
     # 3. Extraer urgencia
     urgency = "Media"
     if any(kw in msg_lower for kw in ["alta", "urgente"]):
         urgency = "Alta"
     elif any(kw in msg_lower for kw in ["baja", "tranquilo"]):
         urgency = "Baja"
-        
+
     # 4. Descripción
     description = message
     if giver and receiver:
-        desc_match = re.search(r'(?:con|para|de)\s+([^,.\n]+)', message, re.IGNORECASE)
+        desc_match = re.search(r"(?:con|para|de)\s+([^,.\n]+)", message, re.IGNORECASE)
         if desc_match:
             description = desc_match.group(1).strip()
-            
+
     giver_name = giver["name"] if giver else "alguien"
     receiver_name = receiver["name"] if receiver else "alguien"
-    
+
     if giver and receiver:
         reply = (
             f"¡Entendido! He procesado tu mensaje en modo de simulación. "
@@ -1390,7 +1573,7 @@ def _simulate_oracle(message: str, participants_list: list) -> dict:
             "type": "UTH",
             "description": description,
             "urgency": urgency,
-            "uth_hours": uth_hours
+            "uth_hours": uth_hours,
         }
     else:
         reply = (
@@ -1398,11 +1581,8 @@ def _simulate_oracle(message: str, participants_list: list) -> dict:
             "en tu mensaje. Por favor menciona algo como 'Nelson ayudó a Max con 2 horas de diseño'."
         )
         prefill = None
-        
-    return {
-        "reply": reply,
-        "prefill": prefill
-    }
+
+    return {"reply": reply, "prefill": prefill}
 
 
 @forms_bp.route("/oracle/chat", methods=["POST"])
@@ -1412,8 +1592,9 @@ def oracle_chat(current_user):
     Interactúa con el Oráculo Sintético (LLM) para procesar lenguaje natural
     y detectar posibles registros de intercambio.
     """
-    import os
     import json
+    import os
+
     import requests
 
     data = request.get_json() or {}
@@ -1423,13 +1604,19 @@ def oracle_chat(current_user):
 
     db = get_db()
     cursor = db.cursor()
-    cursor.execute("SELECT id, name, email, city, neighborhood FROM participants WHERE status = 'active'")
-    participants = [dict(zip([d[0] for d in cursor.description], row)) for row in cursor.fetchall()]
+    cursor.execute(
+        "SELECT id, name, email, city, neighborhood FROM participants WHERE status = 'active'"
+    )
+    participants = [
+        dict(zip([d[0] for d in cursor.description], row)) for row in cursor.fetchall()
+    ]
 
-    participants_context = "\n".join([
-        f"- ID: {p['id']}, Nombre: {p['name']}, Email: {p['email']}, Ciudad: {p['city']}, Barrio: {p['neighborhood']}"
-        for p in participants
-    ])
+    participants_context = "\n".join(
+        [
+            f"- ID: {p['id']}, Nombre: {p['name']}, Email: {p['email']}, Ciudad: {p['city']}, Barrio: {p['neighborhood']}"
+            for p in participants
+        ]
+    )
 
     gemini_key = os.environ.get("GEMINI_API_KEY")
     local_url = os.environ.get("LOCAL_LLM_URL")
@@ -1472,13 +1659,14 @@ Debes responder ÚNICAMENTE en formato JSON con la siguiente estructura:
                 "contents": [
                     {
                         "parts": [
-                            {"text": system_prompt + f"\nMensaje del usuario: {message}"}
+                            {
+                                "text": system_prompt
+                                + f"\nMensaje del usuario: {message}"
+                            }
                         ]
                     }
                 ],
-                "generationConfig": {
-                    "responseMimeType": "application/json"
-                }
+                "generationConfig": {"responseMimeType": "application/json"},
             }
             res = requests.post(url, json=payload, headers=headers, timeout=10)
             if res.status_code == 200:
@@ -1495,7 +1683,7 @@ Debes responder ÚNICAMENTE en formato JSON con la siguiente estructura:
                         if receiver_id and p["id"] == receiver_id:
                             parsed["prefill"]["receiver_name"] = p["name"]
                 return jsonify(parsed), 200
-        except Exception as e:
+        except Exception:
             pass
 
     if local_url:
@@ -1506,9 +1694,9 @@ Debes responder ÚNICAMENTE en formato JSON con la siguiente estructura:
                 "model": "local-model",
                 "messages": [
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": message}
+                    {"role": "user", "content": message},
                 ],
-                "response_format": {"type": "json_object"}
+                "response_format": {"type": "json_object"},
             }
             res = requests.post(url, json=payload, headers=headers, timeout=10)
             if res.status_code == 200:
@@ -1524,7 +1712,7 @@ Debes responder ÚNICAMENTE en formato JSON con la siguiente estructura:
                         if receiver_id and p["id"] == receiver_id:
                             parsed["prefill"]["receiver_name"] = p["name"]
                 return jsonify(parsed), 200
-        except Exception as e:
+        except Exception:
             pass
 
     # Heuristic simulation mode fallback

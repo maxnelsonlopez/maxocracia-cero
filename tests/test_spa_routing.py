@@ -12,7 +12,9 @@ Cubre:
 
 import os
 
-os.environ['SECRET_KEY'] = 'test-secret'
+os.environ["SECRET_KEY"] = "test-secret"
+
+import tempfile
 
 import pytest
 
@@ -20,10 +22,13 @@ from app import _dotform_to_dirform, create_app
 from app.contracts_bp import _alias_dynamic_segments
 from app.utils import get_db
 
-import tempfile
-
-DIST_INDEX = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                          "app", "static", "dist", "index.html")
+DIST_INDEX = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "app",
+    "static",
+    "dist",
+    "index.html",
+)
 HAS_DIST = os.path.exists(DIST_INDEX)
 
 
@@ -31,12 +36,12 @@ HAS_DIST = os.path.exists(DIST_INDEX)
 def client():
     db_fd, db_path = tempfile.mkstemp()
     app = create_app(db_path=db_path)
-    app.config['TESTING'] = True
+    app.config["TESTING"] = True
 
     with app.test_client() as test_client:
         with app.app_context():
             db = get_db()
-            with open('app/schema.sql', 'r', encoding='utf-8') as f:
+            with open("app/schema.sql", "r", encoding="utf-8") as f:
                 db.executescript(f.read())
             db.execute(
                 "INSERT INTO users (id, email, name, password_hash) VALUES (1, 'a@test.com', 'Alice', 'hash')"
@@ -49,30 +54,40 @@ def client():
 
 
 def test_dotform_to_dirform_basic_segment():
-    assert _dotform_to_dirform("admin/network/__next.admin.network.txt") == \
-        "admin/network/__next.admin/network.txt"
+    assert (
+        _dotform_to_dirform("admin/network/__next.admin.network.txt")
+        == "admin/network/__next.admin/network.txt"
+    )
 
 
 def test_dotform_to_dirform_page_segment():
-    assert _dotform_to_dirform("admin/network/__next.admin.network.__PAGE__.txt") == \
-        "admin/network/__next.admin/network/__PAGE__.txt"
+    assert (
+        _dotform_to_dirform("admin/network/__next.admin.network.__PAGE__.txt")
+        == "admin/network/__next.admin/network/__PAGE__.txt"
+    )
 
 
 def test_dotform_to_dirform_single_segment():
-    assert _dotform_to_dirform("micromax/__next.micromax.__PAGE__.txt") == \
-        "micromax/__next.micromax/__PAGE__.txt"
+    assert (
+        _dotform_to_dirform("micromax/__next.micromax.__PAGE__.txt")
+        == "micromax/__next.micromax/__PAGE__.txt"
+    )
 
 
 def test_dotform_to_dirform_nested():
-    assert _dotform_to_dirform("forms/cero/__next.forms.cero.txt") == \
-        "forms/cero/__next.forms/cero.txt"
+    assert (
+        _dotform_to_dirform("forms/cero/__next.forms.cero.txt")
+        == "forms/cero/__next.forms/cero.txt"
+    )
 
 
 def test_dotform_to_dirform_flat_tree_file():
     # Los archivos _tree/_head/_index ya existen en forma de puntos y
     # el mapeo los deja intactos.
-    assert _dotform_to_dirform("admin/dashboard/__next._tree.txt") == \
-        "admin/dashboard/__next._tree.txt"
+    assert (
+        _dotform_to_dirform("admin/dashboard/__next._tree.txt")
+        == "admin/dashboard/__next._tree.txt"
+    )
 
 
 def test_dotform_to_dirform_non_rsc_returns_none():
@@ -84,30 +99,56 @@ def test_dotform_to_dirform_non_rsc_returns_none():
 
 # --- Alias de la ruta dinámica /contracts/<id> ---
 
+
 def test_alias_dynamic_segment_page_payload():
-    assert _alias_dynamic_segments("contracts/demo-sdv-s-001.txt") == "contracts/placeholder.txt"
-    assert _alias_dynamic_segments("contracts/demo-sdv-s-001.html") == "contracts/placeholder.html"
+    assert (
+        _alias_dynamic_segments("contracts/demo-sdv-s-001.txt")
+        == "contracts/placeholder.txt"
+    )
+    assert (
+        _alias_dynamic_segments("contracts/demo-sdv-s-001.html")
+        == "contracts/placeholder.html"
+    )
 
 
 def test_alias_dynamic_segment_nested_payloads():
-    assert _alias_dynamic_segments("contracts/demo-sdv-s-001/__next._tree.txt") == \
-        "contracts/placeholder/__next._tree.txt"
-    assert _alias_dynamic_segments("contracts/demo-sdv-s-001/__next.contracts.demo-sdv-s-001.txt") == \
-        "contracts/placeholder/__next.contracts.placeholder.txt"
-    assert _alias_dynamic_segments("contracts/demo-sdv-s-001/__next.contracts.demo-sdv-s-001.__PAGE__.txt") == \
-        "contracts/placeholder/__next.contracts.placeholder.__PAGE__.txt"
+    assert (
+        _alias_dynamic_segments("contracts/demo-sdv-s-001/__next._tree.txt")
+        == "contracts/placeholder/__next._tree.txt"
+    )
+    assert (
+        _alias_dynamic_segments(
+            "contracts/demo-sdv-s-001/__next.contracts.demo-sdv-s-001.txt"
+        )
+        == "contracts/placeholder/__next.contracts.placeholder.txt"
+    )
+    assert (
+        _alias_dynamic_segments(
+            "contracts/demo-sdv-s-001/__next.contracts.demo-sdv-s-001.__PAGE__.txt"
+        )
+        == "contracts/placeholder/__next.contracts.placeholder.__PAGE__.txt"
+    )
 
 
 def test_alias_dynamic_segment_no_alias_for_static_routes():
     assert _alias_dynamic_segments("contracts/builder.txt") == "contracts/builder.txt"
     assert _alias_dynamic_segments("contracts/builder.html") == "contracts/builder.html"
-    assert _alias_dynamic_segments("contracts/negotiate.txt") == "contracts/negotiate.txt"
-    assert _alias_dynamic_segments("contracts/negotiate.html") == "contracts/negotiate.html"
-    assert _alias_dynamic_segments("contracts/__next.contracts.txt") == "contracts/__next.contracts.txt"
+    assert (
+        _alias_dynamic_segments("contracts/negotiate.txt") == "contracts/negotiate.txt"
+    )
+    assert (
+        _alias_dynamic_segments("contracts/negotiate.html")
+        == "contracts/negotiate.html"
+    )
+    assert (
+        _alias_dynamic_segments("contracts/__next.contracts.txt")
+        == "contracts/__next.contracts.txt"
+    )
     assert _alias_dynamic_segments("contracts.txt") == "contracts.txt"
 
 
 # --- Despacho del before_request (frontend vs API) ---
+
 
 @pytest.mark.skipif(not HAS_DIST, reason="frontend estático no construido")
 def test_rsc_payload_dinamico_servido_sin_token(client):

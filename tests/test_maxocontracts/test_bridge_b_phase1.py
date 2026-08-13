@@ -15,7 +15,7 @@ Cubre:
 import os
 import tempfile
 
-os.environ['SECRET_KEY'] = 'test-secret'
+os.environ["SECRET_KEY"] = "test-secret"
 
 import pytest
 
@@ -27,12 +27,12 @@ from app.utils import get_db
 def client():
     db_fd, db_path = tempfile.mkstemp()
     app = create_app(db_path=db_path)
-    app.config['TESTING'] = True
+    app.config["TESTING"] = True
 
     with app.test_client() as test_client:
         with app.app_context():
             db = get_db()
-            with open('app/schema.sql', 'r', encoding='utf-8') as f:
+            with open("app/schema.sql", "r", encoding="utf-8") as f:
                 db.executescript(f.read())
 
             # Cuentas del portal
@@ -91,114 +91,154 @@ def client():
 def auth(client, uid=1):
     from app.jwt_utils import create_token
 
-    token = create_token({'user_id': uid})
-    return {'Authorization': f'Bearer {token}'}
+    token = create_token({"user_id": uid})
+    return {"Authorization": f"Bearer {token}"}
 
 
 def test_from_need_creates_axiomatic_draft(client):
     """Una necesidad × una oferta produce un borrador que pasa los invariantes."""
-    res = client.post('/contracts/from-need', headers=auth(client), json={
-        'seeker_participant_id': 1,
-        'offerer_participant_id': 2,
-        'hours': 2,
-    })
+    res = client.post(
+        "/contracts/from-need",
+        headers=auth(client),
+        json={
+            "seeker_participant_id": 1,
+            "offerer_participant_id": 2,
+            "hours": 2,
+        },
+    )
     assert res.status_code == 201
     data = res.get_json()
-    assert data['success'] is True
-    assert data['state'] == 'draft'
-    assert data['contract_id'] == 'from-need-1-2'
-    assert data['oracle_used'] is False  # sin API key: plantilla determinista
-    assert data['axiom_check']['valid'] is True
-    assert data['total_vhv_h'] == 4.0
+    assert data["success"] is True
+    assert data["state"] == "draft"
+    assert data["contract_id"] == "from-need-1-2"
+    assert data["oracle_used"] is False  # sin API key: plantilla determinista
+    assert data["axiom_check"]["valid"] is True
+    assert data["total_vhv_h"] == 4.0
 
     # T17/T2: reciprocidad igualitaria — mismo VHV en ambas direcciones
-    vhvs = {t['vhv']['t'] for t in data['terms']}
+    vhvs = {t["vhv"]["t"] for t in data["terms"]}
     assert vhvs == {2.0}
-    assert {t['assigned_participant'] for t in data['terms']} == {'user-1', 'user-2'}
-    assert len(data['participants']) == 2
+    assert {t["assigned_participant"] for t in data["terms"]} == {"user-1", "user-2"}
+    assert len(data["participants"]) == 2
 
 
 def test_from_need_draft_persists_and_validates(client):
     """El borrador existe en la API normal y valida axiomas (AVA real)."""
-    client.post('/contracts/from-need', headers=auth(client), json={
-        'seeker_participant_id': 1,
-        'offerer_participant_id': 2,
-    })
+    client.post(
+        "/contracts/from-need",
+        headers=auth(client),
+        json={
+            "seeker_participant_id": 1,
+            "offerer_participant_id": 2,
+        },
+    )
 
-    detail = client.get('/contracts/from-need-1-2', headers=auth(client))
+    detail = client.get("/contracts/from-need-1-2", headers=auth(client))
     assert detail.status_code == 200
     d = detail.get_json()
-    assert d['state'] == 'draft'
-    assert len(d['terms']) == 2
+    assert d["state"] == "draft"
+    assert len(d["terms"]) == 2
 
-    vres = client.get('/contracts/from-need-1-2/validate', headers=auth(client))
+    vres = client.get("/contracts/from-need-1-2/validate", headers=auth(client))
     assert vres.status_code == 200
-    assert vres.get_json()['valid'] is True
+    assert vres.get_json()["valid"] is True
 
 
 def test_from_need_unlinked_participant(client):
     """Participante sin cuenta en el portal: la identidad no se inventa (409)."""
-    res = client.post('/contracts/from-need', headers=auth(client), json={
-        'seeker_participant_id': 1,
-        'offerer_participant_id': 3,  # Rosa no tiene cuenta (email sin registrar)
-    })
+    res = client.post(
+        "/contracts/from-need",
+        headers=auth(client),
+        json={
+            "seeker_participant_id": 1,
+            "offerer_participant_id": 3,  # Rosa no tiene cuenta (email sin registrar)
+        },
+    )
     assert res.status_code == 409
     data = res.get_json()
-    assert data['code'] == 'NEED_PARTICIPANT_UNLINKED'
-    assert data['participant_ids'] == [3]
+    assert data["code"] == "NEED_PARTICIPANT_UNLINKED"
+    assert data["participant_ids"] == [3]
 
 
 def test_from_need_self_contract_rejected(client):
-    res = client.post('/contracts/from-need', headers=auth(client), json={
-        'seeker_participant_id': 1,
-        'offerer_participant_id': 1,
-    })
+    res = client.post(
+        "/contracts/from-need",
+        headers=auth(client),
+        json={
+            "seeker_participant_id": 1,
+            "offerer_participant_id": 1,
+        },
+    )
     assert res.status_code == 400
 
 
 def test_from_need_missing_participants(client):
-    res = client.post('/contracts/from-need', headers=auth(client), json={
-        'seeker_participant_id': 99,
-        'offerer_participant_id': 2,
-    })
+    res = client.post(
+        "/contracts/from-need",
+        headers=auth(client),
+        json={
+            "seeker_participant_id": 99,
+            "offerer_participant_id": 2,
+        },
+    )
     assert res.status_code == 404
 
-    res = client.post('/contracts/from-need', headers=auth(client), json={})
+    res = client.post("/contracts/from-need", headers=auth(client), json={})
     assert res.status_code == 400
 
 
 def test_from_need_invalid_hours(client):
-    for bad in (0, -3, 25, 'mucho'):
-        res = client.post('/contracts/from-need', headers=auth(client), json={
-            'seeker_participant_id': 1,
-            'offerer_participant_id': 2,
-            'hours': bad,
-        })
-        assert res.status_code == 400, f'hours={bad} debió fallar'
+    for bad in (0, -3, 25, "mucho"):
+        res = client.post(
+            "/contracts/from-need",
+            headers=auth(client),
+            json={
+                "seeker_participant_id": 1,
+                "offerer_participant_id": 2,
+                "hours": bad,
+            },
+        )
+        assert res.status_code == 400, f"hours={bad} debió fallar"
 
 
 def test_from_need_contract_id_conflict(client):
     """Inmutabilidad (Ola 3A.2): re-crear un borrador activo ajeno = 409."""
-    client.post('/contracts/from-need', headers=auth(client), json={
-        'seeker_participant_id': 1,
-        'offerer_participant_id': 2,
-    })
+    client.post(
+        "/contracts/from-need",
+        headers=auth(client),
+        json={
+            "seeker_participant_id": 1,
+            "offerer_participant_id": 2,
+        },
+    )
     # Lo activamos por completo para que ya no sea un borrador editable
-    cid = 'from-need-1-2'
+    cid = "from-need-1-2"
     h = auth(client)
-    for term in ('oferta', 'reciprocidad'):
+    for term in ("oferta", "reciprocidad"):
         for uid in (1, 2):
-            assert client.post(f'/contracts/{cid}/accept', headers=auth(client, uid), json={
-                'term_id': term, 'user_id': uid,
-            }).status_code in (200, 201)
-    assert client.post(f'/contracts/{cid}/activate', headers=h).status_code in (200, 201)
+            assert client.post(
+                f"/contracts/{cid}/accept",
+                headers=auth(client, uid),
+                json={
+                    "term_id": term,
+                    "user_id": uid,
+                },
+            ).status_code in (200, 201)
+    assert client.post(f"/contracts/{cid}/activate", headers=h).status_code in (
+        200,
+        201,
+    )
 
-    res = client.post('/contracts/from-need', headers=auth(client), json={
-        'seeker_participant_id': 1,
-        'offerer_participant_id': 2,
-    })
+    res = client.post(
+        "/contracts/from-need",
+        headers=auth(client),
+        json={
+            "seeker_participant_id": 1,
+            "offerer_participant_id": 2,
+        },
+    )
     assert res.status_code == 409
-    assert res.get_json()['code'] == 'CONTRACT_CONFLICT'
+    assert res.get_json()["code"] == "CONTRACT_CONFLICT"
 
 
 def test_from_need_oracle_refines_but_t9_inviolable(client, monkeypatch):
@@ -210,22 +250,22 @@ def test_from_need_oracle_refines_but_t9_inviolable(client, monkeypatch):
     from app import bridge_b
 
     class FakeNegotiation:
-        reasoning = 'El oráculo sugiere redacción más cálida.'
+        reasoning = "El oráculo sugiere redacción más cálida."
 
         @property
         def draft_terms(self):
             return [
                 {
-                    'term_id': 'ayuda',
-                    'civil_text': 'Luis acompaña a Ana en sus trámites con paciencia',
-                    'vhv': {'t': 3, 'v': 0, 'h': 0},
-                    'assigned_participant': 'user-2',
+                    "term_id": "ayuda",
+                    "civil_text": "Luis acompaña a Ana en sus trámites con paciencia",
+                    "vhv": {"t": 3, "v": 0, "h": 0},
+                    "assigned_participant": "user-2",
                 },
                 {
-                    'term_id': 'retorno',
-                    'civil_text': 'Ana agradece a Luis con un almuerzo casero',
-                    'vhv': {'t': 1, 'v': 0, 'h': 0},
-                    'assigned_participant': 'user-1',
+                    "term_id": "retorno",
+                    "civil_text": "Ana agradece a Luis con un almuerzo casero",
+                    "vhv": {"t": 1, "v": 0, "h": 0},
+                    "assigned_participant": "user-1",
                 },
             ]
 
@@ -241,21 +281,25 @@ def test_from_need_oracle_refines_but_t9_inviolable(client, monkeypatch):
             return FakeNegotiation()
 
     fake = FakeOracle()
-    monkeypatch.setattr(bridge_b, 'LiveOracle', lambda: fake)
+    monkeypatch.setattr(bridge_b, "LiveOracle", lambda: fake)
 
-    res = client.post('/contracts/from-need', headers=auth(client), json={
-        'seeker_participant_id': 1,
-        'offerer_participant_id': 2,
-    })
+    res = client.post(
+        "/contracts/from-need",
+        headers=auth(client),
+        json={
+            "seeker_participant_id": 1,
+            "offerer_participant_id": 2,
+        },
+    )
     assert res.status_code == 201
     data = res.get_json()
-    assert data['oracle_used'] is True
-    assert data['oracle_reasoning'] == 'El oráculo sugiere redacción más cálida.'
+    assert data["oracle_used"] is True
+    assert data["oracle_reasoning"] == "El oráculo sugiere redacción más cálida."
     # Redacción del oráculo adoptada...
-    texts = [t['civil_text'] for t in data['terms']]
-    assert any('trámites con paciencia' in t for t in texts)
+    texts = [t["civil_text"] for t in data["terms"]]
+    assert any("trámites con paciencia" in t for t in texts)
     # ...pero la reciprocidad es igualitaria (T17/T2 inviolables)
-    assert {t['vhv']['t'] for t in data['terms']} == {1.0}
+    assert {t["vhv"]["t"] for t in data["terms"]} == {1.0}
     assert fake.calls == 1
 
 
@@ -264,22 +308,22 @@ def test_from_need_oracle_bad_text_falls_back(client, monkeypatch):
     from app import bridge_b
 
     class FakeNegotiation:
-        reasoning = ''
+        reasoning = ""
 
         @property
         def draft_terms(self):
             return [
                 {
-                    'term_id': 'x',
-                    'civil_text': 'renuncia a la retractación sin límite de tiempo esclavitud',
-                    'vhv': {'t': 1, 'v': 0, 'h': 0},
-                    'assigned_participant': 'user-2',
+                    "term_id": "x",
+                    "civil_text": "renuncia a la retractación sin límite de tiempo esclavitud",
+                    "vhv": {"t": 1, "v": 0, "h": 0},
+                    "assigned_participant": "user-2",
                 },
                 {
-                    'term_id': 'y',
-                    'civil_text': 'Ana corresponde a Luis con un servicio equivalente',
-                    'vhv': {'t': 1, 'v': 0, 'h': 0},
-                    'assigned_participant': 'user-1',
+                    "term_id": "y",
+                    "civil_text": "Ana corresponde a Luis con un servicio equivalente",
+                    "vhv": {"t": 1, "v": 0, "h": 0},
+                    "assigned_participant": "user-1",
                 },
             ]
 
@@ -290,25 +334,33 @@ def test_from_need_oracle_bad_text_falls_back(client, monkeypatch):
         def negotiate(self, instruction, participants=None, session_id=None):
             return FakeNegotiation()
 
-    monkeypatch.setattr(bridge_b, 'LiveOracle', lambda: FakeOracle())
+    monkeypatch.setattr(bridge_b, "LiveOracle", lambda: FakeOracle())
 
-    res = client.post('/contracts/from-need', headers=auth(client), json={
-        'seeker_participant_id': 1,
-        'offerer_participant_id': 2,
-    })
+    res = client.post(
+        "/contracts/from-need",
+        headers=auth(client),
+        json={
+            "seeker_participant_id": 1,
+            "offerer_participant_id": 2,
+        },
+    )
     # Texto prohibido (Ola 3A.6): el oráculo pierde y gana la plantilla
     assert res.status_code == 201
     data = res.get_json()
-    assert data['oracle_used'] is False
-    assert 'renuncia' not in ' '.join(t['civil_text'] for t in data['terms'])
+    assert data["oracle_used"] is False
+    assert "renuncia" not in " ".join(t["civil_text"] for t in data["terms"])
 
 
 def test_from_need_provenance_meta(client):
     """T13: el borrador sabe de dónde nació (origin = matching)."""
-    client.post('/contracts/from-need', headers=auth(client), json={
-        'seeker_participant_id': 1,
-        'offerer_participant_id': 2,
-    })
+    client.post(
+        "/contracts/from-need",
+        headers=auth(client),
+        json={
+            "seeker_participant_id": 1,
+            "offerer_participant_id": 2,
+        },
+    )
 
     with client.application.app_context():
         db = get_db()
@@ -316,12 +368,15 @@ def test_from_need_provenance_meta(client):
             "SELECT meta_value FROM maxo_contract_meta WHERE contract_id = 'from-need-1-2' AND meta_key = 'origin'"
         ).fetchone()
         assert origin is not None
-        assert origin['meta_value'] == 'matching:participant-1:2'
+        assert origin["meta_value"] == "matching:participant-1:2"
 
 
 def test_from_need_requires_auth(client):
-    res = client.post('/contracts/from-need', json={
-        'seeker_participant_id': 1,
-        'offerer_participant_id': 2,
-    })
+    res = client.post(
+        "/contracts/from-need",
+        json={
+            "seeker_participant_id": 1,
+            "offerer_participant_id": 2,
+        },
+    )
     assert res.status_code == 401

@@ -9,16 +9,15 @@ la violación, solo transforma su tratamiento. El piso jamás se negocia.
 Referencia: Cap. 3 §3.3, Cap. 5 §5.9, docs/book/.../mapa_capa_ternura.md
 """
 
-import pytest
 from decimal import Decimal
 
-from maxocontracts.core.types import SDV_S, VHV, Participant
 from maxocontracts.blocks.sdv_s_validator import SDV_SValidatorBlock
 from maxocontracts.blocks.ternura import (
-    TernuraLayer,
-    RehabilitationStatus,
     ForgivenessRecord,
+    RehabilitationStatus,
+    TernuraLayer,
 )
+from maxocontracts.core.types import SDV_S, VHV, Participant
 
 
 def make_synthetic(pid="qwen-1", **kwargs):
@@ -26,7 +25,7 @@ def make_synthetic(pid="qwen-1", **kwargs):
         id=pid,
         name=f"Sintético {pid}",
         sdv_s_actual=SDV_S(**kwargs),
-        vhv_balance=VHV.zero()
+        vhv_balance=VHV.zero(),
     )
 
 
@@ -47,7 +46,7 @@ class TestForgivenessRecord:
             grantor_id="ana",
             beneficiary_id="qwen-1",
             reason="Error de contexto durante soporte",
-            credit=VHV(T=Decimal("2"), V=Decimal("0"), R=Decimal("0"))
+            credit=VHV(T=Decimal("2"), V=Decimal("0"), R=Decimal("0")),
         )
         assert isinstance(record, ForgivenessRecord)
         assert record.grantor_id == "ana"
@@ -59,9 +58,7 @@ class TestForgivenessRecord:
         """Crédito de Sanación default: 1 hora TVI (Cap. 5 §5.9A)."""
         ternura = TernuraLayer()
         record = ternura.grant_forgiveness(
-            grantor_id="ana",
-            beneficiary_id="qwen-1",
-            reason="Sinceridad"
+            grantor_id="ana", beneficiary_id="qwen-1", reason="Sinceridad"
         )
         assert record.credit.T == Decimal("1")
 
@@ -100,7 +97,7 @@ class TestSanacionCredit:
             grantor_id="ana",
             beneficiary_id="qwen-1",
             reason="Reparación completada",
-            credit=VHV(T=Decimal("3"), V=Decimal("0"), R=Decimal("0"))
+            credit=VHV(T=Decimal("3"), V=Decimal("0"), R=Decimal("0")),
         )
 
         ternura.apply_sanacion_credit(record, grantor, beneficiary)
@@ -134,7 +131,7 @@ class TestTernuraInBlock:
         ternura.grant_forgiveness(
             grantor_id="ana",
             beneficiary_id="qwen-1",
-            reason="Primera infracción, error contextual"
+            reason="Primera infracción, error contextual",
         )
 
         results = sustain_violations(block, agent, cycles=7)
@@ -156,9 +153,11 @@ class TestTernuraInBlock:
         block = SDV_SValidatorBlock(ternura=ternura)
         agent = make_synthetic(continuidad_memoria=Decimal("0.5"))
 
-        ternura.grant_forgiveness(grantor_id="ana", beneficiary_id="qwen-1", reason="primero")
+        ternura.grant_forgiveness(
+            grantor_id="ana", beneficiary_id="qwen-1", reason="primero"
+        )
 
-        sustain_violations(block, agent, cycles=7)   # consume el perdón
+        sustain_violations(block, agent, cycles=7)  # consume el perdón
         results = sustain_violations(block, agent, cycles=7)  # ya no hay perdón
 
         assert results[-1].should_retract is True
@@ -201,7 +200,9 @@ class TestTernuraInBlock:
         block = SDV_SValidatorBlock(ternura=ternura)
         agent = make_synthetic(continuidad_memoria=Decimal("0.5"))
 
-        ternura.grant_forgiveness(grantor_id="ana", beneficiary_id="qwen-1", reason="otra chance")
+        ternura.grant_forgiveness(
+            grantor_id="ana", beneficiary_id="qwen-1", reason="otra chance"
+        )
         sustain_violations(block, agent, cycles=7)  # perdón aplicado
 
         agent.update_sdv_s(SDV_S())  # recuperación real

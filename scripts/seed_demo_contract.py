@@ -38,6 +38,7 @@ def _user_id_from_token(token):
     except Exception:
         return None
 
+
 CONTRACT_ID = "demo-intercambio-10h"
 
 DEMO_USERS = [
@@ -91,7 +92,9 @@ def main():
                 user_ids[u["name"]] = _user_id_from_token(data["access_token"])
             else:
                 # Ya existe: obtener token para leer su id
-                login = client.post("/auth/login", json={"email": u["email"], "password": u["password"]})
+                login = client.post(
+                    "/auth/login", json={"email": u["email"], "password": u["password"]}
+                )
                 if login.status_code == 200:
                     token = login.get_json()["access_token"]
                     user_ids[u["name"]] = _user_id_from_token(token)
@@ -105,12 +108,21 @@ def main():
         # Eliminar contrato previo si existe
         with app.app_context():
             from app.utils import get_db
+
             db = get_db()
-            db.execute("DELETE FROM maxo_contracts WHERE contract_id = ?", (CONTRACT_ID,))
+            db.execute(
+                "DELETE FROM maxo_contracts WHERE contract_id = ?", (CONTRACT_ID,)
+            )
             db.commit()
 
         # Token del creador (Max)
-        login = client.post("/auth/login", json={"email": DEMO_USERS[0]["email"], "password": DEMO_USERS[0]["password"]})
+        login = client.post(
+            "/auth/login",
+            json={
+                "email": DEMO_USERS[0]["email"],
+                "password": DEMO_USERS[0]["password"],
+            },
+        )
         token = login.get_json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
 
@@ -125,23 +137,27 @@ def main():
             elif t["term_id"] == "aval-caro":
                 t["assigned_participant_id"] = f"user-{user_ids['Caro']}"
 
-        res = client.post("/contracts/", headers=headers, json={
-            "contract_id": CONTRACT_ID,
-            "civil_description": (
-                "Intercambio ético: Max ofrece 10 horas de trabajo; "
-                "Ana ofrece a cambio un objeto, 10 horas de trabajo o un servicio."
-            ),
-            # Blindaje (Ola 3A): el demo es asimétrico (10h vs 3h) y declara
-            # la asimetría explícitamente; sin reflexión forzada para demo.
-            "min_reflection_hours": 0,
-            "participants": [
-                {"user_id": user_ids["Max"], "wellness": 1.0},
-                {"user_id": user_ids["Ana"], "wellness": 1.0},
-                {"user_id": user_ids["Luis"], "wellness": 1.0},
-                {"user_id": user_ids["Caro"], "wellness": 1.0},
-            ],
-            "terms": TERMS,
-        })
+        res = client.post(
+            "/contracts/",
+            headers=headers,
+            json={
+                "contract_id": CONTRACT_ID,
+                "civil_description": (
+                    "Intercambio ético: Max ofrece 10 horas de trabajo; "
+                    "Ana ofrece a cambio un objeto, 10 horas de trabajo o un servicio."
+                ),
+                # Blindaje (Ola 3A): el demo es asimétrico (10h vs 3h) y declara
+                # la asimetría explícitamente; sin reflexión forzada para demo.
+                "min_reflection_hours": 0,
+                "participants": [
+                    {"user_id": user_ids["Max"], "wellness": 1.0},
+                    {"user_id": user_ids["Ana"], "wellness": 1.0},
+                    {"user_id": user_ids["Luis"], "wellness": 1.0},
+                    {"user_id": user_ids["Caro"], "wellness": 1.0},
+                ],
+                "terms": TERMS,
+            },
+        )
 
         if res.status_code != 201:
             print(f"ERROR al crear el contrato: {res.status_code} {res.get_json()}")
@@ -150,7 +166,9 @@ def main():
         # Reconocimiento explícito de la asimetría (Ola 3A.4, T17 ejecutable):
         # cada parte obligada (y el aval) firma la asimetría con su token.
         for u in DEMO_USERS:
-            login = client.post("/auth/login", json={"email": u["email"], "password": u["password"]})
+            login = client.post(
+                "/auth/login", json={"email": u["email"], "password": u["password"]}
+            )
             uid = user_ids[u["name"]]
             ack = client.post(
                 f"/contracts/{CONTRACT_ID}/acknowledge-asymmetry",
@@ -158,7 +176,9 @@ def main():
                 json={"party_id": f"user-{uid}"},
             )
             if ack.status_code != 200:
-                print(f"  ! {u['name']}: no pudo reconocer la asimetría ({ack.status_code})")
+                print(
+                    f"  ! {u['name']}: no pudo reconocer la asimetría ({ack.status_code})"
+                )
 
         print("=" * 60)
         print(f"OK: Contrato demo creado: {CONTRACT_ID}")
@@ -169,7 +189,9 @@ def main():
         print("\nTérminos y partes obligadas:")
         for t in TERMS:
             print(f"   - {t['civil_text']}")
-            print(f"     -> Obligada: {t['assigned_participant_id']} · T={t['vhv']['t']}h")
+            print(
+                f"     -> Obligada: {t['assigned_participant_id']} · T={t['vhv']['t']}h"
+            )
         print("\nAbre en el navegador:")
         print("   http://127.0.0.1:5001/contracts/demo-intercambio-10h")
         print("   (Panel Visual | Documento Legal — firma como cada co-firmante)")

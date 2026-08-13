@@ -62,7 +62,9 @@ def auth(client):
 def _create(client, auth, **over):
     payload = {
         "title": over.get("title", "Ajustamos la tolerancia de matching?"),
-        "description": over.get("description", "Propuesta operativa de la Cohorte Cero"),
+        "description": over.get(
+            "description", "Propuesta operativa de la Cohorte Cero"
+        ),
         "category": over.get("category", "operational"),
         "options": over.get("options", ["Si", "No"]),
         "reason": over.get("reason", ""),
@@ -82,8 +84,9 @@ def test_crear_propuesta_operativa(client, auth):
 
 
 def test_crear_propuesta_critical_consenso_75(client, auth):
-    resp = _create(client, auth, category="critical",
-                   title="Ajustamos el valor del Maxo?")
+    resp = _create(
+        client, auth, category="critical", title="Ajustamos el valor del Maxo?"
+    )
     assert resp.status_code == 201
     data = resp.get_json()
     assert data["proposal"]["majority_ratio"] == 0.75
@@ -101,10 +104,14 @@ def test_crear_propuesta_opciones_invalidas(client, auth):
 
 def test_votar_y_quorum_no_alcanzado(client, auth):
     pid = _create(client, auth).get_json()["proposal"]["id"]
-    resp = client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(1))
+    resp = client.post(
+        f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(1)
+    )
     assert resp.status_code == 200
 
-    resp = client.post(f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True))
+    resp = client.post(
+        f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True)
+    )
     data = resp.get_json()
     assert resp.status_code == 200
     assert data["proposal"]["result"] == "quorum_not_met"  # 1 voto de 4 usuarios
@@ -113,22 +120,30 @@ def test_votar_y_quorum_no_alcanzado(client, auth):
 def test_votacion_un_voto_por_persona(client, auth):
     pid = _create(client, auth).get_json()["proposal"]["id"]
     client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(1))
-    resp = client.post(f"/voting/proposals/{pid}/vote", json={"option": "No"}, headers=auth(1))
+    resp = client.post(
+        f"/voting/proposals/{pid}/vote", json={"option": "No"}, headers=auth(1)
+    )
     assert resp.status_code == 409
 
 
 def test_opcion_invalida(client, auth):
     pid = _create(client, auth).get_json()["proposal"]["id"]
-    resp = client.post(f"/voting/proposals/{pid}/vote", json={"option": "Quizas"}, headers=auth(1))
+    resp = client.post(
+        f"/voting/proposals/{pid}/vote", json={"option": "Quizas"}, headers=auth(1)
+    )
     assert resp.status_code == 400
 
 
 def test_consenso_critico_75_porciento(client, auth):
     pid = _create(client, auth, category="critical").get_json()["proposal"]["id"]
     for uid in (1, 2, 3):
-        client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(uid))
+        client.post(
+            f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(uid)
+        )
 
-    resp = client.post(f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True))
+    resp = client.post(
+        f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True)
+    )
     data = resp.get_json()["proposal"]
     assert data["result"] == "passed"  # 3/4 quorum ok, 3/3 = 100% > 75%
     assert data["result_detail"]["winner"] == "Si"
@@ -140,25 +155,34 @@ def test_consenso_critico_rechazado_por_minoria(client, auth):
     client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(2))
     client.post(f"/voting/proposals/{pid}/vote", json={"option": "No"}, headers=auth(3))
 
-    resp = client.post(f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True))
+    resp = client.post(
+        f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True)
+    )
     data = resp.get_json()["proposal"]
     assert data["result"] == "rejected"  # 3/4 quorum ok, 2/3 = 66% < 75%
 
 
 def test_emergency_requiere_mayoria_60(client, auth):
-    pid = _create(client, auth, category="emergency",
-                  title="Veto por sufrimiento sintetico").get_json()["proposal"]["id"]
+    pid = _create(
+        client, auth, category="emergency", title="Veto por sufrimiento sintetico"
+    ).get_json()["proposal"]["id"]
     for uid in (1, 2, 3):
-        client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(uid))
+        client.post(
+            f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(uid)
+        )
 
-    resp = client.post(f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True))
+    resp = client.post(
+        f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True)
+    )
     assert resp.get_json()["proposal"]["result"] == "passed"
 
 
 def test_votar_propuesta_cerrada(client, auth):
     pid = _create(client, auth).get_json()["proposal"]["id"]
     client.post(f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True))
-    resp = client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(2))
+    resp = client.post(
+        f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(2)
+    )
     assert resp.status_code == 409
 
 
@@ -180,41 +204,74 @@ def test_stats_publicas(client, auth):
 
 
 FAKE_ANALYSIS = {
-    "vhv": {"vitalTime": 100, "affectedLives": 5, "finiteResources": 300,
-            "timeFactor": 1.2, "confidence": 0.8},
+    "vhv": {
+        "vitalTime": 100,
+        "affectedLives": 5,
+        "finiteResources": 300,
+        "timeFactor": 1.2,
+        "confidence": 0.8,
+    },
     "axiomReport": [
-        {"type": "TRUTH", "passed": True, "score": 90, "reasoning": "Datos verificables"},
+        {
+            "type": "TRUTH",
+            "passed": True,
+            "score": 90,
+            "reasoning": "Datos verificables",
+        },
         {"type": "TIME", "passed": True, "score": 75, "reasoning": "Respeta T2"},
-        {"type": "LIFE", "passed": False, "score": 40, "reasoning": "Aumenta sufrimiento"},
+        {
+            "type": "LIFE",
+            "passed": False,
+            "score": 40,
+            "reasoning": "Aumenta sufrimiento",
+        },
     ],
     "oracleOpinions": [
-        {"role": "Economic", "verdict": "Approve", "analysis": "Rentable", "confidence": 0.8},
-        {"role": "Social", "verdict": "Reject", "analysis": "Desplaza comunidad", "confidence": 0.9},
+        {
+            "role": "Economic",
+            "verdict": "Approve",
+            "analysis": "Rentable",
+            "confidence": 0.8,
+        },
+        {
+            "role": "Social",
+            "verdict": "Reject",
+            "analysis": "Desplaza comunidad",
+            "confidence": 0.9,
+        },
     ],
 }
 
 
 def test_analisis_oraculo_persiste_y_expone(client, auth, monkeypatch):
     """El análisis DeepSeek se persiste (T13) y aparece en el detalle público."""
-    import app.voting_bp as voting_bp
     from app import voting_oracle
 
     monkeypatch.setenv("DEEPSEEK_API_KEY", "test-key")
-    monkeypatch.setattr(voting_oracle, "_call_deepseek", lambda messages, temperature=0.2: FAKE_ANALYSIS)
+    monkeypatch.setattr(
+        voting_oracle, "_call_deepseek", lambda messages, temperature=0.2: FAKE_ANALYSIS
+    )
 
     pid = _create(client, auth).get_json()["proposal"]["id"]
     resp = client.post(f"/voting/proposals/{pid}/analyze", json={}, headers=auth(1))
     assert resp.status_code == 200
     data = resp.get_json()
     assert data["oracle_analysis"]["analysis"]["vhv"]["vitalTime"] == 100
-    assert data["oracle_analysis"]["analysis"]["vhv"]["totalScore"] == 180000  # (100*5*300)*1.2
+    assert (
+        data["oracle_analysis"]["analysis"]["vhv"]["totalScore"] == 180000
+    )  # (100*5*300)*1.2
     assert len(data["oracle_analysis"]["analysis"]["axiomReport"]) == 3
     # 2 oráculos base + el Disidente Permanente (Cap. 19) en segunda pasada
     assert len(data["oracle_analysis"]["analysis"]["oracleOpinions"]) == 3
-    assert data["oracle_analysis"]["analysis"]["oracleOpinions"][-1]["role"] == "Dissident"
+    assert (
+        data["oracle_analysis"]["analysis"]["oracleOpinions"][-1]["role"] == "Dissident"
+    )
 
     detail = client.get(f"/voting/proposals/{pid}").get_json()
-    assert detail["oracle_analysis"]["analysis"]["oracleOpinions"][1]["verdict"] == "Reject"
+    assert (
+        detail["oracle_analysis"]["analysis"]["oracleOpinions"][1]["verdict"]
+        == "Reject"
+    )
 
 
 def test_analisis_sin_fuentes_devuelve_503(client, auth, monkeypatch):
@@ -228,13 +285,18 @@ def test_analisis_sin_fuentes_devuelve_503(client, auth, monkeypatch):
 
 def test_analisis_fallback_local_cuando_deepseek_falla(client, auth, monkeypatch):
     """Si DeepSeek falla, el oráculo local (Jan) produce el análisis (engine=local)."""
-    import app.voting_bp as voting_bp
     from app import voting_oracle
 
     monkeypatch.setenv("DEEPSEEK_API_KEY", "test-key")
     monkeypatch.setenv("LOCAL_ORACLE_ENABLED", "true")
-    monkeypatch.setattr(voting_oracle, "_call_deepseek", lambda m, temperature=0.2: (_ for _ in ()).throw(RuntimeError("nube caída")))
-    monkeypatch.setattr(voting_oracle, "_call_local", lambda m, temperature=0.2: FAKE_ANALYSIS)
+    monkeypatch.setattr(
+        voting_oracle,
+        "_call_deepseek",
+        lambda m, temperature=0.2: (_ for _ in ()).throw(RuntimeError("nube caída")),
+    )
+    monkeypatch.setattr(
+        voting_oracle, "_call_local", lambda m, temperature=0.2: FAKE_ANALYSIS
+    )
 
     pid = _create(client, auth).get_json()["proposal"]["id"]
     resp = client.post(f"/voting/proposals/{pid}/analyze", json={}, headers=auth(1))
@@ -253,14 +315,18 @@ def test_delegacion_arrastra_voto(client, auth):
     """El delegatario vota y arrastra al delegante que no votó (democracia líquida)."""
     pid = _create(client, auth, category="critical").get_json()["proposal"]["id"]
 
-    resp = client.post("/voting/delegations", json={"delegatee_user_id": 2}, headers=auth(1))
+    resp = client.post(
+        "/voting/delegations", json={"delegatee_user_id": 2}, headers=auth(1)
+    )
     assert resp.status_code == 200
 
     client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(2))
     client.post(f"/voting/proposals/{pid}/vote", json={"option": "No"}, headers=auth(3))
     client.post(f"/voting/proposals/{pid}/vote", json={"option": "No"}, headers=auth(4))
 
-    resp = client.post(f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True))
+    resp = client.post(
+        f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True)
+    )
     data = resp.get_json()["proposal"]
     # 3 votos directos (quorum 3/4) + 1 delegado (usuario 1 -> usuario 2, votó Si)
     # efectivos: Si=2, No=2 -> empate 50% < 75% (crítica), rechazada
@@ -278,7 +344,9 @@ def test_voto_directo_anula_delegacion(client, auth):
     client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(2))
     client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(3))
 
-    resp = client.post(f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True))
+    resp = client.post(
+        f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True)
+    )
     data = resp.get_json()["proposal"]
     # directos: No(1), Si(2), Si(3) -> Si=2/3 aprobada; el voto No de 1 anula la delegación
     assert data["result_detail"]["delegated_votes"] == 0
@@ -286,7 +354,9 @@ def test_voto_directo_anula_delegacion(client, auth):
 
 
 def test_delegacion_a_si_mismo_rechazada(client, auth):
-    resp = client.post("/voting/delegations", json={"delegatee_user_id": 1}, headers=auth(1))
+    resp = client.post(
+        "/voting/delegations", json={"delegatee_user_id": 1}, headers=auth(1)
+    )
     assert resp.status_code == 400
 
 
@@ -310,6 +380,7 @@ def test_revocar_delegacion(client, auth):
 def _seed_tvi(client, uid, hours, tag=0):
     """Registra TVI (vida consciente) para un usuario con fechas únicas."""
     from datetime import datetime, timedelta
+
     start = datetime(2026, 8, 1, 8, 0) + timedelta(hours=tag)
     end = start + timedelta(hours=hours)
     with client.application.app_context():
@@ -332,12 +403,16 @@ def test_ponderacion_tvi_cambia_resultado(client, auth):
     client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(2))
     client.post(f"/voting/proposals/{pid}/vote", json={"option": "No"}, headers=auth(3))
 
-    resp = client.post(f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True))
+    resp = client.post(
+        f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True)
+    )
     data = resp.get_json()["proposal"]
     detail = data["result_detail"]
     assert data["result"] == "passed"  # con pesos: Si = 1 + 5 = 6/7 = 85.7%
     assert detail["tvi_weighting"] == "participation_intelligence"
-    assert detail["winner_fraction"] == round(2 / 3, 4)  # conteo simple sigue siendo 66%
+    assert detail["winner_fraction"] == round(
+        2 / 3, 4
+    )  # conteo simple sigue siendo 66%
     assert detail["weighted_fraction"] == round(6 / 7, 4)
     assert detail["option_weights"] == {"Si": 6.0, "No": 1.0}
     assert detail["tvi_hours"] == {"1": 0.0, "2": 40.0, "3": 0.0}
@@ -350,7 +425,9 @@ def test_ponderacion_sin_tvi_retrocompatible(client, auth):
     client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(2))
     client.post(f"/voting/proposals/{pid}/vote", json={"option": "No"}, headers=auth(3))
 
-    resp = client.post(f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True))
+    resp = client.post(
+        f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True)
+    )
     data = resp.get_json()["proposal"]
     detail = data["result_detail"]
     assert data["result"] == "rejected"  # 66% < 75%, igual que sin ponderación
@@ -364,9 +441,13 @@ def test_ponderacion_normalizada_al_mayor_tvi(client, auth):
     _seed_tvi(client, 4, 10.0, tag=2)
     pid = _create(client, auth, category="operational").get_json()["proposal"]["id"]
     for uid in (2, 4):
-        client.post(f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(uid))
+        client.post(
+            f"/voting/proposals/{pid}/vote", json={"option": "Si"}, headers=auth(uid)
+        )
 
-    resp = client.post(f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True))
+    resp = client.post(
+        f"/voting/proposals/{pid}/close", json={}, headers=auth(1, admin=True)
+    )
     detail = resp.get_json()["proposal"]["result_detail"]
     assert detail["option_weights"] == {"Si": 7.0}  # 5 + 2
     assert detail["tvi_hours"] == {"2": 40.0, "4": 10.0}

@@ -42,7 +42,10 @@ def claim_resource(current_user, res_id):
     if requester_id is None:
         return jsonify({"error": "autenticación requerida"}), 401
     requester_id = int(requester_id)
-    if data.get("requester_id") is not None and int(data.get("requester_id")) != requester_id:
+    if (
+        data.get("requester_id") is not None
+        and int(data.get("requester_id")) != requester_id
+    ):
         return jsonify({"error": "no puedes reclamar en nombre de otro usuario"}), 403
     db = get_db()
     cur = db.execute(

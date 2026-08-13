@@ -44,7 +44,7 @@ def seed_user(db_path, email, name="Tester"):
 
 def test_interchange_vhv_fields(client):
     db_path = client.application.config["DATABASE"]
-    giver_id = seed_user(db_path, "a@example.test")
+    seed_user(db_path, "a@example.test")
     receiver_id = seed_user(db_path, "b@example.test")
     token = _login(client, "a@example.test")
 
@@ -61,8 +61,9 @@ def test_interchange_vhv_fields(client):
         "vhv_resources": {"energia_kwh": 1.8, "agua_l": 0.12, "co2_kg": 0.9},
     }
 
-    resp = client.post("/interchanges", json=payload,
-                       headers={"Authorization": f"Bearer {token}"})
+    resp = client.post(
+        "/interchanges", json=payload, headers={"Authorization": f"Bearer {token}"}
+    )
     assert resp.status_code == 201, resp.data
 
     conn = sqlite3.connect(db_path)

@@ -1,6 +1,14 @@
 # Core module for MaxoContracts
-from .types import VHV, Wellness, SDV, MaxoAmount, ContractState
 from .axioms import AxiomValidator
 from .contract import MaxoContract
+from .types import SDV, VHV, ContractState, MaxoAmount, Wellness
 
-__all__ = ["VHV", "Wellness", "SDV", "MaxoAmount", "ContractState", "AxiomValidator", "MaxoContract"]
+__all__ = [
+    "VHV",
+    "Wellness",
+    "SDV",
+    "MaxoAmount",
+    "ContractState",
+    "AxiomValidator",
+    "MaxoContract",
+]

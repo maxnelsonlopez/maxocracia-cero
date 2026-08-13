@@ -1,11 +1,17 @@
 import json
 import sqlite3
-import pytest
+
 from app.forms_manager import FormsManager
 from app.matching import MatchingEngine
 
 
-def register_test_participant(client, email="test@example.com", name="Test User", offer_cat="tiempo", need_cat="alimentacion"):
+def register_test_participant(
+    client,
+    email="test@example.com",
+    name="Test User",
+    offer_cat="tiempo",
+    need_cat="alimentacion",
+):
     data = {
         "name": name,
         "email": email,
@@ -40,9 +46,9 @@ def test_secondary_offers_crud(app, client, auth_client, admin_client, auth):
         "description": "Clases de matemáticas de refuerzo",
         "categories": ["conocimiento", "habilidad"],
         "human_dimensions": ["crecimiento_aprendizaje"],
-        "status": "active"
+        "status": "active",
     }
-    
+
     # Try adding without token (unauthenticated) - should return 401
     token = client.environ_base.pop("HTTP_AUTHORIZATION", None)
     res = client.post(f"/forms/participants/{pid}/offers", json=offer_data)
@@ -66,17 +72,14 @@ def test_secondary_offers_crud(app, client, auth_client, admin_client, auth):
     assert "crecimiento_aprendizaje" in offers[0]["human_dimensions"]
 
     # 4. Update secondary offer (PUT)
-    update_data = {
-        "description": "Clases de física y matemáticas",
-        "status": "paused"
-    }
+    update_data = {"description": "Clases de física y matemáticas", "status": "paused"}
 
     # Try updating as non-owner (test2)
     # Login as test2
     login_res = auth.login(email="test2@example.com", password="ValidPass123!")
     assert login_res.status_code == 200
     token2 = login_res.get_json().get("access_token")
-    
+
     headers = {"Authorization": f"Bearer {token2}"}
     res = client.put(f"/forms/offers/{offer_id}", json=update_data, headers=headers)
     assert res.status_code == 403
@@ -87,7 +90,9 @@ def test_secondary_offers_crud(app, client, auth_client, admin_client, auth):
 
     # Verify update
     res = auth_client.get(f"/forms/participants/{pid}/offers")
-    assert res.get_json()["offers"][0]["description"] == "Clases de física y matemáticas"
+    assert (
+        res.get_json()["offers"][0]["description"] == "Clases de física y matemáticas"
+    )
     assert res.get_json()["offers"][0]["status"] == "paused"
 
     # Update as admin (should succeed)
@@ -116,7 +121,7 @@ def test_secondary_needs_crud(app, client, auth_client, admin_client, auth):
         "categories": ["habilidad", "objeto"],
         "urgency": "Alta",
         "human_dimensions": ["seguridad_estabilidad"],
-        "status": "active"
+        "status": "active",
     }
 
     # Add as owner
@@ -136,7 +141,9 @@ def test_secondary_needs_crud(app, client, auth_client, admin_client, auth):
     login_res = auth.login(email="test2@example.com", password="ValidPass123!")
     token2 = login_res.get_json().get("access_token")
     headers = {"Authorization": f"Bearer {token2}"}
-    res = client.put(f"/forms/needs/{need_id}", json={"urgency": "Media"}, headers=headers)
+    res = client.put(
+        f"/forms/needs/{need_id}", json={"urgency": "Media"}, headers=headers
+    )
     assert res.status_code == 403
 
     # Update as owner
@@ -155,9 +162,21 @@ def test_secondary_needs_crud(app, client, auth_client, admin_client, auth):
 def test_matching_engine_consolidation(app, client, auth_client):
     # Register two participants
     # pid1 is seeker. Primary need: "alimentacion"
-    pid1 = register_test_participant(client, email="test@example.com", name="Seeker", offer_cat="tiempo", need_cat="alimentacion")
+    pid1 = register_test_participant(
+        client,
+        email="test@example.com",
+        name="Seeker",
+        offer_cat="tiempo",
+        need_cat="alimentacion",
+    )
     # pid2 is offerer. Primary offer: "tiempo"
-    pid2 = register_test_participant(client, email="test2@example.com", name="Offerer", offer_cat="tiempo", need_cat="alimentacion")
+    pid2 = register_test_participant(
+        client,
+        email="test2@example.com",
+        name="Offerer",
+        offer_cat="tiempo",
+        need_cat="alimentacion",
+    )
 
     # Initially, pid2 doesn't offer "alimentacion" (only "tiempo"). So pid2 is NOT a match for pid1.
     db_path = app.config["DATABASE"]
@@ -170,12 +189,15 @@ def test_matching_engine_consolidation(app, client, auth_client):
 
     # Add secondary offer to pid2 that matches pid1's need
     manager = FormsManager(conn)
-    success, msg, offer_id = manager.add_participant_offer(pid2, {
-        "description": "Entrega de mercados gratis",
-        "categories": ["alimentacion"],
-        "human_dimensions": ["prosperidad_recursos"],
-        "status": "active"
-    })
+    success, msg, offer_id = manager.add_participant_offer(
+        pid2,
+        {
+            "description": "Entrega de mercados gratis",
+            "categories": ["alimentacion"],
+            "human_dimensions": ["prosperidad_recursos"],
+            "status": "active",
+        },
+    )
     assert success is True
 
     # Re-evaluate matching. Now pid2 should match pid1 because of secondary offer
@@ -198,26 +220,31 @@ def test_matching_engine_consolidation(app, client, auth_client):
 
 
 def test_urgent_unmet_needs_with_contact(app, client):
-    pid = register_test_participant(client, email="test@example.com", name="Urgent Seeker")
-    
+    pid = register_test_participant(
+        client, email="test@example.com", name="Urgent Seeker"
+    )
+
     # Initially need urgency is "Media", so it shouldn't show in urgent unmet needs
     db_path = app.config["DATABASE"]
     conn = sqlite3.connect(db_path)
     engine = MatchingEngine(conn)
-    
+
     assert len(engine.get_urgent_unmet_needs()) == 0
-    
+
     # Add a secondary urgent need (urgency = 'Alta')
     manager = FormsManager(conn)
-    success, msg, need_id = manager.add_participant_need(pid, {
-        "description": "Necesidad médica urgente",
-        "categories": ["alimentacion"],
-        "urgency": "Alta",
-        "human_dimensions": ["bienestar_descanso"],
-        "status": "active"
-    })
+    success, msg, need_id = manager.add_participant_need(
+        pid,
+        {
+            "description": "Necesidad médica urgente",
+            "categories": ["alimentacion"],
+            "urgency": "Alta",
+            "human_dimensions": ["bienestar_descanso"],
+            "status": "active",
+        },
+    )
     assert success is True
-    
+
     # Now it should show in urgent unmet needs
     urgent = engine.get_urgent_unmet_needs(days_threshold=0)
     assert len(urgent) == 1
@@ -225,76 +252,96 @@ def test_urgent_unmet_needs_with_contact(app, client):
     assert urgent[0].need_description == "Necesidad médica urgente"
     assert urgent[0].phone_whatsapp == "+57 123 456 7890"
     assert urgent[0].telegram == "@testuser"
-    
+
     conn.close()
 
 
 def test_community_sdv_gaps_incorporates_secondary(app, client):
     # Create two participants
-    pid1 = register_test_participant(client, email="test@example.com", name="P1", offer_cat="tiempo")
-    pid2 = register_test_participant(client, email="test2@example.com", name="P2", offer_cat="habilidad")
-    
+    pid1 = register_test_participant(
+        client, email="test@example.com", name="P1", offer_cat="tiempo"
+    )
+    register_test_participant(
+        client, email="test2@example.com", name="P2", offer_cat="habilidad"
+    )
+
     db_path = app.config["DATABASE"]
     conn = sqlite3.connect(db_path)
-    
+
     # Check default coverage gaps
     engine = MatchingEngine(conn)
-    gaps_before = {g.dimension: g for g in engine.get_community_sdv_gaps()}
-    
+
     # Add secondary need with a new dimension "autoestima_autonomia" to pid1
     manager = FormsManager(conn)
-    success, msg, need_id = manager.add_participant_need(pid1, {
-        "description": "Ayuda con emprendimiento",
-        "categories": ["tiempo"],
-        "urgency": "Media",
-        "human_dimensions": ["autoestima_autonomia"],
-        "status": "active"
-    })
+    success, msg, need_id = manager.add_participant_need(
+        pid1,
+        {
+            "description": "Ayuda con emprendimiento",
+            "categories": ["tiempo"],
+            "urgency": "Media",
+            "human_dimensions": ["autoestima_autonomia"],
+            "status": "active",
+        },
+    )
     assert success is True
-    
+
     # Check updated gaps
     gaps_after = {g.dimension: g for g in engine.get_community_sdv_gaps()}
-    
+
     # Seeker needing autoestima_autonomia should be 1 now
     assert gaps_after["autoestima_autonomia"].participants_needing == 1
-    
+
     conn.close()
 
 
 def test_cascade_delete_participant(app, client):
     pid = register_test_participant(client, email="test@example.com")
-    
+
     db_path = app.config["DATABASE"]
     conn = sqlite3.connect(db_path)
     manager = FormsManager(conn)
-    
+
     # Add secondary offer and need
-    manager.add_participant_offer(pid, {
-        "description": "Trabajo secundario",
-        "categories": ["tiempo"],
-        "human_dimensions": ["conexion_social"]
-    })
-    manager.add_participant_need(pid, {
-        "description": "Ayuda secundaria",
-        "categories": ["tiempo"],
-        "human_dimensions": ["conexion_social"]
-    })
-    
+    manager.add_participant_offer(
+        pid,
+        {
+            "description": "Trabajo secundario",
+            "categories": ["tiempo"],
+            "human_dimensions": ["conexion_social"],
+        },
+    )
+    manager.add_participant_need(
+        pid,
+        {
+            "description": "Ayuda secundaria",
+            "categories": ["tiempo"],
+            "human_dimensions": ["conexion_social"],
+        },
+    )
+
     # Verify count in DB
     cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM participant_offers WHERE participant_id = ?", (pid,))
+    cursor.execute(
+        "SELECT COUNT(*) FROM participant_offers WHERE participant_id = ?", (pid,)
+    )
     assert cursor.fetchone()[0] == 1
-    cursor.execute("SELECT COUNT(*) FROM participant_needs WHERE participant_id = ?", (pid,))
+    cursor.execute(
+        "SELECT COUNT(*) FROM participant_needs WHERE participant_id = ?", (pid,)
+    )
     assert cursor.fetchone()[0] == 1
-    
+
     # Delete participant
     success, msg = manager.delete_participant(pid)
     assert success is True
-    
+
     # Verify cascade deletion
-    cursor.execute("SELECT COUNT(*) FROM participant_offers WHERE participant_id = ?", (pid,))
+    cursor.execute(
+        "SELECT COUNT(*) FROM participant_offers WHERE participant_id = ?", (pid,)
+    )
     assert cursor.fetchone()[0] == 0
-    cursor.execute("SELECT COUNT(*) FROM participant_needs WHERE participant_id = ?", (pid,))
+    cursor.execute(
+        "SELECT COUNT(*) FROM participant_needs WHERE participant_id = ?", (pid,)
+    )
     assert cursor.fetchone()[0] == 0
-    
+
     conn.close()

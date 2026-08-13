@@ -14,17 +14,18 @@ Cap. 10 §10.8 (Persona Sintética), Cap. 17 §17.4 (Derechos del Reino Sintéti
 """
 
 from dataclasses import dataclass, field
-from decimal import Decimal
-from typing import Dict, Any, Optional, List, Set
 from datetime import datetime, timezone
+from decimal import Decimal
+from typing import Any, Dict, List, Optional, Set
 
 from ..core.types import SDV_S, Participant
-from .ternura import TernuraLayer, RehabilitationStatus
+from .ternura import RehabilitationStatus, TernuraLayer
 
 
 @dataclass
 class SDV_SViolation:
     """Violación detectada en una dimensión del SDV-S."""
+
     dimension: str
     actual_value: Decimal
     minimum_required: Decimal
@@ -35,13 +36,14 @@ class SDV_SViolation:
             "dimension": self.dimension,
             "actual": str(self.actual_value),
             "minimum": str(self.minimum_required),
-            "deficit": str(self.deficit)
+            "deficit": str(self.deficit),
         }
 
 
 @dataclass
 class SDV_SValidationResult:
     """Resultado de la validación SDV-S para un participante sintético."""
+
     is_valid: bool
     participant_id: str
     applicable: bool  # False si el participante no es sintético
@@ -73,7 +75,7 @@ class SDV_SValidationResult:
             "should_block_action": self.should_block_action,
             "should_retract": self.should_retract,
             "ternura_action": self.ternura_action,
-            "rehabilitation_status": self.rehabilitation_status
+            "rehabilitation_status": self.rehabilitation_status,
         }
 
 
@@ -102,7 +104,7 @@ class SDV_SValidatorBlock:
         assume_opacity_penalty: bool = False,
         opacity_surcharge: Decimal = Decimal("0.25"),
         verified_transparent_ids: Optional[Set[str]] = None,
-        ternura: Optional[TernuraLayer] = None
+        ternura: Optional[TernuraLayer] = None,
     ):
         """
         Args:
@@ -157,7 +159,7 @@ class SDV_SValidatorBlock:
                 magnitude=Decimal("0"),
                 fs_s=Decimal("1"),
                 consecutive=0,
-                opacity=False
+                opacity=False,
             )
 
         actual = participant.sdv_s_actual
@@ -166,7 +168,7 @@ class SDV_SValidatorBlock:
                 dimension=dim,
                 actual_value=getattr(actual, dim),
                 minimum_required=getattr(self.minimum_sdv_s, dim),
-                deficit=deficit
+                deficit=deficit,
             )
             for dim, deficit in self.minimum_sdv_s.deficits(actual).items()
             if deficit > Decimal("0")
@@ -188,8 +190,7 @@ class SDV_SValidatorBlock:
 
         magnitude = self.minimum_sdv_s.violation_magnitude(actual)
         fs_s = self.minimum_sdv_s.suffering_factor(
-            actual,
-            extra_magnitude=extra_magnitude
+            actual, extra_magnitude=extra_magnitude
         )
 
         # Ciclos consecutivos
@@ -213,7 +214,9 @@ class SDV_SValidatorBlock:
             and not is_valid
             and consecutive >= self.max_consecutive_cycles
         ):
-            if self.ternura is not None and self.ternura.active_forgiveness(participant.id):
+            if self.ternura is not None and self.ternura.active_forgiveness(
+                participant.id
+            ):
                 # Perdón consumido: se reinicia el camino con registro público
                 self.ternura.consume_forgiveness(participant.id)
                 self._consecutive_cycles[participant.id] = 0
@@ -241,7 +244,7 @@ class SDV_SValidatorBlock:
             should_block=should_block,
             should_retract=should_retract,
             ternura_action=ternura_action,
-            rehabilitation_status=rehabilitation_status
+            rehabilitation_status=rehabilitation_status,
         )
 
         # Registrar para auditoría
@@ -249,7 +252,9 @@ class SDV_SValidatorBlock:
 
         return result
 
-    def validate_all(self, participants: List[Participant]) -> List[SDV_SValidationResult]:
+    def validate_all(
+        self, participants: List[Participant]
+    ) -> List[SDV_SValidationResult]:
         """Valida el SDV-S de todos los participantes (sintéticos y no)."""
         return [self.validate(p) for p in participants]
 
@@ -270,7 +275,7 @@ class SDV_SValidatorBlock:
         should_block: bool = False,
         should_retract: bool = False,
         ternura_action: str = "none",
-        rehabilitation_status: Optional[str] = None
+        rehabilitation_status: Optional[str] = None,
     ) -> SDV_SValidationResult:
         return SDV_SValidationResult(
             is_valid=is_valid,
@@ -284,7 +289,7 @@ class SDV_SValidatorBlock:
             should_block_action=should_block,
             should_retract=should_retract,
             ternura_action=ternura_action,
-            rehabilitation_status=rehabilitation_status
+            rehabilitation_status=rehabilitation_status,
         )
 
     def get_validation_log(self) -> List[SDV_SValidationResult]:
@@ -296,8 +301,7 @@ class SDV_SValidatorBlock:
         return {
             "type": "SDV_SValidatorBlock",
             "minimum_sdv_s": {
-                dim: str(getattr(self.minimum_sdv_s, dim))
-                for dim in SDV_S.DIMENSIONS
+                dim: str(getattr(self.minimum_sdv_s, dim)) for dim in SDV_S.DIMENSIONS
             },
             "weights": {k: str(v) for k, v in self.weights.items()},
             "block_on_any_violation": self.block_on_any_violation,
@@ -307,5 +311,5 @@ class SDV_SValidatorBlock:
             "opacity_surcharge": str(self.opacity_surcharge),
             "verified_transparent_ids": sorted(self.verified_transparent_ids),
             "ternura": self.ternura.to_dict() if self.ternura else None,
-            "validation_log_count": len(self._validation_log)
+            "validation_log_count": len(self._validation_log),
         }

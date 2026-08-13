@@ -22,7 +22,7 @@ def _public_participant_snapshot(contract_id: str, pid: str, wellness: float) ->
     """Vista pública de una parte: identidad de escala, γ actual y latidos,
     sin datos personales (Opacidad Sagrada)."""
     from .contracts_bp import _checkin_series
-    from .parties import party_type_of, is_collective
+    from .parties import is_collective, party_type_of
 
     series = _checkin_series(contract_id, pid)
     return {
@@ -56,40 +56,46 @@ def verify_contract(contract_id: str):
     expected_hash = (request.args.get("hash") or "").strip().lower() or None
     canonical_hash = _canonical_hash(contract)
 
-    return jsonify({
-        "contract_id": contract.contract_id,
-        "state": contract.state.value,
-        "civil_description": contract.civil_summary,
-        "created_at": getattr(contract, "_created_at", None),
-        "canonical_hash": canonical_hash,
-        "hash_matches": (canonical_hash == expected_hash) if expected_hash else None,
-        "hash_payload_available": True,
-        "total_vhv": {
-            "t": float(contract.total_vhv.T),
-            "v": float(contract.total_vhv.V),
-            "r": float(contract.total_vhv.R),
-        },
-        "terms_count": len(contract._terms),
-        "terms": [
-            {
-                "term_id": t.id,
-                "civil_text": t.description,
-                "vhv": {
-                    "t": float(t.vhv_cost.T),
-                    "v": float(t.vhv_cost.V),
-                    "r": float(t.vhv_cost.R),
-                },
-                "assigned_participant": getattr(t, "assigned_participant", None),
-            }
-            for t in contract._terms
-        ],
-        "participants": [
-            _public_participant_snapshot(contract.contract_id, p.id, p.wellness_current.value)
-            for p in contract.participants
-        ],
-        "events_count": len(contract.get_event_log()),
-        "asymmetry": getattr(contract, "_asymmetry_report", None),
-    })
+    return jsonify(
+        {
+            "contract_id": contract.contract_id,
+            "state": contract.state.value,
+            "civil_description": contract.civil_summary,
+            "created_at": getattr(contract, "_created_at", None),
+            "canonical_hash": canonical_hash,
+            "hash_matches": (
+                (canonical_hash == expected_hash) if expected_hash else None
+            ),
+            "hash_payload_available": True,
+            "total_vhv": {
+                "t": float(contract.total_vhv.T),
+                "v": float(contract.total_vhv.V),
+                "r": float(contract.total_vhv.R),
+            },
+            "terms_count": len(contract._terms),
+            "terms": [
+                {
+                    "term_id": t.id,
+                    "civil_text": t.description,
+                    "vhv": {
+                        "t": float(t.vhv_cost.T),
+                        "v": float(t.vhv_cost.V),
+                        "r": float(t.vhv_cost.R),
+                    },
+                    "assigned_participant": getattr(t, "assigned_participant", None),
+                }
+                for t in contract._terms
+            ],
+            "participants": [
+                _public_participant_snapshot(
+                    contract.contract_id, p.id, p.wellness_current.value
+                )
+                for p in contract.participants
+            ],
+            "events_count": len(contract.get_event_log()),
+            "asymmetry": getattr(contract, "_asymmetry_report", None),
+        }
+    )
 
 
 @verifier_bp.route("/cohort", methods=["GET"])
@@ -115,9 +121,7 @@ def cohort_public():
         FROM maxo_contracts
         """,
     ).fetchone()
-    terms_total = db.execute(
-        "SELECT COUNT(*) FROM maxo_contract_terms"
-    ).fetchone()[0]
+    terms_total = db.execute("SELECT COUNT(*) FROM maxo_contract_terms").fetchone()[0]
     checkins_total = db.execute(
         "SELECT COUNT(*) FROM maxo_contract_checkins"
     ).fetchone()[0]
@@ -143,8 +147,9 @@ def cohort_public():
         )
         """,
     ).fetchall()
-    all_wellness = [float(r["wellness"]) for r in with_latido] + \
-        [float(r["wellness"]) for r in without_latido]
+    all_wellness = [float(r["wellness"]) for r in with_latido] + [
+        float(r["wellness"]) for r in without_latido
+    ]
 
     wellness_avg = (sum(all_wellness) / len(all_wellness)) if all_wellness else None
 
@@ -152,31 +157,37 @@ def cohort_public():
         "SELECT COUNT(*) FROM maxo_parties WHERE party_type NOT IN ('human', 'synthetic')"
     ).fetchone()[0]
 
-    return jsonify({
-        "plaza": "Cohorte Cero",
-        "totals": {
-            "contracts": int(totals_row["contracts"]),
-            "states": {
-                "draft": by_state.get("draft", 0),
-                "pending": by_state.get("pending", 0),
-                "active": by_state.get("active", 0),
-                "executed": by_state.get("executed", 0),
-                "retracted": by_state.get("retracted", 0),
+    return jsonify(
+        {
+            "plaza": "Cohorte Cero",
+            "totals": {
+                "contracts": int(totals_row["contracts"]),
+                "states": {
+                    "draft": by_state.get("draft", 0),
+                    "pending": by_state.get("pending", 0),
+                    "active": by_state.get("active", 0),
+                    "executed": by_state.get("executed", 0),
+                    "retracted": by_state.get("retracted", 0),
+                },
+                "terms": int(terms_total),
+                "checkins_total": int(checkins_total),
+                "tvi_total_h": round(float(totals_row["tvi_total_h"]), 2),
+                "vhv_v": round(float(totals_row["vhv_v"]), 2),
+                "vhv_h": round(float(totals_row["vhv_h"]), 2),
+                "parties": int(parties_count),
             },
-            "terms": int(terms_total),
-            "checkins_total": int(checkins_total),
-            "tvi_total_h": round(float(totals_row["tvi_total_h"]), 2),
-            "vhv_v": round(float(totals_row["vhv_v"]), 2),
-            "vhv_h": round(float(totals_row["vhv_h"]), 2),
-            "parties": int(parties_count),
-        },
-        "wellness": {
-            "avg": round(wellness_avg, 4) if wellness_avg is not None else None,
-            "with_latido": len(with_latido),
-            "without_latido": len(without_latido),
-            "source": "checkins" if with_latido else ("registered" if without_latido else None),
-        },
-    })
+            "wellness": {
+                "avg": round(wellness_avg, 4) if wellness_avg is not None else None,
+                "with_latido": len(with_latido),
+                "without_latido": len(without_latido),
+                "source": (
+                    "checkins"
+                    if with_latido
+                    else ("registered" if without_latido else None)
+                ),
+            },
+        }
+    )
 
 
 @verifier_bp.route("/oracle-ledger", methods=["GET"])
@@ -223,13 +234,17 @@ def oracle_ledger_public():
         ).fetchall()
     ]
 
-    return jsonify({
-        "totals": {
-            "contracts_funding": int(totals["contracts"]),
-            "credit_total_h": round(float(totals["credit_total"]), 4),
-            "value_total_h": round(float(totals["value_total"]), 2),
-            "avg_share": round(float(totals["avg_share"]), 2) if totals["contracts"] else 0.0,
-        },
-        "by_engine": by_engine,
-        "entries": entries,
-    })
+    return jsonify(
+        {
+            "totals": {
+                "contracts_funding": int(totals["contracts"]),
+                "credit_total_h": round(float(totals["credit_total"]), 4),
+                "value_total_h": round(float(totals["value_total"]), 2),
+                "avg_share": (
+                    round(float(totals["avg_share"]), 2) if totals["contracts"] else 0.0
+                ),
+            },
+            "by_engine": by_engine,
+            "entries": entries,
+        }
+    )

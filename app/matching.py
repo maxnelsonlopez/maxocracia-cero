@@ -15,8 +15,7 @@ import json
 import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
-
+from typing import Any, Dict, List, Optional
 
 # ──────────────────────────────────────────────────────────────────
 # Pesos y configuración del algoritmo
@@ -28,48 +27,51 @@ URGENCY_WEIGHTS = {
     "Baja": 0.2,
 }
 
-RECENT_EXCHANGE_DAYS = 7          # Días tras los cuales un par se considera "reciente"
-CRITICAL_NEED_LEVEL = 5           # need_level en follow_ups que activa Alerta de Coherencia
-UNRESOLVED_DAYS_THRESHOLD = 7     # Días sin intercambio para una urgencia Alta = alerta
+RECENT_EXCHANGE_DAYS = 7  # Días tras los cuales un par se considera "reciente"
+CRITICAL_NEED_LEVEL = 5  # need_level en follow_ups que activa Alerta de Coherencia
+UNRESOLVED_DAYS_THRESHOLD = 7  # Días sin intercambio para una urgencia Alta = alerta
 
 
 # ──────────────────────────────────────────────────────────────────
 # Tipos de retorno
 # ──────────────────────────────────────────────────────────────────
 
+
 @dataclass
 class MatchResult:
     """Resultado de emparejamiento entre un buscador y un potencial oferente."""
+
     offerer_id: int
     offerer_name: str
     offerer_city: str
     offerer_neighborhood: str
     offerer_phone_whatsapp: Optional[str]
     offerer_telegram: Optional[str]
-    matched_categories: List[str]         # Categorías en común
-    offerer_description: str              # Descripción de lo que ofrece
-    offerer_dimensions: List[str]         # Dimensiones humanas que cubre
-    compatibility_score: float            # 0.0 – 1.0
-    urgency_weight: float                 # Peso por urgencia del buscador
+    matched_categories: List[str]  # Categorías en común
+    offerer_description: str  # Descripción de lo que ofrece
+    offerer_dimensions: List[str]  # Dimensiones humanas que cubre
+    compatibility_score: float  # 0.0 – 1.0
+    urgency_weight: float  # Peso por urgencia del buscador
     same_city: bool
     same_neighborhood: bool
-    recently_exchanged: bool              # True si ya hubo intercambio reciente
+    recently_exchanged: bool  # True si ya hubo intercambio reciente
 
 
 @dataclass
 class UrgentNeed:
     """Participante con necesidad urgente sin resolver."""
+
     participant_id: int
     participant_name: str
     city: str
     neighborhood: str
     need_description: str
-    need_urgency: str                     # "Alta" siempre en esta lista
+    need_urgency: str  # "Alta" siempre en esta lista
     need_categories: List[str]
     need_dimensions: List[str]
-    days_without_exchange: int            # Cuántos días lleva sin un intercambio
-    latest_need_level: Optional[int]      # Del follow-up más reciente (1-5)
-    is_coherence_crime: bool              # True si need_level == 5
+    days_without_exchange: int  # Cuántos días lleva sin un intercambio
+    latest_need_level: Optional[int]  # Del follow-up más reciente (1-5)
+    is_coherence_crime: bool  # True si need_level == 5
     top_matches: List[MatchResult] = field(default_factory=list)
     phone_whatsapp: Optional[str] = None
     telegram: Optional[str] = None
@@ -78,17 +80,19 @@ class UrgentNeed:
 @dataclass
 class CommunityGap:
     """Brecha de cobertura de una dimensión humana en la comunidad."""
+
     dimension: str
-    dimension_label: str                  # Nombre legible
+    dimension_label: str  # Nombre legible
     participants_needing: int
     participants_offering: int
-    coverage_ratio: float                 # offering / needing (< 1 = déficit)
-    gap_severity: str                     # "critical" | "warning" | "ok"
+    coverage_ratio: float  # offering / needing (< 1 = déficit)
+    gap_severity: str  # "critical" | "warning" | "ok"
 
 
 # ──────────────────────────────────────────────────────────────────
 # Motor de Matching
 # ──────────────────────────────────────────────────────────────────
+
 
 class MatchingEngine:
     """
@@ -102,14 +106,14 @@ class MatchingEngine:
     """
 
     DIMENSION_LABELS: Dict[str, str] = {
-        "crecimiento_aprendizaje":  "Educación / Aprendizaje",
-        "bienestar_descanso":       "Bienestar y Descanso",
-        "seguridad_estabilidad":    "Seguridad y Estabilidad",
-        "autoestima_autonomia":     "Autonomía / Autoestima",
-        "conexion_social":          "Conexión Social",
-        "prosperidad_recursos":     "Recursos / Subsistencia",
-        "placer_goce":              "Placer y Goce",
-        "intimidad_vinculos":       "Vínculos Íntimos",
+        "crecimiento_aprendizaje": "Educación / Aprendizaje",
+        "bienestar_descanso": "Bienestar y Descanso",
+        "seguridad_estabilidad": "Seguridad y Estabilidad",
+        "autoestima_autonomia": "Autonomía / Autoestima",
+        "conexion_social": "Conexión Social",
+        "prosperidad_recursos": "Recursos / Subsistencia",
+        "placer_goce": "Placer y Goce",
+        "intimidad_vinculos": "Vínculos Íntimos",
     }
 
     def __init__(self, db_connection: sqlite3.Connection):
@@ -232,7 +236,9 @@ class MatchingEngine:
             sec_cats = self._parse_json(sec_row[0])
             need_cats.extend(sec_cats)
             sec_urgency = sec_row[1] or "Baja"
-            if URGENCY_WEIGHTS.get(sec_urgency, 0.2) > URGENCY_WEIGHTS.get(urgency_val, 0.2):
+            if URGENCY_WEIGHTS.get(sec_urgency, 0.2) > URGENCY_WEIGHTS.get(
+                urgency_val, 0.2
+            ):
                 urgency_val = sec_urgency
 
         # Deduplicar
@@ -262,11 +268,13 @@ class MatchingEngine:
             offer_dims = self._parse_json(r[3])
             if pid not in secondary_offers:
                 secondary_offers[pid] = []
-            secondary_offers[pid].append({
-                "description": offer_desc,
-                "categories": offer_cats,
-                "human_dimensions": offer_dims
-            })
+            secondary_offers[pid].append(
+                {
+                    "description": offer_desc,
+                    "categories": offer_cats,
+                    "human_dimensions": offer_dims,
+                }
+            )
 
         # Candidatos: todos los activos excepto el propio buscador
         cursor.execute(
@@ -306,9 +314,13 @@ class MatchingEngine:
 
             # Deduplicar
             seen_cats = set()
-            offer_cats = [x for x in offer_cats if not (x in seen_cats or seen_cats.add(x))]
+            offer_cats = [
+                x for x in offer_cats if not (x in seen_cats or seen_cats.add(x))
+            ]
             seen_dims = set()
-            offer_dims = [x for x in offer_dims if not (x in seen_dims or seen_dims.add(x))]
+            offer_dims = [
+                x for x in offer_dims if not (x in seen_dims or seen_dims.add(x))
+            ]
 
             if not offer_cats:
                 continue
@@ -325,7 +337,8 @@ class MatchingEngine:
             same_neighborhood = (
                 seeker_neighborhood != ""
                 and seeker_neighborhood == cand_neighborhood
-                and seeker.get("city", "").lower().strip() == (cand.get("city") or "").lower().strip()
+                and seeker.get("city", "").lower().strip()
+                == (cand.get("city") or "").lower().strip()
             )
 
             seeker_city = seeker.get("city", "").lower().strip()
@@ -418,12 +431,14 @@ class MatchingEngine:
             need_urgency = r[4] or "Media"
             if pid not in secondary_needs:
                 secondary_needs[pid] = []
-            secondary_needs[pid].append({
-                "description": need_desc,
-                "categories": need_cats,
-                "human_dimensions": need_dims,
-                "urgency": need_urgency
-            })
+            secondary_needs[pid].append(
+                {
+                    "description": need_desc,
+                    "categories": need_cats,
+                    "human_dimensions": need_dims,
+                    "urgency": need_urgency,
+                }
+            )
 
         # Candidatos: todos los activos excepto el propio oferente
         cursor.execute(
@@ -460,14 +475,20 @@ class MatchingEngine:
                         need_desc += " | " + sec_need["description"]
                     else:
                         need_desc = sec_need["description"]
-                if URGENCY_WEIGHTS.get(sec_need["urgency"], 0.2) > URGENCY_WEIGHTS.get(urgency_val, 0.2):
+                if URGENCY_WEIGHTS.get(sec_need["urgency"], 0.2) > URGENCY_WEIGHTS.get(
+                    urgency_val, 0.2
+                ):
                     urgency_val = sec_need["urgency"]
 
             # Deduplicar
             seen_cats = set()
-            need_cats = [x for x in need_cats if not (x in seen_cats or seen_cats.add(x))]
+            need_cats = [
+                x for x in need_cats if not (x in seen_cats or seen_cats.add(x))
+            ]
             seen_dims = set()
-            need_dims = [x for x in need_dims if not (x in seen_dims or seen_dims.add(x))]
+            need_dims = [
+                x for x in need_dims if not (x in seen_dims or seen_dims.add(x))
+            ]
 
             if not need_cats:
                 continue
@@ -484,7 +505,8 @@ class MatchingEngine:
             same_neighborhood = (
                 offerer_neighborhood != ""
                 and offerer_neighborhood == cand_neighborhood
-                and offerer.get("city", "").lower().strip() == (cand.get("city") or "").lower().strip()
+                and offerer.get("city", "").lower().strip()
+                == (cand.get("city") or "").lower().strip()
             )
 
             offerer_city = offerer.get("city", "").lower().strip()
@@ -517,7 +539,6 @@ class MatchingEngine:
         results.sort(key=lambda r: r.compatibility_score, reverse=True)
         return results[:limit]
 
-
     def get_urgent_unmet_needs(
         self, days_threshold: int = UNRESOLVED_DAYS_THRESHOLD, top_matches: int = 3
     ) -> List[UrgentNeed]:
@@ -532,7 +553,7 @@ class MatchingEngine:
         Orden: need_level crítico primero, luego por días sin intercambio.
         """
         cursor = self.conn.cursor()
-        
+
         # 1. Recuperar necesidades urgentes primarias
         cursor.execute(
             """
@@ -561,7 +582,9 @@ class MatchingEngine:
 
             is_crime = latest_level is not None and latest_level >= CRITICAL_NEED_LEVEL
 
-            matches = self.find_matches(p["id"], limit=top_matches, exclude_recent=False)
+            matches = self.find_matches(
+                p["id"], limit=top_matches, exclude_recent=False
+            )
 
             urgent_needs.append(
                 UrgentNeed(
@@ -712,7 +735,9 @@ class MatchingEngine:
                 offer_counts[dim] = offer_counts.get(dim, 0) + 1
 
         # Always audit all 8 standard dimensions of the SDV
-        all_dims = set(self.DIMENSION_LABELS.keys()) | set(need_counts) | set(offer_counts)
+        all_dims = (
+            set(self.DIMENSION_LABELS.keys()) | set(need_counts) | set(offer_counts)
+        )
         gaps: List[CommunityGap] = []
 
         for dim in all_dims:
@@ -735,7 +760,9 @@ class MatchingEngine:
             gaps.append(
                 CommunityGap(
                     dimension=dim,
-                    dimension_label=self.DIMENSION_LABELS.get(dim, dim.replace("_", " ").title()),
+                    dimension_label=self.DIMENSION_LABELS.get(
+                        dim, dim.replace("_", " ").title()
+                    ),
                     participants_needing=needing,
                     participants_offering=offering,
                     coverage_ratio=round(ratio, 3),
@@ -768,8 +795,6 @@ class MatchingEngine:
             "worst_gap_dimension": worst_gap.dimension_label if worst_gap else None,
             "worst_gap_ratio": worst_gap.coverage_ratio if worst_gap else None,
             "system_alert_level": (
-                "coherence_crime" if crimes
-                else "warning" if urgent
-                else "ok"
+                "coherence_crime" if crimes else "warning" if urgent else "ok"
             ),
         }

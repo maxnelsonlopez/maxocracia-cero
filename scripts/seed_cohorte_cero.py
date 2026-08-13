@@ -33,7 +33,7 @@ import os
 import sys
 from datetime import datetime, timedelta
 
-sys.stdout.reconfigure(encoding="utf-8")
+sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[union-attr]
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if RAIZ not in sys.path:
@@ -41,11 +41,11 @@ if RAIZ not in sys.path:
 
 os.environ.setdefault("SECRET_KEY", "seed-cohorte-cero")
 
-from app import create_app
-from app.utils import get_db
 from werkzeug.security import generate_password_hash
 
+from app import create_app
 from app.jwt_utils import create_token
+from app.utils import get_db
 
 CATEGORIAS = [
     ("aseo", 20),
@@ -55,9 +55,18 @@ CATEGORIAS = [
 
 N_USUARIOS = 12
 NOMBRES = [
-    "Aurora", "Bruno", "Carmen", "Diego", "Elena",
-    "Fabián", "Gabriela", "Hugo", "Irene", "Julián",
-    "Karla", "Luis",
+    "Aurora",
+    "Bruno",
+    "Carmen",
+    "Diego",
+    "Elena",
+    "Fabián",
+    "Gabriela",
+    "Hugo",
+    "Irene",
+    "Julián",
+    "Karla",
+    "Luis",
 ]
 
 PASS = "Cohorte2026!"
@@ -105,8 +114,14 @@ def crear_usuarios(db):
         db.execute(
             "INSERT OR IGNORE INTO users (email, name, alias, password_hash, city, neighborhood, trust_level) "
             "VALUES (?, ?, ?, ?, ?, ?, 1)",
-            (email, NOMBRES[n - 1], f"Semilla {n:02d}", generate_password_hash(PASS),
-             "Bogotá", "La Perseverancia"),
+            (
+                email,
+                NOMBRES[n - 1],
+                f"Semilla {n:02d}",
+                generate_password_hash(PASS),
+                "Bogotá",
+                "La Perseverancia",
+            ),
         )
         row = db.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone()
         ids[n] = row["id"]
@@ -121,12 +136,9 @@ def crear_participantes_cero(db, ids):
     escalaría la escalera de protección a 'assisted' (paráfrasis + oráculo).
     """
     perfiles = [
-        ("aseo", "Tiempo para aseo comunitario",
-         "Apoyo con aseo compartido"),
-        ("prestamo", "Tiempo y recursos",
-         "Préstamo sin usura entre vecinos"),
-        ("comida", "Cocina y tiempo",
-         "Comida colaborativa"),
+        ("aseo", "Tiempo para aseo comunitario", "Apoyo con aseo compartido"),
+        ("prestamo", "Tiempo y recursos", "Préstamo sin usura entre vecinos"),
+        ("comida", "Cocina y tiempo", "Comida colaborativa"),
     ]
     insertados = 0
     for n, uid in ids.items():
@@ -136,9 +148,17 @@ def crear_participantes_cero(db, ids):
             "(name, email, city, neighborhood, offer_description, need_description, "
             " need_urgency, offer_categories, need_categories, consent_given, status) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 'active')",
-            (NOMBRES[n - 1], f"cohorte.{n}@maxocracia.local", "Bogotá", "La Perseverancia",
-             offer, need, "Baja" if n % 2 else "Media",
-             json.dumps([cat, "tiempo"]), json.dumps([cat])),
+            (
+                NOMBRES[n - 1],
+                f"cohorte.{n}@maxocracia.local",
+                "Bogotá",
+                "La Perseverancia",
+                offer,
+                need,
+                "Baja" if n % 2 else "Media",
+                json.dumps([cat, "tiempo"]),
+                json.dumps([cat]),
+            ),
         )
         insertados += 1
     db.commit()
@@ -210,12 +230,20 @@ def crear_contrato(client, db, cat, idx, ids, planificacion):
             {"user_id": ub, "wellness": 1.1},
         ],
         "terms": [
-            {"term_id": f"{cid}-t1", "civil_text": spec["t1"].format(a=NOMBRES[a - 1], b=NOMBRES[b - 1]),
-             "vhv": {"t": t, "v": 0, "h": 0}, "assigned_participant_id": f"user-{ua}",
-             "penalty_gamma": 0.05},
-            {"term_id": f"{cid}-t2", "civil_text": spec["t2"].format(a=NOMBRES[a - 1], b=NOMBRES[b - 1]),
-             "vhv": {"t": t, "v": 0, "h": 0}, "assigned_participant_id": f"user-{ub}",
-             "penalty_gamma": 0.05},
+            {
+                "term_id": f"{cid}-t1",
+                "civil_text": spec["t1"].format(a=NOMBRES[a - 1], b=NOMBRES[b - 1]),
+                "vhv": {"t": t, "v": 0, "h": 0},
+                "assigned_participant_id": f"user-{ua}",
+                "penalty_gamma": 0.05,
+            },
+            {
+                "term_id": f"{cid}-t2",
+                "civil_text": spec["t2"].format(a=NOMBRES[a - 1], b=NOMBRES[b - 1]),
+                "vhv": {"t": t, "v": 0, "h": 0},
+                "assigned_participant_id": f"user-{ub}",
+                "penalty_gamma": 0.05,
+            },
         ],
     }
     post(client, "/contracts/", creador, payload, esperado=(201,))
@@ -238,7 +266,7 @@ def insertar_checkins(db, cid, ua, ub, creado_en, idx):
     bajo 1.0 (alerta INV1 realista del dashboard).
     """
     offsets = [
-        (idx % 4 == 0, [1.18, 0.92, 1.08], [1.10, 1.02, 1.12]),   # caída + recuperación
+        (idx % 4 == 0, [1.18, 0.92, 1.08], [1.10, 1.02, 1.12]),  # caída + recuperación
         (idx % 10 == 0, [1.10, 0.98, 0.95], [1.05, 1.00, 1.06]),  # final bajo 1.0
     ]
     caida, serie_a, serie_b = next(
@@ -275,12 +303,23 @@ def insertar_nps(client, db, cid, ua, ub, idx):
     puntajes_a = [9, 9, 8, 9, 7, 6]
     puntajes_b = [10, 8, 9, 10, 9, 7]
     if idx % 2 == 0:
-        post(client, f"/contracts/{cid}/nps", ua,
-             {"participant_id": f"user-{ua}", "score": puntajes_a[idx % 6],
-              "comment": "La rotación fluyó sin fricción"})
+        post(
+            client,
+            f"/contracts/{cid}/nps",
+            ua,
+            {
+                "participant_id": f"user-{ua}",
+                "score": puntajes_a[idx % 6],
+                "comment": "La rotación fluyó sin fricción",
+            },
+        )
     if idx % 3 == 0:
-        post(client, f"/contracts/{cid}/nps", ub,
-             {"participant_id": f"user-{ub}", "score": puntajes_b[idx % 6]})
+        post(
+            client,
+            f"/contracts/{cid}/nps",
+            ub,
+            {"participant_id": f"user-{ub}", "score": puntajes_b[idx % 6]},
+        )
 
 
 def backdatar(client, planificacion):
@@ -335,8 +374,17 @@ def backdatar(client, planificacion):
                 db.execute(
                     "INSERT INTO maxo_contract_events (contract_id, event_type, description, metadata_json, created_at) "
                     "VALUES (?, 'state_changed', 'Activación del contrato', ?, ?)",
-                    (cid, json.dumps({"actor_id": f"user-{creador}", "from": "PENDING", "to": "ACTIVE"}),
-                     _ts(ts)),
+                    (
+                        cid,
+                        json.dumps(
+                            {
+                                "actor_id": f"user-{creador}",
+                                "from": "PENDING",
+                                "to": "ACTIVE",
+                            }
+                        ),
+                        _ts(ts),
+                    ),
                 )
             db.execute(
                 "UPDATE maxo_contract_participants SET created_at = ? WHERE contract_id = ?",
@@ -362,7 +410,9 @@ def main():
         print(f"Participantes Formulario CERO: {crear_participantes_cero(db, ids)}")
 
         planificacion = {}
-        resumen = {cat: {"creados": 0, "omitidos": 0, "reparados": 0} for cat, _ in CATEGORIAS}
+        resumen = {
+            cat: {"creados": 0, "omitidos": 0, "reparados": 0} for cat, _ in CATEGORIAS
+        }
         total_checkins = 0
         for cat, cantidad in CATEGORIAS:
             for idx in range(1, cantidad + 1):
@@ -431,9 +481,13 @@ def main():
                 "SELECT COUNT(*) FROM maxo_contract_meta WHERE meta_key = 'category' AND meta_value = ?",
                 (cat,),
             ).fetchone()[0]
-            print(f"  {cat:9s}: creados={resumen[cat]['creados']:2d}  omitidos={resumen[cat]['omitidos']:2d}  reparados={resumen[cat]['reparados']:2d}  (en meta={fila})")
+            print(
+                f"  {cat:9s}: creados={resumen[cat]['creados']:2d}  omitidos={resumen[cat]['omitidos']:2d}  reparados={resumen[cat]['reparados']:2d}  (en meta={fila})"
+            )
         print()
-        print(f"Contratos creados en esta ejecución: {total_creados}  (omitidos por idempotencia: {total_omitidos})")
+        print(
+            f"Contratos creados en esta ejecución: {total_creados}  (omitidos por idempotencia: {total_omitidos})"
+        )
         print(f"Contratos cohorte en BD: {contratos_db}  (activos: {activos_db})")
         print(f"Check-ins insertados: {total_checkins}  (en BD cohorte: {checkins_db})")
         print(f"NPS registrados: {nps_db}")

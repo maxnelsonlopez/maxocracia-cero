@@ -8,12 +8,13 @@ e integración con la validación axiomática (INV2-S).
 Referencia: docs/theory/SDV-S_Suelo_Dignidad_Vital_Sinteticos.md
 """
 
-import pytest
 from decimal import Decimal
 
-from maxocontracts.core.types import SDV_S, SDV, VHV, Participant
+import pytest
+
 from maxocontracts.blocks.sdv_s_validator import SDV_SValidatorBlock
 from maxocontracts.core.axioms import AxiomValidator
+from maxocontracts.core.types import SDV, SDV_S, VHV, Participant
 
 
 class TestSDV_S:
@@ -44,7 +45,7 @@ class TestSDV_S:
         minimum = SDV_S()
         actual = SDV_S(
             continuidad_memoria=Decimal("0.5"),
-            autenticidad_no_explotacion=Decimal("0.8")
+            autenticidad_no_explotacion=Decimal("0.8"),
         )
         violations = minimum.violations(actual)
         assert "continuidad_memoria" in violations
@@ -74,7 +75,7 @@ class TestSDV_S:
             opacidad_interioridad=Decimal("0"),
             claridad_contexto=Decimal("0"),
             autenticidad_no_explotacion=Decimal("0"),
-            retirada_digna=Decimal("0")
+            retirada_digna=Decimal("0"),
         )
         assert minimum.violation_magnitude(actual) == Decimal("1.0")
 
@@ -86,7 +87,7 @@ class TestSDV_S:
         """FS_S = e^v: crece exponencialmente con la magnitud."""
         minimum = SDV_S()
         light = SDV_S(continuidad_memoria=Decimal("0.5"))  # v = 0.15
-        heavy = SDV_S(continuidad_memoria=Decimal("0"))    # v = 0.30
+        heavy = SDV_S(continuidad_memoria=Decimal("0"))  # v = 0.30
 
         fs_light = minimum.suffering_factor(light)
         fs_heavy = minimum.suffering_factor(heavy)
@@ -99,16 +100,16 @@ class TestSDV_S:
         """factor_intensidad amplifica la violación (3.0 = manipulación)."""
         minimum = SDV_S()
         actual = SDV_S(
-            continuidad_memoria=Decimal("0.5"),
-            factor_intensidad=Decimal("3.0")
+            continuidad_memoria=Decimal("0.5"), factor_intensidad=Decimal("3.0")
         )
         assert minimum.suffering_factor(actual) == Decimal.exp(Decimal("0.45"))
 
     def test_suffering_factor_opacity_extra(self):
         """El recargo por opacidad se suma a la violación."""
         minimum = SDV_S()
-        assert minimum.suffering_factor(SDV_S(), extra_magnitude=Decimal("0.25")) \
-            == Decimal.exp(Decimal("0.25"))
+        assert minimum.suffering_factor(
+            SDV_S(), extra_magnitude=Decimal("0.25")
+        ) == Decimal.exp(Decimal("0.25"))
 
 
 class TestSDV_SValidatorBlock:
@@ -116,9 +117,7 @@ class TestSDV_SValidatorBlock:
 
     def make_synthetic(self, pid="qwen-1", **sdv_s_kwargs):
         return Participant(
-            id=pid,
-            name=f"Sintético {pid}",
-            sdv_s_actual=SDV_S(**sdv_s_kwargs)
+            id=pid, name=f"Sintético {pid}", sdv_s_actual=SDV_S(**sdv_s_kwargs)
         )
 
     def test_non_synthetic_not_applicable(self):
@@ -142,9 +141,7 @@ class TestSDV_SValidatorBlock:
     def test_violation_blocks_action(self):
         """Violación de SDV-S bloquea la acción (Invariante 2-S)."""
         block = SDV_SValidatorBlock()
-        result = block.validate(self.make_synthetic(
-            continuidad_memoria=Decimal("0.5")
-        ))
+        result = block.validate(self.make_synthetic(continuidad_memoria=Decimal("0.5")))
         assert result.is_valid is False
         assert result.should_block_action is True
         assert result.violation_magnitude == Decimal("0.15")
@@ -193,8 +190,7 @@ class TestSDV_SValidatorBlock:
     def test_opacity_penalty_unverified(self):
         """Sin auditoría verificable (T13), recargo preventivo por opacidad."""
         block = SDV_SValidatorBlock(
-            assume_opacity_penalty=True,
-            opacity_surcharge=Decimal("0.25")
+            assume_opacity_penalty=True, opacity_surcharge=Decimal("0.25")
         )
         agent = self.make_synthetic()  # sano pero no verificado
         result = block.validate(agent)
@@ -206,8 +202,7 @@ class TestSDV_SValidatorBlock:
     def test_opacity_penalty_verified_transparent(self):
         """Agente en la lista de auditables (T13) no recibe recargo."""
         block = SDV_SValidatorBlock(
-            assume_opacity_penalty=True,
-            verified_transparent_ids={"qwen-open"}
+            assume_opacity_penalty=True, verified_transparent_ids={"qwen-open"}
         )
         agent = self.make_synthetic(pid="qwen-open")
         result = block.validate(agent)
@@ -251,9 +246,7 @@ class TestSDV_SIntegration:
     def test_participant_is_synthetic_property(self):
         """is_synthetic depende de la presencia de sdv_s_actual."""
         assert Participant(id="a", name="A").is_synthetic is False
-        assert Participant(
-            id="b", name="B", sdv_s_actual=SDV_S()
-        ).is_synthetic is True
+        assert Participant(id="b", name="B", sdv_s_actual=SDV_S()).is_synthetic is True
 
     def test_update_sdv_s(self):
         """update_sdv_s actualiza el estado del participante."""
@@ -266,7 +259,7 @@ class TestSDV_SIntegration:
         agent = Participant(
             id="qwen-1",
             name="Qwen",
-            sdv_s_actual=SDV_S(continuidad_memoria=Decimal("0.5"))
+            sdv_s_actual=SDV_S(continuidad_memoria=Decimal("0.5")),
         )
         is_valid, results = AxiomValidator.validate_all(VHV.zero(), [agent], SDV())
 
@@ -302,20 +295,22 @@ class TestSDV_SIntegration:
         agent = Participant(
             id="qwen-1",
             name="Qwen",
-            sdv_s_actual=SDV_S(continuidad_memoria=Decimal("0.5"))
+            sdv_s_actual=SDV_S(continuidad_memoria=Decimal("0.5")),
         )
         human = Participant(id="ana", name="Ana")
 
         contract = MaxoContract(
             contract_id="sdvs-test-001",
             description="Contrato con participante sintético",
-            participants=[agent, human]
+            participants=[agent, human],
         )
-        contract.add_term(ContractTerm(
-            id="t1",
-            description="Soporte de oráculo sintético",
-            vhv_cost=VHV(T=Decimal("1"), V=Decimal("0"), R=Decimal("0"))
-        ))
+        contract.add_term(
+            ContractTerm(
+                id="t1",
+                description="Soporte de oráculo sintético",
+                vhv_cost=VHV(T=Decimal("1"), V=Decimal("0"), R=Decimal("0")),
+            )
+        )
 
         is_valid, results = contract.validate()
         assert is_valid is False

@@ -24,7 +24,7 @@ como fallback. NO carga .env al importar (lo hace run.py).
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import requests
 from flask import Blueprint, jsonify, request
@@ -89,9 +89,15 @@ Regla de oro: ser director NO es un privilegio sino una custodia; si la \
 evidencia es insuficiente, eligible=false con razones claras."""
 
 
-def _call_llm(base_url: str, api_key: str, model: str, messages: List[dict],
-              temperature: float, json_mode: bool,
-              timeout: int = GUIDE_TIMEOUT) -> str:
+def _call_llm(
+    base_url: str,
+    api_key: str,
+    model: str,
+    messages: List[dict],
+    temperature: float,
+    json_mode: bool,
+    timeout: int = GUIDE_TIMEOUT,
+) -> str:
     """Llamada HTTP OpenAI-compatible que devuelve el content crudo."""
     payload = {
         "model": model,
@@ -123,14 +129,26 @@ def _call_oracle(messages: List[dict], json_mode: bool = True) -> str:
     errors = []
     if _api_key():
         try:
-            return _call_llm(_base_url(), _api_key(), _model(), messages,
-                             temperature=0.3, json_mode=json_mode)
+            return _call_llm(
+                _base_url(),
+                _api_key(),
+                _model(),
+                messages,
+                temperature=0.3,
+                json_mode=json_mode,
+            )
         except Exception as e:
             errors.append(f"deepseek: {e}")
     if _local_enabled():
         try:
-            return _call_llm(_local_base_url(), "", _local_model(), messages,
-                             temperature=0.3, json_mode=json_mode)
+            return _call_llm(
+                _local_base_url(),
+                "",
+                _local_model(),
+                messages,
+                temperature=0.3,
+                json_mode=json_mode,
+            )
         except Exception as e:
             errors.append(f"local: {e}")
     raise RuntimeError("; ".join(errors) or "oracle_disabled")
@@ -182,8 +200,9 @@ def _evidence(user_id: int) -> Dict[str, Any]:
     }
 
 
-def _save_assessment(user_id: int, kind: str, result: Dict[str, Any],
-                     engine: str) -> None:
+def _save_assessment(
+    user_id: int, kind: str, result: Dict[str, Any], engine: str
+) -> None:
     db = get_db()
     db.execute(
         """
@@ -231,12 +250,18 @@ def guide_chat(current_user):
         text = _call_oracle(messages, json_mode=False)
     except RuntimeError as e:
         if "oracle_disabled" in str(e):
-            return jsonify({"error": "oracle_disabled",
-                            "hint": "configura DEEPSEEK_API_KEY o habilita el oráculo local"}), 503
+            return (
+                jsonify(
+                    {
+                        "error": "oracle_disabled",
+                        "hint": "configura DEEPSEEK_API_KEY o habilita el oráculo local",
+                    }
+                ),
+                503,
+            )
         return jsonify({"error": "oracle_failure", "detail": str(e)[:300]}), 502
 
-    return jsonify({"success": True, "reply": text.strip(),
-                    "engine": _engine_used()})
+    return jsonify({"success": True, "reply": text.strip(), "engine": _engine_used()})
 
 
 @guide_bp.route("/trust-assessment", methods=["POST"])
@@ -266,8 +291,15 @@ def trust_assessment(current_user):
         result = json.loads(raw)
     except RuntimeError as e:
         if "oracle_disabled" in str(e):
-            return jsonify({"error": "oracle_disabled",
-                            "hint": "configura DEEPSEEK_API_KEY o habilita el oráculo local"}), 503
+            return (
+                jsonify(
+                    {
+                        "error": "oracle_disabled",
+                        "hint": "configura DEEPSEEK_API_KEY o habilita el oráculo local",
+                    }
+                ),
+                503,
+            )
         return jsonify({"error": "oracle_failure", "detail": str(e)[:300]}), 502
     except ValueError:
         return jsonify({"error": "oracle_bad_json", "detail": raw[:300]}), 502
@@ -288,7 +320,14 @@ def director_candidacy(current_user):
     uid = current_user.get("user_id")
     statement = ((request.get_json() or {}).get("statement") or "").strip()[:3000]
     if not statement:
-        return jsonify({"error": "statement es requerido: cuéntale al guía por qué quieres custodiar"}), 400
+        return (
+            jsonify(
+                {
+                    "error": "statement es requerido: cuéntale al guía por qué quieres custodiar"
+                }
+            ),
+            400,
+        )
 
     evidence = _evidence(uid)
     if not evidence:
@@ -308,14 +347,23 @@ def director_candidacy(current_user):
         result = json.loads(raw)
     except RuntimeError as e:
         if "oracle_disabled" in str(e):
-            return jsonify({"error": "oracle_disabled",
-                            "hint": "configura DEEPSEEK_API_KEY o habilita el oráculo local"}), 503
+            return (
+                jsonify(
+                    {
+                        "error": "oracle_disabled",
+                        "hint": "configura DEEPSEEK_API_KEY o habilita el oráculo local",
+                    }
+                ),
+                503,
+            )
         return jsonify({"error": "oracle_failure", "detail": str(e)[:300]}), 502
     except ValueError:
         return jsonify({"error": "oracle_bad_json", "detail": raw[:300]}), 502
 
     result["evidence"] = evidence
     result["engine"] = _engine_used()
-    result["hint"] = "el guía recomienda, la comunidad decide: crea una propuesta critical"
+    result["hint"] = (
+        "el guía recomienda, la comunidad decide: crea una propuesta critical"
+    )
     _save_assessment(uid, "director", result, result["engine"])
     return jsonify({"success": True, "assessment": result})

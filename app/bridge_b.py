@@ -31,10 +31,13 @@ from typing import Any, Dict, List, Optional
 
 from flask import Blueprint, jsonify, request
 
-from .jwt_utils import token_required
-from .utils import get_db
 from maxocontracts.core.types import ContractState
 from maxocontracts.oracles.live_oracle import LiveOracle
+
+from .contracts_bp import _validate_civil_text
+from .jwt_utils import token_required
+from .protection import caps_for
+from .utils import get_db
 
 bridge_bp = Blueprint("bridge_b", __name__, url_prefix="/contracts")
 
@@ -58,8 +61,12 @@ def _oracle_maintenance_share() -> float:
         return DEFAULT_ORACLE_MAINTENANCE_SHARE
 
 
-def _credit_oracle_maintenance(contract_id: str, total_vhv_t: Decimal,
-                               engine: str = "deepseek", source: str = "from-need") -> Optional[dict]:
+def _credit_oracle_maintenance(
+    contract_id: str,
+    total_vhv_t: Decimal,
+    engine: str = "deepseek",
+    source: str = "from-need",
+) -> Optional[dict]:
     """Registra el aporte del contrato al sustento del oráculo (T13).
 
     Devuelve la entrada creada o None si ya existía (UNIQUE contract+source).
@@ -149,9 +156,7 @@ def _template_terms(
     return [
         {
             "term_id": "oferta",
-            "civil_text": (
-                f"{offerer_name} entrega a {seeker_name}: {offer_desc}"
-            ),
+            "civil_text": (f"{offerer_name} entrega a {seeker_name}: {offer_desc}"),
             "vhv": {"t": hours, "v": 0, "h": 0},
             "assigned_participant": f"user-{offerer_uid}",
         },
@@ -179,7 +184,6 @@ def _normalize_oracle_terms(
     propuesta se normaliza al mismo VHV en ambas direcciones. Si el texto
     no pasa lenguaje civil, se descarta (el AVA no propone contratos rotos).
     """
-    from .contracts_bp import _validate_civil_text
 
     draft = getattr(negotiation_result, "draft_terms", None)
     if not isinstance(draft, list) or not draft:
@@ -197,12 +201,14 @@ def _normalize_oracle_terms(
         if assigned not in parties:
             # La autoridad de partes manda: nadie ajeno puede cargar términos
             return None
-        normalized.append({
-            "term_id": str(raw.get("term_id") or f"term-{len(normalized) + 1}"),
-            "civil_text": text,
-            "vhv": {"t": hours, "v": 0, "h": 0},
-            "assigned_participant": assigned,
-        })
+        normalized.append(
+            {
+                "term_id": str(raw.get("term_id") or f"term-{len(normalized) + 1}"),
+                "civil_text": text,
+                "vhv": {"t": hours, "v": 0, "h": 0},
+                "assigned_participant": assigned,
+            }
+        )
     return normalized if len(normalized) >= 2 else None
 
 
@@ -235,7 +241,7 @@ def _build_contract(
 
 def _term_from_dict(t: Dict[str, Any]) -> Any:
     """ContratoTerm desde dict (mismo molde que _attach_terms de la API)."""
-    from maxocontracts.core.types import ContractTerm, VHV
+    from maxocontracts.core.types import VHV, ContractTerm
 
     return ContractTerm(
         id=t["term_id"],
@@ -266,19 +272,35 @@ def contract_from_need(current_user):
     El borrador queda en DRAFT (sin firma). La firma asistida llega en la
     Fase 2 del puente B.
     """
-    from .contracts_bp import _save_contract, _token_uid, _validate_civil_text
+    from .contracts_bp import _save_contract, _token_uid
 
     data = request.get_json() or {}
     token_uid = _token_uid(current_user)
 
     try:
-        seeker_id = int(data.get("seeker_participant_id") or data.get("need_participant_id") or 0)
+        seeker_id = int(
+            data.get("seeker_participant_id") or data.get("need_participant_id") or 0
+        )
         offerer_id = int(data.get("offerer_participant_id") or 0)
     except (ValueError, TypeError):
-        return jsonify({"error": "seeker_participant_id y offerer_participant_id son requeridos"}), 400
+        return (
+            jsonify(
+                {
+                    "error": "seeker_participant_id y offerer_participant_id son requeridos"
+                }
+            ),
+            400,
+        )
 
     if seeker_id <= 0 or offerer_id <= 0:
-        return jsonify({"error": "seeker_participant_id y offerer_participant_id son requeridos"}), 400
+        return (
+            jsonify(
+                {
+                    "error": "seeker_participant_id y offerer_participant_id son requeridos"
+                }
+            ),
+            400,
+        )
     if seeker_id == offerer_id:
         return jsonify({"error": "una persona no se contrata consigo misma"}), 400
 
@@ -294,9 +316,23 @@ def contract_from_need(current_user):
     seeker = _get_forms_participant(db, seeker_id)
     offerer = _get_forms_participant(db, offerer_id)
     if seeker is None:
-        return jsonify({"error": f"participante con necesidad {seeker_id} no encontrado o inactivo"}), 404
+        return (
+            jsonify(
+                {
+                    "error": f"participante con necesidad {seeker_id} no encontrado o inactivo"
+                }
+            ),
+            404,
+        )
     if offerer is None:
-        return jsonify({"error": f"participante con oferta {offerer_id} no encontrado o inactivo"}), 404
+        return (
+            jsonify(
+                {
+                    "error": f"participante con oferta {offerer_id} no encontrado o inactivo"
+                }
+            ),
+            404,
+        )
 
     # Vincular la calle con el portal: identidad por email (Ola 3A.1)
     seeker_uid = _link_participant_to_user(db, seeker)
@@ -313,14 +349,21 @@ def contract_from_need(current_user):
         for pid_missing in missing:
             p_row = _get_forms_participant(db, pid_missing)
             if p_row and p_row.get("email"):
-                invites[str(pid_missing)] = f"/invite/{sign_invite(str(p_row['email']))}"
-        return jsonify({
-            "error": "los participantes deben tener cuenta en el portal con el mismo email del Formulario CERO",
-            "code": "NEED_PARTICIPANT_UNLINKED",
-            "participant_ids": missing,
-            "invite_urls": invites,
-            "hint": "abre tu invitación: sin prisa, primero tu pulso, luego tu acuerdo",
-        }), 409
+                invites[str(pid_missing)] = (
+                    f"/invite/{sign_invite(str(p_row['email']))}"
+                )
+        return (
+            jsonify(
+                {
+                    "error": "los participantes deben tener cuenta en el portal con el mismo email del Formulario CERO",
+                    "code": "NEED_PARTICIPANT_UNLINKED",
+                    "participant_ids": missing,
+                    "invite_urls": invites,
+                    "hint": "abre tu invitación: sin prisa, primero tu pulso, luego tu acuerdo",
+                }
+            ),
+            409,
+        )
 
     # 1. Plantilla determinista (garantiza T2/T17 y lenguaje civil)
     draft = _template_terms(seeker, offerer, seeker_uid, offerer_uid, hours)
@@ -374,26 +417,43 @@ def contract_from_need(current_user):
         (contract_id,),
     ).fetchone()
     if existing is not None:
-        if existing["state"] != "draft" or (existing["creator_user_id"] is not None and existing["creator_user_id"] != token_uid):
-            return jsonify({
-                "error": "el contrato ya existe y no es un borrador editable del mismo creador",
-                "code": "CONTRACT_CONFLICT",
-            }), 409
+        if existing["state"] != "draft" or (
+            existing["creator_user_id"] is not None
+            and existing["creator_user_id"] != token_uid
+        ):
+            return (
+                jsonify(
+                    {
+                        "error": "el contrato ya existe y no es un borrador editable del mismo creador",
+                        "code": "CONTRACT_CONFLICT",
+                    }
+                ),
+                409,
+            )
 
     # 5. FILTRO AXIOMÁTICO (AVA): nada roto cruza la puerta
     contract = _build_contract(contract_id, description, seeker_uid, offerer_uid, draft)
     valid, results = contract.validate()
     violations = [r for r in results if not r.is_valid]
     if not valid:
-        return jsonify({
-            "error": "el borrador propuesto no pasa los invariantes y NO se crea",
-            "code": "DRAFT_REJECTED",
-            "violations": [
-                {"axiom": v.axiom_code, "name": v.axiom_name, "message": v.message}
-                for v in violations
-            ],
-            "oracle_used": oracle_used,
-        }), 422
+        return (
+            jsonify(
+                {
+                    "error": "el borrador propuesto no pasa los invariantes y NO se crea",
+                    "code": "DRAFT_REJECTED",
+                    "violations": [
+                        {
+                            "axiom": v.axiom_code,
+                            "name": v.axiom_name,
+                            "message": v.message,
+                        }
+                        for v in violations
+                    ],
+                    "oracle_used": oracle_used,
+                }
+            ),
+            422,
+        )
 
     # 6. Persistencia en DRAFT + procedencia auditable (T13)
     contract._creator_user_id = token_uid
@@ -430,36 +490,42 @@ def contract_from_need(current_user):
             source="from-need",
         )
 
-    return jsonify({
-        "success": True,
-        "contract_id": contract_id,
-        "state": "draft",
-        "civil_description": description,
-        "oracle_used": oracle_used,
-        "oracle_reasoning": oracle_reasoning,
-        "oracle_credit": oracle_credit,
-        "axiom_check": {
-            "valid": True,
-            "checks": len(results),
-            "violations": [],
-        },
-        "participants": [f"user-{seeker_uid}", f"user-{offerer_uid}"],
-        "terms": [
+    return (
+        jsonify(
             {
-                "term_id": t["term_id"],
-                "civil_text": t["civil_text"],
-                "vhv": t["vhv"],
-                "assigned_participant": t["assigned_participant"],
+                "success": True,
+                "contract_id": contract_id,
+                "state": "draft",
+                "civil_description": description,
+                "oracle_used": oracle_used,
+                "oracle_reasoning": oracle_reasoning,
+                "oracle_credit": oracle_credit,
+                "axiom_check": {
+                    "valid": True,
+                    "checks": len(results),
+                    "violations": [],
+                },
+                "participants": [f"user-{seeker_uid}", f"user-{offerer_uid}"],
+                "terms": [
+                    {
+                        "term_id": t["term_id"],
+                        "civil_text": t["civil_text"],
+                        "vhv": t["vhv"],
+                        "assigned_participant": t["assigned_participant"],
+                    }
+                    for t in draft
+                ],
+                "total_vhv_h": hours * 2,
             }
-            for t in draft
-        ],
-        "total_vhv_h": hours * 2,
-    }), 201
+        ),
+        201,
+    )
 
 
 # ──────────────────────────────────────────────────────────────────
 # FASE 2: el camino de firma guiado (el ciclo se cierra)
 # ──────────────────────────────────────────────────────────────────
+
 
 def _activation_blockers(contract, db) -> List[Dict[str, Any]]:
     """Qué falta para activar el contrato, según las protecciones (Ola 3A/3B).
@@ -469,20 +535,33 @@ def _activation_blockers(contract, db) -> List[Dict[str, Any]]:
     aceptación completa de términos.
     """
     from .contracts_bp import _asymmetry_acknowledged
-    from .protection import caps_for, protection_level
+    from .protection import protection_level
 
     blockers: List[Dict[str, Any]] = []
 
     if contract.state == ContractState.DRAFT:
-        blockers.append({"code": "DRAFT_NOT_SUBMITTED", "message": "el contrato aún no entra a la ronda de firma"})
+        blockers.append(
+            {
+                "code": "DRAFT_NOT_SUBMITTED",
+                "message": "el contrato aún no entra a la ronda de firma",
+            }
+        )
         return blockers
 
     if not contract.all_terms_accepted():
         missing = [
-            {"term_id": t.id, "missing": [p for p in contract.participant_ids if not t.accepted_by.get(p)]}
-            for t in contract._terms if not t.is_accepted_by_all(contract.participant_ids)
+            {
+                "term_id": t.id,
+                "missing": [
+                    p for p in contract.participant_ids if not t.accepted_by.get(p)
+                ],
+            }
+            for t in contract._terms
+            if not t.is_accepted_by_all(contract.participant_ids)
         ]
-        blockers.append({"code": "TERMS_UNACCEPTED", "message": "faltan firmas", "terms": missing})
+        blockers.append(
+            {"code": "TERMS_UNACCEPTED", "message": "faltan firmas", "terms": missing}
+        )
 
     if getattr(contract, "_asymmetry_flag", False):
         report = getattr(contract, "_asymmetry_report", {}) or {}
@@ -497,17 +576,22 @@ def _activation_blockers(contract, db) -> List[Dict[str, Any]]:
             needed.add(aval)
         missing = sorted(needed - set(acknowledged))
         if missing:
-            blockers.append({
-                "code": "ASYMMETRY_UNACKNOWLEDGED",
-                "message": "las partes obligadas y un aval deben reconocer la asimetría",
-                "missing": missing,
-                "hint": "POST /contracts/<id>/acknowledge-asymmetry con cada party_id",
-            })
+            blockers.append(
+                {
+                    "code": "ASYMMETRY_UNACKNOWLEDGED",
+                    "message": "las partes obligadas y un aval deben reconocer la asimetría",
+                    "missing": missing,
+                    "hint": "POST /contracts/<id>/acknowledge-asymmetry con cada party_id",
+                }
+            )
 
     shielded = [
-        p.id for p in contract.participants
+        p.id
+        for p in contract.participants
         if p.id.startswith("user-")
-        and caps_for(protection_level(int(p.id[len("user-"):]))).get("requires_witness")
+        and caps_for(protection_level(int(p.id[len("user-") :]))).get(
+            "requires_witness"
+        )
     ]
     if shielded:
         row = db.execute(
@@ -515,12 +599,14 @@ def _activation_blockers(contract, db) -> List[Dict[str, Any]]:
             (contract.contract_id,),
         ).fetchone()
         if not (row and row["meta_value"]):
-            blockers.append({
-                "code": "WITNESS_REQUIRED",
-                "message": "participantes blindados exigen co-testigo humano ajeno a las partes",
-                "shielded_participants": shielded,
-                "hint": "POST /contracts/<id>/witness",
-            })
+            blockers.append(
+                {
+                    "code": "WITNESS_REQUIRED",
+                    "message": "participantes blindados exigen co-testigo humano ajeno a las partes",
+                    "shielded_participants": shielded,
+                    "hint": "POST /contracts/<id>/witness",
+                }
+            )
 
     return blockers
 
@@ -536,14 +622,12 @@ def _promote_participants_to_trust(contract, db) -> List[str]:
     for p in contract.participants:
         if not p.id.startswith("user-"):
             continue
-        uid = int(p.id[len("user-"):])
+        uid = int(p.id[len("user-") :])
         row = db.execute(
             "SELECT trust_level FROM users WHERE id = ?", (uid,)
         ).fetchone()
         if row is not None and int(row["trust_level"] or 0) < 1:
-            db.execute(
-                "UPDATE users SET trust_level = 1 WHERE id = ?", (uid,)
-            )
+            db.execute("UPDATE users SET trust_level = 1 WHERE id = ?", (uid,))
             email_row = db.execute(
                 "SELECT email FROM users WHERE id = ?", (uid,)
             ).fetchone()
@@ -565,8 +649,12 @@ def cycle_status(current_user, contract_id: str):
     Fase 2: el camino de firma — qué falta, quién debe actuar, qué protecciones
     aplican. La firma guiada no oculta la complejidad: la ordena.
     """
-    from .contracts_bp import _asymmetry_acknowledged, _contract_window_blocked, _load_contract
-    from .protection import caps_for, protection_level
+    from .contracts_bp import (
+        _asymmetry_acknowledged,
+        _contract_window_blocked,
+        _load_contract,
+    )
+    from .protection import protection_level
 
     contract = _load_contract(contract_id)
     if contract is None:
@@ -580,42 +668,57 @@ def cycle_status(current_user, contract_id: str):
 
     terms_status = []
     for t in contract._terms:
-        terms_status.append({
-            "term_id": t.id,
-            "civil_text": t.description,
-            "assigned_participant": getattr(t, "assigned_participant", None),
-            "accepted_by": t.accepted_by,
-            "signed_by_all": t.is_accepted_by_all(contract.participant_ids),
-        })
+        terms_status.append(
+            {
+                "term_id": t.id,
+                "civil_text": t.description,
+                "assigned_participant": getattr(t, "assigned_participant", None),
+                "accepted_by": t.accepted_by,
+                "signed_by_all": t.is_accepted_by_all(contract.participant_ids),
+            }
+        )
 
     participants_status = []
     for p in contract.participants:
         level = (
-            protection_level(int(p.id[len("user-"):]))
-            if p.id.startswith("user-") else None
+            protection_level(int(p.id[len("user-") :]))
+            if p.id.startswith("user-")
+            else None
         )
-        participants_status.append({
-            "participant_id": p.id,
-            "protection_level": level,
-            "requires_paraphrase": bool(caps_for(level).get("requires_paraphrase")) if level else False,
-            "requires_witness": bool(caps_for(level).get("requires_witness")) if level else False,
-            "signed_all_terms": all(t.accepted_by.get(p.id) for t in contract._terms),
-        })
+        participants_status.append(
+            {
+                "participant_id": p.id,
+                "protection_level": level,
+                "requires_paraphrase": (
+                    bool(caps_for(level).get("requires_paraphrase")) if level else False
+                ),
+                "requires_witness": (
+                    bool(caps_for(level).get("requires_witness")) if level else False
+                ),
+                "signed_all_terms": all(
+                    t.accepted_by.get(p.id) for t in contract._terms
+                ),
+            }
+        )
 
     blockers = _activation_blockers(contract, db)
     window = _contract_window_blocked(contract, db)
 
-    return jsonify({
-        "contract_id": contract.contract_id,
-        "state": contract.state.value,
-        "origin": origin_row["meta_value"] if origin_row else None,
-        "terms": terms_status,
-        "participants": participants_status,
-        "asymmetry_acknowledged": _asymmetry_acknowledged(contract_id),
-        "blockers": blockers,
-        "window": window,
-        "can_activate": not blockers and window is None and contract.state != ContractState.DRAFT,
-    })
+    return jsonify(
+        {
+            "contract_id": contract.contract_id,
+            "state": contract.state.value,
+            "origin": origin_row["meta_value"] if origin_row else None,
+            "terms": terms_status,
+            "participants": participants_status,
+            "asymmetry_acknowledged": _asymmetry_acknowledged(contract_id),
+            "blockers": blockers,
+            "window": window,
+            "can_activate": not blockers
+            and window is None
+            and contract.state != ContractState.DRAFT,
+        }
+    )
 
 
 @bridge_bp.route("/<contract_id>/cycle", methods=["POST"])
@@ -647,7 +750,7 @@ def cycle_step(current_user, contract_id: str):
         _save_contract,
         _token_uid,
     )
-    from .protection import caps_for, protection_level
+    from .protection import protection_level
 
     contract = _load_contract(contract_id)
     if contract is None:
@@ -658,10 +761,15 @@ def cycle_step(current_user, contract_id: str):
         return jsonify({"error": "token sin identidad válida"}), 403
     pid = f"user-{token_uid}"
     if pid not in contract.participant_ids:
-        return jsonify({
-            "error": "solo las partes del contrato caminan su ciclo",
-            "code": "CYCLE_NOT_PARTICIPANT",
-        }), 403
+        return (
+            jsonify(
+                {
+                    "error": "solo las partes del contrato caminan su ciclo",
+                    "code": "CYCLE_NOT_PARTICIPANT",
+                }
+            ),
+            403,
+        )
 
     db = get_db()
 
@@ -677,17 +785,27 @@ def cycle_step(current_user, contract_id: str):
     # 1. DRAFT → PENDING: validación axiomática antes de la ronda de firma
     if contract.state == ContractState.DRAFT:
         if not contract.submit_for_acceptance():
-            return jsonify({
-                "error": "el borrador no pasa los invariantes y no entra a firma",
-                "code": "DRAFT_REJECTED",
-            }), 422
+            return (
+                jsonify(
+                    {
+                        "error": "el borrador no pasa los invariantes y no entra a firma",
+                        "code": "DRAFT_REJECTED",
+                    }
+                ),
+                422,
+            )
         _save_contract(contract, actor_id=token_uid)
         actions.append({"action": "submitted", "from": "draft", "to": "pending"})
 
     if contract.state not in (ContractState.PENDING, ContractState.DRAFT):
-        return jsonify({
-            "error": f"el ciclo de firma no aplica en estado {contract.state.value}",
-        }), 400
+        return (
+            jsonify(
+                {
+                    "error": f"el ciclo de firma no aplica en estado {contract.state.value}",
+                }
+            ),
+            400,
+        )
 
     # 2. Firmar los términos pendientes de ESTE participante (asistido)
     level = protection_level(token_uid)
@@ -695,8 +813,10 @@ def cycle_step(current_user, contract_id: str):
     if oracle_err:
         code = oracle_err.get("code")
         return jsonify(oracle_err), 503 if code == "PROTECTION_ORACLE_REQUIRED" else 400
-    para_err = _paraphrase_check({"comprehension": data.get("comprehension", True),
-                                  "paraphrase": paraphrase}, level)
+    para_err = _paraphrase_check(
+        {"comprehension": data.get("comprehension", True), "paraphrase": paraphrase},
+        level,
+    )
     if para_err:
         return jsonify(para_err), 400
 
@@ -716,8 +836,9 @@ def cycle_step(current_user, contract_id: str):
             (contract_id, term.id, pid, paraphrase or None),
         )
     if signed_terms:
-        _audit(contract, "cycle_terms_signed", token_uid,
-               terms=signed_terms, assisted=True)
+        _audit(
+            contract, "cycle_terms_signed", token_uid, terms=signed_terms, assisted=True
+        )
         actions.append({"action": "signed", "party": pid, "terms": signed_terms})
     db.commit()
 
@@ -730,8 +851,14 @@ def cycle_step(current_user, contract_id: str):
             "code": "TERMS_UNACCEPTED",
             "message": "faltan firmas de otras partes",
             "missing": [
-                {"term_id": t.id, "missing": [p for p in contract.participant_ids if not t.accepted_by.get(p)]}
-                for t in contract._terms if not t.is_accepted_by_all(contract.participant_ids)
+                {
+                    "term_id": t.id,
+                    "missing": [
+                        p for p in contract.participant_ids if not t.accepted_by.get(p)
+                    ],
+                }
+                for t in contract._terms
+                if not t.is_accepted_by_all(contract.participant_ids)
             ],
         }
     else:
@@ -741,10 +868,13 @@ def cycle_step(current_user, contract_id: str):
                 _save_contract(contract, actor_id=token_uid)
                 from .webhooks import dispatch_event
 
-                dispatch_event("contract.activated", {
-                    "contract_id": contract_id,
-                    "activated_at": datetime.now().isoformat(),
-                })
+                dispatch_event(
+                    "contract.activated",
+                    {
+                        "contract_id": contract_id,
+                        "activated_at": datetime.now().isoformat(),
+                    },
+                )
                 # Puente de Llegada: al caminar su primer acuerdo activo, los
                 # humanos pasan de N0 (recién llegado) a N1 (integrado) —
                 # la voz en la gobernanza se gana con la vida, no con prisa.
@@ -753,15 +883,17 @@ def cycle_step(current_user, contract_id: str):
         else:
             activation_blocked = blockers[0]
 
-    return jsonify({
-        "success": True,
-        "contract_id": contract_id,
-        "party": pid,
-        "state": contract.state.value,
-        "actions": actions,
-        "signed_terms": signed_terms,
-        "activated": activated,
-        "promoted_to_trust": promoted if activated else [],
-        "activation_blocked": activation_blocked,
-        "hint": "GET /contracts/<id>/cycle para ver el camino restante",
-    }), 200 if not activation_blocked else 202
+    return jsonify(
+        {
+            "success": True,
+            "contract_id": contract_id,
+            "party": pid,
+            "state": contract.state.value,
+            "actions": actions,
+            "signed_terms": signed_terms,
+            "activated": activated,
+            "promoted_to_trust": promoted if activated else [],
+            "activation_blocked": activation_blocked,
+            "hint": "GET /contracts/<id>/cycle para ver el camino restante",
+        }
+    ), (200 if not activation_blocked else 202)

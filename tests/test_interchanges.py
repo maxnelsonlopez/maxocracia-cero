@@ -60,8 +60,9 @@ def test_create_interchange_and_credit(client):
     }
 
     # POST interchange (el giver sale del token)
-    resp = client.post("/interchanges", json=payload,
-                       headers={"Authorization": f"Bearer {token}"})
+    resp = client.post(
+        "/interchanges", json=payload, headers={"Authorization": f"Bearer {token}"}
+    )
     assert resp.status_code == 201
     data = resp.get_json()
     assert "credit" in data
@@ -83,12 +84,15 @@ def test_create_interchange_requiere_token(client):
     db_path = client.application.config["DATABASE"]
     giver_id = seed_user(db_path, "anon_giver@example.test", "Anon")
     receiver_id = seed_user(db_path, "anon_receiver@example.test", "AnonR")
-    resp = client.post("/interchanges", json={
-        "interchange_id": "TEST-INT-002",
-        "giver_id": giver_id,
-        "receiver_id": receiver_id,
-        "description": "x",
-    })
+    resp = client.post(
+        "/interchanges",
+        json={
+            "interchange_id": "TEST-INT-002",
+            "giver_id": giver_id,
+            "receiver_id": receiver_id,
+            "description": "x",
+        },
+    )
     assert resp.status_code == 401
 
 

@@ -1,7 +1,8 @@
-import json
 import pytest
+
 from app.matching import MatchingEngine
 from app.utils import get_db
+
 
 class TestOracleAndOffererMatching:
     """Tests for the find_matches_for_offerer logic and the Oracle synthetic chat."""
@@ -27,9 +28,19 @@ class TestOracleAndOffererMatching:
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                "Max Giver", "max@example.com", "Bogotá", "Chapinero", "Ofrece diseño web", "Needs nothing",
-                "Baja", '["tecnologia", "diseño"]', '["crecimiento_aprendizaje"]', "[]", "[]", "active"
-            )
+                "Max Giver",
+                "max@example.com",
+                "Bogotá",
+                "Chapinero",
+                "Ofrece diseño web",
+                "Needs nothing",
+                "Baja",
+                '["tecnologia", "diseño"]',
+                '["crecimiento_aprendizaje"]',
+                "[]",
+                "[]",
+                "active",
+            ),
         )
         offerer_id = cursor.lastrowid
 
@@ -43,9 +54,19 @@ class TestOracleAndOffererMatching:
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                "Nelson Seeker", "nelson@example.com", "Bogotá", "Chapinero", "Offers nothing", "Necesita diseño de logo",
-                "Alta", "[]", "[]", '["diseño"]', '["crecimiento_aprendizaje"]', "active"
-            )
+                "Nelson Seeker",
+                "nelson@example.com",
+                "Bogotá",
+                "Chapinero",
+                "Offers nothing",
+                "Necesita diseño de logo",
+                "Alta",
+                "[]",
+                "[]",
+                '["diseño"]',
+                '["crecimiento_aprendizaje"]',
+                "active",
+            ),
         )
         seeker_id = cursor.lastrowid
         db_conn.commit()
@@ -84,9 +105,19 @@ class TestOracleAndOffererMatching:
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    "Test User", "test@example.com", "Bogotá", "Chapinero", "Ofrece tutorías", "Necesita comida",
-                    "Media", '["educacion"]', '["crecimiento_aprendizaje"]', '["alimentacion"]', '["prosperidad_recursos"]', "active"
-                )
+                    "Test User",
+                    "test@example.com",
+                    "Bogotá",
+                    "Chapinero",
+                    "Ofrece tutorías",
+                    "Necesita comida",
+                    "Media",
+                    '["educacion"]',
+                    '["crecimiento_aprendizaje"]',
+                    '["alimentacion"]',
+                    '["prosperidad_recursos"]',
+                    "active",
+                ),
             )
             db.commit()
 
@@ -103,19 +134,37 @@ class TestOracleAndOffererMatching:
         with app.app_context():
             db = get_db()
             cursor = db.cursor()
-            cursor.execute("DELETE FROM participants") # Clean up to ensure exact names mapping
-            
+            cursor.execute(
+                "DELETE FROM participants"
+            )  # Clean up to ensure exact names mapping
+
             # Insert Max Giver
             cursor.execute(
                 "INSERT INTO participants (name, email, city, neighborhood, offer_description, need_description, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                ("Max Nelson", "maxnelson@example.com", "Bogotá", "Chapinero", "Programacion", "Nada", "active")
+                (
+                    "Max Nelson",
+                    "maxnelson@example.com",
+                    "Bogotá",
+                    "Chapinero",
+                    "Programacion",
+                    "Nada",
+                    "active",
+                ),
             )
             max_id = cursor.lastrowid
-            
+
             # Insert Nelson Seeker
             cursor.execute(
                 "INSERT INTO participants (name, email, city, neighborhood, offer_description, need_description, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                ("Nelson Lopez", "nelsonlopez@example.com", "Bogotá", "Chapinero", "Nada", "Programacion", "active")
+                (
+                    "Nelson Lopez",
+                    "nelsonlopez@example.com",
+                    "Bogotá",
+                    "Chapinero",
+                    "Nada",
+                    "Programacion",
+                    "active",
+                ),
             )
             nelson_id = cursor.lastrowid
             db.commit()
@@ -125,7 +174,7 @@ class TestOracleAndOffererMatching:
         response = auth_client.post("/forms/oracle/chat", json={"message": message})
         assert response.status_code == 200
         data = response.get_json()
-        
+
         assert "reply" in data
         assert data["prefill"] is not None
         assert data["prefill"]["giver_id"] == max_id

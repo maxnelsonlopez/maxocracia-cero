@@ -3,14 +3,17 @@ Tests for participant CRUD actions (update and delete) in Forms system.
 """
 
 import json
+
 import pytest
-from app.utils import get_db
+
 from app.forms_manager import FormsManager
+from app.utils import get_db
 
 
 @pytest.fixture
 def create_participant_helper(client):
     """Helper fixture to create a test participant."""
+
     def _create(email="test@example.com", name="Test Participant"):
         data = {
             "name": name,
@@ -31,12 +34,11 @@ def create_participant_helper(client):
             "need_human_dimensions": ["prosperidad_recursos"],
         }
         response = client.post(
-            "/forms/participant",
-            data=json.dumps(data),
-            content_type="application/json"
+            "/forms/participant", data=json.dumps(data), content_type="application/json"
         )
         assert response.status_code == 201
         return response.get_json()["participant_id"]
+
     return _create
 
 
@@ -55,7 +57,7 @@ def test_update_participant_owner(app, client, auth_client, create_participant_h
     response = auth_client.put(
         f"/forms/participants/{participant_id}",
         data=json.dumps(update_data),
-        content_type="application/json"
+        content_type="application/json",
     )
 
     assert response.status_code == 200
@@ -72,7 +74,9 @@ def test_update_participant_owner(app, client, auth_client, create_participant_h
         assert p["offer_categories"] == ["tiempo", "conocimiento"]
 
 
-def test_update_participant_non_owner_forbidden(app, client, auth, create_participant_helper):
+def test_update_participant_non_owner_forbidden(
+    app, client, auth, create_participant_helper
+):
     """Test that updating another user's participant record is forbidden."""
     # Participant created with admin's email or other email
     participant_id = create_participant_helper(email="other@example.com")
@@ -82,15 +86,13 @@ def test_update_participant_non_owner_forbidden(app, client, auth, create_partic
     token = response_login.get_json()["access_token"]
     client.environ_base["HTTP_AUTHORIZATION"] = f"Bearer {token}"
 
-    update_data = {
-        "need_urgency": "Alta"
-    }
+    update_data = {"need_urgency": "Alta"}
 
     # standard user test@example.com attempts to edit other@example.com's participant
     response = client.put(
         f"/forms/participants/{participant_id}",
         data=json.dumps(update_data),
-        content_type="application/json"
+        content_type="application/json",
     )
 
     assert response.status_code == 403
@@ -101,15 +103,12 @@ def test_update_participant_admin(app, admin_client, create_participant_helper):
     """Test that an administrator can update any participant."""
     participant_id = create_participant_helper(email="test@example.com")
 
-    update_data = {
-        "need_urgency": "Baja",
-        "status": "paused"
-    }
+    update_data = {"need_urgency": "Baja", "status": "paused"}
 
     response = admin_client.put(
         f"/forms/participants/{participant_id}",
         data=json.dumps(update_data),
-        content_type="application/json"
+        content_type="application/json",
     )
 
     assert response.status_code == 200
@@ -131,7 +130,7 @@ def test_update_participant_validation(app, auth_client, create_participant_help
     response = auth_client.put(
         f"/forms/participants/{participant_id}",
         data=json.dumps({"need_urgency": "Inmediata"}),
-        content_type="application/json"
+        content_type="application/json",
     )
     assert response.status_code == 400
     assert "Urgencia debe ser Alta, Media o Baja" in response.get_json()["error"]
@@ -140,13 +139,15 @@ def test_update_participant_validation(app, auth_client, create_participant_help
     response = auth_client.put(
         f"/forms/participants/{participant_id}",
         data=json.dumps({"status": "deleted"}),
-        content_type="application/json"
+        content_type="application/json",
     )
     assert response.status_code == 400
     assert "Estado debe ser active, inactive o paused" in response.get_json()["error"]
 
 
-def test_delete_participant_non_owner_forbidden(app, client, auth, create_participant_helper):
+def test_delete_participant_non_owner_forbidden(
+    app, client, auth, create_participant_helper
+):
     """Test that deleting another user's participant record is forbidden."""
     participant_id = create_participant_helper(email="other@example.com")
 
@@ -204,13 +205,13 @@ def test_delete_participant_cascades(app, admin_client, create_participant_helpe
     response_f = admin_client.post(
         "/forms/follow-up",
         data=json.dumps(followup_data),
-        content_type="application/json"
+        content_type="application/json",
     )
     assert response_f.status_code == 201
     followup_id = response_f.get_json()["followup_id"]
 
     # Verify follow-up exists
-    response_get_f = admin_client.get(f"/forms/follow-ups")
+    response_get_f = admin_client.get("/forms/follow-ups")
     assert response_get_f.status_code == 200
     followups = response_get_f.get_json()["follow_ups"]
     assert any(f["id"] == followup_id for f in followups)
@@ -220,7 +221,7 @@ def test_delete_participant_cascades(app, admin_client, create_participant_helpe
     assert response_del.status_code == 200
 
     # Verify follow-up is cascadingly deleted
-    response_get_f2 = admin_client.get(f"/forms/follow-ups")
+    response_get_f2 = admin_client.get("/forms/follow-ups")
     assert response_get_f2.status_code == 200
     followups2 = response_get_f2.get_json()["follow_ups"]
     assert not any(f["id"] == followup_id for f in followups2)

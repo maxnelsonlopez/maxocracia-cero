@@ -277,11 +277,19 @@ class FormsManager:
             return False, "No se proporcionaron campos válidos para actualizar"
 
         # Validate urgency
-        if "need_urgency" in update_data and update_data["need_urgency"] not in ["Alta", "Media", "Baja"]:
+        if "need_urgency" in update_data and update_data["need_urgency"] not in [
+            "Alta",
+            "Media",
+            "Baja",
+        ]:
             return False, "Urgencia debe ser Alta, Media o Baja"
 
         # Validate status
-        if "status" in update_data and update_data["status"] not in ["active", "inactive", "paused"]:
+        if "status" in update_data and update_data["status"] not in [
+            "active",
+            "inactive",
+            "paused",
+        ]:
             return False, "Estado debe ser active, inactive o paused"
 
         # Serialize JSON fields
@@ -297,9 +305,11 @@ class FormsManager:
 
         try:
             cursor = self.conn.cursor()
-            
+
             # Check if participant exists
-            cursor.execute("SELECT id FROM participants WHERE id = ?", (participant_id,))
+            cursor.execute(
+                "SELECT id FROM participants WHERE id = ?", (participant_id,)
+            )
             if not cursor.fetchone():
                 return False, "Participante no encontrado"
 
@@ -334,18 +344,34 @@ class FormsManager:
             cursor = self.conn.cursor()
 
             # Check if participant exists
-            cursor.execute("SELECT id FROM participants WHERE id = ?", (participant_id,))
+            cursor.execute(
+                "SELECT id FROM participants WHERE id = ?", (participant_id,)
+            )
             if not cursor.fetchone():
                 return False, "Participante no encontrado"
 
             # Set giver_id and receiver_id to NULL in interchanges to avoid breaking references
-            cursor.execute("UPDATE interchange SET giver_id = NULL WHERE giver_id = ?", (participant_id,))
-            cursor.execute("UPDATE interchange SET receiver_id = NULL WHERE receiver_id = ?", (participant_id,))
+            cursor.execute(
+                "UPDATE interchange SET giver_id = NULL WHERE giver_id = ?",
+                (participant_id,),
+            )
+            cursor.execute(
+                "UPDATE interchange SET receiver_id = NULL WHERE receiver_id = ?",
+                (participant_id,),
+            )
 
             # Delete participant (follow_ups will cascade delete if enabled, but let's make sure by deleting manually just in case)
-            cursor.execute("DELETE FROM follow_ups WHERE participant_id = ?", (participant_id,))
-            cursor.execute("DELETE FROM participant_offers WHERE participant_id = ?", (participant_id,))
-            cursor.execute("DELETE FROM participant_needs WHERE participant_id = ?", (participant_id,))
+            cursor.execute(
+                "DELETE FROM follow_ups WHERE participant_id = ?", (participant_id,)
+            )
+            cursor.execute(
+                "DELETE FROM participant_offers WHERE participant_id = ?",
+                (participant_id,),
+            )
+            cursor.execute(
+                "DELETE FROM participant_needs WHERE participant_id = ?",
+                (participant_id,),
+            )
             cursor.execute("DELETE FROM participants WHERE id = ?", (participant_id,))
 
             self.conn.commit()
@@ -372,15 +398,17 @@ class FormsManager:
             offers.append(offer)
         return offers
 
-    def add_participant_offer(self, participant_id: int, data: Dict) -> Tuple[bool, str, Optional[int]]:
+    def add_participant_offer(
+        self, participant_id: int, data: Dict
+    ) -> Tuple[bool, str, Optional[int]]:
         """Agrega una oferta secundaria para un participante."""
         if not data.get("description"):
             return False, "Descripción requerida para la oferta", None
-        
+
         categories = data.get("categories", [])
         if not isinstance(categories, list) or not categories:
             return False, "Debe seleccionar al menos una categoría válida", None
-            
+
         # Validar categorías
         for cat in categories:
             if cat not in self.CATEGORIES:
@@ -396,7 +424,9 @@ class FormsManager:
         try:
             cursor = self.conn.cursor()
             # Verificar si el participante existe
-            cursor.execute("SELECT id FROM participants WHERE id = ?", (participant_id,))
+            cursor.execute(
+                "SELECT id FROM participants WHERE id = ?", (participant_id,)
+            )
             if not cursor.fetchone():
                 return False, "Participante no encontrado", None
 
@@ -430,7 +460,11 @@ class FormsManager:
         if "description" in update_data and not update_data["description"]:
             return False, "La descripción no puede estar vacía"
 
-        if "status" in update_data and update_data["status"] not in ["active", "inactive", "paused"]:
+        if "status" in update_data and update_data["status"] not in [
+            "active",
+            "inactive",
+            "paused",
+        ]:
             return False, "Estado inválido"
 
         if "categories" in update_data:
@@ -452,7 +486,9 @@ class FormsManager:
         try:
             cursor = self.conn.cursor()
             # Verificar existencia
-            cursor.execute("SELECT id FROM participant_offers WHERE id = ?", (offer_id,))
+            cursor.execute(
+                "SELECT id FROM participant_offers WHERE id = ?", (offer_id,)
+            )
             if not cursor.fetchone():
                 return False, "Oferta no encontrada"
 
@@ -470,7 +506,9 @@ class FormsManager:
         """Elimina una oferta secundaria."""
         try:
             cursor = self.conn.cursor()
-            cursor.execute("SELECT id FROM participant_offers WHERE id = ?", (offer_id,))
+            cursor.execute(
+                "SELECT id FROM participant_offers WHERE id = ?", (offer_id,)
+            )
             if not cursor.fetchone():
                 return False, "Oferta no encontrada"
 
@@ -497,15 +535,17 @@ class FormsManager:
             needs.append(need)
         return needs
 
-    def add_participant_need(self, participant_id: int, data: Dict) -> Tuple[bool, str, Optional[int]]:
+    def add_participant_need(
+        self, participant_id: int, data: Dict
+    ) -> Tuple[bool, str, Optional[int]]:
         """Agrega una necesidad secundaria para un participante."""
         if not data.get("description"):
             return False, "Descripción requerida para la necesidad", None
-        
+
         categories = data.get("categories", [])
         if not isinstance(categories, list) or not categories:
             return False, "Debe seleccionar al menos una categoría válida", None
-            
+
         for cat in categories:
             if cat not in self.CATEGORIES:
                 return False, f"Categoría inválida: {cat}", None
@@ -522,7 +562,9 @@ class FormsManager:
 
         try:
             cursor = self.conn.cursor()
-            cursor.execute("SELECT id FROM participants WHERE id = ?", (participant_id,))
+            cursor.execute(
+                "SELECT id FROM participants WHERE id = ?", (participant_id,)
+            )
             if not cursor.fetchone():
                 return False, "Participante no encontrado", None
 
@@ -549,7 +591,13 @@ class FormsManager:
 
     def update_participant_need(self, need_id: int, data: Dict) -> Tuple[bool, str]:
         """Actualiza una necesidad secundaria."""
-        allowed_fields = ["description", "categories", "urgency", "human_dimensions", "status"]
+        allowed_fields = [
+            "description",
+            "categories",
+            "urgency",
+            "human_dimensions",
+            "status",
+        ]
         update_data = {k: v for k, v in data.items() if k in allowed_fields}
         if not update_data:
             return False, "No se proporcionaron campos para actualizar"
@@ -557,10 +605,18 @@ class FormsManager:
         if "description" in update_data and not update_data["description"]:
             return False, "La descripción no puede estar vacía"
 
-        if "urgency" in update_data and update_data["urgency"] not in ["Alta", "Media", "Baja"]:
+        if "urgency" in update_data and update_data["urgency"] not in [
+            "Alta",
+            "Media",
+            "Baja",
+        ]:
             return False, "Urgencia inválida"
 
-        if "status" in update_data and update_data["status"] not in ["active", "inactive", "paused"]:
+        if "status" in update_data and update_data["status"] not in [
+            "active",
+            "inactive",
+            "paused",
+        ]:
             return False, "Estado inválido"
 
         if "categories" in update_data:
@@ -950,10 +1006,10 @@ class FormsManager:
     def get_full_network_graph(self, limit: int = 200) -> Dict:
         """
         Get nodes and edges for the full network graph.
-        
+
         Args:
             limit: Maximum number of exchanges to return
-            
+
         Returns:
             Dictionary with nodes and edges
         """
@@ -963,7 +1019,8 @@ class FormsManager:
         # Note: We join with participants table. We assume IDs match.
         # If IDs refer to users table, we'd join there.
         # Based on forms_bp.py, it seems Red de Apoyo uses participants.
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT 
                 i.id, i.giver_id, i.receiver_id, i.uth_hours, i.type, i.urgency,
                 p1.name as giver_name, p2.name as receiver_name
@@ -972,8 +1029,10 @@ class FormsManager:
             LEFT JOIN participants p2 ON i.receiver_id = p2.id
             ORDER BY i.date DESC
             LIMIT ?
-        """, (limit,))
-        
+        """,
+            (limit,),
+        )
+
         exchanges = []
         node_ids = set()
         nodes = []
@@ -982,49 +1041,51 @@ class FormsManager:
         for row in cursor.fetchall():
             ex = dict(zip([d[0] for d in cursor.description], row))
             exchanges.append(ex)
-            
+
             # Track nodes
-            if ex['giver_id']:
-                node_ids.add((ex['giver_id'], ex['giver_name'] or f"User {ex['giver_id']}"))
-            if ex['receiver_id']:
-                node_ids.add((ex['receiver_id'], ex['receiver_name'] or f"User {ex['receiver_id']}"))
-            
+            if ex["giver_id"]:
+                node_ids.add(
+                    (ex["giver_id"], ex["giver_name"] or f"User {ex['giver_id']}")
+                )
+            if ex["receiver_id"]:
+                node_ids.add(
+                    (
+                        ex["receiver_id"],
+                        ex["receiver_name"] or f"User {ex['receiver_id']}",
+                    )
+                )
+
             # Create edge
-            if ex['giver_id'] and ex['receiver_id']:
-                edges.append({
-                    "id": f"e{ex['id']}",
-                    "source": str(ex['giver_id']),
-                    "target": str(ex['receiver_id']),
-                    "label": f"{ex['uth_hours']} UTH",
-                    "data": {
-                        "type": ex['type'],
-                        "urgency": ex['urgency']
+            if ex["giver_id"] and ex["receiver_id"]:
+                edges.append(
+                    {
+                        "id": f"e{ex['id']}",
+                        "source": str(ex["giver_id"]),
+                        "target": str(ex["receiver_id"]),
+                        "label": f"{ex['uth_hours']} UTH",
+                        "data": {"type": ex["type"], "urgency": ex["urgency"]},
                     }
-                })
+                )
 
         # Create nodes
         # Determine hub nodes (heuristic: degree > 3)
         degree_map = {}
         for e in edges:
-            degree_map[e['source']] = degree_map.get(e['source'], 0) + 1
-            degree_map[e['target']] = degree_map.get(e['target'], 0) + 1
+            degree_map[e["source"]] = degree_map.get(e["source"], 0) + 1
+            degree_map[e["target"]] = degree_map.get(e["target"], 0) + 1
 
         for nid, name in node_ids:
-            nodes.append({
-                "id": str(nid),
-                "type": "participant",
-                "data": { 
-                    "label": name,
-                    "is_hub": degree_map.get(str(nid), 0) > 3
-                },
-                # Initial random position, will be fitted by React Flow
-                "position": { "x": 0, "y": 0 }
-            })
+            nodes.append(
+                {
+                    "id": str(nid),
+                    "type": "participant",
+                    "data": {"label": name, "is_hub": degree_map.get(str(nid), 0) > 3},
+                    # Initial random position, will be fitted by React Flow
+                    "position": {"x": 0, "y": 0},
+                }
+            )
 
-        return {
-            "nodes": nodes,
-            "edges": edges
-        }
+        return {"nodes": nodes, "edges": edges}
 
     def get_temporal_trends(self, period_days: int = 30) -> Dict:
         """
@@ -1260,7 +1321,8 @@ def init_multi_offers_needs_tables(app):
     cur = conn.cursor()
     try:
         # Create participant_offers table
-        cur.execute("""
+        cur.execute(
+            """
         CREATE TABLE IF NOT EXISTS participant_offers (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           participant_id INTEGER NOT NULL,
@@ -1272,9 +1334,11 @@ def init_multi_offers_needs_tables(app):
           updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE CASCADE
         );
-        """)
+        """
+        )
         # Create participant_needs table
-        cur.execute("""
+        cur.execute(
+            """
         CREATE TABLE IF NOT EXISTS participant_needs (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           participant_id INTEGER NOT NULL,
@@ -1287,14 +1351,20 @@ def init_multi_offers_needs_tables(app):
           updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE CASCADE
         );
-        """)
+        """
+        )
         # Create indexes
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_participant_offers_pid ON participant_offers(participant_id);")
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_participant_needs_pid ON participant_needs(participant_id);")
+        cur.execute(
+            "CREATE INDEX IF NOT EXISTS idx_participant_offers_pid ON participant_offers(participant_id);"
+        )
+        cur.execute(
+            "CREATE INDEX IF NOT EXISTS idx_participant_needs_pid ON participant_needs(participant_id);"
+        )
         conn.commit()
-        print("Initialized participant_offers and participant_needs tables if not existed.")
+        print(
+            "Initialized participant_offers and participant_needs tables if not existed."
+        )
     except sqlite3.Error as e:
         print(f"Error initializing multi offers/needs tables: {e}")
     finally:
         conn.close()
-

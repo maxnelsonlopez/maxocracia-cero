@@ -1,15 +1,16 @@
-import sqlite3
 import os
+import sqlite3
 
-DB_PATH = '/Users/Max/Otros documentos/maxocracia-cero/comun.db'
-SCHEMA_PATH = '/Users/Max/Otros documentos/maxocracia-cero/app/schema.sql'
+DB_PATH = "/Users/Max/Otros documentos/maxocracia-cero/comun.db"
+SCHEMA_PATH = "/Users/Max/Otros documentos/maxocracia-cero/app/schema.sql"
+
 
 def migrate():
     if not os.path.exists(DB_PATH):
         print(f"Error: Database not found at {DB_PATH}")
         return
 
-    with open(SCHEMA_PATH, 'r') as f:
+    with open(SCHEMA_PATH, "r") as f:
         schema = f.read()
 
     conn = sqlite3.connect(DB_PATH)
@@ -21,6 +22,7 @@ def migrate():
         print(f"Migration failed: {e}")
     finally:
         conn.close()
+
 
 if __name__ == "__main__":
     migrate()

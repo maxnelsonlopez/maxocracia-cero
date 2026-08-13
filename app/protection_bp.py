@@ -24,11 +24,13 @@ def my_profile(current_user):
     uid = int(uid)
     profile = get_profile(uid)
     effective = protection_level(uid)
-    return jsonify({
-        "profile": profile,
-        "protection_level": effective,
-        "caps": caps_for(effective),
-    })
+    return jsonify(
+        {
+            "profile": profile,
+            "protection_level": effective,
+            "caps": caps_for(effective),
+        }
+    )
 
 
 @protection_bp.route("/profile", methods=["POST"])
@@ -60,9 +62,11 @@ def update_my_profile(current_user):
         companion = int(companion)
         if companion == uid:
             return jsonify({"error": "no puedes ser tu propio acompañante"}), 400
-        row = get_db().execute(
-            "SELECT 1 FROM users WHERE id = ?", (companion,)
-        ).fetchone()
+        row = (
+            get_db()
+            .execute("SELECT 1 FROM users WHERE id = ?", (companion,))
+            .fetchone()
+        )
         if row is None:
             return jsonify({"error": "acompañante no es un usuario real"}), 400
 
@@ -80,8 +84,10 @@ def update_my_profile(current_user):
         declared_age=declared_age,
         declared_education=(data.get("declared_education") or "").strip() or None,
     )
-    return jsonify({
-        "success": True,
-        "profile": profile,
-        "protection_level": protection_level(uid),
-    })
+    return jsonify(
+        {
+            "success": True,
+            "profile": profile,
+            "protection_level": protection_level(uid),
+        }
+    )

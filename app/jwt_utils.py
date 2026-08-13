@@ -102,14 +102,20 @@ def token_required(f):
         api_key = request.headers.get("X-API-Key")
         if api_key:
             from .utils import get_db
+
             db = get_db()
-            row = db.execute("SELECT user_id, revoked FROM api_keys WHERE api_key = ?", (api_key,)).fetchone()
+            row = db.execute(
+                "SELECT user_id, revoked FROM api_keys WHERE api_key = ?", (api_key,)
+            ).fetchone()
             if not row or row["revoked"]:
                 return jsonify({"error": "invalid or revoked api key"}), 401
-            
-            db.execute("UPDATE api_keys SET last_used_at = CURRENT_TIMESTAMP WHERE api_key = ?", (api_key,))
+
+            db.execute(
+                "UPDATE api_keys SET last_used_at = CURRENT_TIMESTAMP WHERE api_key = ?",
+                (api_key,),
+            )
             db.commit()
-            
+
             data = {"id": row["user_id"], "is_api_key": True}
             request.user = data
             return f(data, *args, **kwargs)

@@ -1,10 +1,9 @@
 import openai
-import os
 
 # ─── Configuración ──────────────────────────────────────────────────────────
 
-BASE_URL   = "http://localhost:1337/v1"
-MODEL      = "Qwen3-8B-Q4_K_M"   # Cambia a "janhq/Jan-v3-4b-base-instruct-Q4_K_XL" si quieres más velocidad
+BASE_URL = "http://localhost:1337/v1"
+MODEL = "Qwen3-8B-Q4_K_M"  # Cambia a "janhq/Jan-v3-4b-base-instruct-Q4_K_XL" si quieres más velocidad
 
 # System prompt del Oráculo Maxocracia (versión comprimida)
 # Para la versión completa, edita docs/ORACLE_SYSTEM_PROMPT.md
@@ -142,6 +141,7 @@ client = openai.OpenAI(base_url=BASE_URL, api_key="local")
 
 # ─── Chat interactivo ────────────────────────────────────────────────────────
 
+
 def chat():
     print("╔══════════════════════════════════════════╗")
     print("║       Oráculo Maxocracia Local           ║")
@@ -177,6 +177,6 @@ def chat():
             print("   → Abre Jan y presiona 'Start' en el modelo deseado.\n")
             break
 
+
 if __name__ == "__main__":
     chat()
-

@@ -23,20 +23,21 @@ Principios operativos:
 """
 
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from decimal import Decimal
 from enum import Enum
-from typing import Dict, List, Optional, Any
-from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
 from ..core.types import VHV, Participant
 
 
 class RehabilitationStatus(Enum):
     """Estados del camino de rehabilitación (DeepSeek: Recalibración Vital)."""
-    NORMAL = "normal"                          # Sin proceso activo
-    FORGIVEN = "forgiven"                      # Perdón activo disponible
-    IN_REHABILITATION = "rehabilitation"       # Aprendiz en Rehabilitación
-    REINTEGRATED = "reintegrated"              # Camino completado
+
+    NORMAL = "normal"  # Sin proceso activo
+    FORGIVEN = "forgiven"  # Perdón activo disponible
+    IN_REHABILITATION = "rehabilitation"  # Aprendiz en Rehabilitación
+    REINTEGRATED = "reintegrated"  # Camino completado
 
 
 @dataclass
@@ -47,13 +48,14 @@ class ForgivenessRecord:
     El perdón es un acto documentado: quién perdona, a quién, por qué,
     cuándo, y qué crédito de sanación genera.
     """
+
     record_id: str
-    grantor_id: str          # Quién perdona (el afectado o su representante)
-    beneficiary_id: str      # Quién es perdonado
+    grantor_id: str  # Quién perdona (el afectado o su representante)
+    beneficiary_id: str  # Quién es perdonado
     reason: str
     granted_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     credit: VHV = field(default_factory=VHV.zero)  # Crédito de Sanación
-    consumed: bool = False   # True si ya se usó para reiniciar ciclos
+    consumed: bool = False  # True si ya se usó para reiniciar ciclos
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -63,13 +65,14 @@ class ForgivenessRecord:
             "reason": self.reason,
             "granted_at": self.granted_at.isoformat(),
             "credit": self.credit.to_dict(),
-            "consumed": self.consumed
+            "consumed": self.consumed,
         }
 
 
 @dataclass
 class RehabilitationRecord:
     """Registro del estado de rehabilitación de un participante."""
+
     participant_id: str
     status: RehabilitationStatus
     started_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
@@ -81,8 +84,10 @@ class RehabilitationRecord:
             "participant_id": self.participant_id,
             "status": self.status.value,
             "started_at": self.started_at.isoformat(),
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
-            "strikes": self.strikes
+            "completed_at": (
+                self.completed_at.isoformat() if self.completed_at else None
+            ),
+            "strikes": self.strikes,
         }
 
 
@@ -115,7 +120,7 @@ class TernuraLayer:
         grantor_id: str,
         beneficiary_id: str,
         reason: str,
-        credit: Optional[VHV] = None
+        credit: Optional[VHV] = None,
     ) -> ForgivenessRecord:
         """
         Otorga perdón con registro público.
@@ -134,23 +139,23 @@ class TernuraLayer:
             grantor_id=grantor_id,
             beneficiary_id=beneficiary_id,
             reason=reason,
-            credit=credit or VHV(T=Decimal("1"), V=Decimal("0"), R=Decimal("0"))
+            credit=credit or VHV(T=Decimal("1"), V=Decimal("0"), R=Decimal("0")),
         )
         self._forgiveness.append(record)
-        self._log("forgiveness_granted", {
-            "record_id": record.record_id,
-            "grantor_id": grantor_id,
-            "beneficiary_id": beneficiary_id
-        })
+        self._log(
+            "forgiveness_granted",
+            {
+                "record_id": record.record_id,
+                "grantor_id": grantor_id,
+                "beneficiary_id": beneficiary_id,
+            },
+        )
         return record
 
     def active_forgiveness(self, participant_id: str) -> Optional[ForgivenessRecord]:
         """Retorna el perdón vigente no consumido de un participante."""
         for record in self._forgiveness:
-            if (
-                record.beneficiary_id == participant_id
-                and not record.consumed
-            ):
+            if record.beneficiary_id == participant_id and not record.consumed:
                 return record
         return None
 
@@ -165,17 +170,14 @@ class TernuraLayer:
         if record is None:
             return None
         record.consumed = True
-        self._log("forgiveness_consumed", {
-            "record_id": record.record_id,
-            "beneficiary_id": participant_id
-        })
+        self._log(
+            "forgiveness_consumed",
+            {"record_id": record.record_id, "beneficiary_id": participant_id},
+        )
         return record
 
     def apply_sanacion_credit(
-        self,
-        record: ForgivenessRecord,
-        grantor: Participant,
-        beneficiary: Participant
+        self, record: ForgivenessRecord, grantor: Participant, beneficiary: Participant
     ) -> None:
         """
         Aplica el Crédito de Sanación al VHV de ambas partes (Cap. 5 §5.9A).
@@ -186,12 +188,15 @@ class TernuraLayer:
         """
         grantor.vhv_balance = grantor.vhv_balance + record.credit
         beneficiary.vhv_balance = beneficiary.vhv_balance + record.credit
-        self._log("sanacion_credit_applied", {
-            "record_id": record.record_id,
-            "grantor_id": grantor.id,
-            "beneficiary_id": beneficiary.id,
-            "credit_T": str(record.credit.T)
-        })
+        self._log(
+            "sanacion_credit_applied",
+            {
+                "record_id": record.record_id,
+                "grantor_id": grantor.id,
+                "beneficiary_id": beneficiary.id,
+                "credit_T": str(record.credit.T),
+            },
+        )
 
     # --- Rehabilitación (Qwen / DeepSeek) ---
 
@@ -202,16 +207,16 @@ class TernuraLayer:
             record = RehabilitationRecord(
                 participant_id=participant_id,
                 status=RehabilitationStatus.IN_REHABILITATION,
-                strikes=1
+                strikes=1,
             )
             self._rehabilitation[participant_id] = record
         else:
             record.status = RehabilitationStatus.IN_REHABILITATION
             record.strikes += 1
-        self._log("rehabilitation_started", {
-            "participant_id": participant_id,
-            "strikes": record.strikes
-        })
+        self._log(
+            "rehabilitation_started",
+            {"participant_id": participant_id, "strikes": record.strikes},
+        )
         return record
 
     def demonstrate_change(self, participant_id: str) -> RehabilitationRecord:
@@ -224,8 +229,7 @@ class TernuraLayer:
         record = self._rehabilitation.get(participant_id)
         if record is None:
             record = RehabilitationRecord(
-                participant_id=participant_id,
-                status=RehabilitationStatus.NORMAL
+                participant_id=participant_id, status=RehabilitationStatus.NORMAL
             )
             self._rehabilitation[participant_id] = record
 
@@ -237,10 +241,10 @@ class TernuraLayer:
             record.completed_at = datetime.now(timezone.utc)
             self._log("rehabilitation_completed", {"participant_id": participant_id})
         else:
-            self._log("change_demonstrated", {
-                "participant_id": participant_id,
-                "remaining_strikes": record.strikes
-            })
+            self._log(
+                "change_demonstrated",
+                {"participant_id": participant_id, "remaining_strikes": record.strikes},
+            )
         return record
 
     def status(self, participant_id: str) -> RehabilitationStatus:
@@ -267,23 +271,24 @@ class TernuraLayer:
         return self._event_log.copy()
 
     def _log(self, event_type: str, data: Dict[str, Any]) -> None:
-        self._event_log.append({
-            "event_type": event_type,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            **data
-        })
+        self._event_log.append(
+            {
+                "event_type": event_type,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                **data,
+            }
+        )
 
     def to_dict(self) -> Dict[str, Any]:
         """Serialización para auditoría."""
         return {
             "type": "TernuraLayer",
             "forgiveness_count": len(self._forgiveness),
-            "forgiveness_active": sum(
-                1 for r in self._forgiveness if not r.consumed
-            ),
+            "forgiveness_active": sum(1 for r in self._forgiveness if not r.consumed),
             "rehabilitation_active": [
-                pid for pid, rec in self._rehabilitation.items()
+                pid
+                for pid, rec in self._rehabilitation.items()
                 if rec.status == RehabilitationStatus.IN_REHABILITATION
             ],
-            "event_log_count": len(self._event_log)
+            "event_log_count": len(self._event_log),
         }

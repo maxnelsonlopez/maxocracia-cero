@@ -25,7 +25,7 @@ from app.utils import get_db
 
 @pytest.fixture
 def client():
-    db_fd, db_path = tempfile = __import__("tempfile").mkstemp()
+    db_fd, db_path = __import__("tempfile").mkstemp()
     app = create_app(db_path=db_path)
     app.config["TESTING"] = True
 
@@ -81,8 +81,7 @@ def test_chat_con_oraculo(client, auth, monkeypatch):
         return "¡Bienvenida a la Cohorte! La voz se gana caminando el primer acuerdo."
 
     monkeypatch.setattr(guide_bp, "_call_oracle", fake_call)
-    resp = client.post("/guide/chat", json={"message": "hola"},
-                       headers=auth(1))
+    resp = client.post("/guide/chat", json={"message": "hola"}, headers=auth(1))
     assert resp.status_code == 200
     data = resp.get_json()
     assert data["success"] is True
@@ -94,17 +93,23 @@ def test_trust_assessment_persiste_t13(client, auth, monkeypatch):
     from app import guide_bp
 
     def fake_call(messages, json_mode=True):
-        return json.dumps({
-            "ethic": 80, "attitude": 75, "aptitude": 60,
-            "suggested_trust_level": 1,
-            "reasoning": "Coherencia con los axiomas y disposición a aprender.",
-            "honest_limits": "Evidencia reciente aún corta.",
-        })
+        return json.dumps(
+            {
+                "ethic": 80,
+                "attitude": 75,
+                "aptitude": 60,
+                "suggested_trust_level": 1,
+                "reasoning": "Coherencia con los axiomas y disposición a aprender.",
+                "honest_limits": "Evidencia reciente aún corta.",
+            }
+        )
 
     monkeypatch.setattr(guide_bp, "_call_oracle", fake_call)
-    resp = client.post("/guide/trust-assessment",
-                       json={"statement": "Quiero aportar a la comunidad."},
-                       headers=auth(2))
+    resp = client.post(
+        "/guide/trust-assessment",
+        json={"statement": "Quiero aportar a la comunidad."},
+        headers=auth(2),
+    )
     assert resp.status_code == 200
     data = resp.get_json()["assessment"]
     assert data["ethic"] == 80
@@ -126,16 +131,23 @@ def test_director_candidacy_elige_con_evidencia(client, auth, monkeypatch):
     from app import guide_bp
 
     def fake_call(messages, json_mode=True):
-        return json.dumps({
-            "eligible": True, "ethic": 90, "attitude": 88, "aptitude": 85,
-            "reasoning": "Evidencia sólida: contratos creados, TVI alto, reputación limpia.",
-            "honest_limits": "La decisión final es de la comunidad.",
-        })
+        return json.dumps(
+            {
+                "eligible": True,
+                "ethic": 90,
+                "attitude": 88,
+                "aptitude": 85,
+                "reasoning": "Evidencia sólida: contratos creados, TVI alto, reputación limpia.",
+                "honest_limits": "La decisión final es de la comunidad.",
+            }
+        )
 
     monkeypatch.setattr(guide_bp, "_call_oracle", fake_call)
-    resp = client.post("/guide/director-candidacy",
-                       json={"statement": "Custodiar el sentido, no acumular poder."},
-                       headers=auth(1))
+    resp = client.post(
+        "/guide/director-candidacy",
+        json={"statement": "Custodiar el sentido, no acumular poder."},
+        headers=auth(1),
+    )
     assert resp.status_code == 200
     data = resp.get_json()["assessment"]
     assert data["eligible"] is True

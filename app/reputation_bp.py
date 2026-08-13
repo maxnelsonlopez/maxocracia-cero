@@ -34,7 +34,14 @@ def add_review(current_user):
         return jsonify({"error": "user_id es requerido"}), 400
     user_id = int(user_id)
     if reviewer_uid is not None and user_id == reviewer_uid:
-        return jsonify({"error": "no puedes reseñarte a ti mismo (la reputación la construyen los demás)"}), 400
+        return (
+            jsonify(
+                {
+                    "error": "no puedes reseñarte a ti mismo (la reputación la construyen los demás)"
+                }
+            ),
+            400,
+        )
     db = get_db()
     cur = db.execute(
         "SELECT id, score, reviews_count FROM reputation WHERE user_id = ?", (user_id,)

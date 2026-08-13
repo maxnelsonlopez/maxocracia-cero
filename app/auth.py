@@ -58,11 +58,13 @@ def register():
         # Tokens inertes: el bot cree haber entrado; la identidad no existe.
         inert = create_token({"user_id": 0, "email": email or "", "is_admin": 0})
         return (
-            jsonify({
-                "access_token": inert,
-                "refresh_token": "0.deadbeef",
-                "expires_in": 3600,
-            }),
+            jsonify(
+                {
+                    "access_token": inert,
+                    "refresh_token": "0.deadbeef",
+                    "expires_in": 3600,
+                }
+            ),
             201,
         )
 

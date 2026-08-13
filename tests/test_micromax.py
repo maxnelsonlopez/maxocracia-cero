@@ -1,13 +1,16 @@
 import json
+import os
 import sqlite3
 import tempfile
-import os
+
 import pytest
 from werkzeug.security import generate_password_hash
+
 from app import create_app
-from app.utils import init_db
 from app.jwt_utils import create_token
 from app.micromax import init_micromax_tables
+from app.utils import init_db
+
 
 @pytest.fixture
 def client():
@@ -26,11 +29,17 @@ def client():
         db = sqlite3.connect(db_path)
         db.execute(
             "INSERT INTO users (id, email, name, alias, password_hash) VALUES (?, ?, ?, ?, ?)",
-            (1, "alice@example.com", "Alice", "alice", generate_password_hash("Password1"))
+            (
+                1,
+                "alice@example.com",
+                "Alice",
+                "alice",
+                generate_password_hash("Password1"),
+            ),
         )
         db.execute(
             "INSERT INTO users (id, email, name, alias, password_hash) VALUES (?, ?, ?, ?, ?)",
-            (2, "bob@example.com", "Bob", "bob", generate_password_hash("Password1"))
+            (2, "bob@example.com", "Bob", "bob", generate_password_hash("Password1")),
         )
         db.commit()
         db.close()
@@ -43,16 +52,21 @@ def client():
     except OSError:
         pass
 
+
 @pytest.fixture
 def auth_headers():
     def _headers(user_id, email, is_admin=0):
         token = create_token({"user_id": user_id, "email": email, "is_admin": is_admin})
         return {"Authorization": f"Bearer {token}"}
+
     return _headers
+
 
 def test_micromax_flow(client, auth_headers):
     # 1. Get household (should return None/empty)
-    res = client.get("/api/micromax/household", headers=auth_headers(1, "alice@example.com"))
+    res = client.get(
+        "/api/micromax/household", headers=auth_headers(1, "alice@example.com")
+    )
     assert res.status_code == 200
     data = res.get_json()
     assert data["household"] is None
@@ -62,7 +76,7 @@ def test_micromax_flow(client, auth_headers):
         "/api/micromax/household",
         headers=auth_headers(1, "alice@example.com"),
         data=json.dumps({"name": "Casa de Alice"}),
-        content_type="application/json"
+        content_type="application/json",
     )
     assert res.status_code == 201
     data = res.get_json()
@@ -75,7 +89,7 @@ def test_micromax_flow(client, auth_headers):
         "/api/micromax/household/join",
         headers=auth_headers(2, "bob@example.com"),
         data=json.dumps({"invite_code": invite_code}),
-        content_type="application/json"
+        content_type="application/json",
     )
     assert res.status_code == 200
     data = res.get_json()
@@ -83,7 +97,9 @@ def test_micromax_flow(client, auth_headers):
     assert data["member"]["name"] == "Bob"
 
     # 4. Get household (should now show both)
-    res = client.get("/api/micromax/household", headers=auth_headers(1, "alice@example.com"))
+    res = client.get(
+        "/api/micromax/household", headers=auth_headers(1, "alice@example.com")
+    )
     assert res.status_code == 200
     data = res.get_json()
     assert len(data["members"]) == 2
@@ -92,13 +108,15 @@ def test_micromax_flow(client, auth_headers):
     res = client.post(
         "/api/micromax/member/config",
         headers=auth_headers(1, "alice@example.com"),
-        data=json.dumps({
-            "monthly_income": 1000,
-            "work_hours": 40,
-            "travel_hours": 5,
-            "sleep_hours": 56
-        }),
-        content_type="application/json"
+        data=json.dumps(
+            {
+                "monthly_income": 1000,
+                "work_hours": 40,
+                "travel_hours": 5,
+                "sleep_hours": 56,
+            }
+        ),
+        content_type="application/json",
     )
     assert res.status_code == 200
     data = res.get_json()
@@ -108,17 +126,19 @@ def test_micromax_flow(client, auth_headers):
     res = client.post(
         "/api/micromax/safety-survey",
         headers=auth_headers(1, "alice@example.com"),
-        data=json.dumps({
-            "answers": {
-                "q1": False,
-                "q2": False,
-                "q3": False,
-                "q4": False,
-                "q5": False,
-                "q6": False
+        data=json.dumps(
+            {
+                "answers": {
+                    "q1": False,
+                    "q2": False,
+                    "q3": False,
+                    "q4": False,
+                    "q5": False,
+                    "q6": False,
+                }
             }
-        }),
-        content_type="application/json"
+        ),
+        content_type="application/json",
     )
     assert res.status_code == 200
     data = res.get_json()
@@ -129,17 +149,19 @@ def test_micromax_flow(client, auth_headers):
     res = client.post(
         "/api/micromax/cdd",
         headers=auth_headers(1, "alice@example.com"),
-        data=json.dumps({
-            "task_name": "Lavar platos",
-            "duration_hours": 1.5,
-            "effort_factor": 1.2,
-            "mental_factor": 1.1,
-            "scope_factor": 1.0,
-            "attention_factor": 1.0,
-            "fragmentation_factor": 1.0,
-            "loneliness_factor": 1.0
-        }),
-        content_type="application/json"
+        data=json.dumps(
+            {
+                "task_name": "Lavar platos",
+                "duration_hours": 1.5,
+                "effort_factor": 1.2,
+                "mental_factor": 1.1,
+                "scope_factor": 1.0,
+                "attention_factor": 1.0,
+                "fragmentation_factor": 1.0,
+                "loneliness_factor": 1.0,
+            }
+        ),
+        content_type="application/json",
     )
     assert res.status_code == 201
     data = res.get_json()
@@ -154,7 +176,9 @@ def test_micromax_flow(client, auth_headers):
     assert data[0]["task_name"] == "Lavar platos"
 
     # 9. Get dashboard
-    res = client.get("/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com"))
+    res = client.get(
+        "/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com")
+    )
     assert res.status_code == 200
     data = res.get_json()
     assert "three_accounts" in data
@@ -169,25 +193,29 @@ def test_micromax_flow(client, auth_headers):
     res = client.post(
         "/api/micromax/audit",
         headers=auth_headers(1, "alice@example.com"),
-        data=json.dumps({
-            "audit_date": "2026-05-19",
-            "conflicts_count": 1,
-            "weapon_count": 0,
-            "accusations_count": 0,
-            "threats_count": 0,
-            "s1_hours": 0.0,
-            "s2_score": 1.0,
-            "s3_score": 1.0,
-            "s4_score": 1.0,
-            "s5_score": 1.0,
-            "duration_weeks": 4
-        }),
-        content_type="application/json"
+        data=json.dumps(
+            {
+                "audit_date": "2026-05-19",
+                "conflicts_count": 1,
+                "weapon_count": 0,
+                "accusations_count": 0,
+                "threats_count": 0,
+                "s1_hours": 0.0,
+                "s2_score": 1.0,
+                "s3_score": 1.0,
+                "s4_score": 1.0,
+                "s5_score": 1.0,
+                "duration_weeks": 4,
+            }
+        ),
+        content_type="application/json",
     )
     assert res.status_code == 201
 
     # 11. Verify toxicity calculation on dashboard
-    res = client.get("/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com"))
+    res = client.get(
+        "/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com")
+    )
     assert res.status_code == 200
     data = res.get_json()
     # Conflicts = 1, baseline = 2. ICE = 1/2 * (1 + 0) = 0.5

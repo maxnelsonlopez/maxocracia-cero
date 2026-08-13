@@ -265,7 +265,8 @@ def analyze_proposal(title: str, description: str) -> Dict[str, Any]:
 
     if result is None:
         raise RuntimeError(
-            "oracle_unavailable: " + ("; ".join(errors) if errors else "sin fuentes configuradas")
+            "oracle_unavailable: "
+            + ("; ".join(errors) if errors else "sin fuentes configuradas")
         )
 
     vhv = result.get("vhv") or {}
@@ -309,12 +310,14 @@ def analyze_proposal(title: str, description: str) -> Dict[str, Any]:
     # reflejo. Si la llamada falla, el análisis base sigue sirviendo.
     dissident = _dissident_analysis(title, description, analysis)
     if dissident is not None:
-        oracle_opinions.append({
-            "role": "Dissident",
-            "verdict": dissident.get("final_verdict", "Modify"),
-            "analysis": dissident.get("final_reasoning", ""),
-            "confidence": _clamp(dissident.get("confidence"), 0.0, 1.0),
-        })
+        oracle_opinions.append(
+            {
+                "role": "Dissident",
+                "verdict": dissident.get("final_verdict", "Modify"),
+                "analysis": dissident.get("final_reasoning", ""),
+                "confidence": _clamp(dissident.get("confidence"), 0.0, 1.0),
+            }
+        )
         analysis["dissident"] = dissident
     else:
         analysis["dissident"] = {"available": False}
@@ -322,7 +325,9 @@ def analyze_proposal(title: str, description: str) -> Dict[str, Any]:
     return analysis
 
 
-def _dissident_analysis(title: str, description: str, base: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def _dissident_analysis(
+    title: str, description: str, base: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
     """Segunda pasada del Oráculo Disidente con contexto del análisis base.
 
     El disidente VE el VHV, los axiomas y las opiniones de los otros cuatro
@@ -367,6 +372,7 @@ def _dissident_analysis(title: str, description: str, base: Dict[str, Any]) -> O
 
 def _clamp_dissident(result: Dict[str, Any]) -> Dict[str, Any]:
     """Sanea los campos del veredicto disidente (rangos y tipos)."""
+
     def _clamp(v, lo, hi, default=0.0):
         try:
             return max(lo, min(hi, float(v)))

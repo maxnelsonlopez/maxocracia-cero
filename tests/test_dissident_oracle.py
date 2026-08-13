@@ -16,19 +16,43 @@ import os
 os.environ["SECRET_KEY"] = "test-secret"
 os.environ.pop("DEEPSEEK_API_KEY", None)
 
-import pytest
 
 from app import voting_oracle
 
 BASE_ANALYSIS = {
-    "vhv": {"vitalTime": 10, "affectedLives": 5, "finiteResources": 50,
-            "timeFactor": 1.2, "confidence": 0.8},
+    "vhv": {
+        "vitalTime": 10,
+        "affectedLives": 5,
+        "finiteResources": 50,
+        "timeFactor": 1.2,
+        "confidence": 0.8,
+    },
     "axiomReport": [{"type": "TRUTH", "passed": True, "score": 80, "reasoning": "ok"}],
     "oracleOpinions": [
-        {"role": "Economic", "verdict": "Approve", "analysis": "viable", "confidence": 0.7},
-        {"role": "Social", "verdict": "Approve", "analysis": "justa", "confidence": 0.8},
-        {"role": "Environmental", "verdict": "Approve", "analysis": "sostenible", "confidence": 0.6},
-        {"role": "Futurist", "verdict": "Approve", "analysis": "precavido", "confidence": 0.7},
+        {
+            "role": "Economic",
+            "verdict": "Approve",
+            "analysis": "viable",
+            "confidence": 0.7,
+        },
+        {
+            "role": "Social",
+            "verdict": "Approve",
+            "analysis": "justa",
+            "confidence": 0.8,
+        },
+        {
+            "role": "Environmental",
+            "verdict": "Approve",
+            "analysis": "sostenible",
+            "confidence": 0.6,
+        },
+        {
+            "role": "Futurist",
+            "verdict": "Approve",
+            "analysis": "precavido",
+            "confidence": 0.7,
+        },
     ],
 }
 
@@ -46,6 +70,7 @@ DISSIDENT_RESULT = {
 def _fresh_base():
     """Copia fresca del análisis base (evita mutaciones entre tests)."""
     import copy
+
     return copy.deepcopy(BASE_ANALYSIS)
 
 
@@ -54,8 +79,12 @@ def test_disidente_recibe_contexto_y_cambia_de_opinion(monkeypatch):
     monkeypatch.setenv("LOCAL_ORACLE_ENABLED", "false")
     calls = []
 
-    def fake_llm(base_url, api_key, model, messages, temperature=0.2, json_mode=True, timeout=120):
-        calls.append({"temperature": temperature, "user": messages[-1]["content"][:200]})
+    def fake_llm(
+        base_url, api_key, model, messages, temperature=0.2, json_mode=True, timeout=120
+    ):
+        calls.append(
+            {"temperature": temperature, "user": messages[-1]["content"][:200]}
+        )
         if len(calls) == 1:
             return _fresh_base()
         return DISSIDENT_RESULT
@@ -85,10 +114,14 @@ def test_disidente_puede_rectificar_contra_el_consenso(monkeypatch):
     contra["initial_stance"] = "reject"
     contra["changed_mind"] = False
     contra["final_verdict"] = "Reject"
-    contra["final_reasoning"] = "El consenso apunta a aprobar, pero el examen racional muestra un riesgo fatal para la comunidad."
+    contra["final_reasoning"] = (
+        "El consenso apunta a aprobar, pero el examen racional muestra un riesgo fatal para la comunidad."
+    )
     calls = []
 
-    def fake_llm(base_url, api_key, model, messages, temperature=0.2, json_mode=True, timeout=120):
+    def fake_llm(
+        base_url, api_key, model, messages, temperature=0.2, json_mode=True, timeout=120
+    ):
         calls.append(True)
         if len(calls) == 1:
             return _fresh_base()
@@ -107,7 +140,9 @@ def test_disidente_falla_y_el_analisis_base_sigue_vivo(monkeypatch):
     monkeypatch.setenv("LOCAL_ORACLE_ENABLED", "false")
     calls = []
 
-    def fake_llm(base_url, api_key, model, messages, temperature=0.2, json_mode=True, timeout=120):
+    def fake_llm(
+        base_url, api_key, model, messages, temperature=0.2, json_mode=True, timeout=120
+    ):
         calls.append(True)
         if messages[0]["content"] == voting_oracle.SYSTEM_PROMPT:
             return _fresh_base()
@@ -138,14 +173,16 @@ def test_ava_cuatro_validaciones():
 
 
 def test_dissident_result_saneado():
-    limpio = voting_oracle._clamp_dissident({
-        "initial_stance": "otra cosa",
-        "initial_reasoning": 42,
-        "final_verdict": "RANDOM",
-        "changed_mind": "sí",
-        "final_reasoning": None,
-        "confidence": 99.0,
-    })
+    limpio = voting_oracle._clamp_dissident(
+        {
+            "initial_stance": "otra cosa",
+            "initial_reasoning": 42,
+            "final_verdict": "RANDOM",
+            "changed_mind": "sí",
+            "final_reasoning": None,
+            "confidence": 99.0,
+        }
+    )
     assert limpio["initial_stance"] == "undecided"
     assert limpio["final_verdict"] == "Modify"
     assert limpio["changed_mind"] is False

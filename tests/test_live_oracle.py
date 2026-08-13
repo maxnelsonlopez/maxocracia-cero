@@ -15,11 +15,10 @@ import pytest
 
 from maxocontracts.oracles.live_oracle import (
     LiveOracle,
-    OracleUnavailableError,
     OracleAPIError,
+    OracleUnavailableError,
     _extract_json,
 )
-
 
 DEMO_DRAFT = {
     "terms": [
@@ -103,7 +102,7 @@ def test_is_available_false_when_disabled(monkeypatch):
 
 
 def test_extract_json_from_fenced_block():
-    raw = "Aquí va mi análisis.\n```json\n{\"terms\": [1, 2]}\n```\nFin."
+    raw = 'Aquí va mi análisis.\n```json\n{"terms": [1, 2]}\n```\nFin.'
     assert _extract_json(raw) == {"terms": [1, 2]}
 
 
@@ -171,12 +170,14 @@ def test_feedback_iterates_same_session(monkeypatch):
         calls["n"] += 1
         draft = json.loads(json.dumps(DEMO_DRAFT))
         if calls["n"] == 2:
-            draft["terms"].append({
-                "term_id": "aval-luis",
-                "civil_text": "Luis avala la simetría del intercambio",
-                "vhv": {"t": 0.5, "v": 0.0, "h": 0.0},
-                "assigned_participant": "user-3",
-            })
+            draft["terms"].append(
+                {
+                    "term_id": "aval-luis",
+                    "civil_text": "Luis avala la simetría del intercambio",
+                    "vhv": {"t": 0.5, "v": 0.0, "h": 0.0},
+                    "assigned_participant": "user-3",
+                }
+            )
         return FakeChatResponse(json.dumps(draft))
 
     monkeypatch.setattr(live_module.requests, "post", _fake_post)
@@ -216,7 +217,9 @@ def test_negotiate_http_error_raises(monkeypatch):
 
 
 def test_negotiate_endpoint_503_without_key(client, auth_client):
-    res = auth_client.post("/contracts/negotiate", json={"instruction": "10h por objeto"})
+    res = auth_client.post(
+        "/contracts/negotiate", json={"instruction": "10h por objeto"}
+    )
     assert res.status_code == 503
     body = res.get_json()
     assert body["code"] == "ORACLE_UNAVAILABLE"
@@ -228,7 +231,9 @@ def test_negotiate_endpoint_requires_instruction(monkeypatch, client, auth_clien
     assert res.status_code == 400
 
 
-def test_negotiate_endpoint_ok_with_mocked_client(monkeypatch, client, auth_client, fake_post):
+def test_negotiate_endpoint_ok_with_mocked_client(
+    monkeypatch, client, auth_client, fake_post
+):
     monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-test-123")
     res = auth_client.post(
         "/contracts/negotiate",
@@ -258,7 +263,9 @@ def test_negotiate_endpoint_http_error_returns_502(monkeypatch, client, auth_cli
     assert res.status_code == 502
 
 
-def test_feedback_endpoint_unknown_session_404(monkeypatch, client, auth_client, fake_post):
+def test_feedback_endpoint_unknown_session_404(
+    monkeypatch, client, auth_client, fake_post
+):
     monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-test-123")
     res = auth_client.post(
         "/contracts/negotiate/feedback",
@@ -269,7 +276,9 @@ def test_feedback_endpoint_unknown_session_404(monkeypatch, client, auth_client,
 
 def test_feedback_endpoint_ok(monkeypatch, client, auth_client, fake_post):
     monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-test-123")
-    first = auth_client.post("/contracts/negotiate", json={"instruction": "10h por servicio"})
+    first = auth_client.post(
+        "/contracts/negotiate", json={"instruction": "10h por servicio"}
+    )
     session_id = first.get_json()["session_id"]
 
     res = auth_client.post(
@@ -293,12 +302,14 @@ def test_critique_endpoint_ok(monkeypatch, client, auth_client, fake_post):
             "contract_id": "critique-test-1",
             "civil_description": "Préstamo de 10 Maxos",
             "participants": [{"user_id": 1}, {"user_id": 2}],
-            "terms": [{
-                "term_id": "t1",
-                "civil_text": "Alice presta 10 Maxos a Bob",
-                "vhv": {"t": 1.0, "v": 0, "h": 0},
-                "assigned_participant_id": "user-1",
-            }],
+            "terms": [
+                {
+                    "term_id": "t1",
+                    "civil_text": "Alice presta 10 Maxos a Bob",
+                    "vhv": {"t": 1.0, "v": 0, "h": 0},
+                    "assigned_participant_id": "user-1",
+                }
+            ],
         },
     )
     assert created.status_code == 201
@@ -306,7 +317,9 @@ def test_critique_endpoint_ok(monkeypatch, client, auth_client, fake_post):
     # 2. El oráculo audita (mock): issues y recomendaciones
     audit = {
         "valid": False,
-        "issues": [{"axiom": "T17", "severity": "alta", "message": "Falta contraprestación"}],
+        "issues": [
+            {"axiom": "T17", "severity": "alta", "message": "Falta contraprestación"}
+        ],
         "recommendations": ["Añadir término de reciprocidad para Bob"],
         "reasoning": "El préstamo no tiene contraprestación clara.",
     }
@@ -325,7 +338,9 @@ def test_critique_endpoint_ok(monkeypatch, client, auth_client, fake_post):
     assert "reciprocidad" in body["recommendations"][0]
 
 
-def test_critique_endpoint_unknown_contract_404(monkeypatch, client, auth_client, fake_post):
+def test_critique_endpoint_unknown_contract_404(
+    monkeypatch, client, auth_client, fake_post
+):
     monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-test-123")
     res = auth_client.post("/contracts/no-existe-xyz/critique")
     assert res.status_code == 404

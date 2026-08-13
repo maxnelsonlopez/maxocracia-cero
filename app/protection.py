@@ -14,7 +14,6 @@ La equidad no se negocia con el presupuesto: la degradación elegante
 para assisted/shielded (blindaje_anti_gamificacion_equidad.md §4.2).
 """
 
-import json
 from typing import Dict, Optional
 
 from .utils import get_db
@@ -28,7 +27,7 @@ LEVELS = {
 # Topes y requisitos por nivel (blindaje_anti_gamificacion_equidad.md §4.2)
 CAPS = {
     "standard": {
-        "contract_hours": None,   # sin tope
+        "contract_hours": None,  # sin tope
         "weekly_hours": None,
         "reflection_hours": 0,
         "requires_paraphrase": False,
@@ -61,9 +60,11 @@ PARAPHRASE_MIN_LENGTH = 10
 
 def get_profile(user_id: int) -> dict:
     """Perfil declarado del usuario (o default standard)."""
-    row = get_db().execute(
-        "SELECT * FROM maxo_user_protection WHERE user_id = ?", (user_id,)
-    ).fetchone()
+    row = (
+        get_db()
+        .execute("SELECT * FROM maxo_user_protection WHERE user_id = ?", (user_id,))
+        .fetchone()
+    )
     if row is None:
         return {
             "user_id": user_id,
@@ -75,9 +76,13 @@ def get_profile(user_id: int) -> dict:
     return dict(row)
 
 
-def set_profile(user_id: int, level: str, companion_user_id: Optional[int] = None,
-                declared_age: Optional[int] = None,
-                declared_education: Optional[str] = None) -> dict:
+def set_profile(
+    user_id: int,
+    level: str,
+    companion_user_id: Optional[int] = None,
+    declared_age: Optional[int] = None,
+    declared_education: Optional[str] = None,
+) -> dict:
     """Actualiza el perfil declarado (upsert)."""
     if level not in LEVELS:
         raise ValueError(f"level must be one of: {', '.join(LEVELS)}")
@@ -139,26 +144,34 @@ def is_protected(level: str) -> bool:
 
 def assigned_hours(contract_id: str) -> Dict[str, float]:
     """TVI total (T) asignado por parte obligada en un contrato."""
-    rows = get_db().execute(
-        "SELECT assigned_participant, SUM(vhv_t) AS h FROM maxo_contract_terms "
-        "WHERE contract_id = ? AND assigned_participant IS NOT NULL "
-        "GROUP BY assigned_participant",
-        (contract_id,),
-    ).fetchall()
+    rows = (
+        get_db()
+        .execute(
+            "SELECT assigned_participant, SUM(vhv_t) AS h FROM maxo_contract_terms "
+            "WHERE contract_id = ? AND assigned_participant IS NOT NULL "
+            "GROUP BY assigned_participant",
+            (contract_id,),
+        )
+        .fetchall()
+    )
     return {r["assigned_participant"]: float(r["h"] or 0) for r in rows}
 
 
 def weekly_assigned_hours(pid: str) -> float:
     """TVI asignado a la parte en contratos vigentes (pending + active)."""
-    row = get_db().execute(
-        """
+    row = (
+        get_db()
+        .execute(
+            """
         SELECT COALESCE(SUM(t.vhv_t), 0) AS h
         FROM maxo_contract_terms t
         JOIN maxo_contracts c ON c.contract_id = t.contract_id
         WHERE t.assigned_participant = ? AND c.state IN ('pending', 'active')
         """,
-        (pid,),
-    ).fetchone()
+            (pid,),
+        )
+        .fetchone()
+    )
     return float(row["h"] or 0)
 
 
@@ -193,6 +206,6 @@ def _pid_to_uid(pid: str) -> Optional[int]:
     if not pid or not pid.startswith("user-"):
         return None
     try:
-        return int(pid[len("user-"):])
+        return int(pid[len("user-") :])
     except ValueError:
         return None

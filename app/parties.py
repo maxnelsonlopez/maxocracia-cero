@@ -20,9 +20,9 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
-from .utils import get_db
+from maxocontracts.core.types import SDV, SDV_S, VHV, Participant, Wellness
 
-from maxocontracts.core.types import Participant, SDV, SDV_S, VHV, Wellness
+from .utils import get_db
 
 # --- Escalas (Cap. 10) -------------------------------------------------------
 
@@ -80,11 +80,14 @@ def is_collective(pid: str) -> bool:
 
 # --- Persistencia --------------------------------------------------------------
 
+
 def get_party(party_id: str) -> Optional[dict]:
     """Lee una parte del registro maxo_parties (o None)."""
-    row = get_db().execute(
-        "SELECT * FROM maxo_parties WHERE party_id = ?", (party_id,)
-    ).fetchone()
+    row = (
+        get_db()
+        .execute("SELECT * FROM maxo_parties WHERE party_id = ?", (party_id,))
+        .fetchone()
+    )
     return dict(row) if row else None
 
 
@@ -96,9 +99,7 @@ def list_parties(party_type: Optional[str] = None) -> List[dict]:
             (party_type,),
         ).fetchall()
     else:
-        rows = db.execute(
-            "SELECT * FROM maxo_parties ORDER BY display_name"
-        ).fetchall()
+        rows = db.execute("SELECT * FROM maxo_parties ORDER BY display_name").fetchall()
     return [dict(r) for r in rows]
 
 
@@ -131,8 +132,15 @@ def upsert_party(
                 updated_at = CURRENT_TIMESTAMP
             WHERE party_id = ?
             """,
-            (party_type, display_name or None, parent_party_id, members_json,
-             float(wellness) if wellness is not None else None, owner, party_id),
+            (
+                party_type,
+                display_name or None,
+                parent_party_id,
+                members_json,
+                float(wellness) if wellness is not None else None,
+                owner,
+                party_id,
+            ),
         )
     else:
         db.execute(
@@ -141,8 +149,15 @@ def upsert_party(
                 (party_id, party_type, display_name, parent_party_id, members_json, wellness_value, owner_user_id)
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
-            (party_id, party_type, display_name, parent_party_id, members_json,
-             float(wellness) if wellness is not None else 1.0, owner),
+            (
+                party_id,
+                party_type,
+                display_name,
+                parent_party_id,
+                members_json,
+                float(wellness) if wellness is not None else 1.0,
+                owner,
+            ),
         )
     db.commit()
     return get_party(party_id)
@@ -162,15 +177,13 @@ def members_of(party_id: str) -> dict:
 
 # --- Consentimiento agregado (Fase 2 + extensiones) ----------------------------
 
+
 def _member_weights(members: dict, delegates: List[str]) -> Dict[str, float]:
     """Peso de voto por delegado (default 1.0). Votación ponderada (Ext. 1)."""
     weights = members.get("weights") or {}
     if not isinstance(weights, dict):
         weights = {}
-    return {
-        d: float(weights.get(d, 1.0))
-        for d in delegates
-    }
+    return {d: float(weights.get(d, 1.0)) for d in delegates}
 
 
 def _parse_delegation(raw) -> dict:
@@ -185,7 +198,9 @@ def _parse_delegation(raw) -> dict:
     return None
 
 
-def _delegation_map_for(members: dict, term_id: Optional[str] = None) -> Dict[str, dict]:
+def _delegation_map_for(
+    members: dict, term_id: Optional[str] = None
+) -> Dict[str, dict]:
     """
     Resuelve el mapa de delegaciones aplicable al término (Ext. 1 líquida):
     - delegations: base para todos los términos.
@@ -222,8 +237,9 @@ def _delegation_active(delegation: dict) -> bool:
         return False
 
 
-def _effective_votes(approved: set, members: dict, delegates: List[str],
-                     term_id: Optional[str] = None) -> tuple:
+def _effective_votes(
+    approved: set, members: dict, delegates: List[str], term_id: Optional[str] = None
+) -> tuple:
     """
     Expande la aprobación con delegaciones (Ext. 2 y líquida Ext. 1).
 
@@ -260,8 +276,9 @@ def _effective_votes(approved: set, members: dict, delegates: List[str],
     return effective, applied, sorted(expired)
 
 
-def consent_status(party_id: str, approved_delegates: List[str],
-                   term_id: Optional[str] = None) -> dict:
+def consent_status(
+    party_id: str, approved_delegates: List[str], term_id: Optional[str] = None
+) -> dict:
     """
     Estado del consentimiento agregado de una parte colectiva.
 
@@ -314,9 +331,11 @@ def consent_status(party_id: str, approved_delegates: List[str],
     total_weight = sum(weights.values())
     current_weight = sum(weights[d] for d in effective)
 
-    weighted = any(w != 1.0 for w in weights.values()) or (
-        members.get("weights") is not None
-    ) or members.get("weight_threshold") is not None
+    weighted = (
+        any(w != 1.0 for w in weights.values())
+        or (members.get("weights") is not None)
+        or members.get("weight_threshold") is not None
+    )
 
     if members.get("weight_threshold") is not None:
         # Umbral absoluto de peso (votación ponderada)
@@ -364,13 +383,20 @@ def consent_status(party_id: str, approved_delegates: List[str],
         "current_weight": current_weight,
         "total_weight": total_weight,
         "weights": weights,
-        "quorum": float(members.get("quorum", 1.0)) if members.get("quorum_required") is None and members.get("weight_threshold") is None else None,
+        "quorum": (
+            float(members.get("quorum", 1.0))
+            if members.get("quorum_required") is None
+            and members.get("weight_threshold") is None
+            else None
+        ),
         "quorum_required": members.get("quorum_required"),
         "weight_threshold": members.get("weight_threshold"),
     }
 
 
-def aggregate_wellness(party_id: str, participants_wellness: Dict[str, Decimal]) -> Optional[Decimal]:
+def aggregate_wellness(
+    party_id: str, participants_wellness: Dict[str, Decimal]
+) -> Optional[Decimal]:
     """
     γ agregado real de una parte colectiva (Ext. 3): media (ponderada por
     `weights` si existen) del bienestar de sus miembros presentes en el
@@ -383,22 +409,26 @@ def aggregate_wellness(party_id: str, participants_wellness: Dict[str, Decimal])
     weights = members.get("weights") or {}
     if not isinstance(weights, dict):
         weights = {}
-    present = {d: participants_wellness[d] for d in delegates if d in participants_wellness}
+    present = {
+        d: participants_wellness[d] for d in delegates if d in participants_wellness
+    }
     if not present:
         return None
     total_w = sum(float(weights.get(d, 1.0)) for d in present)
     if total_w <= 0:
         return None
     acc = sum(
-        participants_wellness[d] * Decimal(str(weights.get(d, 1.0)))
-        for d in present
+        participants_wellness[d] * Decimal(str(weights.get(d, 1.0))) for d in present
     )
     return acc / Decimal(str(total_w))
 
 
 # --- Resolver de participantes ------------------------------------------------
 
-def _synthetic_participant(agent_id: str, sdv_s_state: Optional[Dict[str, Any]] = None) -> Participant:
+
+def _synthetic_participant(
+    agent_id: str, sdv_s_state: Optional[Dict[str, Any]] = None
+) -> Participant:
     """
     Crea un participante del Reino Sintético (Persona Sintética, Cap. 10 §10.8).
 
@@ -408,11 +438,7 @@ def _synthetic_participant(agent_id: str, sdv_s_state: Optional[Dict[str, Any]] 
     """
     pid = f"synthetic-{agent_id}"
     state = sdv_s_state or {}
-    kwargs = {
-        dim: Decimal(str(state[dim]))
-        for dim in SDV_S_DIMENSIONS
-        if dim in state
-    }
+    kwargs = {dim: Decimal(str(state[dim])) for dim in SDV_S_DIMENSIONS if dim in state}
     if kwargs:
         # Normalizar a [0, 1] defensivamente (cliente no confiable)
         kwargs = {
@@ -425,7 +451,7 @@ def _synthetic_participant(agent_id: str, sdv_s_state: Optional[Dict[str, Any]] 
         vhv_balance=VHV.zero(),
         wellness_current=Wellness(value=Decimal("1.0")),
         sdv_actual=SDV(),
-        sdv_s_actual=SDV_S(**kwargs)
+        sdv_s_actual=SDV_S(**kwargs),
     )
 
 
@@ -457,10 +483,10 @@ def resolve_participant_by_pid(pid: str) -> Optional[Participant]:
         return None
     ptype = party_type_of(pid)
     if ptype == "synthetic":
-        return _synthetic_participant(pid[len("synthetic-"):])
+        return _synthetic_participant(pid[len("synthetic-") :])
     if ptype == "human":
         try:
-            return get_human_participant(int(pid[len("user-"):]))
+            return get_human_participant(int(pid[len("user-") :]))
         except ValueError:
             return None
     # Escalas colectivas (society-/coop-/org-/eco-)

@@ -116,9 +116,7 @@ def test_balance_and_transfer(client):
 
 
 def _login(client, email, password="Password1"):
-    resp = client.post(
-        "/auth/login", json={"email": email, "password": password}
-    )
+    resp = client.post("/auth/login", json={"email": email, "password": password})
     assert resp.status_code == 200
     return resp.get_json()["access_token"]
 
@@ -129,9 +127,7 @@ def test_ledger_propio(client):
     token = _login(client, "ledger_a@example.test")
 
     # sin movimientos: ledger vacío
-    resp = client.get(
-        f"/maxo/{a}/ledger", headers={"Authorization": f"Bearer {token}"}
-    )
+    resp = client.get(f"/maxo/{a}/ledger", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 200
     data = resp.get_json()
     assert data["user_id"] == a
@@ -148,9 +144,7 @@ def test_ledger_propio(client):
     conn.commit()
     conn.close()
 
-    resp = client.get(
-        f"/maxo/{a}/ledger", headers={"Authorization": f"Bearer {token}"}
-    )
+    resp = client.get(f"/maxo/{a}/ledger", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 200
     data = resp.get_json()
     assert data["count"] == 1
@@ -168,9 +162,7 @@ def test_ledger_propio(client):
     )
     conn.commit()
     conn.close()
-    resp = client.get(
-        f"/maxo/{a}/ledger", headers={"Authorization": f"Bearer {token}"}
-    )
+    resp = client.get(f"/maxo/{a}/ledger", headers={"Authorization": f"Bearer {token}"})
     data = resp.get_json()
     assert data["count"] == 2
     assert data["entries"][0]["change_amount"] == -3.0
@@ -180,7 +172,7 @@ def test_ledger_propio(client):
 def test_ledger_ajeno_forbidden(client):
     db_path = client.application.config["DATABASE"]
     a = seed_user(db_path, "ledger_owner@example.test", "Owner")
-    b = seed_user(db_path, "ledger_intruder@example.test", "Intruder")
+    seed_user(db_path, "ledger_intruder@example.test", "Intruder")
     token_b = _login(client, "ledger_intruder@example.test")
 
     resp = client.get(

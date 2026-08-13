@@ -4,17 +4,15 @@ Tests para el Validador Conceptual de Axiomas
 """
 
 import os
-import pytest
 import sys
 
 # Asegurar que el directorio de scripts esté en el path de Python para importar
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from scripts.validador_conceptual import (
-    check_line_for_forbidden_phrases,
     check_context_for_axiom_definition,
+    check_line_for_forbidden_phrases,
     run_validador,
-    AXIOMS_REGISTRY
 )
 
 

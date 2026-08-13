@@ -28,9 +28,10 @@ def app():
     # Create the database and load test data
     with app.app_context():
         init_db()
-        
+
         # Crear tablas de suscripción para pruebas
         from app.subscriptions import init_subscription_tables
+
         init_subscription_tables(app)
 
         # Add test user with valid password that meets requirements
@@ -68,16 +69,18 @@ def app():
     # Clean up: cerrar conexiones y eliminar archivo temporal
     with app.app_context():
         from app.utils import close_db
+
         close_db()
-    
+
     import gc
+
     gc.collect()
-    
+
     try:
         os.close(db_fd)
     except OSError:
         pass
-    
+
     # Intentar eliminar el archivo (con retry para Windows)
     for _ in range(3):
         try:
@@ -85,6 +88,7 @@ def app():
             break
         except PermissionError:
             import time
+
             time.sleep(0.1)
         except FileNotFoundError:
             break

@@ -22,7 +22,6 @@ from .parties import (
     get_party,
     is_valid_party_id,
     list_parties,
-    members_of,
     party_type_of,
     upsert_party,
 )
@@ -99,7 +98,14 @@ def create_party(current_user):
     party_type = data.get("party_type")
     display_name = (data.get("display_name") or "").strip()
     if party_type not in PARTY_TYPE_LABELS:
-        return jsonify({"error": "party_type must be one of: human, society, cooperative, institution, synthetic, ecosystem"}), 400
+        return (
+            jsonify(
+                {
+                    "error": "party_type must be one of: human, society, cooperative, institution, synthetic, ecosystem"
+                }
+            ),
+            400,
+        )
     if not display_name:
         return jsonify({"error": "display_name is required"}), 400
 
@@ -107,24 +113,36 @@ def create_party(current_user):
     if not party_id:
         # Auto-generar: prefix-<id> con el autoincremento del registro
         prefix = {
-            "human": "user", "synthetic": "synthetic", "society": "society",
-            "cooperative": "coop", "institution": "org", "ecosystem": "eco",
+            "human": "user",
+            "synthetic": "synthetic",
+            "society": "society",
+            "cooperative": "coop",
+            "institution": "org",
+            "ecosystem": "eco",
         }[party_type]
         from .utils import get_db
+
         row = get_db().execute(
             "INSERT INTO maxo_parties (party_id, party_type, display_name, members_json) "
             "VALUES (?, ?, ?, ?)",
             (f"{prefix}-pending", party_type, display_name, "{}"),
         )
         generated_id = f"{prefix}-{row.lastrowid}"
-        get_db().execute("UPDATE maxo_parties SET party_id = ? WHERE id = ?",
-                         (generated_id, row.lastrowid))
+        get_db().execute(
+            "UPDATE maxo_parties SET party_id = ? WHERE id = ?",
+            (generated_id, row.lastrowid),
+        )
         get_db().commit()
         party_id = generated_id
     elif party_type_of(party_id) != party_type:
-        return jsonify({
-            "error": f"party_id '{party_id}' no coincide con party_type '{party_type}'"
-        }), 400
+        return (
+            jsonify(
+                {
+                    "error": f"party_id '{party_id}' no coincide con party_type '{party_type}'"
+                }
+            ),
+            400,
+        )
     elif not is_valid_party_id(party_id):
         return jsonify({"error": f"invalid party_id format: {party_id}"}), 400
 
@@ -152,10 +170,12 @@ def create_party(current_user):
 def list_all_parties(current_user):
     party_type = request.args.get("party_type")
     rows = list_parties(party_type=party_type)
-    return jsonify({
-        "parties": [_party_payload(r) for r in rows],
-        "total": len(rows),
-    })
+    return jsonify(
+        {
+            "parties": [_party_payload(r) for r in rows],
+            "total": len(rows),
+        }
+    )
 
 
 @parties_bp.route("/<party_id>", methods=["GET"])
@@ -183,11 +203,16 @@ def update_party(current_user, party_id: str):
 
     token_uid = _token_uid(current_user)
     if not _can_govern(row, token_uid):
-        return jsonify({
-            "error": "sin autoridad sobre esta parte (solo el owner o delegados en partes legacy)",
-            "code": "GOVERNANCE_FORBIDDEN",
-            "hint": "los delegados de una parte con owner usan POST /parties/<id>/governance-change",
-        }), 403
+        return (
+            jsonify(
+                {
+                    "error": "sin autoridad sobre esta parte (solo el owner o delegados en partes legacy)",
+                    "code": "GOVERNANCE_FORBIDDEN",
+                    "hint": "los delegados de una parte con owner usan POST /parties/<id>/governance-change",
+                }
+            ),
+            403,
+        )
 
     data = request.get_json() or {}
     display_name = (data.get("display_name") or row["display_name"]).strip()
@@ -239,7 +264,10 @@ def governance_change(current_user, party_id: str):
     data = request.get_json() or {}
     new_members = _parse_members(data.get("members"))
     if not isinstance(new_members, dict) or not new_members.get("delegates"):
-        return jsonify({"error": "members.delegates es obligatorio en la propuesta"}), 400
+        return (
+            jsonify({"error": "members.delegates es obligatorio en la propuesta"}),
+            400,
+        )
 
     # El owner aplica directamente; los delegados votan por quórum.
     if row.get("owner_user_id") == token_uid:
@@ -252,18 +280,28 @@ def governance_change(current_user, party_id: str):
             wellness=Decimal(str(row.get("wellness_value", 1.0) or 1.0)),
             owner=row.get("owner_user_id"),
         )
-        return jsonify({
-            "success": True,
-            "applied": True,
-            "mode": "owner",
-            "party": _party_payload(updated),
-        })
+        return jsonify(
+            {
+                "success": True,
+                "applied": True,
+                "mode": "owner",
+                "party": _party_payload(updated),
+            }
+        )
 
     if delegate_pid not in delegates:
-        return jsonify({"error": "solo los delegados de la parte votan el cambio",
-                        "code": "GOVERNANCE_FORBIDDEN"}), 403
+        return (
+            jsonify(
+                {
+                    "error": "solo los delegados de la parte votan el cambio",
+                    "code": "GOVERNANCE_FORBIDDEN",
+                }
+            ),
+            403,
+        )
 
     from .utils import get_db
+
     db = get_db()
     proposal_hash = hashlib.sha256(
         json.dumps(new_members, sort_keys=True, ensure_ascii=False).encode("utf-8")
@@ -295,25 +333,34 @@ def governance_change(current_user, party_id: str):
             wellness=Decimal(str(row.get("wellness_value", 1.0) or 1.0)),
             owner=row.get("owner_user_id"),
         )
-        db.execute("DELETE FROM maxo_party_governance_votes WHERE party_id = ?", (party_id,))
+        db.execute(
+            "DELETE FROM maxo_party_governance_votes WHERE party_id = ?", (party_id,)
+        )
         db.commit()
-        return jsonify({
-            "success": True,
-            "applied": True,
-            "mode": "quorum",
-            "votes": votes,
-            "needed": needed,
-            "party": _party_payload(updated),
-        })
+        return jsonify(
+            {
+                "success": True,
+                "applied": True,
+                "mode": "quorum",
+                "votes": votes,
+                "needed": needed,
+                "party": _party_payload(updated),
+            }
+        )
 
-    return jsonify({
-        "success": True,
-        "applied": False,
-        "mode": "quorum",
-        "votes": votes,
-        "needed": needed,
-        "reason": data.get("reason", ""),
-    }), 202
+    return (
+        jsonify(
+            {
+                "success": True,
+                "applied": False,
+                "mode": "quorum",
+                "votes": votes,
+                "needed": needed,
+                "reason": data.get("reason", ""),
+            }
+        ),
+        202,
+    )
 
 
 @parties_bp.route("/<party_id>", methods=["DELETE"])
@@ -323,9 +370,17 @@ def delete_party(current_user, party_id: str):
     if row is None:
         return jsonify({"error": "party not found"}), 404
     if not _can_govern(row, _token_uid(current_user)):
-        return jsonify({"error": "sin autoridad sobre esta parte",
-                        "code": "GOVERNANCE_FORBIDDEN"}), 403
+        return (
+            jsonify(
+                {
+                    "error": "sin autoridad sobre esta parte",
+                    "code": "GOVERNANCE_FORBIDDEN",
+                }
+            ),
+            403,
+        )
     from .utils import get_db
+
     db = get_db()
     # T13: no borrar partes con contratos activos (el registro es la verdad)
     active = db.execute(
@@ -363,8 +418,15 @@ def extend_quorum_deadline(current_user, party_id: str):
 
     # Autoridad (Ola 3A.3): solo owner o delegados
     if not _can_govern(row, _token_uid(current_user)):
-        return jsonify({"error": "sin autoridad sobre esta parte",
-                        "code": "GOVERNANCE_FORBIDDEN"}), 403
+        return (
+            jsonify(
+                {
+                    "error": "sin autoridad sobre esta parte",
+                    "code": "GOVERNANCE_FORBIDDEN",
+                }
+            ),
+            403,
+        )
 
     data = request.get_json() or {}
     deadline = (data.get("deadline") or "").strip()
@@ -381,8 +443,10 @@ def extend_quorum_deadline(current_user, party_id: str):
         members=members,
         wellness=Decimal(str(row.get("wellness_value", 1.0) or 1.0)),
     )
-    return jsonify({
-        "success": True,
-        "party": _party_payload(updated),
-        "quorum_deadline": deadline,
-    })
+    return jsonify(
+        {
+            "success": True,
+            "party": _party_payload(updated),
+            "quorum_deadline": deadline,
+        }
+    )

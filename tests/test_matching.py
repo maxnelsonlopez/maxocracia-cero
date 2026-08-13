@@ -1,8 +1,8 @@
-import json
-import sqlite3
 import pytest
+
 from app.matching import MatchingEngine
 from app.utils import get_db
+
 
 class TestMatchingEngineUnit:
     """Unit tests for MatchingEngine business logic using an in-memory/direct DB connection."""
@@ -17,7 +17,7 @@ class TestMatchingEngineUnit:
     def test_find_matches_basic(self, db_conn):
         """Test basic matching with categories overlap and scoring."""
         cursor = db_conn.cursor()
-        
+
         # Insert seeker
         cursor.execute(
             """
@@ -28,9 +28,19 @@ class TestMatchingEngineUnit:
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                "Seeker", "seeker@example.com", "Bogotá", "Chapinero", "Offers nothing", "Needs food and help",
-                "Alta", "[]", "[]", '["alimentacion", "habilidad"]', '["prosperidad_recursos"]', "active"
-            )
+                "Seeker",
+                "seeker@example.com",
+                "Bogotá",
+                "Chapinero",
+                "Offers nothing",
+                "Needs food and help",
+                "Alta",
+                "[]",
+                "[]",
+                '["alimentacion", "habilidad"]',
+                '["prosperidad_recursos"]',
+                "active",
+            ),
         )
         seeker_id = cursor.lastrowid
 
@@ -44,9 +54,19 @@ class TestMatchingEngineUnit:
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                "Candidate", "cand@example.com", "Bogotá", "Chapinero", "Provides food", "Needs nothing",
-                "Baja", '["alimentacion", "habilidad"]', '["prosperidad_recursos"]', "[]", "[]", "active"
-            )
+                "Candidate",
+                "cand@example.com",
+                "Bogotá",
+                "Chapinero",
+                "Provides food",
+                "Needs nothing",
+                "Baja",
+                '["alimentacion", "habilidad"]',
+                '["prosperidad_recursos"]',
+                "[]",
+                "[]",
+                "active",
+            ),
         )
         cand_id = cursor.lastrowid
 
@@ -69,24 +89,57 @@ class TestMatchingEngineUnit:
         # Insert Seeker
         cursor.execute(
             "INSERT INTO participants (name, email, city, neighborhood, offer_description, need_description, need_urgency, offer_categories, need_categories, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            ("Seeker Rec", "seeker_rec@example.com", "Bogotá", "Chapinero", "Desc", "Desc", "Alta", "[]", '["objeto"]', "active")
+            (
+                "Seeker Rec",
+                "seeker_rec@example.com",
+                "Bogotá",
+                "Chapinero",
+                "Desc",
+                "Desc",
+                "Alta",
+                "[]",
+                '["objeto"]',
+                "active",
+            ),
         )
         seeker_id = cursor.lastrowid
 
         # Insert Partner (matching)
         cursor.execute(
             "INSERT INTO participants (name, email, city, neighborhood, offer_description, need_description, need_urgency, offer_categories, need_categories, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            ("Partner Rec", "partner_rec@example.com", "Bogotá", "Chapinero", "Desc", "Desc", "Baja", '["objeto"]', "[]", "active")
+            (
+                "Partner Rec",
+                "partner_rec@example.com",
+                "Bogotá",
+                "Chapinero",
+                "Desc",
+                "Desc",
+                "Baja",
+                '["objeto"]',
+                "[]",
+                "active",
+            ),
         )
         partner_id = cursor.lastrowid
 
         # Create recent exchange
         # Note: in schema, interchange has date, giver_id, receiver_id, etc.
         import datetime
+
         today_str = datetime.datetime.now().strftime("%Y-%m-%d")
         cursor.execute(
             "INSERT INTO interchange (interchange_id, date, giver_id, receiver_id, type, description, urgency, impact_resolution_score, reciprocity_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            ("INT-REC-1", today_str, partner_id, seeker_id, "objeto", "Swap", "Baja", 5, "unidirectional")
+            (
+                "INT-REC-1",
+                today_str,
+                partner_id,
+                seeker_id,
+                "objeto",
+                "Swap",
+                "Baja",
+                5,
+                "unidirectional",
+            ),
         )
         db_conn.commit()
 
@@ -98,7 +151,9 @@ class TestMatchingEngineUnit:
 
         # With exclude_recent=False, partner should be included with recently_exchanged=True
         matches_inc = engine.find_matches(seeker_id, exclude_recent=False)
-        partner_match = next((m for m in matches_inc if m.offerer_id == partner_id), None)
+        partner_match = next(
+            (m for m in matches_inc if m.offerer_id == partner_id), None
+        )
         assert partner_match is not None
         assert partner_match.recently_exchanged is True
 
@@ -109,13 +164,35 @@ class TestMatchingEngineUnit:
         # Seeker and candidate with empty neighborhood and city
         cursor.execute(
             "INSERT INTO participants (name, email, city, neighborhood, offer_description, need_description, need_urgency, offer_categories, need_categories, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            ("Seeker Empty", "seeker_empty@example.com", "", "", "Desc", "Desc", "Alta", "[]", '["objeto"]', "active")
+            (
+                "Seeker Empty",
+                "seeker_empty@example.com",
+                "",
+                "",
+                "Desc",
+                "Desc",
+                "Alta",
+                "[]",
+                '["objeto"]',
+                "active",
+            ),
         )
         seeker_id = cursor.lastrowid
 
         cursor.execute(
             "INSERT INTO participants (name, email, city, neighborhood, offer_description, need_description, need_urgency, offer_categories, need_categories, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            ("Partner Empty", "partner_empty@example.com", "", "", "Desc", "Desc", "Baja", '["objeto"]', "[]", "active")
+            (
+                "Partner Empty",
+                "partner_empty@example.com",
+                "",
+                "",
+                "Desc",
+                "Desc",
+                "Baja",
+                '["objeto"]',
+                "[]",
+                "active",
+            ),
         )
         partner_id = cursor.lastrowid
         db_conn.commit()
@@ -137,7 +214,18 @@ class TestMatchingEngineUnit:
         # Insert active participant with urgent need
         cursor.execute(
             "INSERT INTO participants (name, email, city, neighborhood, offer_description, need_description, need_urgency, offer_categories, need_categories, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            ("Urgent User", "urgent_user@example.com", "Bogotá", "Chapinero", "Desc", "Desc", "Alta", "[]", '["objeto"]', "active")
+            (
+                "Urgent User",
+                "urgent_user@example.com",
+                "Bogotá",
+                "Chapinero",
+                "Desc",
+                "Desc",
+                "Alta",
+                "[]",
+                '["objeto"]',
+                "active",
+            ),
         )
         p_id = cursor.lastrowid
         db_conn.commit()
@@ -150,10 +238,20 @@ class TestMatchingEngineUnit:
 
         # 2. Resolved (need_level = 1 in follow-up): should NOT show up
         import datetime
+
         today_str = datetime.datetime.now().strftime("%Y-%m-%d")
         cursor.execute(
             "INSERT INTO follow_ups (follow_up_date, participant_id, follow_up_type, current_situation, situation_change, active_interchanges_status, follow_up_priority, need_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            (today_str, p_id, "need_resolved", "La situación está resuelta", "improved_significantly", "none", "closed", 1)
+            (
+                today_str,
+                p_id,
+                "need_resolved",
+                "La situación está resuelta",
+                "improved_significantly",
+                "none",
+                "closed",
+                1,
+            ),
         )
         db_conn.commit()
 
@@ -201,9 +299,19 @@ class TestMatchingAPI:
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    "API Seeker", "apiseeker@example.com", "Bogotá", "Chapinero", "Desc", "Need food",
-                    "Alta", "[]", "[]", '["alimentacion"]', '["prosperidad_recursos"]', "active"
-                )
+                    "API Seeker",
+                    "apiseeker@example.com",
+                    "Bogotá",
+                    "Chapinero",
+                    "Desc",
+                    "Need food",
+                    "Alta",
+                    "[]",
+                    "[]",
+                    '["alimentacion"]',
+                    '["prosperidad_recursos"]',
+                    "active",
+                ),
             )
             seeker_id = cursor.lastrowid
 
@@ -217,9 +325,19 @@ class TestMatchingAPI:
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    "API Cand", "apicand@example.com", "Bogotá", "Chapinero", "Offer food", "Need nothing",
-                    "Baja", '["alimentacion"]', '["prosperidad_recursos"]', "[]", "[]", "active"
-                )
+                    "API Cand",
+                    "apicand@example.com",
+                    "Bogotá",
+                    "Chapinero",
+                    "Offer food",
+                    "Need nothing",
+                    "Baja",
+                    '["alimentacion"]',
+                    '["prosperidad_recursos"]',
+                    "[]",
+                    "[]",
+                    "active",
+                ),
             )
             cand_id = cursor.lastrowid
             db.commit()

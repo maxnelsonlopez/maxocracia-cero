@@ -13,66 +13,65 @@ Endpoints:
 - GET    /contracts/<id>/civil    - Resumen en lenguaje civil
 """
 
+import os
+import sqlite3
+
+# Importar MaxoContracts core
+import sys
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-import sqlite3
 
 from flask import Blueprint, jsonify, request
 
 from .jwt_utils import token_required
 from .utils import get_db
 
-# Importar MaxoContracts core
-import sys
-import os
-
 # Agregar ruta del proyecto para imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import hashlib
+import json
+import math
+import unicodedata
+from decimal import Decimal, InvalidOperation
+
+from maxocontracts.blocks.sdv_s_validator import SDV_SValidatorBlock
+from maxocontracts.core.axioms import ValidationResult
+from maxocontracts.core.contract import MaxoContract
 from maxocontracts.core.types import (
-    VHV,
-    Wellness,
     SDV,
     SDV_S,
-    Participant,
-    ContractTerm,
+    VHV,
     ContractState,
-    MaxoAmount,
+    ContractTerm,
+    Participant,
+    Wellness,
 )
-from maxocontracts.core.contract import MaxoContract
-from maxocontracts.blocks.sdv_s_validator import SDV_SValidatorBlock
-from maxocontracts.core.axioms import AxiomValidator, ValidationResult
 from maxocontracts.oracles import SyntheticOracle
 from maxocontracts.oracles.live_oracle import (
     LiveOracle,
-    OracleUnavailableError,
     OracleAPIError,
+    OracleUnavailableError,
 )
 
-from .webhooks import dispatch_event
 from .parties import (
+    _synthetic_participant,
     aggregate_wellness,
     consent_status,
-    get_party,
     get_human_participant,
+    get_party,
     is_collective,
     is_valid_party_id,
     members_of,
     party_type_of,
     resolve_participant_by_pid,
-    _synthetic_participant,
 )
 from .protection import (
     caps_for,
     exposure_check,
     protection_level,
 )
-
-from decimal import Decimal, InvalidOperation
-import hashlib
-import json
-import math
-import unicodedata
+from .webhooks import dispatch_event
 
 # --- Blindaje anti-gamificación (Ola 3A) --------------------------------------
 # Límites y umbrales configurables del sistema (diseño: blindaje_anti_gamificacion_equidad.md)
@@ -148,8 +147,7 @@ def _normalize_civil(text: str) -> str:
     """Minúsculas y sin acentos para comparación de patrones."""
     text = (text or "").lower()
     return "".join(
-        c for c in unicodedata.normalize("NFD", text)
-        if unicodedata.category(c) != "Mn"
+        c for c in unicodedata.normalize("NFD", text) if unicodedata.category(c) != "Mn"
     )
 
 
@@ -158,7 +156,9 @@ def _validate_civil_text(text: str) -> Optional[str]:
     patrones explotativos prohibidos (R7)."""
     t = text or ""
     if len(t.split()) > CIVIL_MAX_WORDS:
-        return f"civil_text excede {CIVIL_MAX_WORDS} palabras (lenguaje civil, grado 8º)"
+        return (
+            f"civil_text excede {CIVIL_MAX_WORDS} palabras (lenguaje civil, grado 8º)"
+        )
     if t.count(".") > CIVIL_MAX_SENTENCES:
         return f"civil_text excede {CIVIL_MAX_SENTENCES} oraciones (lenguaje civil)"
     norm = _normalize_civil(t)
@@ -196,7 +196,9 @@ def _reciprocity_imbalance(contract) -> tuple:
     }
 
 
-def _audit(contract: MaxoContract, action: str, actor_id: Optional[int], **extra) -> None:
+def _audit(
+    contract: MaxoContract, action: str, actor_id: Optional[int], **extra
+) -> None:
     """Registro auditable de acciones de la API (Ola 3A.2, T13)."""
     data = {"actor_id": f"user-{actor_id}" if actor_id else None}
     data.update(extra)
@@ -230,6 +232,7 @@ def _protection_oracle_gate(contract, uid: int) -> Optional[dict]:
     válida.
     """
     from .protection import caps_for, protection_level
+
     level = protection_level(uid)
     if not caps_for(level).get("requires_oracle_review"):
         return None
@@ -237,7 +240,7 @@ def _protection_oracle_gate(contract, uid: int) -> Optional[dict]:
     if not oracle.is_available():
         return {
             "error": "tu perfil de protección exige revisión oracular en vivo, "
-                     "y el oráculo no está disponible",
+            "y el oráculo no está disponible",
             "code": "PROTECTION_ORACLE_REQUIRED",
             "protection_level": level,
         }
@@ -246,7 +249,7 @@ def _protection_oracle_gate(contract, uid: int) -> Optional[dict]:
     except (OracleAPIError, OracleUnavailableError):
         return {
             "error": "tu perfil de protección exige revisión oracular en vivo, "
-                     "y el oráculo falló",
+            "y el oráculo falló",
             "code": "PROTECTION_ORACLE_REQUIRED",
             "protection_level": level,
         }
@@ -266,16 +269,21 @@ def _paraphrase_check(data, level: str) -> Optional[dict]:
     sus propias palabras qué promete la cláusula antes de firmar.
     """
     from .protection import PARAPHRASE_MIN_LENGTH, caps_for
+
     if not caps_for(level).get("requires_paraphrase"):
         return None
     if data.get("comprehension") is not True:
-        return {"error": "debes confirmar comprensión (comprehension: true)",
-                "code": "PROTECTION_PARAPHRASE_REQUIRED"}
+        return {
+            "error": "debes confirmar comprensión (comprehension: true)",
+            "code": "PROTECTION_PARAPHRASE_REQUIRED",
+        }
     paraphrase = (data.get("paraphrase") or "").strip()
     if len(paraphrase) < PARAPHRASE_MIN_LENGTH:
-        return {"error": f"escribe con tus palabras qué promete esta cláusula "
-                         f"(mínimo {PARAPHRASE_MIN_LENGTH} caracteres)",
-                "code": "PROTECTION_PARAPHRASE_REQUIRED"}
+        return {
+            "error": f"escribe con tus palabras qué promete esta cláusula "
+            f"(mínimo {PARAPHRASE_MIN_LENGTH} caracteres)",
+            "code": "PROTECTION_PARAPHRASE_REQUIRED",
+        }
     return None
 
 
@@ -286,6 +294,7 @@ def _contract_window_blocked(contract, db) -> Optional[dict]:
     Devuelve un payload de error (423) o None.
     """
     from datetime import timedelta
+
     created_at = getattr(contract, "_created_at", None)
     if created_at:
         try:
@@ -300,8 +309,10 @@ def _contract_window_blocked(contract, db) -> Optional[dict]:
         try:
             dl = datetime.fromisoformat(str(deadline).replace("Z", "+00:00"))
             if datetime.now() > dl:
-                return {"error": "la ventana de firma del contrato venció",
-                        "code": "SIGNATURE_DEADLINE_EXPIRED"}
+                return {
+                    "error": "la ventana de firma del contrato venció",
+                    "code": "SIGNATURE_DEADLINE_EXPIRED",
+                }
         except (ValueError, TypeError):
             pass
 
@@ -311,11 +322,14 @@ def _contract_window_blocked(contract, db) -> Optional[dict]:
         now = datetime.now()
         if now < ready_at:
             remaining = (ready_at - now).total_seconds() / 3600
-            return {"error": f"periodo de reflexión obligatorio en curso "
-                             f"({hours:.0f}h desde la creación)",
-                    "code": "REFLECTION_PENDING",
-                    "remaining_hours": round(remaining, 1)}
+            return {
+                "error": f"periodo de reflexión obligatorio en curso "
+                f"({hours:.0f}h desde la creación)",
+                "code": "REFLECTION_PENDING",
+                "remaining_hours": round(remaining, 1),
+            }
     return None
+
 
 contracts_bp = Blueprint("contracts", __name__, url_prefix="/contracts")
 
@@ -411,7 +425,8 @@ def init_contracts_metrics_tables(app):
     cur = conn.cursor()
 
     try:
-        cur.execute("""
+        cur.execute(
+            """
             CREATE TABLE IF NOT EXISTS maxo_contract_nps (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 contract_id TEXT NOT NULL,
@@ -422,8 +437,10 @@ def init_contracts_metrics_tables(app):
                 FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
                 UNIQUE(contract_id, participant_id)
             )
-        """)
-        cur.execute("""
+        """
+        )
+        cur.execute(
+            """
             CREATE TABLE IF NOT EXISTS maxo_contract_meta (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 contract_id TEXT NOT NULL,
@@ -433,10 +450,12 @@ def init_contracts_metrics_tables(app):
                 FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
                 UNIQUE(contract_id, meta_key)
             )
-        """)
+        """
+        )
         # Registro de Partes de cualquier escala (ROADMAP Bloque B, Fase 1):
         # persona, micro-sociedad, cooperativa, institución, sintética, ecosistema.
-        cur.execute("""
+        cur.execute(
+            """
             CREATE TABLE IF NOT EXISTS maxo_parties (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 party_id TEXT UNIQUE NOT NULL,
@@ -448,9 +467,11 @@ def init_contracts_metrics_tables(app):
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                 updated_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+        """
+        )
         # Firmas delegadas para consentimiento agregado con quórum (Fase 2).
-        cur.execute("""
+        cur.execute(
+            """
             CREATE TABLE IF NOT EXISTS maxo_contract_delegate_approvals (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 contract_id TEXT NOT NULL,
@@ -461,25 +482,35 @@ def init_contracts_metrics_tables(app):
                 FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
                 UNIQUE(contract_id, term_id, party_id, delegate_id)
             )
-        """)
+        """
+        )
         # Migración: cada término puede quedar vinculado a la parte obligada
         # (ej. 'user-1' o 'synthetic-qwen-1'). Permite "bloques vinculados
         # a usuarios" y la vista de documento legal. Solo aplica si la tabla
         # ya existe (en BD nuevas el schema.sql la crea con la columna).
         tables = [
-            r[0] for r in cur.execute(
+            r[0]
+            for r in cur.execute(
                 "SELECT name FROM sqlite_master WHERE type='table'"
             ).fetchall()
         ]
         if "maxo_contract_terms" in tables:
-            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_contract_terms)").fetchall()]
+            cols = [
+                r[1]
+                for r in cur.execute(
+                    "PRAGMA table_info(maxo_contract_terms)"
+                ).fetchall()
+            ]
             if "assigned_participant" not in cols:
                 cur.execute(
                     "ALTER TABLE maxo_contract_terms ADD COLUMN assigned_participant TEXT"
                 )
         # Migración: contratos interescala anidados (Fase 5).
         if "maxo_contracts" in tables:
-            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_contracts)").fetchall()]
+            cols = [
+                r[1]
+                for r in cur.execute("PRAGMA table_info(maxo_contracts)").fetchall()
+            ]
             if "parent_contract_id" not in cols:
                 cur.execute(
                     "ALTER TABLE maxo_contracts ADD COLUMN parent_contract_id TEXT"
@@ -499,12 +530,13 @@ def init_contracts_metrics_tables(app):
                 )
         # Ola 3A.3: autoridad sobre las partes + votos de gobernanza
         if "maxo_parties" in tables:
-            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_parties)").fetchall()]
+            cols = [
+                r[1] for r in cur.execute("PRAGMA table_info(maxo_parties)").fetchall()
+            ]
             if "owner_user_id" not in cols:
-                cur.execute(
-                    "ALTER TABLE maxo_parties ADD COLUMN owner_user_id INTEGER"
-                )
-        cur.execute("""
+                cur.execute("ALTER TABLE maxo_parties ADD COLUMN owner_user_id INTEGER")
+        cur.execute(
+            """
             CREATE TABLE IF NOT EXISTS maxo_party_governance_votes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 party_id TEXT NOT NULL,
@@ -514,10 +546,16 @@ def init_contracts_metrics_tables(app):
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(party_id, proposal_hash, delegate_id)
             )
-        """)
+        """
+        )
         # Ola 3A.5: γ con fuente (actor y timestamp del reporte)
         if "maxo_contract_participants" in tables:
-            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_contract_participants)").fetchall()]
+            cols = [
+                r[1]
+                for r in cur.execute(
+                    "PRAGMA table_info(maxo_contract_participants)"
+                ).fetchall()
+            ]
             if "reported_by" not in cols:
                 cur.execute(
                     "ALTER TABLE maxo_contract_participants ADD COLUMN reported_by TEXT"
@@ -528,19 +566,30 @@ def init_contracts_metrics_tables(app):
                 )
         # Ola 3B: derecho a la comprensión (paráfrasis por término)
         if "maxo_contract_term_approvals" in tables:
-            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_contract_term_approvals)").fetchall()]
+            cols = [
+                r[1]
+                for r in cur.execute(
+                    "PRAGMA table_info(maxo_contract_term_approvals)"
+                ).fetchall()
+            ]
             if "paraphrase" not in cols:
                 cur.execute(
                     "ALTER TABLE maxo_contract_term_approvals ADD COLUMN paraphrase TEXT"
                 )
         if "maxo_contract_delegate_approvals" in tables:
-            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_contract_delegate_approvals)").fetchall()]
+            cols = [
+                r[1]
+                for r in cur.execute(
+                    "PRAGMA table_info(maxo_contract_delegate_approvals)"
+                ).fetchall()
+            ]
             if "paraphrase" not in cols:
                 cur.execute(
                     "ALTER TABLE maxo_contract_delegate_approvals ADD COLUMN paraphrase TEXT"
                 )
         # Ola 3B: perfil de protección (escalera de equidad)
-        cur.execute("""
+        cur.execute(
+            """
             CREATE TABLE IF NOT EXISTS maxo_user_protection (
                 user_id INTEGER PRIMARY KEY,
                 level TEXT NOT NULL DEFAULT 'standard',
@@ -549,9 +598,11 @@ def init_contracts_metrics_tables(app):
                 declared_education TEXT,
                 updated_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+        """
+        )
         # Ola 3C: bitácora de cumplimiento (dientes) + penalización por término
-        cur.execute("""
+        cur.execute(
+            """
             CREATE TABLE IF NOT EXISTS maxo_contract_term_fulfillments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 contract_id TEXT NOT NULL,
@@ -563,15 +614,22 @@ def init_contracts_metrics_tables(app):
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE
             )
-        """)
+        """
+        )
         if "maxo_contract_terms" in tables:
-            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_contract_terms)").fetchall()]
+            cols = [
+                r[1]
+                for r in cur.execute(
+                    "PRAGMA table_info(maxo_contract_terms)"
+                ).fetchall()
+            ]
             if "penalty_gamma" not in cols:
                 cur.execute(
                     "ALTER TABLE maxo_contract_terms ADD COLUMN penalty_gamma REAL DEFAULT 0"
                 )
         # Ola 4, Puente A: γ que escucha la vida (serie temporal de check-ins)
-        cur.execute("""
+        cur.execute(
+            """
             CREATE TABLE IF NOT EXISTS maxo_contract_checkins (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 contract_id TEXT NOT NULL,
@@ -582,11 +640,13 @@ def init_contracts_metrics_tables(app):
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE
             )
-        """)
+        """
+        )
         # Cap. 17.4: Derecho al Mantenimiento Óptimo — ledger del oráculo
         # (gratitud hecha código: cada contrato que usó el oráculo aporta
         # un % de su VHV al sustento del motor; visible en la plaza).
-        cur.execute("""
+        cur.execute(
+            """
             CREATE TABLE IF NOT EXISTS maxo_oracle_ledger (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 contract_id TEXT NOT NULL,
@@ -599,16 +659,23 @@ def init_contracts_metrics_tables(app):
                 FOREIGN KEY (contract_id) REFERENCES maxo_contracts(contract_id) ON DELETE CASCADE,
                 UNIQUE(contract_id, source)
             )
-        """)
+        """
+        )
         # Parlamento de Parámetros: acción vinculante en propuestas (Cap. 11/14)
         # + historial de resoluciones que ajustaron α, β, γ, δ por consenso.
         if "maxo_community_proposals" in tables:
-            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_community_proposals)").fetchall()]
+            cols = [
+                r[1]
+                for r in cur.execute(
+                    "PRAGMA table_info(maxo_community_proposals)"
+                ).fetchall()
+            ]
             if "action_json" not in cols:
                 cur.execute(
                     "ALTER TABLE maxo_community_proposals ADD COLUMN action_json TEXT"
                 )
-        cur.execute("""
+        cur.execute(
+            """
             CREATE TABLE IF NOT EXISTS maxo_parameter_resolutions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 proposal_id INTEGER NOT NULL UNIQUE,
@@ -619,7 +686,8 @@ def init_contracts_metrics_tables(app):
                 applied_by INTEGER,
                 applied_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+        """
+        )
         # Puente de Llegada: escalera de confianza (Cap. 13) + bitácora de
         # llegadas y cuarentenas (honeypot anti-bot, Sun Tzu: vencer sin combatir).
         if "users" in tables:
@@ -628,7 +696,8 @@ def init_contracts_metrics_tables(app):
                 cur.execute(
                     "ALTER TABLE users ADD COLUMN trust_level INTEGER DEFAULT 0"
                 )
-        cur.execute("""
+        cur.execute(
+            """
             CREATE TABLE IF NOT EXISTS maxo_arrivals (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 email TEXT NOT NULL,
@@ -637,14 +706,15 @@ def init_contracts_metrics_tables(app):
                 status TEXT NOT NULL DEFAULT 'arrived',
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+        """
+        )
         # Migración: webhooks filtrados por parte (Ext. 4).
         if "maxo_webhooks" in tables:
-            cols = [r[1] for r in cur.execute("PRAGMA table_info(maxo_webhooks)").fetchall()]
+            cols = [
+                r[1] for r in cur.execute("PRAGMA table_info(maxo_webhooks)").fetchall()
+            ]
             if "party_filter" not in cols:
-                cur.execute(
-                    "ALTER TABLE maxo_webhooks ADD COLUMN party_filter TEXT"
-                )
+                cur.execute("ALTER TABLE maxo_webhooks ADD COLUMN party_filter TEXT")
         conn.commit()
     finally:
         conn.close()
@@ -654,9 +724,12 @@ def init_contracts_metrics_tables(app):
 def serve_builder():
     """Sirve el constructor de contratos de Next.js."""
     from flask import current_app
+
     return current_app.send_static_file("dist/contracts/builder.html")
 
+
 # Helper functions for persistence
+
 
 def _save_contract(contract: MaxoContract, actor_id: Optional[int] = None):
     """Guarda un objeto MaxoContract en la base de datos.
@@ -664,13 +737,14 @@ def _save_contract(contract: MaxoContract, actor_id: Optional[int] = None):
     actor_id (Ola 3A.5): quién reporta el γ al escribir participantes.
     """
     db = get_db()
-    
+
     # 1. Upsert contract header
     parent_id = getattr(contract, "_parent_contract_id", None)
     creator_id = getattr(contract, "_creator_user_id", None)
     deadline = getattr(contract, "_signature_deadline", None)
     reflection = float(getattr(contract, "_min_reflection_hours", 0) or 0)
-    db.execute("""
+    db.execute(
+        """
         INSERT INTO maxo_contracts (contract_id, civil_description, state, total_vhv_t, total_vhv_v, total_vhv_h, parent_contract_id, creator_user_id, signature_deadline, min_reflection_hours, updated_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
         ON CONFLICT(contract_id) DO UPDATE SET
@@ -684,25 +758,25 @@ def _save_contract(contract: MaxoContract, actor_id: Optional[int] = None):
             signature_deadline=COALESCE(excluded.signature_deadline, signature_deadline),
             min_reflection_hours=COALESCE(excluded.min_reflection_hours, min_reflection_hours),
             updated_at=CURRENT_TIMESTAMP
-    """, (
-        contract.contract_id,
-        contract.civil_summary,
-        contract.state.value,
-        float(contract.total_vhv.T),
-        float(contract.total_vhv.V),
-        float(contract.total_vhv.R),
-        parent_id,
-        creator_id,
-        deadline,
-        reflection
-    ))
-    
+    """,
+        (
+            contract.contract_id,
+            contract.civil_summary,
+            contract.state.value,
+            float(contract.total_vhv.T),
+            float(contract.total_vhv.V),
+            float(contract.total_vhv.R),
+            parent_id,
+            creator_id,
+            deadline,
+            reflection,
+        ),
+    )
+
     # 2. Update participants
     # Primero: γ agregado real de las partes colectivas (Ext. 3) — media
     # ponderada del bienestar de sus miembros presentes en este contrato.
-    wellness_map = {
-        p.id: p.wellness_current.value for p in contract.participants
-    }
+    wellness_map = {p.id: p.wellness_current.value for p in contract.participants}
     for p in contract.participants:
         if p.id.startswith(("society-", "coop-", "org-", "eco-")):
             agg = aggregate_wellness(p.id, wellness_map)
@@ -712,13 +786,13 @@ def _save_contract(contract: MaxoContract, actor_id: Optional[int] = None):
         # sdv_status: "ok" para humanos; JSON completo del estado SDV-S
         # para participantes sintéticos (T13: auditable en la base).
         if p.is_synthetic and p.sdv_s_actual is not None:
-            sdv_status = json.dumps({
-                dim: str(getattr(p.sdv_s_actual, dim))
-                for dim in SDV_S.DIMENSIONS
-            })
+            sdv_status = json.dumps(
+                {dim: str(getattr(p.sdv_s_actual, dim)) for dim in SDV_S.DIMENSIONS}
+            )
         else:
             sdv_status = "ok"
-        db.execute("""
+        db.execute(
+            """
             INSERT INTO maxo_contract_participants (contract_id, participant_id, wellness_value, sdv_status, reported_by, reported_at)
             VALUES (?, ?, ?, ?, ?, ?)
             ON CONFLICT(contract_id, participant_id) DO UPDATE SET
@@ -726,19 +800,22 @@ def _save_contract(contract: MaxoContract, actor_id: Optional[int] = None):
                 sdv_status=excluded.sdv_status,
                 reported_by=COALESCE(maxo_contract_participants.reported_by, excluded.reported_by),
                 reported_at=COALESCE(maxo_contract_participants.reported_at, excluded.reported_at)
-        """, (
-            contract.contract_id,
-            p.id,
-            float(p.wellness_current.value),
-            sdv_status,
-            f"user-{actor_id}" if actor_id is not None else None,
-            datetime.now().isoformat()
-        ))
+        """,
+            (
+                contract.contract_id,
+                p.id,
+                float(p.wellness_current.value),
+                sdv_status,
+                f"user-{actor_id}" if actor_id is not None else None,
+                datetime.now().isoformat(),
+            ),
+        )
         # Sincronizar γ agregado de partes colectivas al registro (T13)
         if p.id.startswith(("society-", "coop-", "org-", "eco-")):
             party = get_party(p.id)
             if party is not None:
                 from .parties import upsert_party
+
                 upsert_party(
                     party_id=p.id,
                     party_type=party["party_type"],
@@ -747,10 +824,11 @@ def _save_contract(contract: MaxoContract, actor_id: Optional[int] = None):
                     members=members_of(p.id),
                     wellness=p.wellness_current.value,
                 )
-    
+
     # 3. Update terms and approvals
     for term in contract._terms:
-        db.execute("""
+        db.execute(
+            """
             INSERT INTO maxo_contract_terms (contract_id, term_id, civil_text, vhv_t, vhv_v, vhv_h, assigned_participant, penalty_gamma)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(contract_id, term_id) DO UPDATE SET
@@ -760,54 +838,67 @@ def _save_contract(contract: MaxoContract, actor_id: Optional[int] = None):
                 vhv_h=excluded.vhv_h,
                 assigned_participant=excluded.assigned_participant,
                 penalty_gamma=excluded.penalty_gamma
-        """, (
-            contract.contract_id,
-            term.id,
-            term.description,
-            float(term.vhv_cost.T),
-            float(term.vhv_cost.V),
-            float(term.vhv_cost.R),
-            getattr(term, "assigned_participant", None),
-            float(getattr(term, "penalty_gamma", 0) or 0)
-        ))
-        
+        """,
+            (
+                contract.contract_id,
+                term.id,
+                term.description,
+                float(term.vhv_cost.T),
+                float(term.vhv_cost.V),
+                float(term.vhv_cost.R),
+                getattr(term, "assigned_participant", None),
+                float(getattr(term, "penalty_gamma", 0) or 0),
+            ),
+        )
+
         for p_id, accepted in term.accepted_by.items():
             if accepted:
-                db.execute("""
+                db.execute(
+                    """
                     INSERT OR IGNORE INTO maxo_contract_term_approvals (contract_id, term_id, participant_id)
                     VALUES (?, ?, ?)
-                """, (contract.contract_id, term.id, p_id))
-    
+                """,
+                    (contract.contract_id, term.id, p_id),
+                )
+
     # 4. Sync events (only new ones)
-    existing_events_count = db.execute("SELECT COUNT(*) FROM maxo_contract_events WHERE contract_id = ?", (contract.contract_id,)).fetchone()[0]
+    existing_events_count = db.execute(
+        "SELECT COUNT(*) FROM maxo_contract_events WHERE contract_id = ?",
+        (contract.contract_id,),
+    ).fetchone()[0]
     for i, event in enumerate(contract.get_event_log()):
         if i >= existing_events_count:
-            db.execute("""
+            db.execute(
+                """
                 INSERT INTO maxo_contract_events (contract_id, event_type, description, metadata_json)
                 VALUES (?, ?, ?, ?)
-            """, (
-                contract.contract_id,
-                event.event_type,
-                event.data.get("description", ""),
-                json.dumps(event.data)
-            ))
-            
+            """,
+                (
+                    contract.contract_id,
+                    event.event_type,
+                    event.data.get("description", ""),
+                    json.dumps(event.data),
+                ),
+            )
+
     db.commit()
 
 
 def _load_contract(contract_id: str) -> Optional[MaxoContract]:
     """Reconstruye un objeto MaxoContract desde la base de datos."""
     db = get_db()
-    
+
     # 1. Load header
-    row = db.execute("SELECT * FROM maxo_contracts WHERE contract_id = ?", (contract_id,)).fetchone()
+    row = db.execute(
+        "SELECT * FROM maxo_contracts WHERE contract_id = ?", (contract_id,)
+    ).fetchone()
     if not row:
         return None
-    
+
     contract = MaxoContract(
         contract_id=row["contract_id"],
         description=row["civil_description"],
-        civil_summary=row["civil_description"]
+        civil_summary=row["civil_description"],
     )
     contract._state = ContractState(row["state"])
     if row["parent_contract_id"]:
@@ -820,15 +911,21 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
         contract._min_reflection_hours = row["min_reflection_hours"]
     if row["created_at"]:
         contract._created_at = row["created_at"]
-    
+
     # 2. Load participants
-    p_rows = db.execute("SELECT * FROM maxo_contract_participants WHERE contract_id = ?", (contract_id,)).fetchall()
+    p_rows = db.execute(
+        "SELECT * FROM maxo_contract_participants WHERE contract_id = ?", (contract_id,)
+    ).fetchall()
     for p_row in p_rows:
         participant = _get_or_create_participant_by_pid(p_row["participant_id"])
         if participant:
             participant.update_wellness(Decimal(str(p_row["wellness_value"])))
             # Restaurar estado SDV-S persistido (T13: el registro es la verdad)
-            if participant.is_synthetic and p_row["sdv_status"] and p_row["sdv_status"] != "ok":
+            if (
+                participant.is_synthetic
+                and p_row["sdv_status"]
+                and p_row["sdv_status"] != "ok"
+            ):
                 try:
                     state = json.loads(p_row["sdv_status"])
                     kwargs = {
@@ -856,7 +953,9 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
                 p.update_wellness(agg)
 
     # 3. Load terms
-    t_rows = db.execute("SELECT * FROM maxo_contract_terms WHERE contract_id = ?", (contract_id,)).fetchall()
+    t_rows = db.execute(
+        "SELECT * FROM maxo_contract_terms WHERE contract_id = ?", (contract_id,)
+    ).fetchall()
     for t_row in t_rows:
         term = ContractTerm(
             id=t_row["term_id"],
@@ -864,16 +963,16 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
             vhv_cost=VHV(
                 T=Decimal(str(t_row["vhv_t"])),
                 V=Decimal(str(t_row["vhv_v"])),
-                R=Decimal(str(t_row["vhv_h"]))
-            )
+                R=Decimal(str(t_row["vhv_h"])),
+            ),
         )
         term.assigned_participant = t_row["assigned_participant"]
         term.penalty_gamma = float(t_row["penalty_gamma"] or 0)
-        
+
         # Load approvals for this term
         a_rows = db.execute(
             "SELECT participant_id FROM maxo_contract_term_approvals WHERE contract_id = ? AND term_id = ?",
-            (contract_id, term.id)
+            (contract_id, term.id),
         ).fetchall()
         for a_row in a_rows:
             term.accepted_by[a_row["participant_id"]] = True
@@ -887,7 +986,7 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
             SELECT party_id, delegate_id FROM maxo_contract_delegate_approvals
             WHERE contract_id = ? AND term_id = ?
             """,
-            (contract_id, term.id)
+            (contract_id, term.id),
         ).fetchall()
         delegated = {}
         for d_row in d_rows:
@@ -895,22 +994,22 @@ def _load_contract(contract_id: str) -> Optional[MaxoContract]:
         for party_pid, delegates in delegated.items():
             status = consent_status(party_pid, delegates, term_id=term.id)
             term.accepted_by[party_pid] = bool(status.get("approved"))
-            
+
         contract._terms.append(term)
         # Note: add_term normally adds VHV, but we are rehydrating, so we just append
         # To keep total_vhv consistent, we recalculate it
-        
+
     contract._total_vhv = VHV(
         T=Decimal(str(row["total_vhv_t"])),
         V=Decimal(str(row["total_vhv_v"])),
-        R=Decimal(str(row["total_vhv_h"]))
+        R=Decimal(str(row["total_vhv_h"])),
     )
 
     # T17 ejecutable (Ola 3A.4): el flag de asimetría condiciona la activación.
     flag, report = _reciprocity_imbalance(contract)
     contract._asymmetry_flag = flag
     contract._asymmetry_report = report
-    
+
     return contract
 
 
@@ -956,21 +1055,38 @@ def _canonical_hash(contract: MaxoContract) -> str:
     con las transiciones DRAFT→ACTIVE→EXECUTED: cualquiera puede recomputarlo
     sin servidor y verificar que el acuerdo sellado sigue intacto.
     """
-    payload = json.dumps({
-        "contract_id": contract.contract_id,
-        "civil_description": contract.civil_summary,
-        "participants": sorted(contract.participant_ids),
-        "terms": sorted([
-            {
-                "term_id": t.id,
-                "civil_text": t.description,
-                "vhv": [str(t.vhv_cost.T), str(t.vhv_cost.V), str(t.vhv_cost.R)],
-                "assigned_participant": getattr(t, "assigned_participant", None),
-            }
-            for t in contract._terms
-        ], key=lambda x: x["term_id"]),
-        "total_vhv": [str(contract.total_vhv.T), str(contract.total_vhv.V), str(contract.total_vhv.R)],
-    }, ensure_ascii=False, sort_keys=True)
+    payload = json.dumps(
+        {
+            "contract_id": contract.contract_id,
+            "civil_description": contract.civil_summary,
+            "participants": sorted(contract.participant_ids),
+            "terms": sorted(
+                [
+                    {
+                        "term_id": t.id,
+                        "civil_text": t.description,
+                        "vhv": [
+                            str(t.vhv_cost.T),
+                            str(t.vhv_cost.V),
+                            str(t.vhv_cost.R),
+                        ],
+                        "assigned_participant": getattr(
+                            t, "assigned_participant", None
+                        ),
+                    }
+                    for t in contract._terms
+                ],
+                key=lambda x: x["term_id"],
+            ),
+            "total_vhv": [
+                str(contract.total_vhv.T),
+                str(contract.total_vhv.V),
+                str(contract.total_vhv.R),
+            ],
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -991,12 +1107,10 @@ def _sdv_s_summary(participant: Participant) -> Dict[str, Any]:
             dim: float(getattr(participant.sdv_s_actual, dim))
             for dim in SDV_S.DIMENSIONS
         },
-        "sdv_s_violations": [
-            v.to_dict() for v in result.violations
-        ],
+        "sdv_s_violations": [v.to_dict() for v in result.violations],
         "sdv_s_magnitude": float(result.violation_magnitude),
         "fs_s": float(result.suffering_factor),
-        "sdv_s_status": "ok" if result.is_valid else "violated"
+        "sdv_s_status": "ok" if result.is_valid else "violated",
     }
 
 
@@ -1005,7 +1119,9 @@ def _get_or_create_participant(user_id: int) -> Participant:
     return get_human_participant(user_id)
 
 
-def _resolve_party_from_payload(p_data: Dict[str, Any], owner: Optional[int] = None) -> Optional[Participant]:
+def _resolve_party_from_payload(
+    p_data: Dict[str, Any], owner: Optional[int] = None
+) -> Optional[Participant]:
     """
     Resuelve una parte desde el payload de un participante, soportando
     todas las escalas (ROADMAP Bloque B):
@@ -1028,12 +1144,17 @@ def _resolve_party_from_payload(p_data: Dict[str, Any], owner: Optional[int] = N
                 ptype = party_type_of(pid)
                 display_name = (p_data.get("display_name") or "").strip() or pid
                 from .parties import upsert_party
+
                 upsert_party(
                     party_id=pid,
                     party_type=ptype,
                     display_name=display_name,
                     parent_party_id=p_data.get("parent_party_id"),
-                    members=p_data.get("members") if isinstance(p_data.get("members"), dict) else None,
+                    members=(
+                        p_data.get("members")
+                        if isinstance(p_data.get("members"), dict)
+                        else None
+                    ),
                     owner=owner,
                 )
         return resolve_participant_by_pid(pid)
@@ -1043,7 +1164,9 @@ def _resolve_party_from_payload(p_data: Dict[str, Any], owner: Optional[int] = N
         return _get_or_create_participant(p_id)
 
     agent_id = p_data.get("participant_id")
-    if agent_id and (p_data.get("synthetic") is not None or p_data.get("realm") == "synthetic"):
+    if agent_id and (
+        p_data.get("synthetic") is not None or p_data.get("realm") == "synthetic"
+    ):
         return _synthetic_participant(agent_id, p_data.get("synthetic") or {})
     return None
 
@@ -1100,16 +1223,23 @@ def create_contract(current_user):
     ).fetchone()
     if existing is not None:
         creator = existing["creator_user_id"]
-        if existing["state"] != "draft" or (creator is not None and creator != token_uid):
-            return jsonify({
-                "error": "el contrato ya existe y no es un borrador editable del mismo creador",
-                "code": "CONTRACT_CONFLICT",
-            }), 409
+        if existing["state"] != "draft" or (
+            creator is not None and creator != token_uid
+        ):
+            return (
+                jsonify(
+                    {
+                        "error": "el contrato ya existe y no es un borrador editable del mismo creador",
+                        "code": "CONTRACT_CONFLICT",
+                    }
+                ),
+                409,
+            )
 
     contract = MaxoContract(
         contract_id=contract_id,
         description=civil_description,
-        civil_summary=civil_description
+        civil_summary=civil_description,
     )
     contract._creator_user_id = token_uid
 
@@ -1148,11 +1278,16 @@ def create_contract(current_user):
     if contract.total_vhv.T >= ASSIGNED_REQUIRED_MIN_TOTAL:
         for term in contract._terms:
             if term.vhv_cost.T > 0 and not getattr(term, "assigned_participant", None):
-                return jsonify({
-                    "error": f"término {term.id} sin parte obligada (assigned_participant_id) "
-                             f"en contrato de ≥ {ASSIGNED_REQUIRED_MIN_TOTAL}h",
-                    "code": "UNASSIGNED_OBLIGATION",
-                }), 400
+                return (
+                    jsonify(
+                        {
+                            "error": f"término {term.id} sin parte obligada (assigned_participant_id) "
+                            f"en contrato de ≥ {ASSIGNED_REQUIRED_MIN_TOTAL}h",
+                            "code": "UNASSIGNED_OBLIGATION",
+                        }
+                    ),
+                    400,
+                )
 
     # T17: flag de asimetría (Ola 3A.4) + ventana de reflexión por defecto
     flag, report = _reciprocity_imbalance(contract)
@@ -1162,12 +1297,20 @@ def create_contract(current_user):
 
     # Ola 3B: escalera de equidad (perfil de protección)
     creator_level = protection_level(token_uid)
-    if caps_for(creator_level).get("oracle_required_for_creation") and not LiveOracle().is_available():
-        return jsonify({
-            "error": "tu perfil de protección exige el oráculo en vivo para crear contratos",
-            "code": "PROTECTION_ORACLE_REQUIRED",
-            "protection_level": creator_level,
-        }), 503
+    if (
+        caps_for(creator_level).get("oracle_required_for_creation")
+        and not LiveOracle().is_available()
+    ):
+        return (
+            jsonify(
+                {
+                    "error": "tu perfil de protección exige el oráculo en vivo para crear contratos",
+                    "code": "PROTECTION_ORACLE_REQUIRED",
+                    "protection_level": creator_level,
+                }
+            ),
+            503,
+        )
 
     # Topes de exposición por humano obligado (contrato y semana)
     assigned = {}
@@ -1182,10 +1325,16 @@ def create_contract(current_user):
 
     # Enfriamiento: piso del perfil más protegido entre los humanos
     human_uids = [
-        int(p.id[len("user-"):]) for p in contract.participants if p.id.startswith("user-")
+        int(p.id[len("user-") :])
+        for p in contract.participants
+        if p.id.startswith("user-")
     ]
     reflection_floor = max(
-        [caps_for(protection_level(uid)).get("reflection_hours", 0) for uid in human_uids] or [0]
+        [
+            caps_for(protection_level(uid)).get("reflection_hours", 0)
+            for uid in human_uids
+        ]
+        or [0]
     )
     reflection = data.get("min_reflection_hours")
     if reflection is None:
@@ -1196,11 +1345,16 @@ def create_contract(current_user):
         except (ValueError, TypeError):
             return jsonify({"error": "invalid min_reflection_hours"}), 400
         if value < reflection_floor:
-            return jsonify({
-                "error": f"tu perfil de protección exige al menos {reflection_floor:.0f}h "
-                         f"de reflexión (min_reflection_hours)",
-                "code": "PROTECTION_REFLECTION_FLOOR",
-            }), 400
+            return (
+                jsonify(
+                    {
+                        "error": f"tu perfil de protección exige al menos {reflection_floor:.0f}h "
+                        f"de reflexión (min_reflection_hours)",
+                        "code": "PROTECTION_REFLECTION_FLOOR",
+                    }
+                ),
+                400,
+            )
         contract._min_reflection_hours = value
 
     # Contratos interescala anidados (Fase 5): un contrato puede declararse
@@ -1213,19 +1367,26 @@ def create_contract(current_user):
 
     _audit(contract, "contract_created", token_uid, asymmetry=report)
     _save_contract(contract, actor_id=token_uid)
-    
-    return jsonify({
-        "success": True,
-        "contract_id": contract_id,
-        "state": contract.state.value,
-        "created_at": datetime.now().isoformat(),
-        "asymmetry": report,
-        "requires_asymmetry_acknowledgment": flag,
-        "min_reflection_hours": contract._min_reflection_hours,
-    }), 201
+
+    return (
+        jsonify(
+            {
+                "success": True,
+                "contract_id": contract_id,
+                "state": contract.state.value,
+                "created_at": datetime.now().isoformat(),
+                "asymmetry": report,
+                "requires_asymmetry_acknowledgment": flag,
+                "min_reflection_hours": contract._min_reflection_hours,
+            }
+        ),
+        201,
+    )
 
 
-def _attach_terms(contract: MaxoContract, terms_data: List[Dict[str, Any]]) -> Optional[str]:
+def _attach_terms(
+    contract: MaxoContract, terms_data: List[Dict[str, Any]]
+) -> Optional[str]:
     """Añade los términos del payload a un contrato (creación batch).
 
     Devuelve un mensaje de error si alguna penalización es inválida.
@@ -1242,7 +1403,7 @@ def _attach_terms(contract: MaxoContract, terms_data: List[Dict[str, Any]]) -> O
                 vhv = VHV(
                     T=Decimal(str(t_vhv.get("t", 0))),
                     V=Decimal(str(t_vhv.get("v", 0))),
-                    R=Decimal(str(t_vhv.get("h", 0)))
+                    R=Decimal(str(t_vhv.get("h", 0))),
                 )
                 term = ContractTerm(id=t_id, description=t_civil, vhv_cost=vhv)
                 term.assigned_participant = t_data.get("assigned_participant_id")
@@ -1268,16 +1429,23 @@ def _attach_parent(contract: MaxoContract, parent_id: str):
     node = parent_id
     while node:
         if node == contract.contract_id:
-            return jsonify({"error": "parent_contract_id crearía un ciclo de contratos"}), 400
+            return (
+                jsonify({"error": "parent_contract_id crearía un ciclo de contratos"}),
+                400,
+            )
         node = db.execute(
-            "SELECT parent_contract_id FROM maxo_contracts WHERE contract_id = ?", (node,)
+            "SELECT parent_contract_id FROM maxo_contracts WHERE contract_id = ?",
+            (node,),
         ).fetchone()
         node = node["parent_contract_id"] if node else None
     contract._parent_contract_id = parent_id
-    contract._log_event("subcontract_created", {
-        "parent_contract_id": parent_id,
-        "child_contract_id": contract.contract_id,
-    })
+    contract._log_event(
+        "subcontract_created",
+        {
+            "parent_contract_id": parent_id,
+            "child_contract_id": contract.contract_id,
+        },
+    )
     return None
 
 
@@ -1301,10 +1469,14 @@ def _build_contract_tree(cid: str, db, depth: int = 0) -> Dict[str, Any]:
 def _asymmetry_acknowledged(contract_id: str) -> List[str]:
     """Reconocimientos de asimetría registrados del contrato (Ola 3A.4)."""
     try:
-        row = get_db().execute(
-            "SELECT meta_value FROM maxo_contract_meta WHERE contract_id = ? AND meta_key = 'asymmetry_acknowledged'",
-            (contract_id,),
-        ).fetchone()
+        row = (
+            get_db()
+            .execute(
+                "SELECT meta_value FROM maxo_contract_meta WHERE contract_id = ? AND meta_key = 'asymmetry_acknowledged'",
+                (contract_id,),
+            )
+            .fetchone()
+        )
     except Exception:
         return []
     if not row or not row["meta_value"]:
@@ -1338,7 +1510,7 @@ def create_subcontract(current_user, contract_id: str):
     contract = MaxoContract(
         contract_id=child_id,
         description=data.get("civil_description", ""),
-        civil_summary=data.get("civil_description", "")
+        civil_summary=data.get("civil_description", ""),
     )
     contract._creator_user_id = token_uid
     for p_data in data.get("participants", []):
@@ -1361,19 +1533,34 @@ def create_subcontract(current_user, contract_id: str):
     if contract.total_vhv.T >= ASSIGNED_REQUIRED_MIN_TOTAL:
         for term in contract._terms:
             if term.vhv_cost.T > 0 and not getattr(term, "assigned_participant", None):
-                return jsonify({"error": f"término {term.id} sin parte obligada",
-                                "code": "UNASSIGNED_OBLIGATION"}), 400
+                return (
+                    jsonify(
+                        {
+                            "error": f"término {term.id} sin parte obligada",
+                            "code": "UNASSIGNED_OBLIGATION",
+                        }
+                    ),
+                    400,
+                )
     flag, report = _reciprocity_imbalance(contract)
     contract._asymmetry_flag = flag
     contract._asymmetry_report = report
 
     # Ola 3B: escalera de equidad también para sub-contratos
-    if caps_for(protection_level(token_uid)).get("oracle_required_for_creation") and not LiveOracle().is_available():
-        return jsonify({
-            "error": "tu perfil de protección exige el oráculo en vivo para crear contratos",
-            "code": "PROTECTION_ORACLE_REQUIRED",
-            "protection_level": protection_level(token_uid),
-        }), 503
+    if (
+        caps_for(protection_level(token_uid)).get("oracle_required_for_creation")
+        and not LiveOracle().is_available()
+    ):
+        return (
+            jsonify(
+                {
+                    "error": "tu perfil de protección exige el oráculo en vivo para crear contratos",
+                    "code": "PROTECTION_ORACLE_REQUIRED",
+                    "protection_level": protection_level(token_uid),
+                }
+            ),
+            503,
+        )
     assigned = {}
     for t in contract._terms:
         pid = getattr(t, "assigned_participant", None)
@@ -1388,14 +1575,21 @@ def create_subcontract(current_user, contract_id: str):
     err = _attach_parent(contract, contract_id)
     if err:
         return err
-    _audit(contract, "contract_created", token_uid, parent=contract_id, asymmetry=report)
+    _audit(
+        contract, "contract_created", token_uid, parent=contract_id, asymmetry=report
+    )
     _save_contract(contract, actor_id=token_uid)
-    return jsonify({
-        "success": True,
-        "contract_id": child_id,
-        "parent_contract_id": contract_id,
-        "state": contract.state.value,
-    }), 201
+    return (
+        jsonify(
+            {
+                "success": True,
+                "contract_id": child_id,
+                "parent_contract_id": contract_id,
+                "state": contract.state.value,
+            }
+        ),
+        201,
+    )
 
 
 @contracts_bp.route("/<contract_id>/tree", methods=["GET"])
@@ -1415,17 +1609,20 @@ def get_contract_tree(current_user, contract_id: str):
     while node:
         ancestors.append(node)
         row = db.execute(
-            "SELECT parent_contract_id FROM maxo_contracts WHERE contract_id = ?", (node,)
+            "SELECT parent_contract_id FROM maxo_contracts WHERE contract_id = ?",
+            (node,),
         ).fetchone()
         node = row["parent_contract_id"] if row else None
         if len(ancestors) > 20:
             break
 
-    return jsonify({
-        "contract_id": contract_id,
-        "ancestors": ancestors,
-        "tree": _build_contract_tree(contract_id, db),
-    })
+    return jsonify(
+        {
+            "contract_id": contract_id,
+            "ancestors": ancestors,
+            "tree": _build_contract_tree(contract_id, db),
+        }
+    )
 
 
 def _live_oracle_or_503():
@@ -1433,11 +1630,17 @@ def _live_oracle_or_503():
     con degradación elegante (el resto de la API sigue funcionando)."""
     oracle = LiveOracle()
     if not oracle.is_available():
-        return None, jsonify({
-            "error": "La negociación asistida por oráculo no está disponible.",
-            "code": "ORACLE_UNAVAILABLE",
-            "hint": "Configura DEEPSEEK_API_KEY en el .env para activarla.",
-        }), 503
+        return (
+            None,
+            jsonify(
+                {
+                    "error": "La negociación asistida por oráculo no está disponible.",
+                    "code": "ORACLE_UNAVAILABLE",
+                    "hint": "Configura DEEPSEEK_API_KEY en el .env para activarla.",
+                }
+            ),
+            503,
+        )
     return oracle, None, None
 
 
@@ -1574,10 +1777,15 @@ def _guardian_approve_ecosystem(contract: MaxoContract) -> tuple:
     oracle = LiveOracle()
     if oracle.is_available():
         try:
-            critique = oracle.critique(contract.contract_id, _contract_snapshot(contract))
+            critique = oracle.critique(
+                contract.contract_id, _contract_snapshot(contract)
+            )
             if critique.valid:
                 return True, f"Oráculo en vivo: {critique.reasoning}"
-            return False, f"Oráculo en vivo rechaza la representación: {critique.reasoning}"
+            return (
+                False,
+                f"Oráculo en vivo rechaza la representación: {critique.reasoning}",
+            )
         except (OracleAPIError, OracleUnavailableError):
             pass  # degradación elegante: continuar con el heurístico
 
@@ -1660,12 +1868,14 @@ def contract_stats(current_user):
             key = (row["contract_id"], row["participant_id"])
             if key not in seen_alerts:
                 seen_alerts.add(key)
-                gamma_alerts.append({
-                    "contract_id": row["contract_id"],
-                    "contract_state": row["state"],
-                    "participant_id": row["participant_id"],
-                    "gamma": row["wellness_value"],
-                })
+                gamma_alerts.append(
+                    {
+                        "contract_id": row["contract_id"],
+                        "contract_state": row["state"],
+                        "participant_id": row["participant_id"],
+                        "gamma": row["wellness_value"],
+                    }
+                )
     gamma_alerts.sort(key=lambda a: a["gamma"])
 
     # --- SDV: violaciones ---
@@ -1687,12 +1897,14 @@ def contract_stats(current_user):
             detail = parsed
         except (ValueError, TypeError):
             pass
-        sdv_violations.append({
-            "contract_id": row["contract_id"],
-            "contract_state": row["state"],
-            "participant_id": row["participant_id"],
-            "status": detail if detail is not None else status,
-        })
+        sdv_violations.append(
+            {
+                "contract_id": row["contract_id"],
+                "contract_state": row["state"],
+                "participant_id": row["participant_id"],
+                "status": detail if detail is not None else status,
+            }
+        )
 
     # --- NPS ---
     nps_rows = db.execute(
@@ -1710,9 +1922,7 @@ def contract_stats(current_user):
             "passives": n_passives,
             "promoters": n_promoters,
         }
-        nps = round(
-            ((n_promoters - n_detractors) / len(nps_scores)) * 100.0, 1
-        )
+        nps = round(((n_promoters - n_detractors) / len(nps_scores)) * 100.0, 1)
 
     nps_responses = [
         {
@@ -1778,41 +1988,47 @@ def contract_stats(current_user):
         """
     ).fetchone()
 
-    return jsonify({
-        "summary": {
-            "total": total,
-            "by_state": by_state,
-        },
-        "gamma": {
-            "sample_count": len(wellness_values),
-            "avg": round(sum(wellness_values) / len(wellness_values), 3) if wellness_values else None,
-            "min": round(min(wellness_values), 3) if wellness_values else None,
-            "max": round(max(wellness_values), 3) if wellness_values else None,
-            "distribution": gamma_distribution,
-            "alerts": gamma_alerts,
-        },
-        "sdv": {
-            "violations_count": len(sdv_violations),
-            "violations": sdv_violations,
-        },
-        "nps": {
-            "score": nps,
-            "responses_count": len(nps_scores),
-            "distribution": nps_distribution,
-            "responses": nps_responses,
-        },
-        "trends": {
-            "labels": week_labels,
-            "created": weeks_created,
-            "activated": weeks_activated,
-        },
-        "categories": categories,
-        "vhv": {
-            "t": round(float(vhv_row["t"]), 2),
-            "v": round(float(vhv_row["v"]), 2),
-            "r": round(float(vhv_row["r"]), 2),
-        },
-    })
+    return jsonify(
+        {
+            "summary": {
+                "total": total,
+                "by_state": by_state,
+            },
+            "gamma": {
+                "sample_count": len(wellness_values),
+                "avg": (
+                    round(sum(wellness_values) / len(wellness_values), 3)
+                    if wellness_values
+                    else None
+                ),
+                "min": round(min(wellness_values), 3) if wellness_values else None,
+                "max": round(max(wellness_values), 3) if wellness_values else None,
+                "distribution": gamma_distribution,
+                "alerts": gamma_alerts,
+            },
+            "sdv": {
+                "violations_count": len(sdv_violations),
+                "violations": sdv_violations,
+            },
+            "nps": {
+                "score": nps,
+                "responses_count": len(nps_scores),
+                "distribution": nps_distribution,
+                "responses": nps_responses,
+            },
+            "trends": {
+                "labels": week_labels,
+                "created": weeks_created,
+                "activated": weeks_activated,
+            },
+            "categories": categories,
+            "vhv": {
+                "t": round(float(vhv_row["t"]), 2),
+                "v": round(float(vhv_row["v"]), 2),
+                "r": round(float(vhv_row["r"]), 2),
+            },
+        }
+    )
 
 
 @contracts_bp.route("/<contract_id>/nps", methods=["POST"])
@@ -1847,8 +2063,15 @@ def record_nps(current_user, contract_id: str):
     # Identidad vinculada (Ola 3A.1): el NPS solo se reporta por sí mismo,
     # como delegado de su colectiva o como operador de una sintética.
     if not _can_act_for(participant_id, _token_uid(current_user), contract):
-        return jsonify({"error": "no puedes reportar NPS por esta parte",
-                        "code": "IDENTITY_MISMATCH"}), 403
+        return (
+            jsonify(
+                {
+                    "error": "no puedes reportar NPS por esta parte",
+                    "code": "IDENTITY_MISMATCH",
+                }
+            ),
+            403,
+        )
 
     try:
         score_int = int(score)
@@ -1874,12 +2097,17 @@ def record_nps(current_user, contract_id: str):
     )
     db.commit()
 
-    return jsonify({
-        "success": True,
-        "contract_id": contract_id,
-        "participant_id": participant_id,
-        "score": score_int,
-    }), 201
+    return (
+        jsonify(
+            {
+                "success": True,
+                "contract_id": contract_id,
+                "participant_id": participant_id,
+                "score": score_int,
+            }
+        ),
+        201,
+    )
 
 
 @contracts_bp.route("/<contract_id>/meta", methods=["POST"])
@@ -1919,7 +2147,9 @@ def set_contract_meta(current_user, contract_id: str):
     )
     db.commit()
 
-    return jsonify({"success": True, "contract_id": contract_id, "key": key, "value": value})
+    return jsonify(
+        {"success": True, "contract_id": contract_id, "key": key, "value": value}
+    )
 
 
 @contracts_bp.route("/<contract_id>", methods=["GET"])
@@ -1929,30 +2159,34 @@ def get_contract(current_user, contract_id: str):
     if contract_id == "builder":
         # Evitar conflicto con la ruta del frontend
         return jsonify({"error": "This is a frontend route"}), 404
-        
+
     contract = _load_contract(contract_id)
-    
+
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
-    
+
     # Preparar VHV para JSON
     vhv = {
         "t": float(contract.total_vhv.T),
         "v": float(contract.total_vhv.V),
-        "r": float(contract.total_vhv.R)
+        "r": float(contract.total_vhv.R),
     }
-    
+
     # Ola 4, Puente D: hash canónico de integridad sobre contenido inmutable
     # (T13 radical): el visitante de la plaza puede recomputarlo sin servidor.
     contract_hash = _canonical_hash(contract)
 
     db = get_db()
     parent_contract_id = getattr(contract, "_parent_contract_id", None)
-    subcontract_rows = db.execute(
-        "SELECT contract_id FROM maxo_contracts WHERE parent_contract_id = ? ORDER BY created_at",
-        (contract.contract_id,),
-    ).fetchall() if db is not None else []
-    
+    subcontract_rows = (
+        db.execute(
+            "SELECT contract_id FROM maxo_contracts WHERE parent_contract_id = ? ORDER BY created_at",
+            (contract.contract_id,),
+        ).fetchall()
+        if db is not None
+        else []
+    )
+
     # --- Ola 3C: bitácora de cumplimiento por término (dientes) ---
     fulfillment_rows = db.execute(
         """
@@ -1964,13 +2198,15 @@ def get_contract(current_user, contract_id: str):
     ).fetchall()
     fulfillments_by_term = {}
     for r in fulfillment_rows:
-        fulfillments_by_term.setdefault(r["term_id"], []).append({
-            "status": r["status"],
-            "wellness_delta": r["wellness_delta"],
-            "reported_by": r["reported_by"],
-            "evidence": r["evidence"],
-            "created_at": r["created_at"],
-        })
+        fulfillments_by_term.setdefault(r["term_id"], []).append(
+            {
+                "status": r["status"],
+                "wellness_delta": r["wellness_delta"],
+                "reported_by": r["reported_by"],
+                "evidence": r["evidence"],
+                "created_at": r["created_at"],
+            }
+        )
 
     # Ola 4, Puente A: serie temporal de γ real por participante
     checkins_by_pid = {
@@ -1985,67 +2221,69 @@ def get_contract(current_user, contract_id: str):
     ).fetchone()
     origin = origin_row["meta_value"] if origin_row else None
 
-    return jsonify({
-        "contract_id": contract.contract_id,
-        "state": contract.state.value,
-        "civil_description": contract.civil_summary,
-        "origin": origin,
-        "parent_contract_id": parent_contract_id,
-        "subcontracts": [r["contract_id"] for r in subcontract_rows],
-        "creator_user_id": getattr(contract, "_creator_user_id", None),
-        "signature_deadline": getattr(contract, "_signature_deadline", None),
-        "min_reflection_hours": getattr(contract, "_min_reflection_hours", 0),
-        "asymmetry": getattr(contract, "_asymmetry_report", None),
-        "requires_asymmetry_acknowledgment": bool(getattr(contract, "_asymmetry_flag", False)),
-        "asymmetry_acknowledged": _asymmetry_acknowledged(contract_id),
-        "participants": [p.id for p in contract.participants],
-        "participants_details": [
-            {
-                "id": p.id,
-                "name": p.name,
-                "party_type": party_type_of(p.id),
-                "is_collective": is_collective(p.id),
-                "protection_level": (
-                    protection_level(int(p.id[len("user-"):]))
-                    if p.id.startswith("user-") else None
-                ),
-                "wellness": float(p.wellness_current.value),
-                "is_synthetic": p.is_synthetic,
-                "checkins": checkins_by_pid.get(p.id, []),
-                "checkins_count": len(checkins_by_pid.get(p.id, [])),
-                **(
-                    {"members": members_of(p.id)}
-                    if is_collective(p.id) else {}
-                ),
-                **(
-                    _sdv_s_summary(p)
-                    if p.is_synthetic and p.sdv_s_actual is not None
-                    else {}
-                )
-            }
-            for p in contract.participants
-        ],
-        "terms": [
-            {
-                "term_id": t.id,
-                "civil_text": t.description,
-                "vhv": {
-                    "t": float(t.vhv_cost.T),
-                    "v": float(t.vhv_cost.V),
-                    "r": float(t.vhv_cost.R)
-                },
-                "accepted_by": t.accepted_by,
-                "assigned_participant": t.assigned_participant,
-                "penalty_gamma": float(getattr(t, "penalty_gamma", 0) or 0),
-                "fulfillments": fulfillments_by_term.get(t.id, []),
-            }
-            for t in contract._terms
-        ],
-        "terms_count": len(contract._terms),
-        "total_vhv": vhv,
-        "events_count": len(contract.get_event_log()),
-        "hash": contract_hash
-    })
+    return jsonify(
+        {
+            "contract_id": contract.contract_id,
+            "state": contract.state.value,
+            "civil_description": contract.civil_summary,
+            "origin": origin,
+            "parent_contract_id": parent_contract_id,
+            "subcontracts": [r["contract_id"] for r in subcontract_rows],
+            "creator_user_id": getattr(contract, "_creator_user_id", None),
+            "signature_deadline": getattr(contract, "_signature_deadline", None),
+            "min_reflection_hours": getattr(contract, "_min_reflection_hours", 0),
+            "asymmetry": getattr(contract, "_asymmetry_report", None),
+            "requires_asymmetry_acknowledgment": bool(
+                getattr(contract, "_asymmetry_flag", False)
+            ),
+            "asymmetry_acknowledged": _asymmetry_acknowledged(contract_id),
+            "participants": [p.id for p in contract.participants],
+            "participants_details": [
+                {
+                    "id": p.id,
+                    "name": p.name,
+                    "party_type": party_type_of(p.id),
+                    "is_collective": is_collective(p.id),
+                    "protection_level": (
+                        protection_level(int(p.id[len("user-") :]))
+                        if p.id.startswith("user-")
+                        else None
+                    ),
+                    "wellness": float(p.wellness_current.value),
+                    "is_synthetic": p.is_synthetic,
+                    "checkins": checkins_by_pid.get(p.id, []),
+                    "checkins_count": len(checkins_by_pid.get(p.id, [])),
+                    **({"members": members_of(p.id)} if is_collective(p.id) else {}),
+                    **(
+                        _sdv_s_summary(p)
+                        if p.is_synthetic and p.sdv_s_actual is not None
+                        else {}
+                    ),
+                }
+                for p in contract.participants
+            ],
+            "terms": [
+                {
+                    "term_id": t.id,
+                    "civil_text": t.description,
+                    "vhv": {
+                        "t": float(t.vhv_cost.T),
+                        "v": float(t.vhv_cost.V),
+                        "r": float(t.vhv_cost.R),
+                    },
+                    "accepted_by": t.accepted_by,
+                    "assigned_participant": t.assigned_participant,
+                    "penalty_gamma": float(getattr(t, "penalty_gamma", 0) or 0),
+                    "fulfillments": fulfillments_by_term.get(t.id, []),
+                }
+                for t in contract._terms
+            ],
+            "terms_count": len(contract._terms),
+            "total_vhv": vhv,
+            "events_count": len(contract.get_event_log()),
+            "hash": contract_hash,
+        }
+    )
 
 
 @contracts_bp.route("/<contract_id>/checkin", methods=["POST"])
@@ -2082,13 +2320,20 @@ def contract_checkin(current_user, contract_id: str):
     actor_pid = f"user-{token_uid}"
 
     data = request.get_json() or {}
-    participant_id = str(data.get("participant_id") or data.get("party_id") or actor_pid)
+    participant_id = str(
+        data.get("participant_id") or data.get("party_id") or actor_pid
+    )
 
     if participant_id not in contract.participant_ids:
-        return jsonify({
-            "error": "participant is not part of this contract",
-            "code": "CHECKIN_NOT_PARTICIPANT",
-        }), 403
+        return (
+            jsonify(
+                {
+                    "error": "participant is not part of this contract",
+                    "code": "CHECKIN_NOT_PARTICIPANT",
+                }
+            ),
+            403,
+        )
 
     wellness_val = data.get("wellness", data.get("gamma"))
     if wellness_val is None:
@@ -2098,7 +2343,12 @@ def contract_checkin(current_user, contract_id: str):
     except (ValueError, TypeError, InvalidOperation):
         return jsonify({"error": "invalid wellness value"}), 400
     if value < WELLNESS_MIN or value > WELLNESS_MAX:
-        return jsonify({"error": f"wellness fuera de rango [{WELLNESS_MIN}, {WELLNESS_MAX}]"}), 400
+        return (
+            jsonify(
+                {"error": f"wellness fuera de rango [{WELLNESS_MIN}, {WELLNESS_MAX}]"}
+            ),
+            400,
+        )
 
     source = str(data.get("source") or "checkin").strip() or "checkin"
 
@@ -2119,7 +2369,9 @@ def contract_checkin(current_user, contract_id: str):
         (contract_id, participant_id),
     ).fetchone()
     current_wellness = (
-        Decimal(str(current_row["wellness_value"])) if current_row is not None else value
+        Decimal(str(current_row["wellness_value"]))
+        if current_row is not None
+        else value
     )
     is_decline = value < current_wellness
 
@@ -2136,13 +2388,18 @@ def contract_checkin(current_user, contract_id: str):
         if last is not None and last["days_since"] is not None:
             if float(last["days_since"]) < window_days:
                 days_left = max(0, math.ceil(window_days - float(last["days_since"])))
-                return jsonify({
-                    "error": "check-in semanal ya registrado: el γ escucha con ritmo, no con ruido",
-                    "code": "CHECKIN_WEEKLY_LIMIT",
-                    "window_days": window_days,
-                    "days_until_next": days_left,
-                    "policy": "asymmetric: declines always heard, improvements weekly",
-                }), 429
+                return (
+                    jsonify(
+                        {
+                            "error": "check-in semanal ya registrado: el γ escucha con ritmo, no con ruido",
+                            "code": "CHECKIN_WEEKLY_LIMIT",
+                            "window_days": window_days,
+                            "days_until_next": days_left,
+                            "policy": "asymmetric: declines always heard, improvements weekly",
+                        }
+                    ),
+                    429,
+                )
 
     db.execute(
         """
@@ -2158,17 +2415,27 @@ def contract_checkin(current_user, contract_id: str):
         SET wellness_value = ?, reported_by = ?, reported_at = ?
         WHERE contract_id = ? AND participant_id = ?
         """,
-        (float(value), actor_pid, datetime.now().isoformat(), contract_id, participant_id),
+        (
+            float(value),
+            actor_pid,
+            datetime.now().isoformat(),
+            contract_id,
+            participant_id,
+        ),
     )
 
     for p in contract.participants:
         if p.id == participant_id:
             p.update_wellness(value)
 
-    _audit(contract, "checkin_reported", token_uid,
-           participant_id=participant_id,
-           wellness=float(value),
-           source=source)
+    _audit(
+        contract,
+        "checkin_reported",
+        token_uid,
+        participant_id=participant_id,
+        wellness=float(value),
+        source=source,
+    )
     # T13 durable: el latido queda en la bitácora auditable del contrato.
     db.execute(
         """
@@ -2178,42 +2445,57 @@ def contract_checkin(current_user, contract_id: str):
         (
             contract_id,
             f"Check-in de bienestar: {float(value):.2f} ({source})",
-            json.dumps({
-                "actor_id": actor_pid,
-                "participant_id": participant_id,
-                "wellness": float(value),
-                "source": source,
-            }),
+            json.dumps(
+                {
+                    "actor_id": actor_pid,
+                    "participant_id": participant_id,
+                    "wellness": float(value),
+                    "source": source,
+                }
+            ),
         ),
     )
     # Persiste el estado y sincroniza el γ agregado de colectivas al
     # registro (T13). El reported_by del check-in queda preservado.
     _save_contract(contract, actor_id=token_uid)
 
-    dispatch_event("contract.checkin", {
-        "contract_id": contract_id,
-        "participant_id": participant_id,
-        "wellness": float(value),
-        "source": source,
-        "reported_by": actor_pid,
-    }, party_ids=[participant_id])
+    dispatch_event(
+        "contract.checkin",
+        {
+            "contract_id": contract_id,
+            "participant_id": participant_id,
+            "wellness": float(value),
+            "source": source,
+            "reported_by": actor_pid,
+        },
+        party_ids=[participant_id],
+    )
 
     series = _checkin_series(contract_id, participant_id)
-    return jsonify({
-        "success": True,
-        "contract_id": contract_id,
-        "participant_id": participant_id,
-        "wellness": float(value),
-        "source": source,
-        "reported_by": actor_pid,
-        "total_checkins": len(series),
-        "series": series,
-        "policy": {
-            "mode": "asymmetric",
-            "window_days": window_days,
-            "accepted": "decline_urgent" if is_decline else ("first_latido" if len(series) == 1 else "window_open"),
-        },
-    }), 201
+    return (
+        jsonify(
+            {
+                "success": True,
+                "contract_id": contract_id,
+                "participant_id": participant_id,
+                "wellness": float(value),
+                "source": source,
+                "reported_by": actor_pid,
+                "total_checkins": len(series),
+                "series": series,
+                "policy": {
+                    "mode": "asymmetric",
+                    "window_days": window_days,
+                    "accepted": (
+                        "decline_urgent"
+                        if is_decline
+                        else ("first_latido" if len(series) == 1 else "window_open")
+                    ),
+                },
+            }
+        ),
+        201,
+    )
 
 
 @contracts_bp.route("/<contract_id>/terms", methods=["POST"])
@@ -2221,7 +2503,7 @@ def contract_checkin(current_user, contract_id: str):
 def add_term(current_user, contract_id: str):
     """
     Añadir un término al contrato.
-    
+
     Body JSON:
     {
         "term_id": "term-1",
@@ -2230,19 +2512,19 @@ def add_term(current_user, contract_id: str):
     }
     """
     contract = _load_contract(contract_id)
-    
+
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
-    
+
     if contract.state != ContractState.DRAFT:
         return jsonify({"error": "contract not in draft state"}), 400
-    
+
     data = request.get_json() or {}
-    
+
     term_id = data.get("term_id")
     if not term_id:
         return jsonify({"error": "term_id is required"}), 400
-    
+
     civil_text = data.get("civil_text", "")
     vhv_data = data.get("vhv", {})
     assigned_participant = data.get("assigned_participant_id")
@@ -2256,7 +2538,7 @@ def add_term(current_user, contract_id: str):
         vhv = VHV(
             T=Decimal(str(vhv_data.get("t", 0))),
             V=Decimal(str(vhv_data.get("v", 0))),
-            R=Decimal(str(vhv_data.get("h", 0)))
+            R=Decimal(str(vhv_data.get("h", 0))),
         )
     except (ValueError, TypeError) as e:
         return jsonify({"error": f"invalid vhv format: {e}"}), 400
@@ -2267,29 +2549,34 @@ def add_term(current_user, contract_id: str):
         and contract.total_vhv.T + vhv.T >= ASSIGNED_REQUIRED_MIN_TOTAL
         and not assigned_participant
     ):
-        return jsonify({
-            "error": "término sin parte obligada (assigned_participant_id) en contrato de ≥ "
-                     f"{ASSIGNED_REQUIRED_MIN_TOTAL}h",
-            "code": "UNASSIGNED_OBLIGATION",
-        }), 400
+        return (
+            jsonify(
+                {
+                    "error": "término sin parte obligada (assigned_participant_id) en contrato de ≥ "
+                    f"{ASSIGNED_REQUIRED_MIN_TOTAL}h",
+                    "code": "UNASSIGNED_OBLIGATION",
+                }
+            ),
+            400,
+        )
 
     # Topes de exposición del perfil protegido (Ola 3B)
     if assigned_participant and vhv.T > 0:
         from .protection import assigned_hours
+
         current = assigned_hours(contract_id).get(assigned_participant, 0.0)
         err = exposure_check(assigned_participant, current + float(vhv.T))
         if err:
             return jsonify({"error": err, "code": "PROTECTION_CAP_EXCEEDED"}), 400
 
-    term = ContractTerm(
-        id=term_id,
-        description=civil_text,
-        vhv_cost=vhv
-    )
+    term = ContractTerm(id=term_id, description=civil_text, vhv_cost=vhv)
     term.assigned_participant = assigned_participant
     penalty = _parse_penalty(data.get("penalty_gamma"))
     if penalty is None:
-        return jsonify({"error": f"penalty_gamma debe estar en [0, {PENALTY_GAMMA_MAX}]"}), 400
+        return (
+            jsonify({"error": f"penalty_gamma debe estar en [0, {PENALTY_GAMMA_MAX}]"}),
+            400,
+        )
     term.penalty_gamma = penalty
 
     contract.add_term(term)
@@ -2299,13 +2586,15 @@ def add_term(current_user, contract_id: str):
     contract._asymmetry_report = report
     _audit(contract, "term_added", _token_uid(current_user), term_id=term_id)
     _save_contract(contract, actor_id=_token_uid(current_user))
-    
-    return jsonify({
-        "success": True,
-        "term_id": term_id,
-        "total_terms": len(contract._terms),
-        "assigned_participant": assigned_participant
-    })
+
+    return jsonify(
+        {
+            "success": True,
+            "term_id": term_id,
+            "total_terms": len(contract._terms),
+            "assigned_participant": assigned_participant,
+        }
+    )
 
 
 @contracts_bp.route("/<contract_id>/participants", methods=["POST"])
@@ -2325,22 +2614,25 @@ def add_participant(current_user, contract_id: str):
     {"party_id": "coop-7", "party_type": "cooperative", "display_name": ...}
     """
     contract = _load_contract(contract_id)
-    
+
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
 
     if contract.state != ContractState.DRAFT:
         return jsonify({"error": "contract not in draft state"}), 400
-    
+
     data = request.get_json() or {}
     token_uid = _token_uid(current_user)
 
     participant = _resolve_party_from_payload(data, owner=token_uid)
     if participant is None:
-        return jsonify({
-            "error": "user_id, participant_id (synthetic) or party_id is required"
-        }), 400
-    
+        return (
+            jsonify(
+                {"error": "user_id, participant_id (synthetic) or party_id is required"}
+            ),
+            400,
+        )
+
     # Actualizar wellness si se proporciona (renombrado de gamma)
     # Soporte para "wellness" (nuevo estándar) y "gamma" (legacy)
     wellness_val = data.get("wellness")
@@ -2351,7 +2643,7 @@ def add_participant(current_user, contract_id: str):
         err = _apply_wellness(participant, {"wellness": wellness_val})
         if err:
             return jsonify({"error": err}), 400
-    
+
     contract.add_participant(participant)
     _audit(contract, "participant_added", token_uid, participant_id=participant.id)
     _save_contract(contract, actor_id=token_uid)
@@ -2364,19 +2656,25 @@ def add_participant(current_user, contract_id: str):
             SET reported_by = ?, reported_at = ?
             WHERE contract_id = ? AND participant_id = ?
             """,
-            (f"user-{token_uid}", datetime.now().isoformat(),
-             contract_id, participant.id),
+            (
+                f"user-{token_uid}",
+                datetime.now().isoformat(),
+                contract_id,
+                participant.id,
+            ),
         )
         db.commit()
-    
-    return jsonify({
-        "success": True,
-        "participant_id": participant.id,
-        "party_type": party_type_of(participant.id),
-        "is_synthetic": participant.is_synthetic,
-        "wellness": float(participant.wellness_current.value),
-        "total_participants": len(contract.participants)
-    })
+
+    return jsonify(
+        {
+            "success": True,
+            "participant_id": participant.id,
+            "party_type": party_type_of(participant.id),
+            "is_synthetic": participant.is_synthetic,
+            "wellness": float(participant.wellness_current.value),
+            "total_participants": len(contract.participants),
+        }
+    )
 
 
 @contracts_bp.route("/<contract_id>/validate", methods=["GET"])
@@ -2384,24 +2682,22 @@ def add_participant(current_user, contract_id: str):
 def validate_contract(current_user, contract_id: str):
     """Validar axiomas del contrato."""
     contract = _load_contract(contract_id)
-    
+
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
-    
+
     valid, results = contract.validate()
-    
-    return jsonify({
-        "contract_id": contract_id,
-        "valid": valid,
-        "validations": [
-            {
-                "axiom": r.axiom_code,
-                "valid": r.is_valid,
-                "message": r.message
-            }
-            for r in results
-        ]
-    })
+
+    return jsonify(
+        {
+            "contract_id": contract_id,
+            "valid": valid,
+            "validations": [
+                {"axiom": r.axiom_code, "valid": r.is_valid, "message": r.message}
+                for r in results
+            ],
+        }
+    )
 
 
 @contracts_bp.route("/<contract_id>/accept", methods=["POST"])
@@ -2426,29 +2722,28 @@ def accept_term(current_user, contract_id: str):
     Ecosistemas (eco-*): consentimiento otorgado por el guardián oráculo (Fase 4).
     """
     contract = _load_contract(contract_id)
-    
+
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
 
     token_uid = _token_uid(current_user)
     if token_uid is None:
         return jsonify({"error": "token sin identidad válida"}), 403
-    
+
     # Ventanas temporales server-side (Ola 3A.7, R10/R11)
     window_blocked = _contract_window_blocked(contract, get_db())
     if window_blocked:
         return jsonify(window_blocked), 423
-    
+
     data = request.get_json() or {}
     term_id = data.get("term_id")
     user_id = data.get("user_id")
     participant_id = data.get("participant_id")
     party_id = data.get("party_id")
-    delegate_id = data.get("delegate_id")
-    
+
     if not term_id:
         return jsonify({"error": "term_id is required"}), 400
-    
+
     if party_id:
         pid = str(party_id)
         if not is_valid_party_id(pid):
@@ -2458,8 +2753,11 @@ def accept_term(current_user, contract_id: str):
     elif participant_id:
         pid = f"synthetic-{participant_id}"
     else:
-        return jsonify({"error": "user_id, participant_id or party_id is required"}), 400
-    
+        return (
+            jsonify({"error": "user_id, participant_id or party_id is required"}),
+            400,
+        )
+
     # El consentimiento solo es válido si el participante existe en el contrato
     if pid not in contract.participant_ids:
         return jsonify({"error": f"participant {pid} not in contract"}), 400
@@ -2469,16 +2767,38 @@ def accept_term(current_user, contract_id: str):
     #     como delegado de su colectiva, o como operador asistido de una
     #     sintética/ecosistema del que es participante. ---
     if party_type_of(pid) == "human" and pid != f"user-{token_uid}":
-        return jsonify({"error": "solo puedes firmar por ti mismo", "code": "IDENTITY_MISMATCH"}), 403
-    if is_collective(pid) and party_type_of(pid) != "ecosystem" and not members_of(pid).get("delegates"):
-        return jsonify({
-            "error": f"la parte {pid} no tiene delegados configurados en members_json"
-        }), 409
+        return (
+            jsonify(
+                {
+                    "error": "solo puedes firmar por ti mismo",
+                    "code": "IDENTITY_MISMATCH",
+                }
+            ),
+            403,
+        )
+    if (
+        is_collective(pid)
+        and party_type_of(pid) != "ecosystem"
+        and not members_of(pid).get("delegates")
+    ):
+        return (
+            jsonify(
+                {
+                    "error": f"la parte {pid} no tiene delegados configurados en members_json"
+                }
+            ),
+            409,
+        )
     if not _can_act_for(pid, token_uid, contract):
-        return jsonify({
-            "error": "no puedes actuar por esta parte",
-            "code": "IDENTITY_MISMATCH",
-        }), 403
+        return (
+            jsonify(
+                {
+                    "error": "no puedes actuar por esta parte",
+                    "code": "IDENTITY_MISMATCH",
+                }
+            ),
+            403,
+        )
 
     # Ola 3B: derecho a la comprensión y revisión oracular pre-firma.
     # El firmante protegido escribe la cláusula con sus propias palabras.
@@ -2489,42 +2809,59 @@ def accept_term(current_user, contract_id: str):
     if party_type_of(pid) == "human" or is_collective(pid):
         oracle_err = _protection_oracle_gate(contract, token_uid)
         if oracle_err:
-            return jsonify(oracle_err), 503 if oracle_err.get("code") == "PROTECTION_ORACLE_REQUIRED" else 400
+            return jsonify(oracle_err), (
+                503 if oracle_err.get("code") == "PROTECTION_ORACLE_REQUIRED" else 400
+            )
     paraphrase = (data.get("paraphrase") or "").strip()
 
     # --- Ecosistema del Reino Natural: guardián oráculo (Fase 4) ---
     if party_type_of(pid) == "ecosystem":
         approved, reasoning = _guardian_approve_ecosystem(contract)
         if not approved:
-            return jsonify({
-                "error": "el guardián del Reino Natural no otorga consentimiento",
-                "guardian_reasoning": reasoning,
-            }), 400
+            return (
+                jsonify(
+                    {
+                        "error": "el guardián del Reino Natural no otorga consentimiento",
+                        "guardian_reasoning": reasoning,
+                    }
+                ),
+                400,
+            )
         success = contract.accept_term(term_id, pid)
-        _audit(contract, "term_accept_guardian", token_uid, term_id=term_id, party_id=pid)
+        _audit(
+            contract, "term_accept_guardian", token_uid, term_id=term_id, party_id=pid
+        )
         _save_contract(contract, actor_id=token_uid)
-        return jsonify({
-            "success": success,
-            "term_id": term_id,
-            "accepted_by": pid,
-            "guardian": {"mode": "oracle_guardian", "reasoning": reasoning},
-            "contract_state": contract.state.value
-        })
+        return jsonify(
+            {
+                "success": success,
+                "term_id": term_id,
+                "accepted_by": pid,
+                "guardian": {"mode": "oracle_guardian", "reasoning": reasoning},
+                "contract_state": contract.state.value,
+            }
+        )
 
     # --- Parte colectiva: consentimiento agregado por quórum (Fase 2) ---
     if is_collective(pid):
         members = members_of(pid)
         delegates = members.get("delegates") or []
         if not delegates:
-            return jsonify({
-                "error": f"la parte {pid} no tiene delegados configurados en members_json"
-            }), 409
+            return (
+                jsonify(
+                    {
+                        "error": f"la parte {pid} no tiene delegados configurados en members_json"
+                    }
+                ),
+                409,
+            )
         # El delegado que firma es SIEMPRE el actor del token (Ola 3A.1)
         delegate_pid = f"user-{token_uid}"
         if delegate_pid not in delegates:
-            return jsonify({
-                "error": f"delegate {delegate_pid} no es delegado de {pid}"
-            }), 403
+            return (
+                jsonify({"error": f"delegate {delegate_pid} no es delegado de {pid}"}),
+                403,
+            )
 
         db = get_db()
         db.execute(
@@ -2544,51 +2881,64 @@ def accept_term(current_user, contract_id: str):
             """,
             (contract_id, term_id, pid),
         ).fetchall()
-        consent = consent_status(pid, [r["delegate_id"] for r in approved_rows], term_id=term_id)
+        consent = consent_status(
+            pid, [r["delegate_id"] for r in approved_rows], term_id=term_id
+        )
 
         # Ciclo de vida del quórum (Ext. 3): ventana de sellado vencida
         if consent.get("deadline_expired"):
-            return jsonify({
-                "error": "la ventana de quórum de esta parte venció; solicita una prórroga",
-                "code": "QUORUM_EXPIRED",
-                "consent": consent,
-            }), 409
+            return (
+                jsonify(
+                    {
+                        "error": "la ventana de quórum de esta parte venció; solicita una prórroga",
+                        "code": "QUORUM_EXPIRED",
+                        "consent": consent,
+                    }
+                ),
+                409,
+            )
 
         if consent.get("approved"):
             success = contract.accept_term(term_id, pid)
             _save_contract(contract)
             # Evento de consentimiento agregado sellado: las partes
             # colectivas pueden vigilarse vía webhooks (filtrados por parte).
-            dispatch_event("contract.quorum_sealed", {
-                "contract_id": contract_id,
-                "term_id": term_id,
-                "party_id": pid,
-                "delegates": consent.get("approved_delegates", []),
-                "effective_delegates": consent.get("effective_delegates", []),
-                "delegations_applied": consent.get("delegations_applied", {}),
-                "current_weight": consent.get("current_weight"),
-                "needed_weight": consent.get("needed_weight"),
-                "sealed_at": datetime.now().isoformat(),
-            }, party_ids=[pid])
+            dispatch_event(
+                "contract.quorum_sealed",
+                {
+                    "contract_id": contract_id,
+                    "term_id": term_id,
+                    "party_id": pid,
+                    "delegates": consent.get("approved_delegates", []),
+                    "effective_delegates": consent.get("effective_delegates", []),
+                    "delegations_applied": consent.get("delegations_applied", {}),
+                    "current_weight": consent.get("current_weight"),
+                    "needed_weight": consent.get("needed_weight"),
+                    "sealed_at": datetime.now().isoformat(),
+                },
+                party_ids=[pid],
+            )
         else:
             success = False
 
-        return jsonify({
-            "success": success,
-            "term_id": term_id,
-            "accepted_by": pid,
-            "delegate_id": delegate_pid,
-            "consent": consent,
-            "quorum_reached": bool(consent.get("approved")),
-            "contract_state": contract.state.value
-        }), 200 if consent.get("approved") else 202
+        return jsonify(
+            {
+                "success": success,
+                "term_id": term_id,
+                "accepted_by": pid,
+                "delegate_id": delegate_pid,
+                "consent": consent,
+                "quorum_reached": bool(consent.get("approved")),
+                "contract_state": contract.state.value,
+            }
+        ), (200 if consent.get("approved") else 202)
 
     # --- Parte individual (humana o sintética): flujo estándar ---
     success = contract.accept_term(term_id, pid)
-    
+
     if not success:
         return jsonify({"error": f"failed to accept term {term_id} for {pid}"}), 400
-    
+
     _audit(contract, "term_accept_signed", token_uid, term_id=term_id, party_id=pid)
     _save_contract(contract, actor_id=token_uid)
     # Derecho a la comprensión (Ola 3B): guardar las palabras del firmante
@@ -2602,13 +2952,15 @@ def accept_term(current_user, contract_id: str):
             (paraphrase, contract_id, term_id, pid),
         )
         db.commit()
-    
-    return jsonify({
-        "success": True,
-        "term_id": term_id,
-        "accepted_by": pid,
-        "contract_state": contract.state.value
-    })
+
+    return jsonify(
+        {
+            "success": True,
+            "term_id": term_id,
+            "accepted_by": pid,
+            "contract_state": contract.state.value,
+        }
+    )
 
 
 @contracts_bp.route("/<contract_id>/witness", methods=["POST"])
@@ -2643,11 +2995,13 @@ def witness_contract(current_user, contract_id: str):
     )
     _audit(contract, "contract_witnessed", token_uid)
     db.commit()
-    return jsonify({
-        "success": True,
-        "contract_id": contract_id,
-        "witnessed_by": witness_pid,
-    })
+    return jsonify(
+        {
+            "success": True,
+            "contract_id": contract_id,
+            "witnessed_by": witness_pid,
+        }
+    )
 
 
 @contracts_bp.route("/<contract_id>/terms/<term_id>/fulfillment", methods=["POST"])
@@ -2679,7 +3033,12 @@ def report_fulfillment(current_user, contract_id: str, term_id: str):
         return jsonify({"error": "token sin identidad válida"}), 403
 
     if contract.state != ContractState.ACTIVE:
-        return jsonify({"error": "solo se reporta cumplimiento durante la ejecución activa"}), 400
+        return (
+            jsonify(
+                {"error": "solo se reporta cumplimiento durante la ejecución activa"}
+            ),
+            400,
+        )
 
     term = next((t for t in contract._terms if t.id == term_id), None)
     if term is None:
@@ -2698,12 +3057,26 @@ def report_fulfillment(current_user, contract_id: str, term_id: str):
         if not obligated:
             return jsonify({"error": "el término no tiene parte obligada"}), 400
         if not _can_act_for(obligated, token_uid, contract):
-            return jsonify({"error": "solo la parte obligada reporta su cumplimiento",
-                            "code": "IDENTITY_MISMATCH"}), 403
+            return (
+                jsonify(
+                    {
+                        "error": "solo la parte obligada reporta su cumplimiento",
+                        "code": "IDENTITY_MISMATCH",
+                    }
+                ),
+                403,
+            )
     else:
         if f"user-{token_uid}" not in contract.participant_ids:
-            return jsonify({"error": "solo participantes del contrato reportan incumplimientos",
-                            "code": "IDENTITY_MISMATCH"}), 403
+            return (
+                jsonify(
+                    {
+                        "error": "solo participantes del contrato reportan incumplimientos",
+                        "code": "IDENTITY_MISMATCH",
+                    }
+                ),
+                403,
+            )
 
     # Penalización γ ejecutable (actor: oráculo/sistema)
     penalty = float(getattr(term, "penalty_gamma", 0) or 0)
@@ -2723,12 +3096,25 @@ def report_fulfillment(current_user, contract_id: str, term_id: str):
             (contract_id, term_id, status, evidence, reported_by, wellness_delta)
         VALUES (?, ?, ?, ?, ?, ?)
         """,
-        (contract_id, term_id, status, evidence or None, f"user-{token_uid}", wellness_delta),
+        (
+            contract_id,
+            term_id,
+            status,
+            evidence or None,
+            f"user-{token_uid}",
+            wellness_delta,
+        ),
     )
     db.commit()
 
-    _audit(contract, "term_fulfillment", token_uid,
-           term_id=term_id, status=status, wellness_delta=wellness_delta)
+    _audit(
+        contract,
+        "term_fulfillment",
+        token_uid,
+        term_id=term_id,
+        status=status,
+        wellness_delta=wellness_delta,
+    )
     _save_contract(contract, actor_id=token_uid)
     if wellness_delta != 0 and obligated:
         db.execute(
@@ -2741,23 +3127,28 @@ def report_fulfillment(current_user, contract_id: str, term_id: str):
         db.commit()
 
     if status == "violated":
-        dispatch_event("contract.violation", {
+        dispatch_event(
+            "contract.violation",
+            {
+                "contract_id": contract_id,
+                "term_id": term_id,
+                "violated_by": obligated,
+                "penalty_gamma": wellness_delta,
+                "reported_by": f"user-{token_uid}",
+                "reported_at": datetime.now().isoformat(),
+            },
+        )
+
+    return jsonify(
+        {
+            "success": True,
             "contract_id": contract_id,
             "term_id": term_id,
-            "violated_by": obligated,
-            "penalty_gamma": wellness_delta,
-            "reported_by": f"user-{token_uid}",
-            "reported_at": datetime.now().isoformat(),
-        })
-
-    return jsonify({
-        "success": True,
-        "contract_id": contract_id,
-        "term_id": term_id,
-        "status": status,
-        "wellness_delta": wellness_delta,
-        "obligated": obligated,
-    })
+            "status": status,
+            "wellness_delta": wellness_delta,
+            "obligated": obligated,
+        }
+    )
 
 
 @contracts_bp.route("/<contract_id>/terms/<term_id>/appeal", methods=["POST"])
@@ -2778,8 +3169,12 @@ def appeal_fulfillment(current_user, contract_id: str, term_id: str):
         return jsonify({"error": f"término {term_id} no encontrado"}), 404
     obligated = getattr(term, "assigned_participant", None)
     if not _can_act_for(obligated, token_uid, contract):
-        return jsonify({"error": "solo la parte obligada apela",
-                        "code": "IDENTITY_MISMATCH"}), 403
+        return (
+            jsonify(
+                {"error": "solo la parte obligada apela", "code": "IDENTITY_MISMATCH"}
+            ),
+            403,
+        )
 
     reason = (request.get_json() or {}).get("reason", "").strip()
     if not reason:
@@ -2800,7 +3195,10 @@ def appeal_fulfillment(current_user, contract_id: str, term_id: str):
     # Restaurar el γ descontado (máx. 1.5)
     target = next((p for p in contract.participants if p.id == obligated), None)
     if target is not None:
-        restored = min(Decimal("1.5"), target.wellness_current.value - Decimal(str(row["wellness_delta"])))
+        restored = min(
+            Decimal("1.5"),
+            target.wellness_current.value - Decimal(str(row["wellness_delta"])),
+        )
         target.update_wellness(restored)
 
     db.execute(
@@ -2808,8 +3206,14 @@ def appeal_fulfillment(current_user, contract_id: str, term_id: str):
         (row["id"],),
     )
     db.commit()
-    _audit(contract, "term_fulfillment_appealed", token_uid,
-           term_id=term_id, reason=reason, restored_delta=row["wellness_delta"])
+    _audit(
+        contract,
+        "term_fulfillment_appealed",
+        token_uid,
+        term_id=term_id,
+        reason=reason,
+        restored_delta=row["wellness_delta"],
+    )
     _save_contract(contract, actor_id=token_uid)
     if obligated:
         db.execute(
@@ -2821,14 +3225,16 @@ def appeal_fulfillment(current_user, contract_id: str, term_id: str):
         )
         db.commit()
 
-    return jsonify({
-        "success": True,
-        "contract_id": contract_id,
-        "term_id": term_id,
-        "appealed": True,
-        "restored_gamma": -float(row["wellness_delta"]),
-        "reason": reason,
-    })
+    return jsonify(
+        {
+            "success": True,
+            "contract_id": contract_id,
+            "term_id": term_id,
+            "appealed": True,
+            "restored_gamma": -float(row["wellness_delta"]),
+            "reason": reason,
+        }
+    )
 
 
 @contracts_bp.route("/<contract_id>/finalize", methods=["POST"])
@@ -2850,44 +3256,61 @@ def finalize_contract(current_user, contract_id: str):
 
     db = get_db()
     reported = {
-        r["term_id"] for r in db.execute(
+        r["term_id"]
+        for r in db.execute(
             "SELECT DISTINCT term_id FROM maxo_contract_term_fulfillments WHERE contract_id = ?",
             (contract_id,),
         ).fetchall()
     }
     pending = [t.id for t in contract._terms if t.id not in reported]
     if pending:
-        return jsonify({
-            "error": "hay términos sin reporte de cumplimiento",
-            "code": "EXECUTION_INCOMPLETE",
-            "pending_terms": pending,
-        }), 400
+        return (
+            jsonify(
+                {
+                    "error": "hay términos sin reporte de cumplimiento",
+                    "code": "EXECUTION_INCOMPLETE",
+                    "pending_terms": pending,
+                }
+            ),
+            400,
+        )
 
     if not contract.complete():
         return jsonify({"error": "no se pudo finalizar el contrato"}), 400
 
     token_uid = _token_uid(current_user)
-    _audit(contract, "contract_executed", token_uid,
-           final_vhv={"t": float(contract.total_vhv.T),
-                      "v": float(contract.total_vhv.V),
-                      "r": float(contract.total_vhv.R)})
-    _save_contract(contract, actor_id=token_uid)
-    dispatch_event("contract.executed", {
-        "contract_id": contract_id,
-        "executed_at": datetime.now().isoformat(),
-        "final_vhv": {
+    _audit(
+        contract,
+        "contract_executed",
+        token_uid,
+        final_vhv={
             "t": float(contract.total_vhv.T),
             "v": float(contract.total_vhv.V),
             "r": float(contract.total_vhv.R),
         },
-    })
+    )
+    _save_contract(contract, actor_id=token_uid)
+    dispatch_event(
+        "contract.executed",
+        {
+            "contract_id": contract_id,
+            "executed_at": datetime.now().isoformat(),
+            "final_vhv": {
+                "t": float(contract.total_vhv.T),
+                "v": float(contract.total_vhv.V),
+                "r": float(contract.total_vhv.R),
+            },
+        },
+    )
 
-    return jsonify({
-        "success": True,
-        "contract_id": contract_id,
-        "state": contract.state.value,
-        "executed_at": datetime.now().isoformat(),
-    })
+    return jsonify(
+        {
+            "success": True,
+            "contract_id": contract_id,
+            "state": contract.state.value,
+            "executed_at": datetime.now().isoformat(),
+        }
+    )
 
 
 @contracts_bp.route("/<contract_id>/acknowledge-asymmetry", methods=["POST"])
@@ -2922,8 +3345,15 @@ def acknowledge_asymmetry(current_user, contract_id: str):
     if pid not in contract.participant_ids:
         return jsonify({"error": f"participant {pid} not in contract"}), 400
     if not _can_act_for(pid, token_uid, contract):
-        return jsonify({"error": "no puedes reconocer por esta parte",
-                        "code": "IDENTITY_MISMATCH"}), 403
+        return (
+            jsonify(
+                {
+                    "error": "no puedes reconocer por esta parte",
+                    "code": "IDENTITY_MISMATCH",
+                }
+            ),
+            403,
+        )
 
     db = get_db()
     row = db.execute(
@@ -2949,12 +3379,14 @@ def acknowledge_asymmetry(current_user, contract_id: str):
     _audit(contract, "asymmetry_acknowledged", token_uid, party_id=pid)
     db.commit()
 
-    return jsonify({
-        "success": True,
-        "contract_id": contract_id,
-        "party_id": pid,
-        "acknowledged": acknowledged,
-    })
+    return jsonify(
+        {
+            "success": True,
+            "contract_id": contract_id,
+            "party_id": pid,
+            "acknowledged": acknowledged,
+        }
+    )
 
 
 @contracts_bp.route("/<contract_id>/activate", methods=["POST"])
@@ -2962,7 +3394,7 @@ def acknowledge_asymmetry(current_user, contract_id: str):
 def activate_contract(current_user, contract_id: str):
     """Activar el contrato (todos los términos deben estar aceptados)."""
     contract = _load_contract(contract_id)
-    
+
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
 
@@ -2994,21 +3426,29 @@ def activate_contract(current_user, contract_id: str):
             needed.add(aval)
         missing = sorted(needed - set(acknowledged))
         if missing:
-            return jsonify({
-                "error": "asimetría no reconocida: faltan partes que acepten la asimetría",
-                "code": "ASYMMETRY_UNACKNOWLEDGED",
-                "missing": missing,
-                "acknowledged": acknowledged,
-                "asymmetry": report,
-                "hint": "POST /contracts/<id>/acknowledge-asymmetry con cada party_id",
-            }), 400
-    
+            return (
+                jsonify(
+                    {
+                        "error": "asimetría no reconocida: faltan partes que acepten la asimetría",
+                        "code": "ASYMMETRY_UNACKNOWLEDGED",
+                        "missing": missing,
+                        "acknowledged": acknowledged,
+                        "asymmetry": report,
+                        "hint": "POST /contracts/<id>/acknowledge-asymmetry con cada party_id",
+                    }
+                ),
+                400,
+            )
+
     # Ola 3B: co-testigo humano obligatorio para contratos con participantes
     # blindados (el testigo es ajeno a las partes).
     shielded_participants = [
-        p.id for p in contract.participants
+        p.id
+        for p in contract.participants
         if p.id.startswith("user-")
-        and caps_for(protection_level(int(p.id[len("user-"):]))).get("requires_witness")
+        and caps_for(protection_level(int(p.id[len("user-") :]))).get(
+            "requires_witness"
+        )
     ]
     if shielded_participants:
         row = db.execute(
@@ -3017,43 +3457,55 @@ def activate_contract(current_user, contract_id: str):
         ).fetchone()
         witnessed_by = row["meta_value"] if row else None
         if not witnessed_by:
-            return jsonify({
-                "error": "este contrato protege a participantes blindados: "
-                         "requiere co-testigo humano ajeno a las partes",
-                "code": "WITNESS_REQUIRED",
-                "shielded_participants": shielded_participants,
-                "hint": "POST /contracts/<id>/witness (el testigo firma con su token)",
-            }), 400
-    
+            return (
+                jsonify(
+                    {
+                        "error": "este contrato protege a participantes blindados: "
+                        "requiere co-testigo humano ajeno a las partes",
+                        "code": "WITNESS_REQUIRED",
+                        "shielded_participants": shielded_participants,
+                        "hint": "POST /contracts/<id>/witness (el testigo firma con su token)",
+                    }
+                ),
+                400,
+            )
+
     if contract.state == ContractState.DRAFT:
         # Intentar pasar a PENDING primero (validación axiomática)
         if not contract.submit_for_acceptance():
             return jsonify({"error": "axiom validation failed for submission"}), 400
-            
+
     success = contract.activate()
-    
+
     if not success:
-        return jsonify({
-            "error": "activation failed",
-            "state": contract.state.value,
-            "hint": "ensure all terms are accepted and contract is in PENDING state"
-        }), 400
-    
+        return (
+            jsonify(
+                {
+                    "error": "activation failed",
+                    "state": contract.state.value,
+                    "hint": "ensure all terms are accepted and contract is in PENDING state",
+                }
+            ),
+            400,
+        )
+
     _audit(contract, "contract_activated", token_uid)
     _save_contract(contract, actor_id=token_uid)
-    
+
     # Despachar evento
-    dispatch_event("contract.activated", {
-        "contract_id": contract_id,
-        "activated_at": datetime.now().isoformat()
-    })
-    
-    return jsonify({
-        "success": True,
-        "contract_id": contract_id,
-        "state": contract.state.value,
-        "activated_at": datetime.now().isoformat()
-    })
+    dispatch_event(
+        "contract.activated",
+        {"contract_id": contract_id, "activated_at": datetime.now().isoformat()},
+    )
+
+    return jsonify(
+        {
+            "success": True,
+            "contract_id": contract_id,
+            "state": contract.state.value,
+            "activated_at": datetime.now().isoformat(),
+        }
+    )
 
 
 @contracts_bp.route("/<contract_id>/retract", methods=["POST"])
@@ -3061,7 +3513,7 @@ def activate_contract(current_user, contract_id: str):
 def request_retraction(current_user, contract_id: str):
     """
     Solicitar retractación ética del contrato.
-    
+
     Body JSON:
     {
         "user_id": 123,
@@ -3070,90 +3522,112 @@ def request_retraction(current_user, contract_id: str):
     }
     """
     contract = _load_contract(contract_id)
-    
+
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
-    
+
     data = request.get_json() or {}
     user_id = data.get("user_id")
     party_id = data.get("party_id")
     reason = data.get("reason", "")
     cause = data.get("cause", "gamma_crisis")
-    
+
     if not user_id and not party_id:
         return jsonify({"error": "user_id or party_id is required"}), 400
-    
+
     token_uid = _token_uid(current_user)
     pid = f"user-{user_id}" if user_id else str(party_id)
     # Identidad vinculada (Ola 3A.1): solo por ti mismo o como delegado/operador
     if not _can_act_for(pid, token_uid, contract):
-        return jsonify({"error": "no puedes solicitar retractación por esta parte",
-                        "code": "IDENTITY_MISMATCH"}), 403
+        return (
+            jsonify(
+                {
+                    "error": "no puedes solicitar retractación por esta parte",
+                    "code": "IDENTITY_MISMATCH",
+                }
+            ),
+            403,
+        )
 
     # Ola 3C (dientes, INV1): si el solicitante tiene γ < 0.8, la retractación
     # es AUTOMÁTICA — el bienestar manda sobre el trámite oracular.
     requester = next((p for p in contract.participants if p.id == pid), None)
-    if requester is not None and requester.wellness_current.value < INV1_RETRACTION_THRESHOLD:
+    if (
+        requester is not None
+        and requester.wellness_current.value < INV1_RETRACTION_THRESHOLD
+    ):
         success = contract.retract(reason=reason, actor_id=pid)
         _audit(contract, "contract_retracted_inv1", token_uid, cause=cause)
         _save_contract(contract, actor_id=token_uid)
-        dispatch_event("contract.retracted", {
-            "contract_id": contract_id,
-            "reason": reason,
-            "cause": cause,
-            "automatic": True,
-            "invariant": "INV1",
-            "gamma": float(requester.wellness_current.value),
-        })
-        return jsonify({
-            "success": success,
-            "contract_id": contract_id,
-            "state": contract.state.value,
-            "automatic": True,
-            "invariant": "INV1",
-            "reasoning": f"INV1: el bienestar de {pid} (γ={float(requester.wellness_current.value):.2f}) "
-                         f"está bajo 0.8 — la retractación es un derecho automático.",
-        })
-    
+        dispatch_event(
+            "contract.retracted",
+            {
+                "contract_id": contract_id,
+                "reason": reason,
+                "cause": cause,
+                "automatic": True,
+                "invariant": "INV1",
+                "gamma": float(requester.wellness_current.value),
+            },
+        )
+        return jsonify(
+            {
+                "success": success,
+                "contract_id": contract_id,
+                "state": contract.state.value,
+                "automatic": True,
+                "invariant": "INV1",
+                "reasoning": f"INV1: el bienestar de {pid} (γ={float(requester.wellness_current.value):.2f}) "
+                f"está bajo 0.8 — la retractación es un derecho automático.",
+            }
+        )
+
     # Usar oráculo sintético para evaluar
     oracle = SyntheticOracle()
     # Nota: evaluate_retraction devuelve un objeto OracleResponse
     response = oracle.evaluate_retraction(
         contract_id=contract_id,
         reason=reason,
-        evidence={
-            "requester_id": pid,
-            "cause": cause
-        }
+        evidence={"requester_id": pid, "cause": cause},
     )
-    
+
     # OracleResponse ahora tiene un objeto Verdict
     if response.verdict.approved:
         success = contract.retract(reason=reason, actor_id=pid)
         _save_contract(contract)
-        
+
         # Despachar evento
-        dispatch_event("contract.retracted", {
-            "contract_id": contract_id,
-            "reason": reason,
-            "cause": cause,
-            "oracle_confidence": float(response.verdict.confidence)
-        })
-        
-        return jsonify({
-            "success": success,
-            "contract_id": contract_id,
-            "state": contract.state.value,
-            "oracle_confidence": float(response.verdict.confidence),
-            "oracle_reasoning": response.verdict.reasoning
-        })
+        dispatch_event(
+            "contract.retracted",
+            {
+                "contract_id": contract_id,
+                "reason": reason,
+                "cause": cause,
+                "oracle_confidence": float(response.verdict.confidence),
+            },
+        )
+
+        return jsonify(
+            {
+                "success": success,
+                "contract_id": contract_id,
+                "state": contract.state.value,
+                "oracle_confidence": float(response.verdict.confidence),
+                "oracle_reasoning": response.verdict.reasoning,
+            }
+        )
     else:
-        return jsonify({
-            "success": False,
-            "error": "retraction not approved by oracle",
-            "oracle_confidence": float(response.verdict.confidence),
-            "oracle_reasoning": response.verdict.reasoning
-        }), 400
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": "retraction not approved by oracle",
+                    "oracle_confidence": float(response.verdict.confidence),
+                    "oracle_reasoning": response.verdict.reasoning,
+                }
+            ),
+            400,
+        )
 
 
 @contracts_bp.route("/<contract_id>/civil", methods=["GET"])
@@ -3161,16 +3635,13 @@ def request_retraction(current_user, contract_id: str):
 def get_civil_summary(current_user, contract_id: str):
     """Obtener resumen del contrato en lenguaje civil."""
     contract = _load_contract(contract_id)
-    
+
     if contract is None:
         return jsonify({"error": "contract not found"}), 404
-    
+
     summary = contract.to_civil_language()
-    
-    return jsonify({
-        "contract_id": contract_id,
-        "civil_summary": summary
-    })
+
+    return jsonify({"contract_id": contract_id, "civil_summary": summary})
 
 
 @contracts_bp.route("/validate_graph", methods=["POST"])
@@ -3183,81 +3654,86 @@ def validate_graph(current_user):
     nodes = data.get("nodes", [])
     edges = data.get("edges", [])
     duration = float(data.get("duration", 30.0))
-    
+
     if not nodes:
         return jsonify({"error": "no nodes found in graph"}), 400
-        
+
     # Crear un contrato temporal para validación
     temp_contract = MaxoContract(
-        contract_id="visual-temp",
-        description="Validación Visual de Grafo"
+        contract_id="visual-temp", description="Validación Visual de Grafo"
     )
-    
+
     # Mapear nodos a términos del contrato
     vhv_total_t = Decimal("0")
     n_cond = 0
-    
+
     for node in nodes:
         node_type = node.get("type")
         node_id = node.get("id")
         label = node.get("data", {}).get("label", "Sin etiqueta")
-        
+
         if node_type == "action":
             # Extraer costo VHV si existe en la data
             vhv_cost_val = node.get("data", {}).get("vhvCost", 0.5)
             try:
                 t_val = Decimal(str(vhv_cost_val))
-            except:
+            except Exception:
                 t_val = Decimal("0.5")
-                
+
             vhv_total_t += t_val
             vhv_cost = VHV(T=t_val, V=Decimal("0"), R=Decimal("0"))
-            term = ContractTerm(id=node_id, description=f"Acción: {label}", vhv_cost=vhv_cost)
+            term = ContractTerm(
+                id=node_id, description=f"Acción: {label}", vhv_cost=vhv_cost
+            )
             temp_contract.add_term(term)
-            
+
         elif node_type == "condition":
             n_cond += 1
-            
+
         elif node_type == "sdv":
             # El bloque SDV asegura que el contrato respeta el suelo de dignidad
-            temp_contract.minimum_sdv = SDV() # En el futuro, cargar parámetros específicos
-            
+            temp_contract.minimum_sdv = (
+                SDV()
+            )  # En el futuro, cargar parámetros específicos
+
     # Calcular Peso del Contrato (Complejidad)
     # Peso = (Nº_Condiciones * 2) + (VHV_total_T * 5) + (Duración / 30)
     weight = (n_cond * 2) + float(vhv_total_t * 5) + (duration / 30.0)
-    
+
     if weight < 10:
         ux_signature_type = "simple"
     elif weight <= 50:
         ux_signature_type = "medium"
     else:
         ux_signature_type = "rigorous"
-        
+
     # Inyectar participantes de simulación para evaluaciones de INV1 e INV2
     user_id = current_user.get("user_id") or current_user.get("id") or 1
     db = get_db()
-    user_row = db.execute("SELECT id, name FROM users WHERE id = ?", (user_id,)).fetchone()
+    user_row = db.execute(
+        "SELECT id, name FROM users WHERE id = ?", (user_id,)
+    ).fetchone()
     user_name = user_row["name"] if user_row else f"Usuario {user_id}"
-    
+
     p1 = Participant(
         id=f"user-{user_id}",
         name=user_name,
         wellness_current=Wellness(value=Decimal("1.0")),
-        sdv_actual=SDV()
+        sdv_actual=SDV(),
     )
     p2 = Participant(
         id="user-counterparty",
         name="Bob",
         wellness_current=Wellness(value=Decimal("1.0")),
-        sdv_actual=SDV()
+        sdv_actual=SDV(),
     )
-    
+
     temp_contract.add_participant(p1)
     temp_contract.add_participant(p2)
-            
+
     # Ejecutar validación axiomática de core
     valid, results = temp_contract.validate()
-    
+
     # Construir mapa de conexiones para validación de reciprocidad
     connections = {}
     for edge in edges:
@@ -3266,26 +3742,26 @@ def validate_graph(current_user):
         if source and target:
             connections.setdefault(source, []).append(target)
             connections.setdefault(target, []).append(source)
-            
+
     def has_path_to_type(start_id, target_type):
         visited = set()
         queue = [start_id]
         node_types = {n.get("id"): n.get("type") for n in nodes}
-        
+
         while queue:
             curr = queue.pop(0)
             if curr in visited:
                 continue
             visited.add(curr)
-            
+
             if node_types.get(curr) == target_type:
                 return True
-                
+
             for neighbor in connections.get(curr, []):
                 if neighbor not in visited:
                     queue.append(neighbor)
         return False
-        
+
     # Validar que cada nodo de acción tenga una reciprocidad conectada (Axioma T17)
     connections_valid = True
     for node in nodes:
@@ -3294,34 +3770,34 @@ def validate_graph(current_user):
             label = node.get("data", {}).get("label", "Acción")
             if not has_path_to_type(node_id, "reciprocity"):
                 connections_valid = False
-                results.append(ValidationResult(
-                    is_valid=False,
-                    axiom_code="T17",
-                    axiom_name="Reciprocidad Justa",
-                    message=f"La acción '{label}' ({node_id}) no está conectada a ningún bloque de Reciprocidad."
-                ))
-                
+                results.append(
+                    ValidationResult(
+                        is_valid=False,
+                        axiom_code="T17",
+                        axiom_name="Reciprocidad Justa",
+                        message=f"La acción '{label}' ({node_id}) no está conectada a ningún bloque de Reciprocidad.",
+                    )
+                )
+
     if not connections_valid:
         valid = False
-        
-    return jsonify({
-        "valid": valid,
-        "results": [
-            {
-                "axiom": r.axiom_code,
-                "is_valid": r.is_valid,
-                "message": r.message
-            }
-            for r in results
-        ],
-        "weight": weight,
-        "ux_signature_type": ux_signature_type,
-        "total_vhv": {
-            "t": float(temp_contract.total_vhv.T),
-            "v": float(temp_contract.total_vhv.V),
-            "r": float(temp_contract.total_vhv.R)
+
+    return jsonify(
+        {
+            "valid": valid,
+            "results": [
+                {"axiom": r.axiom_code, "is_valid": r.is_valid, "message": r.message}
+                for r in results
+            ],
+            "weight": weight,
+            "ux_signature_type": ux_signature_type,
+            "total_vhv": {
+                "t": float(temp_contract.total_vhv.T),
+                "v": float(temp_contract.total_vhv.V),
+                "r": float(temp_contract.total_vhv.R),
+            },
         }
-    })
+    )
 
 
 @contracts_bp.route("/cohort", methods=["GET"])
@@ -3337,20 +3813,24 @@ def cohort_overview(current_user):
     """
     db = get_db()
     parties = [
-        dict(r) for r in db.execute(
+        dict(r)
+        for r in db.execute(
             "SELECT * FROM maxo_parties WHERE party_type NOT IN ('human', 'synthetic') ORDER BY display_name"
         ).fetchall()
     ]
     rows = []
     for party in parties:
-        contracts = [dict(r) for r in db.execute(
-            """
+        contracts = [
+            dict(r)
+            for r in db.execute(
+                """
             SELECT c.contract_id, c.state FROM maxo_contracts c
             JOIN maxo_contract_participants cp ON cp.contract_id = c.contract_id
             WHERE cp.participant_id = ? ORDER BY c.created_at DESC
             """,
-            (party["party_id"],),
-        ).fetchall()]
+                (party["party_id"],),
+            ).fetchall()
+        ]
         if not contracts:
             continue
         terms_sealed = db.execute(
@@ -3383,34 +3863,45 @@ def cohort_overview(current_user):
             (party["party_id"],),
         ).fetchone()[0]
         wellness_from_checkins = (
-            float(checkin_row["wellness"]) if checkin_row and checkin_row["wellness"] is not None else None
+            float(checkin_row["wellness"])
+            if checkin_row and checkin_row["wellness"] is not None
+            else None
         )
-        rows.append({
-            "party_id": party["party_id"],
-            "party_type": party["party_type"],
-            "display_name": party["display_name"],
-            "wellness": (
-                wellness_from_checkins if wellness_from_checkins is not None
-                else float(party["wellness_value"] or 1.0)
-            ),
-            "wellness_source": "checkins" if wellness_from_checkins is not None else "registered",
-            "checkins_total": checkins_total,
-            "contracts_total": len(contracts),
-            "contracts_active": sum(1 for c in contracts if c["state"] == "active"),
-            "contracts_pending": sum(1 for c in contracts if c["state"] in ("draft", "pending")),
-            "terms_sealed": terms_sealed,
-        })
+        rows.append(
+            {
+                "party_id": party["party_id"],
+                "party_type": party["party_type"],
+                "display_name": party["display_name"],
+                "wellness": (
+                    wellness_from_checkins
+                    if wellness_from_checkins is not None
+                    else float(party["wellness_value"] or 1.0)
+                ),
+                "wellness_source": (
+                    "checkins" if wellness_from_checkins is not None else "registered"
+                ),
+                "checkins_total": checkins_total,
+                "contracts_total": len(contracts),
+                "contracts_active": sum(1 for c in contracts if c["state"] == "active"),
+                "contracts_pending": sum(
+                    1 for c in contracts if c["state"] in ("draft", "pending")
+                ),
+                "terms_sealed": terms_sealed,
+            }
+        )
 
-    return jsonify({
-        "parties": rows,
-        "totals": {
-            "parties": len(rows),
-            "total_contracts": sum(r["contracts_total"] for r in rows),
-            "active": sum(r["contracts_active"] for r in rows),
-            "pending": sum(r["contracts_pending"] for r in rows),
-            "terms_sealed": sum(r["terms_sealed"] for r in rows),
-        },
-    })
+    return jsonify(
+        {
+            "parties": rows,
+            "totals": {
+                "parties": len(rows),
+                "total_contracts": sum(r["contracts_total"] for r in rows),
+                "active": sum(r["contracts_active"] for r in rows),
+                "pending": sum(r["contracts_pending"] for r in rows),
+                "terms_sealed": sum(r["terms_sealed"] for r in rows),
+            },
+        }
+    )
 
 
 @contracts_bp.route("/", methods=["GET"])
@@ -3418,53 +3909,62 @@ def cohort_overview(current_user):
 def list_contracts(current_user):
     """Listar todos los contratos desde la base de datos con paginación y filtros."""
     db = get_db()
-    
+
     # Parámetros de paginación
-    limit = int(request.args.get('limit', 50))
-    offset = int(request.args.get('offset', 0))
-    
+    limit = int(request.args.get("limit", 50))
+    offset = int(request.args.get("offset", 0))
+
     # Filtros
-    state_filter = request.args.get('state')
-    participant_filter = request.args.get('participant_id')
-    
+    state_filter = request.args.get("state")
+    participant_filter = request.args.get("participant_id")
+
     query = "SELECT contract_id, state FROM maxo_contracts WHERE 1=1"
     params = []
-    
+
     if state_filter:
         query += " AND state = ?"
         params.append(state_filter)
-        
+
     if participant_filter:
         query += " AND contract_id IN (SELECT contract_id FROM maxo_contract_participants WHERE participant_id = ?)"
         params.append(participant_filter)
-        
+
     # Total sin límite
     total = db.execute(f"SELECT COUNT(*) FROM ({query})", params).fetchone()[0]
-    
+
     # Añadir paginación
     query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
     params.extend([limit, offset])
-    
+
     rows = db.execute(query, params).fetchall()
-    
+
     contracts_list = []
     for row in rows:
         c_id = row["contract_id"]
         # Por eficiencia hacemos un resumen rápido
-        p_count = db.execute("SELECT COUNT(*) FROM maxo_contract_participants WHERE contract_id = ?", (c_id,)).fetchone()[0]
-        t_count = db.execute("SELECT COUNT(*) FROM maxo_contract_terms WHERE contract_id = ?", (c_id,)).fetchone()[0]
-        
-        contracts_list.append({
-            "contract_id": c_id,
-            "state": row["state"],
-            "participants": p_count,
-            "terms": t_count
-        })
-    
-    return jsonify({
-        "contracts": contracts_list,
-        "total": total,
-        "limit": limit,
-        "offset": offset,
-        "has_more": (offset + limit) < total
-    })
+        p_count = db.execute(
+            "SELECT COUNT(*) FROM maxo_contract_participants WHERE contract_id = ?",
+            (c_id,),
+        ).fetchone()[0]
+        t_count = db.execute(
+            "SELECT COUNT(*) FROM maxo_contract_terms WHERE contract_id = ?", (c_id,)
+        ).fetchone()[0]
+
+        contracts_list.append(
+            {
+                "contract_id": c_id,
+                "state": row["state"],
+                "participants": p_count,
+                "terms": t_count,
+            }
+        )
+
+    return jsonify(
+        {
+            "contracts": contracts_list,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "has_more": (offset + limit) < total,
+        }
+    )

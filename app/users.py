@@ -43,7 +43,9 @@ def promote_trust(current_user, user_id):
     if row is None:
         return jsonify({"error": "not found"}), 404
     if int(row["trust_level"] or 0) >= 1:
-        return jsonify({"success": True, "user_id": user_id, "trust_level": row["trust_level"]})
+        return jsonify(
+            {"success": True, "user_id": user_id, "trust_level": row["trust_level"]}
+        )
 
     db.execute("UPDATE users SET trust_level = 1 WHERE id = ?", (user_id,))
     db.execute(

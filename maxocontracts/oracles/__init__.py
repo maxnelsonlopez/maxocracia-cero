@@ -1,13 +1,13 @@
 # Oracles subpackage for MaxoContracts
 from .base import OracleInterface
-from .synthetic import SyntheticOracle
 from .live_oracle import (
-    LiveOracle,
-    OracleUnavailableError,
-    OracleAPIError,
-    NegotiationResult,
     CritiqueResult,
+    LiveOracle,
+    NegotiationResult,
+    OracleAPIError,
+    OracleUnavailableError,
 )
+from .synthetic import SyntheticOracle
 
 __all__ = [
     "OracleInterface",

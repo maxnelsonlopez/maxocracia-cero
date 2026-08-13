@@ -91,8 +91,18 @@ def _seed_exchange(db_path, giver, receiver):
             urgency, uth_hours, impact_resolution_score, reciprocity_status
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        ("CRUD-INT-001", "2026-08-01", giver, receiver, "UTH", "Ayuda de prueba",
-         "Media", 2.0, 5, "unidirectional"),
+        (
+            "CRUD-INT-001",
+            "2026-08-01",
+            giver,
+            receiver,
+            "UTH",
+            "Ayuda de prueba",
+            "Media",
+            2.0,
+            5,
+            "unidirectional",
+        ),
     )
     exchange_id = cur.lastrowid
     conn.commit()
@@ -108,8 +118,15 @@ def _seed_followup(db_path, participant_email="participante@example.test"):
         INSERT INTO participants (name, email, city, neighborhood, offer_description, need_description, need_urgency)
         VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
-        ("Participante CRUD", participant_email, "Bogotá", "Chapinero",
-         "Puedo ayudar", "Necesito ayuda", "Baja"),
+        (
+            "Participante CRUD",
+            participant_email,
+            "Bogotá",
+            "Chapinero",
+            "Puedo ayudar",
+            "Necesito ayuda",
+            "Baja",
+        ),
     )
     participant_id = cur.lastrowid
     cur.execute(
@@ -119,8 +136,15 @@ def _seed_followup(db_path, participant_email="participante@example.test"):
             situation_change, active_interchanges_status, follow_up_priority
         ) VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
-        ("2026-08-01", participant_id, "routine_check", "Situación estable",
-         "same", "none", "low"),
+        (
+            "2026-08-01",
+            participant_id,
+            "routine_check",
+            "Situación estable",
+            "same",
+            "none",
+            "low",
+        ),
     )
     followup_id = cur.lastrowid
     conn.commit()

@@ -4,8 +4,6 @@ Tests adicionales para edge cases de maxo.py
 Cubre casos límite y validaciones adicionales
 """
 
-import pytest
-
 from app.maxo import calculate_maxo_price, credit_user, get_balance
 
 

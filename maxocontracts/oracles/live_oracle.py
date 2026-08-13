@@ -18,14 +18,14 @@ Sin API key el sistema no falla: `is_available()` retorna False y la API
 responde 503 con degradación elegante (la validación heurística sigue viva).
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from decimal import Decimal
-from typing import Any, Dict, List, Optional
 import json
 import os
 import re
 import uuid
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from decimal import Decimal
+from typing import Any, Dict, List, Optional
 
 import requests
 
@@ -219,7 +219,11 @@ class LiveOracle:
         timeout: Optional[int] = None,
     ):
         self.api_key = api_key or os.environ.get("DEEPSEEK_API_KEY") or ""
-        self.base_url = (base_url or os.environ.get("DEEPSEEK_BASE_URL") or "https://api.deepseek.com").rstrip("/")
+        self.base_url = (
+            base_url
+            or os.environ.get("DEEPSEEK_BASE_URL")
+            or "https://api.deepseek.com"
+        ).rstrip("/")
         self.model = model or os.environ.get("DEEPSEEK_MODEL") or "deepseek-chat"
         enabled = os.environ.get("DEEPSEEK_ORACLE_ENABLED", "true").strip().lower()
         self.enabled = enabled not in ("false", "0", "no")
@@ -241,9 +245,13 @@ class LiveOracle:
     def _session_updated_dt(sess: Dict[str, Any]) -> datetime:
         updated = sess.get("updated_at")
         try:
-            return datetime.fromisoformat(updated) if isinstance(updated, str) else updated
+            if isinstance(updated, str):
+                return datetime.fromisoformat(updated)
+            if isinstance(updated, datetime):
+                return updated
         except (ValueError, TypeError):
-            return datetime.now()
+            pass
+        return datetime.now()
 
     def _prune_sessions(self) -> None:
         cutoff = datetime.now() - timedelta(minutes=self.SESSION_TTL_MINUTES)
@@ -266,7 +274,9 @@ class LiveOracle:
             return None
         return sess
 
-    def _ensure_session(self, session_id: Optional[str], instruction: str) -> Dict[str, Any]:
+    def _ensure_session(
+        self, session_id: Optional[str], instruction: str
+    ) -> Dict[str, Any]:
         self._prune_sessions()
         if session_id and session_id in _SESSION_STORE:
             sess = _SESSION_STORE[session_id]
@@ -312,7 +322,9 @@ class LiveOracle:
             "Content-Type": "application/json",
         }
         try:
-            resp = requests.post(url, json=payload, headers=headers, timeout=self.timeout)
+            resp = requests.post(
+                url, json=payload, headers=headers, timeout=self.timeout
+            )
         except requests.RequestException as exc:
             raise OracleAPIError(f"No se pudo contactar al oráculo: {exc}") from exc
         if resp.status_code != 200:
@@ -340,15 +352,19 @@ class LiveOracle:
         warnings: List[Dict[str, Any]] = []
 
         if not terms:
-            violations.append({
-                "axiom": "T>0",
-                "message": "El borrador no tiene términos (T > 0)",
-            })
+            violations.append(
+                {
+                    "axiom": "T>0",
+                    "message": "El borrador no tiene términos (T > 0)",
+                }
+            )
         if len(set(parties)) < 2:
-            violations.append({
-                "axiom": "PARTES",
-                "message": "Se requieren al menos 2 partes para un intercambio",
-            })
+            violations.append(
+                {
+                    "axiom": "PARTES",
+                    "message": "Se requieren al menos 2 partes para un intercambio",
+                }
+            )
 
         # T17: balance por parte usando el valor total (t + v + h)
         per_party: Dict[str, float] = {}
@@ -366,31 +382,37 @@ class LiveOracle:
             min_val = min(values)
             imbalance = (max_val - min_val) / max_val if max_val > 0 else 0.0
             if imbalance > 0.2:
-                violations.append({
-                    "axiom": "T17",
-                    "message": (
-                        f"Desbalance {imbalance:.0%} entre partes "
-                        f"({min_val:.1f} vs {max_val:.1f}) viola la Reciprocidad Justa"
-                    ),
-                    "details": per_party,
-                })
+                violations.append(
+                    {
+                        "axiom": "T17",
+                        "message": (
+                            f"Desbalance {imbalance:.0%} entre partes "
+                            f"({min_val:.1f} vs {max_val:.1f}) viola la Reciprocidad Justa"
+                        ),
+                        "details": per_party,
+                    }
+                )
         elif len(parties_with_cost) == 1 and terms:
-            warnings.append({
-                "axiom": "T17",
-                "message": "Solo una parte asume costo: revisar contraprestación",
-                "details": per_party,
-            })
+            warnings.append(
+                {
+                    "axiom": "T17",
+                    "message": "Solo una parte asume costo: revisar contraprestación",
+                    "details": per_party,
+                }
+            )
 
         for term in terms:
             if term.get("vhv", {}).get("v", 0) > 0:
-                warnings.append({
-                    "axiom": "INV2",
-                    "message": (
-                        "Un término afecta vidas (V > 0): verificar que ninguna "
-                        "parte caiga bajo su SDV/SDV-S"
-                    ),
-                    "term_id": term.get("term_id"),
-                })
+                warnings.append(
+                    {
+                        "axiom": "INV2",
+                        "message": (
+                            "Un término afecta vidas (V > 0): verificar que ninguna "
+                            "parte caiga bajo su SDV/SDV-S"
+                        ),
+                        "term_id": term.get("term_id"),
+                    }
+                )
 
         valid = len(violations) == 0
         return {
@@ -426,12 +448,14 @@ class LiveOracle:
             assigned = raw.get("assigned_participant")
             if assigned and assigned not in parties:
                 parties.append(str(assigned))
-            terms.append({
-                "term_id": term_id,
-                "civil_text": civil_text,
-                "vhv": vhv,
-                "assigned_participant": assigned,
-            })
+            terms.append(
+                {
+                    "term_id": term_id,
+                    "civil_text": civil_text,
+                    "vhv": vhv,
+                    "assigned_participant": assigned,
+                }
+            )
         parties = list(dict.fromkeys(str(p) for p in parties))
         reasoning = str(payload.get("reasoning") or "").strip()
         axiom_check = self._axiom_check(terms, parties)
@@ -475,11 +499,15 @@ class LiveOracle:
         self._append_message(
             sess, "user", f"Instrucción del fundador: {instruction}{context}"
         )
-        content = self._chat([{"role": "system", "content": SYSTEM_PROMPT}] + sess["messages"])
+        content = self._chat(
+            [{"role": "system", "content": SYSTEM_PROMPT}] + sess["messages"]
+        )
         self._append_message(sess, "assistant", content)
 
         payload = _extract_json(content)
-        return self._draft_from_model_output(payload, instruction, sess["session_id"], version)
+        return self._draft_from_model_output(
+            payload, instruction, sess["session_id"], version
+        )
 
     def feedback(self, session_id: str, feedback: str) -> NegotiationResult:
         """Itera una sesión de negociación con la retroalimentación del usuario."""
@@ -494,16 +522,24 @@ class LiveOracle:
 
         sess["version"] += 1
         version = sess["version"]
-        self._append_message(sess, "user", f"Retroalimentación de las partes: {feedback}")
-        content = self._chat([{"role": "system", "content": SYSTEM_PROMPT}] + sess["messages"])
+        self._append_message(
+            sess, "user", f"Retroalimentación de las partes: {feedback}"
+        )
+        content = self._chat(
+            [{"role": "system", "content": SYSTEM_PROMPT}] + sess["messages"]
+        )
         self._append_message(sess, "assistant", content)
 
         payload = _extract_json(content)
-        return self._draft_from_model_output(payload, sess["instruction"], session_id, version)
+        return self._draft_from_model_output(
+            payload, sess["instruction"], session_id, version
+        )
 
     # --- Auditoría ---
 
-    def critique(self, contract_id: str, contract_data: Dict[str, Any]) -> CritiqueResult:
+    def critique(
+        self, contract_id: str, contract_data: Dict[str, Any]
+    ) -> CritiqueResult:
         """Audita un contrato existente contra los axiomas y propone mejoras."""
         if not self.is_available():
             raise OracleUnavailableError(
@@ -524,10 +560,12 @@ class LiveOracle:
             "}\n\n"
             f"CONTRATO ({contract_id}):\n{summary}"
         )
-        content = self._chat([
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": prompt},
-        ])
+        content = self._chat(
+            [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": prompt},
+            ]
+        )
         payload = _extract_json(content)
         issues = [
             {

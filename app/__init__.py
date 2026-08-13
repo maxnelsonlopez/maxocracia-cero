@@ -21,7 +21,7 @@ def _dotform_to_dirform(path: str):
     head, _, tail = path.rpartition("/")
     if not tail.startswith("__next.") or not tail.endswith(".txt"):
         return None
-    segments = tail[len("__next."):-len(".txt")].split(".")
+    segments = tail[len("__next.") : -len(".txt")].split(".")
     if not segments:
         return None
     first, rest = segments[0], segments[1:]
@@ -43,7 +43,16 @@ def create_app(db_path=None):
 
     # Permitir CORS en desarrollo y para el dev server de Next.js
     from flask_cors import CORS
-    CORS(app, supports_credentials=True, origins=["http://localhost:3000", "http://127.0.0.1:3000", os.environ.get("FRONTEND_URL", "")])
+
+    CORS(
+        app,
+        supports_credentials=True,
+        origins=[
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            os.environ.get("FRONTEND_URL", ""),
+        ],
+    )
 
     # Inicializar SQLAlchemy y Admin
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + app.config["DATABASE"]
@@ -73,29 +82,28 @@ def create_app(db_path=None):
             init_db(app)
 
     # register blueprints
+    from .arrivals import arrivals_bp
     from .auth import bp as auth_bp
-    from .contracts_bp import contracts_bp
+    from .bridge_b import bridge_bp
+    from .contracts_bp import contracts_bp, init_contracts_metrics_tables
     from .forms_bp import forms_bp
+    from .forms_manager import init_multi_offers_needs_tables
+    from .guide_bp import guide_bp, init_guide_tables
     from .interchanges import bp as interchanges_bp
     from .maxo_bp import bp as maxo_bp
+    from .micromax import init_micromax_tables
+    from .micromax_bp import micromax_bp
+    from .parties_bp import parties_bp
+    from .protection_bp import protection_bp
     from .reputation_bp import bp as reputation_bp
     from .resources_bp import bp as resources_bp
     from .stripe_integration import stripe_bp
-    from .subscriptions import subscriptions_bp, init_subscription_tables
+    from .subscriptions import init_subscription_tables, subscriptions_bp
     from .tvi_bp import tvi_bp
     from .users import bp as users_bp
-    from .vhv_bp import vhv_bp
-    from .micromax_bp import micromax_bp
-    from .micromax import init_micromax_tables
-    from .forms_manager import init_multi_offers_needs_tables
-    from .contracts_bp import init_contracts_metrics_tables
-    from .parties_bp import parties_bp
-    from .protection_bp import protection_bp
     from .verifier_bp import verifier_bp
-    from .bridge_b import bridge_bp
-    from .arrivals import arrivals_bp
+    from .vhv_bp import vhv_bp
     from .voting_bp import voting_bp
-    from .guide_bp import guide_bp, init_guide_tables
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
@@ -162,11 +170,11 @@ def create_app(db_path=None):
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")
     def catch_all(path):
-        from flask import send_from_directory, jsonify
+        from flask import jsonify, send_from_directory
         from werkzeug.exceptions import MethodNotAllowed, NotFound
-        
+
         dist_dir = os.path.join(os.path.dirname(__file__), "static", "dist")
-        
+
         # 1. Intentar servir el archivo exacto (ej: /_next/static/..., .txt, .js, etc.)
         target_path = os.path.join(dist_dir, path)
         if os.path.exists(target_path) and not os.path.isdir(target_path):
@@ -184,7 +192,7 @@ def create_app(db_path=None):
         html_file = f"{path}.html"
         if os.path.exists(os.path.join(dist_dir, html_file)):
             return send_from_directory(dist_dir, html_file)
-            
+
         # 3. Intentar servir index.html en la carpeta (ej: /admin/sdv -> admin/sdv/index.html)
         folder_index = os.path.join(path, "index.html")
         if os.path.exists(os.path.join(dist_dir, folder_index)):
@@ -192,6 +200,7 @@ def create_app(db_path=None):
 
         # 4. Check if the path matches a registered backend route but with a different method.
         from werkzeug.routing import Map, Rule
+
         non_catch_all_rules = [
             Rule(rule.rule, methods=rule.methods, endpoint=rule.endpoint)
             for rule in app.url_map.iter_rules()
@@ -211,27 +220,41 @@ def create_app(db_path=None):
         # 5. Si llegamos aquí y el path coincide con un prefijo de API conocido,
         # devolvemos un 404 real en lugar del SPA.
         backend_prefixes = [
-            "auth/", "api/", "subscriptions/", "forms/", "contracts/", 
-            "vhv/", "tvi/", "users/", "interchanges/", "stripe/", 
-            "reputation/", "resources/", "micromax/"
+            "auth/",
+            "api/",
+            "subscriptions/",
+            "forms/",
+            "contracts/",
+            "vhv/",
+            "tvi/",
+            "users/",
+            "interchanges/",
+            "stripe/",
+            "reputation/",
+            "resources/",
+            "micromax/",
         ]
         if any(path.startswith(pref) for pref in backend_prefixes):
             return jsonify({"error": f"Endpoint '{path}' no encontrado"}), 404
 
         # 6. SPA Fallback: Servir el index.html principal para que Next.js router tome control
-        if not app.config.get("TESTING") and os.path.exists(os.path.join(dist_dir, "index.html")):
+        if not app.config.get("TESTING") and os.path.exists(
+            os.path.join(dist_dir, "index.html")
+        ):
             return send_from_directory(dist_dir, "index.html")
-        
+
         return jsonify({"error": f"Endpoint '{path}' no encontrado"}), 404
 
     @app.errorhandler(404)
     def handle_not_found(e):
         # Si algo llega aquí es porque no coincidió con NINGUNA ruta (ni el catch_all)
         # o porque algún blueprint hizo abort(404)
-        if request.path.startswith('/api/'):
+        from flask import jsonify
+
+        if request.path.startswith("/api/"):
             return jsonify({"error": "API route not found"}), 404
         # Re-intentar catch_all para ver si es una ruta de Next.js
-        return catch_all(request.path.lstrip('/'))
+        return catch_all(request.path.lstrip("/"))
 
     @app.route("/favicon.ico")
     def favicon():

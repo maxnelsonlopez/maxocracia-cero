@@ -1,7 +1,4 @@
-import json
 from datetime import datetime, timedelta, timezone
-
-import pytest
 
 
 def test_admin_interface_protection(client):

@@ -63,7 +63,9 @@ def _proposal_payload(row) -> dict:
         "majority_ratio": row["majority_ratio"],
         "status": row["status"],
         "result": row["result"],
-        "result_detail": json.loads(row["result_detail"]) if row["result_detail"] else None,
+        "result_detail": (
+            json.loads(row["result_detail"]) if row["result_detail"] else None
+        ),
         "created_by": row["created_by"],
         "reason": row["reason"],
         "deadline": row["deadline"],
@@ -158,10 +160,6 @@ def _apply_passed_action(db, row) -> bool:
     return True
 
 
-def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
-
-
 def _vote_payload(row) -> dict:
     return {
         "proposal_id": row["proposal_id"],
@@ -212,10 +210,14 @@ def _close_proposal(db, proposal_id: int) -> dict:
             delegated_extra += 1
 
     quorum = votes_cast / total_users if total_users else 0.0
-    detail = {"total_users": total_users, "votes_cast": votes_cast,
-              "delegated_votes": delegated_extra,
-              "effective_votes": len(effective),
-              "quorum_ratio": row["quorum_ratio"], "quorum_actual": round(quorum, 4)}
+    detail = {
+        "total_users": total_users,
+        "votes_cast": votes_cast,
+        "delegated_votes": delegated_extra,
+        "effective_votes": len(effective),
+        "quorum_ratio": row["quorum_ratio"],
+        "quorum_actual": round(quorum, 4),
+    }
 
     # Participación Inteligente (Cap. 14): el peso de cada voto crece con el
     # TVI registrado (vida consciente invertida), normalizado al mayor emisor
@@ -237,12 +239,17 @@ def _close_proposal(db, proposal_id: int) -> dict:
         result = "quorum_not_met"
     else:
         from collections import Counter
+
         simple_counts = Counter(o for _, o in effective)
         total_weight = sum(option_weight.values()) if option_weight else 0.0
         winner = max(option_weight, key=lambda o: (option_weight[o], simple_counts[o]))
-        weighted_fraction = option_weight[winner] / total_weight if total_weight else 0.0
+        weighted_fraction = (
+            option_weight[winner] / total_weight if total_weight else 0.0
+        )
         detail["winner"] = winner
-        detail["winner_fraction"] = round(simple_counts[winner] / len(effective), 4) if effective else 0.0
+        detail["winner_fraction"] = (
+            round(simple_counts[winner] / len(effective), 4) if effective else 0.0
+        )
         detail["weighted_fraction"] = round(weighted_fraction, 4)
         detail["option_weights"] = {k: round(v, 4) for k, v in option_weight.items()}
         if weighted_fraction >= row["majority_ratio"]:
@@ -304,7 +311,15 @@ def create_proposal(current_user):
     if not description or len(description) > MAX_DESCRIPTION:
         return jsonify({"error": "description obligatoria"}), 400
     if category not in VALID_CATEGORIES:
-        return jsonify({"error": f"categoria invalida: {category}", "validas": sorted(VALID_CATEGORIES)}), 400
+        return (
+            jsonify(
+                {
+                    "error": f"categoria invalida: {category}",
+                    "validas": sorted(VALID_CATEGORIES),
+                }
+            ),
+            400,
+        )
     options = [str(o).strip() for o in options if str(o).strip()]
     if len(options) < 2 or len(options) > MAX_OPTIONS:
         return jsonify({"error": f"se requieren 2-{MAX_OPTIONS} opciones"}), 400
@@ -313,7 +328,9 @@ def create_proposal(current_user):
 
     defaults = CATEGORY_DEFAULTS[category]
     deadline_hours = max(1, min(int(data.get("deadline_hours", 72)), 24 * 30))
-    deadline = (datetime.now(timezone.utc) + timedelta(hours=deadline_hours)).isoformat()
+    deadline = (
+        datetime.now(timezone.utc) + timedelta(hours=deadline_hours)
+    ).isoformat()
 
     db = get_db()
     cur = db.execute(
@@ -323,8 +340,17 @@ def create_proposal(current_user):
              created_by, reason, deadline)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (title, description, category, json.dumps(options, ensure_ascii=False),
-         defaults["quorum"], defaults["majority"], current_user["user_id"], reason, deadline),
+        (
+            title,
+            description,
+            category,
+            json.dumps(options, ensure_ascii=False),
+            defaults["quorum"],
+            defaults["majority"],
+            current_user["user_id"],
+            reason,
+            deadline,
+        ),
     )
     db.commit()
     row = db.execute(
@@ -399,15 +425,18 @@ def cast_vote(current_user, proposal_id: int):
     # Escalera de confianza (Cap. 13, Puente de Llegada): la voz en la
     # gobernanza no es un derecho de llegada — se gana caminando el primer
     # acuerdo. Un recién llegado (N0) recibe y firma; gobernar espera.
-    trust = db.execute(
-        "SELECT trust_level FROM users WHERE id = ?", (uid,)
-    ).fetchone()
+    trust = db.execute("SELECT trust_level FROM users WHERE id = ?", (uid,)).fetchone()
     if trust is None or int(trust["trust_level"] or 0) < 1:
-        return jsonify({
-            "error": "recién llegado: la voz en la gobernanza llega al caminar tu primer acuerdo",
-            "code": "TRUST_LEVEL_REQUIRED",
-            "hint": "firma y activa tu primer contrato (o pide a la comunidad que te ascienda)",
-        }), 403
+        return (
+            jsonify(
+                {
+                    "error": "recién llegado: la voz en la gobernanza llega al caminar tu primer acuerdo",
+                    "code": "TRUST_LEVEL_REQUIRED",
+                    "hint": "firma y activa tu primer contrato (o pide a la comunidad que te ascienda)",
+                }
+            ),
+            403,
+        )
 
     cur = db.execute(
         """
@@ -418,7 +447,10 @@ def cast_vote(current_user, proposal_id: int):
     )
     db.commit()
     if cur.rowcount == 0:
-        return jsonify({"error": "ya votaste en esta propuesta (un voto por persona)"}), 409
+        return (
+            jsonify({"error": "ya votaste en esta propuesta (un voto por persona)"}),
+            409,
+        )
 
     if row["deadline"] and row["deadline"] < _now_iso():
         payload = _close_proposal(db, proposal_id)
@@ -461,8 +493,15 @@ def analyze_proposal(current_user, proposal_id: int):
         return jsonify({"error": "proposal not found"}), 404
 
     if not voting_oracle.is_available():
-        return jsonify({"error": "oracle_disabled",
-                        "hint": "configura DEEPSEEK_API_KEY o habilita el oráculo local (LOCAL_ORACLE_ENABLED)"}), 503
+        return (
+            jsonify(
+                {
+                    "error": "oracle_disabled",
+                    "hint": "configura DEEPSEEK_API_KEY o habilita el oráculo local (LOCAL_ORACLE_ENABLED)",
+                }
+            ),
+            503,
+        )
 
     try:
         analysis = voting_oracle.analyze_proposal(row["title"], row["description"])
@@ -478,7 +517,11 @@ def analyze_proposal(current_user, proposal_id: int):
             model = excluded.model,
             updated_at = datetime('now')
         """,
-        (proposal_id, json.dumps(analysis, ensure_ascii=False), analysis.get("model", "")),
+        (
+            proposal_id,
+            json.dumps(analysis, ensure_ascii=False),
+            analysis.get("model", ""),
+        ),
     )
     db.commit()
 
@@ -521,7 +564,13 @@ def set_delegation(current_user):
         (delegator, delegatee),
     )
     db.commit()
-    return jsonify({"success": True, "delegator_user_id": delegator, "delegatee_user_id": delegatee})
+    return jsonify(
+        {
+            "success": True,
+            "delegator_user_id": delegator,
+            "delegatee_user_id": delegatee,
+        }
+    )
 
 
 @voting_bp.route("/delegations", methods=["GET"])
@@ -531,12 +580,16 @@ def list_delegations():
     rows = db.execute(
         "SELECT * FROM maxo_vote_delegations ORDER BY created_at"
     ).fetchall()
-    return jsonify([
-        {"delegator_user_id": r["delegator_user_id"],
-         "delegatee_user_id": r["delegatee_user_id"],
-         "created_at": r["created_at"]}
-        for r in rows
-    ])
+    return jsonify(
+        [
+            {
+                "delegator_user_id": r["delegator_user_id"],
+                "delegatee_user_id": r["delegatee_user_id"],
+                "created_at": r["created_at"],
+            }
+            for r in rows
+        ]
+    )
 
 
 @voting_bp.route("/delegations", methods=["DELETE"])
@@ -564,15 +617,17 @@ def voting_stats():
         "SELECT COUNT(*) FROM maxo_community_proposals WHERE result='passed'"
     ).fetchone()[0]
     votes_total = db.execute("SELECT COUNT(*) FROM maxo_community_votes").fetchone()[0]
-    return jsonify({
-        "total_proposals": total,
-        "open_proposals": open_count,
-        "passed_proposals": passed,
-        "total_votes": votes_total,
-        "audit": hashlib.sha256(
-            f"{total}:{open_count}:{passed}:{votes_total}".encode("utf-8")
-        ).hexdigest()[:16],
-    })
+    return jsonify(
+        {
+            "total_proposals": total,
+            "open_proposals": open_count,
+            "passed_proposals": passed,
+            "total_votes": votes_total,
+            "audit": hashlib.sha256(
+                f"{total}:{open_count}:{passed}:{votes_total}".encode("utf-8")
+            ).hexdigest()[:16],
+        }
+    )
 
 
 # ──────────────────────────────────────────────────────────────────
@@ -629,10 +684,15 @@ def propose_params(current_user):
     }
     violation = _validate_vhv_params(params)
     if violation:
-        return jsonify({
-            "error": f"violación axiomática: {violation}",
-            "code": "PARAM_AXIOM_VIOLATION",
-        }), 400
+        return (
+            jsonify(
+                {
+                    "error": f"violación axiomática: {violation}",
+                    "code": "PARAM_AXIOM_VIOLATION",
+                }
+            ),
+            400,
+        )
 
     db = get_db()
     current = _current_params(db)
@@ -643,20 +703,26 @@ def propose_params(current_user):
     diffs = []
     for key in ("alpha", "beta", "gamma", "delta"):
         old_v, new_v = current[key], float(params[key])
-        direction = "sube" if new_v > old_v else ("baja" if new_v < old_v else "queda igual")
+        direction = (
+            "sube" if new_v > old_v else ("baja" if new_v < old_v else "queda igual")
+        )
         diffs.append(f"{PARAM_LABELS[key]}: {old_v:g} → {new_v:g} ({direction})")
     title = "Ajuste de los pesos de la economía de la vida (α, β, γ, δ)"
     description = (
         "La comunidad decide los pesos con los que la vida se valora: "
         + ". ".join(diffs)
         + ". Si se aprueba, los nuevos pesos se aplican a todos los cálculos "
-          "futuros con registro público. El sufrimiento nunca puede premiarse "
-          "(γ ≥ 1), la vida no puede ignorarse (β > 0) ni el tiempo (α > 0)."
+        "futuros con registro público. El sufrimiento nunca puede premiarse "
+        "(γ ≥ 1), la vida no puede ignorarse (β > 0) ni el tiempo (α > 0)."
     )
-    reason = (data.get("reason") or "").strip() or "propuesta del Parlamento de Parámetros"
+    reason = (
+        data.get("reason") or ""
+    ).strip() or "propuesta del Parlamento de Parámetros"
 
     deadline_hours = max(1, min(int(data.get("deadline_hours", 72)), 24 * 30))
-    deadline = (datetime.now(timezone.utc) + timedelta(hours=deadline_hours)).isoformat()
+    deadline = (
+        datetime.now(timezone.utc) + timedelta(hours=deadline_hours)
+    ).isoformat()
 
     cur = db.execute(
         """
@@ -674,7 +740,9 @@ def propose_params(current_user):
             current_user["user_id"],
             reason,
             deadline,
-            json.dumps({"type": "set_vhv_params", "params": params}, ensure_ascii=False),
+            json.dumps(
+                {"type": "set_vhv_params", "params": params}, ensure_ascii=False
+            ),
         ),
     )
     db.commit()
@@ -715,11 +783,15 @@ def parliament_params():
             "SELECT * FROM maxo_parameter_resolutions ORDER BY id DESC LIMIT 50"
         ).fetchall()
     ]
-    return jsonify({
-        "current": current,
-        "pending_proposals": pending,
-        "history": history,
-        "audit_hash": hashlib.sha256(
-            json.dumps({"current": current, "history": history}, ensure_ascii=False).encode("utf-8")
-        ).hexdigest()[:16],
-    })
+    return jsonify(
+        {
+            "current": current,
+            "pending_proposals": pending,
+            "history": history,
+            "audit_hash": hashlib.sha256(
+                json.dumps(
+                    {"current": current, "history": history}, ensure_ascii=False
+                ).encode("utf-8")
+            ).hexdigest()[:16],
+        }
+    )

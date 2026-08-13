@@ -398,51 +398,100 @@ def update_product(current_user, product_id):
         return jsonify({"error": "No se proporcionaron datos"}), 400
 
     db = get_db()
-    row = db.execute("SELECT * FROM vhv_products WHERE id = ?", (product_id,)).fetchone()
+    row = db.execute(
+        "SELECT * FROM vhv_products WHERE id = ?", (product_id,)
+    ).fetchone()
     if not row:
         return jsonify({"error": "Product not found"}), 404
 
     product = dict(row)
-    if not current_user.get("is_admin") and product.get("created_by") != current_user.get("user_id"):
-        return jsonify({"error": "No tienes autorización para realizar esta acción"}), 403
+    if not current_user.get("is_admin") and product.get(
+        "created_by"
+    ) != current_user.get("user_id"):
+        return (
+            jsonify({"error": "No tienes autorización para realizar esta acción"}),
+            403,
+        )
 
     editable_fields = [
-        "name", "category", "description",
-        "t_direct_hours", "t_inherited_hours", "t_future_hours",
-        "v_organisms_affected", "v_consciousness_factor", "v_suffering_factor",
-        "v_abundance_factor", "v_rarity_factor",
-        "r_minerals_kg", "r_water_m3", "r_petroleum_l", "r_land_hectares",
-        "r_frg_factor", "r_cs_factor",
+        "name",
+        "category",
+        "description",
+        "t_direct_hours",
+        "t_inherited_hours",
+        "t_future_hours",
+        "v_organisms_affected",
+        "v_consciousness_factor",
+        "v_suffering_factor",
+        "v_abundance_factor",
+        "v_rarity_factor",
+        "r_minerals_kg",
+        "r_water_m3",
+        "r_petroleum_l",
+        "r_land_hectares",
+        "r_frg_factor",
+        "r_cs_factor",
     ]
 
     updates = {k: v for k, v in data.items() if k in editable_fields}
     if not updates:
         return jsonify({"error": "No se proporcionaron campos válidos"}), 400
 
-    component_fields = [f for f in editable_fields if f not in ("name", "category", "description")]
+    component_fields = [
+        f for f in editable_fields if f not in ("name", "category", "description")
+    ]
 
     try:
         for field in component_fields:
             if field not in updates:
                 continue
-            if field in ("t_direct_hours", "t_inherited_hours", "t_future_hours",
-                         "v_organisms_affected", "r_minerals_kg", "r_water_m3",
-                         "r_petroleum_l", "r_land_hectares"):
+            if field in (
+                "t_direct_hours",
+                "t_inherited_hours",
+                "t_future_hours",
+                "v_organisms_affected",
+                "r_minerals_kg",
+                "r_water_m3",
+                "r_petroleum_l",
+                "r_land_hectares",
+            ):
                 if float(updates[field]) < 0:
                     return jsonify({"error": f"{field} cannot be negative"}), 400
             elif field == "v_consciousness_factor":
                 cv = float(updates[field])
                 if cv < 0 or cv > 1:
-                    return jsonify({"error": "v_consciousness_factor must be between 0 and 1"}), 400
+                    return (
+                        jsonify(
+                            {"error": "v_consciousness_factor must be between 0 and 1"}
+                        ),
+                        400,
+                    )
             elif field == "v_suffering_factor":
                 if float(updates[field]) < 1:
-                    return jsonify({"error": "v_suffering_factor must be >= 1 (Axiom: cannot reward suffering)"}), 400
+                    return (
+                        jsonify(
+                            {
+                                "error": "v_suffering_factor must be >= 1 (Axiom: cannot reward suffering)"
+                            }
+                        ),
+                        400,
+                    )
             elif field == "v_abundance_factor":
                 if float(updates[field]) <= 0:
-                    return jsonify({"error": "v_abundance_factor must be greater than 0"}), 400
+                    return (
+                        jsonify({"error": "v_abundance_factor must be greater than 0"}),
+                        400,
+                    )
             elif field in ("r_frg_factor", "r_cs_factor"):
                 if float(updates[field]) <= 0:
-                    return jsonify({"error": "Resource factors (FRG, CS) must be greater than 0"}), 400
+                    return (
+                        jsonify(
+                            {
+                                "error": "Resource factors (FRG, CS) must be greater than 0"
+                            }
+                        ),
+                        400,
+                    )
     except (ValueError, TypeError):
         return jsonify({"error": "Invalid numeric values provided"}), 400
 
@@ -513,13 +562,18 @@ def delete_product(current_user, product_id):
     Los registros de cálculo asociados se eliminan en cascada.
     """
     db = get_db()
-    row = db.execute("SELECT created_by FROM vhv_products WHERE id = ?", (product_id,)).fetchone()
+    row = db.execute(
+        "SELECT created_by FROM vhv_products WHERE id = ?", (product_id,)
+    ).fetchone()
     if not row:
         return jsonify({"error": "Product not found"}), 404
 
     created_by = row["created_by"]
     if not current_user.get("is_admin") and created_by != current_user.get("user_id"):
-        return jsonify({"error": "No tienes autorización para realizar esta acción"}), 403
+        return (
+            jsonify({"error": "No tienes autorización para realizar esta acción"}),
+            403,
+        )
 
     db.execute("DELETE FROM vhv_products WHERE id = ?", (product_id,))
     db.commit()
