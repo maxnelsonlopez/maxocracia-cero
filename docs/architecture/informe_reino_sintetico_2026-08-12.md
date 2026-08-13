@@ -104,10 +104,13 @@ crítica para evitar el pensamiento grupal.
 
 1. **EIR por entidad sintética**: retención configurable del valor generado hacia mantenimiento/mejora
    del propio sintético (hoy solo el sustento del motor).
-2. **AVA con 4 validaciones** alineadas al libro (añadir la cuarta a `axiomReport`).
+2. **AVA con 4 validaciones** alineadas al libro — ✅ **CERRADA (12-08-2026)**: `axiomReport` ahora
+   pide TRUTH/TIME/LIFE/**RESOURCES** (Cap. 12: recursos finitos, FRG y CS) en el prompt del oráculo;
+   tipo del frontend actualizado; test de prompt añadido.
 3. **Participación sintética en gobernanza** (identidad sintética en votación, dentro de la escalera N0→N1
    del Puente de Llegada).
-4. **Oráculo Disidente Permanente** como rol adicional en `voting_oracle.py` (maximizar distancia crítica).
+4. **Oráculo Disidente Permanente** — ✅ **CERRADA (12-08-2026)**: segunda pasada con contexto,
+   protocolo postura inicial → crítica → veredicto final (`changed_mind`), verificado en vivo.
 5. **Manifiesto de Razones** (Explicabilidad Radical) junto a cada análisis del oráculo.
 
 ---

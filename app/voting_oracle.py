@@ -56,7 +56,9 @@ generas, en JSON estricto:
    - TRUTH: ¿se basa en realidad verificable? (T13 transparencia).
    - TIME: ¿respeta la igualdad temporal fundamental (T2) y el TVI (T0/T1)?
    - LIFE: ¿maximiza vida y minimiza sufrimiento? (T16 Minimizar Daño, INV1 gamma >= 1).
-   - Cada ítem: {"type": "TRUTH|TIME|LIFE", "passed": bool, "score": 0-100, "reasoning": str}.
+   - RESOURCES: ¿respeta los recursos finitos y su criticidad sistémica? (Cap. 12,
+     T4 materialización temporal, factor rareza geológica FRG y criticidad CS).
+   - Cada ítem: {"type": "TRUTH|TIME|LIFE|RESOURCES", "passed": bool, "score": 0-100, "reasoning": str}.
 
 3) "oracleOpinions" — opiniones de 5 oráculos sintéticos que debaten:
    - Economic (eficiencia, recursos, viabilidad a largo plazo).

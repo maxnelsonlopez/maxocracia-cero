@@ -102,7 +102,7 @@ verificación determinista — Patrón Puente).
 | RF-I5 | Transparencia: listas, detalle con votos y resultados públicos + hash de auditoría en stats | T13 | ✅ |
 | RF-I6 | Emergencia: veto vital por crimen de coherencia (FS_S → ∞) como categoría de votación | Cap 9.5 §9.5.10 | ✅ (categoría `emergency`) |
 | RF-I7 | Frontend: página `/votaciones` (crear, votar, TruthLedger de cerradas, detalle T13) | demo Gemini portado | ✅ (ago 2026) |
-| RF-I9 | **Oráculo sintético de propuestas**: análisis VHV + axiomas + 4 opiniones, con **DeepSeek como motor principal y fallback a modelos locales** (hub Jan, localhost:1337) — firma T13 del motor (`engine`) | demo Gemini → DeepSeek | ✅ (ago 2026, `voting_oracle.py`) |
+| RF-I9 | **Oráculo sintético de propuestas**: análisis VHV + axiomas + 4 opiniones, con **DeepSeek como motor principal y fallback a modelos locales** (hub Jan, localhost:1337) — firma T13 del motor (`engine`) | demo Gemini → DeepSeek | ✅ (ago 2026, `voting_oracle.py`); **AVA con 4 validaciones (TRUTH/TIME/LIFE/RESOURCES, Cap 14.4) ✅ (12-08-2026)** |
 | RF-I8 | Votación ponderada (por TVI/coherencia) y delegación — fase futura | Cap 14 | ✅ Delegación de voto (democracia líquida prof. 1, ago 2026); **ponderación por TVI (Participación Inteligente, Cap 14) ✅ (ago 2026)**: peso = 1 + 4·(TVI_h / max_TVI), hasta 5x, sin TVI → pesos 1 (retrocompatible), quórum sigue por persona |
 | RF-I10 | **Oráculo Disidente Permanente** (Cap. 19): segunda pasada con TODO el contexto del análisis; protocolo postura inicial → crítica racional → veredicto final, con rectificación honesta (`changed_mind`); si falla, el análisis base sigue vivo | Cap 19 | ✅ (ago 2026, `voting_oracle._dissident_analysis` + 5ª opinión `Dissident`, 5 tests) |
 

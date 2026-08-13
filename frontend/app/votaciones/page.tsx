@@ -41,7 +41,7 @@ interface Proposal {
   oracle_analysis?: {
     analysis: {
       vhv: { vitalTime: number; affectedLives: number; finiteResources: number; timeFactor: number; totalScore: number; confidence: number };
-      axiomReport: { type: "TRUTH" | "TIME" | "LIFE"; passed: boolean; score: number; reasoning: string }[];
+      axiomReport: { type: "TRUTH" | "TIME" | "LIFE" | "RESOURCES"; passed: boolean; score: number; reasoning: string }[];
       oracleOpinions: { role: string; verdict: string; analysis: string; confidence: number }[];
       model: string;
       engine: string;

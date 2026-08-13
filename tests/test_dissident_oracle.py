@@ -128,6 +128,15 @@ def test_prompt_disidente_exige_racionalidad_no_contreras():
     assert "NO eres un contreras" in voting_oracle.DISSIDENT_SYSTEM_PROMPT
 
 
+def test_ava_cuatro_validaciones():
+    """El AVA (Cap. 14.4) exige Verdad, Temporal, Vital y Recursos."""
+    assert "RESOURCES" in voting_oracle.SYSTEM_PROMPT
+    assert "TRUTH" in voting_oracle.SYSTEM_PROMPT
+    assert "TIME" in voting_oracle.SYSTEM_PROMPT
+    assert "LIFE" in voting_oracle.SYSTEM_PROMPT
+    assert "TRUTH|TIME|LIFE|RESOURCES" in voting_oracle.SYSTEM_PROMPT
+
+
 def test_dissident_result_saneado():
     limpio = voting_oracle._clamp_dissident({
         "initial_stance": "otra cosa",
