@@ -1,5 +1,7 @@
 import os
 
+import os
+
 from flask import Flask, request
 
 from .limiter import init_limiter
@@ -104,6 +106,10 @@ def create_app(db_path=None):
     from .verifier_bp import verifier_bp
     from .vhv_bp import vhv_bp
     from .voting_bp import voting_bp
+    from .synthetic_sessions import (
+        init_synthetic_session_tables,
+        synthetic_sessions_bp,
+    )
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
@@ -124,6 +130,8 @@ def create_app(db_path=None):
     app.register_blueprint(subscriptions_bp)
     app.register_blueprint(micromax_bp)
     app.register_blueprint(voting_bp)
+    app.register_blueprint(synthetic_sessions_bp)
+
     app.register_blueprint(guide_bp)
 
     # Inicializar tablas específicas si no existen
@@ -132,6 +140,7 @@ def create_app(db_path=None):
     init_multi_offers_needs_tables(app)
     init_contracts_metrics_tables(app)
     init_guide_tables(app)
+    init_synthetic_session_tables(app)
 
     # placeholder imports to ensure modules loaded
     # other optional blueprints can be imported here

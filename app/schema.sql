@@ -722,3 +722,85 @@ CREATE TABLE IF NOT EXISTS maxo_parameter_resolutions (
     applied_by INTEGER,
     applied_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
+
+
+-- Sesiones manuales de Custodia Sintética: voz separada de poder,
+-- presupuesto por sesión y bitácora revisable. La primera versión no muta
+-- participantes ni seguimientos reales.
+CREATE TABLE IF NOT EXISTS synthetic_agents (
+  agent_id TEXT PRIMARY KEY,
+  display_name TEXT NOT NULL,
+  kind TEXT NOT NULL DEFAULT 'synthetic',
+  provider TEXT NOT NULL,
+  model TEXT NOT NULL,
+  mandate TEXT NOT NULL,
+  active INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS admin_sessions (
+  session_id TEXT PRIMARY KEY,
+  agent_id TEXT NOT NULL,
+  convener_user_id INTEGER NOT NULL,
+  mandate TEXT NOT NULL,
+  mode TEXT NOT NULL CHECK(mode IN ('conversation', 'recommendation', 'reversible_action', 'critical_action')),
+  scope_json TEXT NOT NULL,
+  context_json TEXT NOT NULL,
+  budget_json TEXT NOT NULL,
+  max_requests INTEGER NOT NULL CHECK(max_requests BETWEEN 1 AND 4),
+  requests_used INTEGER NOT NULL DEFAULT 0,
+  max_cost_usd REAL NOT NULL CHECK(max_cost_usd >= 0 AND max_cost_usd <= 0.05),
+  status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'awaiting_review', 'approved', 'rejected', 'revoked', 'expired', 'closed', 'failed')),
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (agent_id) REFERENCES synthetic_agents(agent_id),
+  FOREIGN KEY (convener_user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS session_permissions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id TEXT NOT NULL,
+  permission_level TEXT NOT NULL CHECK(permission_level IN ('P0', 'P1', 'P2', 'P3')),
+  action TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(session_id, permission_level, action),
+  FOREIGN KEY (session_id) REFERENCES admin_sessions(session_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS session_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  actor_kind TEXT NOT NULL,
+  actor_user_id INTEGER,
+  payload_json TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (session_id) REFERENCES admin_sessions(session_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS session_reviews (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id TEXT NOT NULL,
+  reviewer_user_id INTEGER NOT NULL,
+  decision TEXT NOT NULL CHECK(decision IN ('approve', 'reject', 'request_changes')),
+  reason TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (session_id) REFERENCES admin_sessions(session_id) ON DELETE CASCADE,
+  FOREIGN KEY (reviewer_user_id) REFERENCES users(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_sessions_convener ON admin_sessions(convener_user_id);
+CREATE INDEX IF NOT EXISTS idx_session_events_session ON session_events(session_id, id);
+CREATE INDEX IF NOT EXISTS idx_session_reviews_session ON session_reviews(session_id, id);
+
+INSERT OR IGNORE INTO synthetic_agents
+  (agent_id, display_name, kind, provider, model, mandate)
+VALUES (
+  'custodio-participacion',
+  'Custodio de Participación',
+  'synthetic',
+  'deepseek',
+  'configured-server-side',
+  'Clasificar entradas de la Red de Apoyo y preparar seguimientos sin contactar personas ni mutar estados finales.'
+);
