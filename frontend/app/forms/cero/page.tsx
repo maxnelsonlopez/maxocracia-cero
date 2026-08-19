@@ -70,7 +70,52 @@ export default function CeroFormPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const validateStep = (step: number): string | null => {
+    if (step === 0) {
+      const requiredFields: Array<[string, string]> = [
+        [formData.name, "tu nombre o alias"],
+        [formData.email, "tu correo electrónico"],
+        [formData.phone_call, "un teléfono para llamadas"],
+        [formData.phone_whatsapp, "un número de WhatsApp"],
+        [formData.telegram_handle, "tu usuario de Telegram"],
+        [formData.city, "tu ciudad"],
+        [formData.neighborhood, "tu barrio o localidad"],
+        [formData.personal_values, "los valores que te representan"],
+      ];
+      const missingField = requiredFields.find(([value]) => !value.trim());
+
+      if (missingField) {
+        return `Completa ${missingField[1]} para continuar.`;
+      }
+
+      if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) {
+        return "Escribe un correo electrónico válido para poder contactarte.";
+      }
+    }
+
+    if (step === 1 && !formData.offer_description.trim()) {
+      return "Describe brevemente qué puedes ofrecer a la red para continuar.";
+    }
+
+    if (step === 2 && !formData.need_description.trim()) {
+      return "Describe qué necesitas hoy para que la red pueda acompañarte.";
+    }
+
+    if (step === 3 && !formData.consent_given) {
+      return "Necesitas aceptar el uso de datos antes de finalizar el registro.";
+    }
+
+    return null;
+  };
+
   const handleSubmit = async () => {
+    const consentError = validateStep(3);
+    if (consentError) {
+      setErrorMessage(consentError);
+      setStatus("error");
+      return;
+    }
+
     setStatus("submitting");
     try {
       const response = await apiFetch("/forms/participant", {
@@ -127,8 +172,16 @@ export default function CeroFormPage() {
           🤝 Únete a la <span className="text-emerald-500">Red de Apoyo</span>
         </h1>
         <p className="text-slate-400 max-w-2xl mx-auto">
-          Este es el primer paso para crear una comunidad resiliente. Toda la información es voluntaria y confidencial.
+          Este es el primer paso para crear una comunidad resiliente. La información es voluntaria y se usa únicamente para coordinar apoyos dentro de la red.
         </p>
+        <div className="max-w-2xl mx-auto mt-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-left">
+          <p className="text-sm text-slate-300 leading-relaxed">
+            <strong className="text-emerald-300">Antes de empezar:</strong> necesitarás unos minutos para contarnos quién eres, qué puedes ofrecer y qué necesitas. Los campos marcados con <span className="text-emerald-400">*</span> son necesarios para contactarte.
+          </p>
+          <a href="/privacy" className="mt-2 inline-block text-sm text-emerald-400 underline decoration-emerald-500/40 underline-offset-4 hover:text-emerald-300">
+            Conoce cómo protegemos tus datos →
+          </a>
+        </div>
       </div>
 
       {status === "error" && (
@@ -141,12 +194,13 @@ export default function CeroFormPage() {
       <FormWizard
         steps={["Identidad", "Oferta", "Necesidad", "Finalizar"]}
         onComplete={handleSubmit}
+        validateStep={validateStep}
         isSubmitting={status === "submitting"}
       >
         {/* Paso 1: ¿Quién Eres? */}
         <FormStep
           title="👤 ¿Quién Eres?"
-          description="Cuéntanos un poco sobre ti para poder contactarte."
+          description="Necesitamos un canal de contacto y una referencia básica para integrarte a la red."
         >
           <Input
             label="Tu nombre o Alias"
@@ -170,8 +224,7 @@ export default function CeroFormPage() {
             name="referred_by"
             value={formData.referred_by}
             onChange={handleChange}
-            required
-            placeholder="Nombre de la persona o medio"
+            placeholder="Nombre de la persona o medio (opcional)"
           />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
@@ -196,6 +249,7 @@ export default function CeroFormPage() {
             name="telegram_handle"
             value={formData.telegram_handle}
             onChange={handleChange}
+            required
             placeholder="@maxocrata"
           />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -227,7 +281,7 @@ export default function CeroFormPage() {
         {/* Paso 2: ¿Cómo podrías ayudar? */}
         <FormStep
           title="🎁 ¿Cómo Podrías Ayudar?"
-          description="Selecciona las categorías donde puedes aportar a otros."
+          description="Puedes ofrecer tiempo, habilidades, objetos, conocimiento o acompañamiento. Selecciona lo que tenga sentido para ti."
         >
           <FormCheckboxGroup
             label="Categorías de Ayuda"
@@ -254,7 +308,7 @@ export default function CeroFormPage() {
         {/* Paso 3: ¿Qué necesitas? */}
         <FormStep
           title="🙏 ¿Qué Necesitas?"
-          description="No tengas miedo de pedir. La red funciona cuando todos somos honestos."
+          description="No tengas miedo de pedir. La red funciona cuando reconocemos nuestras necesidades con honestidad."
         >
           <FormCheckboxGroup
             label="Categorías de Necesidad"
@@ -281,7 +335,7 @@ export default function CeroFormPage() {
         {/* Paso 4: Consentimiento */}
         <FormStep
           title="✅ Finalizar"
-          description="Casi terminamos. Por favor acepta el manejo de datos."
+          description="Casi terminamos. Revisa el compromiso de privacidad y confirma que podemos usar estos datos para coordinar apoyos."
         >
           <div className="p-6 bg-slate-900/60 border border-slate-800 rounded-2xl">
             <label className="flex items-start gap-3 cursor-pointer group">
@@ -293,7 +347,7 @@ export default function CeroFormPage() {
                 required
               />
               <span className="text-slate-300 text-sm leading-relaxed group-hover:text-white transition-colors">
-                Acepto los términos y condiciones de la Red de Apoyo Maxocracia y autorizo el manejo de mis datos personales para ser contactado por facilitadores y otros participantes de la red con el fin de gestionar intercambios de ayuda.
+                Acepto los <a href="/terms" className="text-emerald-400 underline decoration-emerald-500/40 underline-offset-4 hover:text-emerald-300">términos y condiciones</a> de la Red de Apoyo Maxocracia y autorizo el manejo de mis datos personales para ser contactado por facilitadores y otros participantes de la red con el fin de gestionar intercambios de ayuda. Puedo conocer el detalle en la <a href="/privacy" className="text-emerald-400 underline decoration-emerald-500/40 underline-offset-4 hover:text-emerald-300">política de privacidad</a> y solicitar el borrado de mis datos.
               </span>
             </label>
           </div>

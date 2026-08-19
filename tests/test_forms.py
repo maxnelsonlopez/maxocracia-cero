@@ -34,6 +34,7 @@ class TestFormsManager:
             "need_description": "Necesito ayuda con mercado",
             "need_urgency": "Media",
             "need_human_dimensions": ["prosperidad_recursos"],
+            "consent_given": 1,
         }
 
         response = client.post(
@@ -62,6 +63,31 @@ class TestFormsManager:
         assert json_data["success"] is False
         assert "error" in json_data
 
+    def test_register_participant_requires_consent(self, app, client):
+        """Test that public registration requires explicit consent."""
+        data = {
+            "name": "Consent User",
+            "email": "consent@example.com",
+            "phone_call": "+57 123 456 7890",
+            "phone_whatsapp": "+57 123 456 7890",
+            "telegram_handle": "@consentuser",
+            "city": "Bogotá",
+            "neighborhood": "Chapinero",
+            "personal_values": "Cuidado",
+            "offer_description": "Puedo acompañar",
+            "need_description": "Necesito orientación",
+            "need_urgency": "Media",
+            "consent_given": 0,
+        }
+
+        response = client.post(
+            "/forms/participant", data=json.dumps(data), content_type="application/json"
+        )
+
+        assert response.status_code == 400
+        json_data = response.get_json()
+        assert "manejo de datos" in json_data["error"]
+
     def test_register_participant_duplicate_email(self, app, client):
         """Test participant registration with duplicate email."""
         data = {
@@ -81,6 +107,7 @@ class TestFormsManager:
             "need_description": "Necesito ayuda",
             "need_urgency": "Baja",
             "need_human_dimensions": ["prosperidad_recursos"],
+            "consent_given": 1,
         }
 
         # First registration
@@ -181,6 +208,7 @@ class TestFormsAPI:
             "need_description": "Necesito comida",
             "need_urgency": "Alta",
             "need_human_dimensions": ["prosperidad_recursos"],
+            "consent_given": 1,
         }
 
         participant_response = client.post(

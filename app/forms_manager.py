@@ -111,6 +111,10 @@ class FormsManager:
             if not data.get(field):
                 return False, f"Campo requerido faltante: {field}", None
 
+        # Consent must be explicit; do not silently default it for public registration.
+        if not data.get("consent_given"):
+            return False, "Debes aceptar el manejo de datos para registrarte", None
+
         # Validate urgency
         if data["need_urgency"] not in ["Alta", "Media", "Baja"]:
             return False, "Urgencia debe ser Alta, Media o Baja", None
