@@ -163,6 +163,7 @@ class TestPulsoVitalEndpoint:
             "need_description": "Necesito ayuda con mercado semanal",
             "need_urgency": "Alta",
             "need_human_dimensions": ["prosperidad_recursos"],
+            "consent_given": 1,
         }
 
         reg_response = client.post(

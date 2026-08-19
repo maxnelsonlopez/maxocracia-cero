@@ -29,6 +29,7 @@ def register_test_participant(
         "need_description": "Necesito ayuda",
         "need_urgency": "Media",
         "need_human_dimensions": ["prosperidad_recursos"],
+        "consent_given": 1,
     }
     response = client.post(
         "/forms/participant", data=json.dumps(data), content_type="application/json"

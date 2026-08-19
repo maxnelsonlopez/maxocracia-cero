@@ -285,6 +285,7 @@ export default function CeroFormPage() {
         >
           <FormCheckboxGroup
             label="Categorías de Ayuda"
+            name="offer_categories"
             options={OFFER_CATEGORIES}
             selectedValues={formData.offer_categories}
             onChange={(vals) => setFormData((prev) => ({ ...prev, offer_categories: vals }))}
@@ -299,6 +300,7 @@ export default function CeroFormPage() {
           />
           <FormCheckboxGroup
             label="¿En qué dimensiones humanas ayuda tu oferta?"
+            name="offer_human_dimensions"
             options={HUMAN_DIMENSIONS}
             selectedValues={formData.offer_human_dimensions}
             onChange={(vals) => setFormData((prev) => ({ ...prev, offer_human_dimensions: vals }))}
@@ -312,6 +314,7 @@ export default function CeroFormPage() {
         >
           <FormCheckboxGroup
             label="Categorías de Necesidad"
+            name="need_categories"
             options={NEED_CATEGORIES}
             selectedValues={formData.need_categories}
             onChange={(vals) => setFormData((prev) => ({ ...prev, need_categories: vals }))}
@@ -326,6 +329,7 @@ export default function CeroFormPage() {
           />
           <FormRadioGroup
             label="Urgencia"
+            name="need_urgency"
             options={URGENCY_LEVELS}
             selectedValue={formData.need_urgency}
             onChange={(val) => setFormData((prev) => ({ ...prev, need_urgency: val }))}

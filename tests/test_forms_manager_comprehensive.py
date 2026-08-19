@@ -56,6 +56,7 @@ def sample_participant():
         "offer_description": "Puedo ayudar",
         "need_description": "Necesito ayuda",
         "need_urgency": "Media",
+        "consent_given": 1,
     }
 
 

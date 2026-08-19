@@ -52,6 +52,7 @@ class TestFormsBPEndpoints:
                 "need_description": "Necesito ayuda",
                 "need_urgency": "Baja",
                 "need_human_dimensions": ["prosperidad_recursos"],
+                "consent_given": 1,
             }
             client.post(
                 "/forms/participant",
@@ -119,6 +120,7 @@ class TestFormsBPEndpoints:
             "need_description": "Necesito ayuda",
             "need_urgency": "Baja",
             "need_human_dimensions": ["prosperidad_recursos"],
+            "consent_given": 1,
         }
         giver_resp = client.post(
             "/forms/participant",
@@ -198,6 +200,7 @@ class TestFormsBPEndpoints:
             "need_description": "Necesito comida",
             "need_urgency": "Alta",
             "need_human_dimensions": ["prosperidad_recursos"],
+            "consent_given": 1,
         }
         participant_resp = client.post(
             "/forms/participant",
@@ -258,6 +261,7 @@ class TestFormsBPEndpoints:
             "need_description": "Necesito comida",
             "need_urgency": "Alta",
             "need_human_dimensions": ["prosperidad_recursos"],
+            "consent_given": 1,
         }
         participant_resp = client.post(
             "/forms/participant",
