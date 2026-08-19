@@ -5,7 +5,7 @@ las secciones desconectadas**. Generado el 11-08-2026 con verificación determin
 `fetch`/`api.*` sobre `frontend/app`, cruzado con el inventario de 182 rutas de `mapa_coherencia_ola4.md` §2).
 
 **Stack**: Next.js App Router, `frontend/app/lib/api.ts` como hub (`apiFetch` con Bearer token;
-`API_URL` → localhost:5001 en dev). 33 páginas, ~14.5k líneas de UI.
+`API_URL` → localhost:5001 en dev). 34 páginas, ~15k líneas de UI.
 
 ## 1. Páginas conectadas (página → API consumida)
 
@@ -39,6 +39,7 @@ las secciones desconectadas**. Generado el 11-08-2026 con verificación determin
 | `/admin/sdv` | 276 | `/forms/participants?limit=50`, `/forms/sdv/community` | forms |
 | `/admin/users` | 279 | `/subscriptions/admin/users`, `/subscriptions/activate-manual` | subscriptions |
 | `/admin/participants` | 849 | `/forms/participants`, `/forms/participants/{id}` (GET/POST/DELETE) | forms |
+| `/admin/synthetic-sessions` | panel nuevo | `/api/synthetic-sessions`, `/<session_id>`, `/<session_id>/run`, `/review`, `/revoke`, `/audit` | synthetic_sessions |
 
 ## 2. Páginas sin conexión a API (contenido / estáticas)
 
@@ -94,4 +95,4 @@ Get-Content frontend\app\lib\api.ts
 ```
 
 ---
-**Última actualización**: 12-08-2026 · **Método**: RLM + verificación determinista (Patrón Puente)
+**Última actualización**: 19-08-2026 · **Método**: RLM + verificación determinista (Patrón Puente)
