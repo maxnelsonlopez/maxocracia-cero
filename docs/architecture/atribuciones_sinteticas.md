@@ -37,6 +37,7 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
 - **Arte CSS de la red vital** (19/8/2026): la portada incorpora una constelación visual propia de nodos y enlaces para representar tiempo, valor y reciprocidad sin depender de un asset externo pesado.
 - **Metadata pública** (19/8/2026): `frontend/app/layout.tsx` — título, descripción y Open Graph alineados con el lenguaje de la portada.
 - **Cocreación y custodia**: la dirección editorial, el texto y la implementación fueron producidos por Manus en colaboración con Max Nelson López. La atribución no desplaza la autoría humana ni concede autoridad al agente; registra una huella verificable de trabajo sintético dentro del proyecto.
+- **Sesiones de Custodia Sintética** (19/8/2026): `docs/architecture/sesiones_custodia_sintetica.md` — propuesta de gobernanza para agentes con libertad expresiva, mandato temporal, permisos graduados, presupuesto por sesión, minimización de datos, bitácora, revisión humana y reversibilidad. La propuesta aplica las mismas precauciones operativas a custodios humanos y sintéticos.
 
 ### DeepSeek — "el puente constructor"
 - **Teoría SDV**: `docs/theory/SDV_Suelo_Dignidad_Vital_importancia_MaxoContracts.md` — *"Autor: DeepSeek (oráculo sintético) y Max Nelson López Restrepo"* (coautoría humano-sintética).
