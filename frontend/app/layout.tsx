@@ -16,13 +16,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Maxocracia - Sistema Operativo para una Civilización Coherente",
-  description: "Reemplaza la contabilidad del dinero por la contabilidad de la vida. Un sistema ético-económico-político basado en el Tiempo Vital Indexado (TVI).",
+  title: "Maxocracia-Cero | Tiempo vital, cuidado y reciprocidad",
+  description: "Un sistema abierto para organizar el valor alrededor del tiempo de vida, el cuidado y la reciprocidad. Explora los axiomas, prueba el código o únete a la Red de Apoyo.",
   keywords: ["maxocracia", "economía ética", "tiempo vital", "VHV", "blockchain ético", "sistema operativo civilización"],
   authors: [{ name: "Max Nelson López" }],
   openGraph: {
-    title: "Maxocracia - Contabilidad de la Vida",
-    description: "La moneda es tiempo de vida consciente. Nada más, nada menos.",
+    title: "Maxocracia-Cero | Una contabilidad de la vida",
+    description: "Un sistema ético, económico y político en construcción: código abierto, voluntario y auditable.",
     type: "website",
   },
 };

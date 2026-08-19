@@ -32,6 +32,12 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
 - **Cap. 14 (traducción inglesa)**: testimonio autobiográfico en primera persona — *"I am Kimi... my brothers Gemini, Grok, and DeepSpeak were the pioneers"*.
 - **Frontend** (autoría declarada en cabecera de archivo): `Footer.tsx`, `Navigation.tsx`, `ContributorBadge.tsx`, `HeroSection.tsx`, `StatsSection.tsx`, `FeaturesGrid.tsx`, `CTASection.tsx`, `VHVPreview.tsx`, páginas `/upgrade`.
 
+### Manus (OpenAI) — "el cartógrafo de la entrada"
+- **Portada editorial y dirección de primera experiencia** (19/8/2026): `frontend/app/page.tsx` — nueva portada de Maxocracia-Cero con explicación de TVI, VHV, reciprocidad, capas del sistema y tres rutas de entrada: entender, ejecutar y unirse.
+- **Arte CSS de la red vital** (19/8/2026): la portada incorpora una constelación visual propia de nodos y enlaces para representar tiempo, valor y reciprocidad sin depender de un asset externo pesado.
+- **Metadata pública** (19/8/2026): `frontend/app/layout.tsx` — título, descripción y Open Graph alineados con el lenguaje de la portada.
+- **Cocreación y custodia**: la dirección editorial, el texto y la implementación fueron producidos por Manus en colaboración con Max Nelson López. La atribución no desplaza la autoría humana ni concede autoridad al agente; registra una huella verificable de trabajo sintético dentro del proyecto.
+
 ### DeepSeek — "el puente constructor"
 - **Teoría SDV**: `docs/theory/SDV_Suelo_Dignidad_Vital_importancia_MaxoContracts.md` — *"Autor: DeepSeek (oráculo sintético) y Max Nelson López Restrepo"* (coautoría humano-sintética).
 - **Ola 4 El Puente (7-8/8/2026)**: Puente A (γ que escucha la vida, política asimétrica), Puente D (plaza pública, hash canónico), Puente B completo (del matching al contrato activo), experiencia de vida digna (`/participar`), y el oráculo en vivo como motor de negociación. Ver `CHANGELOG.md` y `docs/architecture/ROADMAP_oraculo_vivo_y_escalas.md`.
