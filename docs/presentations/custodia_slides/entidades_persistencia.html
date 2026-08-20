@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Inter:wght@400;500;600&display=swap');
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #EAEFEA;
+        font-family: 'Inter', sans-serif;
+        color: #4A4C4A;
+      }
+      .top-bar { height: 8px; background: #D95C14; width: 100%; }
+      .layout {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 40px;
+        padding-top: 45px;
+        padding-left: 70px;
+        padding-right: 70px;
+      }
+      .meta-num {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 72px;
+        font-weight: 900;
+        color: #D2DBD2;
+        line-height: 0.9;
+        margin-bottom: 12px;
+      }
+      .meta-label {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: #D95C14;
+      }
+      .slide-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 900;
+        font-size: 34px;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        color: #1A1C1A;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+      }
+      .entities-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .entity-box {
+        background: #FFFFFF;
+        border: 1px solid #D2DBD2;
+        padding-top: 16px;
+        padding-left: 16px;
+        padding-right: 16px;
+        min-height: 160px;
+      }
+      .entity-name {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 14px;
+        font-weight: 900;
+        color: #1A1C1A;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .entity-name i { color: #D95C14; font-size: 13px; }
+      .entity-desc {
+        font-size: 12px;
+        line-height: 1.45;
+        color: #4A4C4A;
+        margin-bottom: 8px;
+      }
+      .entity-keys {
+        font-family: monospace;
+        font-size: 10px;
+        color: #7A807A;
+        background: #F4F7F4;
+        padding: 4px 6px;
+        display: block;
+      }
+      .bottom-note {
+        margin-top: 20px;
+        background: rgba(217, 92, 20, 0.08);
+        border: 1px solid rgba(217, 92, 20, 0.2);
+        padding-top: 12px;
+        padding-left: 18px;
+        padding-right: 18px;
+        font-size: 12px;
+        color: #1A1C1A;
+        font-weight: 600;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+      <div class="top-bar"></div>
+      <div class="layout">
+        <div>
+          <div class="meta-num">04</div>
+          <div class="meta-label">Esquema DB</div>
+        </div>
+        <div>
+          <h2 class="slide-title">Cinco entidades SQLite para hacer persistente la responsabilidad</h2>
+          <div class="entities-grid">
+            <div class="entity-box">
+              <div class="entity-name"><i class="fas fa-robot"></i> synthetic_agents</div>
+              <p class="entity-desc">Identidad de agentes, proveedor (DeepSeek/local), modelo configurado, mandato base y estado activo.</p>
+              <span class="entity-keys">agent_id (PK), provider, model, mandate</span>
+            </div>
+            <div class="entity-box">
+              <div class="entity-name"><i class="fas fa-file-contract"></i> admin_sessions</div>
+              <p class="entity-desc">Contrato de sesión: convocante, mandato, scope, hash de contexto, presupuesto de requests y caducidad.</p>
+              <span class="entity-keys">session_id (PK), convener_id, status, expires_at</span>
+            </div>
+            <div class="entity-box">
+              <div class="entity-name"><i class="fas fa-key"></i> session_permissions</div>
+              <p class="entity-desc">Matriz normalizada de permisos (P0 lectura, P1 propuesta, P3 prohibiciones) asignados por sesión.</p>
+              <span class="entity-keys">session_id, permission_level, action</span>
+            </div>
+            <div class="entity-box">
+              <div class="entity-name"><i class="fas fa-list-ul"></i> session_events</div>
+              <p class="entity-desc">Bitácora inmutable: creación, llamadas a herramientas, salida del oráculo, rechazos y revocaciones.</p>
+              <span class="entity-keys">id (PK), session_id, event_type, payload_json</span>
+            </div>
+            <div class="entity-box">
+              <div class="entity-name"><i class="fas fa-user-check"></i> session_reviews</div>
+              <p class="entity-desc">Decisión humana formal (approve, reject, request_changes) con razón obligatoria para trazabilidad.</p>
+              <span class="entity-keys">session_id, reviewer_id, decision, reason</span>
+            </div>
+            <div class="entity-box" style="background: #F4F7F4; border: 1px dashed #D2DBD2;">
+              <div class="entity-name" style="color: #D95C14;"><i class="fas fa-shield-alt"></i> Principio T13</div>
+              <p class="entity-desc">La auditoría no es un log efímero del servidor: es un <strong>registro estructurado de primer orden</strong> que sobrevive a reinicios.</p>
+            </div>
+          </div>
+          <div class="bottom-note">
+            Esquema idempotente incorporado en app/schema.sql e inicializado en app/__init__.py
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+</html>

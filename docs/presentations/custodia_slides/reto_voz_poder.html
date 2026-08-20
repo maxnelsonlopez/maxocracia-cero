@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Inter:wght@400;500;600&display=swap');
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #EAEFEA;
+        font-family: 'Inter', sans-serif;
+        color: #4A4C4A;
+      }
+      .top-bar { height: 8px; background: #D95C14; width: 100%; }
+      .layout {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 50px;
+        padding-top: 50px;
+        padding-left: 70px;
+        padding-right: 70px;
+      }
+      .meta-num {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 72px;
+        font-weight: 900;
+        color: #D2DBD2;
+        line-height: 0.9;
+        margin-bottom: 12px;
+      }
+      .meta-label {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: #D95C14;
+      }
+      .slide-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 900;
+        font-size: 38px;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        color: #1A1C1A;
+        text-transform: uppercase;
+        margin-bottom: 30px;
+      }
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 30px;
+      }
+      .box {
+        background: #FFFFFF;
+        border: 1px solid #D2DBD2;
+        padding-top: 24px;
+        padding-left: 24px;
+        padding-right: 24px;
+        min-height: 180px;
+      }
+      .box-head {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #1A1C1A;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .box-head i { color: #D95C14; }
+      .box-p {
+        font-size: 14px;
+        line-height: 1.5;
+        color: #4A4C4A;
+      }
+      .quote-strip {
+        background: rgba(217, 92, 20, 0.08);
+        border: 1px solid rgba(217, 92, 20, 0.2);
+        padding-top: 18px;
+        padding-left: 24px;
+        padding-right: 24px;
+        min-height: 80px;
+      }
+      .quote-text {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 15px;
+        color: #1A1C1A;
+        line-height: 1.4;
+      }
+      .quote-src {
+        font-size: 11px;
+        color: #7A807A;
+        margin-top: 4px;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+      <div class="top-bar"></div>
+      <div class="layout">
+        <div>
+          <div class="meta-num">01</div>
+          <div class="meta-label">Gobernanza</div>
+        </div>
+        <div>
+          <h2 class="slide-title">El reto: otorgar voz sin entregar una llave maestra</h2>
+          <div class="grid-2">
+            <div class="box">
+              <div class="box-head"><i class="fas fa-comment-dots"></i> Libertad expresiva</div>
+              <p class="box-p">Un agente sintético puede <strong>razonar, disentir, declarar incertidumbre y negarse</strong> a tareas fuera de su mandato. No se le obliga a fingir neutralidad ni a generar consensos artificiales.</p>
+            </div>
+            <div class="box">
+              <div class="box-head"><i class="fas fa-lock"></i> Contención de efectos</div>
+              <p class="box-p">Lo que se limita estrictamente no es la voz, sino los <strong>efectos reales</strong> sobre personas y estado común. La plataforma valida evidencias y límites en vez de confiar en autoridad retórica.</p>
+            </div>
+          </div>
+          <div class="quote-strip">
+            <p class="quote-text">“La interfaz y la arquitectura deben separar con nitidez tres cosas: lo que el agente piensa, lo que propone y lo que efectivamente ocurrió.”</p>
+            <p class="quote-src">docs/architecture/sesiones_custodia_sintetica.md</p>
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Inter:wght@400;500;600&display=swap');
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #EAEFEA;
+        font-family: 'Inter', sans-serif;
+        color: #4A4C4A;
+      }
+      .top-bar { height: 8px; background: #D95C14; width: 100%; }
+      .layout {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 50px;
+        padding-top: 45px;
+        padding-left: 70px;
+        padding-right: 70px;
+      }
+      .meta-num {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 72px;
+        font-weight: 900;
+        color: #D2DBD2;
+        line-height: 0.9;
+        margin-bottom: 12px;
+      }
+      .meta-label {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: #D95C14;
+      }
+      .slide-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 900;
+        font-size: 36px;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        color: #1A1C1A;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+      }
+      .grid-content {
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        gap: 30px;
+      }
+      .card-item {
+        background: #FFFFFF;
+        border: 1px solid #D2DBD2;
+        padding-top: 16px;
+        padding-left: 20px;
+        padding-right: 20px;
+        margin-bottom: 14px;
+        min-height: 95px;
+      }
+      .card-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 13px;
+        text-transform: uppercase;
+        color: #1A1C1A;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .card-title i { color: #D95C14; }
+      .card-desc {
+        font-size: 12.5px;
+        line-height: 1.45;
+        color: #4A4C4A;
+      }
+      .image-container {
+        background: #FFFFFF;
+        border: 1px solid #D2DBD2;
+        padding-top: 16px;
+        padding-left: 16px;
+        padding-right: 16px;
+        display: flex;
+        flex-direction: column;
+      }
+      .image-container img {
+        width: 386px;
+        height: 250px;
+        object-fit: contain;
+        background: #F8FAF8;
+        border: 1px solid #EAEFEA;
+      }
+      .img-caption {
+        font-size: 11px;
+        color: #7A807A;
+        margin-top: 10px;
+        line-height: 1.4;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+      <div class="top-bar"></div>
+      <div class="layout">
+        <div>
+          <div class="meta-num">06</div>
+          <div class="meta-label">Privacidad</div>
+        </div>
+        <div>
+          <h2 class="slide-title">La privacidad se aplica antes de invocar al modelo</h2>
+          <div class="grid-content">
+            <div>
+              <div class="card-item">
+                <div class="card-title"><i class="fas fa-filter"></i> Redacción Automática de PII</div>
+                <p class="card-desc">Los correos electrónicos y números telefónicos se sustituyen por etiquetas antes de ingresar al contexto del modelo.</p>
+              </div>
+              <div class="card-item">
+                <div class="card-title"><i class="fas fa-fingerprint"></i> Hash Criptográfico (SHA-256)</div>
+                <p class="card-desc">Cada contexto genera una huella inmutable: se verifica exactamente qué documentos estuvieron presentes en la deliberación.</p>
+              </div>
+              <div class="card-item">
+                <div class="card-title"><i class="fas fa-layer-group"></i> Resúmenes Agregados P0</div>
+                <p class="card-desc">Las herramientas de lectura entregan conteos por ciudad y categoría (k &ge; 2) sin exponer registros individuales.</p>
+              </div>
+            </div>
+            <div class="image-container">
+              <img src="/home/ubuntu/upload/search_images/voUNo0RW8N9p.jpg" alt="Diferencia entre Logs y Evidencia Verificada">
+              <p class="img-caption"><strong>Logs vs. Evidencia:</strong> La custodia sintética no acumula datos en bruto; construye registros inmutables y verificables.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+</html>

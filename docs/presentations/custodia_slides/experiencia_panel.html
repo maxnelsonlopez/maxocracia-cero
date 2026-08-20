@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Inter:wght@400;500;600&display=swap');
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #EAEFEA;
+        font-family: 'Inter', sans-serif;
+        color: #4A4C4A;
+      }
+      .top-bar { height: 8px; background: #D95C14; width: 100%; }
+      .layout {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 50px;
+        padding-top: 45px;
+        padding-left: 70px;
+        padding-right: 70px;
+      }
+      .meta-num {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 72px;
+        font-weight: 900;
+        color: #D2DBD2;
+        line-height: 0.9;
+        margin-bottom: 12px;
+      }
+      .meta-label {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: #D95C14;
+      }
+      .slide-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 900;
+        font-size: 36px;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        color: #1A1C1A;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+      }
+      .panel-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      .panel-card {
+        background: #FFFFFF;
+        border: 1px solid #D2DBD2;
+        padding-top: 18px;
+        padding-left: 20px;
+        padding-right: 20px;
+        min-height: 160px;
+      }
+      .panel-head {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #1A1C1A;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .panel-head i { color: #D95C14; }
+      .panel-desc {
+        font-size: 13px;
+        line-height: 1.45;
+        color: #4A4C4A;
+      }
+      .banner {
+        background: #1A1C1A;
+        color: #FFFFFF;
+        padding-top: 14px;
+        padding-left: 20px;
+        padding-right: 20px;
+        min-height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .banner-txt {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .banner-txt span { color: #D95C14; }
+      .banner-sub {
+        font-size: 12px;
+        color: #A0A5A0;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+      <div class="top-bar"></div>
+      <div class="layout">
+        <div>
+          <div class="meta-num">07</div>
+          <div class="meta-label">Interfaz Admin</div>
+        </div>
+        <div>
+          <h2 class="slide-title">El panel convierte gobernanza en una experiencia legible</h2>
+          <div class="panel-grid">
+            <div class="panel-card">
+              <div class="panel-head"><i class="fas fa-plus-circle"></i> 1. Convocación explícita</div>
+              <p class="panel-desc">Formulario con mandato, documentos declarados, selección de herramientas P0 y límite de solicitudes (1-4). Todo visible antes de iniciar la interacción.</p>
+            </div>
+            <div class="panel-card">
+              <div class="panel-head"><i class="fas fa-file-contract"></i> 2. Contrato en tiempo real</div>
+              <p class="panel-desc">Cabecera persistente con agente activo, hash SHA-256 de contexto, solicitudes restantes, caducidad y botones de revocación y exportación de bitácora.</p>
+            </div>
+            <div class="panel-card">
+              <div class="panel-head"><i class="fas fa-columns"></i> 3. Salida en cuatro dimensiones</div>
+              <p class="panel-desc">La respuesta del oráculo se desglosa visualmente en cuatro paneles: <strong>opinión</strong> (voz), <strong>evidencia</strong> (hechos), <strong>propuesta</strong> (borrador) e <strong>incertidumbre</strong>.</p>
+            </div>
+            <div class="panel-card">
+              <div class="panel-head"><i class="fas fa-check-double"></i> 4. Revisión y decisión humana</div>
+              <p class="panel-desc">Botones de Aprobar, Rechazar o Pedir Cambios con ingreso obligatorio de una razón explicativa que se persiste en la bitácora auditable.</p>
+            </div>
+          </div>
+          <div class="banner">
+            <div class="banner-txt">Declaración permanente: <span>“Nada ha mutado”</span></div>
+            <div class="banner-sub">Ruta implementada: /admin/synthetic-sessions (Next.js App Router)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+</html>

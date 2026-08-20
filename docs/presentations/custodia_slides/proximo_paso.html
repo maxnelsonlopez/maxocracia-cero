@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Inter:wght@400;500;600&display=swap');
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #EAEFEA;
+        font-family: 'Inter', sans-serif;
+        color: #4A4C4A;
+      }
+      .top-bar { height: 8px; background: #D95C14; width: 100%; }
+      .layout {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 50px;
+        padding-top: 45px;
+        padding-left: 70px;
+        padding-right: 70px;
+      }
+      .meta-num {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 72px;
+        font-weight: 900;
+        color: #D2DBD2;
+        line-height: 0.9;
+        margin-bottom: 12px;
+      }
+      .meta-label {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: #D95C14;
+      }
+      .slide-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 900;
+        font-size: 36px;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        color: #1A1C1A;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+      }
+      .steps-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .step-item {
+        background: #FFFFFF;
+        border: 1px solid #D2DBD2;
+        padding-top: 18px;
+        padding-left: 16px;
+        padding-right: 16px;
+        min-height: 190px;
+      }
+      .step-tag {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 900;
+        font-size: 11px;
+        color: #D95C14;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+      .step-heading {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 13px;
+        text-transform: uppercase;
+        color: #1A1C1A;
+        margin-bottom: 8px;
+      }
+      .step-body {
+        font-size: 12px;
+        line-height: 1.45;
+        color: #4A4C4A;
+      }
+      .warning-strip {
+        background: #FFFFFF;
+        border: 1px solid #D2DBD2;
+        padding-top: 14px;
+        padding-left: 20px;
+        padding-right: 20px;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .warning-strip i {
+        font-size: 20px;
+        color: #B91C1C;
+      }
+      .warning-content h4 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 12px;
+        text-transform: uppercase;
+        color: #1A1C1A;
+      }
+      .warning-content p {
+        font-size: 12px;
+        color: #7A807A;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+      <div class="top-bar"></div>
+      <div class="layout">
+        <div>
+          <div class="meta-num">10</div>
+          <div class="meta-label">Roadmap</div>
+        </div>
+        <div>
+          <h2 class="slide-title">La próxima autonomía debe ser ganada con evidencia</h2>
+          <div class="steps-grid">
+            <div class="step-item">
+              <div class="step-tag">Fase 1 · Piloto</div>
+              <div class="step-heading">Cohorte Manual</div>
+              <p class="step-body">Ejecutar 10 a 20 sesiones reales con datos minimizados y el rol <code>Custodio de Participación</code>.</p>
+            </div>
+            <div class="step-item">
+              <div class="step-tag">Fase 2 · Análisis</div>
+              <div class="step-heading">Medición de Patrones</div>
+              <p class="step-body">Evaluar suficiencia de contexto, tasa de negativas, incertidumbres declaradas y costos efectivos.</p>
+            </div>
+            <div class="step-item">
+              <div class="step-tag">Fase 3 · Ajuste</div>
+              <div class="step-heading">Informe & Guías</div>
+              <p class="step-body">Documentar lecciones aprendidas, refinar el contrato de sesión y actualizar criterios de revisión.</p>
+            </div>
+            <div class="step-item">
+              <div class="step-tag">Fase 4 · Mutación P2</div>
+              <div class="step-heading">Borrador Reversible</div>
+              <p class="step-body">Habilitar creación de seguimientos como borrador, con botón de reversión y registro de estado anterior.</p>
+            </div>
+          </div>
+          <div class="warning-strip">
+            <i class="fas fa-shield-virus"></i>
+            <div class="warning-content">
+              <h4>Límites que permanecen infranqueables en el corto plazo</h4>
+              <p>Contacto no supervisado con participantes, cambio de roles, modificación de balances, alteración de axiomas o borrado de datos.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+</html>

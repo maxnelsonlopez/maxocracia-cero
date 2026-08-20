@@ -1,0 +1,133 @@
+{
+  "project_info": {
+    "title": "Custodia Sintética",
+    "created": 1787199014.337,
+    "last_updated": 1787199103.314,
+    "total_slides": 12
+  },
+  "slides": [
+    {
+      "id": "portada",
+      "state": "edited",
+      "pageNum": 1
+    },
+    {
+      "id": "reto_voz_poder",
+      "state": "edited",
+      "pageNum": 2
+    },
+    {
+      "id": "contrato_sesion",
+      "state": "edited",
+      "pageNum": 3
+    },
+    {
+      "id": "arquitectura_nucleo",
+      "state": "edited",
+      "pageNum": 4
+    },
+    {
+      "id": "entidades_persistencia",
+      "state": "edited",
+      "pageNum": 5
+    },
+    {
+      "id": "matriz_permisos",
+      "state": "edited",
+      "pageNum": 6
+    },
+    {
+      "id": "privacidad_minima",
+      "state": "edited",
+      "pageNum": 7
+    },
+    {
+      "id": "experiencia_panel",
+      "state": "edited",
+      "pageNum": 8
+    },
+    {
+      "id": "flujo_revision",
+      "state": "edited",
+      "pageNum": 9
+    },
+    {
+      "id": "validacion_entrega",
+      "state": "edited",
+      "pageNum": 10
+    },
+    {
+      "id": "proximo_paso",
+      "state": "edited",
+      "pageNum": 11
+    },
+    {
+      "id": "cierre",
+      "state": "edited",
+      "pageNum": 12
+    }
+  ],
+  "outline": [
+    {
+      "id": "portada",
+      "title": "Custodia Sintética",
+      "summary": "Portada de la presentación sobre arquitectura y panel de deliberación segura en Maxocracia-Cero."
+    },
+    {
+      "id": "reto_voz_poder",
+      "title": "El reto: voz sin llave maestra",
+      "summary": "Separación entre libertad expresiva y efectos sobre el estado común."
+    },
+    {
+      "id": "contrato_sesion",
+      "title": "El contrato de una sesión auditable",
+      "summary": "Componentes esenciales: actor, mandato, alcance, contexto, presupuesto y revisión."
+    },
+    {
+      "id": "arquitectura_nucleo",
+      "title": "Arquitectura integrada al núcleo",
+      "summary": "Integración técnica con Flask, SQLite, JWT y oráculo server-side."
+    },
+    {
+      "id": "entidades_persistencia",
+      "title": "Cinco entidades para la responsabilidad",
+      "summary": "Estructura de datos persistente: agentes, sesiones, permisos, eventos y revisiones."
+    },
+    {
+      "id": "matriz_permisos",
+      "title": "Matriz de permisos por efecto",
+      "summary": "Clasificación P0 a P3 y protección igual para humanos y agentes."
+    },
+    {
+      "id": "privacidad_minima",
+      "title": "Privacidad previa al modelo",
+      "summary": "Minimización de datos, hash de contexto y límites estrictos por sesión.",
+      "image_plan": "/home/ubuntu/upload/search_images/voUNo0RW8N9p.jpg - Visual diagram comparing raw audit data streams (logs) vs verified audit evidence (proof), matching the governance and audit trail concepts of the presentation."
+    },
+    {
+      "id": "experiencia_panel",
+      "title": "Experiencia del panel administrativo",
+      "summary": "Diseño enfocado en deliberación, claridad de estados y separación visual."
+    },
+    {
+      "id": "flujo_revision",
+      "title": "Flujo de revisión y auditoría",
+      "summary": "Ciclo de vida: de sesión activa a revisión humana, revocación o exportación."
+    },
+    {
+      "id": "validacion_entrega",
+      "title": "Validación técnica y entrega",
+      "summary": "Resultados de pruebas backend, build de producción y commits locales."
+    },
+    {
+      "id": "proximo_paso",
+      "title": "Siguiente paso con evidencia",
+      "summary": "Hoja de ruta segura: cohorte manual antes de habilitar acciones reversibles."
+    },
+    {
+      "id": "cierre",
+      "title": "Autonomía y responsabilidad",
+      "summary": "Conclusión sobre deliberación comunitaria asistida por inteligencia sintética."
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Inter:wght@400;500;600&display=swap');
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #EAEFEA;
+        font-family: 'Inter', sans-serif;
+        color: #4A4C4A;
+      }
+      .top-bar { height: 8px; background: #D95C14; width: 100%; }
+      .layout {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 50px;
+        padding-top: 45px;
+        padding-left: 70px;
+        padding-right: 70px;
+      }
+      .meta-num {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 72px;
+        font-weight: 900;
+        color: #D2DBD2;
+        line-height: 0.9;
+        margin-bottom: 12px;
+      }
+      .meta-label {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: #D95C14;
+      }
+      .slide-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 900;
+        font-size: 36px;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        color: #1A1C1A;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+      }
+      .contract-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #FFFFFF;
+        border: 1px solid #D2DBD2;
+      }
+      .contract-table th {
+        background: #F4F7F4;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #1A1C1A;
+        text-align: left;
+        padding-top: 10px;
+        padding-left: 16px;
+        padding-right: 16px;
+        height: 36px;
+        border-bottom: 2px solid #D2DBD2;
+      }
+      .contract-table td {
+        padding-top: 10px;
+        padding-left: 16px;
+        padding-right: 16px;
+        height: 48px;
+        font-size: 13px;
+        border-bottom: 1px solid #EAEFEA;
+        color: #4A4C4A;
+      }
+      .contract-table tr:last-child td { border-bottom: none; }
+      .badge-key {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        color: #D95C14;
+        text-transform: uppercase;
+        font-size: 12px;
+      }
+      .footer-note {
+        margin-top: 18px;
+        font-size: 12px;
+        color: #7A807A;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .footer-note i { color: #D95C14; }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+      <div class="top-bar"></div>
+      <div class="layout">
+        <div>
+          <div class="meta-num">02</div>
+          <div class="meta-label">Contrato</div>
+        </div>
+        <div>
+          <h2 class="slide-title">La sesión convierte la intención en un contrato auditable</h2>
+          <table class="contract-table">
+            <thead>
+              <tr>
+                <th style="width: 220px;">Parámetro</th>
+                <th style="width: 260px;">Pregunta que responde</th>
+                <th>Efecto en el prototipo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="badge-key"><i class="fas fa-id-badge"></i> Actor</td>
+                <td>¿Quién interviene?</td>
+                <td>Agente sintético o custodio humano registrado con modelo y rol explícito.</td>
+              </tr>
+              <tr>
+                <td class="badge-key"><i class="fas fa-bullseye"></i> Mandato</td>
+                <td>¿Para qué fue convocado?</td>
+                <td>Objetivo acotado que prevalece sobre instrucciones libres del chat.</td>
+              </tr>
+              <tr>
+                <td class="badge-key"><i class="fas fa-shield-alt"></i> Alcance (Scope)</td>
+                <td>¿Qué puede hacer y qué no?</td>
+                <td>Listas explícitas de herramientas de lectura (P0), borrador (P1) y prohibiciones (P3).</td>
+              </tr>
+              <tr>
+                <td class="badge-key"><i class="fas fa-user-shield"></i> Contexto</td>
+                <td>¿Qué datos recibe?</td>
+                <td>Documentos filtrados con redacción de datos privados y hash verificable (SHA-256).</td>
+              </tr>
+              <tr>
+                <td class="badge-key"><i class="fas fa-hourglass-half"></i> Presupuesto & Caducidad</td>
+                <td>¿Hasta cuándo y cuánto?</td>
+                <td>Límite estricto de 1-4 solicitudes, tope en USD y expiración máxima de 24 horas.</td>
+              </tr>
+              <tr>
+                <td class="badge-key"><i class="fas fa-clipboard-check"></i> Estado & Revisión</td>
+                <td>¿Qué pasó con el resultado?</td>
+                <td>Estados transparentes: activa, en revisión, aprobada, rechazada o revocada.</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="footer-note">
+            <i class="fas fa-info-circle"></i>
+            <span>Una sesión no es un chat genérico: es una unidad temporal de gobernanza con trazabilidad integral.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Inter:wght@400;500;600&display=swap');
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #EAEFEA;
+        font-family: 'Inter', sans-serif;
+        color: #4A4C4A;
+        position: relative;
+      }
+      .top-bar {
+        height: 8px;
+        background: #D95C14;
+        width: 100%;
+      }
+      .content-wrap {
+        padding-top: 60px;
+        padding-left: 80px;
+        padding-right: 80px;
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 60px;
+      }
+      .meta-col {
+        border-right: 2px solid #D2DBD2;
+        padding-right: 30px;
+      }
+      .tag {
+        display: inline-block;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 11px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: #D95C14;
+        background: rgba(217, 92, 20, 0.1);
+        padding: 6px 12px;
+        border-radius: 4px;
+        margin-bottom: 24px;
+      }
+      .meta-item {
+        margin-bottom: 24px;
+      }
+      .meta-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #7A807A;
+        margin-bottom: 6px;
+      }
+      .meta-val {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1A1C1A;
+      }
+      .main-col {
+        padding-top: 10px;
+      }
+      .title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 900;
+        font-size: 64px;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+        color: #1A1C1A;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+      }
+      .title span {
+        color: #D95C14;
+      }
+      .subtitle {
+        font-size: 22px;
+        line-height: 1.4;
+        color: #4A4C4A;
+        max-width: 720px;
+        margin-bottom: 40px;
+      }
+      .badge-row {
+        display: flex;
+        gap: 16px;
+      }
+      .pill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #FFFFFF;
+        border: 1px solid #D2DBD2;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #1A1C1A;
+      }
+      .pill i {
+        color: #D95C14;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+      <div class="top-bar"></div>
+      <div class="content-wrap">
+        <div class="meta-col">
+          <div class="tag">Maxocracia-Cero</div>
+          <div class="meta-item">
+            <div class="meta-label">Ámbito</div>
+            <div class="meta-val">Gobernanza y Sostenibilidad</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Cocreación</div>
+            <div class="meta-val">Max Nelson López<br>+ Manus (OpenAI)</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Fecha de hito</div>
+            <div class="meta-val">19 de agosto de 2026</div>
+          </div>
+        </div>
+        <div class="main-col">
+          <h1 class="title">Custodia<br><span>Sintética</span></h1>
+          <p class="subtitle">Arquitectura y panel administrativo de deliberación segura: cómo otorgar libertad expresiva a agentes de IA sin delegar el poder operativo.</p>
+          <div class="badge-row">
+            <div class="pill"><i class="fas fa-shield-alt"></i> Permisos P0 / P1 / P3</div>
+            <div class="pill"><i class="fas fa-user-check"></i> Revisión humana previa</div>
+            <div class="pill"><i class="fas fa-database"></i> SQLite + Flask + Next.js</div>
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+</html>

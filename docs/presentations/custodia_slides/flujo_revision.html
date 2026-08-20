@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Inter:wght@400;500;600&display=swap');
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #EAEFEA;
+        font-family: 'Inter', sans-serif;
+        color: #4A4C4A;
+      }
+      .top-bar { height: 8px; background: #D95C14; width: 100%; }
+      .layout {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 50px;
+        padding-top: 45px;
+        padding-left: 70px;
+        padding-right: 70px;
+      }
+      .meta-num {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 72px;
+        font-weight: 900;
+        color: #D2DBD2;
+        line-height: 0.9;
+        margin-bottom: 12px;
+      }
+      .meta-label {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: #D95C14;
+      }
+      .slide-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 900;
+        font-size: 36px;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        color: #1A1C1A;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+      }
+      .lifecycle-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .state-card {
+        background: #FFFFFF;
+        border: 1px solid #D2DBD2;
+        padding-top: 18px;
+        padding-left: 16px;
+        padding-right: 16px;
+        min-height: 175px;
+      }
+      .state-pill {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        padding: 4px 8px;
+        display: inline-block;
+        margin-bottom: 10px;
+      }
+      .st-active { background: rgba(6, 182, 212, 0.15); color: #0891B2; }
+      .st-review { background: rgba(245, 158, 11, 0.15); color: #B45309; }
+      .st-decided { background: rgba(34, 197, 94, 0.15); color: #15803D; }
+      .st-audit { background: rgba(100, 116, 139, 0.15); color: #475569; }
+      .state-name {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 13px;
+        font-weight: 900;
+        color: #1A1C1A;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+      .state-p {
+        font-size: 12px;
+        line-height: 1.4;
+        color: #4A4C4A;
+      }
+      .principles-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .principle-box {
+        background: #F4F7F4;
+        border: 1px solid #D2DBD2;
+        padding-top: 14px;
+        padding-left: 16px;
+        padding-right: 16px;
+        min-height: 85px;
+      }
+      .principle-h {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 12px;
+        color: #1A1C1A;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .principle-h i { color: #D95C14; }
+      .principle-p {
+        font-size: 11.5px;
+        line-height: 1.4;
+        color: #7A807A;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+      <div class="top-bar"></div>
+      <div class="layout">
+        <div>
+          <div class="meta-num">08</div>
+          <div class="meta-label">Ciclo de vida</div>
+        </div>
+        <div>
+          <h2 class="slide-title">El flujo termina en revisión humana, no en automatización</h2>
+          <div class="lifecycle-row">
+            <div class="state-card">
+              <span class="state-pill st-active">Estado 1</span>
+              <div class="state-name">Convocatoria Activa</div>
+              <p class="state-p">El administrador define mandato, contexto y presupuesto. La sesión queda lista para una solicitud acotada.</p>
+            </div>
+            <div class="state-card">
+              <span class="state-pill st-review">Estado 2</span>
+              <div class="state-name">En Revisión</div>
+              <p class="state-p">El oráculo devuelve su análisis en 4 dimensiones. El presupuesto se descuenta y la sesión espera decisión humana.</p>
+            </div>
+            <div class="state-card">
+              <span class="state-pill st-decided">Estado 3</span>
+              <div class="state-name">Decisión Humana</div>
+              <p class="state-p">El custodio evalúa la propuesta y elige: <strong>Aprobar</strong>, <strong>Rechazar</strong> o <strong>Pedir Cambios</strong> con razón obligatoria.</p>
+            </div>
+            <div class="state-card">
+              <span class="state-pill st-audit">Estado 4</span>
+              <div class="state-name">Cierre / Auditoría</div>
+              <p class="state-p">La sesión pasa a estado final (aprobada/rechazada/revocada/caducada) y se puede exportar en JSON completo.</p>
+            </div>
+          </div>
+          <div class="principles-grid">
+            <div class="principle-box">
+              <div class="principle-h"><i class="fas fa-hand-paper"></i> Aprobada &ne; Ejecutada</div>
+              <p class="principle-p">Aprobar valida el criterio del agente; no escribe en <code>follow_ups</code> ni contacta participantes.</p>
+            </div>
+            <div class="principle-box">
+              <div class="principle-h"><i class="fas fa-ban"></i> Revocación Inmediata</div>
+              <p class="principle-p">Cualquier custodio puede revocar la sesión en cualquier momento, bloqueando futuras llamadas.</p>
+            </div>
+            <div class="principle-box">
+              <div class="principle-h"><i class="fas fa-file-download"></i> Exportación Limpia</div>
+              <p class="principle-p">La auditoría se descarga como JSON estructurado con contrato, eventos, revisiones y marcas de tiempo.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+</html>
