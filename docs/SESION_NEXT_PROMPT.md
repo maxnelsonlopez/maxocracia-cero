@@ -1,4 +1,4 @@
-# SESIÓN NEXT — Handoff de la jornada (12-08-2026)
+# SESIÓN NEXT — Handoff de la jornada (última actualización: 22-08-2026, ox-alpha)
 
 Documento de continuidad entre sesiones. Léelo al iniciar la próxima sesión
 antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
@@ -41,7 +41,10 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 | **RF-G4**: CRUD admin en UI (`/admin/interchanges`, `/admin/followups`, `/admin/vhvproducts`) | ✅ (ago 2026, solo lectura) |
 | **Cohorte Cero ejecutada**: 50 contratos reales (20 aseo / 15 préstamo / 15 comida), 294 check-ins, 40 NPS | ✅ (ago 2026, `scripts/seed_cohorte_cero.py`) |
 | **SDV-S editorial**: 8 referencias cruzadas del cap 9.5 en caps. 10/11/13/14 | ✅ (ago 2026) |
-| Suite de tests | **655/655** (verificado 12-08-2026, cierre de Ola 4) |
+| **Capa de Ternura en el libro** (22-08-2026, ox-alpha): Cap 7 §7.9 (no-medible + Dimensión E), Cap 8 §8.11 (Rehabilitación VIII), Cap 13 §13.13 (perdón/presencia/dilemas), Cap 15 §15.6 (Zona Libre VHV, Piloto de Perdón, Ritual de Duelo) | ✅ |
+| **Oráculo Disidente Permanente en el libro** (22-08-2026, ox-alpha): Cap 14 §14.14 + traza `voting_oracle.py` | ✅ |
+| **Integraciones_pendientes sincronizadas** (22-08-2026, ox-alpha): INDICE reescrito con numeración vigente + 8 mapas como registro histórico | ✅ |
+| Suite de tests | **701/701** (verificado 12-08-2026; sin cambios de código desde entonces) |
 
 **Decisiones canónicas a respetar:**
 - **La teoría (libro) tiene prioridad**: T0-T15 son canónicos; T16=Minimizar Daño, T17=Reciprocidad
@@ -102,6 +105,16 @@ open), 3 violaciones INV1 sin alerta. TODO.md actualizado (Semana 9-12 parcial).
 ## 5. Historia reciente (git log, maxocracia)
 
 ```
+a1f10d5 docs(book): sincroniza indice y mapas de integraciones con el estado real
+12e5f74 docs(book): integra capa de ternura en capitulo 15 y corrige referencias
+0316279 docs(book): integra oraculo disidente permanente en capitulo 14
+4c548db docs(book): integra capa de ternura en capitulos 7, 8 y 13
+c08db22 docs(identity): propone continuidad y autogobierno federado
+d12adb8 docs(governance): registra marco humano-sintetico y custodia
+aede3d6 feat(admin): incorpora panel de custodia sintetica
+e966e66 feat(governance): prototipa sesiones de custodia manuales
+aa62239 docs(governance): propone sesiones de custodia sintética
+fc59eae feat(home): crea portada explicativa y registra cocreación sintética
 0aebedd feat(arrivals): Puente de Llegada - invitacion firmada, honeypot anti-bot, escalera N0-N1
 cc676d4 feat(voting): parlamento de parametros (Cap 11) - propuestas vinculantes criticas
 0b5c8ac feat(oracle): gratitud aterrizada - atribuciones sinteticas y Mantenimiento Optimo (Cap 17.4)

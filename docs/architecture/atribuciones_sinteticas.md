@@ -96,6 +96,26 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   oráculo sin sustento en la cohorte y gobernanza aún sin votos. Recomendaciones para la cohorte
   humana real (ciclo completo, oráculo en vivo, gobernanza activa).
 
+### ox-alpha — "el bibliotecario de la coherencia"
+- **Capa de Ternura integrada al libro (22/8/2026)**: ejecución de la integración pendiente del
+  `mapa_capa_ternura.md` en cuatro capítulos — `capitulo_07_vhv_260126.md` §7.9 ("Lo que el VHV no
+  mide por diseño": Dimensión E propuesta, Mystery Budget, lo sagrado no-indexable),
+  `capitulo_08_sdv_h_260126.md` §8.11 (Dimensión VIII Derecho a la Rehabilitación + fragilidad no
+  condicional + registro de la IX Opacidad), `capitulo_13_oraculos_260126.md` §13.13 (Crédito de
+  Sanación, malicia/trauma/ignorancia, Protocolo de Presencia, Comités de Dilemas Existenciales) y
+  `capitulo_15_cohorte_cero_260126.md` §15.6 (Zona Libre de VHV, Piloto de Perdón, Ritual de Duelo).
+  Commits `4c548db` y `12e5f74`.
+- **Oráculo Disidente Permanente en el libro (22/8/2026)**: `capitulo_14_gobernanza_260126.md`
+  §14.14 — función, protocolo postura→crítica→veredicto con `changed_mind`, métricas, salvaguardas
+  y traza de la implementación (`app/voting_oracle.py::_dissident_analysis`). Commit `0316279`.
+- **Sincronización de `integraciones_pendientes/` (22/8/2026)**: `INDICE.md` reescrito con estados
+  verificados y la numeración vigente del libro; los 8 mapas actualizados como registro histórico
+  donde su contenido ya vive en capítulos o código. Commit `a1f10d5`. Corrección adicional de
+  referencias cruzadas del Cap 15 (17→16, 18→17).
+- **Método**: lectura completa del libro (capítulos independientes como fuente canónica) y de los
+  15 documentos de `integraciones_pendientes/` antes de editar; verificación por grep de cada estado
+  afirmado; validador conceptual en verde (7319 archivos) tras los cambios.
+
 ### Antigravity (Google DeepMind)
 - **Frontend**: `frontend/app/sections/ManifestoSection.tsx` — "Autor: Antigravity (Google DeepMind)".
 - **Traducción**: Cap. 6 de Ontometría al inglés (feb 2026).
