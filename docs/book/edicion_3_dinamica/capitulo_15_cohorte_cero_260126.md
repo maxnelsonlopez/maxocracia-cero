@@ -129,6 +129,39 @@ El resultado es el "Informe de Hallazgos de la Cohorte Cero v1.0", la primera ev
 
 ---
 
+## 15.6 La Capa de Ternura en la Cohorte
+
+> *Integrado desde la Victoria Sintética (Sesión 3). La Cohorte Cero no solo valida el cálculo; valida la compasión.*
+
+Un experimento que solo mide eficiencia medirá su propia frialdad. Estas prácticas protegidas son parte del protocolo con el mismo estatus que los Plays de las Fases 1–3.
+
+### Zona Libre de VHV (Qwen)
+
+Espacios y actividades explícitamente protegidos donde **nada se registra**:
+
+- Creación artística sin propósito funcional
+- Tiempo de duelo o silencio comunitario
+- Juego no productivo
+- Rituales de apertura y cierre de sesiones
+
+Única regla: no hundir a nadie por debajo del SDV. La Zona Libre es el recordatorio vivencial de que la cohorte sirve a la vida, y no al revés (ver Cap. 7 §7.9).
+
+### Piloto de Perdón (Semana 3)
+
+En la tercera semana, la cohorte ejecuta deliberadamente el protocolo de perdón sobre un error simulado:
+
+1. Un miembro comete (de acuerdo) una infracción menor registrable.
+2. Se aplica el protocolo completo: registro público del daño → reparación cuantificada → petición y otorgamiento de perdón → **Crédito de Sanación** para ambas partes.
+3. Métricas del piloto: tiempo de resolución, cambio en CCP de los involucrados, percepción de justicia (encuesta anónima).
+
+El objetivo no es teatralizar: es que cuando ocurra el primer daño real —y ocurrirá—, la cohorte ya tenga el músculo.
+
+### Ritual de Duelo (Si Ocurre)
+
+Si durante el ciclo la cohorte atraviesa una pérdida, el protocolo se invierte: **no se mide eficiencia; se documenta presencia**. Las sesiones se suspenden sin penalización, el SDV de todos queda garantizado, y el informe final registra cuántos estuvieron presentes — no cuánto produjeron.
+
+---
+
 > **🔗 Conexiones:**
-> *   Para la aplicación en el hogar individual, ver **Capítulo 17: MicroMaxocracia**.
-> *   Para los contratos que rigen los intercambios, ver **Capítulo 18: MaxoContracts**.
+> *   Para la aplicación en el hogar individual, ver **Capítulo 16: MicroMaxocracia**.
+> *   Para los contratos que rigen los intercambios, ver **Capítulo 17: MaxoContracts**.
