@@ -1,5 +1,9 @@
 # Mapa de Integración: MicroMaxocracia
 
+> **✅ ESTADO ACTUAL (ago 2026): INTEGRADO** — el contenido de este mapa vive en
+> `capitulo_16_micromaxocracia_260126.md` (Tres Cuentas, niveles 0-4, ESI, ICE/IDB/IDP, rituales,
+> protocolo de investigación). Este documento se conserva como referencia histórica del proceso.
+
 ## Información del Documento
 
 **Documentos fuente:**

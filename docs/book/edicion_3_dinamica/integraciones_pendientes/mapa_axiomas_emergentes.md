@@ -1,6 +1,12 @@
 # Mapa de Axiomas Emergentes
 ## Integración de T14, T15 y Extensión T12
 
+> **✅ ESTADO ACTUAL (ago 2026, verificado por ox-alpha): los tres axiomas YA están integrados**
+> en `capitulo_05_arquitectura_260126.md` §5.3 — T12 con su extensión ("Derecho a la Ineficiencia
+> Política, Epistémica y Existencial"), T14 (Precaución Intergeneracional) y T15 (PDE) completos.
+> Los estados 🔴 de este documento reflejan la foto de enero 2026 y se conservan como registro histórico.
+> La numeración antigua de capítulos (3/10/11/15) corresponde hoy a Cap 5 §5.3 y caps. 13/14.
+
 **Fuentes**:
 - `apendice_a_refinamientos_cohorte_original.md`
 - `ANEXO TECNICO ESPECIFICACIONES DE IMPLEMENTACION SINTETICA.md`

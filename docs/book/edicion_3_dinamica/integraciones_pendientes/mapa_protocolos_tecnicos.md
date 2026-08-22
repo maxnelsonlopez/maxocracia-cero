@@ -6,7 +6,8 @@
 #   especificación de smart contracts), con trazabilidad a documentos fuente.
 #
 # Estado
-# - 🔴 No iniciado (estructura base creada)
+# - 🟡 Parcial (ago 2026): T15/PDE resumido en Cap 5 §5.3 y Cap 3; sandbox y especificaciones
+#   técnicas completas siguen como documentos de arquitectura. Baja prioridad.
 #
 # Documentos fuente sugeridos (no exhaustivo)
 # - `docs/architecture/oraculos_dinamicos_reino_sintetico_arquitectura.md`

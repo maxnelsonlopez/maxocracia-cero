@@ -1,5 +1,10 @@
 # Mapa de Integración: MaxoContracts
 
+> **✅ ESTADO ACTUAL (ago 2026): INTEGRADO** — el contenido de este mapa vive en
+> `capitulo_17_maxocontracts_260126.md` (bloques, INV1-4, Decreto Antipobreza, retractación ética,
+> aceptación término-a-término, Derechos del Reino Sintético) y en su implementación viva en el
+> motor `maxocontracts/`. Este documento se conserva como referencia histórica del proceso.
+
 ## Información del Documento
 
 **Documentos fuente:**

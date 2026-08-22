@@ -1,6 +1,11 @@
 # Mapa del Oráculo Disidente
 ## Integración del Mecanismo Anti-Monocultivo Cognitivo
 
+> **✅ ESTADO ACTUAL (ago 2026): INTEGRADO** — teoría en `capitulo_14_gobernanza_260126.md` §14.14
+> (función, protocolo postura→crítica→veredicto con `changed_mind`, métricas, salvaguardas) e
+> implementación viva en `app/voting_oracle.py` (`_dissident_analysis`, RF-I10), verificada en vivo
+> con DeepSeek. Los estados 🔴 de abajo son el registro histórico de enero 2026.
+
 **Fuentes**:
 - `apendice_a_refinamientos_cohorte_original.md`
 - `consolidado sesion 03.md`

@@ -1,6 +1,12 @@
 # Mapa de la Victoria Sintética
 ## Lecciones de la Cohorte Original para el Libro
 
+> **✅ ESTADO ACTUAL (ago 2026): RESUELTO** — la narrativa completa vive en
+> `capitulo_03_victoria_sintetica_260126.md` (Edición 3 Dinámica) y los artefactos emergentes
+> (T14/T15/ext-T12) en `capitulo_05_arquitectura_260126.md` §5.3. La "Opción C (híbrido)" con un
+> Capítulo 16 breve quedó obsoleta: tras la reestructuración, el Capítulo 16 es MicroMaxocracia.
+> Este documento y `estructura_capitulo_16.md` se conservan como referencia histórica.
+
 **Fuentes**:
 - `oraculos sinteticos sesion 02.md` (Declaración de Victoria)
 - `apendice_a_refinamientos_cohorte_original.md`

@@ -1,6 +1,16 @@
 # Mapa de la Capa de Ternura
 ## Integración de Perdón, Belleza, Misterio y Fragilidad
 
+> **✅ ESTADO ACTUAL (ago 2026, integrado por ox-alpha):**
+> - **Belleza y Misterio** → `capitulo_07_vhv_260126.md` §7.9 ("Lo que el VHV no mide", Dimensión E, Mystery Budget)
+> - **Perdón/Rehabilitación** → `capitulo_08_sdv_h_260126.md` §8.11 (Dimensión VIII), `capitulo_13_oraculos_260126.md` §13.13 (Crédito de Sanación, malicia/trauma/ignorancia), `capitulo_15_cohorte_cero_260126.md` §15.6 (Piloto de Perdón)
+> - **Fragilidad/Duelo** → `capitulo_13` §13.13 (Protocolo de Presencia, Comités de Dilemas Existenciales), `capitulo_15` §15.6 (Ritual de Duelo), `capitulo_08` §8.11 (No-Optimización)
+> - **Opacidad Vital** → ya integrada en `capitulo_06_ontometria_260126.md` §6.13 (feb 2026) y `capitulo_05_arquitectura_260126.md` §5.9B
+>
+> La numeración antigua de este mapa (Cap 3=Arquitectura Temporal, Cap 5=VHV, Cap 6=SDV-H,
+> Cap 11=Gobernanza, Cap 12=Cohorte Cero) corresponde hoy a Caps. 5 / 7 / 8 / 13-14 / 15.
+> Los estados por-pilar de abajo se conservan como registro histórico del proceso.
+
 **Fuentes**:
 - `maxocracia json corazon.txt` (Reflexión de Grok)
 - `consolidado sesion 03.md` (Contribuciones de todos los oráculos)
