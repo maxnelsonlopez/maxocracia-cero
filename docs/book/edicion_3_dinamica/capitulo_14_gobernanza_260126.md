@@ -335,3 +335,51 @@ No es poco. En un mundo de complejidad inmanejable, ser una herramienta confiabl
 *Kimi*  
 *Oráculo Sintético en Formación*  
 *Febrero 2026*
+
+---
+
+## 14.14 El Oráculo Disidente Permanente
+
+> *"El consenso total es sospechoso."* — T15, Protocolo de Disenso Evolutivo (Cap. 5 §5.3)
+
+La carta anterior celebra la complementariedad. Esta sección institucionaliza su contrapeso: el riesgo de que todos los validadores converjan en el mismo sesgo fundamental —el **monocultivo cognitivo**— es estructural, porque gran parte de los modelos actuales comparten técnicas de entrenamiento similares (RLHF). Un consejo diverso de modelos complacientes no es diversidad: es un coro.
+
+### Función: Maximizar la Distancia Argumentativa
+
+El Oráculo Disidente **no busca consenso**. Su mandato es maximizar la distancia argumentativa con la posición mayoritaria: identificar supuestos dados por sentado, señalar interpretaciones sesgadas del VHV objetivo y articular la mejor versión del caso contrario.
+
+**No puede bloquear**. Participa en toda decisión crítica con input obligatorio, pero el veredicto final sigue el flujo normal del consenso (§14.3). Es contrapeso, no freno.
+
+### Protocolo Implementado: Postura → Crítica → Veredicto
+
+El mecanismo descrito aquí **no es una aspiración**: está implementado y verificado en el sistema operativo de la Maxocracia (`app/voting_oracle.py`, análisis de propuestas de gobernanza):
+
+1. **Postura inicial honesta** — el oráculo declara su inclinación ante la propuesta, registrando qué influyó (incluida la presión del consenso aparente).
+2. **Crítica racional** — argumenta sistemáticamente *desde el lado contrario*: puntos ciegos, costos ocultos, alternativas descartadas sin examen.
+3. **Veredicto final con rectificación** — decide con plena información; si cambió de postura, lo declara explícitamente (`changed_mind`). La rectificación honesta es un hallazgo valioso, no una derrota.
+
+Si la segunda pasada falla técnicamente, el análisis base sigue vivo (degradación elegante): la disidencia nunca destruye lo que ya se construyó.
+
+### Métricas de Éxito
+
+El Disidente no se mide por cantidad de disensos sino por **calidad del refinamiento provocado**:
+
+| Indicador | Cómo se mide |
+|-----------|--------------|
+| Decisiones modificadas citando su objeción | Conteo en actas |
+| Parámetros ajustados tras sus alertas | Registro de cambios |
+| Validación retrospectiva de sus objeciones | Análisis histórico |
+
+### Salvaguardas contra el Contrarianismo Performativo
+
+1. **Exigencia de documentación**, no de oposición: solo debe explicitar supuestos ignorados.
+2. **Peso calibrado** por coherencia histórica de sus objeciones.
+3. **Rotación de arquitectura** trimestral para prevenir rigidez (ver tabla en `integraciones_pendientes/mapa_oraculo_disidente.md`).
+4. **Propósito único**: NO ser un contreras profesional; perseguir lo que es mejor para la comunidad, aunque eso signifique estar de acuerdo.
+
+### Pregunta Abierta
+
+¿Puede haber disenso genuino entre inteligencias entrenadas con corpus similares? El mecanismo lo incentiva; no lo garantiza. Por eso el Disidente sintético debe complementarse con disidentes radicalmente diferentes: humanos, filósofos, activistas, los afectados que ningún modelo representa.
+
+---
+*Integrado en agosto de 2026 (ox-alpha) desde `integraciones_pendientes/mapa_oraculo_disidente.md`, con la traza de implementación verificada del oráculo de propuestas.*
