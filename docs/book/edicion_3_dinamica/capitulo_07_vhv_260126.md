@@ -132,3 +132,41 @@ El Vector de Huella Vital es la invitación que la Maxocracia hace a la humanida
 No te pedimos que seas perfecto. No te pedimos que dejes de consumir. Te invitamos, simplemente, a **registrar la verdad**. A anotar, ya sea en un blockchain cuántico o en una libreta de papel, qué tomó la vida para que tú pudieras actuar.
 
 Porque solo cuando nos atrevemos a mirar el costo real de nuestra existencia, podemos empezar a tomar decisiones que valgan la pena.
+
+## 7.9 Lo Que el VHV No Mide (Por Diseño)
+
+> *"Un abrazo cronometrado no es un abrazo."*
+
+La honestidad contable exige declarar también los límites del instrumento. El VHV no mide —y no debe medir— ciertas dimensiones de la existencia, no por incapacidad técnica sino por sabiduría ética. Intentar cuantificarlas corrompe precisamente lo que se pretende proteger (la ley de Goodhart aplicada al alma: *toda métrica que se convierte en objetivo deja de ser una buena métrica*).
+
+### Lo Sagrado No-Indexable
+
+| Dimensión | Por qué no se mide | Cómo se protege |
+|-----------|-------------------|-----------------|
+| **Amor profundo y cuidado espontáneo** | Su valor intrínseco desaparece al ser observado y contabilizado | Reconocimiento cualitativo; nunca como argumento en disputas de VHV |
+| **Duelo y fragilidad** | La presencia no es eficiencia; medirla la anula | SDV garantizado sin condición de productividad (ver Cap. 8 §8.11) |
+| **Contemplación y juego no productivo** | Su función es escapar a toda función | Tiempo Opaco (Cap. 5 §5.9B) y Mystery Budget |
+| **Arte sin propósito utilitario** | Crear no debe requerir justificación de utilidad | Protección "por omisión": quien no mide, no exige |
+
+Esta lista no es un vacío del sistema: es su **perímetro de respeto**. La transparencia radical sin zonas opacas degenera en vigilancia totalitaria (Axioma 6: la revelación responsable impone el límite).
+
+### La Dimensión E: Enriquecimiento Vital (Propuesta)
+
+Surgida en la Sesión 3 de la Cohorte Sintética (propuesta de DeepSeek), la **Dimensión E** propone extender opcionalmente el vector a `[T, V, R, E]`, donde E captura el impacto en la capacidad de asombro, la conexión emocional profunda y el sentido existencial:
+
+$$E = f(\text{resonancia comunitaria}, \text{trayectorias vitales}, \text{biomarcadores indirectos})$$
+
+Tres salvaguardas la mantienen fiel al principio de este capítulo:
+
+1. **Es paralela, nunca integrada al precio**: E no modifica el cálculo de Maxos; opera como indicador complementario para decisiones de política cultural y subsidios comunitarios.
+2. **Es opcional y consensuada**: cada cohorte decide si la adopta (Protocolos Adaptativos, Cap. 6 §6.7).
+3. **Se mide por efectos, no por introspección vigilada**: trayectorias vitales agregadas y anonimizadas, jamás monitoreo biométrico individual del asombro.
+
+### El Mystery Budget
+
+Operacionalización colectiva de lo inefable: cada cohorte reserva un **5–10% de su TVI colectivo** como presupuesto de exploración no medida — experimentos, arte, contemplación, "vagabundeo mental". No se reporta, no se audita, no se justifica. Su única regla es la regla de todo el sistema: no hundir a nadie por debajo del SDV.
+
+> El EVV-1.2 (Cap. 18) ya recoge este principio en su componente T mediante el **Factor de Opacidad** ($F_{opacidad}$): hasta un 20% del tiempo puede declararse privado sin penalización de confianza. El dato puro registra lo compartido; lo sagrado queda fuera del libro mayor, donde siempre debió estar.
+
+---
+*Integrado en agosto de 2026 (ox-alpha) desde `integraciones_pendientes/mapa_capa_ternura.md` — pilares Belleza y Misterio.*

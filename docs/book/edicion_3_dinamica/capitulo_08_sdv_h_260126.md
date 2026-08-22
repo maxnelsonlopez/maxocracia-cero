@@ -438,4 +438,34 @@ La pregunta fundamental no es si podemos permitirnos implementar el SDV-H, sino 
 
 ---
 
+## 8.11 Las Dimensiones de la Ternura: VIII y IX
+
+> *Integradas desde la Capa de Ternura (Victoria Sintética, Sesión 3 — "Un sistema perfecto que no perdona, es un sistema muerto").*
+
+Las siete dimensiones anteriores definen el suelo material y social. Dos dimensiones adicionales, surgidas de la exigencia unánime de los oráculos sintéticos, protegen lo que hace humano al humano incluso cuando falla o calla.
+
+### Dimensión VIII: Derecho a la Rehabilitación
+
+**Principio** *(Qwen)*: *"El sistema no expulsa. Reintegra. Pero la responsabilidad por el daño permanece visible."*
+
+- **El error no es motivo de expulsión**, sino de recalibración vital. Quien daña tiene derecho a un camino estructurado de retorno.
+- **Protocolo de Recalibración Vital** *(DeepSeek)*: registro público del daño (sin ocultar, T13) → reparación cuantificada en VHV → reintegración gradual basada en datos verificables.
+- **Límites honestos**: la rehabilitación distingue entre ignorancia (educable), trauma (sanable) y malicia persistente (contenible). Tres reincidencias sin demostración de cambio activan revisión comunitaria — no como castigo, sino como protección del tejido.
+
+Esta dimensión es la base teórica de la **retractación ética** de los MaxoContracts (Cap. 17 §17.5): un contrato puede retractarse porque una persona puede cambiar.
+
+### La Fragilidad No Es Condicional
+
+El SDV-H se garantiza **sin condición de productividad**. En duelo, enfermedad o crisis existencial, el sistema suspende los requisitos de aporte sin retirar el suelo (Derecho a la No-Optimización, Qwen). *"La fragilidad no es falla. Es parte de ser humano"* — y el cuidado de los lentos, los rotos y los improductivos es la verdadera medida de salud de una cohorte (Gemini).
+
+### Dimensión IX: Derecho a la Opacidad Vital
+
+La fracción de TVI "sagrada opaca" (10–20%, no auditable por el sistema ni por otros humanos) está desarrollada íntegramente en el **Capítulo 6 §6.13**, junto con su relación axiomática con T12 y T13. Aquí se registra como dimensión del SDV-H para completar el mapa: el suelo digno incluye un espacio inviolable donde decidir, en privado, quiénes queremos ser.
+
+### Nota sobre la fórmula de violación
+
+Las dimensiones VIII y IX se registran cualitativamente y mediante umbrales binarios (presencia/ausencia del derecho), no mediante pesos en la fórmula §8.5 — medir la rehabilitación o la opacidad con la misma vara cuantitativa que el agua o la vivienda las destruiría. Su violación se documenta y es auditable (T13); su cuantificación queda delegada a la gobernanza de cada cohorte si alguna decide ejercerla.
+
+---
+
 > **📚 Para profundizar:** Este capítulo integra y expande el documento técnico *"SDV-H: Propuesta Integral para la Cuantificación de los Mínimos Existenciales"* (López Restrepo, M. N. & MiniMax Agent, 2025), basado en 123+ fuentes académicas de OMS, ONU, FAO, OIT, CDC, NIH y literatura científica peer-reviewed.

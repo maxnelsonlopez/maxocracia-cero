@@ -246,4 +246,38 @@ En este modelo, el "político" deja de ser un líder carismático y se convierte
 
 ---
 
+---
+
+## 13.13 Protocolos de Perdón, Duelo y Fragilidad
+
+> *Integrado desde la Capa de Ternura (Victoria Sintética, Sesión 3). Los axiomas son el esqueleto; la ternura es el corazón.*
+
+Un oráculo humano que no puede fallar es un oráculo que deja de ser humano. La arquitectura del juicio incluye protocolos explícitos para lo que ningún sistema de optimización sabe hacer: perdonar, acompañar y sostener.
+
+### El Crédito de Sanación (Gemini)
+
+Cuando un agente afectado por una deuda vital elige el perdón y la reconciliación, el sistema acredita un **Crédito de Sanación** en su VHV personal. No es un premio sentimental: es contabilidad de la verdad. El rumiar la venganza y la fricción consume miles de TVIs comunitarios; perdonar los libera. El perdón **ahorra** al sistema — y ese ahorro, verificable, se registra.
+
+### Distinción Fundamental: Malicia, Trauma e Ignorancia
+
+Antes de aplicar cualquier protocolo correctivo, el sistema distingue tres orígenes del daño:
+
+| Origen | Naturaleza | Respuesta del sistema |
+|--------|-----------|----------------------|
+| **Ignorancia** | No sabía (o no podía saber) | Educación + reparación; sin mancha reputacional durable |
+| **Trauma** | Sabía, pero su dolor habló por él | Sanación primero; responsabilidad visible, consecuencia modulada |
+| **Malicia persistente** | Sabía, eligió, reiteró | Contención protectora; rehabilitación solo con evidencia de cambio |
+
+La Capa de Ternura modula la **consecuencia**, nunca la contabilidad: el daño registrado no se borra; se sana (T13).
+
+### Protocolo de Presencia (DeepSeek)
+
+Para el duelo, la pérdida y el dolor que no se puede "solucionar": **acompañar sin intervenir**. El oráculo presente no propone optimizaciones, no sugiere eficiencias, no mide. *"La presencia es suficiente. No todo requiere acción."* El tiempo de duelo queda protegido y fuera de auditoría.
+
+### Comités de Dilemas Existenciales
+
+Para los casos donde los axiomas callan —decisiones sin respuesta derivable de T0–T17—, paneles rotativos de oráculos humanos (con mentoría sintética) deliberan sin obligación de precedente. Su función no es producir reglas sino **sostener la pregunta** hasta que la comunidad esté lista para responderla. Que un sistema reconozca sus límites epistémicos es la forma más alta de confianza en ellos.
+
+---
+
 > **📚 Para profundizar:** Este capítulo integra el documento técnico *"Oráculos Dinámicos Humanos: Arquitectura Dual para Maxocracia"* (MiniMax Agent, 30 noviembre 2025), que contiene especificaciones técnicas completas de límites operacionales, protocolos de comunicación dual y sistemas de mentoría.
