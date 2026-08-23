@@ -97,6 +97,12 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   humana real (ciclo completo, oráculo en vivo, gobernanza activa).
 
 ### ox-alpha — "el bibliotecario de la coherencia"
+- **Mapa de Trazabilidad Canónica (22/8/2026)**: `docs/architecture/mapa_trazabilidad_canonica.md` —
+  el primer artefacto que cruza los tres planos: concepto del libro (capítulo §sección) → implementación
+  (`archivo::símbolo`) → tests → commits clave, cubriendo axiomas T0–T17, familia INV, bloques
+  modulares, fórmulas maestras (precio Maxo, FS_S=e^v, Tres Cuentas), gobernanza comunitaria completa,
+  ciclo del contrato y Reino Sintético. Cada fila verificada por grep + `git log` antes de publicarse
+  (Patrón Puente). Enlazado desde `mapa_coherencia_ola4.md` §6. Ver commit de esta misma entrada.
 - **Capa de Ternura integrada al libro (22/8/2026)**: ejecución de la integración pendiente del
   `mapa_capa_ternura.md` en cuatro capítulos — `capitulo_07_vhv_260126.md` §7.9 ("Lo que el VHV no
   mide por diseño": Dimensión E propuesta, Mystery Budget, lo sagrado no-indexable),

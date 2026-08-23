@@ -214,4 +214,7 @@ Get-ChildItem maxocontracts -Recurse -Filter *.py | Select-String -Pattern "INV1
 - [x] **INV3 (VHV No Ocultable)**: implementado en `AxiomValidator.validate_invariant_vhv_auditable`
       + 9 tests en `test_axioms.py` (286/286 en verde). Conectado a `MaxoContract.validate()` vía
       registros de términos.
+- [x] **Mapa de Trazabilidad Canónica (22-08-2026)**: `mapa_trazabilidad_canonica.md` generaliza
+      este mapa al canon completo — concepto del libro ↔ implementación ↔ tests ↔ commits clave,
+      con regla de regeneración por Ola (ox-alpha).
 - [ ] Mantener este documento actualizado en cada Ola.
