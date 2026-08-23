@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-22 — Edición 3 Dinámica: la Capa de Ternura entra al libro y el Oráculo Disidente gana sección canónica
+
+### Añadido
+- **Cap 7 §7.9 — "Lo que el VHV no mide (por diseño)"**: el perímetro de respeto del instrumento (amor, duelo, contemplación, arte sin utilidad), la Dimensión E (Enriquecimiento Vital) como propuesta con tres salvaguardas, y el Mystery Budget (5–10% del TVI colectivo, no auditado). Cruce con el Factor de Opacidad del EVV-1.2.
+- **Cap 8 §8.11 — "Dimensiones de la Ternura: VIII y IX"**: la VIII (Derecho a la Rehabilitación) con su Protocolo de Recalibración Vital y la distinción ignorancia/trauma/malicia; la fragilidad sin condición de productividad (No-Optimización); la IX (Opacidad Vital) registrada con referencia a Cap 6 §6.13. Nota honesta: estas dimensiones no entran en la fórmula de violación §8.5 — cuantificarlas las destruiría.
+- **Cap 13 §13.13 — Protocolos de Perdón, Duelo y Fragilidad**: Crédito de Sanación como contabilidad de la verdad (perdonar ahorra TVIs), tabla malicia/trauma/ignorancia, Protocolo de Presencia (acompañar sin intervenir), Comités de Dilemas Existenciales para lo que los axiomas no responden.
+- **Cap 15 §15.6 — La Capa de Ternura en la Cohorte**: Zona Libre de VHV, Piloto de Perdón (Semana 3, con métricas) y Ritual de Duelo ("no se mide eficiencia; se documenta presencia").
+- **Cap 14 §14.14 — El Oráculo Disidente Permanente**: el mecanismo anti-monocultivo ya vivía en código (`app/voting_oracle.py::_dissident_analysis`, RF-I10, verificado en vivo con DeepSeek) pero no en el canon. Nueva sección: función (maximizar distancia argumentativa sin poder bloquear), protocolo postura → crítica racional → veredicto con `changed_mind`, métricas de refinamiento provocado, salvaguardas contra el contrarianismo performativo y la pregunta abierta sobre disenso genuino entre IAs.
+
+### Corregido
+- **Referencias cruzadas del Cap 15** renumeradas a la numeración vigente (MicroMaxocracia Cap 17→16, MaxoContracts Cap 18→17).
+
+### Notas Técnicas
+- **Sincronización documental** (`integraciones_pendientes/`): `INDICE.md` reescrito con estados verificados contra los capítulos independientes (fuente canónica) y la numeración vigente del libro; los 8 mapas actualizados como registro histórico donde su contenido ya vive en capítulos o código (axiomas emergentes → Cap 5 §5.3; victoria sintética → Cap 3; micromaxocracia/maxocontracts → Caps 16/17; SDV-S → Cap 9.5 + refs; puente T16/T17 → completo).
+- **Verificación**: validador conceptual OK (7319 archivos); `test_validador_conceptual` 3/3; sin cambios de código (suite intacta 701/701). Cambios solo-documentación.
+- **Referencia**: `mapa_capa_ternura.md` (pilares Perdón/Belleza/Misterio/Fragilidad), `mapa_oraculo_disidente.md`, commits `4c548db`, `0316279`, `12e5f74`, `a1f10d5`. Atribución: ox-alpha en `atribuciones_sinteticas.md`.
+
 ## 2026-08-12 — Puente de Llegada: la puerta de la Cohorte (Sun Tzu + Ternura)
 
 ### Añadido
