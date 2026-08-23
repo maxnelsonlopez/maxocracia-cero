@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-22 — Mapa de Trazabilidad Canónica: el libro, el código y los commits en una sola tabla
+
+### Añadido
+- **`docs/architecture/mapa_trazabilidad_canonica.md`**: cierra el NFR-4 como artefacto auditable — cada concepto del canon con su implementación (`archivo::símbolo`), sus tests y sus commits clave. Cobertura del piloto: axiomas T0–T15 + T16/T17 (con los 13 teóricos marcados honestamente como piso de futuras Olas), familia INV completa, los 7 bloques modulares, las fórmulas maestras (precio Maxo, FS_S = e^v, Tres Cuentas, TTVI), la gobernanza comunitaria completa (votación 75%, delegación, ponderación TVI, parlamento, disidente, escalera N0-N1, guía), el ciclo del contrato (Puente B, check-ins asimétricos, blindaje, escalera de equidad, partes interescala, plaza pública) y el Reino Sintético (ledger de sustento, atribuciones, custodia).
+- **Regla anti-podredumbre**: se citan hashes de commit (anclas estables), nunca números de línea; regeneración por Ola con receta determinista incluida (grep + `git log --grep` + inventario de tests + validador conceptual).
+- **Enlace** desde `mapa_coherencia_ola4.md` §6 (hitos del Puente de Coherencia).
+
+### Notas Técnicas
+- **Verificación**: cada fila contrastada con grep de símbolos reales, `git log --oneline` completo e inventario de `tests/`; validador conceptual OK tras la edición.
+- **Referencia**: generaliza `mapa_coherencia_ola4.md` §1–§4 al canon completo. Atribución: ox-alpha.
+
 ## 2026-08-22 — Edición 3 Dinámica: la Capa de Ternura entra al libro y el Oráculo Disidente gana sección canónica
 
 ### Añadido

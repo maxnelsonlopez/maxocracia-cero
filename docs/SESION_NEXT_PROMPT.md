@@ -44,6 +44,7 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 | **Capa de Ternura en el libro** (22-08-2026, ox-alpha): Cap 7 §7.9 (no-medible + Dimensión E), Cap 8 §8.11 (Rehabilitación VIII), Cap 13 §13.13 (perdón/presencia/dilemas), Cap 15 §15.6 (Zona Libre VHV, Piloto de Perdón, Ritual de Duelo) | ✅ |
 | **Oráculo Disidente Permanente en el libro** (22-08-2026, ox-alpha): Cap 14 §14.14 + traza `voting_oracle.py` | ✅ |
 | **Integraciones_pendientes sincronizadas** (22-08-2026, ox-alpha): INDICE reescrito con numeración vigente + 8 mapas como registro histórico | ✅ |
+| **Mapa de Trazabilidad Canónica** (22-08-2026, ox-alpha): libro↔código↔tests↔commits (`docs/architecture/mapa_trazabilidad_canonica.md`) — piloto completo; regenerar por Ola | ✅ |
 | Suite de tests | **701/701** (verificado 12-08-2026; sin cambios de código desde entonces) |
 
 **Decisiones canónicas a respetar:**
