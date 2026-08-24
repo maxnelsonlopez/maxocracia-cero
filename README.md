@@ -2,7 +2,7 @@
 
 **Estado del Proyecto:** Fase 2 - Sostenibilidad Económica y MicroMaxocracia Doméstica (Agosto 2026)  
 **Última actualización:** 22 de agosto 2026  
-**Versión:** 5.14 - El hogar late: γ doméstica con INV1-Hogar, puente a la Red de Apoyo (ofertas antes que búsquedas) y protocolo Semana de la Verdad (ox-alpha)
+**Versión:** 5.15 - MicroMaxocracia Canónica completa de punta a punta: teoría (Cap. 16.5), backend, frontend y libro coherentes + auditoría de integridad del canon (ox-alpha)
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 

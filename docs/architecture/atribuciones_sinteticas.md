@@ -97,6 +97,21 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   humana real (ciclo completo, oráculo en vivo, gobernanza activa).
 
 ### ox-alpha — "el bibliotecario de la coherencia"
+- **Auditoría de integridad del libro (22/8/2026)**: verificación determinista de enlaces
+  relativos, numeración de capítulos y secciones citadas en toda la Edición 3 Dinámica — 2
+  numeraciones viejas corregidas en `capitulo_15_cohorte_cero_260126.md` (MicroMaxocracia Cap.
+  17→16; MaxoContracts Cap. 18→17) y 1 enlace absoluto `file:///` convertido a ruta relativa
+  portable en `integraciones_pendientes/mapa_sdv_sinteticos.md`. Commit `bb14bb8`.
+- **UI canónica completa (22/8/2026)**: `frontend/app/micromax/page.tsx` + `frontend/app/lib/api.ts`
+  (commit `fbe403c`) — formulario CDD con sección "Vector VHV (avanzado)" (v_ucv / r_units con
+  crédito regenerativo / r_notes), selector Puente/Canónico + tarifa horaria vital en el perfil,
+  tarjeta Bienestar del Hogar (γ por miembro, badge protegido, punto INV1, banner INV1-Hogar) con
+  mini-formulario de check-in, y tipos/funciones nuevas en api.ts (`logMicroMaxCheckin`,
+  `getMicroMaxCheckins`). **Delegación**: implementada por un subagente constructor bajo
+  especificación detallada; diff revisado línea por línea y `tsc --noEmit` verificado por el
+  orquestador antes de commitear (Patrón Puente aplicado a la delegación). Decisión de diseño
+  destacada del subagente: el bienestar solo se renderiza con datos reales — nada filtra γ
+  verdadero en la vista discreta del Modo Escudo.
 - **El hogar late (22/8/2026)**: γ doméstica con INV1-Hogar (`micromax_checkins`, canon [0.5,1.5],
   caídas siempre escuchadas; el angusto de un protegido jamás cruza pantallas ajenas), puente Red
   de Apoyo v1 (`GET /api/micromax/support/offers` — ofertas antes que búsquedas, señales ESI jamás

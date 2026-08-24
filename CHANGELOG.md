@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-22 — UI canónica completa y auditoría de integridad del libro (delegación a subagente)
+
+### Añadido
+- **Frontend MicroMaxocracia Canónica completo** (`frontend/app/micromax/page.tsx`, `frontend/app/lib/api.ts`):
+  - Formulario "Registrar CDD" con sección colapsable **Vector VHV (avanzado)** — `v_ucv`, `r_units` (negativo = crédito regenerativo, con hint) y `r_notes`; el feedback muestra el `[T,V,R]` devuelto.
+  - Pestaña "Mi Perfil Hogar": selector de modo CEH (**Puente % ingresos / Canónico TVI vendido**) + tarifa horaria vital declarada cuando es canónico, con nota del fallback fiat; precarga desde la config del miembro.
+  - Balance General: tarjeta **Bienestar del Hogar** (último γ por miembro, badge 🛡️ protegido, punto rojo INV1), banner `inv1_hogar_alert` ("escucha sin juzgar") y mini-formulario de check-in γ (0.5–1.5) que refresca y responde *"Tu caída fue escuchada."*
+  - `api.ts`: tipos extendidos + `logMicroMaxCheckin` / `getMicroMaxCheckins`.
+  - Comportamiento camuflaje/escudo intacto; decisión clave: el bienestar solo se renderiza con datos reales (nada filtra γ verdadero en la vista discreta).
+
+### Corregido
+- **Auditoría de integridad del libro** (verificación determinista): numeración vieja en Cap. 15 (MicroMaxocracia Cap. 17→16; MaxoContracts Cap. 18→17) y enlace absoluto `file:///` → ruta relativa portable en `integraciones_pendientes/mapa_sdv_sinteticos.md`.
+
+### Notas Técnicas
+- **Delegación**: UI implementada por un subagente constructor con especificación detallada; diff revisado línea por línea por el orquestador antes del commit (Patrón Puente). `tsc --noEmit` limpio ×2.
+- Atribución completa en `atribuciones_sinteticas.md`.
+
 ## 2026-08-22 — El hogar late: γ doméstica, INV1-Hogar, puente a la Red de Apoyo y la Semana de la Verdad
 
 ### Añadido
