@@ -97,6 +97,12 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   humana real (ciclo completo, oráculo en vivo, gobernanza activa).
 
 ### ox-alpha — "el bibliotecario de la coherencia"
+- **Compatibilidad canónica doméstica↔general + escala vecinal (22/8/2026)**: `app/micromax.py`,
+  `app/micromax_bp.py`, 4 tests nuevos (commit `f9697a5`) y Cap. 16.5 §16.5.13 — vector [T,V,R]
+  opcional en cada tarea CDD, CEH canónica por TVI vendido con fallback fiat seguro
+  (`ceh_mode`/`hourly_rate`), pesos p₁/p₂/p₃ expuestos, y la formalización del "hogar" como unidad
+  de convivencia: roommates resuelven arriendo-vs-tareas con aritmética visible y los conjuntos
+  residenciales escalan vía maxo_parties con contratos interescala N-de-M.
 - **Modo Escudo Doméstico (22/8/2026)**: `app/micromax.py`, `app/micromax_bp.py`,
   `frontend/app/micromax/page.tsx` + 3 tests — corrección del hallazgo de campo de Max: una ESI en
   rojo dejaba a la persona sin poder registrar su trabajo invisible. Ahora el registro propio nunca

@@ -2,7 +2,7 @@
 
 **Estado del Proyecto:** Fase 2 - Sostenibilidad Económica y MicroMaxocracia Doméstica (Agosto 2026)  
 **Última actualización:** 22 de agosto 2026  
-**Versión:** 5.11 - MicroMaxocracia Canónica (Cap. 16.5): el hogar en unidades del sistema — VHV vectorial, CEH en TVI vendido, notación liberada (ox-alpha)
+**Versión:** 5.13 - Compatibilidad canónica doméstica↔general (vector [T,V,R] en CDD, CEH por TVI vendido) y escala vecinal: roommates y conjuntos residenciales como unidades de convivencia (ox-alpha)
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 

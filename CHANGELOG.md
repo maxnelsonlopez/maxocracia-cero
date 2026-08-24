@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-22 — Compatibilidad canónica MicroMaxocracia ↔ Maxocracia + escala vecinal (roommates y conjuntos)
+
+### Añadido
+- **Vector VHV en cada tarea doméstica** (`log_cdd`): campos opcionales `v_ucv`, `r_units`, `r_notes` — cada registro porta ahora su `[T, V, R]` junto al escalar ponderado (que sigue alimentando el equilibrio intacto). El hecho doméstico queda limpio y comparable con los intercambios del sistema general. Migración idempotente de columnas para BDs existentes.
+- **CEH canónica por TVI vendido** (`member/config`: `ceh_mode` 'bridge'|'canonical' + `hourly_rate` declarada): cuando *todos* los miembros con ingresos usan modo canónico, la segunda cuenta se mide en horas de vida vendidas — unidad homogénea con CDD y TED. Si el hogar es mixto, fallback seguro a fiat con `ceh_unit` explícito en la salida. Demostración en test: ingresos 1000@50/h vs 400@20/h pasan de brecha 71/29 (fiat) a **50/50 en TVI vendido**.
+- **Salida del dashboard**: `pesos: {p1,p2,p3}` expuestos, `ceh_mode`/`ceh_value` por miembro, `total_ceh` + `ceh_unit` en totales.
+- **Cap. 16.5 §16.5.13 — Más allá del parentesco**: el "hogar" formalizado como unidad de convivencia (núcleo familiar, piso compartido, casa comunitaria o conjunto residencial). Roommates resuelven la pelea arriendo-vs-tareas con aritmética visible; conjuntos residenciales escalan vía `maxo_parties` (tipo `coop-`/`society-`) con contratos interescala N-de-M. Principio de escala: *el parentesco no es criterio de entrada; la convivencia lo es*.
+
+### Notas Técnicas
+- Retrocompatible total: sin los campos nuevos todo funciona exactamente igual (defaults 0/'bridge'); tests cubren vector completo, defaults, componentes negativos rechazados, homogeneización TVI, fallback mixto y modo inválido.
+- Suite paralela 453/453. Estado §16.5.11 actualizado; quedan pendientes: check-ins γ domésticos, UI de nuevos campos, plantillas domésticas en builder, puente wants_support→matching.
+
 ## 2026-08-22 — Modo Escudo Doméstico: el registro propio nunca se bloquea (hallazgo de campo)
 
 ### Corregido
