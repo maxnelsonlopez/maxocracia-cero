@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-22 — Crédito regenerativo: el Reino Natural como conviviente (Cap. 16.5 §16.5.14)
+
+### Añadido
+- **`r_units` negativo en CDD = crédito regenerativo** (EVV-1.2 §4.3): las jornadas de cuidado ecosistémico del hogar extendido — reforestación, humedales, arboladas — se registran devolviendo más de lo que toman. `v_ucv` sigue sin admitir negativos: una vida afectada no se des-afecta en la misma cuenta.
+- **Cap. 16.5 §16.5.14 — El hogar extendido**: la convivencia bidireccional humano↔territorio; los representantes de ecosistemas ya tienen asiento (partes `eco-` con guardián oráculo y quórum N-de-M, Cap. 10/17); el tiempo del territorio es TA y no se coloniza (el PIU traduce); Zona Libre también para el Reino Natural; **SDV-E + INV2-E convocados como próxima gran ramificación** (precedente SDV-S, Cap. 9.5).
+
+### Notas Técnicas
+- Test nuevo: jornada de reforestación con `r_units: -12` registrada y devuelta íntegra. Suite de micromax 8/8; validador conceptual OK.
+
 ## 2026-08-22 — Compatibilidad canónica MicroMaxocracia ↔ Maxocracia + escala vecinal (roommates y conjuntos)
 
 ### Añadido

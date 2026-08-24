@@ -97,6 +97,10 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   humana real (ciclo completo, oráculo en vivo, gobernanza activa).
 
 ### ox-alpha — "el bibliotecario de la coherencia"
+- **Reino Natural conviviente + crédito regenerativo (22/8/2026)**: `app/micromax.py` (r_units
+  negativo = regeneración, EVV §4.3) + Cap. 16.5 §16.5.14 — el hogar extendido al territorio:
+  convivencia bidireccional, eco-partes con guardián oráculo como representantes ya vivos,
+  TA no colonizado (PIU) y SDV-E + INV2-E convocados como próxima gran ramificación.
 - **Compatibilidad canónica doméstica↔general + escala vecinal (22/8/2026)**: `app/micromax.py`,
   `app/micromax_bp.py`, 4 tests nuevos (commit `f9697a5`) y Cap. 16.5 §16.5.13 — vector [T,V,R]
   opcional en cada tarea CDD, CEH canónica por TVI vendido con fallback fiat seguro
