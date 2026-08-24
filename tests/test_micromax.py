@@ -441,7 +441,7 @@ def test_compatibilidad_vector_vhv_en_cdd(client, auth_headers):
     assert res.status_code == 201
     assert res.get_json()["vhv_vector"] == {"T": 1.0, "V": 0.0, "R": 0.0}
 
-    # Componentes negativos rechazados
+    # Componentes negativos rechazados (V: una vida afectada no se des-afecta)
     res = client.post(
         "/api/micromax/cdd",
         headers=auth_headers(1, "alice@example.com"),
@@ -458,6 +458,37 @@ def test_compatibilidad_vector_vhv_en_cdd(client, auth_headers):
         content_type="application/json",
     )
     assert res.status_code == 400
+
+
+def test_credito_regenerativo_r_negativo(client, auth_headers):
+    """Cap. 16.5 s16.5.14 / EVV 1.2 s4.3: el cuidado del Reino Natural se registra
+    con R negativo (devolver mas de lo tomado)."""
+    client.post(
+        "/api/micromax/household",
+        headers=auth_headers(1, "alice@example.com"),
+        data=json.dumps({"name": "Conjunto Los Sauces"}),
+        content_type="application/json",
+    )
+    res = client.post(
+        "/api/micromax/cdd",
+        headers=auth_headers(1, "alice@example.com"),
+        data=json.dumps(
+            {
+                "task_name": "Jornada de reforestacion del humedal",
+                "duration_hours": 4.0,
+                "effort_factor": 1.3,
+                "mental_factor": 1.0,
+                "scope_factor": 1.5,
+                "r_units": -12.0,
+                "r_notes": "40 arboles nativos plantados; captura neta estimada",
+            }
+        ),
+        content_type="application/json",
+    )
+    assert res.status_code == 201
+    data = res.get_json()
+    assert data["vhv_vector"] == {"T": 4.0, "V": 0.0, "R": -12.0}
+    assert data["r_notes"] == "40 arboles nativos plantados; captura neta estimada"
 
 
 def test_ceh_canonica_tvi_homogeneiza_las_cuentas(client, auth_headers):

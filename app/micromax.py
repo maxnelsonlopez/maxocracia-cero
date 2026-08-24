@@ -333,13 +333,18 @@ class MicroMaxManager:
         personas) y `r_units`/`r_notes` (recursos del hogar) completan el vector
         [T, V, R] junto a `duration_hours` (T). El escalar ponderado sigue calculandose
         igual para el equilibrio — el hecho queda limpio y comparable con el sistema general.
+        `r_units` NEGATIVO = credito regenerativo (EVV 1.2 s4.3): cuidado ecosistemico
+        que devuelve mas de lo que toma (s16.5.14, Reino Natural como conviviente).
         """
         if not task_name or not task_name.strip():
             raise ValueError("Task name cannot be empty.")
         if duration_hours <= 0 or duration_hours > 24:
             raise ValueError("Task duration must be between 0 and 24 hours.")
-        if v_ucv < 0 or r_units < 0:
-            raise ValueError("VHV components cannot be negative.")
+        if v_ucv < 0:
+            raise ValueError("V component (lives affected) cannot be negative.")
+        # Cap. 16.5 s16.5.14 / EVV 1.2 s4.3: r_units NEGATIVO = credito regenerativo
+        # (devolver mas de lo tomado: arboladas, humedales, suelos). V no puede ser
+        # negativo: una vida afectada no se des-afecta en la misma cuenta.
 
         # Ponderation boundaries check
         if not (1.0 <= effort_factor <= 2.0):
