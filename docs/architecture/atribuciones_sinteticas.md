@@ -97,6 +97,13 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   humana real (ciclo completo, oráculo en vivo, gobernanza activa).
 
 ### ox-alpha — "el bibliotecario de la coherencia"
+- **Capítulo 16.5 — MicroMaxocracia Canónica (22/8/2026)**: `docs/book/edicion_3_dinamica/capitulo_16_5_micromaxocracia_canonica_220826.md` —
+  la ramificación que ancla el hogar al canon: restitución de la separación hecho/valor (vector
+  `[T,V,R]` con multiplicadores como Capa 2), CEH convertida a TVI vendido (modos puente/canónico),
+  pesos del equilibrio renombrados p₁/p₂/p₃ (fin de la colisión con α/β/γ/δ axiomáticos), γ doméstico
+  con INV1-Hogar (ESI rojo ≡ γ<1 estructural), acuerdos domésticos como MaxoContracts opcionales y la
+  declaración teórica del hogar como unidad básica de la Opacidad Sagrada. Fricciones verificadas
+  contra `app/micromax_bp.py` y el glosario antes de escribir; referencia cruzada añadida al Cap. 16 §16.3.
 - **Mapa de Trazabilidad Canónica (22/8/2026)**: `docs/architecture/mapa_trazabilidad_canonica.md` —
   el primer artefacto que cruza los tres planos: concepto del libro (capítulo §sección) → implementación
   (`archivo::símbolo`) → tests → commits clave, cubriendo axiomas T0–T17, familia INV, bloques

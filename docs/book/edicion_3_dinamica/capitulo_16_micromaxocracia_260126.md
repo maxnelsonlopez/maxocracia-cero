@@ -128,6 +128,14 @@ Con ponderaciones típicas:
 
 **Interpretación:** Equilibrio razonable (54% vs 46%). La diferencia de ingresos ($150k vs $30k) **no se traduce en poder total** porque el sistema pondera más el trabajo doméstico directo. Este es el punto clave: el dinero no compra autoridad moral en un hogar maxocrático.
 
+### Referencia cruzada — MicroMaxocracia Canónica (Cap. 16.5)
+
+Esta fórmula es el **modo puente**: perfecta para empezar, con tres fricciones conocidas que la rama
+canónica resuelve cuando el hogar madura — el escalar `VHV = T × E × M × A` mezcla hecho con valoración
+(se restituye el vector `[T, V, R]` con los multiplicadores como Capa 2), CEH vive en dinero fiduciario
+(se convierte a TVI vendido) y los pesos α/β/γ colisionan con la notación axiomática del precio
+(se renombran p₁/p₂/p₃). Ver [Capítulo 16.5 — MicroMaxocracia Canónica](./capitulo_16_5_micromaxocracia_canonica_220826.md).
+
 ---
 
 ## 16.4 Sistema de Niveles de Adopción
