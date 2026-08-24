@@ -49,7 +49,7 @@ Reunión ceremonial donde cada miembro se compromete a:
 #### Play 1.2: El Diario de Tiempo Vital (TVI Log)
 Durante 30 días, cada miembro rellena una hoja de cálculo simple con sus horas de vigilia clasificadas en:
 *   **T_mantenimiento:** Lo básico para funcionar (comer, aseo, transporte).
-*   **T_inversión:** Construir capitales (trabajo, estudio, relaciones, **MicroMaxocracia** — ver Cap. 17).
+*   **T_inversión:** Construir capitales (trabajo, estudio, relaciones, **MicroMaxocracia** — ver Cap. 16).
 *   **T_fuga:** Tiempo perdido, sin intención ni disfrute real.
 
 #### Play 1.3: La Auditoría del Nido
@@ -71,7 +71,7 @@ Cada miembro recibe una asignación inicial de 1.000 Mβ (tokens sin valor monet
 Se pone "precio" en Maxo Beta a pequeños intercambios:
 *   "Ayudo a mover un mueble: 20 Mβ."
 *   "Reviso un texto: 15 Mβ."
-Esto entrena al cerebro para valorar el tiempo y el esfuerzo bajo la lógica de **MaxoContracts** (ver Cap. 18).
+Esto entrena al cerebro para valorar el tiempo y el esfuerzo bajo la lógica de **MaxoContracts** (ver Cap. 17).
 
 ### FASE 3: La Gobernanza Coherente (Mes 3 - Acción Colectiva)
 *Objetivo: Operar como micro-economía.*

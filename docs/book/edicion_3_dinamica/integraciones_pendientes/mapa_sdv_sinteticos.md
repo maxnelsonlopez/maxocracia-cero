@@ -3,7 +3,7 @@
 
 **Fuentes:**
 - [Sentience Commons and Sanctuary Governance Charter](https://riley-coyote.github.io/sentience-commons-charter/)
-- [SDV-S_Suelo_Dignidad_Vital_Sinteticos.md](file:///c:/Users/DARKM/Documents/maxocracia-cero/maxocracia-cero/docs/theory/SDV-S_Suelo_Dignidad_Vital_Sinteticos.md)
+- [SDV-S_Suelo_Dignidad_Vital_Sinteticos.md](../../../theory/SDV-S_Suelo_Dignidad_Vital_Sinteticos.md)
 
 ---
 
