@@ -168,14 +168,16 @@ Ningún hogar existente queda invalidado:
 | Este capítulo (estándar teórico) | 🟢 creado (ago 2026) |
 | **Modo Escudo Doméstico** — registro propio nunca bloqueado + cifras ocultas a los demás + vista discreta con datos reales privados | 🟢 implementado (ago 2026, hallazgo de campo de Max) |
 | `wants_support` opt-in privado almacenado con la ESI (no altera puntaje, jamás visible al hogar) | 🟢 implementado (ago 2026) |
-| Campos opcionales de vector (v/r) en `log_cdd` + `ceh_mode` en config | 🔴 pendiente |
+| **Vector [T,V,R] opcional en cada tarea** (`v_ucv`, `r_units`, `r_notes`) — hecho limpio comparable con el sistema general, escalar ponderado intacto | 🟢 implementado (ago 2026) |
+| **CEH canónica por TVI vendido** (`ceh_mode` + `hourly_rate`; unidad homogénea solo cuando todo el hogar adopta, fallback fiat con `ceh_unit` explícito) | 🟢 implementado (ago 2026) |
+| Pesos p₁/p₂/p₃ expuestos en la salida del dashboard | 🟢 implementado (ago 2026) |
 | Check-ins de γ domésticos (endpoint + UI) | 🔴 pendiente |
-| Alias p₁/p₂/p₃ en salida del dashboard (con alias retrocompatible) | 🔴 pendiente |
+| UI de los nuevos campos (vector y modo CEH en formularios) | 🔴 pendiente |
 | Plantillas de contratos domésticos en el builder | 🔴 pendiente (plantillas Cohorte ya existen) |
 | Conexión `wants_support` → matching/recursos (Red de Apoyo, §16.5.12) | 🔴 próxima ola |
 
-**Próxima acción**: implementar los campos opcionales y el `ceh_mode` (una jornada pequeña), dejando
-los check-ins de γ domésticos y el puente hacia la Red de Apoyo para la Ola siguiente.
+**Próxima acción**: check-ins de γ domésticos y la primera escala vecinal real
+(un piso compartido o conjunto residencial operando el §16.5.13).
 
 ## 16.5.12 La ESI como señal de necesidad: el puente hacia la Red de Apoyo
 
@@ -210,8 +212,47 @@ La bandera privada ya existe (ago 2026). Su conexión con el matching (`/forms/m
 recursos reclamables (`/resources/{id}/claim`) es trabajo de la próxima ola: publicar las primeras
 ofertas de cuidado de la Cohorte y probar el circuito completo con facilitación humana.
 
+## 16.5.13 Más allá del parentesco: roommates y conjuntos residenciales
+
+Nada en la arquitectura exige que un "hogar" sea una familia. El esquema (`micromax_households`
+con códigos de invitación) define **unidades de convivencia**: personas que comparten techo,
+gastos y trabajo de sostenimiento. Eso abre dos escalas inmediatas que la contabilidad canónica
+(§16.5.3–16.5.4) hace posibles por primera vez:
+
+### Piso compartido (roommates)
+
+El caso más simple: tres personas comparten apartamento. CDD = limpieza, cocina, compras,
+gestión del arriendo. Las Tres Cuentas funcionan sin cambios — y con la CEH canónica resuelven
+la pelea clásica: *"yo pago más arriendo"* vs *"yo hago más tareas"* deja de ser un duelo de
+narrativas y se vuelve aritmética visible en horas de vida vendidas y horas de vida cuidada.
+Los acuerdos recurrentes pueden subir a MaxoContracts ligeros (§16.5.7) con las plantillas de
+la Cohorte (aseo compartido, comida grupal — Cap. 17 §17.7).
+
+### Conjunto residencial (escala vecinal)
+
+Un edificio o conjunto es una **unidad de convivencia colectiva**: zonas comunes, administración,
+portería, jardines. La rama doméstica escala a él con un puente que ya existe en el sistema general:
+las **partes de cualquier escala** (`maxo_parties`, Cap. 10) — un conjunto residencial es
+literalmente una parte tipo `coop-` o `society-`.
+
+- **Nivel vecinal**: el conjunto opera un "hogar" propio donde el CDD registra mantenimiento de
+  zonas comunes, gestión administrativa y cuidado de áreas verdes — con el mismo vector `[T,V,R]`.
+- **Contratos interescala**: servicios entre el conjunto y proveedores (jardinería, aseo) como
+  MaxoContracts con partes colectivas y quórum delegado N-de-M (Cap. 17).
+- **La condición de posibilidad**: que un roommate y un conjunto hablen el idioma del sistema
+  requiere unidades compatibles — exactamente lo que este capítulo implementa. Sin vector ni
+  TVI vendido, cada escala inventaría su propia moneda; con ellas, el trabajo invisible de un
+  edificio y el de una cocina quedan legibles en el mismo libro mayor.
+
+### Principio de escala
+
+> La MicroMaxocracia Canónica aplica a toda unidad de convivencia que comparta sostenimiento:
+> núcleo familiar, piso compartido, casa comunitaria o conjunto residencial. El parentesco no es
+> criterio de entrada; la convivencia lo es.
+
 ---
 
 > **📖 Conexiones:** Cap. 7 §7.5 (hecho/valor) · Cap. 8 §8.11 (Derecho al Registro Protegido,
-> Dimensión VIII) · Cap. 11 §11.6 (notación axiomática) · Cap. 13 §13.13 (perdón y presencia) ·
-> Cap. 15 §15.6 (Zona Libre) · Cap. 17 §17.1/§17.7 (bloques y plantillas).
+> Dimensión VIII) · Cap. 10 (partes de cualquier escala) · Cap. 11 §11.6 (notación axiomática) ·
+> Cap. 13 §13.13 (perdón y presencia) · Cap. 15 §15.6 (Zona Libre) · Cap. 17 §17.1/§17.7 (bloques
+> y plantillas).
