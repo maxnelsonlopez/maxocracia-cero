@@ -103,7 +103,10 @@ El patrón del Puente A (γ que escucha la vida) llega al fractal doméstico:
   Desintoxicación** del Cap. 16 §16.5 — que queda así reconocido como la forma doméstica de la
   retractación ética: el sistema sirve a las personas, no al revés.
 - **ESI rojo ≡ γ<1 estructural**: la Escala de Seguridad era intuitivamente el mismo umbral;
-  ahora lo decimos con la notación común. Un hogar en rojo no implementa el ledger: primero sana.
+  ahora lo decimos con la notación común. Y bajo INV1-Hogar, el rojo no cierra nada: activa el
+  **Modo Escudo Doméstico** — *el registro propio nunca se bloquea* (Derecho al Registro
+  Protegido); lo que se oculta a los demás convivientes son las cifras de quien está protegida.
+  La protección que silencia no es protección: es la violación con otra cara.
 
 ## 16.5.7 Acuerdos domésticos como MaxoContracts ligeros (opcional, Nivel 3+)
 
@@ -142,7 +145,7 @@ compartida de quienes comparten el techo.
 | Ledger de tareas | VHV de intercambios (`forms/exchange`) | Vector [T,V,R] + coeficientes en Capa 2 |
 | Check-in semanal | Check-ins de γ (`/contracts/<id>/checkin`, Puente A) | Registro con fuente; política asimétrica |
 | Auditoría mensual | Auditoría de coherencia + stats | Acta con procedencia (T13) |
-| ESI / Protocolo de Desintoxicación | INV1 + retractación ética + Ternura | Umbral γ<1; perdón protocolizado |
+| ESI / Protocolo de Desintoxicación | INV1 + retractación ética + Ternura | Umbral γ<1; **Modo Escudo** (registro propio jamás bloqueado, cifras ocultas a los demás); perdón protocolizado |
 | Niveles 0–4 | Resolución variable del VHV (Cap. 7 §7.3) | Sin cambios; modo puente→canónico en Nivel 2+ |
 | Trabajo emocional no-indexable | Zona Libre de VHV (15 §15.6) + Dimensión E (7 §7.9) | Reforzado: la rama canónica no coloniza lo opaco |
 
@@ -163,15 +166,52 @@ Ningún hogar existente queda invalidado:
 |---|---|
 | Hub doméstico (`app/micromax_bp.py`: household, cdd, safety-survey, audits, dashboard) | 🟢 vivo |
 | Este capítulo (estándar teórico) | 🟢 creado (ago 2026) |
+| **Modo Escudo Doméstico** — registro propio nunca bloqueado + cifras ocultas a los demás + vista discreta con datos reales privados | 🟢 implementado (ago 2026, hallazgo de campo de Max) |
+| `wants_support` opt-in privado almacenado con la ESI (no altera puntaje, jamás visible al hogar) | 🟢 implementado (ago 2026) |
 | Campos opcionales de vector (v/r) en `log_cdd` + `ceh_mode` en config | 🔴 pendiente |
 | Check-ins de γ domésticos (endpoint + UI) | 🔴 pendiente |
-| Renombrar pesos en salida del dashboard (con alias retrocompatible) | 🔴 pendiente |
+| Alias p₁/p₂/p₃ en salida del dashboard (con alias retrocompatible) | 🔴 pendiente |
 | Plantillas de contratos domésticos en el builder | 🔴 pendiente (plantillas Cohorte ya existen) |
+| Conexión `wants_support` → matching/recursos (Red de Apoyo, §16.5.12) | 🔴 próxima ola |
 
 **Próxima acción**: implementar los campos opcionales y el `ceh_mode` (una jornada pequeña), dejando
-los check-ins de γ domésticos para la Ola siguiente.
+los check-ins de γ domésticos y el puente hacia la Red de Apoyo para la Ola siguiente.
+
+## 16.5.12 La ESI como señal de necesidad: el puente hacia la Red de Apoyo
+
+Las seis preguntas de la Escala de Seguridad no son solo un filtro de entrada: son un **mapa de
+necesidades**. Cada "sí" describe algo concreto que la persona necesita y probablemente no puede
+obtener dentro de su hogar:
+
+| Señal ESI | Necesidad que describe | Apoyo que la comunidad puede ofrecer |
+|---|---|---|
+| Miedo a expresar desacuerdo | Voz protegida, acompañamiento | Acompañamiento emocional, escucha entrenada |
+| Dinero controlado coercitivamente | Independencia económica | Asesoría financiera, rutas de empleo, recursos |
+| Amenazas al cuestionar tareas | Seguridad jurídica | Asesoría legal, rutas de denuncia seguras |
+| Represalias si documenta su carga | Confidencialidad y respaldo | Testigos comunitarios, registro protegido |
+| Descalificación constante | Reconocimiento | Validación por pares, círculos de apoyo |
+| Miedo a ser honesta sobre cómo se siente | Espacio seguro de palabra | Grupos de apoyo, terapia subsidiada |
+
+### Principios del puente (no negociables)
+
+1. **Consentimiento explícito y granular** (`wants_support`, opt-in voluntario y revocable): la señal
+   viaja hacia afuera *solo si* la persona lo decide. Nunca automáticamente.
+2. **Nunca hacia el hogar**: el opt-in es invisible al conviviente. El sistema jamás notifica,
+   sugiere ni filtra nada que revele quién respondió qué dentro del hogar.
+3. **Identidad protegida**: el match se realiza sin exponer el hogar ni la relación — la víctima
+   reclama ofertas de cuidado desde su perfil de protección (`/protection`), no desde su domicilio.
+4. **Ofertas antes que búsquedas**: la comunidad publica *ofertas de apoyo* (asesoría legal,
+   acompañamiento, recursos) en el muro común; quien está protegida reclama sin declarar necesidad
+   pública alguna. La necesidad sensible nunca se publica; la abundancia de la red sí.
+
+### Estado
+
+La bandera privada ya existe (ago 2026). Su conexión con el matching (`/forms/matching`) y los
+recursos reclamables (`/resources/{id}/claim`) es trabajo de la próxima ola: publicar las primeras
+ofertas de cuidado de la Cohorte y probar el circuito completo con facilitación humana.
 
 ---
 
-> **📖 Conexiones:** Cap. 7 §7.5 (hecho/valor) · Cap. 11 §11.6 (notación axiomática) · Cap. 13 §13.13
-> (perdón y presencia) · Cap. 15 §15.6 (Zona Libre) · Cap. 17 §17.1/§17.7 (bloques y plantillas).
+> **📖 Conexiones:** Cap. 7 §7.5 (hecho/valor) · Cap. 8 §8.11 (Derecho al Registro Protegido,
+> Dimensión VIII) · Cap. 11 §11.6 (notación axiomática) · Cap. 13 §13.13 (perdón y presencia) ·
+> Cap. 15 §15.6 (Zona Libre) · Cap. 17 §17.1/§17.7 (bloques y plantillas).

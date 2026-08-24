@@ -216,9 +216,9 @@ El sistema incluye protecciones críticas porque **puede volverse tóxico** si s
 **Puntuación:**
 - 🟢 **0 respuestas verdaderas**: Seguro implementar
 - 🟡 **1-2 verdaderas**: Implementar con facilitador externo
-- 🔴 **3+ verdaderas**: **NO implementar** sin abordar dinámicas de poder
+- 🔴 **3+ verdaderas**: **Modo Escudo** — el sistema se implementa contigo, nunca contra ti
 
-> **CRÍTICO:** Si tu puntuación es roja, la MicroMaxocracia NO es la herramienta apropiada. Se necesitan intervenciones previas como terapia especializada o asesoría legal. Implementar el sistema en estas condiciones puede ser peligroso.
+> **CRÍTICO — El Derecho al Registro Protegido:** una puntuación roja **jamás silencia**. Hacer visible el propio trabajo invisible es *más* necesario en riesgo, no menos. Lo que el Modo Escudo modula es la **exposición**, nunca la voz: el registro personal sigue funcionando y queda guardado de forma privada para quien respondió; sus cifras se ocultan a los demás miembros del hogar; la pantalla adopta por defecto un modo discreto; y se ofrecen rutas de ayuda y apoyo de la red con consentimiento explícito. El ledger *colaborativo* completo (auditorías conjuntas, negociación de pesos) espera a que exista seguridad, y para eso mismo el sistema señala el camino: terapia especializada o asesoría legal primero. Pero el registro de la persona no se apaga jamás.
 
 ---
 
