@@ -7,6 +7,14 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
 
+def _ensure_column(cur, table: str, ddl: str):
+    """Adds a column if it does not exist yet (idempotent migration for existing DBs)."""
+    try:
+        cur.execute(f"ALTER TABLE {table} ADD COLUMN {ddl}")
+    except sqlite3.OperationalError:
+        pass  # column already exists
+
+
 def init_micromax_tables(app):
     """
     Initializes MicroMaxocracia tables in SQLite.
@@ -120,6 +128,14 @@ def init_micromax_tables(app):
         cur.execute(
             "CREATE INDEX IF NOT EXISTS idx_micromax_audits_household ON micromax_audits(household_id)"
         )
+
+        # Migracion canonica (Cap. 16.5): vector VHV [T,V,R] opcional en CDD y
+        # CEH por TVI vendido en la configuracion del miembro. Idempotente.
+        _ensure_column(cur, "micromax_cdd_logs", "v_ucv REAL DEFAULT 0")
+        _ensure_column(cur, "micromax_cdd_logs", "r_units REAL DEFAULT 0")
+        _ensure_column(cur, "micromax_cdd_logs", "r_notes TEXT DEFAULT ''")
+        _ensure_column(cur, "micromax_members", "ceh_mode TEXT DEFAULT 'bridge'")
+        _ensure_column(cur, "micromax_members", "hourly_rate REAL DEFAULT 0")
 
         conn.commit()
     except Exception as e:
@@ -246,10 +262,21 @@ class MicroMaxManager:
         work_hours: float,
         travel_hours: float,
         sleep_hours: float,
+        ceh_mode: str = "bridge",
+        hourly_rate: float = 0.0,
     ) -> Dict:
-        """Updates work/life economic configuration for a household member."""
+        """Updates work/life economic configuration for a household member.
+
+        Cap. 16.5: `ceh_mode` ('bridge' = % fiat, 'canonical' = TVI vendido) y
+        `hourly_rate` (tarifa horaria vital declarada) habilitan la contabilidad
+        canonica cuando todo el hogar la adopta.
+        """
         if monthly_income < 0 or work_hours < 0 or travel_hours < 0 or sleep_hours < 0:
             raise ValueError("Parameters cannot be negative.")
+        if hourly_rate < 0:
+            raise ValueError("Hourly rate cannot be negative.")
+        if ceh_mode not in ("bridge", "canonical"):
+            raise ValueError("ceh_mode must be 'bridge' or 'canonical'.")
         if (work_hours + travel_hours + sleep_hours) > 168:
             raise ValueError(
                 "Total hours (work + travel + sleep) cannot exceed 168 hours in a week."
@@ -266,10 +293,19 @@ class MicroMaxManager:
         cursor.execute(
             """
             UPDATE micromax_members
-            SET monthly_income = ?, work_hours = ?, travel_hours = ?, sleep_hours = ?
+            SET monthly_income = ?, work_hours = ?, travel_hours = ?, sleep_hours = ?,
+                ceh_mode = ?, hourly_rate = ?
             WHERE user_id = ?
         """,
-            (monthly_income, work_hours, travel_hours, sleep_hours, user_id),
+            (
+                monthly_income,
+                work_hours,
+                travel_hours,
+                sleep_hours,
+                ceh_mode,
+                hourly_rate,
+                user_id,
+            ),
         )
         conn.commit()
 
@@ -287,12 +323,23 @@ class MicroMaxManager:
         fragmentation_factor: float = 1.0,
         loneliness_factor: float = 1.0,
         logged_date: Optional[str] = None,
+        v_ucv: float = 0.0,
+        r_units: float = 0.0,
+        r_notes: str = "",
     ) -> Dict:
-        """Logs a direct contribution (CDD) task with VHV & FIC calculation."""
+        """Logs a direct contribution (CDD) task with VHV & FIC calculation.
+
+        Cap. 16.5 (compatibilidad canonica): `v_ucv` (vidas afectadas, ej. cuidado de
+        personas) y `r_units`/`r_notes` (recursos del hogar) completan el vector
+        [T, V, R] junto a `duration_hours` (T). El escalar ponderado sigue calculandose
+        igual para el equilibrio — el hecho queda limpio y comparable con el sistema general.
+        """
         if not task_name or not task_name.strip():
             raise ValueError("Task name cannot be empty.")
         if duration_hours <= 0 or duration_hours > 24:
             raise ValueError("Task duration must be between 0 and 24 hours.")
+        if v_ucv < 0 or r_units < 0:
+            raise ValueError("VHV components cannot be negative.")
 
         # Ponderation boundaries check
         if not (1.0 <= effort_factor <= 2.0):
@@ -332,8 +379,9 @@ class MicroMaxManager:
             """
             INSERT INTO micromax_cdd_logs (
                 member_id, task_name, duration_hours, effort_factor, mental_factor, scope_factor,
-                attention_factor, fragmentation_factor, loneliness_factor, calculated_vhv, logged_date
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                attention_factor, fragmentation_factor, loneliness_factor, calculated_vhv,
+                logged_date, v_ucv, r_units, r_notes
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
             (
                 member["id"],
@@ -347,6 +395,9 @@ class MicroMaxManager:
                 loneliness_factor,
                 calculated_vhv,
                 logged_date,
+                v_ucv,
+                r_units,
+                (r_notes or "").strip(),
             ),
         )
         log_id = cursor.lastrowid
@@ -359,6 +410,8 @@ class MicroMaxManager:
             "duration_hours": duration_hours,
             "calculated_vhv": calculated_vhv,
             "logged_date": logged_date,
+            "vhv_vector": {"T": duration_hours, "V": v_ucv, "R": r_units},
+            "r_notes": (r_notes or "").strip(),
         }
 
     def get_cdd_logs(
@@ -593,8 +646,33 @@ class MicroMaxManager:
         # Totals computed ONLY over visible members (nothing inferable by difference)
         visible_members = [m for m in members if _visible(m["id"])]
         total_cdd = sum(member_cdds[m["id"]] for m in visible_members)
-        total_income = sum(m["monthly_income"] for m in visible_members)
+        total_income = sum(m["monthly_income"] or 0 for m in visible_members)
         total_ted = sum(member_teds[m["id"]] for m in visible_members)
+
+        # CEH canonica (Cap. 16.5): TVI vendido cuando TODOS los miembros con ingresos
+        # usan modo canonical con tarifa horaria vital declarada; si no, fallback fiat.
+        def _member_mode(m):
+            return m.get("ceh_mode") or "bridge"
+
+        contributing = [m for m in visible_members if (m.get("monthly_income") or 0) > 0]
+        ceh_unit = (
+            "tvi"
+            if contributing
+            and all(
+                _member_mode(m) == "canonical"
+                and (m.get("hourly_rate") or 0) > 0
+                for m in contributing
+            )
+            else "fiat"
+        )
+
+        def _ceh_value(m) -> float:
+            income = m.get("monthly_income") or 0.0
+            if ceh_unit == "tvi":
+                return income / (m.get("hourly_rate") or 0.0)
+            return float(income)
+
+        total_ceh = sum(_ceh_value(m) for m in visible_members)
 
         # Ponderations (p1/p2/p3 en la rama canonica Cap. 16.5; alias historicos aqui)
         p1, p2, p3 = 0.6, 0.3, 0.1
@@ -620,11 +698,12 @@ class MicroMaxManager:
                 continue
 
             cdd = member_cdds[m["id"]]
-            income = m["monthly_income"]
+            income = m.get("monthly_income") or 0.0
             ted = member_teds[m["id"]]
 
             cdd_share = cdd / total_cdd if total_cdd > 0 else 0.0
-            ceh_share = income / total_income if total_income > 0 else 0.0
+            ceh_value = _ceh_value(m)
+            ceh_share = ceh_value / total_ceh if total_ceh > 0 else 0.0
             ted_share = ted / total_ted if total_ted > 0 else 0.0
 
             equilibrio = (p1 * cdd_share) + (p2 * ceh_share) + (p3 * ted_share)
@@ -637,6 +716,8 @@ class MicroMaxManager:
                     "cdd": round(cdd, 2),
                     "cdd_share": round(cdd_share * 100, 2),
                     "income": income,
+                    "ceh_mode": _member_mode(m),
+                    "ceh_value": round(ceh_value, 4),
                     "ceh_share": round(ceh_share * 100, 2),
                     "ted": round(ted, 2),
                     "ted_share": round(ted_share * 100, 2),
@@ -651,7 +732,10 @@ class MicroMaxManager:
                 "total_cdd": round(total_cdd, 2),
                 "total_income": total_income,
                 "total_ted": round(total_ted, 2),
+                "total_ceh": round(total_ceh, 4),
+                "ceh_unit": ceh_unit,
             },
+            "pesos": {"p1": p1, "p2": p2, "p3": p3},
         }
 
     def calculate_toxicity_indices(

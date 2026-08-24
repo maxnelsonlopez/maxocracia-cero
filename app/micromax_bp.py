@@ -117,6 +117,8 @@ def update_member_config(current_user):
         work_hours = float(data.get("work_hours", 0))
         travel_hours = float(data.get("travel_hours", 0))
         sleep_hours = float(data.get("sleep_hours", 56))
+        ceh_mode = str(data.get("ceh_mode") or "bridge")
+        hourly_rate = float(data.get("hourly_rate", 0))
 
         member = manager.update_member_config(
             current_user["user_id"],
@@ -124,6 +126,8 @@ def update_member_config(current_user):
             work_hours,
             travel_hours,
             sleep_hours,
+            ceh_mode=ceh_mode,
+            hourly_rate=hourly_rate,
         )
         return jsonify(member), 200
     except ValueError as e:
@@ -160,6 +164,9 @@ def log_cdd(current_user):
             fragmentation_factor=float(data.get("fragmentation_factor", 1.0)),
             loneliness_factor=float(data.get("loneliness_factor", 1.0)),
             logged_date=data.get("logged_date"),
+            v_ucv=float(data.get("v_ucv", 0.0)),
+            r_units=float(data.get("r_units", 0.0)),
+            r_notes=str(data.get("r_notes", "") or ""),
         )
         return jsonify(log), 201
     except ValueError as e:

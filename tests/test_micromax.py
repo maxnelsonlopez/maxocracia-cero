@@ -385,3 +385,156 @@ def test_esi_wants_support_es_privado_y_opt_in(client, auth_headers):
     res = client.get("/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com"))
     survey = res.get_json().get("safety_survey")
     assert survey is None or survey.get("member_id") != 2
+
+
+def test_compatibilidad_vector_vhv_en_cdd(client, auth_headers):
+    """Cap. 16.5: cada tarea puede portar su vector [T, V, R] opcional sin romper
+    el escalar ponderado que alimenta el equilibrio."""
+    res = client.post(
+        "/api/micromax/household",
+        headers=auth_headers(1, "alice@example.com"),
+        data=json.dumps({"name": "Hogar"}),
+        content_type="application/json",
+    )
+    assert res.status_code == 201
+
+    # Con vector completo (ej. cuidado de persona dependiente con insumos)
+    res = client.post(
+        "/api/micromax/cdd",
+        headers=auth_headers(1, "alice@example.com"),
+        data=json.dumps(
+            {
+                "task_name": "Cuidado de mama",
+                "duration_hours": 3.0,
+                "effort_factor": 1.5,
+                "mental_factor": 1.3,
+                "scope_factor": 1.2,
+                "v_ucv": 0.5,
+                "r_units": 4.0,
+                "r_notes": "medicamentos y transporte",
+            }
+        ),
+        content_type="application/json",
+    )
+    assert res.status_code == 201
+    data = res.get_json()
+    assert data["vhv_vector"] == {"T": 3.0, "V": 0.5, "R": 4.0}
+    assert data["r_notes"] == "medicamentos y transporte"
+    # El escalar ponderado sigue intacto: 3 * (1.5*1.3*1.2) = 7.02
+    assert data["calculated_vhv"] == 7.02
+
+    # Sin campos nuevos: retrocompatible (defaults a cero)
+    res = client.post(
+        "/api/micromax/cdd",
+        headers=auth_headers(1, "alice@example.com"),
+        data=json.dumps(
+            {
+                "task_name": "Lavar platos",
+                "duration_hours": 1.0,
+                "effort_factor": 1.0,
+                "mental_factor": 1.0,
+                "scope_factor": 1.0,
+            }
+        ),
+        content_type="application/json",
+    )
+    assert res.status_code == 201
+    assert res.get_json()["vhv_vector"] == {"T": 1.0, "V": 0.0, "R": 0.0}
+
+    # Componentes negativos rechazados
+    res = client.post(
+        "/api/micromax/cdd",
+        headers=auth_headers(1, "alice@example.com"),
+        data=json.dumps(
+            {
+                "task_name": "X",
+                "duration_hours": 1.0,
+                "effort_factor": 1.0,
+                "mental_factor": 1.0,
+                "scope_factor": 1.0,
+                "v_ucv": -1,
+            }
+        ),
+        content_type="application/json",
+    )
+    assert res.status_code == 400
+
+
+def test_ceh_canonica_tvi_homogeneiza_las_cuentas(client, auth_headers):
+    """Cap. 16.5 s16.5.4: cuando todo el hogar usa modo canonico, la CEH se mide en
+    horas de vida vendidas — el dinero deja de comprar peso en el equilibrio."""
+    res = client.post(
+        "/api/micromax/household",
+        headers=auth_headers(1, "alice@example.com"),
+        data=json.dumps({"name": "Hogar"}),
+        content_type="application/json",
+    )
+    invite_code = res.get_json()["household"]["invite_code"]
+    assert _join(client, auth_headers, 2, "bob@example.com", invite_code).status_code == 200
+
+    # Alice gana 1000 con tarifa 50/h -> 20 h vendidas; Bob gana 400 con tarifa 20/h -> 20 h.
+    # En fiat la brecha es 71/29; en TVI vendido es 50/50.
+    for uid, email, income, rate in [
+        (1, "alice@example.com", 1000, 50),
+        (2, "bob@example.com", 400, 20),
+    ]:
+        res = client.post(
+            "/api/micromax/member/config",
+            headers=auth_headers(uid, email),
+            data=json.dumps(
+                {
+                    "monthly_income": income,
+                    "work_hours": 40,
+                    "travel_hours": 5,
+                    "sleep_hours": 56,
+                    "ceh_mode": "canonical",
+                    "hourly_rate": rate,
+                }
+            ),
+            content_type="application/json",
+        )
+        assert res.status_code == 200
+        assert res.get_json()["ceh_mode"] == "canonical"
+
+    res = client.get("/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com"))
+    assert res.status_code == 200
+    ta = res.get_json()["three_accounts"]
+    members = {m["name"]: m for m in ta["members"]}
+    assert members["Alice"]["ceh_share"] == 50.0
+    assert members["Bob"]["ceh_share"] == 50.0
+    assert ta["totals"]["ceh_unit"] == "tvi"
+    assert ta["totals"]["total_ceh"] == 40.0
+    assert ta["pesos"] == {"p1": 0.6, "p2": 0.3, "p3": 0.1}
+
+    # Modo mixto: fallback seguro a fiat (unidad homogenea garantizada)
+    client.post(
+        "/api/micromax/member/config",
+        headers=auth_headers(2, "bob@example.com"),
+        data=json.dumps(
+            {
+                "monthly_income": 400,
+                "work_hours": 40,
+                "travel_hours": 5,
+                "sleep_hours": 56,
+                "ceh_mode": "bridge",
+                "hourly_rate": 20,
+            }
+        ),
+        content_type="application/json",
+    )
+    res = client.get("/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com"))
+    ta = res.get_json()["three_accounts"]
+    assert ta["totals"]["ceh_unit"] == "fiat"
+    members = {m["name"]: m for m in ta["members"]}
+    assert members["Alice"]["ceh_share"] == 71.43
+    assert members["Bob"]["ceh_share"] == 28.57
+
+
+def test_ceh_mode_invalido_rechazado(client, auth_headers):
+    res = client.post(
+        "/api/micromax/member/config",
+        headers=auth_headers(1, "alice@example.com"),
+        data=json.dumps({"ceh_mode": "fiat_total"}),
+        content_type="application/json",
+    )
+    assert res.status_code == 400
