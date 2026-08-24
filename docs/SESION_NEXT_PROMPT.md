@@ -46,7 +46,8 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 | **Integraciones_pendientes sincronizadas** (22-08-2026, ox-alpha): INDICE reescrito con numeración vigente + 8 mapas como registro histórico | ✅ |
 | **Mapa de Trazabilidad Canónica** (22-08-2026, ox-alpha): libro↔código↔tests↔commits (`docs/architecture/mapa_trazabilidad_canonica.md`) — piloto completo; regenerar por Ola | ✅ |
 | **Capítulo 16.5 — MicroMaxocracia Canónica** (22-08-2026, ox-alpha): VHV vectorial doméstico, CEH→TVI vendido (modos puente/canónico), pesos p₁/p₂/p₃ (fin de colisión con α/β/γ/δ), γ doméstico + INV1-Hogar, hogar = unidad básica de Opacidad Sagrada | ✅ teoría · 🔴 implementación: campos v/r en `log_cdd`, `ceh_mode`, check-ins γ, alias dashboard |
-| Suite de tests | **701/701** (verificado 12-08-2026; sin cambios de código desde entonces) |
+| **Modo Escudo Doméstico** (22-08-2026, hallazgo de campo de Max): ESI roja ya no bloquea el registro propio; cifras del protegido ocultas a los demás; frontend persiste CDD real con vista discreta; `wants_support` opt-in privado como gancho hacia la Red de Apoyo (Cap 16.5 §16.5.12 — conexión matching/resources pendiente) | ✅ código + libro · 🔴 próxima ola: puente wants_support → matching/recursos |
+| Suite de tests | **453/453 paralela** (verificado 22-08-2026 tras Modo Escudo; suite completa 701/701 al cierre de Ola 4) |
 
 **Decisiones canónicas a respetar:**
 - **La teoría (libro) tiene prioridad**: T0-T15 son canónicos; T16=Minimizar Daño, T17=Reciprocidad

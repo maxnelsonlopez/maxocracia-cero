@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-22 — Modo Escudo Doméstico: el registro propio nunca se bloquea (hallazgo de campo)
+
+### Corregido
+- **Bug grave de protección inversa (reportado por Max)**: una encuesta ESI respondida en rojo (≥3) **dejaba a la persona sin poder registrar su trabajo invisible** — `log_cdd` lanzaba `Access Blocked` y el frontend descartaba los registros en simulación local. La protección terminaba silenciando justamente a quien más necesitaba visibilidad.
+- **`log_cdd` ya nunca bloquea por ESI**: el registro personal es irrenunciable (Derecho al Registro Protegido, Cap. 16.5).
+
+### Añadido
+- **Modo Escudo Doméstico**: las cifras del miembro protegido se ocultan a los *demás* miembros — salen de totales y cuotas del dashboard (`calculate_three_accounts`, IDP en `calculate_toxicity_indices`) para que nada sea inferible por diferencia. Ella siempre ve el hogar completo, incluidas sus propias cifras (`protegido: true` como marca visible).
+- **Frontend con escudo real**: la vista discreta (datos simulados) se mantiene por defecto, pero ahora **persiste el CDD real** en el servidor; botón privado "Ver mis registros reales" solo para la persona protegida. Las auditorías siguen sin persistirse en modo escudo por diseño: son registros compartidos sin autoría que expondrían actividad al conviviente.
+- **`wants_support` — la ESI como señal de necesidad (opt-in privado)**: checkbox voluntario y revocable en la encuesta; se almacena junto a las respuestas sin alterar el puntaje y **jamás es visible al hogar**. Gancho teorizado en Cap. 16.5 §16.5.12 para que la Red de Apoyo ofrezca acompañamiento/asesoría legal/recursos vía matching y recursos reclamables (conexión: próxima ola).
+- **Tests**: 3 nuevos — regresión del bloqueo (rojo → CDD 201), ocultamiento selectivo de cifras (vista ajena vs. vista propia), privacidad de `wants_support`.
+
+### Notas Técnicas
+- `calculate_three_accounts`/`calculate_toxicity_indices` aceptan `requester_user_id` opcional (retrocompatible); dashboard pasa al solicitante. `save/get_safety_survey` exponen `protection_mode` ('shielded'/'standard'), `blocked: False` retrocompatible y `can_log: True`.
+- Suite paralela 453/453; `tsc --noEmit` limpio. Libro actualizado: Cap. 16 §16.5 (Derecho al Registro Protegido sustituye el "NO implementar") y Cap. 16.5 §§16.5.6/9/11/12.
+
 ## 2026-08-22 — Capítulo 16.5: MicroMaxocracia Canónica (la rama doméstica en unidades del sistema)
 
 ### Añadido

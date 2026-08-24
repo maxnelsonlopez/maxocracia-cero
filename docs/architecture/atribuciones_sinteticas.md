@@ -97,6 +97,14 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   humana real (ciclo completo, oráculo en vivo, gobernanza activa).
 
 ### ox-alpha — "el bibliotecario de la coherencia"
+- **Modo Escudo Doméstico (22/8/2026)**: `app/micromax.py`, `app/micromax_bp.py`,
+  `frontend/app/micromax/page.tsx` + 3 tests — corrección del hallazgo de campo de Max: una ESI en
+  rojo dejaba a la persona sin poder registrar su trabajo invisible. Ahora el registro propio nunca
+  se bloquea (Derecho al Registro Protegido), las cifras del protegido se ocultan a los demás
+  miembros, el frontend persiste el CDD real bajo vista discreta con toggle privado, y
+  `wants_support` (opt-in privado) queda como gancho hacia la Red de Apoyo. Teoría alineada:
+  Cap. 16 §16.5 y Cap. 16.5 §§16.5.6/9/11/12 (incluido el nuevo §16.5.12 con el diseño del puente
+  ESI → matching/recursos). Commit `ce44182`.
 - **Capítulo 16.5 — MicroMaxocracia Canónica (22/8/2026)**: `docs/book/edicion_3_dinamica/capitulo_16_5_micromaxocracia_canonica_220826.md` —
   la ramificación que ancla el hogar al canon: restitución de la separación hecho/valor (vector
   `[T,V,R]` con multiplicadores como Capa 2), CEH convertida a TVI vendido (modos puente/canónico),

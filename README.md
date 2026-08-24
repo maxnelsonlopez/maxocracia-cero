@@ -37,7 +37,7 @@ La **Maxocracia** es un sistema ético-económico-político alternativo que prop
 
 ### Software Funcional
 - **Portal Unificado (Hybrid Frontend)**: Nueva landing page moderna (Next.js) servida por Flask.
-- **MicroMaxocracia v1.0**: Registro interactivo de CDD, balance de Tres Cuentas en UI, encuesta de seguridad ESI con pantalla de bloqueo y monitor Detox relacional en tiempo real.
+- **MicroMaxocracia v1.0**: Registro interactivo de CDD, balance de Tres Cuentas en UI, encuesta de seguridad ESI con **Modo Escudo Doméstico** (el registro propio nunca se bloquea; cifras privadas para quien está en riesgo) y monitor Detox relacional en tiempo real.
 - **Nexus Simulator v2.2**: Simulador interactivo del VHV con Modo Oráculo Dinámico.
 - **MaxoContracts v2.5**: Persistencia SQLite, 5 bloques modulares, oráculo sintético en vivo (DeepSeek), constructor de contratos visual (React Flow) con biblioteca de plantillas, validador de grafos, UX sobre-explicada liminal y **partes de cualquier escala** (personas, micro-sociedades, cooperativas, instituciones, sintéticas y ecosistemas).
 - **SDV-S en la Interfaz**: Panel "Reino Sintético · SDV-S" en el detalle de contratos — FS_S = e^v, las 5 dimensiones de la ontometría sintética, violaciones y el Invariante INV2-S con el camino de Ternura. Las rutas dinámicas de `/contracts/` funcionan en pestaña nueva y por clic.
