@@ -137,6 +137,24 @@ def init_micromax_tables(app):
         _ensure_column(cur, "micromax_members", "ceh_mode TEXT DEFAULT 'bridge'")
         _ensure_column(cur, "micromax_members", "hourly_rate REAL DEFAULT 0")
 
+        # 6. Check-ins de gamma domestica (Cap. 16.5 s16.5.6 - INV1-Hogar):
+        #    el latido del hogar. Politica asimetrica del Puente A aplicada al fractal.
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS micromax_checkins (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                member_id INTEGER NOT NULL,
+                gamma REAL NOT NULL,
+                note TEXT DEFAULT '',
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (member_id) REFERENCES micromax_members(id) ON DELETE CASCADE
+            )
+        """
+        )
+        cur.execute(
+            "CREATE INDEX IF NOT EXISTS idx_micromax_checkins_member ON micromax_checkins(member_id)"
+        )
+
         conn.commit()
     except Exception as e:
         app.logger.error(f"Error initializing MicroMaxocracia tables: {e}")
@@ -742,6 +760,121 @@ class MicroMaxManager:
             },
             "pesos": {"p1": p1, "p2": p2, "p3": p3},
         }
+
+    def log_checkin(self, user_id: int, gamma: float, note: str = "") -> Dict:
+        """Check-in de bienestar domestico (Cap. 16.5 s16.5.6).
+
+        Canon del sistema: gamma con tope [0.5, 1.5] (blindaje Ola 3A). INV1-Hogar:
+        una CAIDA bajo 1.0 se escucha siempre — la respuesta marca inv1=True para que
+        la persona y el hogar la vean. Bajo Modo Escudo, el angusto de quien esta
+        protegida JAMAS se emite a los demas convivientes (solo ella la ve).
+        """
+        if not (0.5 <= gamma <= 1.5):
+            raise ValueError("Gamma must be between 0.5 and 1.5.")
+
+        member = self.get_member(user_id)
+        if not member:
+            raise ValueError("User is not registered in a MicroMaxocracia household.")
+
+        conn = self._get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO micromax_checkins (member_id, gamma, note) VALUES (?, ?, ?)",
+            (member["id"], gamma, (note or "").strip()),
+        )
+        checkin_id = cursor.lastrowid
+        conn.commit()
+
+        return {
+            "id": checkin_id,
+            "member_id": member["id"],
+            "gamma": gamma,
+            "note": (note or "").strip(),
+            "inv1": gamma < 1.0,
+        }
+
+    def get_checkins(self, user_id: int, limit: int = 30) -> List[Dict]:
+        """Serie temporal de gamma propia."""
+        member = self.get_member(user_id)
+        if not member:
+            return []
+
+        conn = self._get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT id, gamma, note, created_at FROM micromax_checkins
+            WHERE member_id = ?
+            ORDER BY id DESC
+            LIMIT ?
+        """,
+            (member["id"], limit),
+        )
+        return [dict(row) for row in cursor.fetchall()]
+
+    def get_household_wellbeing(
+        self, household_id: int, requester_user_id: Optional[int] = None
+    ) -> Dict:
+        """Ultimo gamma por miembro + alerta INV1-Hogar, respetando el Modo Escudo.
+
+        La vista de cada quien computa solo miembros visibles: el angusto de un
+        protegido nunca cruza la pantalla de sus convivientes.
+        """
+        members = self.get_household_members(household_id)
+        shielded_ids = self._get_shielded_member_ids(household_id)
+
+        requester_member_id = None
+        if requester_user_id is not None:
+            for m in members:
+                if m["user_id"] == requester_user_id:
+                    requester_member_id = m["id"]
+                    break
+
+        def _visible(member_id: int) -> bool:
+            return member_id not in shielded_ids or member_id == requester_member_id
+
+        conn = self._get_db_connection()
+        cursor = conn.cursor()
+
+        results = []
+        inv1_alert = False
+        for m in members:
+            cursor.execute(
+                """
+                SELECT gamma FROM micromax_checkins WHERE member_id = ?
+                ORDER BY id DESC LIMIT 1
+            """,
+                (m["id"],),
+            )
+            row = cursor.fetchone()
+            latest_gamma = row["gamma"] if row else None
+
+            if not _visible(m["id"]):
+                results.append(
+                    {
+                        "member_id": m["id"],
+                        "name": m["name"],
+                        "gamma": None,
+                        "protegido": True,
+                        "inv1": None,
+                    }
+                )
+                continue
+
+            member_inv1 = latest_gamma is not None and latest_gamma < 1.0
+            if member_inv1:
+                inv1_alert = True
+            results.append(
+                {
+                    "member_id": m["id"],
+                    "name": m["name"],
+                    "gamma": latest_gamma,
+                    "protegido": m["id"] in shielded_ids,
+                    "inv1": member_inv1,
+                }
+            )
+
+        return {"members": results, "inv1_hogar_alert": inv1_alert}
 
     def calculate_toxicity_indices(
         self, household_id: int, requester_user_id: Optional[int] = None

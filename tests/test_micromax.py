@@ -569,3 +569,99 @@ def test_ceh_mode_invalido_rechazado(client, auth_headers):
         content_type="application/json",
     )
     assert res.status_code == 400
+
+
+def test_gamma_domestica_latido_e_inv1_hogar(client, auth_headers):
+    """Cap. 16.5 s16.5.6: check-ins de bienestar; INV1-Hogar escucha las caidas."""
+    client.post(
+        "/api/micromax/household",
+        headers=auth_headers(1, "alice@example.com"),
+        data=json.dumps({"name": "Hogar"}),
+        content_type="application/json",
+    )
+
+    # Gamma fuera del canon [0.5, 1.5] rechazada
+    res = client.post(
+        "/api/micromax/checkin",
+        headers=auth_headers(1, "alice@example.com"),
+        data=json.dumps({"gamma": 1.9}),
+        content_type="application/json",
+    )
+    assert res.status_code == 400
+
+    # Subida tranquila
+    res = client.post(
+        "/api/micromax/checkin",
+        headers=auth_headers(1, "alice@example.com"),
+        data=json.dumps({"gamma": 1.2, "note": "buena semana"}),
+        content_type="application/json",
+    )
+    assert res.status_code == 201
+    assert res.get_json()["inv1"] is False
+
+    # Caida: se escucha siempre (INV1)
+    res = client.post(
+        "/api/micromax/checkin",
+        headers=auth_headers(1, "alice@example.com"),
+        data=json.dumps({"gamma": 0.8, "note": "semana dura"}),
+        content_type="application/json",
+    )
+    assert res.status_code == 201
+    assert res.get_json()["inv1"] is True
+
+    # Serie propia completa
+    res = client.get("/api/micromax/checkins", headers=auth_headers(1, "alice@example.com"))
+    serie = res.get_json()
+    assert len(serie) == 2
+    assert serie[0]["gamma"] == 0.8  # la mas reciente primero
+
+    # Dashboard: ultimo gamma + alerta INV1-Hogar activa
+    res = client.get("/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com"))
+    wb = res.get_json()["wellbeing"]
+    assert wb["inv1_hogar_alert"] is True
+    assert wb["members"][0]["gamma"] == 0.8
+
+
+def test_escudo_oculta_el_angusto_ajeno_pero_la_persona_se_ve_su_propio(client, auth_headers):
+    """El gamma de un protegido nunca cruza la pantalla de sus convivientes;
+    ella si se ve a si misma y su INV1 propio."""
+    res = client.post(
+        "/api/micromax/household",
+        headers=auth_headers(1, "alice@example.com"),
+        data=json.dumps({"name": "Hogar"}),
+        content_type="application/json",
+    )
+    invite_code = res.get_json()["household"]["invite_code"]
+    assert _join(client, auth_headers, 2, "bob@example.com", invite_code).status_code == 200
+
+    client.post(
+        "/api/micromax/safety-survey",
+        headers=auth_headers(2, "bob@example.com"),
+        data=json.dumps({"answers": RED_ANSWERS}),
+        content_type="application/json",
+    )
+    # Bob reporta angusto (gamma bajo)
+    res = client.post(
+        "/api/micromax/checkin",
+        headers=auth_headers(2, "bob@example.com"),
+        data=json.dumps({"gamma": 0.6, "note": "privado"}),
+        content_type="application/json",
+    )
+    assert res.status_code == 201 and res.get_json()["inv1"] is True
+
+    # Vista de ALICE: el angusto de Bob no existe en su pantalla
+    res = client.get("/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com"))
+    wb = res.get_json()["wellbeing"]
+    bob_view = next(m for m in wb["members"] if m["name"] == "Bob")
+    alice_view = next(m for m in wb["members"] if m["name"] == "Alice")
+    assert bob_view["protegido"] is True
+    assert bob_view["gamma"] is None and bob_view["inv1"] is None
+    assert wb["inv1_hogar_alert"] is False  # nada filtrado por inferencia
+
+    # Vista de BOB: ve su propio angusto y su INV1 personal
+    res = client.get("/api/micromax/dashboard", headers=auth_headers(2, "bob@example.com"))
+    wb = res.get_json()["wellbeing"]
+    bob_view = next(m for m in wb["members"] if m["name"] == "Bob")
+    assert bob_view["gamma"] == 0.6
+    assert bob_view["inv1"] is True
+    assert wb["inv1_hogar_alert"] is True

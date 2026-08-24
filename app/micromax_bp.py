@@ -270,6 +270,37 @@ def get_audits(current_user):
         return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
 
 
+@micromax_bp.route("/checkin", methods=["POST"])
+@token_required
+def log_checkin(current_user):
+    """Check-in de gamma domestica (Cap. 16.5 s16.5.6): el latido del hogar."""
+    data = request.get_json() or {}
+    try:
+        gamma = float(data.get("gamma"))
+    except (TypeError, ValueError):
+        return jsonify({"error": "Gamma debe ser un numero entre 0.5 y 1.5."}), 400
+
+    try:
+        res = manager.log_checkin(
+            current_user["user_id"], gamma, note=str(data.get("note", "") or "")
+        )
+        return jsonify(res), 201
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
+
+
+@micromax_bp.route("/checkins", methods=["GET"])
+@token_required
+def get_checkins(current_user):
+    limit = request.args.get("limit", 30, type=int)
+    try:
+        return jsonify(manager.get_checkins(current_user["user_id"], limit)), 200
+    except Exception as e:
+        return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
+
+
 @micromax_bp.route("/dashboard", methods=["GET"])
 @token_required
 def get_dashboard(current_user):
@@ -293,6 +324,9 @@ def get_dashboard(current_user):
         toxicity = manager.calculate_toxicity_indices(
             member["household_id"], requester_user_id=current_user["user_id"]
         )
+        wellbeing = manager.get_household_wellbeing(
+            member["household_id"], requester_user_id=current_user["user_id"]
+        )
         survey = manager.get_safety_survey(current_user["user_id"])
 
         return (
@@ -300,6 +334,7 @@ def get_dashboard(current_user):
                 {
                     "three_accounts": three_accounts,
                     "toxicity": toxicity,
+                    "wellbeing": wellbeing,
                     "safety_survey": survey,
                 }
             ),
