@@ -301,6 +301,19 @@ def get_checkins(current_user):
         return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
 
 
+@micromax_bp.route("/support/offers", methods=["GET"])
+@token_required
+def get_support_offers(current_user):
+    """Red de Apoyo (Cap. 16.5 s16.5.12): ofertas comunitarias afinadas por las
+    senales ESI de la persona. Requiere su opt-in privado; jamas expone hogar."""
+    try:
+        return jsonify(manager.get_support_offers(current_user["user_id"])), 200
+    except PermissionError as e:
+        return jsonify({"error": str(e)}), 403
+    except Exception as e:
+        return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
+
+
 @micromax_bp.route("/dashboard", methods=["GET"])
 @token_required
 def get_dashboard(current_user):

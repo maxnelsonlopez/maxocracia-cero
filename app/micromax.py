@@ -876,6 +876,67 @@ class MicroMaxManager:
 
         return {"members": results, "inv1_hogar_alert": inv1_alert}
 
+    def get_support_offers(self, user_id: int) -> Dict:
+        """Puente Red de Apoyo (Cap. 16.5 s16.5.12) — solo con opt-in privado activo.
+
+        Ofertas antes que busquedas: devuelve los recursos comunitarios abiertos,
+        ordenados por afinidad con las senales ESI de la persona (que nunca salen
+        del canal). Nada aqui revela hogar ni respuestas a terceros: es una lectura
+        personal de la abundancia de la red.
+        """
+        member = self.get_member(user_id)
+        survey = self.get_safety_survey(user_id)
+        if not member or not survey or not survey.get("wants_support"):
+            # Mensaje neutro: no filtra estado ni existencia de encuesta
+            raise PermissionError(
+                "Este canal requiere tu consentimiento de apoyo (opt-in privado en la encuesta ESI)."
+            )
+
+        answers = survey.get("answers", {})
+        signal_map = {
+            "q1": ["emocional", "acompanamiento"],
+            "q2": ["financiero", "legal"],
+            "q3": ["legal", "emergencia"],
+            "q4": ["comunitario", "testigos"],
+            "q5": ["acompanamiento", "comunitario"],
+            "q6": ["emocional", "terapia"],
+        }
+        signal_categories = []
+        for q, cats in signal_map.items():
+            if answers.get(q) is True:
+                for c in cats:
+                    if c not in signal_categories:
+                        signal_categories.append(c)
+
+        conn = self._get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT id, title, description, category, created_at FROM resources WHERE available = 1 ORDER BY created_at DESC"
+        )
+        rows = [dict(r) for r in cursor.fetchall()]
+
+        def _affinity(resource: Dict) -> List[str]:
+            hay = " ".join(
+                str(resource.get(k) or "") for k in ("title", "description", "category")
+            ).lower()
+            return [c for c in signal_categories if c in hay]
+
+        matched, others = [], []
+        for r in rows:
+            reasons = _affinity(r)
+            item = dict(r)
+            if reasons:
+                item["match_reasons"] = reasons
+                matched.append(item)
+            else:
+                others.append(item)
+
+        return {
+            "signal_categories": signal_categories,
+            "offers": matched + others,
+            "note": "Ofertas antes que busquedas (Cap. 16.5 s16.5.12): reclama desde tu perfil, sin declarar necesidad publica.",
+        }
+
     def calculate_toxicity_indices(
         self, household_id: int, requester_user_id: Optional[int] = None
     ) -> Dict:

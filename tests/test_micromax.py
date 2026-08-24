@@ -665,3 +665,55 @@ def test_escudo_oculta_el_angusto_ajeno_pero_la_persona_se_ve_su_propio(client, 
     assert bob_view["gamma"] == 0.6
     assert bob_view["inv1"] is True
     assert wb["inv1_hogar_alert"] is True
+
+
+def test_puente_apoyo_opt_in_y_ofertas_ordenadas(client, auth_headers):
+    """Cap. 16.5 s16.5.12: ofertas antes que busquedas — sin opt-in no hay canal;
+    con opt-in, las ofertas afinadas por senal van primero y nada expone el hogar."""
+    # Recursos comunitarios (ofertas publicas de cuidado)
+    client.post(
+        "/resources",
+        headers=auth_headers(1, "alice@example.com"),
+        data=json.dumps(
+            {"title": "Asesoria legal gratuita", "description": "orientacion", "category": "legal"}
+        ),
+        content_type="application/json",
+    )
+    client.post(
+        "/resources",
+        headers=auth_headers(1, "alice@example.com"),
+        data=json.dumps(
+            {"title": "Taller de cocina", "description": "clases", "category": "hogar"}
+        ),
+        content_type="application/json",
+    )
+
+    # Sin opt-in: canal cerrado con mensaje neutro
+    res = client.get("/api/micromax/support/offers", headers=auth_headers(2, "bob@example.com"))
+    assert res.status_code == 403
+
+    res = client.post(
+        "/api/micromax/household",
+        headers=auth_headers(2, "bob@example.com"),
+        data=json.dumps({"name": "Hogar Privado de Bob"}),
+        content_type="application/json",
+    )
+    invite_unused = res.get_json()["household"]["invite_code"]
+
+    # Bob responde rojo con señal legal (q3) y da su consentimiento
+    answers = dict(RED_ANSWERS)
+    res = client.post(
+        "/api/micromax/safety-survey",
+        headers=auth_headers(2, "bob@example.com"),
+        data=json.dumps({"answers": answers, "wants_support": True}),
+        content_type="application/json",
+    )
+    assert res.status_code == 200
+
+    res = client.get("/api/micromax/support/offers", headers=auth_headers(2, "bob@example.com"))
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data["offers"][0]["title"] == "Asesoria legal gratuita"
+    assert "legal" in data["offers"][0]["match_reasons"]
+    assert any(o["title"] == "Taller de cocina" for o in data["offers"])
+    assert "q3" not in json.dumps(data).lower()  # las respuestas jamás viajan
