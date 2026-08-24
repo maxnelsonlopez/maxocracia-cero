@@ -128,7 +128,7 @@ export const api = {
     }
     return res.json();
   },
-  updateMicroMaxConfig: async (config: { monthly_income: number; work_hours: number; travel_hours: number; sleep_hours: number }) => {
+  updateMicroMaxConfig: async (config: { monthly_income: number; work_hours: number; travel_hours: number; sleep_hours: number; ceh_mode?: "bridge" | "canonical"; hourly_rate?: number }) => {
     const res = await apiFetch("/api/micromax/member/config", {
       method: "POST",
       body: JSON.stringify(config),
@@ -149,6 +149,9 @@ export const api = {
     fragmentation_factor: number;
     loneliness_factor: number;
     logged_date?: string;
+    v_ucv?: number;
+    r_units?: number;
+    r_notes?: string;
   }) => {
     const res = await apiFetch("/api/micromax/cdd", {
       method: "POST",
@@ -210,6 +213,22 @@ export const api = {
   getMicroMaxAudits: async () => {
     const res = await apiFetch("/api/micromax/audits");
     if (!res.ok) throw new Error("Error loading audits");
+    return res.json();
+  },
+  logMicroMaxCheckin: async (gamma: number, note?: string) => {
+    const res = await apiFetch("/api/micromax/checkin", {
+      method: "POST",
+      body: JSON.stringify({ gamma, note }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Error saving checkin");
+    }
+    return res.json();
+  },
+  getMicroMaxCheckins: async (limit: number = 30) => {
+    const res = await apiFetch(`/api/micromax/checkins?limit=${limit}`);
+    if (!res.ok) throw new Error("Error loading checkins");
     return res.json();
   },
   getMicroMaxDashboard: async (startDate?: string, endDate?: string) => {

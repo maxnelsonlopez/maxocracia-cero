@@ -115,6 +115,8 @@ export default function MicroMaxPage() {
   const [workHours, setWorkHours] = useState(0);
   const [travelHours, setTravelHours] = useState(0);
   const [sleepHours, setSleepHours] = useState(56);
+  const [cehMode, setCehMode] = useState<"bridge" | "canonical">("bridge");
+  const [hourlyRate, setHourlyRate] = useState("");
 
   // CDD Form states
   const [taskName, setTaskName] = useState("");
@@ -126,6 +128,10 @@ export default function MicroMaxPage() {
   const [fragmentation, setFragmentation] = useState(1.0);
   const [loneliness, setLoneliness] = useState(1.0);
   const [presetIndex, setPresetIndex] = useState("-1");
+  const [showVhvAdvanced, setShowVhvAdvanced] = useState(false);
+  const [vUcv, setVUcv] = useState("");
+  const [rUnits, setRUnits] = useState("");
+  const [rNotes, setRNotes] = useState("");
 
   // Audit Form states
   const [auditDate, setAuditDate] = useState(new Date().toISOString().split("T")[0]);
@@ -139,6 +145,10 @@ export default function MicroMaxPage() {
   const [s4, setS4] = useState(0);
   const [s5, setS5] = useState(0);
   const [auditWeeks, setAuditWeeks] = useState(4);
+
+  // Check-in de bienestar (INV1-Hogar)
+  const [checkinGamma, setCheckinGamma] = useState(1.0);
+  const [checkinNote, setCheckinNote] = useState("");
 
   // Load basic data
   const loadInitialData = async () => {
@@ -191,6 +201,8 @@ export default function MicroMaxPage() {
             setWorkHours(currentMember.work_hours);
             setTravelHours(currentMember.travel_hours);
             setSleepHours(currentMember.sleep_hours || 56);
+            setCehMode(currentMember.ceh_mode === "canonical" ? "canonical" : "bridge");
+            setHourlyRate(currentMember.hourly_rate != null ? String(currentMember.hourly_rate) : "");
           }
         }
       }
@@ -276,7 +288,9 @@ export default function MicroMaxPage() {
         monthly_income: income,
         work_hours: workHours,
         travel_hours: travelHours,
-        sleep_hours: sleepHours
+        sleep_hours: sleepHours,
+        ceh_mode: cehMode,
+        ...(cehMode === "canonical" && hourlyRate.trim() !== "" && { hourly_rate: parseFloat(hourlyRate) })
       });
       await loadInitialData();
       alert("Configuración de tiempos e ingresos actualizada con éxito.");
@@ -302,8 +316,14 @@ export default function MicroMaxPage() {
         scope_factor: scope,
         attention_factor: attention,
         fragmentation_factor: fragmentation,
-        loneliness_factor: loneliness
+        loneliness_factor: loneliness,
+        ...(vUcv.trim() !== "" && { v_ucv: parseFloat(vUcv) }),
+        ...(rUnits.trim() !== "" && { r_units: parseFloat(rUnits) }),
+        ...(rNotes.trim() !== "" && { r_notes: rNotes.trim() })
       });
+      const vectorTxt = res?.vhv_vector
+        ? ` Vector VHV [T: ${res.vhv_vector.T} · V: ${res.vhv_vector.V} · R: ${res.vhv_vector.R}]${res.r_notes ? ` — ${res.r_notes}` : ""}`
+        : "";
 
       if (isCamouflaged) {
         const nuevo = res ?? {
@@ -320,7 +340,10 @@ export default function MicroMaxPage() {
         setTaskName("");
         setDuration(1.0);
         setPresetIndex("-1");
-        alert("Tarea doméstica registrada y ponderada con éxito.");
+        setVUcv("");
+        setRUnits("");
+        setRNotes("");
+        alert("Tarea doméstica registrada y ponderada con éxito." + vectorTxt);
         setLoading(false);
         return;
       }
@@ -329,10 +352,29 @@ export default function MicroMaxPage() {
       setTaskName("");
       setDuration(1.0);
       setPresetIndex("-1");
+      setVUcv("");
+      setRUnits("");
+      setRNotes("");
       await loadInitialData();
-      alert("Tarea doméstica registrada y ponderada con éxito.");
+      alert("Tarea doméstica registrada y ponderada con éxito." + vectorTxt);
     } catch (err: any) {
       alert("No se pudo registrar la tarea: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCheckin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await api.logMicroMaxCheckin(checkinGamma, checkinNote.trim() || undefined);
+      setCheckinNote("");
+      setCheckinGamma(1.0);
+      await loadInitialData();
+      alert(res.inv1 ? "Tu caída fue escuchada." : "Registro de bienestar guardado.");
+    } catch (err: any) {
+      alert("No se pudo registrar el check-in: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -702,6 +744,20 @@ export default function MicroMaxPage() {
             {activeTab === "dashboard" && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
+                {/* Banner INV1-Hogar */}
+                {dashboard.wellbeing?.inv1_hogar_alert === true && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="lg:col-span-3 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl flex items-center gap-3"
+                  >
+                    <AlertTriangle className="text-red-400 shrink-0" size={20} />
+                    <span className="text-sm text-red-300 font-semibold">
+                      INV1-Hogar: alguien visible está bajo γ 1.0 — escucha sin juzgar
+                    </span>
+                  </motion.div>
+                )}
+
                 {/* 3 Accounts breakdown */}
                 <div className="lg:col-span-2 space-y-6">
                   <div className="bg-slate-900/30 backdrop-blur-xl border border-slate-800 p-6 rounded-3xl shadow-xl space-y-6">
@@ -873,6 +929,68 @@ export default function MicroMaxPage() {
                   </div>
                 </div>
 
+                {/* Bienestar del Hogar (γ) + Check-in INV1 */}
+                {dashboard.wellbeing && (
+                  <div className="lg:col-span-3 bg-slate-900/30 backdrop-blur-xl border border-slate-800 p-6 rounded-3xl shadow-xl space-y-5">
+                    <h2 className="text-xl font-semibold flex items-center gap-2">
+                      <Heart size={22} className="text-indigo-400" />
+                      Bienestar del Hogar (γ)
+                    </h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {(dashboard.wellbeing.members || []).map((w: any) => (
+                        <div key={w.member_id} className="p-4 bg-slate-950 border border-slate-900 rounded-2xl flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="font-semibold text-white text-sm truncate">{w.name}</span>
+                            {w.protegido && w.gamma == null && (
+                              <span className="shrink-0 text-[11px] px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300">
+                                🛡️ protegido
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {w.inv1 === true && (
+                              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" title="INV1 activo" />
+                            )}
+                            <span className={`font-mono font-bold ${w.gamma != null && w.gamma < 1.0 ? "text-red-400" : "text-slate-200"}`}>
+                              {w.gamma != null ? `γ ${Number(w.gamma).toFixed(2)}` : "—"}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                      {(!dashboard.wellbeing.members || dashboard.wellbeing.members.length === 0) && (
+                        <p className="text-slate-600 text-sm text-center py-4 md:col-span-2">Sin miembros visibles para mostrar.</p>
+                      )}
+                    </div>
+
+                    <form onSubmit={handleCheckin} className="pt-4 border-t border-slate-800 space-y-3">
+                      <div className="flex justify-between text-xs font-semibold uppercase tracking-wider text-slate-400">
+                        <span>¿Cómo estás? (γ 0.5 – 1.5)</span>
+                        <span className="font-bold text-white normal-case">{checkinGamma.toFixed(1)}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.5"
+                        max="1.5"
+                        step="0.1"
+                        value={checkinGamma}
+                        onChange={(e) => setCheckinGamma(parseFloat(e.target.value))}
+                        className="w-full accent-indigo-600"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Nota opcional (privada, solo para ti)"
+                        value={checkinNote}
+                        onChange={(e) => setCheckinNote(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 text-sm"
+                      />
+                      <Button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold rounded-xl shadow-lg">
+                        Registrar cómo estoy
+                      </Button>
+                    </form>
+                  </div>
+                )}
+
               </div>
             )}
 
@@ -1040,6 +1158,71 @@ export default function MicroMaxPage() {
                             </select>
                           </div>
                         </div>
+                      </div>
+
+                      {/* Vector VHV (avanzado, opcional) */}
+                      <div className="space-y-4 pt-4 border-t border-slate-800">
+                        <button
+                          type="button"
+                          onClick={() => setShowVhvAdvanced(!showVhvAdvanced)}
+                          className="w-full py-3 px-4 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-bold flex justify-between items-center transition-all text-sm"
+                        >
+                          <span className="flex items-center gap-2">
+                            <Info size={18} />
+                            Vector VHV (avanzado)
+                          </span>
+                          <span className="text-xs">{showVhvAdvanced ? "▲" : "▼"}</span>
+                        </button>
+
+                        <AnimatePresence>
+                          {showVhvAdvanced && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-900 space-y-3">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div className="space-y-1">
+                                    <label className="text-xs text-slate-400">V — Vidas afectadas (UCV)</label>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      step="0.1"
+                                      value={vUcv}
+                                      onChange={(e) => setVUcv(e.target.value)}
+                                      placeholder="Ej: 2 (cuidado de personas)"
+                                      className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-indigo-500"
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <label className="text-xs text-slate-400">R — Recursos del hogar</label>
+                                    <input
+                                      type="number"
+                                      step="0.1"
+                                      value={rUnits}
+                                      onChange={(e) => setRUnits(e.target.value)}
+                                      placeholder="Ej: -3"
+                                      className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-indigo-500"
+                                    />
+                                    <p className="text-[11px] text-slate-500">negativo = crédito regenerativo, p.ej. reforestación</p>
+                                  </div>
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="text-xs text-slate-400">Notas de recursos (opcional)</label>
+                                  <input
+                                    type="text"
+                                    value={rNotes}
+                                    onChange={(e) => setRNotes(e.target.value)}
+                                    placeholder="Ej: compost, semillas, reparación"
+                                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-indigo-500"
+                                  />
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
 
                       <Button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold rounded-xl shadow-lg">
@@ -1440,6 +1623,38 @@ export default function MicroMaxPage() {
                         className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 text-sm"
                       />
                     </div>
+
+                    {/* Modo CEH (Cap. 16.5): puente fiat o canónico TVI vendido */}
+                    <div className="space-y-1">
+                      <label className="text-xs text-slate-400">Modo de la Cuenta Económica del Hogar (CEH)</label>
+                      <select
+                        value={cehMode}
+                        onChange={(e) => setCehMode(e.target.value === "canonical" ? "canonical" : "bridge")}
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-indigo-500 text-sm"
+                      >
+                        <option value="bridge">Puente (% de ingresos)</option>
+                        <option value="canonical">Canónico (TVI vendido)</option>
+                      </select>
+                    </div>
+
+                    {cehMode === "canonical" && (
+                      <div className="p-4 bg-indigo-950/20 border border-indigo-900/40 rounded-2xl space-y-2">
+                        <div className="space-y-1">
+                          <label className="text-xs text-slate-400">Tarifa horaria vital declarada (por hora)</label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.5"
+                            value={hourlyRate}
+                            onChange={(e) => setHourlyRate(e.target.value)}
+                            className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 text-sm"
+                          />
+                        </div>
+                        <p className="text-[11px] text-slate-400 leading-relaxed">
+                          Solo si todo el hogar usa modo canónico la cuenta se mide en horas vendidas; si no, fallback a fiat.
+                        </p>
+                      </div>
+                    )}
 
                     {/* Derecho a la Opacidad Vital */}
                     <div className="p-4 bg-indigo-950/20 border border-indigo-900/40 rounded-2xl space-y-2">
