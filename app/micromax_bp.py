@@ -191,7 +191,11 @@ def save_safety_survey(current_user):
         return jsonify({"error": "Respuestas de la encuesta ESI requeridas."}), 400
 
     try:
-        res = manager.save_safety_survey(current_user["user_id"], answers)
+        res = manager.save_safety_survey(
+            current_user["user_id"],
+            answers,
+            wants_support=data.get("wants_support"),
+        )
         return jsonify(res), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
@@ -274,9 +278,14 @@ def get_dashboard(current_user):
         end_date = request.args.get("end_date")
 
         three_accounts = manager.calculate_three_accounts(
-            member["household_id"], start_date, end_date
+            member["household_id"],
+            start_date,
+            end_date,
+            requester_user_id=current_user["user_id"],
         )
-        toxicity = manager.calculate_toxicity_indices(member["household_id"])
+        toxicity = manager.calculate_toxicity_indices(
+            member["household_id"], requester_user_id=current_user["user_id"]
+        )
         survey = manager.get_safety_survey(current_user["user_id"])
 
         return (

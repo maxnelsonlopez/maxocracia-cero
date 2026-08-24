@@ -86,6 +86,11 @@ export default function MicroMaxPage() {
   const [showSecuritySupport, setShowSecuritySupport] = useState(false);
   const [showESIGuide, setShowESIGuide] = useState(false);
 
+  // Modo Escudo Domestico (Cap. 16.5): el registro propio nunca se bloquea.
+  // Datos reales guardados en privado; por defecto la pantalla muestra la vista discreta.
+  const [escudoReal, setEscudoReal] = useState<{ dash: any; logs: any[] } | null>(null);
+  const [mostrarReal, setMostrarReal] = useState(false);
+
   // Auth check
   const [authError, setAuthError] = useState(false);
 
@@ -98,6 +103,8 @@ export default function MicroMaxPage() {
     q5: false,
     q6: false
   });
+  // Opt-in PRIVADO: permitir que la Red de Apoyo ofrezca acompanamiento/asesoria/recursos
+  const [wantsSupport, setWantsSupport] = useState(false);
 
   // Household Join/Create form states
   const [householdName, setHouseholdName] = useState("");
@@ -154,6 +161,17 @@ export default function MicroMaxPage() {
           setIsCamouflaged(true);
           dashData = MOCK_DASHBOARD;
           setLogs(MOCK_LOGS);
+          // Modo Escudo: los datos reales se cargan en privado y quedan disponibles
+          // tras el toggle; por defecto la pantalla muestra la vista discreta.
+          try {
+            const [realDash, realLogs] = await Promise.all([
+              api.getMicroMaxDashboard(),
+              api.getMicroMaxCDDLogs(),
+            ]);
+            setEscudoReal({ dash: realDash, logs: realLogs || [] });
+          } catch {
+            setEscudoReal(null);
+          }
         } else {
           setIsCamouflaged(false);
           dashData = await api.getMicroMaxDashboard();
@@ -273,58 +291,10 @@ export default function MicroMaxPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      if (isCamouflaged && survey?.score !== undefined && survey.score >= 3) {
-        // Simular registro localmente
-        const mockLog = {
-          id: Math.floor(Math.random() * 100000),
-          task_name: taskName || "Tarea Personalizada",
-          duration_hours: duration,
-          calculated_vhv: parseFloat(liveVhv.toFixed(2)),
-          logged_date: new Date().toISOString().split("T")[0]
-        };
-        setLogs(prev => [mockLog, ...prev]);
-        
-        // Simular actualización del balance en el estado local para dar feedback visual sin cambiar backend
-        setDashboard((prev: any) => {
-          if (!prev) return prev;
-          const updatedMembers = prev.three_accounts.members.map((m: any) => {
-            if (m.name === "Tú") {
-              const newCdd = m.cdd + mockLog.calculated_vhv;
-              const prevShare = m.cdd_share;
-              const newShare = Math.min(prevShare + 1.2, 90.0);
-              return { 
-                ...m, 
-                cdd: parseFloat(newCdd.toFixed(2)),
-                cdd_share: parseFloat(newShare.toFixed(2)),
-                equilibrio: parseFloat(Math.min(m.equilibrio + 0.5, 105.0).toFixed(2))
-              };
-            } else {
-              const newShare = Math.max(m.cdd_share - 1.2, 10.0);
-              return {
-                ...m,
-                cdd_share: parseFloat(newShare.toFixed(2)),
-                equilibrio: parseFloat(Math.max(m.equilibrio - 0.5, 95.0).toFixed(2))
-              };
-            }
-          });
-          return {
-            ...prev,
-            three_accounts: {
-              ...prev.three_accounts,
-              members: updatedMembers
-            }
-          };
-        });
-
-        setTaskName("");
-        setDuration(1.0);
-        setPresetIndex("-1");
-        alert("Tarea doméstica registrada y ponderada con éxito.");
-        setLoading(false);
-        return;
-      }
-
-      await api.logMicroMaxCDD({
+      // Modo Escudo (Cap. 16.5): el registro se PERSISTE siempre — es la herramienta
+      // de visibilidad de quien más lo necesita. En camuflaje, la respuesta se integra
+      // en silencio a la vista actual sin recargar (la pantalla sigue discreta).
+      const res = await api.logMicroMaxCDD({
         task_name: taskName,
         duration_hours: duration,
         effort_factor: effort,
@@ -334,6 +304,27 @@ export default function MicroMaxPage() {
         fragmentation_factor: fragmentation,
         loneliness_factor: loneliness
       });
+
+      if (isCamouflaged) {
+        const nuevo = res ?? {
+          id: Math.floor(Math.random() * 100000),
+          task_name: taskName || "Tarea Personalizada",
+          duration_hours: duration,
+          calculated_vhv: parseFloat(liveVhv.toFixed(2)),
+          logged_date: new Date().toISOString().split("T")[0]
+        };
+        setLogs(prev => [nuevo, ...prev]);
+        setEscudoReal(prev =>
+          prev ? { ...prev, logs: [nuevo, ...prev.logs] } : prev
+        );
+        setTaskName("");
+        setDuration(1.0);
+        setPresetIndex("-1");
+        alert("Tarea doméstica registrada y ponderada con éxito.");
+        setLoading(false);
+        return;
+      }
+
       // Reset form
       setTaskName("");
       setDuration(1.0);
@@ -351,8 +342,12 @@ export default function MicroMaxPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await api.saveMicroMaxSafetySurvey(surveyAnswers);
+      const res = await api.saveMicroMaxSafetySurvey({
+        ...surveyAnswers,
+        wants_support: wantsSupport
+      } as any);
       setSurvey(res);
+      setWantsSupport(false);
       await loadInitialData();
     } catch (err: any) {
       setError("Error al guardar la encuesta de seguridad: " + err.message);
@@ -361,11 +356,28 @@ export default function MicroMaxPage() {
     }
   };
 
+  // Modo Escudo: alternar entre la vista discreta (por defecto) y los datos reales privados
+  const toggleVistaReal = () => {
+    if (!escudoReal) return;
+    const next = !mostrarReal;
+    setMostrarReal(next);
+    if (next) {
+      setDashboard(escudoReal.dash);
+      setLogs(escudoReal.logs);
+    } else {
+      setDashboard(MOCK_DASHBOARD);
+      setLogs(MOCK_LOGS);
+    }
+  };
+
   const handleLogAudit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       if (isCamouflaged && survey?.score !== undefined && survey.score >= 3) {
+        // Auditorías: son registros COMPARTIDOS del hogar (sin autoría), así que en
+        // Modo Escudo no se persisten — persistirla expondría actividad al conviviente.
+        // El CDD personal sí se persiste siempre (Derecho al Registro Protegido).
         alert("Auditoría mensual guardada correctamente.");
         setConflicts(0);
         setWeapons(0);
@@ -584,9 +596,9 @@ export default function MicroMaxPage() {
                           </p>
                         </div>
                         <div>
-                          <h4 className="font-extrabold text-white text-sm mb-1">¿Cómo te protege la Escala ESI?</h4>
+                          <h4 className="font-extrabold text-white text-sm mb-1">¿Cómo te protege la Escala ESI? (Modo Escudo)</h4>
                           <p>
-                            La Escala de Seguridad Relacional (ESI) evalúa si tu relación cuenta con los pilares mínimos de respeto y simetría. Si respondes afirmativamente a 3 o más preguntas, el sistema detecta que el ledger doméstico **no es seguro** y podría empeorar las tensiones. Para proteger tu seguridad, el sistema simulará un funcionamiento estable pero desactivará la persistencia en el servidor para evitar que el registro sea usado en tu contra.
+                            La Escala de Seguridad Relacional (ESI) evalúa si tu relación cuenta con los pilares mínimos de respeto y simetría. Si respondes afirmativamente a 3 o más preguntas, el sistema activa el <strong>Modo Escudo Doméstico</strong>: tu registro sigue funcionando siempre y queda guardado de forma privada para ti — hacer visible tu trabajo invisible es más necesario en riesgo, no menos. Lo que cambia es la exposición: tus cifras se ocultan al resto del hogar en el balance compartido y, por defecto, esta pantalla muestra una vista discreta con datos simulados; tus registros reales están a un botón de distancia, solo para ti.
                           </p>
                         </div>
                       </div>
@@ -614,6 +626,23 @@ export default function MicroMaxPage() {
                     />
                   </div>
                 ))}
+
+                <div className="p-4 rounded-xl bg-slate-950 border border-slate-900 space-y-2">
+                  <label className="flex gap-4 items-start justify-between cursor-pointer">
+                    <span className="text-sm text-slate-300 font-medium">
+                      Quiero que la Red de Apoyo pueda ofrecerme acompañamiento, asesoría o recursos (privado — nadie de mi hogar lo ve)
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={wantsSupport}
+                      onChange={(e) => setWantsSupport(e.target.checked)}
+                      className="w-5 h-5 accent-emerald-600 rounded cursor-pointer mt-1"
+                    />
+                  </label>
+                  <p className="text-xs text-slate-500">
+                    Opt-in voluntario y revocable: nunca se comparte con tu hogar; solo habilita señales de apoyo hacia la comunidad.
+                  </p>
+                </div>
 
                 <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold rounded-2xl shadow-xl shadow-indigo-500/10">
                   Guardar y Analizar Seguridad
@@ -652,6 +681,22 @@ export default function MicroMaxPage() {
                 );
               })}
             </div>
+
+            {/* Modo Escudo: alternar vista discreta / datos reales privados */}
+            {isCamouflaged && escudoReal && (
+              <div className="flex flex-wrap items-center gap-3 p-4 bg-emerald-950/40 border border-emerald-900 rounded-2xl">
+                <Shield size={18} className="text-emerald-400" />
+                <span className="text-sm text-emerald-200 font-semibold">
+                  Modo Escudo activo — tu registro funciona y es privado. Vista discreta por defecto.
+                </span>
+                <button
+                  onClick={toggleVistaReal}
+                  className="ml-auto px-4 py-2 text-sm font-bold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition-all"
+                >
+                  {mostrarReal ? "Ocultar (vista discreta)" : "Ver mis registros reales"}
+                </button>
+              </div>
+            )}
 
             {/* TAB CONTENT: DASHBOARD (THREE ACCOUNTS) */}
             {activeTab === "dashboard" && (

@@ -221,6 +221,24 @@ class MicroMaxManager:
         )
         return [dict(row) for row in cursor.fetchall()]
 
+    def _get_shielded_member_ids(self, household_id: int) -> set:
+        """Modo Escudo Domestico (Cap. 16.5): ids de miembros con ESI en rojo (score >= 3).
+
+        Sus cifras se ocultan a los DEMAS miembros del hogar; ella siempre ve las suyas
+        y las del hogar completo. El registro propio nunca se bloquea ni se borra.
+        """
+        conn = self._get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT m.id FROM micromax_members m
+            JOIN micromax_safety_surveys s ON s.member_id = m.id
+            WHERE m.household_id = ? AND s.score >= 3
+            """,
+            (household_id,),
+        )
+        return {row["id"] for row in cursor.fetchall()}
+
     def update_member_config(
         self,
         user_id: int,
@@ -297,16 +315,10 @@ class MicroMaxManager:
         if not member:
             raise ValueError("User is not registered in a MicroMaxocracia household.")
 
-        # ESI Checklist blockage verification
-        cursor.execute(
-            "SELECT score FROM micromax_safety_surveys WHERE member_id = ?",
-            (member["id"],),
-        )
-        survey = cursor.fetchone()
-        if survey and survey["score"] >= 3:
-            raise ValueError(
-                "MicroMaxocracia Access Blocked: ESI Checklist score is too high (safety threshold crossed)."
-            )
+        # Modo Escudo Domestico (Cap. 16.5): una encuesta ESI en rojo JAMAS bloquea
+        # el registro propio. Hacer visible el trabajo invisible es mas necesario
+        # en riesgo, no menos. Lo que el escudo modula es la exposicion (las cifras
+        # de quien esta protegida se ocultan a los demas miembros), nunca la voz.
 
         # Formula VHV calculation
         vhi_base = effort_factor * mental_factor * scope_factor
@@ -370,8 +382,16 @@ class MicroMaxManager:
         )
         return [dict(row) for row in cursor.fetchall()]
 
-    def save_safety_survey(self, user_id: int, answers: Dict[str, bool]) -> Dict:
-        """Saves ESI safety survey, counts score and triggers blocking rules."""
+    def save_safety_survey(
+        self, user_id: int, answers: Dict[str, bool], wants_support: Optional[bool] = None
+    ) -> Dict:
+        """Saves ESI safety survey, counts score and activates Modo Escudo when red.
+
+        Cap. 16.5: el rojo ya no bloquea el registro propio (Derecho al Registro
+        Protegido). `wants_support` es un opt-in PRIVADO de la persona para que la
+        Red de Apoyo pueda ofrecerle acompanamiento/asesoria/recursos; jamas se
+        expone al resto del hogar.
+        """
         if len(answers) != 6:
             raise ValueError("ESI Safety survey must contain exactly 6 questions.")
 
@@ -379,9 +399,13 @@ class MicroMaxManager:
         if not member:
             raise ValueError("User is not registered in a MicroMaxocracia household.")
 
-        # Count true answers
+        # Count true answers (only the 6 questions count toward the score)
         score = sum(1 for v in answers.values() if v is True)
-        answers_str = json.dumps(answers)
+
+        payload = dict(answers)
+        if wants_support is not None:
+            payload["_wants_support"] = bool(wants_support)
+        answers_str = json.dumps(payload)
 
         conn = self._get_db_connection()
         cursor = conn.cursor()
@@ -399,11 +423,14 @@ class MicroMaxManager:
             "member_id": member["id"],
             "score": score,
             "answers": answers,
-            "blocked": score >= 3,
+            "wants_support": bool(wants_support) if wants_support is not None else False,
+            "protection_mode": "shielded" if score >= 3 else "standard",
+            "blocked": False,
+            "can_log": True,
         }
 
     def get_safety_survey(self, user_id: int) -> Optional[Dict]:
-        """Gets ESI survey for a member."""
+        """Gets ESI survey for a member (self-view only)."""
         member = self.get_member(user_id)
         if not member:
             return None
@@ -417,11 +444,16 @@ class MicroMaxManager:
         if not row:
             return None
 
+        payload = json.loads(row["answers_json"])
+        wants_support = bool(payload.pop("_wants_support", False))
+
         return {
             "id": row["id"],
             "member_id": row["member_id"],
             "score": row["score"],
-            "answers": json.loads(row["answers_json"]),
+            "answers": payload,
+            "wants_support": wants_support,
+            "protection_mode": "shielded" if row["score"] >= 3 else "standard",
             "created_at": row["created_at"],
         }
 
@@ -506,14 +538,33 @@ class MicroMaxManager:
         household_id: int,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        requester_user_id: Optional[int] = None,
     ) -> Dict:
-        """Calculates CDD, CEH, TED, and Equilibrium values for members in a household."""
+        """Calculates CDD, CEH, TED, and Equilibrium values for members in a household.
+
+        Modo Escudo (Cap. 16.5): las cifras de un miembro con ESI en rojo se ocultan a
+        los DEMAS miembros (sus valores salen de los totales y de las cuotas para que
+        nada sea inferible). Ella misma siempre ve el hogar completo, incluidas sus
+        propias cifras.
+        """
         members = self.get_household_members(household_id)
         if not members:
             return {"members": [], "totals": {}}
 
         conn = self._get_db_connection()
         cursor = conn.cursor()
+
+        shielded_ids = self._get_shielded_member_ids(household_id)
+
+        requester_member_id = None
+        if requester_user_id is not None:
+            for m in members:
+                if m["user_id"] == requester_user_id:
+                    requester_member_id = m["id"]
+                    break
+
+        def _visible(member_id: int) -> bool:
+            return member_id not in shielded_ids or member_id == requester_member_id
 
         # Fetch CDD sums
         member_cdds = {}
@@ -531,11 +582,7 @@ class MicroMaxManager:
             row = cursor.fetchone()
             member_cdds[m["id"]] = row["vhv_sum"] if row["vhv_sum"] is not None else 0.0
 
-        total_cdd = sum(member_cdds.values())
-        total_income = sum(m["monthly_income"] for m in members)
-
-        # Calculate TED: 168 - work - travel - sleep
-        # If sleep is not configured, fallback to 56 hours
+        # TED: 168 - work - travel - sleep (fallback sleep 56)
         member_teds = {}
         for m in members:
             ted = (
@@ -543,13 +590,35 @@ class MicroMaxManager:
             )
             member_teds[m["id"]] = max(ted, 0.0)  # Cannot have negative energy
 
-        total_ted = sum(member_teds.values())
+        # Totals computed ONLY over visible members (nothing inferable by difference)
+        visible_members = [m for m in members if _visible(m["id"])]
+        total_cdd = sum(member_cdds[m["id"]] for m in visible_members)
+        total_income = sum(m["monthly_income"] for m in visible_members)
+        total_ted = sum(member_teds[m["id"]] for m in visible_members)
 
-        # Ponderations
-        alpha, beta, gamma = 0.6, 0.3, 0.1
+        # Ponderations (p1/p2/p3 en la rama canonica Cap. 16.5; alias historicos aqui)
+        p1, p2, p3 = 0.6, 0.3, 0.1
 
         member_results = []
         for m in members:
+            if not _visible(m["id"]):
+                member_results.append(
+                    {
+                        "id": m["id"],
+                        "name": m["name"],
+                        "user_id": m["user_id"],
+                        "cdd": None,
+                        "cdd_share": None,
+                        "income": None,
+                        "ceh_share": None,
+                        "ted": None,
+                        "ted_share": None,
+                        "equilibrio": None,
+                        "protegido": True,
+                    }
+                )
+                continue
+
             cdd = member_cdds[m["id"]]
             income = m["monthly_income"]
             ted = member_teds[m["id"]]
@@ -558,7 +627,7 @@ class MicroMaxManager:
             ceh_share = income / total_income if total_income > 0 else 0.0
             ted_share = ted / total_ted if total_ted > 0 else 0.0
 
-            equilibrio = (alpha * cdd_share) + (beta * ceh_share) + (gamma * ted_share)
+            equilibrio = (p1 * cdd_share) + (p2 * ceh_share) + (p3 * ted_share)
 
             member_results.append(
                 {
@@ -572,6 +641,7 @@ class MicroMaxManager:
                     "ted": round(ted, 2),
                     "ted_share": round(ted_share * 100, 2),
                     "equilibrio": round(equilibrio * 100, 2),
+                    "protegido": m["id"] in shielded_ids,
                 }
             )
 
@@ -584,8 +654,14 @@ class MicroMaxManager:
             },
         }
 
-    def calculate_toxicity_indices(self, household_id: int) -> Dict:
-        """Calculates relational health indices (ICE, IDB, IDP) and Detox warnings."""
+    def calculate_toxicity_indices(
+        self, household_id: int, requester_user_id: Optional[int] = None
+    ) -> Dict:
+        """Calculates relational health indices (ICE, IDB, IDP) and Detox warnings.
+
+        Modo Escudo (Cap. 16.5): el IDP se calcula solo con las cifras visibles para
+        quien consulta (las de un miembro protegido no se filtran por inferencia).
+        """
         conn = self._get_db_connection()
         cursor = conn.cursor()
 
@@ -640,6 +716,19 @@ class MicroMaxManager:
         # Fetch CDD logged in this audit period
         members = self.get_household_members(household_id)
 
+        shielded_ids = self._get_shielded_member_ids(household_id)
+        requester_member_id = None
+        if requester_user_id is not None:
+            for m in members:
+                if m["user_id"] == requester_user_id:
+                    requester_member_id = m["id"]
+                    break
+
+        def _visible(member_id: int) -> bool:
+            return member_id not in shielded_ids or member_id == requester_member_id
+
+        visible_members = [m for m in members if _visible(m["id"])]
+
         # Find start and end date of latest audit period
         end_date = latest_audit["audit_date"]
         try:
@@ -651,7 +740,7 @@ class MicroMaxManager:
             start_date = None
 
         cdd_weekly_averages = []
-        for m in members:
+        for m in visible_members:
             query = "SELECT SUM(calculated_vhv) as vhv_sum FROM micromax_cdd_logs WHERE member_id = ?"
             params = [m["id"]]
             if start_date:

@@ -165,10 +165,13 @@ export const api = {
     if (!res.ok) throw new Error("Error loading CDD logs");
     return res.json();
   },
-  saveMicroMaxSafetySurvey: async (answers: Record<string, boolean>) => {
+  saveMicroMaxSafetySurvey: async (
+    payload: Record<string, boolean> & { wants_support?: boolean }
+  ) => {
+    const { wants_support, ...answers } = payload;
     const res = await apiFetch("/api/micromax/safety-survey", {
       method: "POST",
-      body: JSON.stringify({ answers }),
+      body: JSON.stringify({ answers, wants_support }),
     });
     if (!res.ok) {
       const err = await res.json();
