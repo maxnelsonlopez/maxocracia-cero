@@ -171,10 +171,12 @@ Ningún hogar existente queda invalidado:
 | **Vector [T,V,R] opcional en cada tarea** (`v_ucv`, `r_units`, `r_notes`) — hecho limpio comparable con el sistema general, escalar ponderado intacto | 🟢 implementado (ago 2026) |
 | **CEH canónica por TVI vendido** (`ceh_mode` + `hourly_rate`; unidad homogénea solo cuando todo el hogar adopta, fallback fiat con `ceh_unit` explícito) | 🟢 implementado (ago 2026) |
 | Pesos p₁/p₂/p₃ expuestos en la salida del dashboard | 🟢 implementado (ago 2026) |
+| **Crédito regenerativo** — `r_units` negativo en CDD (EVV §4.3): cuidado del Reino Natural que devuelve más de lo toma | 🟢 implementado (ago 2026, §16.5.14) |
 | Check-ins de γ domésticos (endpoint + UI) | 🔴 pendiente |
 | UI de los nuevos campos (vector y modo CEH en formularios) | 🔴 pendiente |
 | Plantillas de contratos domésticos en el builder | 🔴 pendiente (plantillas Cohorte ya existen) |
 | Conexión `wants_support` → matching/recursos (Red de Apoyo, §16.5.12) | 🔴 próxima ola |
+| **SDV-E** — Suelo de Dignidad Vital para Ecosistemas + INV2-E (convocado por §16.5.14) | 🔴 próxima gran ramificación |
 
 **Próxima acción**: check-ins de γ domésticos y la primera escala vecinal real
 (un piso compartido o conjunto residencial operando el §16.5.13).
@@ -250,9 +252,48 @@ literalmente una parte tipo `coop-` o `society-`.
 > núcleo familiar, piso compartido, casa comunitaria o conjunto residencial. El parentesco no es
 > criterio de entrada; la convivencia lo es.
 
+## 16.5.14 El hogar extendido: el Reino Natural como conviviente
+
+Toda unidad de convivencia humana habita *dentro* de un ecosistema: el conjunto residencial junto
+al humedal, el piso bajo las arboladas, la casa comunitaria sobre la cuenca. Si la convivencia es
+compartir sostenimiento (§16.5.13), esa relación es bidireccional — y los Tres Reinos (Cap. 10)
+dejan de ser una ontología lejana para sentarse a la mesa del hogar:
+
+### Convivencia bidireccional
+
+- **El humano sostiene al territorio**: jornadas de reforestación, cuidado de zonas verdes,
+  limpieza del humedal urbano. Se registra como CDD vecinal con vector `[T, V, R]` donde
+  **R negativo = crédito regenerativo** (EVV-1.2 §4.3): devolver más de lo que se toma.
+  Implementado (ago 2026).
+- **El territorio sostiene al humano**: agua, sombra, aire, regulación climática. Su tiempo es
+  **Tiempo Absoluto (TA)** — aquí manda el límite honesto: *la contabilidad doméstica no coloniza
+  el tiempo ajeno*. El PIU (Cap. 5 §5.5) es quien traduce entre TA y TVI; nosotros registramos
+  la interacción, no la vida interna del ecosistema.
+
+### Representación: los representantes de ecosistemas ya tienen asiento
+
+La infraestructura existe: las partes `eco-` de MaxoContracts cuentan con **guardián oráculo**
+para el Reino Natural, consentimiento agregado por quórum delegado N-de-M y contratos interescala
+(Cap. 10/17). En la escala vecinal esto significa algo concreto: ningún acuerdo del conjunto que
+afecte su humedal o su arbolada es legítimo sin el consenso de su parte `eco-` — el guardián
+consiente por quienes no firman con manos.
+
+### Salvaguardas específicas del Reino Natural
+
+1. **Zona Libre también para él**: parte del valor del humedal es inefable (Cap. 7 §7.9). Los
+   sensores miden salud (agua, cobertura, biodiversidad indicadora); jamás "milagros". Medir todo
+   sería la forma técnica de dejar de escucharlo.
+2. **El suelo antes que el saldo**: el SDV-E —los mínimos del diseño biológico del ecosistema
+   (Cap. 10 §10.4)— es la ramificación pendiente que este capítulo convoca, siguiendo el precedente
+   del SDV-S (Cap. 9.5): estándar primero, contabilidad después. Un conjunto con crédito
+   regenerativo acumulado pero humedal bajo su SDV-E no está en coherencia: INV2-E será su juez.
+3. **Cuidado ≠ extracción estética**: jardín podado para la foto no es cuidado; se registra lo
+   que regenera, no lo que adorna.
+
 ---
 
-> **📖 Conexiones:** Cap. 7 §7.5 (hecho/valor) · Cap. 8 §8.11 (Derecho al Registro Protegido,
-> Dimensión VIII) · Cap. 10 (partes de cualquier escala) · Cap. 11 §11.6 (notación axiomática) ·
-> Cap. 13 §13.13 (perdón y presencia) · Cap. 15 §15.6 (Zona Libre) · Cap. 17 §17.1/§17.7 (bloques
-> y plantillas).
+> **📖 Conexiones:** Cap. 5 §5.5 (PIU, traducción TA↔TVI) · Cap. 7 §7.5 (hecho/valor) · Cap. 7 §7.9
+> (Zona Libre) · Cap. 8 §8.11 (Derecho al Registro Protegido) · Cap. 10 (Tres Reinos, eco-partes,
+> SDV-E por desarrollar) · Cap. 13 §13.13 (perdón y presencia) · Cap. 15 §15.6 (Zona Libre de VHV) ·
+> Cap. 17 §17.1/§17.7 (bloques, plantillas, partes de cualquier escala) · Cap. 18 §4.3
+> (R negativo = regeneración).
