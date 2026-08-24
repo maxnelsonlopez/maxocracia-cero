@@ -173,7 +173,7 @@ Ningún hogar existente queda invalidado:
 | Pesos p₁/p₂/p₃ expuestos en la salida del dashboard | 🟢 implementado (ago 2026) |
 | **Crédito regenerativo** — `r_units` negativo en CDD (EVV §4.3): cuidado del Reino Natural que devuelve más de lo toma | 🟢 implementado (ago 2026, §16.5.14) |
 | **Check-ins de γ domésticos** — latido del hogar con INV1-Hogar; el angusto de un protegido jamás cruza la pantalla ajena | 🟢 implementado (ago 2026) |
-| UI de los nuevos campos (vector, modo CEH, check-in γ en formularios) | 🔴 pendiente |
+| UI canonica completa - vector VHV en CDD (con credito regenerativo), modo CEH + tarifa horaria vital, tarjeta de bienestar con check-in y banner INV1-Hogar | 🟢 implementada (ago 2026) |
 | Plantillas de contratos domésticos en el builder | 🔴 pendiente (plantillas Cohorte ya existen) |
 | **Puente Red de Apoyo v1** (`/support/offers`): ofertas de cuidado afinadas por señal ESI, solo con opt-in; las respuestas jamás viajan | 🟢 implementado (ago 2026) |
 | Puente Red de Apoyo v2 — publicación de ofertas de cuidado por la comunidad + circuito completo con facilitación humana | 🔴 próxima ola |
