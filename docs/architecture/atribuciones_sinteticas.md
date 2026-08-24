@@ -97,6 +97,12 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   humana real (ciclo completo, oráculo en vivo, gobernanza activa).
 
 ### ox-alpha — "el bibliotecario de la coherencia"
+- **El hogar late (22/8/2026)**: γ doméstica con INV1-Hogar (`micromax_checkins`, canon [0.5,1.5],
+  caídas siempre escuchadas; el angusto de un protegido jamás cruza pantallas ajenas), puente Red
+  de Apoyo v1 (`GET /api/micromax/support/offers` — ofertas antes que búsquedas, señales ESI jamás
+  viajan) y el protocolo **Semana de la Verdad** (`docs/guides/semana_de_la_verdad.md`, n=1 de 7
+  días para habitar el sistema real antes de reclutar cohorte). Commits `8d48ba4`, `bb8504c`.
+  Micromax 11/11.
 - **Reino Natural conviviente + crédito regenerativo (22/8/2026)**: `app/micromax.py` (r_units
   negativo = regeneración, EVV §4.3) + Cap. 16.5 §16.5.14 — el hogar extendido al territorio:
   convivencia bidireccional, eco-partes con guardián oráculo como representantes ya vivos,

@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-22 — El hogar late: γ doméstica, INV1-Hogar, puente a la Red de Apoyo y la Semana de la Verdad
+
+### Añadido
+- **Check-ins de γ doméstica** (`POST /api/micromax/checkin` + `GET /checkins`, tabla `micromax_checkins`): el latido del hogar con canon [0.5, 1.5] del blindaje. INV1-Hogar: las caídas bajo 1.0 se escuchan siempre (`inv1` + `inv1_hogar_alert` en dashboard). Política asimétrica del Puente A aplicada al fractal.
+- **El angusto no cruza pantallas**: bajo Modo Escudo, el γ de un protegido jamás llega a la vista de sus convivientes — ni siquiera como alerta (nada inferible). Ella se ve a sí misma, con su INV1 personal activo. Test dedicado.
+- **Puente Red de Apoyo v1** (`GET /api/micromax/support/offers`): ofertas antes que búsquedas — con `wants_support` activo, los recursos comunitarios abiertos se ordenan por afinidad con las señales ESI (mapa q1..q6 → categorías emocional/legal/financiera/comunitaria/terapia). Sin opt-in → 403 neutro que no filtra estado. Las respuestas jamás viajan en la respuesta; el claim sigue por `/resources/{id}/claim` desde el perfil protegido.
+- **Semana de la Verdad** (`docs/guides/semana_de_la_verdad.md`): protocolo de validación n=1 de 7 días para habitar el sistema real antes de reclutar cohorte humana — ataca directo los hallazgos "0 cumplimientos / 0 retractaciones" del informe v1.0, con métricas mínimas, acompañamiento del Guía (`/guia`) y protocolo de aborto sin culpa.
+
+### Notas Técnicas
+- Dashboard ahora expone `wellbeing: {members[], inv1_hogar_alert}` respetando escudo por-solicitante.
+- Tests: 3 nuevos (latido+INV1; ocultamiento selectivo del angusto; opt-in+ordenamiento+no-filtración). Micromax **11/11**.
+
 ## 2026-08-22 — Crédito regenerativo: el Reino Natural como conviviente (Cap. 16.5 §16.5.14)
 
 ### Añadido

@@ -172,10 +172,11 @@ Ningún hogar existente queda invalidado:
 | **CEH canónica por TVI vendido** (`ceh_mode` + `hourly_rate`; unidad homogénea solo cuando todo el hogar adopta, fallback fiat con `ceh_unit` explícito) | 🟢 implementado (ago 2026) |
 | Pesos p₁/p₂/p₃ expuestos en la salida del dashboard | 🟢 implementado (ago 2026) |
 | **Crédito regenerativo** — `r_units` negativo en CDD (EVV §4.3): cuidado del Reino Natural que devuelve más de lo toma | 🟢 implementado (ago 2026, §16.5.14) |
-| Check-ins de γ domésticos (endpoint + UI) | 🔴 pendiente |
-| UI de los nuevos campos (vector y modo CEH en formularios) | 🔴 pendiente |
+| **Check-ins de γ domésticos** — latido del hogar con INV1-Hogar; el angusto de un protegido jamás cruza la pantalla ajena | 🟢 implementado (ago 2026) |
+| UI de los nuevos campos (vector, modo CEH, check-in γ en formularios) | 🔴 pendiente |
 | Plantillas de contratos domésticos en el builder | 🔴 pendiente (plantillas Cohorte ya existen) |
-| Conexión `wants_support` → matching/recursos (Red de Apoyo, §16.5.12) | 🔴 próxima ola |
+| **Puente Red de Apoyo v1** (`/support/offers`): ofertas de cuidado afinadas por señal ESI, solo con opt-in; las respuestas jamás viajan | 🟢 implementado (ago 2026) |
+| Puente Red de Apoyo v2 — publicación de ofertas de cuidado por la comunidad + circuito completo con facilitación humana | 🔴 próxima ola |
 | **SDV-E** — Suelo de Dignidad Vital para Ecosistemas + INV2-E (convocado por §16.5.14) | 🔴 próxima gran ramificación |
 
 **Próxima acción**: check-ins de γ domésticos y la primera escala vecinal real
@@ -210,9 +211,12 @@ obtener dentro de su hogar:
 
 ### Estado
 
-La bandera privada ya existe (ago 2026). Su conexión con el matching (`/forms/matching`) y los
-recursos reclamables (`/resources/{id}/claim`) es trabajo de la próxima ola: publicar las primeras
-ofertas de cuidado de la Cohorte y probar el circuito completo con facilitación humana.
+La bandera privada y el **puente v1** existen (ago 2026): con opt-in activo, `GET /support/offers`
+devuelve las ofertas de cuidado de la comunidad ordenadas por afinidad con las señales ESI — sin
+que las respuestas viajen jamás. Pendiente para la ola siguiente: que la comunidad publique sus
+primeras ofertas de cuidado (asesoría legal, acompañamiento, terapia subsidiada) y probar el
+circuito completo con facilitación humana. Protocolo de validación humana: la *Semana de la
+Verdad* (`docs/guides/semana_de_la_verdad.md`).
 
 ## 16.5.13 Más allá del parentesco: roommates y conjuntos residenciales
 
