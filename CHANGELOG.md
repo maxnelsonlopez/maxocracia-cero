@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-08-22 — Capítulo 16.5: MicroMaxocracia Canónica (la rama doméstica en unidades del sistema)
+
+### Añadido
+- **`capitulo_16_5_micromaxocracia_canonica_220826.md`** (precedente SDV-S: estándar → capítulo): resuelve tres fricciones verificables del Cap. 16 contra el canon —
+  - **Hecho/valor restituido**: el "VHV doméstico" escalar (`T × E × M × A`) se descompone en el vector objetivo `[T, V, R]` (Capa 1) con los multiplicadores como coeficientes de valoración consensuados (Capa 2). El dato queda limpio para siempre.
+  - **CEH liberada del fiat**: modo puente (%) → modo canónico `CEH_TVI = ingresos aportados / tarifa horaria vital` — las tres cuentas quedan en horas de vida, unidad homogénea (T2 hecha aritmética).
+  - **Notación liberada**: los pesos del equilibrio α/β/γ (que colisionaban con los parámetros axiomáticos del precio) pasan a p₁/p₂/p₃. Regla instituida: un símbolo griego, un solo significado (T13).
+- **γ doméstico + INV1-Hogar**: check-ins de bienestar por miembro con política asimétrica; ESI rojo ≡ γ<1 estructural; el Protocolo de Desintoxicación reconocido como la forma doméstica de la retractación ética con Ternura.
+- **Acuerdos domésticos como MaxoContracts opcionales (Nivel 3+)**: plantillas Cohorte (Cap. 17 §17.7) con ReciprocityBlock (balance de VHV ponderado) y WellnessProtectorBlock.
+- **Declaración teórica nueva**: el hogar como **unidad básica de la Opacidad Sagrada** — transparencia radical hacia adentro (T13 intra-hogar), Tiempo Opaco colectivo hacia afuera.
+- **Compatibilidad retroactiva total**: escalar histórico reinterpretado como VHV ponderado (siempre lo fue); modo puente válido indefinidamente.
+
+### Corregido
+- Referencia cruzada añadida al Cap. 16 §16.3 señalando las tres fricciones y enlazando la rama canónica.
+
+### Notas Técnicas
+- **Implementación pendiente documentada** en el capítulo (§16.5.11): campos opcionales v/r en `log_cdd`, `ceh_mode` en member config, check-ins γ domésticos, alias p₁/p₂/p₃ en dashboard, plantillas domésticas en builder.
+- **Verificación**: validador conceptual OK; sin cambios de código. Fila actualizada en `mapa_trazabilidad_canonica.md`. Atribución: ox-alpha.
+
 ## 2026-08-22 — Mapa de Trazabilidad Canónica: el libro, el código y los commits en una sola tabla
 
 ### Añadido

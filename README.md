@@ -2,7 +2,7 @@
 
 **Estado del Proyecto:** Fase 2 - Sostenibilidad Económica y MicroMaxocracia Doméstica (Agosto 2026)  
 **Última actualización:** 22 de agosto 2026  
-**Versión:** 5.10 - Integraciones editoriales cerradas: la Capa de Ternura en los Caps. 7/8/13/15 y el Oráculo Disidente Permanente en el Cap. 14 §14.14 (ox-alpha)
+**Versión:** 5.11 - MicroMaxocracia Canónica (Cap. 16.5): el hogar en unidades del sistema — VHV vectorial, CEH en TVI vendido, notación liberada (ox-alpha)
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maxnelsonlopez/maxocracia-cero)
 
@@ -27,6 +27,7 @@ La **Maxocracia** es un sistema ético-económico-político alternativo que prop
 - **Nuevos capítulos consolidados**: MicroMaxocracia (Cap. 16), MaxoContracts (Cap. 17), Estándar EVV 1.2 (Cap. 18).
 - **Capa de Ternura integrada (ago 2026)**: lo que el VHV no mide por diseño y la Dimensión E (Cap. 7 §7.9), el Derecho a la Rehabilitación como dimensión VIII del SDV-H (Cap. 8 §8.11), los protocolos de perdón/duelo/fragilidad de los oráculos humanos (Cap. 13 §13.13) y las prácticas protegidas de la Cohorte — Zona Libre de VHV, Piloto de Perdón, Ritual de Duelo (Cap. 15 §15.6).
 - **Oráculo Disidente Permanente canónico (ago 2026)**: Cap. 14 §14.14 documenta en el libro el mecanismo anti-monocultivo que ya corre en `voting_oracle.py` — postura inicial honesta → crítica racional del lado contrario → veredicto con rectificación declarada (`changed_mind`).
+- **MicroMaxocracia Canónica (Cap. 16.5, ago 2026)**: la ramificación que ancla el hogar al canon — VHV vectorial doméstico (hecho/valor separados), CEH convertido a TVI vendido (adiós al fiduciario en la segunda cuenta), pesos del equilibrio renombrados p₁/p₂/p₃ (adiós a la colisión con α/β/γ/δ axiomáticos), γ doméstico con INV1-Hogar y acuerdos como MaxoContracts opcionales. El hogar declarado unidad básica de la Opacidad Sagrada: transparencia hacia adentro, opacidad hacia afuera.
 
 ### Capítulos Destacados
 - **Cap. 3: Victoria Sintética** — El consenso ético entre inteligencias artificiales.

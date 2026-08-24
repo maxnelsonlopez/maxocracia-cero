@@ -45,6 +45,7 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 | **Oráculo Disidente Permanente en el libro** (22-08-2026, ox-alpha): Cap 14 §14.14 + traza `voting_oracle.py` | ✅ |
 | **Integraciones_pendientes sincronizadas** (22-08-2026, ox-alpha): INDICE reescrito con numeración vigente + 8 mapas como registro histórico | ✅ |
 | **Mapa de Trazabilidad Canónica** (22-08-2026, ox-alpha): libro↔código↔tests↔commits (`docs/architecture/mapa_trazabilidad_canonica.md`) — piloto completo; regenerar por Ola | ✅ |
+| **Capítulo 16.5 — MicroMaxocracia Canónica** (22-08-2026, ox-alpha): VHV vectorial doméstico, CEH→TVI vendido (modos puente/canónico), pesos p₁/p₂/p₃ (fin de colisión con α/β/γ/δ), γ doméstico + INV1-Hogar, hogar = unidad básica de Opacidad Sagrada | ✅ teoría · 🔴 implementación: campos v/r en `log_cdd`, `ceh_mode`, check-ins γ, alias dashboard |
 | Suite de tests | **701/701** (verificado 12-08-2026; sin cambios de código desde entonces) |
 
 **Decisiones canónicas a respetar:**
