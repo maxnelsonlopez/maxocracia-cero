@@ -166,6 +166,12 @@ class SDV:
     # Educación
     educacion_anos_minimos: int = 12
 
+    # Educación (estado actual del participante — años completados de educación formal)
+    # None = no reportado: la verificación se activa en cuanto hay dato (el sistema
+    # mide lo que se declara; "sin dato" no invalida retroactivamente los SDV
+    # existentes ni rompe la compatibilidad con instancias sin este campo).
+    educacion_anos: Optional[int] = None
+
     # Trabajo
     trabajo_horas_semana_max: Decimal = Decimal("48")
 
@@ -183,6 +189,10 @@ class SDV:
             and actual.agua_litros_dia >= self.agua_litros_dia
             and actual.salud_acceso_horas <= self.salud_acceso_horas
             and actual.trabajo_horas_semana_max <= self.trabajo_horas_semana_max
+            and (
+                actual.educacion_anos is None
+                or actual.educacion_anos >= self.educacion_anos_minimos
+            )
         )
 
     def violations(self, actual: "SDV") -> Dict[str, str]:
@@ -210,6 +220,14 @@ class SDV:
         if actual.salud_acceso_horas > self.salud_acceso_horas:
             violations["salud"] = (
                 f"{actual.salud_acceso_horas}h > {self.salud_acceso_horas}h máximo"
+            )
+
+        if (
+            actual.educacion_anos is not None
+            and actual.educacion_anos < self.educacion_anos_minimos
+        ):
+            violations["educacion"] = (
+                f"{actual.educacion_anos}a < {self.educacion_anos_minimos}a mínimo"
             )
 
         if actual.trabajo_horas_semana_max > self.trabajo_horas_semana_max:

@@ -190,6 +190,25 @@ class TestAxiomValidatorInvariants:
         assert result.is_valid is False
         assert "vivienda" in result.message
 
+    def test_invariant2_sdv_educacion_violated(self):
+        """Dimensión educativa bajo el piso (INV2-EDU) falla Invariante 2."""
+        minimum = SDV()
+        actual = SDV(educacion_anos=6)  # 6 < 12 mínimo
+
+        result = AxiomValidator.validate_invariant_sdv(actual, minimum)
+
+        assert result.is_valid is False
+        assert "educacion" in result.message
+
+    def test_invariant2_sdv_educacion_met(self):
+        """Dimensión educativa en el piso (12 años) pasa Invariante 2."""
+        minimum = SDV()
+        actual = SDV(educacion_anos=12)
+
+        result = AxiomValidator.validate_invariant_sdv(actual, minimum)
+
+        assert result.is_valid is True
+
     def test_invariant4_retractability(self):
         """Retractabilidad garantizada pasa Invariante 4."""
         result = AxiomValidator.validate_invariant_retractability(True)

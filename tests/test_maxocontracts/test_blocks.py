@@ -13,7 +13,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from maxocontracts.blocks.action import ActionBlock, CommonActions
 from maxocontracts.blocks.condition import CommonConditions, ConditionBlock
-from maxocontracts.core.types import VHV
+from maxocontracts.blocks.sdv_validator import SDVValidatorBlock
+from maxocontracts.core.types import Participant, SDV, VHV
 
 # --- ConditionBlock Tests ---
 
@@ -48,6 +49,39 @@ def test_condition_block_evaluation_failure():
 
     assert result.passed is False
     assert result.reason == "Condición no satisfecha"
+
+
+# --- SDVValidatorBlock: dimensión educativa (INV2-EDU) ---
+
+
+def test_sdv_validator_block_educacion_violation():
+    """Bloque SDV: participante bajo el piso educativo produce violación."""
+    validator = SDVValidatorBlock(minimum_sdv=SDV())
+    participant = Participant(
+        id="edu-under",
+        name="Bajo el piso educativo",
+        sdv_actual=SDV(educacion_anos=8),
+    )
+
+    result = validator.validate(participant)
+
+    assert result.is_valid is False
+    assert any(v.dimension == "educacion" for v in result.violations)
+
+
+def test_sdv_validator_block_educacion_met():
+    """Bloque SDV: participante con 12 años de educación es válido."""
+    validator = SDVValidatorBlock(minimum_sdv=SDV())
+    participant = Participant(
+        id="edu-ok",
+        name="En el piso educativo",
+        sdv_actual=SDV(educacion_anos=12),
+    )
+
+    result = validator.validate(participant)
+
+    assert result.is_valid is True
+    assert result.violation_count == 0
 
 
 def test_condition_block_exception_handling():

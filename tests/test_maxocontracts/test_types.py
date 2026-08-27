@@ -133,6 +133,40 @@ class TestSDV:
         assert "vivienda" in violations
         assert "alimentacion" in violations
 
+    # --- Dimensión educativa (INV2-EDU) ---
+
+    def test_sdv_educacion_violation(self):
+        """Años de educación bajo el mínimo reportan violación."""
+        minimum = SDV()
+        actual = SDV(educacion_anos=10)  # 10 < 12 mínimo
+
+        assert minimum.meets_minimum(actual) is False
+        assert "educacion" in minimum.violations(actual)
+
+    def test_sdv_educacion_boundary(self):
+        """Exactamente en el piso educativo (12 años) es válido."""
+        minimum = SDV()
+        actual = SDV(educacion_anos=12)
+
+        assert minimum.meets_minimum(actual) is True
+        assert len(minimum.violations(actual)) == 0
+
+    def test_sdv_educacion_above_minimum(self):
+        """Por encima del piso educativo es válido."""
+        minimum = SDV()
+        actual = SDV(educacion_anos=15)
+
+        assert minimum.meets_minimum(actual) is True
+        assert len(minimum.violations(actual)) == 0
+
+    def test_sdv_educacion_not_reported_passes(self):
+        """Sin dato reportado (None) no invalida (compatibilidad)."""
+        minimum = SDV()
+        actual = SDV()  # educacion_anos = None por defecto
+
+        assert minimum.meets_minimum(actual) is True
+        assert len(minimum.violations(actual)) == 0
+
 
 class TestParticipant:
     """Tests para Participante."""

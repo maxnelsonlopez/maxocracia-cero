@@ -198,6 +198,19 @@ class SDVValidatorBlock:
                 )
             )
 
+        # Educación (mínimo de años de educación formal; solo con dato reportado)
+        if (
+            actual_sdv.educacion_anos is not None
+            and actual_sdv.educacion_anos < self.minimum_sdv.educacion_anos_minimos
+        ):
+            violations.append(
+                self._create_violation(
+                    "educacion",
+                    Decimal(actual_sdv.educacion_anos),
+                    Decimal(self.minimum_sdv.educacion_anos_minimos),
+                )
+            )
+
         # Trabajo (invertido - máximo de horas aceptable)
         if (
             actual_sdv.trabajo_horas_semana_max
@@ -259,6 +272,7 @@ class SDVValidatorBlock:
                 "vivienda_m2": str(self.minimum_sdv.vivienda_m2),
                 "alimentacion_kcal": str(self.minimum_sdv.alimentacion_kcal),
                 "agua_litros_dia": str(self.minimum_sdv.agua_litros_dia),
+                "educacion_anos_minimos": self.minimum_sdv.educacion_anos_minimos,
             },
             "block_on_any_violation": self.block_on_any_violation,
             "validation_log_count": len(self._validation_log),
