@@ -2,6 +2,7 @@
 
 > **Fase:** Ola 4 + — plan operativo de la rama educativa (marco conceptual en `docs/theory/EDUCACION_SIAMESA_estructura_maxocratica.md` y `docs/theory/ESTRUCTURA_IDEAL_ORGANISMO_EDUCATIVO_VITAL.md`).
 > **Estado:** M1 implementado (INV2-EDU) — el motor ya valida la dimensión educativa cuando hay dato. M2-M5 diseñados, pendientes de sesiones siguientes.
+> **Track paralelo (MVP):** `plataforma_educativa/` — plataforma educativa independiente con árbol (8 ramas), reuniones-células de 8, monitores-vacuadores y perfil sin email: prototipo vivo del OEV (ver `docs/guides/PLATAFORMA_EDUCATIVA.md`). Sirve de plantilla para los hitos M2-M4 de la plataforma principal.
 > **Regla de coherencia:** cada hito = commit conventional en español + tests + entrada en `docs/architecture/atribuciones_sinteticas.md`.
 
 ---
