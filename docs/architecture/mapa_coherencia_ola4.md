@@ -162,6 +162,7 @@ afirmación sobre ubicaciones/nombres debe confirmarse con grep antes de documen
 |---|---|---|
 | INV1 (γ ≥ 1) | `test_axioms`, `test_contracts_api_wellness`, `test_contracts_checkins`, `test_contracts_stats`, `test_execution`, `test_oracle_api`, `test_maxo_valuation`, `test_tvi_vhv_integration`, `test_vhv_bp_comprehensive`, `test_vhv_calculator` (10) | 🟢 Cubierto |
 | INV2 (SDV-H) | `test_axioms`, `test_contracts_sdv_s_api`, `test_sdv_s` (3) | 🟢 Cubierto |
+| **INV2-EDU (dimensión educativa)** | `test_axioms` (+2), `test_types` (+4), `test_blocks` (+2) — 8 casos nuevos (sep 2026) | 🟢 Implementado y cubierto: `SDV.educacion_anos` opcional; con dato reportado, bajo el piso (12 años) dispara INV2 |
 | INV2-S (SDV-S) | `test_contracts_sdv_s_api`, `test_sdv_s`, `test_ternura`, `test_pulse` (4) | 🟢 Cubierto |
 | **INV3 (VHV No Ocultable)** | `test_axioms` (9 casos nuevos) | 🟢 Implementado y cubierto (ago 2026) |
 | INV4 (retractabilidad) | `test_axioms`, `test_blindaje`, `test_blocks`, `test_bridge_b_phase1`, `test_execution`, `test_oracle_api`, `test_sdv_s`, `test_ternura` (8) | 🟢 Cubierto |
@@ -170,7 +171,8 @@ afirmación sobre ubicaciones/nombres debe confirmarse con grep antes de documen
 | Ternura (perdón) | `test_ternura` (1) | 🟢 Cubierto |
 
 **Conclusión M3**: los invariantes implementados tienen cobertura real y la suite pasa completa
-(286/286 en ago 2026). INV3 quedó implementado y cubierto en la misma sesión de M3 (9 tests nuevos).
+(726/726 en sep 2026; 286/286 del motor en ago 2026 → creció a 294+ incluyendo la cobertura
+INV2-EDU). INV3 quedó implementado y cubierto en la misma sesión de M3 (9 tests nuevos).
 
 ## 5. Cómo regenerar / actualizar este mapa
 

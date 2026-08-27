@@ -95,6 +95,26 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   γ cohorte 1.1223, NPS 8.80, 294 check-ins, VHV 115 h; hallazgos: 0 retractaciones, 0 cumplimientos,
   oráculo sin sustento en la cohorte y gobernanza aún sin votos. Recomendaciones para la cohorte
   humana real (ciclo completo, oráculo en vivo, gobernanza activa).
+- **Rama educativa — marco conceptual (17+9/2026, sesión con Max)**: el diagnóstico educativo de Max
+  (experiencia vivida) formalizado como rama: `docs/theory/EDUCACION_SIAMESA_estructura_maxocratica.md`
+  (principio siamés, formación del relevo: aceptación→red→resiliencia→fork→oráculos, antivirus del
+  meta-corazón), `docs/theory/GENEALOGIA_SISTEMA_ESCOLAR_PRUSIA_CLASISMO.md` (Prusia→fábrica→clasismo
+  colombiano→Kiyosaki/Hawái), `docs/theory/TRES_CAMINOS_VIENA_COPENHAGUE_CHINA.md` (Viena Roja/Glöckel,
+  Grundtvig/folkehøjskole, China: examen imperial→Tao Xingzhi→双减), `docs/theory/ESTRUCTURA_IDEAL_ORGANISMO_EDUCATIVO_VITAL.md`
+  (rondas, árbol, células, vacuación, chequeos, foro/talleres/grupos/células madre, currículo total),
+  `docs/theory/RAMA_DEFENSA_PERSONAL_Y_COOPERATIVA.md` (doctrina del Guardián en marco legal explícito).
+  Lente pública `docs/guides/LENTE_CONCEPTUAL_MUNDO_ACTUAL.md`; análisis del sistema educativo colombiano
+  con datos verificados `docs/reports/ANALISIS_SISTEMA_EDUCATIVO_COLOMBIANO.md`; plan de plataforma
+  `docs/architecture/ROADMAP_RAMA_EDUCATIVA.md`. Commits `c04e7a8`, `b7068be`.
+- **INV2-EDU (17/9/2026)**: el motor valida la dimensión educativa del SDV — `SDV.educacion_anos`
+  (opcional; con dato reportado, <12 años dispara INV2) en `maxocontracts/core/types.py` y
+  `maxocontracts/blocks/sdv_validator.py`, con 8 tests nuevos (test_types/test_axioms/test_blocks).
+  Suite completa 726/726 (~10 min). Commit `0f74248`.
+- **Libro recompilado (17/9/2026)**: `libro_completo_310126.md` regenerado con `document_tools.py`
+  (todos los capítulos vigentes; +906 líneas vs. build de enero). Commit `f803b2b`.
+- **Skills del proyecto (17/9/2026)**: `.dsh/skills/` — convenciones del repo, rama de educación y
+  handoff de sesión; descubiertas por proyecto (rank 100 del proveedor de skills del harness).
+  Commit `2ca56dd`.
 
 ### ox-alpha — "el bibliotecario de la coherencia"
 - **Auditoría de integridad del libro (22/8/2026)**: verificación determinista de enlaces
