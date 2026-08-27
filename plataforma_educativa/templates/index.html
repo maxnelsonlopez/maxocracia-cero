@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plataforma Educativa</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <span class="brand">Plataforma Educativa</span>
+    <span id="welcome" class="welcome"></span>
+  </header>
+
+  <!-- ============ ACCESO (login / registro) ============ -->
+  <section id="auth-view" class="center">
+    <div class="card auth-card">
+      <h1 id="auth-title">Iniciar sesión</h1>
+
+      <form id="login-form" class="stack">
+        <input type="text" id="login-username" placeholder="Nombre de usuario" autocomplete="username">
+        <input type="password" id="login-password" placeholder="Contraseña" autocomplete="current-password">
+        <button type="submit" class="primary">Entrar</button>
+      </form>
+
+      <hr>
+      <p class="muted">¿No tienes cuenta? Regístrate (el email es opcional).</p>
+      <form id="register-form" class="stack">
+        <input type="text" id="reg-username" placeholder="Nombre de usuario">
+        <input type="email" id="reg-email" placeholder="Email (opcional)">
+        <input type="password" id="reg-password" placeholder="Contraseña">
+        <button type="submit" class="secondary">Crear cuenta</button>
+      </form>
+
+      <p id="auth-error" class="error" hidden></p>
+    </div>
+  </section>
+
+  <!-- ============ APLICACIÓN ============ -->
+  <section id="app-view" hidden>
+    <div class="layout">
+      <div class="panel">
+        <button id="btn-logout" class="ghost">Cerrar sesión</button>
+        <h2>Mis ramas</h2>
+        <div id="progress" class="progress-list"></div>
+
+        <h2>Mi disponibilidad</h2>
+        <div class="stack">
+          <input type="text" id="av-week" placeholder="Semana ISO (ej. 2026-W08)">
+          <div class="chips" id="slot-chips"></div>
+          <button id="btn-save-availability" class="secondary">Guardar disponibilidad</button>
+        </div>
+
+        <h2>Mis reuniones</h2>
+        <button id="btn-refresh-meetings" class="ghost">Refrescar</button>
+        <div id="my-meetings" class="list"></div>
+
+        <div id="coordinator-zone" hidden>
+          <h2>Coordinador</h2>
+          <button id="btn-generate-week" class="primary">Generar semana</button>
+          <div id="coordinator-output" class="list"></div>
+        </div>
+      </div>
+
+      <div class="panel wide">
+        <h2>Árbol de Habilidades</h2>
+        <div class="toolbar">
+          <input type="text" id="tree-search" placeholder="Buscar tema...">
+        </div>
+        <div id="tree" class="tree"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ventana de test -->
+  <div id="test-modal" class="modal" hidden>
+    <div class="modal-card">
+      <h2 id="test-title">Test</h2>
+      <div id="test-body"></div>
+      <div class="modal-actions">
+        <button id="btn-test-cancel" class="ghost">Cancelar</button>
+        <button id="btn-test-submit" class="primary">Enviar respuestas</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

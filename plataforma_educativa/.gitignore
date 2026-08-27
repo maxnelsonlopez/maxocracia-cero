@@ -1,0 +1,14 @@
+# Base de datos local (no commitearla).
+*.db
+*.sqlite
+*.sqlite3
+
+# Cachés y artefactos de Python.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Archivos de test que se generan en caliente (por si acaso).
+test.db

@@ -1,0 +1,4 @@
+# Plataforma Educativa — dependencias
+# Flask 3.1.x es compatible con Python 3.10-3.13 (probado en 3.13).
+# No hace falta SQLAlchemy: se usa sqlite3 de la librería estándar.
+flask>=3.0,<4
