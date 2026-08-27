@@ -115,6 +115,17 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
 - **Skills del proyecto (17/9/2026)**: `.dsh/skills/` — convenciones del repo, rama de educación y
   handoff de sesión; descubiertas por proyecto (rank 100 del proveedor de skills del harness).
   Commit `2ca56dd`.
+- **Plataforma educativa MVP (17/9/2026, sesión con Max)**: `plataforma_educativa/` — plataforma
+  educativa independiente (puerto 5050) pero compatible: árbol de 8 ramas y 35 temas (matemáticas,
+  higiene, relaciones, lectura, escritura, lenguaje, naturaleza, computadores) con 105 preguntas,
+  registro sin email obligatorio, perfil con progreso, tests virtuales (≥70%), y **reuniones
+  semanales automáticas de máx. 8 estudiantes** agrupadas por el tema más débil y la simetría de
+  perfiles (`plataforma_educativa/app/planner.py`), con monitores que ya pasaron el test de
+  capacidad y están en su fase de mentoría (la *vacuación*: mastered = test + mentor_rounds ≥ 1).
+  25 tests en verde; boot verificado en vivo (GET / 200). **Delegación**: implementada por un
+  subagente constructor bajo especificación detallada; diff revisado y suite re-ejecutada por el
+  orquestador antes de commitear. Diseño/mapeo al OEV: `docs/guides/PLATAFORMA_EDUCATIVA.md`;
+  docs del marco y roadmap en los commits previos de esta sesión. Commits `36f8caf`, `9ee05af`.
 
 ### ox-alpha — "el bibliotecario de la coherencia"
 - **Auditoría de integridad del libro (22/8/2026)**: verificación determinista de enlaces
