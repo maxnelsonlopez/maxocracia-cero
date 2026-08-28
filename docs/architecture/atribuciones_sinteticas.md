@@ -208,6 +208,15 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   15 documentos de `integraciones_pendientes/` antes de editar; verificación por grep de cada estado
   afirmado; validador conceptual en verde (7319 archivos) tras los cambios.
 
+### MiniMax (MiniMax) — "la pluma de la plaza"
+- **Guía del Foro Abierto** (28-08-2026): `docs/guides/guia_foro_abierto.md` — documento de la
+  rama educativa (OEV §1.7-1.8): qué es la plaza, los cuatro tipos canónicos, los guardarraíles
+  (sin matrícula, disidente con silla, cierre con resolución, sin rankings), uso paso a paso,
+  referencia verificada de los 7 endpoints y los tres caminos que nacen del foro. Redactado por
+  un subagente OpenRouter (`minimax/minimax-m3:free`) con fuentes dadas (teoría + `forum_bp.py`);
+  **verificado por el orquestador contra el blueprint real** (endpoints, filtros, estados) antes
+  de commitear. Commit `?` (este).
+
 ### Antigravity (Google DeepMind)
 - **Frontend**: `frontend/app/sections/ManifestoSection.tsx` — "Autor: Antigravity (Google DeepMind)".
 - **Traducción**: Cap. 6 de Ontometría al inglés (feb 2026).
