@@ -132,9 +132,11 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   Células Madre (`app/groups_bp.py`, commit `5d0b457`), M5 UI (`/foro`, `/talleres`, `/grupos`)
   + puente años↔índice (`educacion_indice`, commit `e992061`), triada de mentoría en la
   plataforma educativa (`8d7dfc9`), exclusión de `plataforma_educativa` de la recolección
-  raíz (`pytest.ini`). Diseño guiado por resúmenes de la teoría OEV; verificación end-to-end
-  con ojos propios (helpers reescritos tras errores de edición; dicotomía
-  igualdad-vs-subcontenido en asserts de `in` sobre listas).
+  raíz (`pytest.ini`, `13d6430`), **respuestas del foro** (`0ffa126`, la plaza conversa),
+  **M6 árbol de habilidades** en el motor (`4071457`: `maxocontracts/tree.py` — SkillTree,
+  caminos de maestría, forks, `evaluate_unlock`). Diseño guiado por resúmenes de la teoría
+  OEV; verificación end-to-end con ojos propios (helpers reescritos tras errores de edición;
+  dicotomía igualdad-vs-subcontenido en asserts de `in` sobre listas).
 
 ### ox-alpha — "el bibliotecario de la coherencia"
 - **Auditoría de integridad del libro (22/8/2026)**: verificación determinista de enlaces

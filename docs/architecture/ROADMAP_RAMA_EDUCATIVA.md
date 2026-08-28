@@ -1,7 +1,7 @@
 # Roadmap de implementación — Rama Educativa en la plataforma
 
 > **Fase:** Ola 4 + — plan operativo de la rama educativa (marco conceptual en `docs/theory/EDUCACION_SIAMESA_estructura_maxocratica.md` y `docs/theory/ESTRUCTURA_IDEAL_ORGANISMO_EDUCATIVO_VITAL.md`).
-> **Estado:** M1-M5 implementados (28-08-2026) — el motor valida educación (INV2-EDU), el Foro Abierto, los Talleres con la regla de oro (vacuación + triada), los Grupos/ECEs y Células Madre, la UI y el puente años↔índice. Track paralelo (MVP): `plataforma_educativa/` con la triada de mentoría completada (32/32).
+> **Estado:** M1-M6 implementados (28-08-2026) — motor (INV2-EDU, regla de oro, triada, **árbol de habilidades**), Foro Abierto (+ respuestas), Talleres, Grupos/ECEs y Células Madre, UI y puente años↔índice, guía del foro (MiniMax). Track paralelo (MVP): `plataforma_educativa/` con triada de mentoría completada.
 > **Regla de coherencia:** cada hito = commit conventional en español + tests + entrada en `docs/architecture/atribuciones_sinteticas.md`.
 
 ---
@@ -57,6 +57,15 @@
 - **Frontend** (`frontend/app/`): páginas `/foro`, `/talleres`, `/grupos` (API real, nada pintado) + sección de navegación "Aprendizaje" (desktop y móvil).
 - **Puente**: `app/sdv_analyzer.py` `educacion_indice()` (años del motor ↔ índice 0-1 del SDVScore): ≥12 años → 1.0, lineal 0.1→1.0 0-12 años, None → 1.0 (sin dato no castiga); umbral canónico a decidir en parlamento.
 - **Docs**: `mapa_frontend_ola4.md` (+4 filas: guia, foro, talleres, grupos); 7 tests del puente; commit `e992061`.
+
+## M6 ✅ Árbol de habilidades en el motor (`maxocontracts/tree.py`)
+
+**Qué es:** el tejido como dominio — nodos de skill con prerrequisitos (caminos de maestría, no años), forks del tejido, y el veredicto completo de apertura (prereq + regla de oro + triada, T13).
+
+- `SkillNode` (id canónico `rama/nodo`, nombre, rama, prereqs, dificultad 1-5, descripción) y `SkillTree` inmutable **validado** (ids únicos, prérequisito ausente, auto-certificación, ciclos — guardarraíles).
+- `prereqs_met`/`path_of` (camino de maestría), `with_node` (fork: el tejido se expande), `build_canonical_tree` (8 ramas canónicas = el mismo cosmos del prototipo) y `evaluate_unlock` (prerrequisitos + vacuación + triada en un veredicto serializable).
+- API: `POST /workshops` valida `skill_node` como nodo del árbol (`rama` | `rama/nodo`); el cosmos completo por tema vive en `plataforma_educativa/`.
+- **Tests**: 28 (20 motor `tests/test_maxocontracts/test_tree.py` + 8 validación API); commit `4071457`.
 
 ---
 
