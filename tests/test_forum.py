@@ -289,3 +289,76 @@ def test_multiple_replies_ordered(auth_client):
     listing = auth_client.get(f"/forum/posts/{post_id}/replies")
     bodies = [r["body"] for r in listing.get_json()["replies"]]
     assert bodies == ["primera", "segunda"]
+
+
+# ---------------------------------------------------------------------------
+# Puente siamés (M8): la necesidad del foro sangra a la Plaza de Apoyo
+# ---------------------------------------------------------------------------
+
+
+def _register_participant(client, email="test@example.com"):
+    return client.post(
+        "/forms/participant",
+        json={
+            "name": "Test User",
+            "email": email,
+            "phone_call": "555",
+            "phone_whatsapp": "555",
+            "telegram_handle": "@test",
+            "city": "Bogotá",
+            "neighborhood": "Centro",
+            "personal_values": "comunidad",
+            "offer_description": "enseño lectura",
+            "need_description": "aprender",
+            "need_urgency": "Media",
+            "consent_given": True,
+        },
+    )
+
+
+def test_need_links_to_plaza_when_participant_exists(auth_client):
+    """Con Form Cero: la necesidad del foro aparece en el matching (batido)."""
+    _register_participant(auth_client)
+    resp = auth_client.post(
+        "/forum/posts",
+        json={"kind": "need", "title": "Quiero aprender huertas", "body": "Necesito aprender huertas con la comunidad."},
+    )
+    assert resp.status_code == 201
+    post = resp.get_json()["post"]
+    assert post["in_plaza"] is True
+    assert post["need_id"] is not None
+
+    # La necesidad vive en participant_needs (la tabla del matching).
+    participant = auth_client.get("/forms/participants?limit=10").get_json()[
+        "participants"
+    ][0]
+    needs = auth_client.get(
+        f"/forms/participants/{participant['id']}/needs"
+    ).get_json()["needs"]
+    assert any(n["id"] == post["need_id"] for n in needs)
+
+
+def test_need_standalone_without_participant(auth_client):
+    """Sin Form Cero: el post queda standalone con aviso (honesto)."""
+    resp = auth_client.post(
+        "/forum/posts",
+        json={"kind": "need", "title": "Necesidad", "body": "Sin formulario aún."},
+    )
+    post = resp.get_json()["post"]
+    assert resp.status_code == 201
+    assert post["in_plaza"] is False
+    assert post["need_id"] is None
+
+
+def test_need_no_duplicates_in_plaza(auth_client):
+    """Dos posts iguales referencian la misma necesidad (no se duplica)."""
+    _register_participant(auth_client)
+    body = "Necesito aprender a reparar bicicletas."
+    first = auth_client.post(
+        "/forum/posts", json={"kind": "need", "title": "Bici 1", "body": body}
+    ).get_json()["post"]
+    second = auth_client.post(
+        "/forum/posts", json={"kind": "need", "title": "Bici 2", "body": body}
+    ).get_json()["post"]
+    assert first["need_id"] is not None
+    assert second["need_id"] == first["need_id"]

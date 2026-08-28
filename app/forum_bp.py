@@ -84,6 +84,7 @@ def _post_to_dict(db: Any, row: Any) -> Dict[str, Any]:
         "tags": _parse_tags(row["tags"]),
         "status": row["status"],
         "need_id": row["need_id"],
+        "in_plaza": row["need_id"] is not None,
         "reply_count": int(replies_count or 0),
         "author": {
             "user_id": row["user_id"],
@@ -92,6 +93,56 @@ def _post_to_dict(db: Any, row: Any) -> Dict[str, Any]:
         "created_at": row["created_at"],
         "updated_at": row["updated_at"],
     }
+
+
+def _link_forum_need_to_matching(db: Any, uid: int, body: str) -> Optional[int]:
+    """Puente siamés (M8): la necesidad del foro sangra al matching.
+
+    Si el autor tiene Formulario CERO (participante), se crea/vincula la
+    necesidad en `participant_needs` — la MISMA tabla que consume la Plaza
+    de Apoyo (Cap. 12.3.1 + bombeo vital: el SDV protege la vida para que
+    la EIR la eleve; la necesidad educativa entra por la comunidad y la
+    solución vuelve al hilo).
+
+    Devuelve el `need_id` vinculado, o None si el autor no tiene
+    participante (el post queda standalone con aviso honesto).
+    """
+    user = db.execute("SELECT email FROM users WHERE id = ?", (uid,)).fetchone()
+    if user is None:
+        return None
+    participant = db.execute(
+        "SELECT id FROM participants WHERE email = ?", (user["email"],)
+    ).fetchone()
+    if participant is None:
+        return None
+    pid = participant["id"]
+
+    # No duplicar: si ya existe una necesidad activa idéntica, se referencia.
+    existing = db.execute(
+        """
+        SELECT id FROM participant_needs
+        WHERE participant_id = ? AND description = ? AND status = 'active'
+        """,
+        (pid, body),
+    ).fetchone()
+    if existing:
+        return existing["id"]
+
+    cur = db.execute(
+        """
+        INSERT INTO participant_needs (
+          participant_id, description, categories, urgency, human_dimensions, status
+        ) VALUES (?, ?, ?, 'Media', ?, 'active')
+        """,
+        (
+            pid,
+            body,
+            json.dumps(["educacion"], ensure_ascii=False),
+            json.dumps(["crecimiento_aprendizaje"], ensure_ascii=False),
+        ),
+    )
+    db.commit()
+    return cur.lastrowid
 
 
 def init_forum_tables(app) -> None:
@@ -187,6 +238,19 @@ def create_post(current_user):
         """,
         (uid, kind, title, body, json.dumps(tags, ensure_ascii=False), need_id),
     )
+
+    # Puente siamés: la necesidad educativa del foro sangra a la Plaza de
+    # Apoyo (la misma participant_needs que consume el matching), cuando el
+    # autor tiene Formulario CERO; el cierre con resolución del hilo es el
+    # retorno de la solución (la necesidad entra, la solución vuelve).
+    linked_need_id = None
+    if kind == "need" and need_id is None:
+        linked_need_id = _link_forum_need_to_matching(db, uid, body)
+        if linked_need_id is not None:
+            db.execute(
+                "UPDATE forum_posts SET need_id = ? WHERE id = ?",
+                (linked_need_id, cur.lastrowid),
+            )
     db.commit()
     row = db.execute(
         """

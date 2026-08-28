@@ -24,6 +24,7 @@ interface ForumPost {
   tags: string[];
   status: string;
   reply_count?: number;
+  in_plaza?: boolean;
   author: { user_id: number; name: string };
   created_at: string;
 }
@@ -346,6 +347,20 @@ export default function ForoPage() {
                   >
                     Cerrar con resolución
                   </button>
+                )}
+                {post.kind === "need" && (
+                  post.in_plaza ? (
+                    <Link
+                      href="/matching"
+                      className="mt-3 ml-2 inline-block px-3 py-1.5 rounded-lg border border-emerald-500/40 text-xs text-emerald-300 hover:bg-emerald-950/20 transition-all"
+                    >
+                      Ver en la Plaza de Apoyo →
+                    </Link>
+                  ) : (
+                    <span className="mt-3 ml-2 inline-block px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-500">
+                      Registra tu Form Cero para que esta necesidad llegue a la Plaza de Apoyo
+                    </span>
+                  )
                 )}
                 <div className="mt-3 border-t border-slate-800/60 pt-3">
                   <button
