@@ -23,6 +23,7 @@ interface ForumPost {
   body: string;
   tags: string[];
   status: string;
+  reply_count?: number;
   author: { user_id: number; name: string };
   created_at: string;
 }
@@ -50,6 +51,11 @@ export default function ForoPage() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ kind: "question", title: "", body: "", tags: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [repliesOpen, setRepliesOpen] = useState<Record<number, boolean>>({});
+  const [repliesByPost, setRepliesByPost] = useState<
+    Record<number, { id: number; body: string; author: { name: string }; created_at: string }[]>
+  >({});
+  const [replyDrafts, setReplyDrafts] = useState<Record<number, string>>({});
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -133,6 +139,43 @@ export default function ForoPage() {
         body: JSON.stringify({ resolution }),
       });
       if (!res.ok) throw new Error("No se pudo cerrar");
+      await load();
+    } catch (e: any) {
+      setError(e.message);
+    }
+  };
+
+  const toggleReplies = async (postId: number) => {
+    const open = !repliesOpen[postId];
+    setRepliesOpen((r) => ({ ...r, [postId]: open }));
+    if (open && !repliesByPost[postId]) {
+      try {
+        const res = await apiFetch(`/forum/posts/${postId}/replies`);
+        if (!res.ok) throw new Error("No se pudieron cargar las respuestas");
+        const data = await res.json();
+        setRepliesByPost((r) => ({ ...r, [postId]: data.replies || [] }));
+      } catch (e: any) {
+        setError(e.message);
+      }
+    }
+  };
+
+  const sendReply = async (postId: number) => {
+    const body = (replyDrafts[postId] || "").trim();
+    if (!body) return;
+    try {
+      const res = await apiFetch(`/forum/posts/${postId}/replies`, {
+        method: "POST",
+        body: JSON.stringify({ body }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "No se pudo responder");
+      }
+      setReplyDrafts((d) => ({ ...d, [postId]: "" }));
+      const list = await apiFetch(`/forum/posts/${postId}/replies`);
+      const data = await list.json();
+      setRepliesByPost((r) => ({ ...r, [postId]: data.replies || [] }));
       await load();
     } catch (e: any) {
       setError(e.message);
@@ -304,6 +347,51 @@ export default function ForoPage() {
                     Cerrar con resolución
                   </button>
                 )}
+                <div className="mt-3 border-t border-slate-800/60 pt-3">
+                  <button
+                    onClick={() => toggleReplies(post.id)}
+                    className="px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
+                  >
+                    💬 Respuestas ({post.reply_count ?? 0})
+                  </button>
+                  {repliesOpen[post.id] && (
+                    <div className="mt-3 space-y-3">
+                      <div className="space-y-2">
+                        {(repliesByPost[post.id] || []).map((rep) => (
+                          <div
+                            key={rep.id}
+                            className="bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5"
+                          >
+                            <p className="text-sm text-slate-200 whitespace-pre-wrap">{rep.body}</p>
+                            <p className="text-[11px] text-slate-500 mt-1">
+                              {rep.author.name} · {rep.created_at}
+                            </p>
+                          </div>
+                        ))}
+                        {post.status === "open" && (
+                          <div className="flex gap-2">
+                            <input
+                              value={replyDrafts[post.id] || ""}
+                              onChange={(e) =>
+                                setReplyDrafts((d) => ({ ...d, [post.id]: e.target.value }))
+                              }
+                              placeholder="Tu voz en la plaza…"
+                              maxLength={5000}
+                              className="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 focus:border-violet-500 outline-none text-sm"
+                            />
+                            <button
+                              onClick={() => sendReply(post.id)}
+                              disabled={!(replyDrafts[post.id] || "").trim()}
+                              className="px-3 py-2 rounded-xl bg-violet-500 text-white text-xs font-bold hover:bg-violet-600 disabled:opacity-40 transition-all"
+                            >
+                              Responder
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </motion.article>
             ))}
           </div>

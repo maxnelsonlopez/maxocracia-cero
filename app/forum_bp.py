@@ -69,8 +69,12 @@ def _parse_tags(raw: Optional[str]) -> List[str]:
         return []
 
 
-def _post_to_dict(row: Any) -> Dict[str, Any]:
+def _post_to_dict(db: Any, row: Any) -> Dict[str, Any]:
     """Serialización T13 de un post del foro (procedencia y estado legibles)."""
+    replies_count = db.execute(
+        "SELECT COUNT(*) FROM forum_replies WHERE post_id = ?",
+        (row["id"],),
+    ).fetchone()[0]
     return {
         "id": row["id"],
         "kind": row["kind"],
@@ -80,6 +84,7 @@ def _post_to_dict(row: Any) -> Dict[str, Any]:
         "tags": _parse_tags(row["tags"]),
         "status": row["status"],
         "need_id": row["need_id"],
+        "reply_count": int(replies_count or 0),
         "author": {
             "user_id": row["user_id"],
             "name": row["name"],
@@ -116,6 +121,22 @@ def init_forum_tables(app) -> None:
         )
         db.execute(
             "CREATE INDEX IF NOT EXISTS idx_forum_posts_status ON forum_posts(status);"
+        )
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS forum_replies (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              post_id INTEGER NOT NULL,
+              user_id INTEGER NOT NULL,
+              body TEXT NOT NULL,
+              created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+              FOREIGN KEY (post_id) REFERENCES forum_posts(id) ON DELETE CASCADE,
+              FOREIGN KEY (user_id) REFERENCES users(id)
+            )
+            """
+        )
+        db.execute(
+            "CREATE INDEX IF NOT EXISTS idx_forum_replies_post ON forum_replies(post_id);"
         )
         db.commit()
 
@@ -175,7 +196,7 @@ def create_post(current_user):
         """,
         (cur.lastrowid,),
     ).fetchone()
-    return jsonify({"success": True, "post": _post_to_dict(row)}), 201
+    return jsonify({"success": True, "post": _post_to_dict(db, row)}), 201
 
 
 @forum_bp.route("/posts", methods=["GET"])
@@ -221,7 +242,7 @@ def list_posts(current_user):
         """,
         (*params, limit),
     ).fetchall()
-    posts = [_post_to_dict(r) for r in rows]
+    posts = [_post_to_dict(db, r) for r in rows]
     return jsonify({"success": True, "count": len(posts), "posts": posts})
 
 
@@ -240,7 +261,88 @@ def get_post(current_user, post_id):
     ).fetchone()
     if row is None:
         return jsonify({"error": "post no encontrado"}), 404
-    return jsonify({"success": True, "post": _post_to_dict(row)})
+    return jsonify({"success": True, "post": _post_to_dict(db, row)})
+
+
+@forum_bp.route("/posts/<int:post_id>/replies", methods=["POST"])
+@token_required
+def add_reply(current_user, post_id):
+    """Responder en la plaza: la conversación que la hace viva.
+
+    La ignorancia bienvenida y la disidencia con silla: toda voz responde,
+    sin credencial. Los posts cerrados/resueltos no reciben respuestas
+    nuevas (el cierre es el fin declarado de la conversación).
+    """
+    data = request.get_json() or {}
+    body = (data.get("body") or "").strip()
+
+    if not body:
+        return jsonify({"error": "body es requerido"}), 400
+    if len(body) > MAX_BODY:
+        return jsonify({"error": f"body no puede superar {MAX_BODY} caracteres"}), 400
+
+    db = get_db()
+    post = db.execute("SELECT * FROM forum_posts WHERE id = ?", (post_id,)).fetchone()
+    if post is None:
+        return jsonify({"error": "post no encontrado"}), 404
+    if post["status"] != "open":
+        return jsonify({"error": "el post está cerrado: su conversación ya cerró"}), 400
+
+    uid = current_user.get("user_id")
+    cur = db.execute(
+        "INSERT INTO forum_replies (post_id, user_id, body) VALUES (?, ?, ?)",
+        (post_id, uid, body),
+    )
+    db.commit()
+    reply = db.execute(
+        "SELECT fr.*, u.name FROM forum_replies fr JOIN users u ON u.id = fr.user_id WHERE fr.id = ?",
+        (cur.lastrowid,),
+    ).fetchone()
+    return (
+        jsonify(
+            {
+                "success": True,
+                "reply": {
+                    "id": reply["id"],
+                    "post_id": reply["post_id"],
+                    "body": reply["body"],
+                    "author": {"user_id": reply["user_id"], "name": reply["name"]},
+                    "created_at": reply["created_at"],
+                },
+            }
+        ),
+        201,
+    )
+
+
+@forum_bp.route("/posts/<int:post_id>/replies", methods=["GET"])
+@token_required
+def list_replies(current_user, post_id):
+    """Listar las respuestas de un post (la conversación es pública, T13)."""
+    db = get_db()
+    post = db.execute("SELECT * FROM forum_posts WHERE id = ?", (post_id,)).fetchone()
+    if post is None:
+        return jsonify({"error": "post no encontrado"}), 404
+    rows = db.execute(
+        """
+        SELECT fr.*, u.name FROM forum_replies fr
+        JOIN users u ON u.id = fr.user_id
+        WHERE fr.post_id = ?
+        ORDER BY fr.created_at ASC, fr.id ASC
+        """,
+        (post_id,),
+    ).fetchall()
+    replies = [
+        {
+            "id": r["id"],
+            "post_id": r["post_id"],
+            "body": r["body"],
+            "author": {"user_id": r["user_id"], "name": r["name"]},
+            "created_at": r["created_at"],
+        }
+        for r in rows
+    ]
+    return jsonify({"success": True, "count": len(replies), "replies": replies})
 
 
 @forum_bp.route("/posts/<int:post_id>/close", methods=["POST"])
@@ -278,7 +380,7 @@ def close_post(current_user, post_id):
         "SELECT fp.*, u.name FROM forum_posts fp JOIN users u ON u.id = fp.user_id WHERE fp.id = ?",
         (post_id,),
     ).fetchone()
-    return jsonify({"success": True, "post": _post_to_dict(updated)})
+    return jsonify({"success": True, "post": _post_to_dict(db, updated)})
 
 
 @forum_bp.route("/needs", methods=["GET"])
@@ -294,5 +396,5 @@ def forum_needs(current_user):
         ORDER BY fp.created_at DESC, fp.id DESC
         """
     ).fetchall()
-    posts = [_post_to_dict(r) for r in rows]
+    posts = [_post_to_dict(db, r) for r in rows]
     return jsonify({"success": True, "count": len(posts), "posts": posts})

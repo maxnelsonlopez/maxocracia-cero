@@ -207,3 +207,85 @@ def test_get_post_detail(auth_client):
     assert resp.status_code == 200
     assert resp.get_json()["post"]["id"] == post_id
     assert resp.get_json()["post"]["kind"] == "workshop_offer"
+
+
+# ---------------------------------------------------------------------------
+# Respuestas (la conversación de la plaza — siguiente etapa de la rama)
+# ---------------------------------------------------------------------------
+
+
+def _create_open_post(client):
+    created = client.post(
+        "/forum/posts", json={"kind": "question", "title": "Q", "body": "b"}
+    )
+    return created.get_json()["post"]["id"]
+
+
+def test_add_reply_ok(auth_client):
+    post_id = _create_open_post(auth_client)
+    resp = auth_client.post(
+        f"/forum/posts/{post_id}/replies", json={"body": "Yo tampoco lo tenía claro."}
+    )
+    assert resp.status_code == 201
+    reply = resp.get_json()["reply"]
+    assert reply["post_id"] == post_id
+    assert reply["author"]["name"] == "Test User"
+
+    # El listado muestra la respuesta en orden.
+    listing = auth_client.get(f"/forum/posts/{post_id}/replies")
+    assert listing.status_code == 200
+    assert listing.get_json()["count"] == 1
+    assert listing.get_json()["replies"][0]["author"]["name"] == "Test User"
+
+    # El post ahora reporta reply_count.
+    detail = auth_client.get(f"/forum/posts/{post_id}")
+    assert detail.get_json()["post"]["reply_count"] == 1
+
+
+def test_add_reply_requires_body(auth_client):
+    post_id = _create_open_post(auth_client)
+    resp = auth_client.post(f"/forum/posts/{post_id}/replies", json={"body": " "})
+    assert resp.status_code == 400
+
+
+def test_add_reply_requires_open_post(auth_client):
+    post_id = _create_open_post(auth_client)
+    auth_client.post(f"/forum/posts/{post_id}/close", json={})
+    resp = auth_client.post(
+        f"/forum/posts/{post_id}/replies", json={"body": "intento tardío"}
+    )
+    assert resp.status_code == 400
+
+
+def test_add_reply_to_missing_post(auth_client):
+    resp = auth_client.post("/forum/posts/9999/replies", json={"body": "hola"})
+    assert resp.status_code == 404
+
+
+def test_list_replies_of_missing_post(auth_client):
+    resp = auth_client.get("/forum/posts/9999/replies")
+    assert resp.status_code == 404
+
+
+def test_replies_require_token(client):
+    assert client.post("/forum/posts/1/replies", json={"body": "x"}).status_code == 401
+    assert client.get("/forum/posts/1/replies").status_code == 401
+
+
+def test_multiple_replies_ordered(auth_client):
+    post_id = _create_open_post(auth_client)
+    auth_client.post(f"/forum/posts/{post_id}/replies", json={"body": "primera"})
+
+    # Segunda respuesta de otro usuario.
+    login = auth_client.post(
+        "/auth/login", json={"email": "test2@example.com", "password": "ValidPass123!"}
+    )
+    token = login.get_json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+    auth_client.post(
+        f"/forum/posts/{post_id}/replies", json={"body": "segunda"}, headers=headers
+    )
+
+    listing = auth_client.get(f"/forum/posts/{post_id}/replies")
+    bodies = [r["body"] for r in listing.get_json()["replies"]]
+    assert bodies == ["primera", "segunda"]
