@@ -54,7 +54,8 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 | **Puente Red de Apoyo v1** (22-08-2026, `bb8504c`): `/support/offers` — ofertas de cuidado afinadas por señal ESI con opt-in privado; respuestas jamás viajan | ✅ backend · 🔴 comunidad publica primeras ofertas |
 | **Semana de la Verdad** (22-08-2026): protocolo n=1 de 7 días (`docs/guides/semana_de_la_verdad.md`) para habitar el sistema real antes de reclutar cohorte — responde al hallazgo "0 cumplimientos" del informe v1.0 | ✅ protocolo · 🔴 ejecución humana |
 | **Modo Escudo Doméstico** (22-08-2026, hallazgo de campo de Max): ESI roja ya no bloquea el registro propio; cifras del protegido ocultas a los demás; frontend persiste CDD real con vista discreta; `wants_support` opt-in privado como gancho hacia la Red de Apoyo (Cap 16.5 §16.5.12) | ✅ código + libro · 🔴 puente v2: ofertas publicadas por la comunidad |
-| Suite de tests | **453/453 paralela** (verificado 22-08-2026 tras Modo Escudo; suite completa 701/701 al cierre de Ola 4) |
+| **Rama educativa M1-M5** (28-08-2026, sesión con Max): INV2-EDU ya en motor; **M2 Foro Abierto** (`app/forum_bp.py`, 15 tests), **M3 Talleres + regla de oro** (`maxocontracts/skills.py` — vacuación: obra + material + mentoría ≥1h TVI, triada mentor+par+oráculo con veto; `app/workshops_bp.py`, 30 tests), **M4 Grupos/ECEs + Células Madre** (`app/groups_bp.py`, fractalidad → nodo "facilitación", 12 tests), **M5 UI** `/foro` `/talleres` `/grupos` + nav "Aprendizaje" + puente `educacion_indice()` (años↔índice, 7 tests), **triada de mentoría en `plataforma_educativa/`** (`mentorship/verify`, 7 tests) | ✅ M1-M5 + docs (ROADMAP, mapas, pilar N RF-EDU-0..10, atribuciones) · 🔴 pendientes naturales: replies en foro, SkillNode motor, form Cero con años, umbral del puente al parlamento |
+| Suite de tests | **790/790** (verificado 28-08-2026 tras la rama educativa M1-M5; plataforma educativa 32/32 en su propio venv/contexto — excluida de la recolección raíz vía `pytest.ini` `norecursedirs`) |
 
 **Decisiones canónicas a respetar:**
 - **La teoría (libro) tiene prioridad**: T0-T15 son canónicos; T16=Minimizar Daño, T17=Reciprocidad
@@ -65,6 +66,11 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 - Tests: escribir archivos SIEMPRE con `encoding="utf-8"`; NUNCA reescribir archivos con
   Get-Content/Set-Content de PowerShell (corrompe UTF-8 — lección aprendida en esta jornada).
 - Oráculos: fallback local `LOCAL_ORACLE_BASE_URL=http://localhost:1337/v1`.
+- **pytest de la raíz**: `pytest.ini` excluye `plataforma_educativa` (norecursedirs).
+  La plataforma se testea desde su carpeta (conftest propio, sys.path).
+- **Rama educativa**: la regla de oro (vacuación) vive en `maxocontracts/skills.py`
+  (puro, sin Flask) y la concesión por triada en `app/workshops_bp.py`; el foro
+  referencia necesidades, nunca las duplica.
 
 ## 3. Cómo verificar al arrancar
 
