@@ -223,6 +223,28 @@ def me():
     )
 
 
+def _triada_state(user_id, topic_id):
+    """Estado de la triada de mentoría de un par (usuario, tema), o None.
+
+    La triada es la capa de opinión de la validación (mentor + par + oráculo
+    con veto); la regla es: mentor y par aprueban y el oráculo no veta.
+    """
+    db = get_db()
+    row = db.execute(
+        "SELECT * FROM mentorship_triadas WHERE user_id = ? AND topic_id = ?",
+        (user_id, topic_id),
+    ).fetchone()
+    if row is None:
+        return None
+    return {
+        "outcome": row["outcome"],
+        "mentor_ok": bool(row["mentor_ok"]),
+        "peer_ok": bool(row["peer_ok"]),
+        "oracle_veto": bool(row["oracle_veto"]),
+        "created_at": row["created_at"],
+    }
+
+
 @api_bp.route("/api/tree", methods=["GET"])
 @login_required
 def tree():
@@ -254,6 +276,7 @@ def tree():
                     "score": st["score"],
                     "mentor_rounds": st["mentor_rounds"],
                     "mentorship_approved": st["mentorship_approved"],
+                    "triada": _triada_state(g.user_id, topic["id"]),
                     "unlocked": _prereqs_ok(g.user_id, prereq_ids),
                 }
             )
@@ -401,6 +424,59 @@ def topic_request_mentorship(topic_id):
         ),
         200,
     )
+
+
+@api_bp.route("/api/topics/<int:topic_id>/mentorship/verify", methods=["POST"])
+@login_required
+def topic_mentorship_verify(topic_id):
+    """Verifica la triada de mentoría (mentor + par + oráculo con veto).
+
+    Solo el coordinador puede verificar. Resultado por la regla de la
+    validación en tres capas:
+      - ``validated`` si mentor y par aprueban y el oráculo no veta;
+      - ``vetoed`` si el oráculo ejerce el veto (axiomas en riesgo);
+      - ``pending`` si falta algún aval.
+    """
+    topic = _get_topic_or_404(topic_id)
+    if topic is None:
+        return jsonify({"error": "El tema no existe."}), 404
+    if not _is_coordinator():
+        return jsonify({"error": "Solo el coordinador verifica la triada."}), 403
+
+    data = request.get_json(silent=True) or {}
+    mentor_ok = bool(data.get("mentor_ok", False))
+    peer_ok = bool(data.get("peer_ok", False))
+    oracle_veto = bool(data.get("oracle_veto", False))
+    target_user = data.get("user_id")
+    if not isinstance(target_user, int):
+        return jsonify({"error": "user_id (el aprendiz) es requerido."}), 400
+
+    if oracle_veto:
+        outcome = "vetoed"
+    elif mentor_ok and peer_ok:
+        outcome = "validated"
+    else:
+        outcome = "pending"
+
+    db = get_db()
+    existing = db.execute(
+        "SELECT id FROM mentorship_triadas WHERE user_id = ? AND topic_id = ?",
+        (target_user, topic_id),
+    ).fetchone()
+    if existing:
+        db.execute(
+            "UPDATE mentorship_triadas SET mentor_ok = ?, peer_ok = ?, oracle_veto = ?, outcome = ? "
+            "WHERE id = ?",
+            (int(mentor_ok), int(peer_ok), int(oracle_veto), outcome, existing["id"]),
+        )
+    else:
+        db.execute(
+            "INSERT INTO mentorship_triadas (user_id, topic_id, mentor_ok, peer_ok, oracle_veto, outcome, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (target_user, topic_id, int(mentor_ok), int(peer_ok), int(oracle_veto), outcome, _now()),
+        )
+    db.commit()
+    return jsonify({"success": True, "triada": _triada_state(target_user, topic_id)}), 200
 
 
 # --------------------------------------------------------------------------

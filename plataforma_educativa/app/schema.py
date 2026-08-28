@@ -94,6 +94,18 @@ CREATE TABLE IF NOT EXISTS availability (
     slots TEXT NOT NULL,
     PRIMARY KEY (user_id, semana)
 );
+
+CREATE TABLE IF NOT EXISTS mentorship_triadas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    topic_id INTEGER NOT NULL REFERENCES topics(id),
+    mentor_ok INTEGER NOT NULL DEFAULT 0,
+    peer_ok INTEGER NOT NULL DEFAULT 0,
+    oracle_veto INTEGER NOT NULL DEFAULT 0,
+    outcome TEXT NOT NULL CHECK(outcome IN ('pending', 'validated', 'vetoed')),
+    created_at TEXT NOT NULL,
+    UNIQUE(user_id, topic_id)
+);
 """
 
 
