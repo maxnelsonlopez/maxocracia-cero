@@ -91,6 +91,7 @@ def create_app(db_path=None):
     from .forms_bp import forms_bp
     from .forms_manager import init_multi_offers_needs_tables
     from .forum_bp import forum_bp, init_forum_tables
+    from .groups_bp import groups_bp, init_groups_tables
     from .guide_bp import guide_bp, init_guide_tables
     from .interchanges import bp as interchanges_bp
     from .maxo_bp import bp as maxo_bp
@@ -137,6 +138,7 @@ def create_app(db_path=None):
     app.register_blueprint(guide_bp)
     app.register_blueprint(forum_bp)
     app.register_blueprint(workshops_bp)
+    app.register_blueprint(groups_bp)
 
     # Inicializar tablas específicas si no existen
     init_subscription_tables(app)
@@ -146,6 +148,7 @@ def create_app(db_path=None):
     init_guide_tables(app)
     init_forum_tables(app)
     init_workshops_tables(app)
+    init_groups_tables(app)
     init_synthetic_session_tables(app)
 
     # placeholder imports to ensure modules loaded
