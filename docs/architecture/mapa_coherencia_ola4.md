@@ -219,4 +219,11 @@ Get-ChildItem maxocontracts -Recurse -Filter *.py | Select-String -Pattern "INV1
 - [x] **Mapa de Trazabilidad Canónica (22-08-2026)**: `mapa_trazabilidad_canonica.md` generaliza
       este mapa al canon completo — concepto del libro ↔ implementación ↔ tests ↔ commits clave,
       con regla de regeneración por Ola (ox-alpha).
+- [x] **Rama educativa M1-M5 (28-08-2026)**: OEV implementado en la plataforma principal —
+      M2 Foro Abierto (`app/forum_bp.py`), M3 Talleres + regla de oro
+      (`maxocontracts/skills.py` + `app/workshops_bp.py`), M4 Grupos/ECEs + Células Madre
+      (`app/groups_bp.py`), M5 UI `/foro` `/talleres` `/grupos` + puente
+      `educacion_indice()` (años↔índice). 49 tests nuevos (24 motor+API foro, 15 motor+API
+      talleres, 12 grupos, 7 puente; más 7 de la triada en `plataforma_educativa/`).
+      Triada de mentoría en el prototipo (`mentorship_triadas`). Ver ROADMAP_RAMA_EDUCATIVA.md.
 - [ ] Mantener este documento actualizado en cada Ola.

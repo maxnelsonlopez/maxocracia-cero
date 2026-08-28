@@ -126,6 +126,15 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   subagente constructor bajo especificación detallada; diff revisado y suite re-ejecutada por el
   orquestador antes de commitear. Diseño/mapeo al OEV: `docs/guides/PLATAFORMA_EDUCATIVA.md`;
   docs del marco y roadmap en los commits previos de esta sesión. Commits `36f8caf`, `9ee05af`.
+- **Rama educativa M2-M5 (28/8/2026, sesión con Max)**: implementación completa del ROADMAP:
+  M2 Foro Abierto (`app/forum_bp.py`, commit `128cfa6`), M3 Talleres + regla de oro
+  (`maxocontracts/skills.py` + `app/workshops_bp.py`, commit `c93a8a5`), M4 Grupos/ECEs y
+  Células Madre (`app/groups_bp.py`, commit `5d0b457`), M5 UI (`/foro`, `/talleres`, `/grupos`)
+  + puente años↔índice (`educacion_indice`, commit `e992061`), triada de mentoría en la
+  plataforma educativa (`8d7dfc9`), exclusión de `plataforma_educativa` de la recolección
+  raíz (`pytest.ini`). Diseño guiado por resúmenes de la teoría OEV; verificación end-to-end
+  con ojos propios (helpers reescritos tras errores de edición; dicotomía
+  igualdad-vs-subcontenido en asserts de `in` sobre listas).
 
 ### ox-alpha — "el bibliotecario de la coherencia"
 - **Auditoría de integridad del libro (22/8/2026)**: verificación determinista de enlaces

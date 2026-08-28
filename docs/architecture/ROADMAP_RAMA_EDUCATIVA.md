@@ -1,8 +1,7 @@
 # Roadmap de implementación — Rama Educativa en la plataforma
 
 > **Fase:** Ola 4 + — plan operativo de la rama educativa (marco conceptual en `docs/theory/EDUCACION_SIAMESA_estructura_maxocratica.md` y `docs/theory/ESTRUCTURA_IDEAL_ORGANISMO_EDUCATIVO_VITAL.md`).
-> **Estado:** M1 implementado (INV2-EDU) — el motor ya valida la dimensión educativa cuando hay dato. M2-M5 diseñados, pendientes de sesiones siguientes.
-> **Track paralelo (MVP):** `plataforma_educativa/` — plataforma educativa independiente con árbol (8 ramas), reuniones-células de 8, monitores-vacuadores y perfil sin email: prototipo vivo del OEV (ver `docs/guides/PLATAFORMA_EDUCATIVA.md`). Sirve de plantilla para los hitos M2-M4 de la plataforma principal.
+> **Estado:** M1-M5 implementados (28-08-2026) — el motor valida educación (INV2-EDU), el Foro Abierto, los Talleres con la regla de oro (vacuación + triada), los Grupos/ECEs y Células Madre, la UI y el puente años↔índice. Track paralelo (MVP): `plataforma_educativa/` con la triada de mentoría completada (32/32).
 > **Regla de coherencia:** cada hito = commit conventional en español + tests + entrada en `docs/architecture/atribuciones_sinteticas.md`.
 
 ---
@@ -25,40 +24,39 @@
 
 ---
 
-## M2 ⏳ Foro Abierto (`app/forum_bp.py`)
+## M2 ✅ Foro Abierto (`app/forum_bp.py`)
 
 **Qué es:** la plaza del conocimiento: cualquier participante publica un tema, una pregunta, una oferta de taller o una necesidad educativa.
 
 - **Nuevo**: blueprint `forum_bp.py` con patrón de `guide_bp.py` (`token_required`, `init_*_tables`, T13) + tabla `forum_posts` (autor, tipo: `topic|question|workshop_offer|need`, título, cuerpo, tags, estado).
 - **Ya existe**: necesidades en `forms_bp.py` (`POST /participants/<id>/needs`) y matching (`find_matches`, `get_community_sdv_gaps`) — el foro los referencia, no los duplica.
-- **Endpoints** (propuesta): `POST /forum/posts`, `GET /forum/posts?type=&tags=`, `POST /forum/posts/<id>/close`, `GET /forum/needs→matching`.
-- **Tests**: crear post, listar por tipo, cerrar, permisos (token).
-- **Docs**: `frontend/` página `/foro` (M5); este hito solo API + tests.
+- **Endpoints**: `POST /forum/posts`, `GET /forum/posts?type=&tag=&status=`, `GET /forum/posts/<id>`, `POST /forum/posts/<id>/close`, `GET /forum/needs` (puerta al matching).
+- **Tests**: 15 (`tests/test_forum.py`) — crear post, listar por tipo/tag, cerrar (autor/admin), permiso 403, puerta de necesidades.
+- **Docs**: página `/foro` (M5); commit `128cfa6`.
 
-## M3 ⏳ Talleres de Aprendizaje (`app/workshops_bp.py`)
+## M3 ✅ Talleres de Aprendizaje (`app/workshops_bp.py`)
 
 **Qué es:** la unidad de enseñanza de CUALQUIER skill (la regla de oro: el skill se gana enseñándolo — la vacuación).
 
-- **Tabla** `workshops` (título, skill_nodo, facilitador_id, estado `open|running|closed`, maestría mínima exigida, cupos), `workshop_enrollments` (aprendiz, estado `apprentice|advanced`), `workshop_outputs` (material de enseñanza abierto — la obra verificable).
-- **Regla de oro en el motor**: para ganar el nodo de skill, el aprendiz debe (1) obra aplicada, (2) material de enseñanza publicado, (3) mentoría mínima (contada en TVI). Extensión a `maxocontracts/` (tipo `SkillNode`, `SkilledParticipant`?) o contrato flexible en `app/` con verificación por triada.
-- **Endpoints**: `POST /workshops` (desde foro), `POST /workshops/<id>/enroll`, `POST /workshops/<id>/outputs`, `POST /workshops/<id>/grant-skill` (triada: facilitador + par + oráculo con veto).
-- **Tests**: creación (requiere facilitador con nodo ganado), inscripción, material, concesión de skill, rechazo sin triada.
+- **Tabla** `workshops` (título, skill_nodo, facilitador_id, estado `open|running|closed`, cupos 5-12), `workshop_enrollments` (aprendiz, estado `apprentice|advanced`), `workshop_outputs` (material abierto | obra aplicada), `skill_awards` (T13 completo).
+- **Regla de oro en el motor**: `maxocontracts/skills.py` — para ganar el skill: (1) obra aplicada, (2) material de enseñanza publicado, (3) mentoría mínima (≥1h TVI); veredicto puro (`evaluate_vacuacion`) + triada (`evaluate_triada`: mentor + par + oráculo con veto).
+- **Endpoints**: `POST /workshops`, `GET /workshops`, `GET /workshops/<id>`, `POST /workshops/<id>/enroll`, `POST /workshops/<id>/outputs`, `POST /workshops/<id>/grant-skill`, `POST /workshops/<id>/close`.
+- **Tests**: 30 (15 motor `tests/test_maxocontracts/test_skills.py` + 15 API `tests/test_workshops.py`); commit `c93a8a5`.
 
-## M4 ⏳ Grupos de Solución y Células Madre (`app/groups_bp.py`)
+## M4 ✅ Grupos de Solución y Células Madre (`app/groups_bp.py`)
 
 **Qué es:** los ECEs — grupos que resuelven necesidades reales de la comunidad — y las células madre, cuyo oficio es formar otros grupos.
 
-- **Tabla** `edu_groups` (tipo: `solution_group | mother_cell`, necesidad vinculada → `matching`, célula madre vinculada).
-- **Célula madre**: cada grupo formado registra su matriz (trazabilidad fractal); la célula madre gana nodo "facilitación" al ver florecer una réplica.
-- **Ya existe**: `micromax_bp.py` (household) como patrón doméstico — aquí es educativo, no se mezcla.
-- **Endpoints**: `POST /groups` (solución/ madre), `POST /groups/<id>/join`, `POST /groups/<id>/needs` (vincular necesidad), `POST /groups/<id>/child` (registrar réplica).
-- **Tests**: crear ambos tipos, vincular necesidad, registrar réplica.
+- **Tabla** `edu_groups` (tipo: `solution_group | mother_cell`, need_title/need_id, estado), `edu_group_members` (rol member/coordinator), `edu_group_children` (fractalidad), `group_skill_nodes` (nodo ganado con evidencia).
+- **Célula madre**: cada grupo formado registra su matriz (trazabilidad fractal); la madre gana nodo "facilitación" al ver florecer una réplica.
+- **Endpoints**: `POST /groups`, `GET /groups`, `GET /groups/<id>`, `POST /groups/<id>/join`, `POST /groups/<id>/child`, `POST /groups/<id>/close`.
+- **Tests**: 12 (`tests/test_groups.py`); commit `5d0b457`.
 
-## M5 ⏳ UI y puente años↔índice
+## M5 ✅ UI y puente años↔índice
 
-- **Frontend** (`frontend/app/`): páginas `/foro`, `/talleres`, `/grupos` siguiendo el patrón de `guide_bp`/`guia` (API real, nada pintado).
-- **Puente**: `app/sdv_analyzer.py` `SDVScore.educacion` (0-1) ↔ años del motor (`educacion_anos`); mapeo documentado (≥12 años → 1.0, lineal o umbral canónico a decidir en parlamento).
-- **Docs**: `mapa_frontend_ola4.md` (+3 páginas), guía del foro en `docs/guides/`.
+- **Frontend** (`frontend/app/`): páginas `/foro`, `/talleres`, `/grupos` (API real, nada pintado) + sección de navegación "Aprendizaje" (desktop y móvil).
+- **Puente**: `app/sdv_analyzer.py` `educacion_indice()` (años del motor ↔ índice 0-1 del SDVScore): ≥12 años → 1.0, lineal 0.1→1.0 0-12 años, None → 1.0 (sin dato no castiga); umbral canónico a decidir en parlamento.
+- **Docs**: `mapa_frontend_ola4.md` (+4 filas: guia, foro, talleres, grupos); 7 tests del puente; commit `e992061`.
 
 ---
 

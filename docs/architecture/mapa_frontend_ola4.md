@@ -31,6 +31,10 @@ las secciones desconectadas**. Generado el 11-08-2026 con verificación determin
 | `/upgrade` | 24+client | `/stripe/config`, `/stripe/create-checkout-session` | stripe |
 | `/transparency` | 12+client | `/subscriptions/transparency-report` | subscriptions |
 | `/verificador` | 12+client | `/verificador/cohort` | verifier |
+| `/guia` | 552 | `/guide/chat`, `/guide/trust-assessment`, `/guide/director-candidacy` | guide |
+| `/foro` | ~340 | `/forum/posts` (GET/POST), `/forum/posts/{id}`, `/forum/posts/{id}/close`, `/forum/needs` | forum (rama educativa M2) |
+| `/talleres` | ~400 | `/workshops` (GET/POST), `/workshops/{id}`, `/enroll`, `/outputs`, `/grant-skill`, `/close` | workshops + motor de vacuación (M3) |
+| `/grupos` | ~330 | `/groups` (GET/POST), `/groups/{id}`, `/join`, `/child`, `/close` | groups — ECEs + Células Madre (M4) |
 | `/admin/contracts` | 620 | `/contracts/`, `/contracts/stats` | contracts |
 | `/admin/dashboard` | 276 | `/forms/dashboard/alerts|stats|trends`, `/subscriptions/admin/stats` | forms, subscriptions |
 | `/admin/matching` | 529 | `/forms/matching/gaps`, `/forms/matching/urgent` | forms |

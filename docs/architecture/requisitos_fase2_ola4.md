@@ -142,6 +142,24 @@ verificación determinista — Patrón Puente).
 
 ---
 
+### N. Educación — Organismo Educativo Vital ✨ (pilar educativo, 28-08-2026)
+
+| ID | Requisito | Fuente | Estado |
+|---|---|---|---|
+| RF-EDU-0 | **INV2-EDU**: el motor valida la dimensión educativa del SDV (años ≥ 12 con dato; sin dato no castiga) | ROADMAP M1 | ✅ (`SDV.educacion_anos`, `_check_all_dimensions`, 8 tests) |
+| RF-EDU-1 | **Foro Abierto**: publicar tema/pregunta/oferta de taller/necesidad sin matrícula ni credencial; filtros por tipo/tag/estado; cierre con resolución (autor o admin); puerta `/forum/needs` al matching | OEV §1.7 | ✅ (`app/forum_bp.py`, 15 tests, `128cfa6`) |
+| RF-EDU-2 | **Talleres de Aprendizaje**: creación 5-12 personas (el creador facilita), inscripción con cupos, obras de salida (material abierto | obra aplicada) | OEV §1.7 | ✅ (`app/workshops_bp.py`) |
+| RF-EDU-3 | **Regla de oro (vacuación)**: el skill se gana con obra aplicada + material publicado + mentoría ≥ 1h TVI; veredicto en motor puro | Siamesa §2c/§3g | ✅ (`maxocontracts/skills.py`, 15 tests motor) |
+| RF-EDU-4 | **Triada de concesión**: mentor (facilitador) + par + oráculo con veto; todo verificador es verificable; T13 completo | Siamesa §3e | ✅ (`/workshops/<id>/grant-skill`) |
+| RF-EDU-5 | **Grupos de Solución (ECEs)**: el grupo nace de una necesidad real (need_title) y coordina sin mandato | OEV §1.7 | ✅ (`app/groups_bp.py`, 12 tests, `5d0b457`) |
+| RF-EDU-6 | **Células Madre**: meta-grupo que forma grupos; réplica → nodo "facilitación" con evidencia; fractalidad trazable | OEV §1.7 | ✅ (`/groups/<id>/child`) |
+| RF-EDU-7 | **UI**: `/foro`, `/talleres`, `/grupos` con API real; navegación "Aprendizaje" (desktop + móvil) | mapa_frontend | ✅ (M5, `e992061`) |
+| RF-EDU-8 | **Puente años↔índice**: `educacion_indice()` (≥12 años → 1.0; lineal 0.1→1.0; None → sin castigo) determinista, umbral canónico a parlamento | ROADMAP M5 | ✅ (`app/sdv_analyzer.py`, 7 tests) |
+| RF-EDU-9 | **Triada de mentoría en `plataforma_educativa/`**: `/mentorship/verify` (solo coordinador; validated/vetoed/pending); el árbol expone la triada por tema | prototipo OEV | ✅ (7 tests, 32/32 de la plataforma) |
+| RF-EDU-10 | **Anti-gamificación**: sin rankings por persona, sin cronometraje del ensayo-error; estado, no tribunal | Siamesa §3g.5 | ✅ (diseño respetado en toda la capa) |
+
+---
+
 ## 2. Requisitos no funcionales
 
 | ID | Requisito | Métrica / verificación | Estado |
