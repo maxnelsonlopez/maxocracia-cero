@@ -122,6 +122,8 @@ class FormsManager:
         # Años de educación (dimensión SDV-H, INV2-EDU): opcional, 0-60.
         educacion_anos = data.get("educacion_anos")
         if educacion_anos is not None:
+            if isinstance(educacion_anos, bool):
+                return False, "educacion_anos debe ser un número", None
             try:
                 educacion_anos = float(educacion_anos)
             except (TypeError, ValueError):
@@ -303,6 +305,8 @@ class FormsManager:
         # Validate educacion_anos (0-60; None permite limpiar el dato).
         if "educacion_anos" in update_data:
             if update_data["educacion_anos"] is not None:
+                if isinstance(update_data["educacion_anos"], bool):
+                    return False, "educacion_anos debe ser un número"
                 try:
                     update_data["educacion_anos"] = float(update_data["educacion_anos"])
                 except (TypeError, ValueError):
@@ -1337,6 +1341,17 @@ class FormsManager:
         }
 
 
+def init_participants_education_column(conn) -> None:
+    """Migración idempotente de la columna educativa del SDV-H (INV2-EDU).
+
+    Las bases nuevas ya la traen en `schema.sql`; las existentes
+    (comun.db de producción) la obtienen con un ALTER condicional.
+    """
+    cols = [r[1] for r in conn.execute("PRAGMA table_info(participants)").fetchall()]
+    if "educacion_anos" not in cols:
+        conn.execute("ALTER TABLE participants ADD COLUMN educacion_anos REAL")
+
+
 def init_multi_offers_needs_tables(app):
     """
     Initializes multi offers and needs tables in SQLite.
@@ -1387,10 +1402,10 @@ def init_multi_offers_needs_tables(app):
             "CREATE INDEX IF NOT EXISTS idx_participant_needs_pid ON participant_needs(participant_id);"
         )
         # Migración idempotente: columna educativa del SDV-H (INV2-EDU) para
-        # bases existentes (el CREATE de schema.sql la trae en las nuevas).
-        existing_cols = [r[1] for r in cur.execute("PRAGMA table_info(participants)").fetchall()]
-        if "educacion_anos" not in existing_cols:
-            cur.execute("ALTER TABLE participants ADD COLUMN educacion_anos REAL")
+        # bases existentes (el CREATE de schema.sql la trae en las nuevas);
+        # se delega a su propia función para que el helper de ofertas/
+        # necesidades no cargue con responsabilidades ajenas.
+        init_participants_education_column(conn)
         conn.commit()
         print(
             "Initialized participant_offers and participant_needs tables if not existed."

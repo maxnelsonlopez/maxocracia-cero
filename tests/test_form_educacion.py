@@ -79,6 +79,30 @@ def test_update_rejects_invalid_years(auth_client):
     assert resp.status_code == 400
 
 
+def test_register_rejects_boolean(auth_client):
+    """Guardarraíl: booleanos no pueden pasar como años (bajó de la revisión)."""
+    resp = auth_client.post("/forms/participant", json=_form_data(educacion_anos=True))
+    assert resp.status_code == 400
+
+
+def test_update_by_non_owner_forbidden(auth_client):
+    """PUT con educacion_anos: solo el dueño (o admin) — 403 para terceros."""
+    created = auth_client.post("/forms/participant", json=_form_data())
+    participant_id = created.get_json()["participant_id"]
+
+    login = auth_client.post(
+        "/auth/login", json={"email": "test2@example.com", "password": "ValidPass123!"}
+    )
+    token = login.get_json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = auth_client.put(
+        f"/forms/participants/{participant_id}",
+        json={"educacion_anos": 12},
+        headers=headers,
+    )
+    assert resp.status_code == 403
+
+
 class TestAnalyzerConPuente:
     def test_estimacion_usa_anos_declarados(self, auth_client):
         created = auth_client.post(
@@ -94,9 +118,37 @@ class TestAnalyzerConPuente:
             score = analyzer.estimate_participant_sdv(participant_id)
             assert score.educacion == educacion_indice(6)  # 0.55
 
+    def test_estimacion_cero_anos_minimo_vital(self, auth_client):
+        """0 años = exclusión cognitiva (índice 0.1, mínimo vital teórico)."""
+        created = auth_client.post(
+            "/forms/participant", json=_form_data(educacion_anos=0)
+        )
+        participant_id = created.get_json()["participant_id"]
+        with auth_client.application.app_context():
+            from app.utils import get_db
+
+            conn = get_db()
+            analyzer = SDVAnalyzer(conn)
+            score = analyzer.estimate_participant_sdv(participant_id)
+            assert score.educacion == 0.1
+
     def test_estimacion_piso_pleno_con_12_anos(self, auth_client):
         created = auth_client.post(
             "/forms/participant", json=_form_data(educacion_anos=14)
+        )
+        participant_id = created.get_json()["participant_id"]
+        with auth_client.application.app_context():
+            from app.utils import get_db
+
+            conn = get_db()
+            analyzer = SDVAnalyzer(conn)
+            score = analyzer.estimate_participant_sdv(participant_id)
+            assert score.educacion == 1.0
+
+    def test_estimacion_exactamente_12_anos(self, auth_client):
+        """12 años exactos: el canon del SDV-H (borde canónico) -> 1.0."""
+        created = auth_client.post(
+            "/forms/participant", json=_form_data(educacion_anos=12)
         )
         participant_id = created.get_json()["participant_id"]
         with auth_client.application.app_context():
