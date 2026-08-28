@@ -35,6 +35,7 @@ from .jwt_utils import token_required
 from .utils import get_db
 
 from maxocontracts.skills import TriadaVotos, evaluar_concesion
+from maxocontracts.tree import is_valid_node_id
 
 logger = logging.getLogger(__name__)
 
@@ -201,6 +202,13 @@ def create_workshop(current_user):
         return jsonify({"error": f"title no puede superar {MAX_TITLE} caracteres"}), 400
     if not skill_node:
         return jsonify({"error": "skill_node es requerido (nodo del árbol de habilidades)"}), 400
+    if not is_valid_node_id(skill_node):
+        return jsonify(
+            {
+                "error": "skill_node debe ser un nodo del árbol: 'rama' o 'rama/nodo' "
+                "(slugs minúsculos, sin espacios ni apostrofes)"
+            }
+        ), 400
     if len(description) > MAX_DESCRIPTION:
         return jsonify(
             {"error": f"description no puede superar {MAX_DESCRIPTION} caracteres"}

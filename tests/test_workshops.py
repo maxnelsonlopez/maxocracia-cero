@@ -65,6 +65,20 @@ def test_create_workshop_missing_fields(auth_client):
     assert resp.status_code == 400  # falta skill_node
 
 
+def test_create_workshop_validates_node_id(auth_client):
+    """skill_node debe ser un nodo del árbol (rama o rama/nodo) — M6."""
+    resp = _create_workshop(auth_client, skill_node="no vale / tres / partes")
+    assert resp.status_code == 400
+    resp = _create_workshop(auth_client, skill_node="")
+    assert resp.status_code == 400
+    # Nodo canónico válido (rama + slash es el formato del tejido).
+    resp = _create_workshop(auth_client, skill_node="naturaleza/huertas")
+    assert resp.status_code == 201
+    # Fork con rama nueva también siembra el tejido (formato válido).
+    resp = _create_workshop(auth_client, skill_node="gastronomia/fermentos")
+    assert resp.status_code == 201
+
+
 def test_enroll_workshop(auth_client):
     created = _create_workshop(auth_client)
     workshop_id = created.get_json()["workshop"]["id"]
