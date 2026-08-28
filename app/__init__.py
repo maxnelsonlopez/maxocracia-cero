@@ -107,6 +107,7 @@ def create_app(db_path=None):
     from .verifier_bp import verifier_bp
     from .vhv_bp import vhv_bp
     from .voting_bp import voting_bp
+    from .workshops_bp import init_workshops_tables, workshops_bp
     from .synthetic_sessions import (
         init_synthetic_session_tables,
         synthetic_sessions_bp,
@@ -135,6 +136,7 @@ def create_app(db_path=None):
 
     app.register_blueprint(guide_bp)
     app.register_blueprint(forum_bp)
+    app.register_blueprint(workshops_bp)
 
     # Inicializar tablas específicas si no existen
     init_subscription_tables(app)
@@ -143,6 +145,7 @@ def create_app(db_path=None):
     init_contracts_metrics_tables(app)
     init_guide_tables(app)
     init_forum_tables(app)
+    init_workshops_tables(app)
     init_synthetic_session_tables(app)
 
     # placeholder imports to ensure modules loaded
