@@ -60,6 +60,12 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 **Decisiones canónicas a respetar:**
 - **La teoría (libro) tiene prioridad**: T0-T15 son canónicos; T16=Minimizar Daño, T17=Reciprocidad
   Justa (renumerados desde "T7"/"T9" de ingeniería). No reintroducir T9=Reciprocidad.
+- **Reflexión de cierre de la rama educativa (28-08-2026)**: `docs/architecture/reflexion_eutopia_rama_educativa.md`
+  — leerla antes de ampliar la rama; contiene UX pendiente (búsqueda en plaza, triada sin
+  prompt(), hub educativo, Guía↔foro), N+1 de reply_count, y la síntesis de identidad
+  (app principal :5001 ↔ plataforma_educativa :5050) como siguiente hito estructural.
+- **La teoría (libro) tiene prioridad**: T0-T15 son canónicos; T16=Minimizar Daño, T17=Reciprocidad
+  Justa (renumerados desde "T7"/"T9" de ingeniería). No reintroducir T9=Reciprocidad.
 - El validador conceptual (`scripts/validador_conceptual.py` + su test) exige coherencia axiomática
   en TODO el repo — correrlo tras cambios que mencionen axiomas.
 - `app/voting_oracle.py` **no carga .env al importar** (contamina tests; run.py ya lo hace).
