@@ -217,7 +217,11 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   referencia verificada de los 7 endpoints y los tres caminos que nacen del foro. Redactado por
   un subagente OpenRouter (`minimax/minimax-m3:free`) con fuentes dadas (teoría + `forum_bp.py`);
   **verificado por el orquestador contra el blueprint real** (endpoints, filtros, estados) antes
-  de commitear. Commit `?` (este).
+  de commitear. Commit `f5eefa0`.
+- **Revisión de código M7** (28-08-2026): auditoría del Form Cero con años de educación — halló
+  la faltante de bordes canónicos del puente (0 y 12 años), el guard anti-booleanos y la
+  ubicación engañosa del ALTER de migración; los tres hallazgos aplicados en `17efc5d`
+  (+4 tests). Veredicto inicial "CON CAMBIOS" → suite final 12/12.
 
 ### Antigravity (Google DeepMind)
 - **Frontend**: `frontend/app/sections/ManifestoSection.tsx` — "Autor: Antigravity (Google DeepMind)".
