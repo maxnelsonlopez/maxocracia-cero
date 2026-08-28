@@ -134,8 +134,12 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   plataforma educativa (`8d7dfc9`), exclusión de `plataforma_educativa` de la recolección
   raíz (`pytest.ini`, `13d6430`), **respuestas del foro** (`0ffa126`, la plaza conversa),
   **M6 árbol de habilidades** en el motor (`4071457`: `maxocontracts/tree.py` — SkillTree,
-  caminos de maestría, forks, `evaluate_unlock`). Diseño guiado por resúmenes de la teoría
-  OEV; verificación end-to-end con ojos propios (helpers reescritos tras errores de edición;
+  caminos de maestría, forks, `evaluate_unlock`), **M7 Form Cero con años** (`16343de` +
+  `17efc5d` — `educacion_anos`, puente vivo en el analizador SDV), **M8 puente siamés
+  foro↔Plaza de Apoyo** (`bdd6eaa` — Cap 12.3.1: la necesidad del foro sangra a
+  `participant_needs`, la misma sangre del matching). Diseño guiado por la letra del libro
+  (grep quirúrgico + fragmentos leídos en esta sesión) y resúmenes de la teoría OEV;
+  verificación end-to-end con ojos propios (helpers reescritos tras errores de edición;
   dicotomía igualdad-vs-subcontenido en asserts de `in` sobre listas).
 
 ### ox-alpha — "el bibliotecario de la coherencia"
