@@ -36,7 +36,9 @@ import {
   BarChart3,
   ChevronDown,
   Vote,
-  Compass
+  Compass,
+  MessagesSquare,
+  GraduationCap
 } from "lucide-react";
 import { ContributorBadge } from "./ContributorBadge";
 import { useAuth } from "../context/AuthContext";
@@ -63,6 +65,14 @@ const navSections = [
     links: [
       { href: "/contracts/builder", label: "Builder", icon: Zap },
       { href: "/contracts", label: "Lista", icon: FileText },
+    ]
+  },
+  {
+    label: "Aprendizaje",
+    links: [
+      { href: "/foro", label: "Foro Abierto", icon: MessagesSquare },
+      { href: "/talleres", label: "Talleres", icon: GraduationCap },
+      { href: "/grupos", label: "Grupos y Células", icon: Users },
     ]
   },
 ];
@@ -256,6 +266,9 @@ export function Navigation() {
                   <MobileNavLink href="/matching" label="Plaza de Apoyo" icon={Handshake} onClick={() => setIsOpen(false)} />
                   <MobileNavLink href="/votaciones" label="Votaciones" icon={Vote} onClick={() => setIsOpen(false)} />
                   <MobileNavLink href="/guia" label="Guía de la Maxocracia" icon={Compass} onClick={() => setIsOpen(false)} />
+                  <MobileNavLink href="/foro" label="Foro Abierto" icon={MessagesSquare} onClick={() => setIsOpen(false)} />
+                  <MobileNavLink href="/talleres" label="Talleres de Aprendizaje" icon={GraduationCap} onClick={() => setIsOpen(false)} />
+                  <MobileNavLink href="/grupos" label="Grupos y Células" icon={Users} onClick={() => setIsOpen(false)} />
                   <MobileNavLink href="/perfil" label="Perfil Vital" icon={Heart} onClick={() => setIsOpen(false)} />
                 </div>
               )}

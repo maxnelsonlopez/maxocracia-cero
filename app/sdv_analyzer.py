@@ -16,6 +16,33 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+# Canon del SDV-H IV (Educación y Desarrollo): >= 12 años de educación formal.
+EDU_ANIOS_MINIMOS = 12
+
+
+def educacion_indice(anos_educacion: Optional[float]) -> float:
+    """Puente años del motor (INV2-EDU) -> índice 0-1 del SDVScore (M5).
+
+    El motor maxocontracts trabaja en AÑOS (canon SDV-H); la capa de análisis
+    usa índice 0-1. Mapeo del puente:
+
+      - None (no reportado)    -> 1.0 (INV2-EDU solo se activa con dato; la
+                                  duda no se castiga sin evidencia).
+      - >= 12 años             -> 1.0 (piso pleno del canon SDV-H).
+      - 0..12 años             -> 0.1 + 0.9 * (años/12), lineal; 0 años =
+                                  mínimo vital teórico 0.1 (exclusión cognitiva).
+
+    El umbral canónico exacto puede revisarse en el parlamento de parámetros
+    (Cap. 11); esta función materializa el puente y es determinista.
+    """
+    if anos_educacion is None:
+        return 1.0
+    if anos_educacion >= EDU_ANIOS_MINIMOS:
+        return 1.0
+    if anos_educacion <= 0:
+        return 0.1
+    return round(0.1 + 0.9 * (anos_educacion / EDU_ANIOS_MINIMOS), 3)
+
 
 @dataclass
 class SDVScore:
