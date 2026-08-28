@@ -199,7 +199,7 @@ class SDVAnalyzer:
 
         # 1. Obtener datos del participante
         cursor.execute(
-            "SELECT need_human_dimensions, need_urgency FROM participants WHERE id = ?",
+            "SELECT need_human_dimensions, need_urgency, educacion_anos FROM participants WHERE id = ?",
             (participant_id,),
         )
         p_row = cursor.fetchone()
@@ -208,6 +208,7 @@ class SDVAnalyzer:
 
         need_dims = self._parse_json(p_row[0])
         urgency = p_row[1]
+        educacion_anos = p_row[2]
 
         score = SDVScore()
 
@@ -244,7 +245,15 @@ class SDVAnalyzer:
                         # Sobrescribimos o profundizamos la penalización
                         setattr(score, target, max(0.1, 1.0 - extra_penalty))
 
-        # 4. Normalizar: no dejar que suba de 1.0 ni baje de 0.1 (mínimo vital teórico)
+        # 4. Puente educativo (INV2-EDU): si la persona reportó años formales,
+        # la dimensión educativa se calcula por el canon años<->índice (M5/M7):
+        # el dato declarado manda sobre la estimación por necesidad; sin dato
+        # (None) se conserva la estimación cualitativa anterior (no se castiga
+        # la duda sin evidencia).
+        if educacion_anos is not None:
+            score.educacion = educacion_indice(float(educacion_anos))
+
+        # 5. Normalizar: no dejar que suba de 1.0 ni baje de 0.1 (mínimo vital teórico)
         for target in [
             "vivienda",
             "alimentacion",

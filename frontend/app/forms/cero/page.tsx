@@ -60,6 +60,7 @@ export default function CeroFormPage() {
     need_description: "",
     need_urgency: "Media",
     consent_given: false,
+    educacion_anos: "",
   });
 
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
@@ -123,6 +124,8 @@ export default function CeroFormPage() {
         body: JSON.stringify({
           ...formData,
           consent_given: formData.consent_given ? 1 : 0,
+          educacion_anos:
+            formData.educacion_anos === "" ? null : Number(formData.educacion_anos),
         }),
       });
 
@@ -268,6 +271,16 @@ export default function CeroFormPage() {
               required
             />
           </div>
+          <Input
+            label="Años de educación formal completados (opcional)"
+            name="educacion_anos"
+            type="number"
+            min={0}
+            max={60}
+            value={formData.educacion_anos}
+            onChange={handleChange}
+            placeholder="Ej: 12 — alimenta la dimensión educativa del SDV (INV2-EDU)"
+          />
           <FormTextArea
             label="¿Qué valores te representan?"
             name="personal_values"

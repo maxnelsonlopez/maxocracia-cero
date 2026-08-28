@@ -119,6 +119,16 @@ class FormsManager:
         if data["need_urgency"] not in ["Alta", "Media", "Baja"]:
             return False, "Urgencia debe ser Alta, Media o Baja", None
 
+        # Años de educación (dimensión SDV-H, INV2-EDU): opcional, 0-60.
+        educacion_anos = data.get("educacion_anos")
+        if educacion_anos is not None:
+            try:
+                educacion_anos = float(educacion_anos)
+            except (TypeError, ValueError):
+                return False, "educacion_anos debe ser un número", None
+            if educacion_anos < 0 or educacion_anos > 60:
+                return False, "educacion_anos debe estar entre 0 y 60 años", None
+
         # Validate and serialize JSON fields
         offer_categories = self._safe_json_dump(data.get("offer_categories", []))
         offer_dimensions = self._safe_json_dump(data.get("offer_human_dimensions", []))
@@ -134,8 +144,8 @@ class FormsManager:
                     telegram_handle, city, neighborhood, personal_values,
                     offer_categories, offer_description, offer_human_dimensions,
                     need_categories, need_description, need_urgency, need_human_dimensions,
-                    consent_given
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    consent_given, educacion_anos
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
                 (
                     data["name"],
@@ -155,6 +165,7 @@ class FormsManager:
                     data["need_urgency"],
                     need_dimensions,
                     data.get("consent_given", 1),
+                    educacion_anos,
                 ),
             )
 
@@ -273,6 +284,7 @@ class FormsManager:
             "need_human_dimensions",
             "consent_given",
             "status",
+            "educacion_anos",
         ]
 
         # Filter update data to allowed fields
@@ -287,6 +299,16 @@ class FormsManager:
             "Baja",
         ]:
             return False, "Urgencia debe ser Alta, Media o Baja"
+
+        # Validate educacion_anos (0-60; None permite limpiar el dato).
+        if "educacion_anos" in update_data:
+            if update_data["educacion_anos"] is not None:
+                try:
+                    update_data["educacion_anos"] = float(update_data["educacion_anos"])
+                except (TypeError, ValueError):
+                    return False, "educacion_anos debe ser un número"
+                if update_data["educacion_anos"] < 0 or update_data["educacion_anos"] > 60:
+                    return False, "educacion_anos debe estar entre 0 y 60 años"
 
         # Validate status
         if "status" in update_data and update_data["status"] not in [
@@ -1364,6 +1386,11 @@ def init_multi_offers_needs_tables(app):
         cur.execute(
             "CREATE INDEX IF NOT EXISTS idx_participant_needs_pid ON participant_needs(participant_id);"
         )
+        # Migración idempotente: columna educativa del SDV-H (INV2-EDU) para
+        # bases existentes (el CREATE de schema.sql la trae en las nuevas).
+        existing_cols = [r[1] for r in cur.execute("PRAGMA table_info(participants)").fetchall()]
+        if "educacion_anos" not in existing_cols:
+            cur.execute("ALTER TABLE participants ADD COLUMN educacion_anos REAL")
         conn.commit()
         print(
             "Initialized participant_offers and participant_needs tables if not existed."

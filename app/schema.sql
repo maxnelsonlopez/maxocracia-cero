@@ -243,6 +243,11 @@ CREATE TABLE IF NOT EXISTS participants (
   need_urgency TEXT CHECK(need_urgency IN ('Alta', 'Media', 'Baja')),
   need_human_dimensions TEXT,  -- JSON array of dimensions their need addresses
   
+  -- Educación (dimensión del SDV-H, INV2-EDU): años formales completados.
+  -- None = no reportado (el motor solo valida cuando hay dato; el puente
+  -- educacion_indice() convierte años <-> índice 0-1).
+  educacion_anos REAL,
+  
   -- Consent and metadata
   consent_given INTEGER DEFAULT 1,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
