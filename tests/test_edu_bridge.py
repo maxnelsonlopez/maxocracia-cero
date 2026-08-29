@@ -127,3 +127,52 @@ def test_sync_mastery_recorded_and_no_auto_promotion(client, auth_header, bridge
     assert events_data["events"][0]["topic_slug"] == "aritmetica_vital"
     assert events_data["events"][0]["triada_approved"] is True
     assert events_data["events"][0]["t13_hash"] == data["t13_hash"]
+
+
+def test_sync_node_report_on_behalf_without_user_jwt(client, auth_header, bridge_token):
+    """Sincronización automática (servicio-a-servicio): el nodo OEV reporta en
+    nombre del usuario con su token de servicio, sin el JWT de esa persona."""
+    _, user_id = auth_header
+    resp = client.post(
+        "/edu-bridge/sync-mastery",
+        headers={"X-Edu-Bridge-Token": bridge_token},
+        json={
+            "user_id": user_id,
+            "topic_slug": "cuidado_vital",
+            "branch_slug": "relaciones",
+            "score": 95,
+            "mentor_rounds": 2,
+            "triada_approved": True,
+        },
+    )
+    assert resp.status_code == 201
+    data = resp.get_json()
+    assert data["trust_effect"] == "none"
+    assert len(data["t13_hash"]) == 64
+
+    # El usuario ve su evidencia (con su JWT humano, consulta normal).
+    headers, _ = auth_header
+    events = client.get("/edu-bridge/events", headers=headers).get_json()
+    assert events["count"] == 1
+    assert events["events"][0]["branch_slug"] == "relaciones"
+
+
+def test_sync_node_unknown_user_404(client, bridge_token):
+    """El nodo reporta un user_id que no existe en Maxocracia -> 404."""
+    resp = client.post(
+        "/edu-bridge/sync-mastery",
+        headers={"X-Edu-Bridge-Token": bridge_token},
+        json={"user_id": 999999, "topic_slug": "x", "branch_slug": "y"},
+    )
+    assert resp.status_code == 404
+
+
+def test_sync_without_any_identity_400(client, bridge_token):
+    """Sin user_id reportado y sin JWT humano no hay identidad de evento."""
+    resp = client.post(
+        "/edu-bridge/sync-mastery",
+        headers={"X-Edu-Bridge-Token": bridge_token},
+        json={"topic_slug": "x", "branch_slug": "y"},
+    )
+    assert resp.status_code == 400
+    assert resp.get_json()["code"] == "TARGET_USER_REQUIRED"

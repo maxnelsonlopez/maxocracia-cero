@@ -84,22 +84,31 @@ def status(current_user: Dict[str, Any]):
 
 
 @edu_bridge_bp.route("/sync-mastery", methods=["POST"])
-@token_required
-def sync_mastery(current_user: Dict[str, Any]):
+def sync_mastery():
     """Sincroniza un hito de maestría o mentoría verificado por el nodo OEV (T13).
 
     Procedencia: el evento NO lo declara el usuario (eso convertiría la escalera
     de confianza en un ascensor); lo reporta el nodo educativo :5050 con su
-    token de servicio (`X-Edu-Bridge-Token`). Sin token configurado, el puente
-    queda cerrado (fail-closed).
+    token de servicio (`X-Edu-Bridge-Token`). El token de servicio es SUFICIENTE
+    (la sincronización automática es servicio-a-servicio); si además hay un JWT
+    humano válido, se acepta su `user_id` como objetivo salvo que el nodo
+    reporte uno explícito. Sin token configurado, el puente queda cerrado
+    (fail-closed).
 
     El evento queda como EVIDENCIA en el Perfil Vital; la escalera N0→N1 sigue
     siendo asunto del primer acuerdo (Cap. 13) — la formación que pese en la voz
     es una decisión de parlamento, no un endpoint.
     """
-    user_id = current_user.get("user_id")
-    if not user_id:
-        return jsonify({"error": "invalid token"}), 401
+    from .jwt_utils import verify_token
+
+    # El emisor humano (si lo hay): su JWT es opcional gracias al token de servicio.
+    bearer = ""
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        bearer = auth_header.split(" ", 1)[1].strip()
+    emisor = verify_token(bearer) if bearer else None
+
+    data = request.get_json(silent=True) or {}
 
     # Procedencia del nodo OEV (comparación en tiempo constante, T13).
     presented = request.headers.get("X-Edu-Bridge-Token") or ""
@@ -117,7 +126,31 @@ def sync_mastery(current_user: Dict[str, Any]):
             403,
         )
 
-    data = request.get_json(silent=True) or {}
+    # Identidad del evento: user_id reportado por el nodo, o el del JWT humano
+    # si el emisor es una persona (retrocompatibilidad).
+    reported = data.get("user_id")
+    if reported is not None:
+        try:
+            target_user_id = int(reported)
+        except (TypeError, ValueError):
+            return jsonify({"error": "user_id reportado debe ser un entero"}), 400
+    elif emisor and emisor.get("user_id"):
+        target_user_id = int(emisor["user_id"])
+    else:
+        return (
+            jsonify(
+                {
+                    "error": "se requiere user_id reportado o un JWT humano de emisor",
+                    "code": "TARGET_USER_REQUIRED",
+                }
+            ),
+            400,
+        )
+    db = get_db()
+    target = db.execute("SELECT id FROM users WHERE id = ?", (target_user_id,)).fetchone()
+    if target is None:
+        return jsonify({"error": f"user_id {target_user_id} no existe en Maxocracia"}), 404
+
     topic_slug = (data.get("topic_slug") or "").strip()
     branch_slug = (data.get("branch_slug") or "").strip()
     score = data.get("score")
@@ -137,7 +170,7 @@ def sync_mastery(current_user: Dict[str, Any]):
     t13_hash = hashlib.sha256(
         "|".join(
             [
-                str(user_id),
+                str(target_user_id),
                 topic_slug,
                 branch_slug,
                 str(score),
@@ -148,7 +181,6 @@ def sync_mastery(current_user: Dict[str, Any]):
         ).encode("utf-8")
     ).hexdigest()
 
-    db = get_db()
     cur = db.execute(
         """
         INSERT INTO edu_mastery_events (
@@ -156,7 +188,7 @@ def sync_mastery(current_user: Dict[str, Any]):
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
-            user_id,
+            target_user_id,
             topic_slug,
             branch_slug,
             score,
