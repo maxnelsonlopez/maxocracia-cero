@@ -728,6 +728,31 @@ CREATE TABLE IF NOT EXISTS maxo_parameter_resolutions (
     applied_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Parlamento Educativo (rama educativa M5/M8): el umbral canónico del puente
+-- años<->índice es POLÍTICA VOTABLE por la comunidad. La LEY (INV2-EDU:
+-- >= 12 años de educación formal, SDV-H IV) NO se vota y vive en el motor
+-- (maxocontracts.core.types.SDV.educacion_anos_minimos). Este parámetro
+-- define los años que marcan PLENITUD (índice 1.0) en el analizador SDV;
+-- solo puede subir o quedarse: nunca por debajo de la ley.
+CREATE TABLE IF NOT EXISTS edu_parameters (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    umbral_anios REAL NOT NULL DEFAULT 12.0,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_by INTEGER,  -- user_id que propuso la decisión aprobada
+    notes TEXT,  -- procedencia (T13): decisión comunitaria #N
+    FOREIGN KEY (updated_by) REFERENCES users(id),
+    CHECK (umbral_anios >= 12.0),  -- Axioma: no por debajo de la ley (INV2-EDU)
+    CHECK (umbral_anios <= 30.0)   -- Límite sano de plenitud razonable
+);
+-- Historial de resoluciones vinculantes del Parlamento Educativo (T13).
+CREATE TABLE IF NOT EXISTS edu_parameter_resolutions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    proposal_id INTEGER NOT NULL UNIQUE,
+    umbral_anios REAL NOT NULL,
+    applied_by INTEGER,
+    applied_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
 
 -- Sesiones manuales de Custodia Sintética: voz separada de poder,
 -- presupuesto por sesión y bitácora revisable. La primera versión no muta

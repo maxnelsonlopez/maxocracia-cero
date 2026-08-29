@@ -39,3 +39,33 @@ class TestPuenteEducacion:
         """El puente nunca desciende por debajo del piso del analyzer (0.1)."""
         for anos in range(0, 25):
             assert 0.1 <= educacion_indice(float(anos)) <= 1.0
+
+
+class TestPuenteUmbralParametrizado:
+    """El umbral de plenitud es votable (Parlamento Educativo, 12-30);
+    la ley (>= 12 años, INV2-EDU) no se vota. El puente es determinista
+    para cualquier umbral válido."""
+
+    def test_plenitud_segunda_el_umbral(self):
+        # Con umbral comunitario 14: plenitud a partir de 14 años.
+        assert educacion_indice(14, umbral_anios=14) == 1.0
+        assert educacion_indice(20, umbral_anios=14) == 1.0
+
+    def test_lineal_con_umbral_personalizado(self):
+        # 12 años con umbral 14: 0.1 + 0.9 * (12/14) = 0.871 — la ley se
+        # cumple (INV2-EDU) pero la plenitud aspiracional no (entropía δ).
+        assert educacion_indice(12, umbral_anios=14) == 0.871
+        assert educacion_indice(7, umbral_anios=14) == 0.55  # 0.1 + 0.9*0.5
+
+    def test_none_no_castiga_con_cualquier_umbral(self):
+        # La duda sin dato jamás castiga, sea cual sea la plenitud votada.
+        assert educacion_indice(None, umbral_anios=30) == 1.0
+
+    def test_default_retrocompatible_con_canon(self):
+        # Sin umbral explícito, el canon SDV-H (12 años) manda.
+        assert educacion_indice(12) == 1.0
+        assert educacion_indice(6, umbral_anios=12) == educacion_indice(6)
+
+    def test_umbral_maximo_30_es_lineal(self):
+        # 15 años con el techo de plenitud: 0.1 + 0.9 * (15/30) = 0.55.
+        assert educacion_indice(15, umbral_anios=30) == 0.55

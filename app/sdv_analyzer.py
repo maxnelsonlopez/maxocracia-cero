@@ -17,10 +17,35 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 # Canon del SDV-H IV (Educación y Desarrollo): >= 12 años de educación formal.
+# Esta es la LEY (INV2-EDU en maxocontracts): nunca se vota ni se negocia.
 EDU_ANIOS_MINIMOS = 12
 
 
-def educacion_indice(anos_educacion: Optional[float]) -> float:
+def get_edu_umbral_anios(conn: sqlite3.Connection) -> float:
+    """Umbral canónico vigente del puente (Parlamento Educativo, T13).
+
+    La comunidad vota los años que marcan PLENITUD (índice 1.0); mientras no
+    haya resolución, el canon SDV-H (12 años) manda — la ley no se negocia
+    por ausencia de votación. Si la tabla aún no existe (BD pre-migración),
+    se responde el canon: el puente jamás deja de ser determinista.
+    """
+    try:
+        row = conn.execute(
+            "SELECT umbral_anios FROM edu_parameters ORDER BY id DESC LIMIT 1"
+        ).fetchone()
+    except sqlite3.OperationalError:
+        return float(EDU_ANIOS_MINIMOS)
+    if row is None:
+        return float(EDU_ANIOS_MINIMOS)
+    try:
+        return float(row[0])
+    except (TypeError, ValueError):
+        return float(EDU_ANIOS_MINIMOS)
+
+
+def educacion_indice(
+    anos_educacion: Optional[float], umbral_anios: float = EDU_ANIOS_MINIMOS
+) -> float:
     """Puente años del motor (INV2-EDU) -> índice 0-1 del SDVScore (M5).
 
     El motor maxocontracts trabaja en AÑOS (canon SDV-H); la capa de análisis
@@ -28,20 +53,21 @@ def educacion_indice(anos_educacion: Optional[float]) -> float:
 
       - None (no reportado)    -> 1.0 (INV2-EDU solo se activa con dato; la
                                   duda no se castiga sin evidencia).
-      - >= 12 años             -> 1.0 (piso pleno del canon SDV-H).
-      - 0..12 años             -> 0.1 + 0.9 * (años/12), lineal; 0 años =
+      - >= umbral_anios        -> 1.0 (plenitud: el piso del canon por defecto).
+      - 0..umbral_anios        -> 0.1 + 0.9 * (años/umbral), lineal; 0 años =
                                   mínimo vital teórico 0.1 (exclusión cognitiva).
 
-    El umbral canónico exacto puede revisarse en el parlamento de parámetros
-    (Cap. 11); esta función materializa el puente y es determinista.
+    `umbral_anios` es el umbral canónico del Parlamento Educativo (12-30;
+    default 12, la ley). La ley misma (>= 12 años, INV2-EDU) no se vota:
+    el puente solo calibra la plenitud aspiracional por encima del piso.
     """
     if anos_educacion is None:
         return 1.0
-    if anos_educacion >= EDU_ANIOS_MINIMOS:
+    if anos_educacion >= umbral_anios:
         return 1.0
     if anos_educacion <= 0:
         return 0.1
-    return round(0.1 + 0.9 * (anos_educacion / EDU_ANIOS_MINIMOS), 3)
+    return round(0.1 + 0.9 * (anos_educacion / umbral_anios), 3)
 
 
 @dataclass
@@ -251,7 +277,9 @@ class SDVAnalyzer:
         # (None) se conserva la estimación cualitativa anterior (no se castiga
         # la duda sin evidencia).
         if educacion_anos is not None:
-            score.educacion = educacion_indice(float(educacion_anos))
+            score.educacion = educacion_indice(
+                float(educacion_anos), get_edu_umbral_anios(self.conn)
+            )
 
         # 5. Normalizar: no dejar que suba de 1.0 ni baje de 0.1 (mínimo vital teórico)
         for target in [

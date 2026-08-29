@@ -21,6 +21,7 @@ app/parties_bp.py (patrón de quórum de gobernanza de Partes, Ola 3A.3).
 
 import hashlib
 import json
+import math
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 
@@ -79,6 +80,26 @@ def _proposal_payload(row) -> dict:
     }
 
 
+def _trust_level_guard(db, current_user: dict):
+    """Escalera de confianza (Cap. 13, Puente de Llegada): proponer en el
+    parlamento es gobernar — la voz se gana caminando el primer acuerdo.
+    Un recién llegado (N0) recibe y firma; proponer espera."""
+    uid = current_user["user_id"]
+    trust = db.execute("SELECT trust_level FROM users WHERE id = ?", (uid,)).fetchone()
+    if trust is None or int(trust["trust_level"] or 0) < 1:
+        return (
+            jsonify(
+                {
+                    "error": "recién llegado: la voz en la gobernanza llega al caminar tu primer acuerdo",
+                    "code": "TRUST_LEVEL_REQUIRED",
+                    "hint": "firma y activa tu primer contrato (o pide a la comunidad que te ascienda)",
+                }
+            ),
+            403,
+        )
+    return None
+
+
 def _validate_vhv_params(params: dict) -> Optional[str]:
     """Restricciones axiomáticas del Parlamento de Parámetros (Cap. 11):
     α > 0 (no ignorar el tiempo), β > 0 (no ignorar la vida),
@@ -91,6 +112,10 @@ def _validate_vhv_params(params: dict) -> Optional[str]:
         delta = float(params["delta"])
     except (KeyError, ValueError, TypeError):
         return "se requieren alpha, beta, gamma y delta numéricos"
+    if any(isinstance(v, bool) for v in (params["alpha"], params["beta"], params["gamma"], params["delta"])):
+        return "los parámetros deben ser números, no booleanos"
+    if not all(math.isfinite(v) for v in (alpha, beta, gamma, delta)):
+        return "los parámetros deben ser números finitos"
     if alpha <= 0:
         return "α debe ser > 0 (axioma: no se puede ignorar el tiempo)"
     if beta <= 0:
@@ -102,10 +127,79 @@ def _validate_vhv_params(params: dict) -> Optional[str]:
     return None
 
 
+# ──────────────────────────────────────────────────────────────────
+# PARLAMENTO EDUCATIVO (rama educativa M5/M8): el umbral canónico del
+# puente años<->índice se vota; la LEY (INV2-EDU ≥ 12 años) no.
+# ──────────────────────────────────────────────────────────────────
+
+# La ley vive en el motor (maxocontracts.core.types.SDV.educacion_anos_minimos)
+# y en app/sdv_analyzer.py (EDU_ANIOS_MINIMOS): nunca se vota ni se negocia.
+EDU_UMBRAL_MIN = 12.0
+# Límite sano de plenitud: 30 años formales es cota razonable de aspiración.
+EDU_UMBRAL_MAX = 30.0
+# Anti-flip-flop (Cap. 14, la palabra y el poder con fecha de vencimiento):
+# entre dos cambios del umbral debe pasar al menos esta ventana de días.
+EDU_COOLDOWN_DAYS = 14
+
+
+def _validate_edu_umbral_params(params: dict) -> Optional[str]:
+    """Guardarraíles axiomáticos del Parlamento Educativo:
+    - umbral_anios numérico en [12, 30]: nunca por debajo de la ley
+      (INV2-EDU: ≥ 12 años de educación formal, SDV-H IV) — el piso
+      legal no se vota; y nunca por encima del límite sano de plenitud.
+    Devuelve el mensaje de violación o None si es válido."""
+    if not isinstance(params, dict):
+        return "se requieren umbral_anios numérico"
+    value = params.get("umbral_anios")
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return "umbral_anios debe ser numérico"
+    try:
+        umbral = float(value)
+    except (ValueError, TypeError):
+        return "umbral_anios debe ser numérico"
+    if not math.isfinite(umbral):
+        return "umbral_anios debe ser un número finito"
+    if umbral < EDU_UMBRAL_MIN:
+        return "el umbral no puede quedar por debajo de la ley (≥ 12 años: INV2-EDU, SDV-H IV)"
+    if umbral > EDU_UMBRAL_MAX:
+        return f"el umbral no puede superar {EDU_UMBRAL_MAX:g} años (límite sano de plenitud)"
+    return None
+
+
+def _current_edu_umbral(db) -> tuple:
+    """(umbral vigente, procedencia) del Parlamento Educativo (T13).
+    Sin resoluciones aún: el canon SDV-H (12 años) — la ley no negociada."""
+    row = db.execute(
+        "SELECT umbral_anios, notes FROM edu_parameters ORDER BY id DESC LIMIT 1"
+    ).fetchone()
+    if row is None:
+        return (float(EDU_UMBRAL_MIN), "canon_sdv_h")
+    return (float(row["umbral_anios"]), "comunidad")
+
+
+def _last_edu_resolution_at(db) -> Optional[datetime]:
+    """Fecha de la última resolución vinculante del Parlamento Educativo
+    (None si la comunidad aún no ha votado el umbral)."""
+    row = db.execute(
+        "SELECT applied_at FROM edu_parameter_resolutions ORDER BY id DESC LIMIT 1"
+    ).fetchone()
+    if row is None or not row["applied_at"]:
+        return None
+    try:
+        dt = datetime.fromisoformat(str(row["applied_at"]).replace(" ", "T"))
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        # SQLite CURRENT_TIMESTAMP es UTC sin zona: se ancla a UTC (T13).
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
 def _apply_passed_action(db, row) -> bool:
-    """Parlamento de Parámetros: aplica la acción vinculante de una
-    propuesta aprobada (Cap. 11: el Oráculo Dinámico ajusta α, β, γ, δ
-    por votación comunitaria con restricciones axiomáticas).
+    """Parlamento de parámetros: aplica la acción vinculante de una
+    propuesta aprobada (Cap. 11: el Oráculo Dinámico ajusta α, β, γ, δ;
+    rama educativa: la comunidad vota el umbral canónico del puente
+    años<->índice). Despacha por `type` de la acción.
 
     Devuelve True si se aplicó una acción; False si no había acción o
     no era aplicable (T13: la inacción también queda documentada).
@@ -117,9 +211,17 @@ def _apply_passed_action(db, row) -> bool:
         action = json.loads(action_json)
     except (ValueError, TypeError):
         return False
-    if not isinstance(action, dict) or action.get("type") != "set_vhv_params":
+    if not isinstance(action, dict):
         return False
+    if action.get("type") == "set_vhv_params":
+        return _apply_set_vhv_params(db, row, action)
+    if action.get("type") == "set_edu_umbral":
+        return _apply_set_edu_umbral(db, row, action)
+    return False
 
+
+def _apply_set_vhv_params(db, row, action: dict) -> bool:
+    """Ejecuta la resolución comunitaria sobre α, β, γ, δ (Cap. 11)."""
     params = action.get("params") or {}
     violation = _validate_vhv_params(params)
     if violation:
@@ -157,6 +259,37 @@ def _apply_passed_action(db, row) -> bool:
     )
     db.commit()
     clear_vhv_params_cache()
+    return True
+
+
+def _apply_set_edu_umbral(db, row, action: dict) -> bool:
+    """Ejecuta la resolución comunitaria del Parlamento Educativo: actualiza
+    el umbral canónico del puente años<->índice (rama educativa, T13)."""
+    params = action.get("params") or {}
+    violation = _validate_edu_umbral_params(params)
+    if violation:
+        return False  # defensa en profundidad: la validación ya ocurrió al crear
+
+    umbral = float(params["umbral_anios"])
+    db.execute(
+        """
+        INSERT INTO edu_parameters (umbral_anios, updated_by, notes)
+        VALUES (?, ?, ?)
+        """,
+        (
+            umbral,
+            row["created_by"],
+            f"decisión comunitaria #{row['id']} (Parlamento Educativo, T13)",
+        ),
+    )
+    db.execute(
+        """
+        INSERT INTO edu_parameter_resolutions (proposal_id, umbral_anios, applied_by)
+        VALUES (?, ?, ?)
+        """,
+        (row["id"], umbral, row["created_by"]),
+    )
+    db.commit()
     return True
 
 
@@ -695,6 +828,9 @@ def propose_params(current_user):
         )
 
     db = get_db()
+    guard = _trust_level_guard(db, current_user)
+    if guard:
+        return guard
     current = _current_params(db)
     if current is None:
         return jsonify({"error": "no hay parámetros actuales configurados"}), 500
@@ -760,16 +896,20 @@ def parliament_params():
     """
     db = get_db()
     current = _current_params(db)
-    pending = [
-        _proposal_payload(r)
-        for r in db.execute(
-            """
-            SELECT * FROM maxo_community_proposals
-            WHERE status = 'open' AND action_json IS NOT NULL
-            ORDER BY id DESC LIMIT 20
-            """
-        ).fetchall()
-    ]
+    pending = []
+    for r in db.execute(
+        """
+        SELECT * FROM maxo_community_proposals
+        WHERE status = 'open' AND action_json IS NOT NULL
+        ORDER BY id DESC LIMIT 20
+        """
+    ).fetchall():
+        try:
+            action = json.loads(r["action_json"])
+        except (ValueError, TypeError):
+            continue
+        if isinstance(action, dict) and action.get("type") == "set_vhv_params":
+            pending.append(_proposal_payload(r))
     history = [
         {
             "proposal_id": r["proposal_id"],
@@ -781,6 +921,165 @@ def parliament_params():
         }
         for r in db.execute(
             "SELECT * FROM maxo_parameter_resolutions ORDER BY id DESC LIMIT 50"
+        ).fetchall()
+    ]
+    return jsonify(
+        {
+            "current": current,
+            "pending_proposals": pending,
+            "history": history,
+            "audit_hash": hashlib.sha256(
+                json.dumps(
+                    {"current": current, "history": history}, ensure_ascii=False
+                ).encode("utf-8")
+            ).hexdigest()[:16],
+        }
+    )
+
+
+@voting_bp.route("/parliament/educativo", methods=["POST"])
+@token_required
+def propose_edu_umbral(current_user):
+    """
+    Parlamento Educativo (rama educativa): propone el umbral canónico del
+    puente años<->índice — los años de educación formal que marcan PLENITUD
+    (índice 1.0) en la dimensión educativa del SDV-H.
+
+    Body JSON:
+    {
+        "umbral_anios": float (12.0-30.0; la ley INV2-EDU ≥ 12 NO se vota),
+        "reason": str (opcional, T13),
+        "deadline_hours": int (opcional, default 72)
+    }
+
+    Categoría CRITICAL (consenso 75%, Cap. 14): el umbral define la
+    lectura del piso educativo; no es una decisión operativa. Si se aprueba,
+    el umbral se aplica al analizador SDV con procedencia auditable. Entre
+    dos cambios debe pasar una ventana anti-flip-flop (14 días).
+    """
+    data = request.get_json() or {}
+    params = {"umbral_anios": data.get("umbral_anios")}
+    violation = _validate_edu_umbral_params(params)
+    if violation:
+        return (
+            jsonify(
+                {
+                    "error": f"violación axiomática: {violation}",
+                    "code": "PARAM_AXIOM_VIOLATION",
+                }
+            ),
+            400,
+        )
+
+    db = get_db()
+    guard = _trust_level_guard(db, current_user)
+    if guard:
+        return guard
+    last = _last_edu_resolution_at(db)
+    if last is not None:
+        elapsed = datetime.now(timezone.utc) - last
+        if elapsed < timedelta(days=EDU_COOLDOWN_DAYS):
+            return (
+                jsonify(
+                    {
+                        "error": (
+                            f"el umbral cambió hace menos de {EDU_COOLDOWN_DAYS} días "
+                            "(anti-flip-flop, Cap. 14); espera a la próxima ventana"
+                        ),
+                        "code": "EDU_COOLDOWN",
+                    }
+                ),
+                409,
+            )
+
+    current, provenance = _current_edu_umbral(db)
+    umbral = float(params["umbral_anios"])
+    direction = "sube" if umbral > current else ("baja" if umbral < current else "queda igual")
+
+    # Lenguaje civil: la comunidad entiende qué decide (T13). La ley no se
+    # toca: 12 años (INV2-EDU) siguen siendo el piso de todo cálculo.
+    title = "Umbral canónico del puente educativo (años de plenitud)"
+    description = (
+        "La comunidad decide cuántos años de educación formal marcan la "
+        f"PLENITUD (índice 1.0) de la dimensión educativa del SDV-H: {current:g} → "
+        f"{umbral:g} años ({direction}). El piso legal NO cambia: la ley "
+        "INV2-EDU sigue exigiendo ≥ 12 años (SDV-H IV) y la duda sin dato "
+        "sigue sin castigarse. Una plenitud más alta reconoce que el saber "
+        "decae (entropía δ) y que la base nunca se gradúa: quien se detuvo "
+        "en el piso y no siguió aprendiendo obtiene un índice menor, no una "
+        "violación. Si se aprueba, el nuevo umbral se aplica a todos los "
+        "análisis con registro público."
+    )
+    reason = (
+        data.get("reason") or ""
+    ).strip() or "propuesta del Parlamento Educativo"
+
+    deadline_hours = max(1, min(int(data.get("deadline_hours", 72)), 24 * 30))
+    deadline = (
+        datetime.now(timezone.utc) + timedelta(hours=deadline_hours)
+    ).isoformat()
+
+    cur = db.execute(
+        """
+        INSERT INTO maxo_community_proposals
+            (title, description, category, options_json, quorum_ratio, majority_ratio,
+             created_by, reason, deadline, action_json)
+        VALUES (?, ?, 'critical', ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            title,
+            description,
+            json.dumps(["Aprobar", "Mantener"], ensure_ascii=False),
+            CATEGORY_DEFAULTS["critical"]["quorum"],
+            CATEGORY_DEFAULTS["critical"]["majority"],
+            current_user["user_id"],
+            reason,
+            deadline,
+            json.dumps(
+                {"type": "set_edu_umbral", "params": {"umbral_anios": umbral}},
+                ensure_ascii=False,
+            ),
+        ),
+    )
+    db.commit()
+    row = db.execute(
+        "SELECT * FROM maxo_community_proposals WHERE id = ?", (cur.lastrowid,)
+    ).fetchone()
+    return jsonify({"success": True, "proposal": _proposal_payload(row)}), 201
+
+
+@voting_bp.route("/parliament/educativo", methods=["GET"])
+def parliament_educativo():
+    """
+    Parlamento Educativo (público, T13): umbral canónico vigente del puente
+    años<->índice, propuestas abiertas e historial de resoluciones.
+    """
+    db = get_db()
+    current_value, provenance = _current_edu_umbral(db)
+    current = {"umbral_anios": current_value, "provenance": provenance}
+    pending = []
+    for r in db.execute(
+        """
+        SELECT * FROM maxo_community_proposals
+        WHERE status = 'open' AND action_json IS NOT NULL
+        ORDER BY id DESC LIMIT 20
+        """
+    ).fetchall():
+        try:
+            action = json.loads(r["action_json"])
+        except (ValueError, TypeError):
+            continue
+        if isinstance(action, dict) and action.get("type") == "set_edu_umbral":
+            pending.append(_proposal_payload(r))
+    history = [
+        {
+            "proposal_id": r["proposal_id"],
+            "umbral_anios": r["umbral_anios"],
+            "applied_by": r["applied_by"],
+            "applied_at": r["applied_at"],
+        }
+        for r in db.execute(
+            "SELECT * FROM edu_parameter_resolutions ORDER BY id DESC LIMIT 50"
         ).fetchall()
     ]
     return jsonify(

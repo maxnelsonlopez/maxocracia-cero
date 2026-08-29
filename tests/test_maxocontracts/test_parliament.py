@@ -112,6 +112,13 @@ def test_propose_axiom_violations_rejected(client):
         {"alpha": 100.0, "beta": 0, "gamma": 1.0, "delta": 100.0},
         {"alpha": 100.0, "beta": 2000.0, "gamma": 0.5, "delta": 100.0},
         {"alpha": 100.0, "beta": 2000.0, "gamma": 1.0, "delta": -5},
+        # NaN e infinito no son parámetros: las comparaciones axiomáticas
+        # con NaN son False y quedarían pasar (guardarraíl de finitud).
+        {"alpha": float("nan"), "beta": 2000.0, "gamma": 1.0, "delta": 100.0},
+        {"alpha": 100.0, "beta": float("inf"), "gamma": 1.0, "delta": 100.0},
+        # True es subclase de int: un bool JSON no es un peso (symetría con
+        # el Parlamento Educativo, que ya lo rechaza).
+        {"alpha": True, "beta": 2000.0, "gamma": 1.0, "delta": 100.0},
     ]
     for params in cases:
         res = _propose(client, params)
