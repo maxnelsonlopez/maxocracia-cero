@@ -157,6 +157,7 @@ verificación determinista — Patrón Puente).
 | RF-EDU-8 | **Puente años↔índice**: `educacion_indice()` (≥12 años → 1.0; lineal 0.1→1.0; None → sin castigo) determinista, umbral canónico a parlamento | ROADMAP M5 | ✅ (`app/sdv_analyzer.py`, 7 tests) |
 | RF-EDU-9 | **Triada de mentoría en `plataforma_educativa/`**: `/mentorship/verify` (solo coordinador; validated/vetoed/pending); el árbol expone la triada por tema | prototipo OEV | ✅ (7 tests, 32/32 de la plataforma) |
 | RF-EDU-10 | **Anti-gamificación**: sin rankings por persona, sin cronometraje del ensayo-error; estado, no tribunal | Siamesa §3g.5 | ✅ (diseño respetado en toda la capa) |
+| RF-EDU-11 | **Parlamento Educativo**: el umbral canónico del puente años↔índice es votable (12-30, categoría critical 60/75, T13, anti-flip-flop 14 días); la ley ≥ 12 (INV2-EDU) no se vota | M5 + reflexión §5 | ✅ (`/voting/parliament/educativo`, 16 tests, 29-08-2026) |
 
 ---
 

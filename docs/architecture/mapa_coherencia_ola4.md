@@ -226,4 +226,13 @@ Get-ChildItem maxocontracts -Recurse -Filter *.py | Select-String -Pattern "INV1
       `educacion_indice()` (años↔índice). 49 tests nuevos (24 motor+API foro, 15 motor+API
       talleres, 12 grupos, 7 puente; más 7 de la triada en `plataforma_educativa/`).
       Triada de mentoría en el prototipo (`mentorship_triadas`). Ver ROADMAP_RAMA_EDUCATIVA.md.
+- [x] **Parlamento Educativo — umbral canónico del puente (29-08-2026)**: el umbral
+      años↔índice deja de ser constante sagrada. `POST/GET /voting/parliament/educativo`
+      (categoría critical 60/75, T13), acción vinculante `set_edu_umbral` despachada por
+      `_apply_passed_action`, tablas `edu_parameters`/`edu_parameter_resolutions`
+      (CHECK ≥ 12 — la ley INV2-EDU no se vota — y ≤ 30), `educacion_indice(anos, umbral)`
+      parametrizada + `get_edu_umbral_anios()` con fallback al canon, anti-flip-flop de
+      14 días y guardarraíl de finitud (NaN/∞) en ambos parlamentos. 21 tests nuevos
+      (16 parlamento educativo + 5 puente) + 2 casos NaN en el parlamento de parámetros.
+      Propuesta documentada: PROPUESTA_PARLAMENTO_UMBRAL_EDUCATIVO.md.
 - [ ] Mantener este documento actualizado en cada Ola.

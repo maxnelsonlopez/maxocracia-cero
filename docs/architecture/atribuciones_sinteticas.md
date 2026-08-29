@@ -141,6 +141,20 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   (grep quirúrgico + fragmentos leídos en esta sesión) y resúmenes de la teoría OEV;
   verificación end-to-end con ojos propios (helpers reescritos tras errores de edición;
   dicotomía igualdad-vs-subcontenido en asserts de `in` sobre listas).
+- **Parlamento Educativo — umbral canónico del puente (29/8/2026)**: cierra el único pendiente
+  de la rama M1-M8. El umbral años↔índice deja de ser constante sagrada: `POST/GET
+  /voting/parliament/educativo` (categoría critical 60/75, T13), acción vinculante
+  `set_edu_umbral` despachada por `_apply_passed_action`, tablas `edu_parameters` /
+  `edu_parameter_resolutions` (CHECK ≥ 12 —la ley INV2-EDU no se vota— y ≤ 30),
+  `educacion_indice(anos, umbral)` parametrizada + `get_edu_umbral_anios()` con fallback
+  al canon, anti-flip-flop de 14 días y guardarraíl de finitud (NaN/∞) en ambos
+  parlamentos. Propuesta documentada `PROPUESTA_PARLAMENTO_UMBRAL_EDUCATIVO.md`.
+  **Delegación**: diseño revisado por Nemotron (openrouter `:free` — confirmó la teoría
+  Rondas/δ, detectó el hueco anti-flip-flop y el frontend queda como candidato) y la
+  propuesta revisada por MiniMax (openrouter `:free` — hallazgos de atribución
+  corregidos: "parlamento" no es término del libro, el 60% de quórum vive en el
+  blueprint, cita del piso truncada). Implementación + verificación (suite, validador)
+  del orquestador; 21 tests nuevos.
 
 ### ox-alpha — "el bibliotecario de la coherencia"
 - **Auditoría de integridad del libro (22/8/2026)**: verificación determinista de enlaces
