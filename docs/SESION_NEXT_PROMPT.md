@@ -15,6 +15,12 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 > requisitos en `docs/architecture/requisitos_fase2_ola4.md`.
 > Patrón de trabajo: RLM navega + director verifica + teoría decide (guía en el repo
 > local_models: `docs/GUIA_RLM_COLABORADOR.md`).
+> **Delegación OpenRouter gratuita**: apóyate intensamente en subagentes con proveedor
+> `openrouter` y modelos `:free` declarados en el harness (`minimax/minimax-m3:free` y
+> `nvidia/nemotron-3-super-120b-a12b:free`) para investigar contextos largos, redactar
+> documentos y revisar diffs; el pool compartido satura con 429 (reintentar o cambiar de
+> modelo; Nemotron es el más estable hoy). El orquestador implementa y verifica siempre
+> con ojos propios antes de commitear — el subagente redacta, el director decide.
 > Revisa los pendientes del §4 y elige el siguiente paso con criterio; commits regulares
 > en español; respeta el principio "la teoría tiene prioridad".
 
