@@ -15,9 +15,22 @@ import {
   Loader2,
   AlertTriangle,
   User,
+  GraduationCap,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
+import InfoTip from "../components/ui/InfoTip";
+
+interface EduEvent {
+  id: number;
+  topic_slug: string;
+  branch_slug: string;
+  score: number | null;
+  mentor_rounds: number;
+  triada_approved: boolean;
+  verified_at: string;
+  t13_hash: string;
+}
 
 interface LedgerEntry {
   id: number;
@@ -91,6 +104,7 @@ export default function PerfilPage() {
   const [reputation, setReputation] = useState<{ score: number; reviews_count: number } | null>(null);
   const [resources, setResources] = useState<ResourceItem[]>([]);
   const [interchanges, setInterchanges] = useState<Interchange[]>([]);
+  const [eduEvents, setEduEvents] = useState<EduEvent[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -149,6 +163,15 @@ export default function PerfilPage() {
   useEffect(() => {
     load();
     loadInterchanges();
+    // Evidencia educativa sincronizada desde el nodo del OEV (T13).
+    apiFetch("/edu-bridge/events")
+      .then(async (res) => {
+        if (res.ok) {
+          const data = await res.json();
+          setEduEvents(data.events || []);
+        }
+      })
+      .catch(() => setEduEvents([]));
   }, [load, loadInterchanges]);
 
   const doTransfer = async () => {
@@ -530,6 +553,54 @@ export default function PerfilPage() {
                     >
                       Reclamar
                     </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="glass rounded-2xl border border-slate-800 p-6">
+          <h3 className="flex items-center gap-2 font-bold text-white mb-4">
+            <GraduationCap className="w-5 h-5 text-emerald-400" />
+            Camino de aprendizaje
+            <InfoTip
+              text="Lo que el nodo educativo (OEV) reportó de tu formación: temas aprobados, mentoría que diste a otros y la triada que lo confirmó. Cada registro lleva su huella T13 (verificable). La voz en la gobernanza no sube por aprender sola: la escalera sigue siendo por tu primer acuerdo — esta evidencia acompaña tu Perfil Vital."
+            />
+          </h3>
+          {eduEvents.length === 0 ? (
+            <p className="text-sm text-slate-500 py-3">
+              Aún no hay evidencia educativa sincronizada. Aprueba y enseña desde el{" "}
+              <Link href="/foro" className="text-emerald-400 hover:text-emerald-300 underline underline-offset-2">
+                nodo educativo
+              </Link>{" "}
+              para que se vea aquí.
+            </p>
+          ) : (
+            <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+              {eduEvents.map((ev) => (
+                <div key={ev.id} className="bg-slate-900/40 rounded-lg px-4 py-3 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">
+                      {ev.branch_slug.replace("_", " ")} · {ev.topic_slug.replace("_", " ")}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {ev.verified_at?.slice(0, 10)}
+                      {ev.score != null ? ` · avance ${Math.round(ev.score)}/100` : ""}
+                      {ev.mentor_rounds > 0 ? ` · mentoría a ${ev.mentor_rounds} ronda${ev.mentor_rounds > 1 ? "s" : ""}` : ""}
+                    </p>
+                    <p className="text-[10px] font-mono text-slate-600 mt-1 truncate">
+                      t13 {ev.t13_hash?.slice(0, 16)}…
+                    </p>
+                  </div>
+                  {ev.triada_approved ? (
+                    <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      ✓ triada
+                    </span>
+                  ) : (
+                    <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                      en camino
+                    </span>
                   )}
                 </div>
               ))}
