@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash TEXT NOT NULL,
     email TEXT,
     is_coordinator INTEGER NOT NULL DEFAULT 0,
+    maxo_user_id INTEGER UNIQUE,
     created_at TEXT NOT NULL
 );
 
@@ -372,11 +373,27 @@ def _seed(db_conn):
             )
 
 
+def _migrate_db(conn):
+    """Aplica migraciones ligeras e idempotentes para bases de datos existentes."""
+    cursor = conn.execute("PRAGMA table_info(users)")
+    columns = [row["name"] for row in cursor.fetchall()]
+    if "maxo_user_id" not in columns:
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN maxo_user_id INTEGER")
+            conn.execute(
+                "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_maxo_user_id ON users(maxo_user_id)"
+            )
+        except sqlite3.OperationalError:
+            pass
+
+
 def init_db(app):
     """Crea las tablas y siembra el árbol sobre la base configurada."""
     conn = sqlite3.connect(app.config["DATABASE"])
     conn.row_factory = sqlite3.Row
     conn.executescript(SCHEMA)
+    _migrate_db(conn)
     _seed(conn)
     conn.commit()
     conn.close()
+

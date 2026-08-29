@@ -215,12 +215,15 @@ def me():
                     "username": user["username"],
                     "email": user["email"],
                     "is_coordinator": bool(user["is_coordinator"]),
+                    "maxo_user_id": user["maxo_user_id"] if "maxo_user_id" in user.keys() else None,
+                    "is_federated": getattr(g, "is_federated", False),
                 },
                 "branches": progress,
             }
         ),
         200,
     )
+
 
 
 def _triada_state(user_id, topic_id):

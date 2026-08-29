@@ -13,6 +13,10 @@ import sys
 _PLATFORM_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, _PLATFORM_ROOT)
 
+# Clave compartida de prueba para la federación JWT (los tests de Gemini y los
+# locales la usan; sin ella la federación queda fail-closed por diseño).
+os.environ.setdefault("SECRET_KEY", "test-platform-secret")
+
 import pytest  # noqa: E402
 
 from app import create_app  # noqa: E402
