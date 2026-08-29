@@ -261,6 +261,47 @@ def list_workshops(current_user):
     return jsonify({"success": True, "count": len(workshops), "workshops": workshops})
 
 
+@workshops_bp.route("/tree", methods=["GET"])
+@token_required
+def skill_tree(current_user):
+    """El tejido visible: ramas canónicas del árbol de habilidades (T13).
+
+    El árbol es patrimonio accesible (el conocimiento pasado es patrimonio,
+    no necesita 60 ms de permiso); aquí se expone como ESTADO, nunca como
+    ranking de personas (anti-gamificación: el mapa no compara a nadie).
+    """
+    from maxocontracts.tree import build_canonical_tree
+
+    tree = build_canonical_tree()
+    branches = []
+    total = 0
+    for branch in tree.branches():
+        nodes = []
+        for n in tree.nodes_by_branch(branch):
+            nodes.append(
+                {
+                    "id": n.id,
+                    "name": n.name,
+                    "branch": n.branch,
+                    "prereq_ids": list(n.prereq_ids),
+                    "dificultad": n.dificultad,
+                    "description": n.description,
+                }
+            )
+            total += 1
+        branches.append({"branch": branch, "count": len(nodes), "nodes": nodes})
+    return jsonify(
+        {
+            "success": True,
+            "tree": {
+                "branches": branches,
+                "total_nodes": total,
+                "note": "El tejido es infinito y forkable: cualquier rama nueva puede nacer de la comunidad (con_node).",
+            },
+        }
+    )
+
+
 @workshops_bp.route("/<int:workshop_id>", methods=["GET"])
 @token_required
 def get_workshop(current_user, workshop_id):
@@ -287,6 +328,20 @@ def get_workshop(current_user, workshop_id):
         if award
         else None
     )
+    # Lista de enrolados (T13): la triada no se hace a ciegas; el facilitador
+    # ve quién vacua. Estado, no ranking.
+    workshop["enrollments"] = [
+        {"user_id": r["user_id"], "name": r["name"]}
+        for r in db.execute(
+            """
+            SELECT e.user_id, u.name FROM workshop_enrollments e
+            JOIN users u ON u.id = e.user_id
+            WHERE e.workshop_id = ?
+            ORDER BY e.enrolled_at ASC, e.user_id ASC
+            """,
+            (workshop_id,),
+        ).fetchall()
+    ]
     return jsonify({"success": True, "workshop": workshop})
 
 

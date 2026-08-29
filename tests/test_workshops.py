@@ -341,3 +341,50 @@ def test_close_workshop_by_facilitator(auth_client):
     resp = auth_client.post(f"/workshops/{workshop_id}/close")
     assert resp.status_code == 200
     assert resp.get_json()["workshop"]["status"] == "closed"
+
+
+class TestTejidoVisible:
+    """El árbol de habilidades como patrimonio (M6): ramas canónicas legibles
+    (T13), estado público, nunca ranking de personas (anti-gamificación)."""
+
+    def test_tree_requires_token(self, client):
+        assert client.get("/workshops/tree").status_code == 401
+
+    def test_tree_canonical_branches(self, auth_client):
+        resp = auth_client.get("/workshops/tree")
+        assert resp.status_code == 200
+        data = resp.get_json()["tree"]
+        # El canónico del motor declara las 8 ramas (el cosmos de temas vive
+        # en el árbol de la plataforma educativa :5050 — el mismo diseño).
+        assert len(data["branches"]) == 8
+        assert data["total_nodes"] == 8
+        ids = set()
+        for b in data["branches"]:
+            assert b["count"] == len(b["nodes"])
+            nodes = b["nodes"]
+            if nodes:
+                assert all(n["branch"] == b["branch"] for n in nodes)
+                assert all(1 <= n["dificultad"] <= 5 for n in nodes)
+                assert all(0 < len(n["name"]) < 200 for n in nodes)
+                ids.update(n["id"] for n in nodes)
+        # El cosmos referenciado por los talleres M3 existe en el tejido.
+        assert "naturaleza" in ids
+
+    def test_tree_prereqs_son_lista_de_ids(self, auth_client):
+        data = auth_client.get("/workshops/tree").get_json()["tree"]
+        for b in data["branches"]:
+            for n in b["nodes"]:
+                assert isinstance(n["prereq_ids"], list)
+                assert all(isinstance(p, str) for p in n["prereq_ids"])
+
+
+def test_workshop_detail_includes_enrollments(auth_client):
+    """La triada no se hace a ciegas: el detalle muestra quién está inscrito
+    (T13: estado, no ranking)."""
+    created = _create_workshop(auth_client)
+    workshop_id = created.get_json()["workshop"]["id"]
+    headers2 = _login_as(auth_client, "test2@example.com")
+    assert auth_client.post(f"/workshops/{workshop_id}/enroll", headers=headers2).status_code == 200
+
+    detail = auth_client.get(f"/workshops/{workshop_id}").get_json()["workshop"]
+    assert detail["enrollments"] == [{"user_id": 2, "name": "Test User 2"}]
