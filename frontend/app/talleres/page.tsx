@@ -10,6 +10,9 @@ import {
   Users,
   Award,
   Lock,
+  TreePine,
+  ChevronDown,
+  X,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
@@ -26,10 +29,28 @@ interface Workshop {
   facilitator: { user_id: number; name: string };
   my_award?: { outcome: string } | null;
   outputs?: { id: number; kind: string; title: string; author: { name: string } }[];
+  enrollments?: { user_id: number; name: string }[];
+}
+
+interface TriadaState {
+  workshop: Workshop;
+  learnerId: string;
+  mentorOk: boolean;
+  peerOk: boolean;
+  oracleVeto: boolean;
+  hours: string;
+  message: { kind: "ok" | "err"; text: string } | null;
+  busy: boolean;
+}
+
+interface TreeBranch {
+  branch: string;
+  count: number;
+  nodes: { id: string; name: string; dificultad: number; prereq_ids: string[] }[];
 }
 
 export default function TalleresPage() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [details, setDetails] = useState<Record<number, Workshop>>({});
   const [loading, setLoading] = useState(true);
@@ -42,6 +63,9 @@ export default function TalleresPage() {
     capacity: 8,
   });
   const [submitting, setSubmitting] = useState(false);
+  const [tree, setTree] = useState<TreeBranch[] | null>(null);
+  const [openBranch, setOpenBranch] = useState<string | null>(null);
+  const [triada, setTriada] = useState<TriadaState | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -61,6 +85,19 @@ export default function TalleresPage() {
   useEffect(() => {
     if (isAuthenticated) load();
   }, [isAuthenticated, load]);
+
+  // El tejido visible: ramas canónicas del árbol (T13, estado no tribunal).
+  useEffect(() => {
+    if (!isAuthenticated || tree) return;
+    apiFetch("/workshops/tree")
+      .then(async (res) => {
+        if (res.ok) {
+          const data = await res.json();
+          setTree(data.tree?.branches || null);
+        }
+      })
+      .catch(() => setTree(null));
+  }, [isAuthenticated, tree]);
 
   const openDetail = async (id: number) => {
     try {
@@ -156,41 +193,57 @@ export default function TalleresPage() {
     }
   };
 
-  const grantSkill = async (workshop: Workshop) => {
-    const targetId = Number(prompt("ID del aprendiz que vacua el skill (user_id):"));
-    if (!targetId) return;
-    const mentorOk = confirm("¿El mentor (facilitador) avala?");
-    const peerOk = confirm("¿Un par aprendiz avala?");
-    const oracleVeto = confirm("¿El oráculo ejerce el VETO? (solo si un axioma está en riesgo)");
-    const hours = Number(prompt("Horas de mentoría registradas (TVI):", "1")) || 0;
+  const openTriada = async (workshop: Workshop) => {
+    // El detalle trae la lista de inscritos (T13): la triada no se hace a ciegas.
+    await openDetail(workshop.id);
+    const fresh = details[workshop.id] ?? workshop;
+    setTriada({
+      workshop: fresh,
+      learnerId: "",
+      mentorOk: false,
+      peerOk: false,
+      oracleVeto: false,
+      hours: "1",
+      message: null,
+      busy: false,
+    });
+  };
+
+  const submitTriada = async () => {
+    if (!triada) return;
+    const targetId = Number(triada.learnerId);
+    if (!targetId) {
+      setTriada({ ...triada, message: { kind: "err", text: "Elige quién vacua la habilidad." } });
+      return;
+    }
+    setTriada({ ...triada, busy: true, message: null });
     try {
-      const res = await apiFetch(`/workshops/${workshop.id}/grant-skill`, {
+      const res = await apiFetch(`/workshops/${triada.workshop.id}/grant-skill`, {
         method: "POST",
         body: JSON.stringify({
           user_id: targetId,
-          mentor_ok: mentorOk,
-          peer_ok: peerOk,
-          oracle_veto: oracleVeto,
-          mentoria_horas: hours,
+          mentor_ok: triada.mentorOk,
+          peer_ok: triada.peerOk,
+          oracle_veto: triada.oracleVeto,
+          mentoria_horas: Number(triada.hours) || 0,
         }),
       });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "No se pudo conceder");
-      }
       const data = await res.json();
+      if (!res.ok) {
+        setTriada((t) => t && { ...t, busy: false, message: { kind: "err", text: data.error || "No se pudo conceder" } });
+        return;
+      }
       const award = data.award;
-      setError("");
-      alert(
+      const text =
         award.outcome === "awarded"
-          ? `🎉 Skill "${award.skill_node}" vacua: la validación es la transferencia.`
+          ? `🎉 ${award.skill_node}: ¡ha vacuado! La validación es la transferencia.`
           : award.outcome === "awaiting_triada"
-            ? `En espera de la triada: ${award.triada_bloqueos.join("; ")}`
-            : `Rechazado por la regla de oro: ${award.vacua_faltantes.join("; ")}`
-      );
-      await openDetail(workshop.id);
+            ? `En espera de la triada: ${(award.triada_bloqueos || []).join("; ")}`
+            : `Rechazado por la regla de oro: ${(award.vacua_faltantes || []).join("; ")}`;
+      setTriada((t) => t && { ...t, busy: false, message: { kind: "ok", text } });
+      await openDetail(triada.workshop.id);
     } catch (e: any) {
-      setError(e.message);
+      setTriada((t) => t && { ...t, busy: false, message: { kind: "err", text: e.message || "Error de conexión" } });
     }
   };
 
@@ -223,6 +276,69 @@ export default function TalleresPage() {
             <Plus className="w-4 h-4" /> Ofrecer un taller
           </button>
         </div>
+
+        {/* El tejido: ramas canónicas del árbol (estado, no tribunal) */}
+        {tree && (
+          <div className="glass rounded-2xl border border-slate-800 p-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <TreePine className="w-4 h-4 text-emerald-400" />
+              <h2 className="text-sm font-bold text-white">
+                El mapa de lo que se puede aprender
+              </h2>
+              <InfoTip
+                text="Estas son las ramas maestras del tejido: matemáticas, naturaleza, relaciones… Cada rama es un camino de habilidades, y el mapa no clasifica a nadie — solo muestra qué existe. El tejido es infinito y forkable: si la rama de tu comunidad no existe, se crea con su propia semilla (así crecen los árboles de verdad)."
+              />
+              <span className="text-[10px] font-mono text-slate-600 ml-auto">
+                {tree.reduce((a, b) => a + b.count, 0)} semillas
+              </span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {tree.map((b) => (
+                <button
+                  key={b.branch}
+                  onClick={() => setOpenBranch(openBranch === b.branch ? null : b.branch)}
+                  className={`px-3 py-2 rounded-xl border text-left text-xs transition-all ${
+                    openBranch === b.branch
+                      ? "border-emerald-500/50 bg-emerald-950/20 text-emerald-300"
+                      : "border-slate-700 text-slate-300 hover:border-emerald-500/30"
+                  }`}
+                >
+                  <span className="capitalize font-semibold">{b.branch.replace("_", " ")}</span>
+                  <ChevronDown
+                    className={`w-3 h-3 inline ml-1 transition-transform ${
+                      openBranch === b.branch ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+            {openBranch &&
+              tree
+                .filter((b) => b.branch === openBranch)
+                .map((b) => (
+                  <ul key={b.branch} className="space-y-1.5 text-xs">
+                    {b.nodes.map((n) => (
+                      <li key={n.id} className="flex items-start gap-2 text-slate-400">
+                        <span className="text-emerald-400 mt-0.5">·</span>
+                        <span>
+                          <b className="text-slate-200">{n.name}</b>{" "}
+                          <span className="text-slate-600">
+                            ({"•".repeat(n.dificultad)}
+                            {"○".repeat(5 - n.dificultad)})
+                          </span>
+                          {n.prereq_ids.length > 0 && (
+                            <span className="text-slate-600">
+                              {" "}
+                              — antes: {n.prereq_ids.join(", ")}
+                            </span>
+                          )}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ))}
+          </div>
+        )}
 
         {showForm && (
           <motion.div
@@ -356,13 +472,20 @@ export default function TalleresPage() {
                       >
                         + Obra aplicada (hecho con la comunidad)
                       </button>
-                      <button
-                        onClick={() => grantSkill(w)}
-                        className="px-3 py-1.5 rounded-lg border border-violet-500/40 text-violet-300 text-xs hover:bg-violet-950/20 transition-all"
-                      >
-                        <Award className="w-3.5 h-3.5 inline mr-1" />
-                        Conceder skill (triada)
-                      </button>
+                      {user?.id === details[w.id]?.facilitator?.user_id && (
+                        <button
+                          onClick={() => openTriada(w)}
+                          className="px-3 py-1.5 rounded-lg border border-violet-500/40 text-violet-300 text-xs hover:bg-violet-950/20 transition-all"
+                        >
+                          <Award className="w-3.5 h-3.5 inline mr-1" />
+                          Conceder habilidad (triada)
+                        </button>
+                      )}
+                      {user?.id !== details[w.id]?.facilitator?.user_id && (
+                        <span className="text-[11px] text-slate-600 self-center">
+                          La habilidad la concede el maestro del taller, por triada.
+                        </span>
+                      )}
                     </div>
                     {details[w.id].outputs && details[w.id].outputs!.length > 0 && (
                       <ul className="space-y-1 text-xs text-slate-400">
@@ -389,6 +512,137 @@ export default function TalleresPage() {
                 )}
               </motion.article>
             ))}
+          </div>
+        )}
+
+        {/* Triada de concesión: sin prompt(), la lista de inscritos manda */}
+        {triada && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="w-full max-w-lg glass rounded-2xl border border-violet-500/30 p-6 space-y-4"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Award className="w-4 h-4 text-violet-400" />
+                    Conceder habilidad a quien la enseña
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Taller: <b className="text-slate-300">{triada.workshop.title}</b> ·{" "}
+                    {triada.workshop.skill_node}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setTriada(null)}
+                  className="text-slate-500 hover:text-white transition-colors"
+                  aria-label="Cerrar"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {(triada.workshop.enrollments?.length ?? 0) === 0 ? (
+                <p className="text-xs text-amber-300/90 border border-amber-500/30 rounded-xl px-4 py-3 bg-amber-950/20">
+                  Aún no hay aprendices inscritos. La triada espera: la habilidad se
+                  gana enseñando a alguien de verdad (vacuación).
+                </p>
+              ) : (
+                <>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      ¿Quién vacua la habilidad? (la lista del taller)
+                    </label>
+                    <select
+                      value={triada.learnerId}
+                      onChange={(e) => setTriada({ ...triada, learnerId: e.target.value })}
+                      className="w-full px-3 py-2 text-sm rounded-xl bg-slate-950 border border-slate-800 focus:outline-none focus:ring-1 focus:ring-violet-500 text-white"
+                    >
+                      <option value="">— elige a un aprendiz —</option>
+                      {(triada.workshop.enrollments || []).map((e) => (
+                        <option key={e.user_id} value={String(e.user_id)}>
+                          {e.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-2">
+                    <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={triada.mentorOk}
+                        onChange={(e) => setTriada({ ...triada, mentorOk: e.target.checked })}
+                        className="accent-violet-500"
+                      />
+                      El maestro avala: ya enseña el material con la comunidad
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={triada.peerOk}
+                        onChange={(e) => setTriada({ ...triada, peerOk: e.target.checked })}
+                        className="accent-violet-500"
+                      />
+                      Una par avala: otro aprendiz lo confirma por haberlo visto
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={triada.oracleVeto}
+                        onChange={(e) => setTriada({ ...triada, oracleVeto: e.target.checked })}
+                        className="accent-rose-500"
+                      />
+                      El guardián (oráculo) ejerce el veto — solo si un axioma está en riesgo
+                      <InfoTip
+                        text="El guardián no vota según gustos: solo puede vetar si la concesión rompe un axioma (por ejemplo, si la obra daña a alguien). Su veto se registra con quién fue y por qué (T13)."
+                      />
+                    </label>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      Horas de mentoría que el aprendiz dio a otros (TVI)
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      step={0.5}
+                      value={triada.hours}
+                      onChange={(e) => setTriada({ ...triada, hours: e.target.value })}
+                      className="w-full px-3 py-2 text-sm font-mono rounded-xl bg-slate-950 border border-slate-800 focus:outline-none focus:ring-1 focus:ring-violet-500 text-white"
+                    />
+                  </div>
+
+                  {triada.message && (
+                    <div
+                      className={`text-[11px] font-mono ${
+                        triada.message.kind === "ok" ? "text-emerald-400" : "text-rose-400"
+                      }`}
+                    >
+                      {triada.message.text}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={() => setTriada(null)}
+                      className="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 text-xs hover:text-white transition-all"
+                    >
+                      Cerrar
+                    </button>
+                    <button
+                      onClick={submitTriada}
+                      disabled={triada.busy || !triada.learnerId}
+                      className="px-4 py-2 rounded-xl bg-violet-500 hover:bg-violet-400 disabled:opacity-40 text-white text-xs font-bold transition-all"
+                    >
+                      {triada.busy ? "Vaciando..." : "Emitir veredicto"}
+                    </button>
+                  </div>
+                </>
+              )}
+            </motion.div>
           </div>
         )}
       </div>
