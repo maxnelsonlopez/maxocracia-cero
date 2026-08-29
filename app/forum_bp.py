@@ -266,10 +266,11 @@ def create_post(current_user):
 @forum_bp.route("/posts", methods=["GET"])
 @token_required
 def list_posts(current_user):
-    """Listar la plaza con filtros opcionales (type, tag, status, limit)."""
+    """Listar la plaza con filtros opcionales (type, tag, status, q, limit)."""
     kind = (request.args.get("type") or "").strip()
     tag = (request.args.get("tag") or "").strip()
     status = (request.args.get("status") or "").strip()
+    term = (request.args.get("q") or "").strip()
     try:
         limit = min(max(int(request.args.get("limit", 50)), 1), 100)
     except ValueError:
@@ -293,6 +294,18 @@ def list_posts(current_user):
     if tag:
         clauses.append("fp.tags LIKE ?")
         params.append(f'%"{tag}"%')
+    # Búsqueda textual literal (título o cuerpo): los comodines de LIKE se
+    # escapan para que el término sea literal y no un pattern (T13: la plaza
+    # se busca y se entiende; nada se interpreta de más).
+    if term:
+        escaped = (
+            term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        )
+        pattern = f"%{escaped.lower()}%"
+        clauses.append(
+            "(LOWER(fp.title) LIKE ? ESCAPE '\\' OR LOWER(fp.body) LIKE ? ESCAPE '\\')"
+        )
+        params.extend([pattern, pattern])
 
     where = ("WHERE " + " AND ".join(clauses)) if clauses else ""
     db = get_db()

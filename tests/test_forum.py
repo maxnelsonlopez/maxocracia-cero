@@ -362,3 +362,61 @@ def test_need_no_duplicates_in_plaza(auth_client):
     ).get_json()["post"]
     assert first["need_id"] is not None
     assert second["need_id"] == first["need_id"]
+
+
+class TestBusquedaTextual:
+    """La plaza se busca con la propia lengua (Backlog UX, reflexión §3.1): el
+    filtro por tipo/tag se queda corto al crecer; la búsqueda es literal y
+    case-insensitive (título o cuerpo)."""
+
+    def _posts(self, auth_client):
+        auth_client.post(
+            "/forum/posts",
+            json={"kind": "question", "title": "¿Qué es un TVI?", "body": "Primer cuerpo."},
+        )
+        auth_client.post(
+            "/forum/posts",
+            json={"kind": "topic", "title": "Huertas urbanas", "body": "Cultivar en comunidad."},
+        )
+
+    def test_busqueda_por_titulo(self, auth_client):
+        self._posts(auth_client)
+        data = auth_client.get("/forum/posts?q=huertas").get_json()
+        assert data["count"] == 1
+        assert data["posts"][0]["title"] == "Huertas urbanas"
+
+    def test_busqueda_case_insensitive(self, auth_client):
+        self._posts(auth_client)
+        upper = auth_client.get("/forum/posts?q=TVI").get_json()
+        lower = auth_client.get("/forum/posts?q=tvi").get_json()
+        assert upper["count"] == lower["count"] == 1
+
+    def test_busqueda_por_cuerpo(self, auth_client):
+        self._posts(auth_client)
+        data = auth_client.get("/forum/posts?q=cultivar").get_json()
+        assert data["count"] == 1
+        assert data["posts"][0]["title"] == "Huertas urbanas"
+
+    def test_busqueda_sin_resultados(self, auth_client):
+        self._posts(auth_client)
+        data = auth_client.get("/forum/posts?q=noexiste").get_json()
+        assert data["count"] == 0
+
+    def test_busqueda_comodines_literales(self, auth_client):
+        """% y _ se escapan: el término se busca tal cual, no como patrón."""
+        auth_client.post(
+            "/forum/posts",
+            json={"kind": "topic", "title": "Costos vitales", "body": "El costo es 10% de la vida."},
+        )
+        literal = auth_client.get("/forum/posts?q=10%25").get_json()
+        assert literal["count"] == 1
+        # '_' literal no matchea '10%' ni '10X' (sin subrayado en el texto).
+        underscore = auth_client.get("/forum/posts?q=10_").get_json()
+        assert underscore["count"] == 0
+
+    def test_busqueda_combinada_con_tipo(self, auth_client):
+        self._posts(auth_client)
+        data = auth_client.get("/forum/posts?q=tvi&type=topic").get_json()
+        assert data["count"] == 0
+        data = auth_client.get("/forum/posts?q=tvi&type=question").get_json()
+        assert data["count"] == 1
