@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import InfoTip from "../components/ui/InfoTip";
 import {
   Sparkles,
   Send,
@@ -120,7 +121,18 @@ export default function GuiaPage() {
           </p>
           <p className="text-xs text-slate-400 mt-2 max-w-2xl">
             Los oráculos sintéticos procesan, los humanos custodian el sentido. Pregunta, conoce tu
-            lugar en la escalera de confianza y —si es tu vocación— presenta tu candidatura a director.
+            lugar en la escalera de confianza{" "}
+            <InfoTip
+              text="La escalera de confianza es la forma en que un recién llegado gana voz: primero se registra y recibe (N0), luego firma su primer acuerdo y participa (N1), y así sube. Nadie nace con voz en la gobernanza: la voz se camina. Los pasos quedan registrados y son reversibles."
+            />{" "}
+            y —si es tu vocación— presenta tu candidatura a director.
+          </p>
+          <p className="text-xs text-slate-400 mt-2 max-w-2xl">
+            Y cuando quieras aprender algo —matemáticas, huertas, programación—{" "}
+            <Link href="/foro" className="text-violet-300 hover:text-violet-200 underline underline-offset-2">
+              la plaza está abierta
+            </Link>
+            : ahí nacen los talleres, los grupos de solución y las células (OEV §1.7).
           </p>
         </div>
 

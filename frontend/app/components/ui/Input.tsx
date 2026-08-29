@@ -1,12 +1,15 @@
 import React from "react";
+import InfoTip from "./InfoTip";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   error?: string;
+  /** Ayuda emergente (ℹ️) en lenguaje sencillo que explica el concepto. */
+  hint?: string;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, className = "", id, name, required, ...props }, ref) => {
+  ({ label, error, hint, className = "", id, name, required, ...props }, ref) => {
     const inputId = id ?? name;
     const errorId = error && inputId ? `${inputId}-error` : undefined;
 
@@ -16,6 +19,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {label}
           {required && <span className="ml-1 text-emerald-400" aria-hidden="true">*</span>}
           {required && <span className="sr-only"> (requerido)</span>}
+          {hint && <InfoTip className="ml-2" text={hint} />}
         </label>
         <input
           ref={ref}

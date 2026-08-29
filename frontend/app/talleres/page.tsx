@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
+import InfoTip from "../components/ui/InfoTip";
 
 interface Workshop {
   id: number;
@@ -202,12 +203,18 @@ export default function TalleresPage() {
             Talleres de Aprendizaje
           </h1>
           <p className="text-sm text-emerald-400/80 font-mono mt-1">
-            OEV §1.7 — la unidad de enseñanza de cualquier skill (5-12 personas)
+            La escuela de cualquier cosa: un grupo pequeño (5-12) donde alguien que sabe enseña
           </p>
           <p className="text-slate-400 text-sm mt-2">
-            Regla de oro (la vacuación): el skill se gana produciendo material de enseñanza
-            y mentoría a nuevos aprendices. La concesión es por triada: mentor + par +
-            oráculo con veto. Nunca ranking de personas.
+            Aquí no hay exámenes ni notas. Para que se te reconozca una habilidad:{" "}
+            <b className="text-emerald-300">ponla en práctica</b>,{" "}
+            <b className="text-emerald-300">enséñala con material propio</b> y{" "}
+            <b className="text-emerald-300">ayuda a alguien a aprenderla</b>.
+            Lo confirma el maestro + un compañero + un guardián con veto.
+            <InfoTip
+              className="ml-2"
+              text="A esto lo llamamos 'vacuar' el conocimiento (la regla de oro): el saber se gana enseñándolo. Nada de clasificar personas ni rankings: cada paso se registra para que cualquiera pueda revisarlo (T13)."
+            />
           </p>
           <button
             onClick={() => setShowForm(!showForm)}
@@ -233,9 +240,13 @@ export default function TalleresPage() {
             <input
               value={form.skill_node}
               onChange={(e) => setForm({ ...form, skill_node: e.target.value })}
-              placeholder="Nodo del árbol de habilidades (ej: naturaleza/huertas)"
+              placeholder="Rama de la habilidad (ej: naturaleza/huertas)"
               className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 focus:border-emerald-500 outline-none"
             />
+            <p className="text-[11px] text-slate-500 flex items-center gap-1.5">
+              Todas las habilidades del mundo viven en un árbol que ramifica y se expande con la comunidad.
+              <InfoTip text="El Árbol de Habilidades es el mapa completo de lo que un humano puede aprender: matemáticas, cocina, programación, jardinería… Cada rama tiene caminos (primero lo básico, luego lo avanzado) y cualquier persona puede proponer una rama nueva: el tejido es infinito y se bifurca (por eso no hay ningún currículo congelado)." />
+            </p>
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}

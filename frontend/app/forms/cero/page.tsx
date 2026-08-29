@@ -272,14 +272,15 @@ export default function CeroFormPage() {
             />
           </div>
           <Input
-            label="Años de educación formal completados (opcional)"
+            label="¿Cuántos años has estudiado? (opcional)"
+            hint="Colegio, universidad, formación formal... Si no quieres contestar, deja el campo vacío: nadie se te baja el puntaje por ello. El dato sirve para que el sistema conozca tu piso educativo (el mínimo de la dignidad es 12 años); el saber que se aprende en la vida también cuenta."
             name="educacion_anos"
             type="number"
             min={0}
             max={60}
             value={formData.educacion_anos}
             onChange={handleChange}
-            placeholder="Ej: 12 — alimenta la dimensión educativa del SDV (INV2-EDU)"
+            placeholder="Ej: 12"
           />
           <FormTextArea
             label="¿Qué valores te representan?"

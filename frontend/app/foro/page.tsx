@@ -11,9 +11,12 @@ import {
   CheckCircle2,
   Tag,
   User,
+  Search,
+  X,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
+import InfoTip from "../components/ui/InfoTip";
 
 interface ForumPost {
   id: number;
@@ -48,6 +51,7 @@ export default function ForoPage() {
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
+  const [query, setQuery] = useState("");
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ kind: "question", title: "", body: "", tags: "" });
@@ -61,7 +65,12 @@ export default function ForoPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const url = filter ? `/forum/posts?type=${filter}` : "/forum/posts";
+      const params = new URLSearchParams();
+      if (filter) params.set("type", filter);
+      const term = query.trim();
+      if (term) params.set("q", term);
+      const qs = params.toString();
+      const url = qs ? `/forum/posts?${qs}` : "/forum/posts";
       const res = await apiFetch(url);
       if (!res.ok) throw new Error("No se pudieron cargar los posts");
       const data = await res.json();
@@ -72,7 +81,7 @@ export default function ForoPage() {
     } finally {
       setLoading(false);
     }
-  }, [filter]);
+  }, [filter, query]);
 
   useEffect(() => {
     if (isAuthenticated) load();
@@ -192,12 +201,48 @@ export default function ForoPage() {
             Foro Abierto
           </h1>
           <p className="text-sm text-violet-400/80 font-mono mt-1">
-            OEV §1.7 — la plaza del conocimiento: temas, preguntas, talleres y necesidades
+            La plaza del conocimiento: temas, preguntas, talleres y necesidades
+            <InfoTip
+              className="ml-2"
+              text="Aquí cualquiera propone: un tema para conversar, una pregunta para que otros respondan, una oferta para enseñar algo, o una necesidad para que la comunidad se organice y la resuelva. No hay matrícula, no hay credencial, no hay examen de entrada — y quien llevó la contraria en el pasado tiene su silla, no su porta."
+            />
           </p>
           <p className="text-slate-400 text-sm mt-2">
             La ignorancia bienvenida: no hay examen de entrada, no hay credencial.
-            Del foro nacen talleres (preguntas), grupos de solución (necesidades) y células (personas).
+            De la plaza nacen tres caminos — pregunta, necesidad o encuentro:
           </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+            <Link
+              href="/talleres"
+              className="group rounded-xl border border-emerald-500/20 bg-emerald-950/20 p-4 hover:border-emerald-400/50 transition-all"
+            >
+              <div className="text-emerald-300 font-bold text-xs uppercase tracking-wider">Preguntas →</div>
+              <div className="text-white text-sm font-semibold mt-1">Talleres de Aprendizaje</div>
+              <p className="text-slate-500 text-[11px] mt-1">
+                La unidad de enseñanza de cualquier skill: 5-12 personas, regla de oro (vacuación).
+              </p>
+            </Link>
+            <Link
+              href="/grupos"
+              className="group rounded-xl border border-sky-500/20 bg-sky-950/20 p-4 hover:border-sky-400/50 transition-all"
+            >
+              <div className="text-sky-300 font-bold text-xs uppercase tracking-wider">Necesidades →</div>
+              <div className="text-white text-sm font-semibold mt-1">Grupos de Solución (ECEs)</div>
+              <p className="text-slate-500 text-[11px] mt-1">
+                La necesidad entra de la comunidad; la solución vuelve. Coordinación sin mandato.
+              </p>
+            </Link>
+            <Link
+              href="/grupos"
+              className="group rounded-xl border border-amber-500/20 bg-amber-950/20 p-4 hover:border-amber-400/50 transition-all"
+            >
+              <div className="text-amber-300 font-bold text-xs uppercase tracking-wider">Personas →</div>
+              <div className="text-white text-sm font-semibold mt-1">Células Madre</div>
+              <p className="text-slate-500 text-[11px] mt-1">
+                El meta-grupo que forma grupos: la máquina fractal del OEV en su tercer nivel.
+              </p>
+            </Link>
+          </div>
           <button
             onClick={() => setShowForm(!showForm)}
             className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-500 text-white font-bold text-sm hover:bg-violet-600 transition-all"
@@ -257,6 +302,25 @@ export default function ForoPage() {
             </button>
           </motion.div>
         )}
+
+        <div className="relative">
+          <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar en la plaza… (título o texto)"
+            className="w-full pl-9 pr-9 py-2 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-violet-500/50"
+          />
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+              aria-label="Limpiar búsqueda"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
 
         <div className="flex flex-wrap gap-2">
           <button

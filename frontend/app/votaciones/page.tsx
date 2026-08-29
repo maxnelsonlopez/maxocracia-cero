@@ -20,6 +20,7 @@ import {
 import { motion } from "framer-motion";
 import { apiFetch } from "../lib/api";
 import ParlamentoParams from "./ParlamentoParams";
+import ParlamentoEducativo from "./ParlamentoEducativo";
 
 interface Proposal {
   id: number;
@@ -219,6 +220,9 @@ export default function VotacionesPage() {
 
         {/* Parlamento de Parámetros (Cap. 11: la comunidad ajusta α, β, γ, δ) */}
         <ParlamentoParams />
+
+        {/* Parlamento Educativo (M9: la comunidad vota el umbral del puente años↔índice) */}
+        <ParlamentoEducativo />
 
         {error && (
           <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold flex items-center gap-2">

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Network, Plus, Loader2, Users, GitFork, Award, Lock } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
+import InfoTip from "../components/ui/InfoTip";
 
 interface EduGroup {
   id: number;
@@ -69,8 +70,9 @@ export default function GruposPage() {
           <Network className="w-12 h-12 text-violet-400 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-white mb-2">Grupos de Solución y Células Madre</h1>
           <p className="text-slate-400 mb-6">
-            Los ECEs: la necesidad entra de la comunidad, la solución vuelve a ella. Las
-            células madre forman los grupos que multiplican. Inicia sesión para participar.
+            Un "grupo de solución" se arma cuando la comunidad dice "necesitamos esto" y alguien
+            se junta a resolverlo. Una "célula madre" es el grupo que forma otros grupos.
+            Inicia sesión para participar.
           </p>
           <Link
             href="/login"
@@ -119,7 +121,7 @@ export default function GruposPage() {
   };
 
   const registerChild = async (mother: EduGroup) => {
-    const childId = Number(prompt("ID del grupo hijo que nació de esta célula:"));
+    const childId = Number(prompt("Número del grupo que nació de esta célula (ver su detalle):"));
     if (!childId) return;
     try {
       const res = await apiFetch(`/groups/${mother.id}/child`, {
@@ -156,11 +158,15 @@ export default function GruposPage() {
             Grupos de Solución y Células Madre
           </h1>
           <p className="text-sm text-sky-400/80 font-mono mt-1">
-            OEV §1.7 — ECEs: la necesidad entra de la comunidad, la solución vuelve a ella
+            Las necesidades de la comunidad se resuelven en grupo, y cada grupo deja aprendizaje
           </p>
           <p className="text-slate-400 text-sm mt-2">
-            Cada grupo de solución siembra aprendizaje. Las células madre son el meta-grupo
-            cuyo oficio es formar otros grupos: la máquina fractal en su tercer nivel.
+            Un grupo de solución resuelve una necesidad real; una célula madre forma grupos
+            de solución.
+            <InfoTip
+              className="ml-2"
+              text="'ECE' no es un grito ni una sigla secreta: son los Encargos Comunitarios Educativos — la necesidad entra desde la comunidad y la solución vuelve a ella. Las células madre son la capa que multiplica: forman grupos, y cada grupo formado deja constancia de quién lo hizo nacer (así se ve la fractalidad: un grupo → otro grupo → más aprendizaje)."
+            />
           </p>
           <button
             onClick={() => setShowForm(!showForm)}

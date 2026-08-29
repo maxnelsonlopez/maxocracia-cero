@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Scale, Send, History, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { apiFetch } from "../lib/api";
+import InfoTip from "../components/ui/InfoTip";
 
 interface ParliamentData {
     current: { alpha: number; beta: number; gamma: number; delta: number } | null;
@@ -11,11 +12,43 @@ interface ParliamentData {
     audit_hash: string;
 }
 
-const FIELDS: Array<{ key: "alpha" | "beta" | "gamma" | "delta"; label: string; hint: string; step: number }> = [
-    { key: "alpha", label: "α · peso del tiempo", hint: "> 0 (no se ignora el tiempo)", step: 1 },
-    { key: "beta", label: "β · peso de la vida", hint: "> 0 (no se ignora la vida)", step: 1 },
-    { key: "gamma", label: "γ · aversión al sufrimiento", hint: "≥ 1 (nunca premiar el sufrimiento)", step: 0.1 },
-    { key: "delta", label: "δ · recursos finitos", hint: "≥ 0 (no se ignoran los recursos)", step: 1 },
+interface FieldDef {
+    key: "alpha" | "beta" | "gamma" | "delta";
+    label: string;
+    hint: string;
+    step: number;
+    tip: string;
+}
+
+const FIELDS: Array<FieldDef> = [
+    {
+        key: "alpha",
+        label: "Valor del tiempo (α)",
+        hint: "> 0 (nunca cero: el tiempo siempre vale)",
+        step: 1,
+        tip: "α dice cuánto cuenta cada hora de vida invertida. Nunca puede ser 0, porque eso permitiría que alguien trabaje 'gratis': en la Maxocracia no existe el trabajo sin devolución.",
+    },
+    {
+        key: "beta",
+        label: "Valor de la vida (β)",
+        hint: "> 0 (nunca cero: la vida siempre cuenta)",
+        step: 1,
+        tip: "β pondera cuánto impacta cada decisión en la vida de otros seres. Nunca puede ser 0: ignorar la vida de quien se ve afectado es lo que el sistema prohíbe desde la raíz.",
+    },
+    {
+        key: "gamma",
+        label: "Cuidado del sufrimiento (γ)",
+        hint: "≥ 1 (nunca premiar el dolor)",
+        step: 0.1,
+        tip: "γ es la aversión al sufrimiento: cuánto pesa el dolor causado. Si fuera menor que 1, el sistema podría premiar el sufrimiento de alguien — eso está prohibido por axioma.",
+    },
+    {
+        key: "delta",
+        label: "Cuidado de los recursos (δ)",
+        hint: "≥ 0 (los recursos finitos cuentan)",
+        step: 1,
+        tip: "δ pondera el consumo de recursos limitados: agua, minerales, energía, suelo. Nunca negativo: los recursos del planeta no se ignoran en la contabilidad de la vida.",
+    },
 ];
 
 export default function ParlamentoParams() {
@@ -91,14 +124,17 @@ export default function ParlamentoParams() {
                 <div>
                     <h2 className="text-sm font-bold text-white flex items-center gap-2">
                         <Scale className="w-4 h-4 text-violet-400" />
-                        Parlamento de Parámetros
+                        Los valores de la vida
+                        <InfoTip
+                            text="Este es un parlamento de verdad: la comunidad vota los números con que el sistema valora el tiempo, la vida, el sufrimiento y los recursos (matemáticamente: α, β, γ, δ). No hay un banco central que decida en secreto: vota la gente, y lo votado se aplica con registro público."
+                        />
                         <span className="text-[9px] font-mono text-violet-400/70 uppercase tracking-widest">
-                            Cap. 11 · Oráculo Dinámico
+                            Cap. 11
                         </span>
                     </h2>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                        La comunidad decide con cuánto peso la vida se valora (α, β, γ, δ).
-                        Propuesta crítica: quórum 60% y consenso del 75%. Si se aprueba, se aplica con registro público (T13).
+                        La comunidad decide cuánto valen el tiempo, la vida, el sufrimiento y
+                        los recursos. Es una decisión seria: 60% de participación y 75% de acuerdo.
                     </p>
                 </div>
                 {data?.audit_hash && (
@@ -109,8 +145,9 @@ export default function ParlamentoParams() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {FIELDS.map((f) => (
                     <div key={f.key} className="space-y-1">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                             {f.label}
+                            <InfoTip text={f.tip} />
                         </label>
                         <input
                             type="number"
