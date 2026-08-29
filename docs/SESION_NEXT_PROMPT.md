@@ -1,4 +1,4 @@
-# SESIÓN NEXT — Handoff de la jornada (última actualización: 22-08-2026, ox-alpha)
+# SESIÓN NEXT — Handoff de la jornada (última actualización: 29-08-2026, DeepSeek + OpenRouter)
 
 Documento de continuidad entre sesiones. Léelo al iniciar la próxima sesión
 antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
@@ -8,19 +8,25 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 ## 1. Prompt para Max (pegar en la próxima sesión)
 
 > Continuamos la Maxocracia desde donde quedamos (ver `docs/SESION_NEXT_PROMPT.md`).
-> Contexto: Fase 2 — Ola 4 "El Puente", versión 5.6+. El sistema de gobernanza comunitaria
-> está completo (propuestas por categoría con quórum y consenso 75%, oráculo DeepSeek con
-> fallback local, delegación de voto, parlamento de parámetros vinculante). El Puente de
-> Coherencia (mapa teoría↔código) está en `docs/architecture/mapa_coherencia_ola4.md` y los
-> requisitos en `docs/architecture/requisitos_fase2_ola4.md`.
+> Contexto: Fase 2 — Ola 4 "El Puente", versión 5.6+. **La rama educativa M1-M9 está
+> COMPLETA y su único pendiente (la votación del umbral canónico del puente en el
+> parlamento) quedó CERRADO el 29-08-2026**: el Parlamento Educativo vota el umbral
+> años↔índice (12-30, critical 60/75, T13, anti-flip-flop 14 días, N1+); la ley
+> INV2-EDU (≥12) no se vota. Propuesta lista en
+> `docs/architecture/PROPUESTA_PARLAMENTO_UMBRAL_EDUCATIVO.md` (M9, commit `cf85973`).
+> **Próximo hito estructural: síntesis de identidad del OEV — UNA sola puerta entre
+> la app principal (:5001) y `plataforma_educativa/` (:5050)**: empezar por diseño
+> (leer `platforma_educativa/app/auth.py` y su README; decidir SSO/JWT compartido vs
+> espejo de identidad), con teoría primero.
 > Patrón de trabajo: RLM navega + director verifica + teoría decide (guía en el repo
 > local_models: `docs/GUIA_RLM_COLABORADOR.md`).
 > **Delegación OpenRouter gratuita**: apóyate intensamente en subagentes con proveedor
 > `openrouter` y modelos `:free` declarados en el harness (`minimax/minimax-m3:free` y
-> `nvidia/nemotron-3-super-120b-a12b:free`) para investigar contextos largos, redactar
-> documentos y revisar diffs; el pool compartido satura con 429 (reintentar o cambiar de
-> modelo; Nemotron es el más estable hoy). El orquestador implementa y verifica siempre
-> con ojos propios antes de commitear — el subagente redacta, el director decide.
+> `nvidia/nemotron-3-super-120b-a12b:free`); el pool compartido satura con 429 —
+> reintentar o cambiar de modelo (Nemotron es el más estable en tareas cortas; ambas
+> fallan en tareas largas con tools; MiniMax sostiene mejor los informes largos).
+> El orquestador implementa y verifica siempre con ojos propios antes de commitear —
+> el subagente redacta, el director decide.
 > Revisa los pendientes del §4 y elige el siguiente paso con criterio; commits regulares
 > en español; respeta el principio "la teoría tiene prioridad".
 
@@ -60,16 +66,19 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 | **Puente Red de Apoyo v1** (22-08-2026, `bb8504c`): `/support/offers` — ofertas de cuidado afinadas por señal ESI con opt-in privado; respuestas jamás viajan | ✅ backend · 🔴 comunidad publica primeras ofertas |
 | **Semana de la Verdad** (22-08-2026): protocolo n=1 de 7 días (`docs/guides/semana_de_la_verdad.md`) para habitar el sistema real antes de reclutar cohorte — responde al hallazgo "0 cumplimientos" del informe v1.0 | ✅ protocolo · 🔴 ejecución humana |
 | **Modo Escudo Doméstico** (22-08-2026, hallazgo de campo de Max): ESI roja ya no bloquea el registro propio; cifras del protegido ocultas a los demás; frontend persiste CDD real con vista discreta; `wants_support` opt-in privado como gancho hacia la Red de Apoyo (Cap 16.5 §16.5.12) | ✅ código + libro · 🔴 puente v2: ofertas publicadas por la comunidad |
-| **Rama educativa M1-M8** (28-08-2026, sesión con Max): INV2-EDU en motor; **M2 Foro Abierto** + respuestas (22 tests), **M3 Talleres + regla de oro** (`maxocontracts/skills.py`; triada con veto), **M4 Grupos/ECEs + Células Madre** (12 tests), **M5 UI** + puente `educacion_indice()`, **M6 árbol de habilidades** (`maxocontracts/tree.py`, 20 tests), **M7 Form Cero con años** (`educacion_anos` + puente vivo; 12 tests; revisado por MiniMax), **M8 puente siamés foro↔Plaza de Apoyo** (Cap 12.3.1/bombeo: la necesidad del foro sangra a `participant_needs` — la tabla del matching — sin duplicados; `in_plaza` T13) · MiniMax redactó la guía del foro y revisó M7 | ✅ M1-M8 + docs · 🔴 único pendiente de la rama: votación del umbral canónico del puente en el parlamento (gobernanza) |
-| Suite de tests | **818/818** (verificado 28-08-2026 tras M6 árbol de habilidades; plataforma educativa 32/32 en su propio venv/contexto — excluida de la recolección raíz vía `pytest.ini` `norecursedirs`) |
+| **Rama educativa M1-M8** (28-08-2026, sesión con Max): INV2-EDU en motor; **M2 Foro Abierto** + respuestas (22 tests), **M3 Talleres + regla de oro** (`maxocontracts/skills.py`; triada con veto), **M4 Grupos/ECEs + Células Madre** (12 tests), **M5 UI** + puente `educacion_indice()`, **M6 árbol de habilidades** (`maxocontracts/tree.py`, 20 tests), **M7 Form Cero con años** (`educacion_anos` + puente vivo; 12 tests; revisado por MiniMax), **M8 puente siamés foro↔Plaza de Apoyo** (Cap 12.3.1/bombeo: la necesidad del foro sangra a `participant_needs` — la tabla del matching — sin duplicados; `in_plaza` T13) · MiniMax redactó la guía del foro y revisó M7 | ✅ M1-M8 + docs |
+| **M9 Parlamento Educativo** (29-08-2026): el umbral canónico del puente años↔índice deja de ser constante sagrada — `POST/GET /voting/parliament/educativo` (categoría critical 60/75, T13), acción vinculante `set_edu_umbral`, tablas `edu_parameters`/`edu_parameter_resolutions` (CHECK 12-30), `educacion_indice(anos, umbral)` parametrizada + `get_edu_umbral_anios()` con fallback al canon, anti-flip-flop 14 días, escalera N1+ en ambos parlamentos, finitud (NaN/∞) y no-bool en ambos validadores · Nemotron revisó el diseño (confirmó Rondas/δ, detectó el hueco anti-flip-flop) y MiniMax la propuesta (corrigió atribuciones: "parlamento" no es término del libro — es Cap. 11 §11.7; el 60% de quórum vive en el blueprint) | ✅ **pendiente de la rama CERRADO** · doc `PROPUESTA_PARLAMENTO_UMBRAL_EDUCATIVO.md` · 🔴 siguiente hito estructural: **síntesis de identidad del OEV** (:5001 ↔ :5050) |
+| Suite de tests | **858/858** (verificado 29-08-2026 tras M9; plataforma educativa 32/32 en su propio venv/contexto — excluida de la recolección raíz vía `pytest.ini` `norecursedirs`; validador conceptual OK) |
 
 **Decisiones canónicas a respetar:**
 - **La teoría (libro) tiene prioridad**: T0-T15 son canónicos; T16=Minimizar Daño, T17=Reciprocidad
   Justa (renumerados desde "T7"/"T9" de ingeniería). No reintroducir T9=Reciprocidad.
 - **Reflexión de cierre de la rama educativa (28-08-2026)**: `docs/architecture/reflexion_eutopia_rama_educativa.md`
   — leerla antes de ampliar la rama; contiene UX pendiente (búsqueda en plaza, triada sin
-  prompt(), hub educativo, Guía↔foro), N+1 de reply_count, y la síntesis de identidad
+  `prompt()`, hub educativo, Guía↔foro), N+1 de reply_count, y la síntesis de identidad
   (app principal :5001 ↔ plataforma_educativa :5050) como siguiente hito estructural.
+  El umbral del parlamento (su §5) quedó resuelto en **M9** (29-08-2026): ver
+  `docs/architecture/PROPUESTA_PARLAMENTO_UMBRAL_EDUCATIVO.md`.
 - **La teoría (libro) tiene prioridad**: T0-T15 son canónicos; T16=Minimizar Daño, T17=Reciprocidad
   Justa (renumerados desde "T7"/"T9" de ingeniería). No reintroducir T9=Reciprocidad.
 - El validador conceptual (`scripts/validador_conceptual.py` + su test) exige coherencia axiomática
@@ -88,8 +97,9 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 
 ```powershell
 # Backend (cwd = raíz del repo)
-.venv\Scripts\python.exe -m pytest tests/test_voting.py tests/test_maxocontracts/test_parliament.py -q
+.venv\Scripts\python.exe -m pytest tests/test_voting.py tests/test_maxocontracts/test_parliament.py tests/test_parlamento_educativo.py tests/test_sdv_educacion_puente.py -q
 .venv\Scripts\python.exe -m pytest tests/test_validador_conceptual.py -q   # coherencia axiomática
+.venv\Scripts\python.exe scripts\validador_conceptual.py                  # validador en vivo
 
 # Frontend (cwd = frontend/)
 npx tsc --noEmit
@@ -97,17 +107,25 @@ npx tsc --noEmit
 
 ## 4. Pendientes priorizados
 
-**El backlog de la Ola 4 está CERRADO (12-08-2026, sesión continua).** Estado final:
+**La rama educativa M1-M9 está CERRADA (29-08-2026).** Lo que sigue:
 
-1. ~~Cohorte Cero real~~ ✅ **EJECUTADA**: 50 contratos en `comun.db` via `scripts/seed_cohorte_cero.py`
-   (20 aseo, 15 préstamo, 15 comida; 294 check-ins, 40 NPS; γ 1.099, NPS 57.5 en `/admin/contracts`)
-2. ~~RF-G4~~ ✅ páginas `/admin/interchanges`, `/admin/followups`, `/admin/vhvproducts` (solo lectura
-   + detalle; faltan PUT/DELETE backend para mutación — candidato a futura ola)
-3. ~~RF-I8~~ ✅ votación ponderada por TVI (Participación Inteligente, Cap 14): peso 1+4·(TVI/max) hasta
-   5x, retrocompatible, quórum por persona; badge en `/votaciones`
-4. ~~M4 fase 2 / RF-B4~~ ✅ botón "Contrato Ético" en `/matching` → `POST /contracts/from-need`
-5. ~~SDV-S editorial~~ ✅ 8 referencias cruzadas del cap. 9.5 en caps. 10/11/13/14
-6. Mantener mapas y handoff al día (regla continua)
+1. **Síntesis de identidad del OEV** (hito estructural, diseño primero): UNA sola puerta
+   entre la app principal (:5001) y `plataforma_educativa/` (:5050). Empezar por
+   `plataforma_educativa/README.md` + `plataforma_educativa/app/auth.py` (tokens en
+   memoria, `users` propios, `PLATAFORMA_EDUCATIVA_DB`) y `app/auth.py`/`app/jwt_utils.py`
+   del sistema principal; decidir entre (a) JWT compartido/SSO con mismo secreto,
+   (b) espejo de identidad (tabla `users` común o mapeo), o (c) puerta única con
+   sesión puente; documentar la decisión en `docs/architecture/` antes de implementar.
+   Teoría: OEV §1.7-1.8 (foro, talleres, ECEs, células madre) y la reflexión §5.1.
+2. **Backlog UX de la plaza** (reflexión §3): búsqueda textual en `/foro` (backend
+   `?q=` + input), triada sin `prompt()/confirm()` ni pedir `user_id` a mano, hub
+   educativo en `/foro` (tres caminos), Guía↔foro (RF-M ↔ RF-EDU en `guide_bp.py`).
+3. **UI del Parlamento Educativo** (candidato, 29-08): `GET /voting/parliament/educativo`
+   ya existe; falta la sección en `/votaciones` (espejo de `ParlamentoParams.tsx`).
+4. **Hardening/performance** (candidatos): N+1 de `reply_count` en el foro (COUNT GROUP
+   BY + paginación por cursor); oráculos síncronos (120 s) → colas/async cuando el
+   parlamento vote de verdad.
+5. Mantener mapas y handoff al día (regla continua)
 
 **Futuro posible (fuera de la Ola 4)**: hitos del informe del Reino Sintético
 (`docs/architecture/informe_reino_sintetico_2026-08-12.md` §7): EIR por entidad sintética, AVA con
@@ -133,6 +151,9 @@ open), 3 violaciones INV1 sin alerta. TODO.md actualizado (Semana 9-12 parcial).
 ## 5. Historia reciente (git log, maxocracia)
 
 ```
+fbb8da7 docs(educacion): propuesta al parlamento del umbral canonico del puente (M9)
+cf85973 feat(voting): parlamento educativo vota el umbral canonico del puente (M9)
+60b4e9f docs(maps): RF-EDU-11, coherencia y atribuciones del parlamento educativo
 a1f10d5 docs(book): sincroniza indice y mapas de integraciones con el estado real
 12e5f74 docs(book): integra capa de ternura en capitulo 15 y corrige referencias
 0316279 docs(book): integra oraculo disidente permanente en capitulo 14
