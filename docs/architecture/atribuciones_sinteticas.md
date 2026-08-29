@@ -241,13 +241,30 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   ubicación engañosa del ALTER de migración; los tres hallazgos aplicados en `17efc5d`
   (+4 tests). Veredicto inicial "CON CAMBIOS" → suite final 12/12.
 
-### Antigravity (Google DeepMind)
+### Antigravity & Gemini (Google / DeepMind) — "el artífice del puente de identidad"
 - **Frontend**: `frontend/app/sections/ManifestoSection.tsx` — "Autor: Antigravity (Google DeepMind)".
 - **Traducción**: Cap. 6 de Ontometría al inglés (feb 2026).
-
-### Gemini (Google) — pionero del Cap. 14
 - **Pionero de la Victoria Sintética** (dic 2025) según el testimonio de Kimi en el Cap. 14.
 - **Demo de gobernanza** portada a la API real de votación (ver commit `342fa0c`).
+- **M12 Síntesis de Identidad del Organismo Educativo Vital (OEV)** (29/8/2026):
+  - **Autenticación híbrida y JIT en OEV**: `plataforma_educativa/app/auth.py` — soporte simultáneo para tokens locales en memoria (autonomía fractal) y JWTs federados de Maxocracia (`HS256`, clave compartida `SECRET_KEY`), con aprovisionamiento Just-In-Time (JIT) en base de datos local `users` vinculando `maxo_user_id` y rol de coordinador según `is_admin`.
+  - **Esquema OEV con migración idempotente**: `plataforma_educativa/app/schema.py` — adición de columna `maxo_user_id INTEGER UNIQUE` y migración `_migrate_db` en `init_db`.
+  - **Perfil OEV con federación**: `plataforma_educativa/app/api_routes.py` — exposición de `maxo_user_id` e `is_federated` en `/api/me`.
+  - **Claims de identidad en Maxocracia**: `app/auth.py` — emisión consistente de `name` y `alias` en `/auth/register`, `/auth/login` y `/auth/refresh`.
+  - **Blueprint del Puente Educativo**: `app/edu_bridge_bp.py` + `app/__init__.py` — endpoints `/edu-bridge/status`, `/edu-bridge/sync-mastery` (con hash auditable T13 y promoción automática N0→N1 por mentoría demostrada) y `/edu-bridge/events`.
+  - **Integración en API Frontend**: `frontend/app/lib/api.ts` — funciones `getEduBridgeStatus`, `syncEduMastery`, `getEduEvents` con tipado estricto verificado con `tsc --noEmit`.
+  - **Documento Canónico de Arquitectura**: `docs/architecture/SINTESIS_IDENTIDAD_OEV.md`.
+  - **Suite de Tests**: 39/39 tests en `plataforma_educativa/tests/` (incluyendo `test_jwt_auth.py`) y 4/4 tests en `tests/test_edu_bridge.py`.
+- **Revisión y corrección del puente (29/8/2026, DeepSeek — orquestador)**: la v1 de
+  `/edu-bridge/sync-mastery` permitía que CUALQUIER usuario autenticado declarara su
+  propia maestría (`triada_approved: true`, `mentor_rounds: 2`) y se promoviera N0→N1
+  con un solo POST — la escalera de confianza se compraba. Corregido en código y tests:
+  (1) procedencia exigida (token de servicio `EDU_BRIDGE_SERVICE_TOKEN`, fail-closed 403);
+  (2) **sin auto-promoción** (la escalera sigue siendo del primer acuerdo, Cap. 13);
+  (3) `t13_hash` = SHA-256 real (antes una cadena predecible); (4) `SECRET_KEY` de la
+  plataforma sin constante pública por defecto (fail-closed 503, modo autónomo intacto).
+  Tests finales: 40/40 OEV + 5/5 puente.
+
 
 ### Matrix Agent
 - **Anti-RLHF**: `docs/book/ediciones_1_y_2/antidoto_sesgo_rlhf.md` — "Autor: Matrix Agent".

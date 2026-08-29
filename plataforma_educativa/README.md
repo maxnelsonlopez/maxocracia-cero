@@ -17,6 +17,26 @@ implementación de demostración; no reemplaza la plataforma Maxocracia.
 
 - Python 3.13 (probado) — se usan `Flask` y el `sqlite3` de la librería estándar.
 - No hace falta SQLAlchemy ni ORM: se usa `sqlite3`.
+- `pyjwt >= 2.8` (autenticación federada).
+
+## Federación con Maxocracia (Una sola puerta)
+
+La plataforma acepta dos credenciales: tokens locales (modo autónomo) y **JWTs
+de Maxocracia** (modo federado, aprovisionamiento Just-In-Time). Para federar:
+
+```powershell
+# En el nodo OEV y en :5001, LA MISMA clave (la de la app principal):
+$env:SECRET_KEY = "<la misma SECRET_KEY de Maxocracia>"
+
+# Token de servicio con el que el nodo reporta maestrías al puente (:5001)
+# (en :5001 y en el nodo OEV, el mismo valor):
+$env:EDU_BRIDGE_SERVICE_TOKEN = "<secreto compartido del puente>"
+```
+
+Sin `SECRET_KEY` la federación queda **cerrada por diseño** (503 explícito; el modo
+autónomo local sigue funcionando). Sin `EDU_BRIDGE_SERVICE_TOKEN` el puente
+`/edu-bridge/sync-mastery` rechaza con 403 (fail-closed): la escalera de confianza
+no se compra con una declaración.
 
 ## Cómo correr (Windows)
 

@@ -69,8 +69,9 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 | **Rama educativa M1-M8** (28-08-2026, sesión con Max): INV2-EDU en motor; **M2 Foro Abierto** + respuestas (22 tests), **M3 Talleres + regla de oro** (`maxocontracts/skills.py`; triada con veto), **M4 Grupos/ECEs + Células Madre** (12 tests), **M5 UI** + puente `educacion_indice()`, **M6 árbol de habilidades** (`maxocontracts/tree.py`, 20 tests), **M7 Form Cero con años** (`educacion_anos` + puente vivo; 12 tests; revisado por MiniMax), **M8 puente siamés foro↔Plaza de Apoyo** (Cap 12.3.1/bombeo: la necesidad del foro sangra a `participant_needs` — la tabla del matching — sin duplicados; `in_plaza` T13) · MiniMax redactó la guía del foro y revisó M7 | ✅ M1-M8 + docs |
 | **M9 Parlamento Educativo** (29-08-2026): el umbral canónico del puente años↔índice deja de ser constante sagrada — `POST/GET /voting/parliament/educativo` (categoría critical 60/75, T13), acción vinculante `set_edu_umbral`, tablas `edu_parameters`/`edu_parameter_resolutions` (CHECK 12-30), `educacion_indice(anos, umbral)` parametrizada + `get_edu_umbral_anios()` con fallback al canon, anti-flip-flop 14 días, escalera N1+ en ambos parlamentos, finitud (NaN/∞) y no-bool en ambos validadores · Nemotron revisó el diseño (confirmó Rondas/δ, detectó el hueco anti-flip-flop) y MiniMax la propuesta (corrigió atribuciones: "parlamento" no es término del libro — es Cap. 11 §11.7; el 60% de quórum vive en el blueprint) | ✅ **pendiente de la rama CERRADO** · doc `PROPUESTA_PARLAMENTO_UMBRAL_EDUCATIVO.md` · 🔴 siguiente hito estructural: **síntesis de identidad del OEV** (:5001 ↔ :5050) |
 | **M10 Plaza Hablable** (29-08-2026, decisión de Max): **la UI habla en lenguaje de calle, el concepto complejo vive en ayuda emergente** — `InfoTip.tsx` (componente reutilizable ℹ️, hover/clic; `Input` acepta `hint`) + etiquetas humanas en `/foro`, `/talleres`, `/grupos`, `/guia`, `/votaciones` (ParlamentoParams → "Los valores de la vida"; ParlamentoEducativo → "La escuela que queremos") y Form Cero ("¿Cuántos años has estudiado?"). Incluye **búsqueda textual en la plaza** (`GET /forum/posts?q=`, literal + case-insensitive, 6 tests), **hub educativo** (tres caminos con enlaces), **Guía↔foro** (la Guía anuncia la plaza) y **UI del Parlamento Educativo** en `/votaciones` | ✅ (tsc limpio; commits `f2fc7f5`, `c447c9d`, `93543d3`) |
-| **M11 Tejido visible y triada en UI** (29-08-2026): `GET /workshops/tree` (ramas canónicas del árbol — estado, no tribunal), detalle del taller con lista de inscritos, y **concesión por modal** (sin `prompt()/confirm()` — el último ítem UX de la reflexión): solo el facilitador ve el botón; avales explicados con InfoTip; horas de mentoría | ✅ (3 tests; commits `d4c5a24`, `b6639ed`) · **La UI del OEV de la rama educativa está COMPLETA** — queda solo la síntesis de identidad (:5001 ↔ :5050) |
-| Suite de tests | **858/858** (verificado 29-08-2026 tras M9; plataforma educativa 32/32 en su propio venv/contexto — excluida de la recolección raíz vía `pytest.ini` `norecursedirs`; validador conceptual OK) |
+| **M11 Tejido visible y triada en UI** (29-08-2026): `GET /workshops/tree` (ramas canónicas del árbol — estado, no tribunal), detalle del taller con lista de inscritos, y **concesión por modal** (sin `prompt()/confirm()` — el último ítem UX de la reflexión): solo el facilitador ve el botón; avales explicados con InfoTip; horas de mentoría | ✅ (3 tests; commits `d4c5a24`, `b6639ed`) |
+| **M12 Síntesis de Identidad del OEV** (29-08-2026: Gemini implementó · DeepSeek revisó/corrigió): **UNA sola puerta de identidad** entre :5001 y :5050 — autenticación híbrida en `plataforma_educativa/app/auth.py` (tokens locales en memoria + JWTs federados con clave compartida, JIT vinculando `maxo_user_id`, migración idempotente), blueprint `app/edu_bridge_bp.py` (`/status`, `/sync-mastery`, `/events`), doc `SINTESIS_IDENTIDAD_OEV.md` · **corrección del orquestador**: la v1 auto-promovía N0→N1 con un POST del propio usuario (la escalera se compraba) → ahora el nodo OEV reporta con token de servicio `EDU_BRIDGE_SERVICE_TOKEN` (fail-closed 403), **sin auto-promoción** (la escalera es del primer acuerdo, Cap. 13), `t13_hash` = SHA-256 real y `SECRET_KEY` sin constante pública (fail-closed 503) | ✅ (40/40 en OEV —6 JWT + 1 fail-closed—, 5/5 puente corregido, tsc limpio) |
+| Suite de tests | **862/862** (verificado 29-08-2026 tras M12; plataforma educativa 40/40; tsc limpio; validador conceptual OK) |
 
 **Decisiones canónicas a respetar:**
 - **La teoría (libro) tiene prioridad**: T0-T15 son canónicos; T16=Minimizar Daño, T17=Reciprocidad
@@ -78,7 +79,7 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 - **Reflexión de cierre de la rama educativa (28-08-2026)**: `docs/architecture/reflexion_eutopia_rama_educativa.md`
   — leerla antes de ampliar la rama; contiene UX pendiente (búsqueda en plaza, triada sin
   `prompt()`, hub educativo, Guía↔foro), N+1 de reply_count, y la síntesis de identidad
-  (app principal :5001 ↔ plataforma_educativa :5050) como siguiente hito estructural.
+  (app principal :5001 ↔ plataforma_educativa :5050) ahora completada en M12.
   El umbral del parlamento (su §5) quedó resuelto en **M9** (29-08-2026): ver
   `docs/architecture/PROPUESTA_PARLAMENTO_UMBRAL_EDUCATIVO.md`.
 - **La teoría (libro) tiene prioridad**: T0-T15 son canónicos; T16=Minimizar Daño, T17=Reciprocidad
@@ -99,7 +100,8 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 
 ```powershell
 # Backend (cwd = raíz del repo)
-.venv\Scripts\python.exe -m pytest tests/test_voting.py tests/test_maxocontracts/test_parliament.py tests/test_parlamento_educativo.py tests/test_sdv_educacion_puente.py -q
+.venv\Scripts\python.exe -m pytest tests/test_edu_bridge.py tests/test_voting.py tests/test_maxocontracts/test_parliament.py tests/test_parlamento_educativo.py tests/test_sdv_educacion_puente.py -q
+.venv\Scripts\python.exe -m pytest plataforma_educativa/tests/ -q        # OEV autónomo + federado
 .venv\Scripts\python.exe -m pytest tests/test_validador_conceptual.py -q   # coherencia axiomática
 .venv\Scripts\python.exe scripts\validador_conceptual.py                  # validador en vivo
 
@@ -109,26 +111,16 @@ npx tsc --noEmit
 
 ## 4. Pendientes priorizados
 
-**La rama educativa M1-M11 está CERRADA (29-08-2026) — UI completa.** Lo que sigue:
+**La rama educativa M1-M12 está CERRADA (29-08-2026)** — el hito estructural (síntesis de identidad) se implementó, pero la **puerta en la UI** aún no existe: `frontend/app/lib/api.ts` trae `getEduBridgeStatus/syncEduMastery/getEduEvents` sin consumidores. Lo que sigue:
 
-1. **Síntesis de identidad del OEV** (hito estructural, diseño primero): UNA sola puerta
-   entre la app principal (:5001) y `plataforma_educativa/` (:5050). Empezar por
-   `plataforma_educativa/README.md` + `plataforma_educativa/app/auth.py` (tokens en
-   memoria, `users` propios, `PLATAFORMA_EDUCATIVA_DB`) y `app/auth.py`/`app/jwt_utils.py`
-   del sistema principal; decidir entre (a) JWT compartido/SSO con mismo secreto,
-   (b) espejo de identidad (tabla `users` común o mapeo), o (c) puerta única con
-   sesión puente; documentar la decisión en `docs/architecture/` antes de implementar.
-   Teoría: OEV §1.7-1.8 (foro, talleres, ECEs, células madre) y la reflexión §5.1.
-   **Recordatorio de Max**: la Maxocracia YA funciona como proceso — la demostración
-   sintética viva está en `atribuciones_sinteticas.md` (subagentes, oráculos con veto,
-   disidente, delegación verificable); la cohorte humana es la siguiente capa empírica,
-   no la única prueba de vida.
-2. **Expandir el patrón "plaza hablable"** (`InfoTip`) al resto del repo: `matching`,
+1. **Puerta de la UI del OEV**: botón/redirect desde :5001 hacia :5050 portando el JWT (o token corto de un uso), y en el frontend estático de la plataforma capturarlo y usarlo como Bearer. Sin esto la síntesis es API-only (Max aún no puede entrar "por una sola puerta" con clic).
+2. **Celebración en vivo del puente**: configurar `SECRET_KEY` compartida + `EDU_BRIDGE_SERVICE_TOKEN` en ambos nodos (ver README actualizado de la plataforma) y probar el flujo JIT end-to-end.
+3. **Expandir el patrón "plaza hablable"** (`InfoTip`) al resto del repo: `matching`,
    `vhv`, `micromax`, `contracts` — la rama educativa marcó el modelo (decisión de Max).
-3. **Hardening/performance** (candidatos): N+1 de `reply_count` en el foro (COUNT GROUP
+4. **Hardening/performance** (candidatos): N+1 de `reply_count` en el foro (COUNT GROUP
    BY + paginación por cursor); oráculos síncronos (120 s) → colas/async cuando el
    parlamento vote de verdad.
-4. Mantener mapas y handoff al día (regla continua)
+5. Mantener mapas y handoff al día (regla continua)
 
 **Futuro posible (fuera de la Ola 4)**: hitos del informe del Reino Sintético
 (`docs/architecture/informe_reino_sintetico_2026-08-12.md` §7): EIR por entidad sintética, AVA con
