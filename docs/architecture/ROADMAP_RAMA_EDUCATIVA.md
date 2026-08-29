@@ -1,7 +1,7 @@
 # Roadmap de implementación — Rama Educativa en la plataforma
 
 > **Fase:** Ola 4 + — plan operativo de la rama educativa (marco conceptual en `docs/theory/EDUCACION_SIAMESA_estructura_maxocratica.md` y `docs/theory/ESTRUCTURA_IDEAL_ORGANISMO_EDUCATIVO_VITAL.md`).
-> **Estado:** M1-M6 implementados (28-08-2026) — motor (INV2-EDU, regla de oro, triada, **árbol de habilidades**), Foro Abierto (+ respuestas), Talleres, Grupos/ECEs y Células Madre, UI y puente años↔índice, guía del foro (MiniMax). Track paralelo (MVP): `plataforma_educativa/` con triada de mentoría completada.
+> **Estado:** M1-M8 implementados (28-08-2026) + **M9 Parlamento Educativo** (29-08-2026) — motor (INV2-EDU, regla de oro, triada, árbol de habilidades), Foro Abierto (+ respuestas), Talleres, Grupos/ECEs y Células Madre, UI y puente años↔índice **gobernable por votación**, guía del foro (MiniMax). Track paralelo (MVP): `plataforma_educativa/` con triada de mentoría completada.
 > **Regla de coherencia:** cada hito = commit conventional en español + tests + entrada en `docs/architecture/atribuciones_sinteticas.md`.
 
 ---
@@ -66,6 +66,22 @@
 - `prereqs_met`/`path_of` (camino de maestría), `with_node` (fork: el tejido se expande), `build_canonical_tree` (8 ramas canónicas = el mismo cosmos del prototipo) y `evaluate_unlock` (prerrequisitos + vacuación + triada en un veredicto serializable).
 - API: `POST /workshops` valida `skill_node` como nodo del árbol (`rama` | `rama/nodo`); el cosmos completo por tema vive en `plataforma_educativa/`.
 - **Tests**: 28 (20 motor `tests/test_maxocontracts/test_tree.py` + 8 validación API); commit `4071457`.
+
+## M9 ✅ Parlamento Educativo — el umbral canónico se vota (29-08-2026)
+
+**Problema resuelto:** M5 dejó `educacion_indice()` con el umbral congelado en 12 años y anotó "umbral canónico a decidir en parlamento" — pero no existía ningún mecanismo para votarlo: era una constante sagrada con la puerta cerrada.
+
+**Implementación (la ley NO se vota; la plenitud sí):**
+
+| Archivo | Cambio |
+|---|---|
+| `app/schema.sql` | Tablas `edu_parameters` (umbral vigente + procedencia T13; CHECK ≥ 12 — INV2-EDU — y ≤ 30) y `edu_parameter_resolutions` (historial vinculante, T13) |
+| `app/voting_bp.py` | `POST/GET /voting/parliament/educativo` (categoría critical 60/75); acción vinculante `set_edu_umbral` despachada por `_apply_passed_action`; guardarraíles: `_validate_edu_umbral_params` (12-30, finito, no bool), anti-flip-flop 14 días (`EDU_COOLDOWN_DAYS`), escalera de confianza N1+ (guard añadido también al parlamento de α/β/γ/δ); finitud NaN/∞ y no-bool en ambos validadores |
+| `app/sdv_analyzer.py` | `educacion_indice(anos, umbral_anios=EDU_ANIOS_MINIMOS)` parametrizada (retrocompatible) + `get_edu_umbral_anios(conn)` (última resolución o canon; tabla ausente → canon) |
+| Tests | `tests/test_parlamento_educativo.py` (20: validación, creación, flujo aprobado/rechazado, cooldown, N0, NaN/∞, analizador con umbral comunitario) + `tests/test_sdv_educacion_puente.py` (+5 de umbral parametrizado) + `tests/test_maxocontracts/test_parliament.py` (+casos NaN/bool) |
+| Docs | `docs/architecture/PROPUESTA_PARLAMENTO_UMBRAL_EDUCATIVO.md` — la propuesta lista para la comunidad (consecuencia honesta: umbral > 12 → quien tiene la ley obtiene índice < 1.0, narrativa "riesgo"; fundamento: Rondas §1.1 + δ §5.7) |
+
+**Semántica:** la aspiración de plenitud es política votable (12-30); la ley ≥ 12 años es axioma del motor (`SDV.educacion_anos_minimos`) y no se toca. El parlamento ya sabe qué hacer: `_apply_passed_action` ejecuta y el analizador SDV recalibra los índices con el canónico vigente.
 
 ---
 
