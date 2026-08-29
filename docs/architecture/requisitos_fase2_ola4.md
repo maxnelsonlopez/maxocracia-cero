@@ -161,6 +161,7 @@ verificación determinista — Patrón Puente).
 | RF-EDU-12 | **Búsqueda textual en la plaza**: `GET /forum/posts?q=` (título o cuerpo, literal, case-insensitive, comodines escapados) + input en `/foro` | reflexión §3.1 | ✅ (6 tests, 29-08-2026) |
 | RF-EDU-13 | **Plaza hablable (lenguaje sencillo)**: etiquetas en lenguaje de calle + `InfoTip` (ayuda emergente ℹ️) para el concepto complejo — patrón del repo en `frontend/app/components/ui/InfoTip.tsx`; aplicado en foro/talleres/grupos/guía/votaciones/Form Cero | T13 (lenguaje civil) + reflexión §3 | ✅ (29-08-2026) |
 | RF-EDU-14 | **Hub educativo + Guía↔foro**: `/foro` muestra los tres caminos (talleres, grupos/ECEs, células madre) con enlaces y la Guía anuncia la plaza | reflexión §3.3-3.4 | ✅ (29-08-2026) |
+| RF-EDU-15 | **Tejido visible + triada en UI**: `GET /workshops/tree` (ramas canónicas: nodos, prereqs, dificultad — estado, no tribunal) y concesión de habilidad por modal con la lista de inscritos (adiós `prompt()`; solo el facilitador) | OEV §1.2 + reflexión §3.2 | ✅ (3 tests + modal, 29-08-2026) |
 
 ---
 

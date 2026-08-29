@@ -68,7 +68,8 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 | **Modo Escudo Doméstico** (22-08-2026, hallazgo de campo de Max): ESI roja ya no bloquea el registro propio; cifras del protegido ocultas a los demás; frontend persiste CDD real con vista discreta; `wants_support` opt-in privado como gancho hacia la Red de Apoyo (Cap 16.5 §16.5.12) | ✅ código + libro · 🔴 puente v2: ofertas publicadas por la comunidad |
 | **Rama educativa M1-M8** (28-08-2026, sesión con Max): INV2-EDU en motor; **M2 Foro Abierto** + respuestas (22 tests), **M3 Talleres + regla de oro** (`maxocontracts/skills.py`; triada con veto), **M4 Grupos/ECEs + Células Madre** (12 tests), **M5 UI** + puente `educacion_indice()`, **M6 árbol de habilidades** (`maxocontracts/tree.py`, 20 tests), **M7 Form Cero con años** (`educacion_anos` + puente vivo; 12 tests; revisado por MiniMax), **M8 puente siamés foro↔Plaza de Apoyo** (Cap 12.3.1/bombeo: la necesidad del foro sangra a `participant_needs` — la tabla del matching — sin duplicados; `in_plaza` T13) · MiniMax redactó la guía del foro y revisó M7 | ✅ M1-M8 + docs |
 | **M9 Parlamento Educativo** (29-08-2026): el umbral canónico del puente años↔índice deja de ser constante sagrada — `POST/GET /voting/parliament/educativo` (categoría critical 60/75, T13), acción vinculante `set_edu_umbral`, tablas `edu_parameters`/`edu_parameter_resolutions` (CHECK 12-30), `educacion_indice(anos, umbral)` parametrizada + `get_edu_umbral_anios()` con fallback al canon, anti-flip-flop 14 días, escalera N1+ en ambos parlamentos, finitud (NaN/∞) y no-bool en ambos validadores · Nemotron revisó el diseño (confirmó Rondas/δ, detectó el hueco anti-flip-flop) y MiniMax la propuesta (corrigió atribuciones: "parlamento" no es término del libro — es Cap. 11 §11.7; el 60% de quórum vive en el blueprint) | ✅ **pendiente de la rama CERRADO** · doc `PROPUESTA_PARLAMENTO_UMBRAL_EDUCATIVO.md` · 🔴 siguiente hito estructural: **síntesis de identidad del OEV** (:5001 ↔ :5050) |
-| **M10 Plaza Hablable** (29-08-2026, decisión de Max): **la UI habla en lenguaje de calle, el concepto complejo vive en ayuda emergente** — `InfoTip.tsx` (componente reutilizable ℹ️, hover/clic; `Input` acepta `hint`) + etiquetas humanas en `/foro`, `/talleres`, `/grupos`, `/guia`, `/votaciones` (ParlamentoParams → "Los valores de la vida"; ParlamentoEducativo → "La escuela que queremos") y Form Cero ("¿Cuántos años has estudiado?"). Incluye **búsqueda textual en la plaza** (`GET /forum/posts?q=`, literal + case-insensitive, 6 tests), **hub educativo** (tres caminos con enlaces), **Guía↔foro** (la Guía anuncia la plaza) y **UI del Parlamento Educativo** en `/votaciones` | ✅ (tsc limpio; commits `f2fc7f5`, `c447c9d`, `93543d3`) · 🔴 queda un solo ítem UX de la reflexión: la **triada sin `prompt()`** en `/talleres` (refactor de modal con lista de enrolados) |
+| **M10 Plaza Hablable** (29-08-2026, decisión de Max): **la UI habla en lenguaje de calle, el concepto complejo vive en ayuda emergente** — `InfoTip.tsx` (componente reutilizable ℹ️, hover/clic; `Input` acepta `hint`) + etiquetas humanas en `/foro`, `/talleres`, `/grupos`, `/guia`, `/votaciones` (ParlamentoParams → "Los valores de la vida"; ParlamentoEducativo → "La escuela que queremos") y Form Cero ("¿Cuántos años has estudiado?"). Incluye **búsqueda textual en la plaza** (`GET /forum/posts?q=`, literal + case-insensitive, 6 tests), **hub educativo** (tres caminos con enlaces), **Guía↔foro** (la Guía anuncia la plaza) y **UI del Parlamento Educativo** en `/votaciones` | ✅ (tsc limpio; commits `f2fc7f5`, `c447c9d`, `93543d3`) |
+| **M11 Tejido visible y triada en UI** (29-08-2026): `GET /workshops/tree` (ramas canónicas del árbol — estado, no tribunal), detalle del taller con lista de inscritos, y **concesión por modal** (sin `prompt()/confirm()` — el último ítem UX de la reflexión): solo el facilitador ve el botón; avales explicados con InfoTip; horas de mentoría | ✅ (3 tests; commits `d4c5a24`, `b6639ed`) · **La UI del OEV de la rama educativa está COMPLETA** — queda solo la síntesis de identidad (:5001 ↔ :5050) |
 | Suite de tests | **858/858** (verificado 29-08-2026 tras M9; plataforma educativa 32/32 en su propio venv/contexto — excluida de la recolección raíz vía `pytest.ini` `norecursedirs`; validador conceptual OK) |
 
 **Decisiones canónicas a respetar:**
@@ -108,7 +109,7 @@ npx tsc --noEmit
 
 ## 4. Pendientes priorizados
 
-**La rama educativa M1-M10 está CERRADA (29-08-2026).** Lo que sigue:
+**La rama educativa M1-M11 está CERRADA (29-08-2026) — UI completa.** Lo que sigue:
 
 1. **Síntesis de identidad del OEV** (hito estructural, diseño primero): UNA sola puerta
    entre la app principal (:5001) y `plataforma_educativa/` (:5050). Empezar por
@@ -118,15 +119,16 @@ npx tsc --noEmit
    (b) espejo de identidad (tabla `users` común o mapeo), o (c) puerta única con
    sesión puente; documentar la decisión en `docs/architecture/` antes de implementar.
    Teoría: OEV §1.7-1.8 (foro, talleres, ECEs, células madre) y la reflexión §5.1.
-2. **Triada sin `prompt()` en `/talleres`** (único ítem UX restante de la reflexión §3.2):
-   modal con la lista de enrolados del taller en lugar de pedir `user_id` a mano;
-   los 3 confirm()→ accionables con checkboxes y veredicto antes de enviar.
-3. **Expandir el patrón "plaza hablable"** (`InfoTip`) al resto del repo: `matching`,
+   **Recordatorio de Max**: la Maxocracia YA funciona como proceso — la demostración
+   sintética viva está en `atribuciones_sinteticas.md` (subagentes, oráculos con veto,
+   disidente, delegación verificable); la cohorte humana es la siguiente capa empírica,
+   no la única prueba de vida.
+2. **Expandir el patrón "plaza hablable"** (`InfoTip`) al resto del repo: `matching`,
    `vhv`, `micromax`, `contracts` — la rama educativa marcó el modelo (decisión de Max).
-4. **Hardening/performance** (candidatos): N+1 de `reply_count` en el foro (COUNT GROUP
+3. **Hardening/performance** (candidatos): N+1 de `reply_count` en el foro (COUNT GROUP
    BY + paginación por cursor); oráculos síncronos (120 s) → colas/async cuando el
    parlamento vote de verdad.
-5. Mantener mapas y handoff al día (regla continua)
+4. Mantener mapas y handoff al día (regla continua)
 
 **Futuro posible (fuera de la Ola 4)**: hitos del informe del Reino Sintético
 (`docs/architecture/informe_reino_sintetico_2026-08-12.md` §7): EIR por entidad sintética, AVA con
@@ -152,6 +154,8 @@ open), 3 violaciones INV1 sin alerta. TODO.md actualizado (Semana 9-12 parcial).
 ## 5. Historia reciente (git log, maxocracia)
 
 ```
+b6639ed feat(edu-ux): arbol visible y concesion por triada en UI (sin prompt())
+d4c5a24 feat(workshops): tejido visible y triada con la lista del taller
 93543d3 docs(maps): RF-EDU-12/13/14 y mapa frontend de la plaza hablable
 c447c9d feat(edu-ux): plaza hablable - lenguaje sencillo con InfoTip, hub, guia<->foro y parlamento educativo en UI
 f2fc7f5 feat(forum): busqueda textual en la plaza - la plaza se habla
