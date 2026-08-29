@@ -109,6 +109,7 @@ def create_app(db_path=None):
     from .vhv_bp import vhv_bp
     from .voting_bp import voting_bp
     from .workshops_bp import init_workshops_tables, workshops_bp
+    from .edu_bridge_bp import init_edu_bridge_tables, edu_bridge_bp
     from .synthetic_sessions import (
         init_synthetic_session_tables,
         synthetic_sessions_bp,
@@ -139,6 +140,7 @@ def create_app(db_path=None):
     app.register_blueprint(forum_bp)
     app.register_blueprint(workshops_bp)
     app.register_blueprint(groups_bp)
+    app.register_blueprint(edu_bridge_bp)
 
     # Inicializar tablas específicas si no existen
     init_subscription_tables(app)
@@ -149,7 +151,9 @@ def create_app(db_path=None):
     init_forum_tables(app)
     init_workshops_tables(app)
     init_groups_tables(app)
+    init_edu_bridge_tables(app)
     init_synthetic_session_tables(app)
+
 
     # placeholder imports to ensure modules loaded
     # other optional blueprints can be imported here

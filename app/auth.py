@@ -84,7 +84,15 @@ def register():
         db.commit()
 
         # Crear tokens para el nuevo usuario (predeterminado no admin)
-        access_token = create_token({"user_id": user_id, "email": email, "is_admin": 0})
+        access_token = create_token(
+            {
+                "user_id": user_id,
+                "email": email,
+                "is_admin": 0,
+                "name": name,
+                "alias": alias,
+            }
+        )
 
         # Generar refresh token
         jti = str(uuid4())
@@ -130,8 +138,15 @@ def login():
 
     # Create access token (expires in 1 hour)
     access_token = create_token(
-        {"user_id": user["id"], "email": user["email"], "is_admin": user["is_admin"]}
+        {
+            "user_id": user["id"],
+            "email": user["email"],
+            "is_admin": user["is_admin"],
+            "name": user["name"] if "name" in user.keys() else None,
+            "alias": user["alias"] if "alias" in user.keys() else None,
+        }
     )
+
 
     # Generate refresh token (expires in 30 days)
     jti = str(uuid4())
@@ -259,6 +274,8 @@ def refresh():
             "user_id": data.get("user_id"),
             "email": data.get("email"),
             "is_admin": data.get("is_admin", 0),
+            "name": data.get("name"),
+            "alias": data.get("alias"),
         }
         new_token = create_token(payload)
         return jsonify({"token": new_token})
@@ -298,8 +315,15 @@ def refresh():
 
     # Create new access token
     access_token = create_token(
-        {"user_id": user["id"], "email": user["email"], "is_admin": user["is_admin"]}
+        {
+            "user_id": user["id"],
+            "email": user["email"],
+            "is_admin": user["is_admin"],
+            "name": user["name"] if "name" in user.keys() else None,
+            "alias": user["alias"] if "alias" in user.keys() else None,
+        }
     )
+
 
     # Prepare response data
     response_data = {

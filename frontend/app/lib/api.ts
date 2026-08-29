@@ -241,5 +241,35 @@ export const api = {
     const res = await apiFetch(url);
     if (!res.ok) throw new Error("Error loading dashboard");
     return res.json();
+  },
+
+  // Educational Bridge & OEV Identity
+  getEduBridgeStatus: async () => {
+    const res = await apiFetch("/edu-bridge/status");
+    if (!res.ok) throw new Error("Error loading educational bridge status");
+    return res.json();
+  },
+  syncEduMastery: async (data: {
+    topic_slug: string;
+    branch_slug: string;
+    score?: number;
+    mentor_rounds?: number;
+    triada_approved?: boolean;
+  }) => {
+    const res = await apiFetch("/edu-bridge/sync-mastery", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Error syncing educational mastery");
+    }
+    return res.json();
+  },
+  getEduEvents: async () => {
+    const res = await apiFetch("/edu-bridge/events");
+    if (!res.ok) throw new Error("Error loading educational events");
+    return res.json();
   }
 };
+
