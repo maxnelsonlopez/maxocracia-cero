@@ -158,6 +158,9 @@ verificación determinista — Patrón Puente).
 | RF-EDU-9 | **Triada de mentoría en `plataforma_educativa/`**: `/mentorship/verify` (solo coordinador; validated/vetoed/pending); el árbol expone la triada por tema | prototipo OEV | ✅ (7 tests, 32/32 de la plataforma) |
 | RF-EDU-10 | **Anti-gamificación**: sin rankings por persona, sin cronometraje del ensayo-error; estado, no tribunal | Siamesa §3g.5 | ✅ (diseño respetado en toda la capa) |
 | RF-EDU-11 | **Parlamento Educativo**: el umbral canónico del puente años↔índice es votable (12-30, categoría critical 60/75, T13, anti-flip-flop 14 días); la ley ≥ 12 (INV2-EDU) no se vota | M5 + reflexión §5 | ✅ (`/voting/parliament/educativo`, 16 tests, 29-08-2026) |
+| RF-EDU-12 | **Búsqueda textual en la plaza**: `GET /forum/posts?q=` (título o cuerpo, literal, case-insensitive, comodines escapados) + input en `/foro` | reflexión §3.1 | ✅ (6 tests, 29-08-2026) |
+| RF-EDU-13 | **Plaza hablable (lenguaje sencillo)**: etiquetas en lenguaje de calle + `InfoTip` (ayuda emergente ℹ️) para el concepto complejo — patrón del repo en `frontend/app/components/ui/InfoTip.tsx`; aplicado en foro/talleres/grupos/guía/votaciones/Form Cero | T13 (lenguaje civil) + reflexión §3 | ✅ (29-08-2026) |
+| RF-EDU-14 | **Hub educativo + Guía↔foro**: `/foro` muestra los tres caminos (talleres, grupos/ECEs, células madre) con enlaces y la Guía anuncia la plaza | reflexión §3.3-3.4 | ✅ (29-08-2026) |
 
 ---
 

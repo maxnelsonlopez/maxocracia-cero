@@ -32,9 +32,10 @@ las secciones desconectadas**. Generado el 11-08-2026 con verificación determin
 | `/transparency` | 12+client | `/subscriptions/transparency-report` | subscriptions |
 | `/verificador` | 12+client | `/verificador/cohort` | verifier |
 | `/guia` | 552 | `/guide/chat`, `/guide/trust-assessment`, `/guide/director-candidacy` | guide |
-| `/foro` | ~340 | `/forum/posts` (GET/POST), `/forum/posts/{id}`, `/forum/posts/{id}/close`, `/forum/needs` | forum (rama educativa M2) |
+| `/foro` | ~450 | `/forum/posts` (GET/POST, filtros type/tag/status/**q**), `/forum/posts/{id}`, `/forum/posts/{id}/close`, `/forum/needs` | forum (rama educativa M2) + hub educativo + búsqueda (29-08) |
 | `/talleres` | ~400 | `/workshops` (GET/POST), `/workshops/{id}`, `/enroll`, `/outputs`, `/grant-skill`, `/close` | workshops + motor de vacuación (M3) |
 | `/grupos` | ~330 | `/groups` (GET/POST), `/groups/{id}`, `/join`, `/child`, `/close` | groups — ECEs + Células Madre (M4) |
+| `/votaciones` | 662+ | `ParlamentoParams` + **`ParlamentoEducativo`** (29-08): `/voting/parliament/params`, `/voting/parliament/educativo` | voting + M9 UI |
 | `/admin/contracts` | 620 | `/contracts/`, `/contracts/stats` | contracts |
 | `/admin/dashboard` | 276 | `/forms/dashboard/alerts|stats|trends`, `/subscriptions/admin/stats` | forms, subscriptions |
 | `/admin/matching` | 529 | `/forms/matching/gaps`, `/forms/matching/urgent` | forms |
