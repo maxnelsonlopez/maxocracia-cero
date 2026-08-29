@@ -5,6 +5,8 @@ Endpoints autenticados por token (cabecera ``X-Auth-Token``). Devuelven JSON.
 """
 
 import json
+import os
+import urllib.request
 from datetime import datetime, timedelta, timezone
 from datetime import date as _date
 
@@ -63,6 +65,49 @@ def _user_state(user_id, topic_id):
     }
 
 
+def _report_mastery_to_maxocracia(user_id, topic_id, score, mentor_rounds):
+    """Reporta una maestría verificada al puente (:5001) — sincronización
+    automática del OEV (M12). Best-effort: el nodo autónomo jamás se rompe
+    porque el puente esté caído o no esté federado; sin configuración no
+    reporta (el nodo autónomo sigue siendo autónomo)."""
+    url = os.environ.get("EDU_BRIDGE_URL")
+    secret = os.environ.get("EDU_BRIDGE_SERVICE_TOKEN")
+    if not url or not secret:
+        return False
+    db = get_db()
+    maxo = db.execute("SELECT maxo_user_id FROM users WHERE id = ?", (user_id,)).fetchone()
+    if maxo is None or not maxo["maxo_user_id"]:
+        return False  # nodo autónomo: sin identidad federada, nada que sincronizar
+    topic = db.execute("SELECT slug, branch_id FROM topics WHERE id = ?", (topic_id,)).fetchone()
+    if topic is None:
+        return False
+    branch = db.execute("SELECT slug FROM branches WHERE id = ?", (topic["branch_id"],)).fetchone()
+    if branch is None:
+        return False
+    payload = {
+        "user_id": int(maxo["maxo_user_id"]),
+        "topic_slug": topic["slug"],
+        "branch_slug": branch["slug"],
+        "score": score,
+        "mentor_rounds": mentor_rounds or 0,
+        "triada_approved": True,
+    }
+    try:
+        req = urllib.request.Request(
+            url.rstrip("/") + "/edu-bridge/sync-mastery",
+            method="POST",
+            headers={
+                "Content-Type": "application/json",
+                "X-Edu-Bridge-Token": secret,
+            },
+            data=json.dumps(payload).encode("utf-8"),
+        )
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            return resp.status == 201
+    except Exception:
+        return False
+
+
 def _upsert_user_state(user_id, topic_id, estado=None, score=None, mentor_rounds=None,
                        mentorship_approved=None):
     """Inserta o actualiza la fila de progreso user_topics."""
@@ -71,6 +116,7 @@ def _upsert_user_state(user_id, topic_id, estado=None, score=None, mentor_rounds
         "SELECT * FROM user_topics WHERE user_id = ? AND topic_id = ?",
         (user_id, topic_id),
     ).fetchone()
+    transitioned_to_mastered = False
     if current is None:
         db.execute(
             "INSERT INTO user_topics (user_id, topic_id, estado, score, updated_at, "
@@ -85,6 +131,9 @@ def _upsert_user_state(user_id, topic_id, estado=None, score=None, mentor_rounds
                 1 if mentorship_approved else 0,
             ),
         )
+        transitioned_to_mastered = estado == "mastered"
+        final_score = score
+        final_mr = mentor_rounds if mentor_rounds is not None else 0
     else:
         new_estado = estado if estado is not None else current["estado"]
         new_score = score if score is not None else current["score"]
@@ -99,7 +148,15 @@ def _upsert_user_state(user_id, topic_id, estado=None, score=None, mentor_rounds
             "mentor_rounds = ?, mentorship_approved = ? WHERE user_id = ? AND topic_id = ?",
             (new_estado, new_score, _now(), new_mr, new_ma, user_id, topic_id),
         )
+        transitioned_to_mastered = new_estado == "mastered" and current["estado"] != "mastered"
+        final_score = new_score
+        final_mr = new_mr
     db.commit()
+
+    # La validación es la transferencia: al vacuar (mastered), el nodo reporta
+    # al Perfil Vital con su token de servicio (M12, best-effort).
+    if transitioned_to_mastered:
+        _report_mastery_to_maxocracia(user_id, topic_id, final_score, final_mr)
 
 
 def _topic_questions(topic_id):

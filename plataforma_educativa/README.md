@@ -38,6 +38,15 @@ autónomo local sigue funcionando). Sin `EDU_BRIDGE_SERVICE_TOKEN` el puente
 `/edu-bridge/sync-mastery` rechaza con 403 (fail-closed): la escalera de confianza
 no se compra con una declaración.
 
+**Sincronización automática de maestrías**: cuando el nodo verifica una maestría
+(`mastered` = test aprobado + mentoría a otros), la reporta al puente de :5001 con
+su token de servicio (la persona no necesita estar conectada ni tener su JWT). Es
+best-effort: si el puente está caído, el nodo sigue vivo:
+
+```powershell
+$env:EDU_BRIDGE_URL = "http://127.0.0.1:5001"   # el :5001 de Maxocracia
+```
+
 ## Cómo correr (Windows)
 
 Desde la carpeta `plataforma_educativa/`:
