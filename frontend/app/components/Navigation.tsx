@@ -77,10 +77,23 @@ const navSections = [
   },
 ];
 
+// Nodo educativo del OEV (espejo del default del backend `EDUCATIONAL_PLATFORM_URL`).
+const OEV_URL = process.env.NEXT_PUBLIC_EDU_PLATFORM_URL || "http://localhost:5050";
+
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { isAuthenticated, user, logout } = useAuth();
+
+  // Puerta del OEV (:5050): el JWT viaja en el FRAGMENTO de la URL (#jwt=...),
+  // que nunca llega al servidor (no queda en logs); el nodo lo captura una vez
+  // y lo usa como identidad federada (M12).
+  const enterOevNode = () => {
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("mc_access_token") : null;
+    const fragment = token ? `#jwt=${encodeURIComponent(token)}` : "";
+    window.location.href = `${OEV_URL}/${fragment}`;
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -146,6 +159,17 @@ export function Navigation() {
                   <Compass className="w-3.5 h-3.5" />
                   Guía
                 </Link>
+              )}
+
+              {isAuthenticated && (
+                <button
+                  onClick={enterOevNode}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/20 transition-all border border-emerald-500/20 mr-1 shadow-lg shadow-emerald-500/5 cursor-pointer"
+                  title="Entrar al nodo educativo con tu identidad (una sola puerta)"
+                >
+                  <GraduationCap className="w-3.5 h-3.5" />
+                  Nodo Educativo
+                </button>
               )}
 
               {isAuthenticated && (
@@ -269,6 +293,16 @@ export function Navigation() {
                   <MobileNavLink href="/foro" label="Foro Abierto" icon={MessagesSquare} onClick={() => setIsOpen(false)} />
                   <MobileNavLink href="/talleres" label="Talleres de Aprendizaje" icon={GraduationCap} onClick={() => setIsOpen(false)} />
                   <MobileNavLink href="/grupos" label="Grupos y Células" icon={Users} onClick={() => setIsOpen(false)} />
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      enterOevNode();
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium text-emerald-300 hover:text-white hover:bg-slate-800 transition-all duration-200 text-left w-full"
+                  >
+                    <GraduationCap className="w-5 h-5 text-emerald-500" />
+                    Nodo Educativo (plaza viva)
+                  </button>
                   <MobileNavLink href="/perfil" label="Perfil Vital" icon={Heart} onClick={() => setIsOpen(false)} />
                 </div>
               )}

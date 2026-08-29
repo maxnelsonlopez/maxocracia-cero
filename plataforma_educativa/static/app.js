@@ -364,8 +364,31 @@ function init() {
   $("btn-test-submit").addEventListener("click", submitTest);
   $("tree-search").addEventListener("input", function () { loadAll(); });
 
+  // Puerta del OEV (M12): la identidad llega por el FRAGMENTO de la URL
+  // (#jwt=...), que nunca viajó al servidor (no quedó en logs). Se captura una
+  // sola vez, se guarda como token federado y se limpia la URL.
+  captureFederatedJwt();
+
   if (getToken()) { showApp(); loadAll(); }
   else { showAuth(); }
+}
+
+// ------------------------------------------------------------------
+// Identidad federada desde la Maxocracia (:5001) — Una sola puerta
+// ------------------------------------------------------------------
+function captureFederatedJwt() {
+  var m = location.hash.match(/^#jwt=([^&]+)/);
+  if (!m) return;
+  try {
+    var jwt = decodeURIComponent(m[1]);
+    if (jwt && jwt.split(".").length === 3) {
+      setToken(jwt);
+      history.replaceState(null, "", location.pathname + location.search);
+      console.info("Identidad federada del OEV capturada (JWT de Maxocracia).");
+    }
+  } catch (e) {
+    console.warn("Fragmento federado inválido, se ignora.", e);
+  }
 }
 
 function showError(msg) {
