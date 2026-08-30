@@ -97,6 +97,11 @@ function renderCity(branches) {
       html += '<button class="city-lot" data-action="lot" data-topic="' + t.id + '" title="' + esc(t.titulo) + '">' +
         icon + '<span>' + esc(t.titulo) + "</span>" +
         (t.dificultad ? '<small>' + "★".repeat(t.dificultad) + "</small>" : "") + "</button>";
+      // La biblioteca de la ciudad (M15): los lotes con material se leen.
+      if (t.materials > 0) {
+        html += '<button class="city-lot lot-library" data-action="library" data-topic="' + t.id +
+          '" title="La biblioteca del lote: ' + esc(t.titulo) + '">📖</button>';
+      }
     });
     html += "</div></div>";
   });
@@ -223,6 +228,10 @@ function renderTopic(t) {
   var st = t.estado;
   var actions = "";
   var showTeach = st === "test_passed" || st === "mastered";
+  // La biblioteca de la ciudad (M15): si el lote tiene material, se lee.
+  if (t.materials > 0) {
+    actions += '<button class="small" data-action="library" data-topic="' + t.id + '">📖 Guía</button>';
+  }
   if (st === "not_seen" || st === "learning") {
     if (!locked) {
       actions += '<button class="small" data-action="start" data-topic="' + t.id + '">Empezar</button>';
@@ -234,7 +243,7 @@ function renderTopic(t) {
     if (!locked) actions += '<button class="small primary" data-action="test" data-topic="' + t.id + '">Rehacer test</button>';
     if (showTeach) {
       if (t.evidence) {
-        actions += '<span class="badge mastered" title="' + esc(t.evidence.titulo) + '">Material ' + esc(t.evidence.tipo) + " ✓</span>";
+        actions += '<button class="small" data-action="evidence-view" data-topic="' + t.id + '" title="' + esc(t.evidence.titulo) + '">🎁 Ver mi material</button>';
       } else {
         actions += '<button class="small" data-action="evidence" data-topic="' + t.id + '">Aportar material</button>';
       }
@@ -262,6 +271,8 @@ function bindTopicButtons() {
       else if (action === "test") openTest(topicId);
       else if (action === "mentor") requestMentorship(topicId);
       else if (action === "evidence") openEvidence(topicId);
+      else if (action === "evidence-view") openEvidenceView(topicId);
+      else if (action === "library") openLibrary(topicId);
       else if (action === "lot") showTopicHint(topicId);
     });
   });
@@ -381,11 +392,212 @@ function submitTest() {
   api("/api/topics/" + testTopic + "/test", { method: "POST", body: { answers: answers } })
     .then(function (data) {
       closeTest();
-      alert("Resultado: " + data.correct + "/" + data.total + " (" + data.score + "%). " +
-        (data.passed ? "¡Aprobado!" : "Aún no alcanzas el 70%."));
+      celebrate(data.passed, data.correct, data.total, data.score);
       loadAll();
     })
     .catch(console.error);
+}
+
+// ------------------------------------------------------------------
+// La Biblioteca de la Ciudad (M15): guías propias y enlaces al mundo.
+// El mini-markdown es deliberadamente mínimo (títulos en negrita, listas,
+// citas) — la biblioteca es un mapa, no un curso entero.
+// ------------------------------------------------------------------
+var libraryTopic = null;
+var libraryTopicTitle = "";
+
+function findTopic(topicId) {
+  var found = null;
+  (cityBranches || []).some(function (b) {
+    return b.topics.some(function (t) {
+      if (t.id === topicId) { found = t; return true; }
+      return false;
+    });
+  });
+  return found;
+}
+
+function mdInline(s) {
+  return s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+          .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+}
+
+function renderMarkdown(md) {
+  var safe = esc(md);
+  var lines = safe.split("\n");
+  var html = "";
+  var inList = false;
+  lines.forEach(function (line) {
+    var t = line.trim();
+    if (t === "") { if (inList) { html += "</ul>"; inList = false; } return; }
+    if (t.indexOf("> ") === 0) {
+      if (inList) { html += "</ul>"; inList = false; }
+      html += "<blockquote>" + mdInline(t.slice(2)) + "</blockquote>";
+      return;
+    }
+    if (t.indexOf("- ") === 0) {
+      if (!inList) { html += "<ul>"; inList = true; }
+      html += "<li>" + mdInline(t.slice(2)) + "</li>";
+      return;
+    }
+    if (inList) { html += "</ul>"; inList = false; }
+    html += "<p>" + mdInline(t) + "</p>";
+  });
+  if (inList) html += "</ul>";
+  return html;
+}
+
+function openLibrary(topicId) {
+  libraryTopic = topicId;
+  var topic = findTopic(topicId);
+  libraryTopicTitle = topic ? topic.titulo : "";
+  $("library-topic").textContent = "Lote: " + libraryTopicTitle;
+  api("/api/topics/" + topicId + "/materials").then(function (data) {
+    renderLibraryList(data.materials || []);
+    $("library-modal").hidden = false;
+  }).catch(console.error);
+}
+
+function renderLibraryList(materials) {
+  var html = "";
+  var guias = materials.filter(function (m) { return m.tipo === "guia"; });
+  var enlaces = materials.filter(function (m) { return m.tipo === "enlace"; });
+  if (!materials.length) {
+    html = '<p class="muted">Esta biblioteca se está sembrando. Mientras tanto, el test te lleva de la mano.</p>';
+  } else {
+    if (guias.length) {
+      html += '<h3 class="lib-section">📖 Guías de la ciudad <span class="muted">(nuestras, llegan al instante)</span></h3><div class="lib-list">';
+      guias.forEach(function (g) {
+        html += '<div class="lib-item"><div class="lib-item-main"><strong>' + esc(g.titulo) +
+          "</strong><span class='muted'> por " + esc(g.autor) + "</span></div>" +
+          '<button class="small primary" data-read="' + g.id + '">Leer</button></div>';
+      });
+      html += "</div>";
+    }
+    if (enlaces.length) {
+      html += '<h3 class="lib-section">🌍 El mundo <span class="muted">(fuentes externas)</span></h3><div class="lib-list">';
+      enlaces.forEach(function (e) {
+        html += '<div class="lib-item"><strong>' + esc(e.titulo) + "</strong>" +
+          '<a class="link-btn" href="' + esc(e.url) + '" target="_blank" rel="noopener noreferrer">Abrir ↗</a></div>';
+      });
+      html += "</div>";
+    }
+  }
+  var q = encodeURIComponent(libraryTopicTitle);
+  html += '<h3 class="lib-section">🔎 Buscar más profundo <span class="muted">(el mundo es grande, la ciudad te da el mapa)</span></h3><div class="lib-list">' +
+    '<a class="link-btn" href="https://es.khanacademy.org/search?page_search_query=' + q + '" target="_blank" rel="noopener noreferrer">Khan Academy 🔎</a>' +
+    '<a class="link-btn" href="https://www.youtube.com/results?search_query=' + q + '" target="_blank" rel="noopener noreferrer">YouTube 🔎</a></div>';
+  $("library-body").innerHTML = html;
+  document.querySelectorAll("[data-read]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      openMaterial(Number(btn.getAttribute("data-read")));
+    });
+  });
+}
+
+function openMaterial(materialId) {
+  api("/api/materials/" + materialId).then(function (data) {
+    var m = data.material || {};
+    var html = '<button class="ghost small" data-back="1">📚 Volver a la lista</button>' +
+      '<div class="lib-read"><h3>' + esc(m.titulo) + "</h3>" +
+      "<p class='muted'>" + esc(m.autor) + "</p>" +
+      renderMarkdown(m.contenido || "(sin contenido todavía)") + "</div>";
+    $("library-body").innerHTML = html;
+    document.querySelector("[data-back]").addEventListener("click", function () {
+      renderLibraryListFromServer();
+    });
+  }).catch(console.error);
+}
+
+function renderLibraryListFromServer() {
+  if (!libraryTopic) return;
+  api("/api/topics/" + libraryTopic + "/materials").then(function (data) {
+    renderLibraryList(data.materials || []);
+  });
+}
+
+function openEvidenceView(topicId) {
+  var topic = findTopic(topicId);
+  var ev = topic ? topic.evidence : null;
+  var html = "";
+  if (!ev) {
+    html = '<p class="muted">Aún no has aportado material en este lote.</p>';
+  } else if (ev.tipo === "texto") {
+    html = '<div class="lib-read"><h3>' + esc(ev.titulo) +
+      '</h3><p class="prewrap">' + esc(ev.texto || "") + "</p></div>";
+  } else {
+    html = '<div class="lib-read"><h3>' + esc(ev.titulo) + "</h3>" +
+      "<p class='muted'>Tipo: " + esc(ev.tipo) + "</p>" +
+      '<a class="link-btn" href="' + esc(ev.url || "#") + '" target="_blank" rel="noopener noreferrer">Abrir mi material ↗</a></div>';
+  }
+  $("evidence-view-body").innerHTML = html;
+  $("evidence-view-modal").hidden = false;
+}
+
+// ------------------------------------------------------------------
+// Compartir la luz (M15): muro de luces con opt-in retractable y SIN
+// ranking — el orden lo da el abecedario, jamás el puntaje.
+// ------------------------------------------------------------------
+function openLights() {
+  $("lights-body").innerHTML = '<p class="muted">Encendiendo luces…</p>';
+  $("lights-modal").hidden = false;
+  api("/api/me").then(function (me) {
+    var on = !!(me.user || {}).share_progress;
+    $("lights-toggle-input").checked = on;
+    updateLightsLabel(on);
+  }).catch(console.error);
+  loadLights();
+}
+
+function updateLightsLabel(on) {
+  $("lights-toggle-label").textContent = on ? "Mi luz está encendida 🌟" : "Mi luz está apagada";
+}
+
+function loadLights() {
+  api("/api/community/lights").then(renderLights).catch(console.error);
+}
+
+function renderLights(data) {
+  var html = '<div class="lights-summary"><span class="light-big">🏮 ' +
+    data.total_lights + "</span> luces encendidas hoy en la ciudad</div>";
+  if (data.by_branch.some(function (b) { return b.lights > 0; })) {
+    html += '<div class="chips">';
+    data.by_branch.forEach(function (b) {
+      if (b.lights > 0) {
+        html += '<span class="chip on">' + esc(b.nombre) + ": " + b.lights +
+          " luz" + (b.lights > 1 ? "es" : "") + "</span>";
+      }
+    });
+    html += "</div>";
+  }
+  if (!data.lights.length) {
+    html += '<p class="muted">Nadie ha encendido su luz todavía. Puedes ser quien alumbre el primer barrio.</p>';
+  } else {
+    html += '<div class="lights-grid">';
+    data.lights.forEach(function (l) {
+      var barrios = l.branches.filter(function (b) { return b.pct > 0; })
+        .map(function (b) { return esc(b.nombre) + " " + b.pct + "%"; }).join(" · ");
+      html += '<div class="light-card"><h3>🎇 ' + esc(l.username) + "</h3>" +
+        '<p class="muted">' + (barrios || "recién llegada, construyendo su primer lote") + "</p>" +
+        "<p><span class='badge passed'>" + l.mastered_total + " dominado" + (l.mastered_total === 1 ? "" : "s") +
+        "</span>" + (l.best_score != null ? " <span class='badge mastered'>mejor nota " + l.best_score + "%</span>" : "") +
+        "</p></div>";
+    });
+    html += "</div>";
+  }
+  html += '<p class="muted">El muro se ordena por el abecedario: en la ciudad nadie va primero que nadie.</p>';
+  $("lights-body").innerHTML = html;
+}
+
+// ------------------------------------------------------------------
+// Celebración (guardarraíl: jamás un ranking; la ciudad se ilumina junta)
+// ------------------------------------------------------------------
+function celebrate(passed, correct, total, score) {
+  $("celebrate-title").textContent = passed ? "¡La ciudad se iluminó! 🌟" : "Todavía no, y eso también enseña";
+  $("celebrate-body").textContent = passed
+    ? correct + "/" + total + " (" + score + "%). Un lote más iluminado en tu barrio. El camino se hace al andar."
+    : correct + "/" + total + " (" + score + "%). El lote se aprueba con 70%; hoy te llevas el aprendizaje — la ciudad te espera, sin prisa.";
+  $("celebrate-modal").hidden = false;
 }
 
 // ------------------------------------------------------------------
@@ -518,6 +730,26 @@ function init() {
   $("btn-test-submit").addEventListener("click", submitTest);
   $("btn-evidence-cancel").addEventListener("click", closeEvidence);
   $("btn-evidence-submit").addEventListener("click", submitEvidence);
+  $("btn-evidence-view-cancel").addEventListener("click", function () {
+    $("evidence-view-modal").hidden = true;
+  });
+  $("btn-library-cancel").addEventListener("click", function () {
+    $("library-modal").hidden = true;
+  });
+  $("btn-lights").addEventListener("click", openLights);
+  $("btn-lights-cancel").addEventListener("click", function () {
+    $("lights-modal").hidden = true;
+  });
+  $("lights-toggle-input").addEventListener("change", function () {
+    var on = this.checked;
+    api("/api/me/share-progress", { method: "POST", body: { on: on } }).then(function () {
+      updateLightsLabel(on);
+      loadLights();
+    }).catch(console.error);
+  });
+  $("btn-celebrate-close").addEventListener("click", function () {
+    $("celebrate-modal").hidden = true;
+  });
   $("tree-search").addEventListener("input", function () { loadAll(); });
 
   // Puerta del OEV (M12): la identidad llega por el FRAGMENTO de la URL

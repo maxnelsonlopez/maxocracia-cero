@@ -163,3 +163,78 @@ hr { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
 .option:hover { background: #f2f5f9; }
 .hint { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+
+/* La Biblioteca de la Ciudad (M15) */
+.lot-library { padding: 6px 8px; background: #f4f8ef; border-color: var(--ok); }
+.lot-library:hover { background: #e8f2e0; color: var(--ok); }
+.lib-section { font-size: 0.92rem; color: var(--brand); margin: 14px 0 6px; }
+.lib-section .muted { font-weight: 400; }
+.lib-list { display: flex; flex-direction: column; gap: 8px; }
+.lib-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 0.9rem;
+}
+.lib-item-main { display: flex; flex-direction: column; gap: 2px; }
+.lib-read { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+.lib-read h3 { color: var(--brand); }
+.lib-read blockquote {
+  border-left: 3px solid var(--accent); margin: 8px 0; padding: 4px 12px;
+  color: var(--muted); font-style: italic;
+}
+.lib-read ul { margin: 6px 0; }
+.link-btn {
+  display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px;
+  border: 1px solid var(--brand); border-radius: 8px; color: var(--brand);
+  text-decoration: none; font-size: 0.85rem; background: #fff;
+}
+.link-btn:hover { background: rgba(15,107,107,0.08); }
+.lib-list .link-btn { margin-left: 10px; }
+.prewrap { white-space: pre-wrap; }
+
+/* Compartir la luz (M15) */
+.lights-toggle { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.lights-toggle p { flex: 1 1 280px; margin: 0 0 6px; }
+.switch { position: relative; display: inline-block; width: 52px; height: 28px; flex-shrink: 0; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch-slider {
+  position: absolute; inset: 0; background: #ccd4de; border-radius: 28px;
+  transition: background 0.2s; cursor: pointer;
+}
+.switch-slider::before {
+  content: ""; position: absolute; width: 22px; height: 22px; left: 3px; top: 3px;
+  background: #fff; border-radius: 50%; transition: transform 0.2s;
+}
+.switch input:checked + .switch-slider { background: var(--accent); }
+.switch input:checked + .switch-slider::before { transform: translateX(24px); }
+.lights-summary { margin: 12px 0 8px; font-size: 0.9rem; color: var(--muted); }
+.light-big { font-size: 1.3rem; font-weight: 700; color: var(--brand); }
+.lights-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 10px; margin: 12px 0;
+}
+.light-card {
+  border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
+  background: #fdfaf1;
+}
+.light-card h3 { margin: 0 0 4px; font-size: 0.98rem; }
+.light-card .badge { margin-right: 4px; }
+
+/* Celebración (guardarraíl: sin rankings, la ciudad se ilumina) */
+.celebrate-card { text-align: center; overflow: hidden; position: relative; }
+.celebrate-card h2 { color: var(--brand); }
+.celebrate-card .modal-actions { justify-content: center; }
+.confetti {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+}
+.confetti::before, .confetti::after {
+  content: "🏆 ✨ 🏮 🌠 ✨ 🏮 🌟 🏆 ✨ 🏮 ✨ 🌟";
+  position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+  font-size: 1.1rem; letter-spacing: 14px; white-space: nowrap;
+  animation: confetti-drop 4s linear infinite;
+}
+.confetti::after { animation-delay: 2s; }
+@keyframes confetti-drop {
+  0% { top: -30px; opacity: 0; }
+  15% { opacity: 1; }
+  100% { top: 105%; opacity: 0; }
+}

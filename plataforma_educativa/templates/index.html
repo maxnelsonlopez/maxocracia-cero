@@ -68,6 +68,7 @@
         <div class="toolbar">
           <input type="text" id="tree-search" placeholder="Buscar tema...">
           <button id="btn-city-toggle" class="ghost small" onclick="toggleCity()">🗺 La ciudad</button>
+          <button id="btn-lights" class="ghost small">🏮 La luz de la ciudad</button>
         </div>
         <div id="tree" class="tree"></div>
       </div>
@@ -110,6 +111,65 @@
       <div class="modal-actions">
         <button id="btn-evidence-cancel" class="ghost">Cancelar</button>
         <button id="btn-evidence-submit" class="primary">Guardar material</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- La Biblioteca de la Ciudad (M15): leer guías y abrir enlaces del lote -->
+  <div id="library-modal" class="modal" hidden>
+    <div class="modal-card">
+      <h2>📖 La biblioteca del lote</h2>
+      <p id="library-topic" class="muted"></p>
+      <div id="library-body"></div>
+      <div class="modal-actions">
+        <button id="btn-library-cancel" class="ghost">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ver material propio aportado (M13): la obra nunca se pierde -->
+  <div id="evidence-view-modal" class="modal" hidden>
+    <div class="modal-card">
+      <h2>🎁 Mi material de enseñanza</h2>
+      <p class="muted">Tu obra didáctica en este lote. La vacuación es tuya: gracias por dejar mapa.</p>
+      <div id="evidence-view-body"></div>
+      <div class="modal-actions">
+        <button id="btn-evidence-view-cancel" class="ghost">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compartir la luz (M15): opt-in, retractable y SIN ranking -->
+  <div id="lights-modal" class="modal" hidden>
+    <div class="modal-card">
+      <h2>🏮 La luz de la ciudad</h2>
+      <div class="lights-toggle">
+        <p class="muted">
+          Si enciendes tu luz, la ciudad ve cuánto construyes: tu progreso por
+          barrio, tus temas dominados y tus mejores notas. Es voluntario y
+          puedes apagarla cuando quieras — al apagarla, tu luz se retira al instante.
+        </p>
+        <label class="switch">
+          <input type="checkbox" id="lights-toggle-input">
+          <span class="switch-slider"></span>
+        </label>
+        <span id="lights-toggle-label" class="muted">Mi luz está apagada</span>
+      </div>
+      <div id="lights-body"></div>
+      <div class="modal-actions">
+        <button id="btn-lights-cancel" class="ghost">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Celebración al aprobar (guardarraíl: jamás un ranking, solo la ciudad) -->
+  <div id="celebrate-modal" class="modal" hidden>
+    <div class="modal-card celebrate-card">
+      <div class="confetti" aria-hidden="true"></div>
+      <h2 id="celebrate-title">¡La ciudad se iluminó! 🌟</h2>
+      <p id="celebrate-body" class="muted"></p>
+      <div class="modal-actions">
+        <button id="btn-celebrate-close" class="primary">Seguir construyendo</button>
       </div>
     </div>
   </div>
