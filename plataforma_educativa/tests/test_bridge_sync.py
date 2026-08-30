@@ -97,6 +97,27 @@ def test_mastered_reporta_al_puente(client, app, monkeypatch):
     monkeypatch.setenv("EDU_BRIDGE_URL", "http://maxo.test:5001")
     monkeypatch.setenv("EDU_BRIDGE_SERVICE_TOKEN", "secreto-del-nodo")
 
+    # La regla de oro (M13): material propio + mentoría previa cierra la
+    # maestría AQUÍ (la transición dispara el reporte al puente).
+    with mock.patch("app.api_routes.urllib.request.urlopen") as urlopen:
+        ev = client.post(
+            f"/api/topics/{topic_id}/evidence",
+            headers={"X-Auth-Token": token},
+            json={"tipo": "texto", "titulo": "Guía", "texto": "contenido"},
+        )
+        assert ev.status_code == 201
+        assert urlopen.called, "el nodo debe reportar la maestría al puente"
+        request = urlopen.call_args[0][0]
+        assert "edu-bridge/sync-mastery" in request.full_url
+        sent_headers = {k.lower(): v for k, v in getattr(request, "headers", {}).items()}
+        assert sent_headers.get("x-edu-bridge-token") == "secreto-del-nodo"
+        payload = json.loads(request.data.decode("utf-8"))
+        assert payload["user_id"] == 4242
+        assert payload["triada_approved"] is True
+        assert payload["mentor_rounds"] == 1
+        assert payload["topic_slug"].startswith("sync_")
+        assert payload["branch_slug"]
+
     with mock.patch("app.api_routes.urllib.request.urlopen") as urlopen:
         resp = client.post(
             f"/api/topics/{topic_id}/test",
@@ -104,18 +125,7 @@ def test_mastered_reporta_al_puente(client, app, monkeypatch):
             json={"answers": [0, 0, 0]},
         )
         assert resp.status_code == 200
-
-    assert urlopen.called, "el nodo debe reportar la maestría al puente"
-    request = urlopen.call_args[0][0]
-    assert "edu-bridge/sync-mastery" in request.full_url
-    sent_headers = {k.lower(): v for k, v in getattr(request, "headers", {}).items()}
-    assert sent_headers.get("x-edu-bridge-token") == "secreto-del-nodo"
-    payload = json.loads(request.data.decode("utf-8"))
-    assert payload["user_id"] == 4242
-    assert payload["triada_approved"] is True
-    assert payload["mentor_rounds"] == 1
-    assert payload["topic_slug"].startswith("sync_")
-    assert payload["branch_slug"]
+        urlopen.assert_not_called()  # ya estaba mastered: no hay re-reporte
 
 
 def test_puente_caido_no_rompe_el_nodo(client, app, monkeypatch):
@@ -133,12 +143,20 @@ def test_puente_caido_no_rompe_el_nodo(client, app, monkeypatch):
     monkeypatch.setenv("EDU_BRIDGE_URL", "http://maxo.test:5001")
     monkeypatch.setenv("EDU_BRIDGE_SERVICE_TOKEN", "secreto-del-nodo")
 
+    # Regla de oro (M13): material + mentoría previa -> mastery al subir la obra.
     def _boom(*args, **kwargs):
         raise IOError("puente caído")
 
     with mock.patch(
         "app.api_routes.urllib.request.urlopen", side_effect=_boom
     ) as urlopen:
+        ev = client.post(
+            f"/api/topics/{topic_id}/evidence",
+            headers={"X-Auth-Token": token},
+            json={"tipo": "texto", "titulo": "Guía", "texto": "contenido"},
+        )
+        assert ev.status_code == 201  # el nodo sigue vivo con el puente caído
+        assert urlopen.called
         resp = client.post(
             f"/api/topics/{topic_id}/test",
             headers={"X-Auth-Token": token},

@@ -84,6 +84,34 @@
     </div>
   </div>
 
+  <!-- Material de enseñanza propio (M13: la vacuación sin muros) -->
+  <div id="evidence-modal" class="modal" hidden>
+    <div class="modal-card">
+      <h2>Aportar material de enseñanza</h2>
+      <p class="muted">
+        La regla de oro no espera alumnos: deja aquí tu obra didáctica — una guía
+        escrita, un audio, un video o una imagen. Con material + la primera ronda
+        de mentoría, el tema queda dominado (vacuación completa).
+      </p>
+      <div class="stack">
+        <select id="evidence-tipo" aria-label="Tipo de material">
+          <option value="texto">Texto (guía, apuntes, explicación)</option>
+          <option value="audio">Audio</option>
+          <option value="video">Video</option>
+          <option value="imagen">Imagen</option>
+        </select>
+        <input id="evidence-titulo" type="text" placeholder="Título (ej: Guía de fracciones con trozos de pizza)" aria-label="Título del material" />
+        <input id="evidence-url" type="text" placeholder="Dirección (URL) del archivo — para audio, video o imagen" aria-label="URL del archivo" />
+        <textarea id="evidence-texto" rows="5" placeholder="Contenido escrito (para texto)" aria-label="Contenido escrito"></textarea>
+        <p id="evidence-error" class="error" hidden></p>
+      </div>
+      <div class="modal-actions">
+        <button id="btn-evidence-cancel" class="ghost">Cancelar</button>
+        <button id="btn-evidence-submit" class="primary">Guardar material</button>
+      </div>
+    </div>
+  </div>
+
   <script src="/static/app.js"></script>
 </body>
 </html>

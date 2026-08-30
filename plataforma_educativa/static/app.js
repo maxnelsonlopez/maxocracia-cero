@@ -132,22 +132,32 @@ function renderTopic(t) {
   var locked = !t.unlocked;
   var st = t.estado;
   var actions = "";
+  var showTeach = st === "test_passed" || st === "mastered";
   if (st === "not_seen" || st === "learning") {
-    if (!locked) actions += '<button class="small" data-action="start" data-topic="' + t.id + '">Empezar</button>';
-    actions += '<button class="small primary" data-action="test" data-topic="' + t.id + '">Hacer test</button>';
+    if (!locked) {
+      actions += '<button class="small" data-action="start" data-topic="' + t.id + '">Empezar</button>';
+      actions += '<button class="small primary" data-action="test" data-topic="' + t.id + '">Hacer test</button>';
+    } else {
+      actions += '<span class="hint">🔒 primero aprueba el prerrequisito</span>';
+    }
   } else {
-    actions += '<button class="small primary" data-action="test" data-topic="' + t.id + '">Rehacer test</button>';
-    if (st === "test_passed" || st === "mastered") {
-      actions += '<button class="small" data-action="mentor" data-topic="' + t.id + '">Pedir mentoría</button>';
+    if (!locked) actions += '<button class="small primary" data-action="test" data-topic="' + t.id + '">Rehacer test</button>';
+    if (showTeach) {
+      if (t.evidence) {
+        actions += '<span class="badge mastered" title="' + esc(t.evidence.titulo) + '">Material ' + esc(t.evidence.tipo) + " ✓</span>";
+      } else {
+        actions += '<button class="small" data-action="evidence" data-topic="' + t.id + '">Aportar material</button>';
+      }
     }
   }
-  var badge = st === "mastered" ? "badge mastered" : st === "test_passed" ? "badge passed" : "badge";
+  var label = t.ready_to_teach ? "Listo para enseñar" : (estadoLabel[st] || st);
+  var badge = st === "mastered" ? "badge mastered" : (t.ready_to_teach ? "badge ready" : (st === "test_passed" ? "badge passed" : "badge"));
   return '<div class="topic">' +
     '<div class="topic-main">' +
     '<div class="topic-title">' + esc(t.titulo) + (t.dificultad ? ' <span class="diff">' + "★".repeat(t.dificultad) + "</span>" : "") + "</div>" +
     '<div class="topic-sub">' + esc(t.descripcion) + " · " + t.questions + " preguntas" + (locked ? " · 🔒 prerrequisito" : "") + "</div>" +
     "</div>" +
-    '<span class="' + badge + '">' + estadoLabel[st] + "</span>" +
+    '<span class="' + badge + '">' + esc(label) + "</span>" +
     (st !== "not_seen" ? '<span class="score">' + (t.score == null ? "" : t.score + "%") + "</span>" : "") +
     '<div class="topic-actions">' + actions + "</div>" +
     "</div>";
@@ -161,6 +171,7 @@ function bindTopicButtons() {
       if (action === "start") startTopic(topicId);
       else if (action === "test") openTest(topicId);
       else if (action === "mentor") requestMentorship(topicId);
+      else if (action === "evidence") openEvidence(topicId);
     });
   });
 }
@@ -206,7 +217,9 @@ function openTest(topicId) {
       q.opciones.forEach(function (opt, j) {
         html += '<label class="option"><input type="radio" name="q-' + i + '" value="' + j + '"> ' + esc(opt) + "</label>";
       });
-      html += '<p class="hint">' + esc(q.explicacion || "") + "</p></div>";
+      // La explicación NO se muestra antes de responder (se revelaría la
+      // respuesta); aparece como corrección tras enviar.
+      html += "</div>";
     });
     $("test-body").innerHTML = html || '<p class="muted">Sin preguntas.</p>';
     $("test-modal").hidden = false;
@@ -214,6 +227,52 @@ function openTest(topicId) {
 }
 
 function closeTest() { $("test-modal").hidden = true; testTopic = null; }
+
+// ------------------------------------------------------------------
+// Material de enseñanza (M13): la vacuación sin muros
+// ------------------------------------------------------------------
+var evidenceTopic = null;
+
+function openEvidence(topicId) {
+  evidenceTopic = topicId;
+  $("evidence-tipo").value = "texto";
+  $("evidence-titulo").value = "";
+  $("evidence-url").value = "";
+  $("evidence-texto").value = "";
+  $("evidence-error").hidden = true;
+  $("evidence-modal").hidden = false;
+}
+
+function closeEvidence() { $("evidence-modal").hidden = true; evidenceTopic = null; }
+
+function submitEvidence() {
+  if (!evidenceTopic) return;
+  var payload = {
+    tipo: $("evidence-tipo").value,
+    titulo: $("evidence-titulo").value.trim(),
+    url: $("evidence-url").value.trim(),
+    texto: $("evidence-texto").value.trim()
+  };
+  if (!payload.titulo) { $("evidence-error").textContent = "Dales un título a tu material."; $("evidence-error").hidden = false; return; }
+  if (payload.tipo === "texto" && !payload.texto) { $("evidence-error").textContent = "Para texto, escribe el contenido."; $("evidence-error").hidden = false; return; }
+  if (payload.tipo !== "texto" && !payload.url) { $("evidence-error").textContent = "Pega la dirección (URL) del archivo."; $("evidence-error").hidden = false; return; }
+
+  $("btn-evidence-submit").disabled = true;
+  api("/api/topics/" + evidenceTopic + "/evidence", { method: "POST", body: payload })
+    .then(function (data) {
+      $("btn-evidence-submit").disabled = false;
+      if (data.__status === 201) { closeEvidence(); loadAll(); }
+      else {
+        $("evidence-error").textContent = data.error || "No se pudo guardar.";
+        $("evidence-error").hidden = false;
+      }
+    })
+    .catch(function () {
+      $("btn-evidence-submit").disabled = false;
+      $("evidence-error").textContent = "Error de conexión.";
+      $("evidence-error").hidden = false;
+    });
+}
 
 function submitTest() {
   var testBody = $("test-body");
@@ -362,6 +421,8 @@ function init() {
   $("btn-generate-week").addEventListener("click", generateWeek);
   $("btn-test-cancel").addEventListener("click", closeTest);
   $("btn-test-submit").addEventListener("click", submitTest);
+  $("btn-evidence-cancel").addEventListener("click", closeEvidence);
+  $("btn-evidence-submit").addEventListener("click", submitEvidence);
   $("tree-search").addEventListener("input", function () { loadAll(); });
 
   // Puerta del OEV (M12): la identidad llega por el FRAGMENTO de la URL

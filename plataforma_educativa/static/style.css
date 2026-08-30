@@ -39,6 +39,8 @@ input, select, textarea {
   padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px;
   font-size: 0.95rem; background: #fff; width: 100%;
 }
+/* Los radios/checks NO se estiran: el círculo va pegado a su opción. */
+input[type="radio"], input[type="checkbox"] { width: auto; margin: 0; }
 input:focus { outline: 2px solid var(--brand); outline-offset: 0; }
 button {
   border: none; border-radius: 8px; padding: 10px 16px; cursor: pointer;
@@ -111,6 +113,7 @@ hr { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
 }
 .badge.passed { background: #dff3e6; color: var(--ok); }
 .badge.mastered { background: #cfe4f3; color: #1d6fa5; }
+.badge.ready { background: #efe4c3; color: #8a6100; }
 .score { font-size: 0.8rem; color: var(--warn); min-width: 42px; text-align: right; }
 .topic-actions { display: flex; gap: 6px; }
 
@@ -128,7 +131,11 @@ hr { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
 .modal-card h2 { margin-top: 0; color: var(--brand); }
 .question { border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
 .question p { margin: 0 0 8px; }
-.option { display: block; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.option {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 8px; border-radius: 6px; cursor: pointer;
+}
+.option input[type="radio"] { flex-shrink: 0; }
 .option:hover { background: #f2f5f9; }
 .hint { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }

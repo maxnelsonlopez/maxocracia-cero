@@ -113,7 +113,8 @@ def test_test_below_70_not_passed(client, app):
 
 
 def test_mastered_requires_mentor_rounds(client, app):
-    """Dominar (mastered) exige aprobar el test Y haber mentoreado >=1 reunión."""
+    """Dominar (mastered) exige aprobar el test, material propio (M13) Y haber
+    mentoreado >=1 reunión — la regla de oro: la maestría se gana enseñando."""
     token = _token(client)
     topic_id = _make_topic(app, 4)
 
@@ -135,7 +136,20 @@ def test_mastered_requires_mentor_rounds(client, app):
         )
         db.commit()
 
+    # Mentoría SIN material todavía: la maestría espera la obra (M13).
     resp2 = client.post(
         f"/api/topics/{topic_id}/test", headers=_headers(token), json={"answers": answers}
     )
-    assert resp2.get_json()["estado"]["estado"] == "mastered"
+    assert resp2.get_json()["estado"]["estado"] == "test_passed"
+
+    # Con material propio la vacuación se cierra.
+    ev = client.post(
+        f"/api/topics/{topic_id}/evidence",
+        headers=_headers(token),
+        json={"tipo": "texto", "titulo": "Mi guía", "texto": "contenido"},
+    )
+    assert ev.status_code == 201
+    resp3 = client.post(
+        f"/api/topics/{topic_id}/test", headers=_headers(token), json={"answers": answers}
+    )
+    assert resp3.get_json()["estado"]["estado"] == "mastered"

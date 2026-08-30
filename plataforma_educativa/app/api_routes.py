@@ -56,12 +56,25 @@ def _user_state(user_id, topic_id):
             "score": None,
             "mentor_rounds": 0,
             "mentorship_approved": False,
+            "evidence": None,
+            "ready_to_teach": False,
         }
+    evidence = None
+    if row["evidence"]:
+        try:
+            evidence = json.loads(row["evidence"])
+        except (ValueError, TypeError):
+            evidence = {"tipo": "texto", "titulo": "material (sin metadatos legibles)"}
+    # Regla de oro sin muros (M13): aprobado + material propio + mentoría >= 1
+    # es maestría; aprobado + material (sin alumnos aún) es 'listo para enseñar'.
+    ready_to_teach = row["estado"] == "test_passed" and bool(evidence)
     return {
         "estado": row["estado"],
         "score": row["score"],
         "mentor_rounds": row["mentor_rounds"],
         "mentorship_approved": bool(row["mentorship_approved"]),
+        "evidence": evidence,
+        "ready_to_teach": ready_to_teach,
     }
 
 
@@ -109,18 +122,19 @@ def _report_mastery_to_maxocracia(user_id, topic_id, score, mentor_rounds):
 
 
 def _upsert_user_state(user_id, topic_id, estado=None, score=None, mentor_rounds=None,
-                       mentorship_approved=None):
+                       mentorship_approved=None, evidence=None):
     """Inserta o actualiza la fila de progreso user_topics."""
     db = get_db()
     current = db.execute(
         "SELECT * FROM user_topics WHERE user_id = ? AND topic_id = ?",
         (user_id, topic_id),
     ).fetchone()
+    new_evidence = evidence if evidence is not None else (current["evidence"] if current else None)
     transitioned_to_mastered = False
     if current is None:
         db.execute(
             "INSERT INTO user_topics (user_id, topic_id, estado, score, updated_at, "
-            "mentor_rounds, mentorship_approved) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "mentor_rounds, mentorship_approved, evidence) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 user_id,
                 topic_id,
@@ -129,6 +143,7 @@ def _upsert_user_state(user_id, topic_id, estado=None, score=None, mentor_rounds
                 _now(),
                 mentor_rounds if mentor_rounds is not None else 0,
                 1 if mentorship_approved else 0,
+                new_evidence,
             ),
         )
         transitioned_to_mastered = estado == "mastered"
@@ -143,10 +158,15 @@ def _upsert_user_state(user_id, topic_id, estado=None, score=None, mentor_rounds
             if mentorship_approved is not None
             else current["mentorship_approved"]
         )
+        # Regla de oro sin muros (M13): aprobado + material propio + primera
+        # mentoría = maestría (la vacuación completa, aunque no haya aula llena).
+        if new_estado == "test_passed" and new_mr >= 1 and new_evidence:
+            new_estado = "mastered"
         db.execute(
             "UPDATE user_topics SET estado = ?, score = ?, updated_at = ?, "
-            "mentor_rounds = ?, mentorship_approved = ? WHERE user_id = ? AND topic_id = ?",
-            (new_estado, new_score, _now(), new_mr, new_ma, user_id, topic_id),
+            "mentor_rounds = ?, mentorship_approved = ?, evidence = ? "
+            "WHERE user_id = ? AND topic_id = ?",
+            (new_estado, new_score, _now(), new_mr, new_ma, new_evidence, user_id, topic_id),
         )
         transitioned_to_mastered = new_estado == "mastered" and current["estado"] != "mastered"
         final_score = new_score
@@ -336,6 +356,8 @@ def tree():
                     "score": st["score"],
                     "mentor_rounds": st["mentor_rounds"],
                     "mentorship_approved": st["mentorship_approved"],
+                    "evidence": st["evidence"],
+                    "ready_to_teach": st["ready_to_teach"],
                     "triada": _triada_state(g.user_id, topic["id"]),
                     "unlocked": _prereqs_ok(g.user_id, prereq_ids),
                 }
@@ -426,6 +448,17 @@ def topic_test(topic_id):
 
     data = request.get_json(silent=True) or {}
     answers = data.get("answers") or []
+    prereq_ids = json.loads(topic["prereq_ids"] or "[]")
+    if not _prereqs_ok(g.user_id, prereq_ids):
+        return (
+            jsonify(
+                {
+                    "error": "Este tema tiene prerrequisitos: primero aprueba lo anterior (el árbol se camina, no se salta).",
+                    "blocked_by": prereq_ids,
+                }
+            ),
+            403,
+        )
     questions = _topic_questions(topic_id)
     if not questions:
         return jsonify({"error": "El tema no tiene preguntas."}), 400
@@ -441,7 +474,7 @@ def topic_test(topic_id):
     best_score = max(score, st["score"] or 0)
 
     if score >= TEST_PASS_THRESHOLD:
-        new_estado = "mastered" if st["mentor_rounds"] >= 1 else "test_passed"
+        new_estado = "mastered" if (st["mentor_rounds"] >= 1 and st["evidence"]) else "test_passed"
     else:
         # Si ya estaba aprobado, no se degrada con un intento peor.
         new_estado = "test_passed" if st["estado"] in ("test_passed", "mastered") else "learning"
@@ -460,6 +493,54 @@ def topic_test(topic_id):
         ),
         200,
     )
+
+
+@api_bp.route("/api/topics/<int:topic_id>/evidence", methods=["POST"])
+@login_required
+def topic_evidence(topic_id):
+    """Aporta material de enseñanza propio (M13): texto, audio, video o imagen.
+
+    La vacuación sin muros: aunque no haya alumnos todavía, quien aprobó puede
+    dejar su material didáctico (la obra de la regla de oro). Con material +
+    primera ronda de mentoría, la maestría se cierra sola.
+    """
+    topic = _get_topic_or_404(topic_id)
+    if topic is None:
+        return jsonify({"error": "El tema no existe."}), 404
+
+    st = _user_state(g.user_id, topic_id)
+    if st["estado"] not in ("test_passed", "mastered"):
+        return (
+            jsonify(
+                {
+                    "error": "Primero aprueba el tema: el material de enseñanza se aporta sobre lo que ya sabes (mínimo 70%).",
+                    "estado": st["estado"],
+                }
+            ),
+            400,
+        )
+
+    data = request.get_json(silent=True) or {}
+    tipo = (data.get("tipo") or "").strip()
+    titulo = (data.get("titulo") or "").strip()
+    url = (data.get("url") or "").strip()
+    texto = (data.get("texto") or "").strip()
+    if tipo not in ("texto", "audio", "video", "imagen"):
+        return jsonify({"error": "tipo debe ser: texto, audio, video o imagen."}), 400
+    if not titulo:
+        return jsonify({"error": "dales un título a tu material."}), 400
+    if tipo == "texto" and not texto:
+        return jsonify({"error": "para texto, escribe el contenido."}), 400
+    if tipo != "texto" and not url:
+        return jsonify({"error": f"para {tipo}, pega la dirección (URL) del archivo."}), 400
+
+    evidence = json.dumps(
+        {"tipo": tipo, "titulo": titulo[:200], "url": url[:1000], "texto": texto[:8000]},
+        ensure_ascii=False,
+    )
+    # La regla de oro: si ya tenía mentoría (sin material), ahora se cierra.
+    _upsert_user_state(g.user_id, topic_id, evidence=evidence, mentor_rounds=st["mentor_rounds"])
+    return jsonify({"success": True, "evidence": {"tipo": tipo, "titulo": titulo}}), 201
 
 
 @api_bp.route("/api/topics/<int:topic_id>/request-mentorship", methods=["POST"])
@@ -597,11 +678,13 @@ def _weak_topics_for_user(user_id):
 
 
 def _qualified_monitors(week):
-    """Usuarios calificados para enseñar cada tema: mastered + mentor_rounds>=1 + disponibilidad."""
+    """Usuarios calificados para enseñar cada tema: maestros y maestros en espera
+    (aprobado + material propio) con disponibilidad — la cola de tutores (M13)."""
     rows = get_db().execute(
         "SELECT ut.user_id, ut.topic_id FROM user_topics ut "
         "JOIN availability a ON a.user_id = ut.user_id AND a.semana = ? "
-        "WHERE ut.estado = 'mastered' AND ut.mentor_rounds >= 1",
+        "WHERE (ut.estado = 'mastered' AND ut.mentor_rounds >= 1) "
+        "   OR (ut.estado = 'test_passed' AND ut.evidence IS NOT NULL AND ut.evidence != '')",
         (week,),
     ).fetchall()
     by_topic = {}

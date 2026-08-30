@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS user_topics (
     updated_at TEXT NOT NULL,
     mentor_rounds INTEGER NOT NULL DEFAULT 0,
     mentorship_approved INTEGER NOT NULL DEFAULT 0,
+    evidence TEXT,
     PRIMARY KEY (user_id, topic_id)
 );
 
@@ -383,6 +384,16 @@ def _migrate_db(conn):
             conn.execute(
                 "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_maxo_user_id ON users(maxo_user_id)"
             )
+        except sqlite3.OperationalError:
+            pass
+
+    # Evidencia didáctica del aprendiz (M13): material de enseñanza propio
+    # (texto, audio, video, imagen) — la vacuación sin muros.
+    cursor = conn.execute("PRAGMA table_info(user_topics)")
+    topic_columns = [row["name"] for row in cursor.fetchall()]
+    if "evidence" not in topic_columns:
+        try:
+            conn.execute("ALTER TABLE user_topics ADD COLUMN evidence TEXT")
         except sqlite3.OperationalError:
             pass
 
