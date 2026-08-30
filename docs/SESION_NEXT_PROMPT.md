@@ -1,4 +1,4 @@
-# SESIÓN NEXT — Handoff de la jornada (última actualización: 29-08-2026, DeepSeek + OpenRouter)
+# SESIÓN NEXT — Handoff de la jornada (última actualización: 30-08-2026, DeepSeek + OpenRouter)
 
 Documento de continuidad entre sesiones. Léelo al iniciar la próxima sesión
 antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
@@ -8,27 +8,32 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 ## 1. Prompt para Max (pegar en la próxima sesión)
 
 > Continuamos la Maxocracia desde donde quedamos (ver `docs/SESION_NEXT_PROMPT.md`).
-> Contexto: Fase 2 — Ola 4 "El Puente", versión 5.6+. **La rama educativa M1-M9 está
-> COMPLETA y su único pendiente (la votación del umbral canónico del puente en el
-> parlamento) quedó CERRADO el 29-08-2026**: el Parlamento Educativo vota el umbral
-> años↔índice (12-30, critical 60/75, T13, anti-flip-flop 14 días, N1+); la ley
-> INV2-EDU (≥12) no se vota. Propuesta lista en
-> `docs/architecture/PROPUESTA_PARLAMENTO_UMBRAL_EDUCATIVO.md` (M9, commit `cf85973`).
-> **Próximo hito estructural: síntesis de identidad del OEV — UNA sola puerta entre
-> la app principal (:5001) y `plataforma_educativa/` (:5050)**: empezar por diseño
-> (leer `platforma_educativa/app/auth.py` y su README; decidir SSO/JWT compartido vs
-> espejo de identidad), con teoría primero.
-> Patrón de trabajo: RLM navega + director verifica + teoría decide (guía en el repo
-> local_models: `docs/GUIA_RLM_COLABORADOR.md`).
-> **Delegación OpenRouter gratuita**: apóyate intensamente en subagentes con proveedor
-> `openrouter` y modelos `:free` declarados en el harness (`minimax/minimax-m3:free` y
-> `nvidia/nemotron-3-super-120b-a12b:free`); el pool compartido satura con 429 —
-> reintentar o cambiar de modelo (Nemotron es el más estable en tareas cortas; ambas
-> fallan en tareas largas con tools; MiniMax sostiene mejor los informes largos).
-> El orquestador implementa y verifica siempre con ojos propios antes de commitear —
-> el subagente redacta, el director decide.
-> Revisa los pendientes del §4 y elige el siguiente paso con criterio; commits regulares
-> en español; respeta el principio "la teoría tiene prioridad".
+> Contexto: Fase 2 — Ola 4 "El Puente", versión 5.6+. **La rama educativa
+> M1-M15 está COMPLETA**: M9 (parlamento del umbral) y M12 (síntesis de
+> identidad OEV :5001↔:5050) cerrados; **M15 (30-08-2026) — La Biblioteca de la
+> Ciudad**: 35 guías propias (markdown, redactadas por agentes OpenRouter
+> `:free` + revisión del director) + 35 enlaces a Wikipedia VERIFICADOS
+> (HTTP 200 real) + lectura en la UI (📖 por lote) + celebración al aprobar
+> (sin rankings) + **la luz de la ciudad** (progreso/notas compartidas con
+> opt-in voluntario y retractable, muro SIN ranking — orden alfabético).
+> Diseño canónico: `docs/architecture/BIBLIOTECA_CIUDAD_MATERIAL_EDUCATIVO.md`.
+> **Siguiente paso natural**: Fase 2 de la Ciudad (Rondas anti-δ — la base
+> nunca se gradúa; las guías ya dan material de repaso) — ver
+> `docs/architecture/GAMIFICACION_CIUDAD_APRENDIZAJE.md` §4.
+> Patrón de trabajo: RLM navega + director verifica + teoría decide (guía en el
+> repo local_models: `docs/GUIA_RLM_COLABORADOR.md`).
+> **Delegación OpenRouter gratuita**: apóyate intensamente en subagentes con
+> proveedor `openrouter` y modelos `:free` declarados en el harness
+> (`minimax/minimax-m3:free` y `nvidia/nemotron-3-super-120b-a12b:free`); el
+> pool compartido satura con 429 — reintentar o cambiar de modelo (Nemotron es
+> el más estable en tareas cortas; ambas fallan en tareas largas con tools;
+> MiniMax sostiene mejor los informes largos). M15 demostró el pipeline:
+> subagente redacta guías (formato `=== ARCHIVO: <slug>.md ===`), el director
+> revisa/normaliza y las escribe como `plataforma_educativa/materials/*.md`.
+> El orquestador implementa y verifica siempre con ojos propios antes de
+> commitear — el subagente redacta, el director decide.
+> Revisa los pendientes del §4 y elige el siguiente paso con criterio; commits
+> regulares en español; respeta el principio "la teoría tiene prioridad".
 
 ## 2. Briefing para el agente (opencode / DeepSeek)
 
@@ -72,7 +77,9 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 | **M11 Tejido visible y triada en UI** (29-08-2026): `GET /workshops/tree` (ramas canónicas del árbol — estado, no tribunal), detalle del taller con lista de inscritos, y **concesión por modal** (sin `prompt()/confirm()` — el último ítem UX de la reflexión): solo el facilitador ve el botón; avales explicados con InfoTip; horas de mentoría | ✅ (3 tests; commits `d4c5a24`, `b6639ed`) |
 | **M12 Síntesis de Identidad del OEV** (29-08-2026: Gemini implementó · DeepSeek revisó/corrigió): **UNA sola puerta de identidad** entre :5001 y :5050 — autenticación híbrida en `plataforma_educativa/app/auth.py` (tokens locales en memoria + JWTs federados con clave compartida, JIT vinculando `maxo_user_id`, migración idempotente), blueprint `app/edu_bridge_bp.py` (`/status`, `/sync-mastery`, `/events`), doc `SINTESIS_IDENTIDAD_OEV.md` · **corrección del orquestador**: la v1 auto-promovía N0→N1 con un POST del propio usuario (la escalera se compraba) → el nodo OEV reporta con token de servicio `EDU_BRIDGE_SERVICE_TOKEN` (fail-closed 403), **sin auto-promoción** (la escalera es del primer acuerdo, Cap. 13), `t13_hash` = SHA-256 real y `SECRET_KEY` sin constante pública (fail-closed 503) · **M12.1 puerta en la UI** (botón "Nodo Educativo", JWT por fragmento `#jwt=`; captura en `app.js`) · **M12.2 sincronización automática**: el nodo reporta maestrías (`mastered`) al puente servicio-a-servicio (`EDU_BRIDGE_URL` + token; best-effort, sin JWT humano) · **M12.3 evidencia visible**: "Camino de aprendizaje" en `/perfil` (eventos T13) · **celebrada EN VIVO** (demo end-to-end `scratch/demo_m12.py`) | ✅ (8/8 puente, 44/44 OEV, tsc limpio, demo en vivo ✅) |
 | **M13 Vacuación sin muros** (29-08-2026, feedback de Max probando en vivo): la regla de oro no espera alumnos — `user_topics.evidence` (texto/audio/video/imagen) + `POST /api/topics/<id>/evidence`; **aprobado + material = "listo para enseñar"** (badge, cola de tutores vía `_qualified_monitors`) y **material + primera mentoría = mastered** (reporte al puente incluido, M12). Fixes de la auditoría MiniMax aplicados: **A2** (la explicación se revelaba antes de responder) y **A4** (el test exige prerrequisitos 403 + UI bloqueada) · puerta del nodo también en el menú Aprendizaje (Max no la veía en la barra) · auditoría completa archivada en `docs/architecture/MEJORAS_PLATAFORMA_EDUCATIVA_auditoria_2026-08-29.md` (16 preguntas nuevas redactadas por MiniMax, listas para seed) | ✅ (49/49 plataforma, 8/8 puente, tsc limpio) |
-| Suite de tests | **872/872** (verificado 29-08-2026 tras M12; plataforma educativa 49/49; tsc limpio; validador conceptual OK) |
+| **M14 Ciudad del Saber** (29-08-2026, idea de Max: el conocimiento como ciudad): vista de mapa-ciudad con niebla por barrio, lore (8 barrios), compañero de sugerencias (`GET /api/suggest` — rama con más progreso, lo sencillo primero, cero presión) y estados de lote (🔒◽🔨✅✨🏛) con la verdad sin engaño: aprobado+material = ✨, no 🏛 | ✅ (doc `GAMIFICACION_CIUDAD_APRENDIZAJE.md`; fase 2: Rondas anti-δ) |
+| **M15 La Biblioteca de la Ciudad** (30-08-2026, petición de Max: material educativo real, insertable, propio + enlaces al mundo; apariencia que provoque volver; progreso y notas compartidas voluntarias y retractables): tabla `materials` (guia markdown | enlace) + `users.share_progress` (opt-in default 0); **35 guías propias** (250-320 palabras, redactadas por agentes OpenRouter `:free` bajo plantilla + revisión y normalización del director; humanas: analogías de cocina/tienda/huerta/plaza, cero rankings, "la ciudad se ilumina…") + **35 enlaces a Wikipedia verificados** (HTTP 200 real, 30-08-2026); inserción por archivo: `materials/<slug>.md` + `sync_materials.py` (idempotente por `material_key`, reporta huérfanos, autocontenido); endpoints `GET /api/topics/<id>/materials`, `GET /api/materials/<id>`, `GET /api/community/lights` (muro SIN ranking — orden alfabético, solo lo publicado: T13), `POST /api/me/share-progress` (retracta al instante); UI: 📖 por lote/árbol (gueías primero, enlaces al fondo, búsquedas Khan/YouTube por título), lector mini-markdown seguro, 🎁 Ver mi material (M13), celebración con confeti (adiós `alert()`), interruptor de la luz | ✅ (72/72 plataforma +23 tests; 875/875 raíz; validador OK; 70 materiales vivos en la DB; commits `4351acb`/`28d41ff`/`1cdc8e7`/`567ee8c`) |
+| Suite de tests | **875/875** (raíz, 30-08-2026) · **72/72** plataforma educativa · 8/8 puente · tsc limpio · validador conceptual OK |
 
 **Decisiones canónicas a respetar:**
 - **La teoría (libro) tiene prioridad**: T0-T15 son canónicos; T16=Minimizar Daño, T17=Reciprocidad
@@ -96,6 +103,13 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 - **Rama educativa**: la regla de oro (vacuación) vive en `maxocontracts/skills.py`
   (puro, sin Flask) y la concesión por triada en `app/workshops_bp.py`; el foro
   referencia necesidades, nunca las duplica.
+- **M15 Biblioteca de la Ciudad**: los enlaces del mundo se siembran SOLO
+  verificados (estado HTTP real; jamás URLs alucinadas — el director verifica);
+  la inserción canónica de guías es por archivo `plataforma_educativa/materials/`
+  + `sync_materials.py` (idempotente, autocontenido); la luz compartida es
+  SIN RANKING (orden alfabético permanente — guardarraíl OEV §1.5) y el opt-in
+  es default apagado + retractado instantáneo; la guía acompaña pero NO
+  sustituye la obra (la validación sigue siendo test + vacuación).
 
 ## 3. Cómo verificar al arrancar
 
@@ -112,15 +126,24 @@ npx tsc --noEmit
 
 ## 4. Pendientes priorizados
 
-**La rama educativa M1-M12 está CERRADA (29-08-2026)** — síntesis de identidad implementada, corregida, blindada, **con puerta en la UI, sincronización automática y evidencia visible en el Perfil Vital**, y celebrada en vivo. Lo que sigue:
+**La rama educativa M1-M15 está CERRADA (30-08-2026)** — identidad federada OEV implementada y blindada, Ciudad del Saber (M14) y **Biblioteca de la Ciudad** (M15: 35 guías + 35 enlaces verificados + luz compartida opt-in) vivos en la plataforma. Lo que sigue:
 
-1. **Federar de verdad en producción**: `SECRET_KEY` compartida real + `EDU_BRIDGE_SERVICE_TOKEN` + `EDU_BRIDGE_URL` en ambos nodos (README de la plataforma) — la demo usó valores de prueba.
-2. **Expandir el patrón "plaza hablable"** (`InfoTip`) al resto del repo: `matching`,
-   `vhv`, `micromax`, `contracts` — la rama educativa marcó el modelo (decisión de Max).
-3. **Hardening/performance** (candidatos): N+1 de `reply_count` en el foro (COUNT GROUP
-   BY + paginación por cursor); oráculos síncronos (120 s) → colas/async cuando el
-   parlamento vote de verdad.
-4. Mantener mapas y handoff al día (regla continua)
+1. **Rondas de mantenimiento (anti-δ)** — Fase 2 de la Ciudad: lotes dominados se
+   marcan "requiere Ronda" tras N semanas sin tocar; repasar (las guías ya dan
+   material) devuelve el brillo. Teoría OEV §1.1 (la base nunca se gradúa).
+   Doc: `docs/architecture/GAMIFICACION_CIUDAD_APRENDIZAJE.md` §4.
+2. **Itinerarios** (misiones opcionales: rutas temáticas sugeridas — caminos a
+   todas partes, ninguno obligatorio) y **cartografía compartida** (barrios
+   iluminados por la comunidad sin revelar quién hizo qué — privacidad T13).
+3. **Federar de verdad en producción**: `SECRET_KEY` compartida real +
+   `EDU_BRIDGE_SERVICE_TOKEN` + `EDU_BRIDGE_URL` en ambos nodos (README de la
+   plataforma) — la demo usó valores de prueba.
+4. **Expandir el patrón "plaza hablable"** (`InfoTip`) al resto del repo:
+   `matching`, `vhv`, `micromax`, `contracts` (decisión de Max).
+5. **Hardening/performance** (candidatos): N+1 de `reply_count` en el foro (COUNT
+   GROUP BY + paginación por cursor); oráculos síncronos (120 s) → colas/async
+   cuando el parlamento vote de verdad.
+6. Mantener mapas y handoff al día (regla continua).
 
 **Futuro posible (fuera de la Ola 4)**: hitos del informe del Reino Sintético
 (`docs/architecture/informe_reino_sintetico_2026-08-12.md` §7): EIR por entidad sintética, AVA con
