@@ -2,7 +2,9 @@
 
 > **Sesión**: 29-08-2026 (idea de Max: "el conocimiento como ciudad que se forma
 > mientras aprendes"). **Estado**: Fase 1 implementada — vista de mapa-ciudad,
-> niebla, lore por barrio, compañero de sugerencias. OEV §1.5 (chequeos
+> niebla, lore por barrio, compañero de sugerencias; **M15 (30-08-2026)** añadió
+> la Biblioteca de la Ciudad (material educativo), la celebración al aprobar y
+> la luz compartida opt-in (sin ranking). OEV §1.5 (chequeos
 > gamificados con guardarraíles) como canon.
 
 ## 1. La metáfora
@@ -38,6 +40,24 @@ persona necesita orientarse. La ciudad del saber es un **mapa que se ilumina**:
   con estados; clic → empezar (libre), test (en obra), o árbol (detalles).
 - Lore de los 8 barrios escrito en `static/app.js` (`CITY_LORE`).
 - Verdad sin engaño: `test_passed` + material = ✨ (listo para enseñar), no 🏛.
+
+## 3.5. M15 — la Biblioteca y la luz (30-08)
+
+- **Biblioteca por lote**: 35 guías propias en markdown (250-320 palabras,
+  redactadas por agentes OpenRouter `:free` bajo plantilla + revisión del
+  director; 35/35 en `plataforma_educativa/materials/`) y 35 enlaces a Wikipedia
+  verificados (HTTP 200 real). Inserción por archivo + `sync_materials.py`.
+- **Lectura en la UI**: botón 📖 en lote y árbol; el lector renderiza un
+  subconjunto mínimo de markdown (seguro, sin XSS) y siempre ofrece "buscar más
+  profundo" (Khan Academy / YouTube por el título del tema) — la ciudad da el
+  mapa, el mundo es la profundidad.
+- **Ver lo que ya aportaste**: el material propio (M13) se abre en un modal
+  (🎁 Ver mi material) — la obra nunca se pierde de vista.
+- **Celebración al aprobar**: confeti + frase de la ciudad (nunca un ranking).
+- **La luz de la ciudad** (`/api/community/lights` + interruptor en perfil):
+  progreso por barrio, temas dominados y mejor nota, en un **muro ordenado por
+  abecedario** — ver la ciudad encenderse juntos; apagar la luz la retira al
+  instante (opt-in, retractable, T13).
 
 ## 4. Fases siguientes (propuestas, sin cerrar)
 

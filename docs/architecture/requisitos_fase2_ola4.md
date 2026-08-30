@@ -162,6 +162,8 @@ verificación determinista — Patrón Puente).
 | RF-EDU-13 | **Plaza hablable (lenguaje sencillo)**: etiquetas en lenguaje de calle + `InfoTip` (ayuda emergente ℹ️) para el concepto complejo — patrón del repo en `frontend/app/components/ui/InfoTip.tsx`; aplicado en foro/talleres/grupos/guía/votaciones/Form Cero | T13 (lenguaje civil) + reflexión §3 | ✅ (29-08-2026) |
 | RF-EDU-14 | **Hub educativo + Guía↔foro**: `/foro` muestra los tres caminos (talleres, grupos/ECEs, células madre) con enlaces y la Guía anuncia la plaza | reflexión §3.3-3.4 | ✅ (29-08-2026) |
 | RF-EDU-15 | **Tejido visible + triada en UI**: `GET /workshops/tree` (ramas canónicas: nodos, prereqs, dificultad — estado, no tribunal) y concesión de habilidad por modal con la lista de inscritos (adiós `prompt()`; solo el facilitador) | OEV §1.2 + reflexión §3.2 | ✅ (3 tests + modal, 29-08-2026) |
+| RF-EDU-16 | **La Biblioteca de la Ciudad (material educativo)**: guías propias en markdown por tema (carga instantánea) + enlaces al mundo verificados (Wikipedia 200 real + búsquedas Khan/YouTube); inserción canónica por archivo (`materials/<slug>.md` + `sync_materials.py`, idempotente); lectura en UI (📖 en lote/árbol) | OEV §1.7-1.8 (tejido abierto) + BIBLIOTECA_CIUDAD_MATERIAL_EDUCATIVO.md | ✅ (35 guías + 35 enlaces, 6 tests plataforma, 30-08-2026) |
+| RF-EDU-17 | **Compartir la luz (espacio compartido voluntario)**: progreso y mejores notas en un muro de luces con opt-in explícito y retractado instantáneo (`users.share_progress`); SIN RANKING (orden alfabético); solo lo publicado viaja (T13); conteos por barrio agregados | T13 + OEV §1.5 (estado, no tribunal) + BIBLIOTECA_CIUDAD_MATERIAL_EDUCATIVO.md §4 | ✅ (6 tests, 30-08-2026) |
 
 ---
 
