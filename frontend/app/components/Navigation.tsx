@@ -80,20 +80,20 @@ const navSections = [
 // Nodo educativo del OEV (espejo del default del backend `EDUCATIONAL_PLATFORM_URL`).
 const OEV_URL = process.env.NEXT_PUBLIC_EDU_PLATFORM_URL || "http://localhost:5050";
 
+// Puerta del OEV (:5050): el JWT viaja en el FRAGMENTO de la URL (#jwt=...),
+// que nunca llega al servidor (no queda en logs); el nodo lo captura una vez
+// y lo usa como identidad federada (M12).
+function enterOevNode() {
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("mc_access_token") : null;
+  const fragment = token ? `#jwt=${encodeURIComponent(token)}` : "";
+  window.location.href = `${OEV_URL}/${fragment}`;
+}
+
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { isAuthenticated, user, logout } = useAuth();
-
-  // Puerta del OEV (:5050): el JWT viaja en el FRAGMENTO de la URL (#jwt=...),
-  // que nunca llega al servidor (no queda en logs); el nodo lo captura una vez
-  // y lo usa como identidad federada (M12).
-  const enterOevNode = () => {
-    const token =
-      typeof window !== "undefined" ? localStorage.getItem("mc_access_token") : null;
-    const fragment = token ? `#jwt=${encodeURIComponent(token)}` : "";
-    window.location.href = `${OEV_URL}/${fragment}`;
-  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -374,6 +374,18 @@ function NavDropdown({ section }: { section: typeof navSections[0] }) {
                   {link.label}
                 </Link>
               ))}
+              {section.label === "Aprendizaje" && (
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    enterOevNode();
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-emerald-300 hover:text-white hover:bg-white/5 transition-all group w-full text-left"
+                >
+                  <GraduationCap className="w-4 h-4 text-emerald-500 group-hover:text-emerald-400 transition-colors" />
+                  Nodo Educativo (una sola puerta)
+                </button>
+              )}
             </div>
           </motion.div>
         )}
