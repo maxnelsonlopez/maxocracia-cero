@@ -3,7 +3,10 @@
 > **Sesión**: 30-08-2026 (petición de Max: material educativo real, insertado
 > fácilmente, con contenido propio de carga rápida y enlaces al mundo;
 > apariencia que provoque volver; progreso y notas compartidos de forma
-> voluntaria, opcional y retractable). **Estado**: diseño canónico (M15).
+> voluntaria, opcional y retractable). **Estado**: diseño canónico (M15),
+> ampliado por la **categoría Ética (M16)** — los fundamentos en lenguaje común
+> con estructura para traducciones (idioma en materiales y personas):
+> `docs/architecture/ETICA_LENGUAJE_COMUN_CATEGORIA.md`.
 > Recordar: OEV §1.7-1.8 (el tejido es el conocimiento total, forkable, con
 > materiales abiertos en los talleres) y §1.5 (chequeos con guardarraíles).
 

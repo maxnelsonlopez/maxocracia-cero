@@ -9,16 +9,22 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 
 > Continuamos la Maxocracia desde donde quedamos (ver `docs/SESION_NEXT_PROMPT.md`).
 > Contexto: Fase 2 — Ola 4 "El Puente", versión 5.6+. **La rama educativa
-> M1-M15 está COMPLETA**: M9 (parlamento del umbral) y M12 (síntesis de
+> M1-M16 está COMPLETA**: M9 (parlamento del umbral) y M12 (síntesis de
 > identidad OEV :5001↔:5050) cerrados; **M15 (30-08-2026) — La Biblioteca de la
 > Ciudad**: 35 guías propias (markdown, redactadas por agentes OpenRouter
 > `:free` + revisión del director) + 35 enlaces a Wikipedia VERIFICADOS
 > (HTTP 200 real) + lectura en la UI (📖 por lote) + celebración al aprobar
 > (sin rankings) + **la luz de la ciudad** (progreso/notas compartidas con
 > opt-in voluntario y retractable, muro SIN ranking — orden alfabético).
-> Diseño canónico: `docs/architecture/BIBLIOTECA_CIUDAD_MATERIAL_EDUCATIVO.md`.
-> **Siguiente paso natural**: Fase 2 de la Ciudad (Rondas anti-δ — la base
-> nunca se gradúa; las guías ya dan material de repaso) — ver
+> **M16 (30-08-2026) — la categoría Ética**: los fundamentos del sistema en
+> lenguaje común (12 temas en el orden del libro; la jerga propia VHV/TVI/SDV/
+> Maxo/EIR/OEV SOLO en el puente final "El idioma de la ciudad"); estructura
+> para traducciones (idioma en materiales y personas).
+> Diseño canónico: `docs/architecture/BIBLIOTECA_CIUDAD_MATERIAL_EDUCATIVO.md`
+> y `docs/architecture/ETICA_LENGUAJE_COMUN_CATEGORIA.md`.
+> **Siguiente paso natural**: traducciones reales de la Ética (fase 2 i18n) o
+> Fase 2 de la Ciudad (Rondas anti-δ — la base nunca se gradúa; las guías ya
+> dan material de repaso) — ver
 > `docs/architecture/GAMIFICACION_CIUDAD_APRENDIZAJE.md` §4.
 > Patrón de trabajo: RLM navega + director verifica + teoría decide (guía en el
 > repo local_models: `docs/GUIA_RLM_COLABORADOR.md`).
@@ -79,7 +85,8 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 | **M13 Vacuación sin muros** (29-08-2026, feedback de Max probando en vivo): la regla de oro no espera alumnos — `user_topics.evidence` (texto/audio/video/imagen) + `POST /api/topics/<id>/evidence`; **aprobado + material = "listo para enseñar"** (badge, cola de tutores vía `_qualified_monitors`) y **material + primera mentoría = mastered** (reporte al puente incluido, M12). Fixes de la auditoría MiniMax aplicados: **A2** (la explicación se revelaba antes de responder) y **A4** (el test exige prerrequisitos 403 + UI bloqueada) · puerta del nodo también en el menú Aprendizaje (Max no la veía en la barra) · auditoría completa archivada en `docs/architecture/MEJORAS_PLATAFORMA_EDUCATIVA_auditoria_2026-08-29.md` (16 preguntas nuevas redactadas por MiniMax, listas para seed) | ✅ (49/49 plataforma, 8/8 puente, tsc limpio) |
 | **M14 Ciudad del Saber** (29-08-2026, idea de Max: el conocimiento como ciudad): vista de mapa-ciudad con niebla por barrio, lore (8 barrios), compañero de sugerencias (`GET /api/suggest` — rama con más progreso, lo sencillo primero, cero presión) y estados de lote (🔒◽🔨✅✨🏛) con la verdad sin engaño: aprobado+material = ✨, no 🏛 | ✅ (doc `GAMIFICACION_CIUDAD_APRENDIZAJE.md`; fase 2: Rondas anti-δ) |
 | **M15 La Biblioteca de la Ciudad** (30-08-2026, petición de Max: material educativo real, insertable, propio + enlaces al mundo; apariencia que provoque volver; progreso y notas compartidas voluntarias y retractables): tabla `materials` (guia markdown | enlace) + `users.share_progress` (opt-in default 0); **35 guías propias** (250-320 palabras, redactadas por agentes OpenRouter `:free` bajo plantilla + revisión y normalización del director; humanas: analogías de cocina/tienda/huerta/plaza, cero rankings, "la ciudad se ilumina…") + **35 enlaces a Wikipedia verificados** (HTTP 200 real, 30-08-2026); inserción por archivo: `materials/<slug>.md` + `sync_materials.py` (idempotente por `material_key`, reporta huérfanos, autocontenido); endpoints `GET /api/topics/<id>/materials`, `GET /api/materials/<id>`, `GET /api/community/lights` (muro SIN ranking — orden alfabético, solo lo publicado: T13), `POST /api/me/share-progress` (retracta al instante); UI: 📖 por lote/árbol (gueías primero, enlaces al fondo, búsquedas Khan/YouTube por título), lector mini-markdown seguro, 🎁 Ver mi material (M13), celebración con confeti (adiós `alert()`), interruptor de la luz | ✅ (72/72 plataforma +23 tests; 875/875 raíz; validador OK; 70 materiales vivos en la DB; commits `4351acb`/`28d41ff`/`1cdc8e7`/`567ee8c`) |
-| Suite de tests | **875/875** (raíz, 30-08-2026) · **72/72** plataforma educativa · 8/8 puente · tsc limpio · validador conceptual OK |
+| **M16 La categoría Ética** (30-08-2026, decisión de Max: enseñar la Maxocracia dejando la jerga propia PARA EL FINAL; categoría "Ética"; canon implícito puramente maxocrático; capítulos del libro como orden; estructura para traducciones): rama `etica` (orden 0 — los valores primero) con **12 temas** en el orden del libro (El dinero que nos manda → ¿Qué vale la pena? → La vida se cuenta y no se vende → El mínimo que todos merecen → Tu tiempo es tuyo → La palabra que obliga → Dar y recibir con medida → Lo que se hace, se ve → Decidir juntos y rectificar → Cuidar sin cronómetro → La casa grande → **El idioma de la ciudad** — puente final que nombra VHV/TVI/SDV/Maxo/MaxoContract/EIR/OEV, "ya lo entendías"); 12 guías de biblioteca + 36 preguntas de **situaciones concretas** (nunca doctrina) + 12 enlaces Wikipedia verificados; **estructura i18n desde ya** (`materials.idioma`, `users.idioma`, `material_key <slug>#<idioma>g<orden>`, archivos `<slug>.<idioma>.md`, `POST /api/me/idioma`, biblioteca por lengua); auditoría anti-jerga DETERMINISTA en los tests (regex sobre las 12 guías: cero términos propios fuera del puente, que sí los nombra) | ✅ (78/78 plataforma +6; 875/875 raíz; validador OK; 129 materiales vivos: 47 guías + 82 enlaces; commits `1b31803`/`a7f4192`/`7c82cbe`) |
+| Suite de tests | **875/875** (raíz, 30-08-2026) · **78/78** plataforma educativa · 8/8 puente · tsc limpio · validador conceptual OK |
 
 **Decisiones canónicas a respetar:**
 - **La teoría (libro) tiene prioridad**: T0-T15 son canónicos; T16=Minimizar Daño, T17=Reciprocidad
@@ -110,6 +117,13 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
   SIN RANKING (orden alfabético permanente — guardarraíl OEV §1.5) y el opt-in
   es default apagado + retractado instantáneo; la guía acompaña pero NO
   sustituye la obra (la validación sigue siendo test + vacuación).
+- **M16 la Ética**: la jerga propia (VHV/TVI/SDV/Maxo/MaxoContract/EIR/OEV) está
+  PROHIBIDA en las guías de los temas 1-11 (auditoría determinista en los
+  tests) y se nombra solo en el puente final; las preguntas son situaciones
+  concretas, nunca definiciones (anti-catecismo); el idioma del material vive
+  en `materials.idioma` con `material_key` por lengua y la preferencia en
+  `users.idioma`; las traducciones las hace la comunidad y las verifica el
+  director — el canon no se delega a una máquina.
 
 ## 3. Cómo verificar al arrancar
 
@@ -126,24 +140,28 @@ npx tsc --noEmit
 
 ## 4. Pendientes priorizados
 
-**La rama educativa M1-M15 está CERRADA (30-08-2026)** — identidad federada OEV implementada y blindada, Ciudad del Saber (M14) y **Biblioteca de la Ciudad** (M15: 35 guías + 35 enlaces verificados + luz compartida opt-in) vivos en la plataforma. Lo que sigue:
+**La rama educativa M1-M16 está CERRADA (30-08-2026)** — identidad federada OEV implementada y blindada, Ciudad del Saber (M14), **Biblioteca de la Ciudad** (M15) y **la categoría Ética en lenguaje común (M16)** vivos en la plataforma. Lo que sigue:
 
-1. **Rondas de mantenimiento (anti-δ)** — Fase 2 de la Ciudad: lotes dominados se
+1. **Traducciones reales (fase 2 de la estructura i18n)**: empezar por la Ética —
+   la comunidad traduce `materials/<slug>.<idioma>.md` y el director verifica
+   (el tema 12 se re-explica, no se traduce literal); UI i18n (diccionario de
+   etiquetas) luego. Doc: `ETICA_LENGUAJE_COMUN_CATEGORIA.md` §5.
+2. **Rondas de mantenimiento (anti-δ)** — Fase 2 de la Ciudad: lotes dominados se
    marcan "requiere Ronda" tras N semanas sin tocar; repasar (las guías ya dan
    material) devuelve el brillo. Teoría OEV §1.1 (la base nunca se gradúa).
    Doc: `docs/architecture/GAMIFICACION_CIUDAD_APRENDIZAJE.md` §4.
-2. **Itinerarios** (misiones opcionales: rutas temáticas sugeridas — caminos a
+3. **Itinerarios** (misiones opcionales: rutas temáticas sugeridas — caminos a
    todas partes, ninguno obligatorio) y **cartografía compartida** (barrios
    iluminados por la comunidad sin revelar quién hizo qué — privacidad T13).
-3. **Federar de verdad en producción**: `SECRET_KEY` compartida real +
+4. **Federar de verdad en producción**: `SECRET_KEY` compartida real +
    `EDU_BRIDGE_SERVICE_TOKEN` + `EDU_BRIDGE_URL` en ambos nodos (README de la
    plataforma) — la demo usó valores de prueba.
-4. **Expandir el patrón "plaza hablable"** (`InfoTip`) al resto del repo:
+5. **Expandir el patrón "plaza hablable"** (`InfoTip`) al resto del repo:
    `matching`, `vhv`, `micromax`, `contracts` (decisión de Max).
-5. **Hardening/performance** (candidatos): N+1 de `reply_count` en el foro (COUNT
+6. **Hardening/performance** (candidatos): N+1 de `reply_count` en el foro (COUNT
    GROUP BY + paginación por cursor); oráculos síncronos (120 s) → colas/async
    cuando el parlamento vote de verdad.
-6. Mantener mapas y handoff al día (regla continua).
+7. Mantener mapas y handoff al día (regla continua).
 
 **Futuro posible (fuera de la Ola 4)**: hitos del informe del Reino Sintético
 (`docs/architecture/informe_reino_sintetico_2026-08-12.md` §7): EIR por entidad sintética, AVA con
