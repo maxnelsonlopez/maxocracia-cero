@@ -37,7 +37,7 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 
 ## 2. Briefing para el agente (opencode / DeepSeek)
 
-**Estado actual (12-08-2026, jornada mixta de dos sesiones):**
+**Estado actual (30-08-2026, jornada M15 — Biblioteca de la Ciudad; la tabla se actualizó con cada hito):**
 
 | Área | Estado |
 |---|---|
@@ -169,6 +169,20 @@ open), 3 violaciones INV1 sin alerta. TODO.md actualizado (Semana 9-12 parcial).
 ## 5. Historia reciente (git log, maxocracia)
 
 ```
+1380488 docs(handoff): M15 biblioteca de la ciudad y la luz compartida
+567ee8c docs(educacion): biblioteca de la ciudad y la luz - diseno canonico (M15)
+1cdc8e7 feat(edu-ux): biblioteca, celebracion y luz de la ciudad en la UI (M15)
+28d41ff feat(edu-plataforma): 35 guias propias del saber - la ciudad ya tiene material (M15)
+4351acb feat(edu-plataforma): la biblioteca de la ciudad - material educativo por tema (M15)
+5c9c37f fix(plataforma-educativa): el companero no repite la obra en curso (inicio M14)
+ed3f16f docs(educacion): diseno de la ciudad del saber y handoff M14
+ecd82dc feat(plataforma-educativa): la ciudad del saber - mapa, niebla, lore y companero (M14)
+5d8086e docs(handoff): M13 vacuacion sin muros y hallazgos de prueba en vivo
+63d3f5e feat(nav): la puerta del nodo educativo aparece en el menu Aprendizaje
+6378243 docs(educacion): auditoria de mejora de la plataforma (MiniMax) y handoff M13
+b1c678e feat(plataforma-educativa): vacuacion sin muros - material de ensenanza propio (M13)
+70f5eae fix(plataforma-educativa): el modal de test ya no se cuela en el login
+217c0f0 docs(handoff): M12.1-12.3 - puerta, sincronizacion automatica y evidencia visible
 b6639ed feat(edu-ux): arbol visible y concesion por triada en UI (sin prompt())
 d4c5a24 feat(workshops): tejido visible y triada con la lista del taller
 93543d3 docs(maps): RF-EDU-12/13/14 y mapa frontend de la plaza hablable
@@ -197,4 +211,4 @@ c59f608 feat(voting): votacion comunitaria (Cap 14) - categorias, quorum, consen
 ```
 
 ---
-**Mantenido por**: Max + DeepSeek (opencode) · **Próxima actualización**: al cierre de la siguiente sesión
+**Mantenido por**: Max + DeepSeek (harness) · **Próxima actualización**: al cierre de la siguiente sesión
