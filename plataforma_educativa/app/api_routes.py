@@ -39,6 +39,15 @@ def _user_row():
     return get_db().execute("SELECT * FROM users WHERE id = ?", (g.user_id,)).fetchone()
 
 
+def _user_lang():
+    """Idioma de la persona (M16); la biblioteca se sirve en su lengua."""
+    if "user_lang" not in g:
+        user = _user_row()
+        lang = user["idioma"] if user and "idioma" in user.keys() else "es"
+        g.user_lang = (lang or "es").strip()[:2] or "es"
+    return g.user_lang
+
+
 def _is_coordinator():
     user = _user_row()
     return bool(user and user["is_coordinator"])
@@ -359,6 +368,7 @@ def me():
                     "maxo_user_id": user["maxo_user_id"] if "maxo_user_id" in user.keys() else None,
                     "is_federated": getattr(g, "is_federated", False),
                     "share_progress": bool(user["share_progress"]) if "share_progress" in user.keys() else False,
+                    "idioma": user["idioma"] if "idioma" in user.keys() else "es",
                 },
                 "branches": progress,
             }
@@ -409,7 +419,8 @@ def tree():
                 "SELECT COUNT(*) AS n FROM questions WHERE topic_id = ?", (topic["id"],)
             ).fetchone()["n"]
             m_count = db.execute(
-                "SELECT COUNT(*) AS n FROM materials WHERE topic_id = ?", (topic["id"],)
+                "SELECT COUNT(*) AS n FROM materials WHERE topic_id = ? AND idioma = ?",
+                (topic["id"], _user_lang()),
             ).fetchone()["n"]
             topic_list.append(
                 {
@@ -1076,9 +1087,10 @@ def _fmt_material(row):
     }
 
 
-def _topic_materials(topic_id):
+def _topic_materials(topic_id, idioma="es"):
     rows = get_db().execute(
-        "SELECT * FROM materials WHERE topic_id = ? ORDER BY orden, id", (topic_id,)
+        "SELECT * FROM materials WHERE topic_id = ? AND idioma = ? ORDER BY orden, id",
+        (topic_id, idioma),
     ).fetchall()
     return [_fmt_material(r) for r in rows]
 
@@ -1086,10 +1098,31 @@ def _topic_materials(topic_id):
 @api_bp.route("/api/topics/<int:topic_id>/materials", methods=["GET"])
 @login_required
 def topic_materials(topic_id):
-    """La biblioteca del lote: guías + enlaces del tema (M15)."""
+    """La biblioteca del lote: guías + enlaces del tema (M15/M16).
+
+    Se sirve en el idioma de la persona (``users.idioma``); ``?lang=``
+    sobreescribe (para traducciones y pruebas).
+    """
     if _get_topic_or_404(topic_id) is None:
         return jsonify({"error": "El tema no existe."}), 404
-    return jsonify({"topic_id": topic_id, "materials": _topic_materials(topic_id)}), 200
+    lang = (request.args.get("lang") or _user_lang())[:2] or "es"
+    return jsonify({"topic_id": topic_id, "lang": lang, "materials": _topic_materials(topic_id, lang)}), 200
+
+
+@api_bp.route("/api/me/idioma", methods=["POST"])
+@login_required
+def me_idioma():
+    """Cambia la preferencia de idioma de la persona (M16, estructura i18n)."""
+    data = request.get_json(silent=True) or {}
+    idioma = (data.get("idioma") or "").strip()[:2]
+    if len(idioma) != 2 or not idioma.isalpha():
+        return jsonify({"error": "idioma debe ser un código de dos letras (ej: es)."}), 400
+    db = get_db()
+    db.execute("UPDATE users SET idioma = ? WHERE id = ?", (idioma.lower(), g.user_id))
+    db.commit()
+    if "user_lang" in g:
+        g.user_lang = idioma.lower()
+    return jsonify({"idioma": idioma.lower()}), 200
 
 
 @api_bp.route("/api/materials/<int:material_id>", methods=["GET"])

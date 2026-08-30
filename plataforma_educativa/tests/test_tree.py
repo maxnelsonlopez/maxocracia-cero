@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Test 3: el árbol viene sembrado (8 ramas, >30 temas, preguntas por tema)."""
+"""Test 3: el árbol viene sembrado (9 ramas, >40 temas, preguntas por tema)."""
 
 
 def _token(client, username="nodo"):
@@ -8,21 +8,21 @@ def _token(client, username="nodo"):
     return resp.get_json()["token"]
 
 
-def test_tree_has_8_branches_and_more_than_30_topics(client):
+def test_tree_has_9_branches_and_more_than_40_topics(client):
     token = _token(client)
     headers = {"X-Auth-Token": token}
     resp = client.get("/api/tree", headers=headers)
     assert resp.status_code == 200
     branches = resp.get_json()["branches"]
-    assert len(branches) == 8
+    assert len(branches) == 9
 
     total = sum(len(b["topics"]) for b in branches)
-    assert total > 30
+    assert total > 40
 
-    # Slugs obligatorios de las 8 ramas.
+    # Slugs obligatorios de las 9 ramas (la Ética desde M16).
     slugs = {b["slug"] for b in branches}
     assert {
-        "matematicas", "higiene", "relaciones", "lectura",
+        "etica", "matematicas", "higiene", "relaciones", "lectura",
         "escritura", "lenguaje", "naturaleza", "computadores",
     } <= slugs
 
@@ -43,6 +43,7 @@ def test_branches_are_ordered(client):
     token = _token(client)
     headers = {"X-Auth-Token": token}
     branches = client.get("/api/tree", headers=headers).get_json()["branches"]
-    # Las 8 ramas deben estar en orden (campo 'orden'): empiezan y terminan así.
-    assert branches[0]["slug"] == "matematicas"
+    # Las 9 ramas deben estar en orden (campo 'orden'): la Ética primero
+    # (M16: los valores antes que la técnica), computadores al final.
+    assert branches[0]["slug"] == "etica"
     assert branches[-1]["slug"] == "computadores"

@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS users (
     is_coordinator INTEGER NOT NULL DEFAULT 0,
     maxo_user_id INTEGER UNIQUE,
     share_progress INTEGER NOT NULL DEFAULT 0,
+    idioma TEXT NOT NULL DEFAULT 'es',
     created_at TEXT NOT NULL
 );
 
@@ -113,6 +114,8 @@ CREATE TABLE IF NOT EXISTS mentorship_triadas (
 -- La Biblioteca de la Ciudad (M15): material educativo por tema.
 -- 'guia' = contenido propio en markdown (carga local instantánea);
 -- 'enlace' = URL verificada al mundo compartido (Wikipedia, Khan, YouTube).
+-- 'idioma' (M16): la biblioteca se sirve en la lengua de la persona; los
+-- idiomas conviven sin pisarse (material_key incluye el idioma).
 CREATE TABLE IF NOT EXISTS materials (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     topic_id INTEGER NOT NULL REFERENCES topics(id),
@@ -124,6 +127,7 @@ CREATE TABLE IF NOT EXISTS materials (
     contenido TEXT,
     autor TEXT NOT NULL DEFAULT 'siembra',
     orden INTEGER NOT NULL DEFAULT 0,
+    idioma TEXT NOT NULL DEFAULT 'es',
     created_at TEXT NOT NULL
 );
 """
@@ -379,7 +383,246 @@ MATERIAL_LINKS = [
     ("internet_seguro", "Seguridad de la información — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Seguridad_de_la_informaci%C3%B3n"),
     ("programacion_inicial", "Programación — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Programaci%C3%B3n"),
     ("ia_aliada", "Inteligencia artificial — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Inteligencia_artificial"),
+    # M16 — la Ética en lenguaje común (enlaces verificados 30-08-2026).
+    ("etica_el_dinero_que_nos_manda", "Deuda — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Deuda"),
+    ("etica_que_vale_la_pena", "Ética — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/%C3%89tica"),
+    ("etica_la_vida_se_cuenta", "Economía del cuidado — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Econom%C3%ADa_del_cuidado"),
+    ("etica_el_minimo_que_todos_merecen", "Mínimo vital — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/M%C3%ADnimo_vital"),
+    ("etica_tu_tiempo_es_tuyo", "Gestión del tiempo — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Gesti%C3%B3n_del_tiempo"),
+    ("etica_la_palabra_que_obliga", "Contrato — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Contrato"),
+    ("etica_dar_y_recibir_con_medida", "Economía del don — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Econom%C3%ADa_del_don"),
+    ("etica_todo_lo_que_se_hace_se_ve", "Registro público — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Registro_p%C3%BAblico"),
+    ("etica_decidir_juntos", "Asamblea — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Asamblea"),
+    ("etica_cuidar_sin_cronometro", "Trabajo de cuidados — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Trabajo_de_cuidados"),
+    ("etica_la_casa_grande", "Cooperativa — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Cooperativa"),
+    ("etica_el_idioma_de_la_ciudad", "Banco de tiempo — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Banco_de_tiempo"),
 ]
+
+
+def _seed_etica(db_conn):
+    """Siembra la categoría Ética (M16): la casa en lenguaje común.
+
+    Idempotente por slug (rama por nombre, temas por slug): arranca sobre
+    bases que ya tienen las 8 ramas sin tocarlas. Las preguntas se añaden
+    solo si el tema aún no tiene ninguna (la revisión posterior no duplica).
+    """
+    branch = db_conn.execute(
+        "SELECT id FROM branches WHERE slug = 'etica'"
+    ).fetchone()
+    if branch is None:
+        cur = db_conn.execute(
+            "INSERT INTO branches (slug, nombre, descripcion, orden) VALUES "
+            "('etica', 'Ética', 'La casa en común: antes de medir y construir, se aprende para qué. "
+            "Los fundamentos del sistema en lenguaje común; el idioma propio se nombra al final.', 0)"
+        )
+        branch_id = cur.lastrowid
+    else:
+        branch_id = branch["id"]
+
+    topic_ids = {}
+    # Primera pasada: temas sin prerrequisitos (se resuelven por slug).
+    for pos, (slug, titulo, descripcion, dificultad, _prereqs) in enumerate(ETICA_TOPICS, start=1):
+        row = db_conn.execute(
+            "SELECT id FROM topics WHERE slug = ?", (slug,)
+        ).fetchone()
+        if row is not None:
+            topic_ids[slug] = row["id"]
+            continue
+        cur = db_conn.execute(
+            "INSERT INTO topics (branch_id, slug, titulo, descripcion, orden, prereq_ids, dificultad) "
+            "VALUES (?, ?, ?, ?, ?, '[]', ?)",
+            (branch_id, slug, titulo, descripcion, pos, dificultad),
+        )
+        topic_ids[slug] = cur.lastrowid
+
+    # Segunda pasada: prerrequisitos (cadena 1→12) y preguntas del banco.
+    for pos, (slug, _t, _d, _dif, prereqs) in enumerate(ETICA_TOPICS, start=1):
+        prereq_ids = [topic_ids[p] for p in prereqs if p in topic_ids]
+        db_conn.execute(
+            "UPDATE topics SET prereq_ids = ?, orden = ? WHERE slug = ?",
+            (json.dumps(prereq_ids), pos, slug),
+        )
+        row = db_conn.execute(
+            "SELECT id FROM topics WHERE slug = ?", (slug,)
+        ).fetchone()
+        q_count = db_conn.execute(
+            "SELECT COUNT(*) AS n FROM questions WHERE topic_id = ?", (row["id"],)
+        ).fetchone()["n"]
+        if q_count == 0:
+            for (pregunta, opciones, correcta, explicacion) in ETICA_QUESTIONS.get(slug, []):
+                db_conn.execute(
+                    "INSERT INTO questions (topic_id, pregunta, opciones, correcta, explicacion) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (row["id"], pregunta, json.dumps(opciones, ensure_ascii=False), correcta, explicacion),
+                )
+
+
+# La categoría Ética (M16): (slug, título común, descripción, dificultad 1-3, prereqs por slug).
+# Los temas siguen el orden de los capítulos del libro, SIN jerga propia
+# (excepto el puente final). Ver docs/architecture/ETICA_LENGUAJE_COMUN_CATEGORIA.md.
+ETICA_TOPICS = [
+    ("etica_el_dinero_que_nos_manda", "El dinero que nos manda",
+     "Cómo la deuda y el interés terminan mandando sobre la vida; cuándo una deuda es puente y cuándo cadena.", 1, []),
+    ("etica_que_vale_la_pena", "¿Qué vale la pena?",
+     "Cuatro prioridades antes de cualquier medida: la vida, la verdad, el tiempo y la medida justa.", 1, ["etica_el_dinero_que_nos_manda"]),
+    ("etica_la_vida_se_cuenta", "La vida se cuenta y no se vende",
+     "La huella de una actividad en tres números: cuánto tomó, qué tan real fue y hacia dónde llevó.", 2, ["etica_que_vale_la_pena"]),
+    ("etica_el_minimo_que_todos_merecen", "El mínimo que todos merecen",
+     "El piso común que nadie cruza hacia abajo, y por qué el techo sí es de cada quien.", 2, ["etica_la_vida_se_cuenta"]),
+    ("etica_tu_tiempo_es_tuyo", "Tu tiempo es tuyo",
+     "El presupuesto vital de la semana: sueño, trabajo, descanso y compartir. El descanso no se vende.", 2, ["etica_el_minimo_que_todos_merecen"]),
+    ("etica_la_palabra_que_obliga", "La palabra que obliga",
+     "Prometer y cumplir; la palabra por escrito con testigos; verificar no es desconfiar.", 2, ["etica_tu_tiempo_es_tuyo"]),
+    ("etica_dar_y_recibir_con_medida", "Dar y recibir con medida",
+     "Dar no empobrece cuando vuelve aprendizaje o cuidado; la medida que ambos lados pueden mirar.", 3, ["etica_la_palabra_que_obliga"]),
+    ("etica_todo_lo_que_se_hace_se_ve", "Lo que se hace, se ve",
+     "Lo que cuenta se registra y se ve; la vida íntima es sagrada y no se registra.", 3, ["etica_dar_y_recibir_con_medida"]),
+    ("etica_decidir_juntos", "Decidir juntos y rectificar",
+     "Las decisiones que afectan a todos se toman entre todos; la voz disidente tiene silla; cambiar de opinión es virtud.", 3, ["etica_todo_lo_que_se_hace_se_ve"]),
+    ("etica_cuidar_sin_cronometro", "Cuidar sin cronómetro",
+     "Lo que no se mide y vale: un cuidado, un duelo, un perdón. La otra mitad de la economía.", 3, ["etica_decidir_juntos"]),
+    ("etica_la_casa_grande", "La casa grande: comunidad y oficios",
+     "Nadie se sostiene solo: cuidar, construir, cultivar, enseñar, limpiar — todos los oficios hacen la casa.", 3, ["etica_cuidar_sin_cronometro"]),
+    ("etica_el_idioma_de_la_ciudad", "El idioma de la ciudad",
+     "El puente final: las frases comunes que ya viviste, ahora con sus nombres propios.", 3, ["etica_la_casa_grande"]),
+]
+
+# Banco de preguntas por slug (M16): (pregunta, [opciones], índice_correcta, explicación).
+# Situaciones concretas en lenguaje común (nunca doctrina); revisadas por el director.
+ETICA_QUESTIONS = {
+    "etica_el_dinero_que_nos_manda": [
+        ("María pide un préstamo para comprar semillas y, con la venta de la cosecha, pagarlo y que a su familia le quede para comer. ¿Qué tipo de deuda está usando?",
+         ["Una deuda que crece sola y nunca termina", "Una deuda-puente, porque la lleva de hoy a un mejor momento", "Una deuda de lujo, por pedir sin necesidad", "Una deuda que no sirve, porque pudo esperar"], 1,
+         "Es una deuda-puente: la saca de una necesidad y se puede cerrar con el fruto de su trabajo, sin hundirla."),
+        ("Don Pedro pide cada mes un préstamo nuevo para pagar el anterior, y los intereses se comen lo que gana. ¿Qué está ocurriendo?",
+         ["Está usando una deuda-puente de forma inteligente", "Está ahorrando sin darse cuenta", "Está cayendo en una deuda-cadena, que se encadena con otra y nunca acaba", "Está protegido porque siempre puede pedir más"], 2,
+         "Es una deuda-cadena: cada préstamo alimenta el siguiente, los intereses la hacen crecer y no le dejan salida limpia."),
+        ("Una familia prefiere no pedir dinero para un viaje de placer, porque no quiere endeudarse por algo que no le deja un bien. ¿Qué refleja esa decisión?",
+         ["Que nunca deben pedir nada, ni siquiera para una emergencia", "Que el viaje era más importante que todo", "Que las deudas son siempre malas y no hay excepciones", "Que miden si la deuda es puente o cadena antes de aceptarla"], 3,
+         "Saben distinguir una deuda que abre camino (puente) de una que solo encadena problemas, y por eso deciden con cuidado."),
+    ],
+    "etica_que_vale_la_pena": [
+        ("La abuela está enferma; con la plata de la casa alcanza para su medicina o para arreglar el carro. Si eligen la medicina, ¿qué prioridad están cuidando?",
+         ["La medida justa", "La verdad", "La vida y la salud", "El tiempo"], 2,
+         "La salud de la abuela va primero: cuidar la vida vale más que arreglar el carro."),
+        ("Un vendedor dice que la fruta está fresca, pero está muy verde. Si tú lo aclaras con respeto, ¿qué prioridad estás cuidando?",
+         ["La vida", "La verdad", "El tiempo", "La medida justa"], 1,
+         "Decir lo que realmente es, sin exagerar, es cuidar la verdad, aunque no sea cómodo."),
+        ("Entre dos amigos, uno hace todo el trabajo de la casa y el otro nada. ¿Qué prioridad se está olvidando?",
+         ["La medida justa, porque nadie debería cargar más de lo que le toca", "La verdad", "El tiempo", "La vida"], 0,
+         "Repartir parejo lo que cuesta es respetar la medida justa, para que ninguno quede agotado por culpa del otro."),
+    ],
+    "etica_la_vida_se_cuenta": [
+        ("Al terminar el día, tu tío cuenta su jornada: \"me tomó 8 horas\", \"fue trabajo de verdad\", \"sirvió para dar de comer a mi familia\". ¿Qué está haciendo?",
+         ["Vendiendo su día por plata", "Contando su actividad en tres números: cuánto duró, qué tan real fue y hacia dónde llevó", "Presumiendo de su esfuerzo", "Quejándose de su trabajo"], 1,
+         "Ese es el modo de contar la vida: el tiempo que tomó, la verdad de lo hecho y el rumbo que le dejó."),
+        ("Para decidir si una actividad valió la pena, ¿qué preguntas te ayudan a contarla?",
+         ["¿Cuánto dinero dejó, qué dirán los demás y qué me conviene?", "¿Quién la vio, cuánto duró y qué me apuraba hacer después?", "¿Qué tan difícil fue, quién la pidió y me alcanzó para descansar?", "¿Cuánto tiempo tomó, qué tan real fue y hacia dónde llevó?"], 3,
+         "Esas tres preguntas son las que cuentan una actividad en serio: su tiempo, su verdad y su dirección."),
+        ("Una vecina te dice: \"trabajé todo el día, pero no sé a dónde me llevó\". ¿Qué número de su actividad le falta mirar?",
+         ["Cuánto tiempo tomó", "Qué tan real fue", "Hacia dónde llevó, es decir su dirección", "Cuánto le pagaron"], 2,
+         "Sin saber hacia dónde lleva el esfuerzo, el tiempo y la verdad no bastan para decidir si valió la pena."),
+    ],
+    "etica_el_minimo_que_todos_merecen": [
+        ("En tu barrio proponen que todas las familias tengan acceso a la misma comida, agua, salud y escuela para sus hijos. ¿Qué se está garantizando?",
+         ["Un techo común, para que nadie pueda superar a otro", "Que nadie pueda tener más que el resto", "Un piso común, un mínimo igual para todos", "Que los que ahorran deben repartir lo suyo"], 2,
+         "El piso común es el mínimo que todos merecen por igual: comida, agua, salud, techo, escuela y vínculos."),
+        ("Una familia vive justa y con lo necesario; otra ahorra, crece y llega a tener más. ¿Cuál es lo correcto con el piso y el techo?",
+         ["La segunda rompió la regla porque no debe superar a nadie", "El piso común es para todos, y cada quien puede subir tan alto como quiera", "La primera debería enojarse porque no tiene lo mismo", "Solo una puede tener lo necesario"], 1,
+         "El piso común se garantiza a todos; el techo no: cada persona llega tan alto como se lo proponga."),
+        ("Si el dinero no alcanza para darle a todos el mismo lujo, ¿qué debería asegurarse primero para todas las personas?",
+         ["Que nadie tenga más que el resto", "Que todos gasten igual", "Que los que ganan más den todo lo que tienen", "El mínimo de comida, agua, salud, techo, escuela y vínculos para todos"], 3,
+         "Primero se garantiza el piso para todos; el techo no es igual, porque cada quien sube hasta donde pueda."),
+    ],
+    "etica_tu_tiempo_es_tuyo": [
+        ("Alguien trabaja, duerme, descansa y comparte con su familia. ¿Qué está haciendo?",
+         ["Un presupuesto vital, donde el descanso y el compartir también cuentan", "Una excusa para trabajar menos", "Un desorden, porque debería trabajar más", "Poner el sueño por encima de todo"], 0,
+         "El presupuesto vital reparte el día en sueño, trabajo, descanso y compartir, sin dejar ninguna parte por fuera."),
+        ("A tu hermano le ofrecen un turno extra bien pagado, pero así no dormiría nada. ¿Qué principio le ayuda a decir que no?",
+         ["Que dormir es perder plata", "Que el tiempo no se puede organizar", "Que el descanso no se vende, aunque le paguen por perderlo", "Que si paga bien, siempre conviene"], 2,
+         "El descanso y el sueño son tuyos y no están en venta: el dinero no manda sobre tu salud y tu pausa."),
+        ("En tu casa quieren organizar el día para dormir bien, cumplir el trabajo, descansar y compartir en familia. ¿Cómo se llama esta forma de repartir la jornada?",
+         ["Un exceso de descanso", "Una pérdida de tiempo", "Una forma de trabajar sin parar", "Un presupuesto vital, que reparte sueño, trabajo, descanso y compartir"], 3,
+         "Es el presupuesto vital: repartir el tiempo entre sueño, trabajo, descanso y compartir, con cada parte en su lugar."),
+    ],
+    "etica_la_palabra_que_obliga": [
+        ("Un amigo te promete devolverte las herramientas el sábado, pero también pides un papel firmado con dos testigos. ¿Por qué hacerlo?",
+         ["Porque no confías en nadie", "Porque un acuerdo con testigos obliga por igual a ambos y evita malentendidos", "Porque los papeles se pierden", "Porque estás buscando pelea"], 1,
+         "Ponerlo por escrito con testigos no es desconfiar: es que la promesa quede clara y obligue por igual a quien promete y a quien recibe."),
+        ("Para que una promesa importante obligue de verdad, ¿qué conviene asegurar?",
+         ["Solo la palabra dicha de viva voz", "Nada, porque prometer es suficiente", "Que se cumpla lo acordado y, si es importante, dejarlo por escrito con testigos", "Que nadie más se entere"], 2,
+         "Cumplir es lo esencial, y dejarlo por escrito con testigos hace que la promesa sea clara y verificable para los dos."),
+        ("Cuando alguien promete algo, ¿qué significa verificar antes de confiar plenamente?",
+         ["Desconfiar y tratarle como a un embaucador", "Vigilarle todo el tiempo", "Exigir que prometa más", "Confirmar los hechos para no confundir confianza con descuido, porque verificar no es desconfiar"], 3,
+         "Verificar es confirmar lo que se dijo para acordar con seriedad; eso no es desconfiar, es cuidar el acuerdo."),
+    ],
+    "etica_dar_y_recibir_con_medida": [
+        ("Un amigo te pasa sus apuntes cuando faltaste a clase y tú quieres corresponderle, pero tu semana está llena. ¿Qué es una medida justa?",
+         ["No devolver nada porque \"ya te ayudó sin esperar nada\"", "Devolverle algo que te cuesta poco y a él le sirve de verdad, aunque no sea exactamente igual", "Pagarte lo que valen sus apuntes en dinero", "Prometerle que algún día lo compensarás, sin plazo ni forma concreta"], 1,
+         "La medida justa se mira entre los dos: no tiene que ser igual en cantidad, sino que ambos la acepten sin que a nadie le duela."),
+        ("En el mercado, una señora que siempre te vende fruta te regala de vez en cuando una mazorca extra \"para la casa\". Tú no quieres quedar en deuda. ¿Qué haces con medida?",
+         ["Le das las gracias y aceptas, porque dar y recibir con medida también es dejarse querer", "Le pides que ya no te dé nada para no deberle", "Le pagas la mazorca cada vez aunque ella insista en regalarla", "Le llevas toda tu compra a otro puesto para que \"la cosa no se confunda\""], 0,
+         "Dar no empobrece cuando vuelve en cuidado o en confianza; la medida justa es que ambos se sientan bien, no hacer cuentas exactas."),
+        ("Organizas un bazar comunitario. Alguien aporta mucho tiempo y otra persona aporta solo una libra de café. ¿Es justo?",
+         ["No, quien aporta más tiempo debe recibir más de lo recaudado", "No, quien aporta poco no debería participar en el bazar", "Sí, si ambos lo aceptan con gusto: cada uno dio lo que podía y lo que dejó vuelve como cuidado y aprendizaje", "Solo es justo si cada uno aporta exactamente lo mismo"], 2,
+         "La medida justa no se mide en lo aportado sino en que los dos lados la miren y la acepten sin que a ninguno le duela."),
+    ],
+    "etica_todo_lo_que_se_hace_se_ve": [
+        ("En tu grupo, hiciste el compromiso de enseñar lectura a los niños los sábados (se anotó en el tablero común), pero esta semana no puedes ir. ¿Qué hace visible tu situación?",
+         ["Avisar por adelantado para que el tablero y el grupo lo vean y puedan cubrirte", "No decir nada, porque es algo personal", "Avisar solo a un amigo de confianza, sin tocar el tablero", "Quejarte en privado de que el tablero \"te vigila\""], 0,
+         "Los acuerdos se registran para que todos los vean; avisar y hacer visible el cambio mantiene la confianza sin meterte en tu vida privada."),
+        ("En tu huerta comunitaria, anotaste que le pusiste agua al cultivo de don Carlos una tarde (se registra con quién y cuándo). Después don Carlos dice que no le regaste. ¿Qué resuelve esto?",
+         ["Que cada quien lleve cuenta propia y ya", "Que el registro visible muestre que sí lo hiciste, y ambos puedan mirarlo", "Que se lo pregunte solo a la familia, porque \"es asunto de casa\"", "Que don Carlos mienta y no se pueda saber nada"], 1,
+         "Lo que cuenta se registra y se ve: no para vigilar, sino para que las cosas queden claras entre los dos."),
+        ("Una compañera te cuenta algo muy personal que le pasa en su casa. En la ciudad hay un espacio para registrar lo que se hace. ¿Qué corresponde?",
+         ["Registrar ese relato personal para que quede \"a la vista\", porque todo se ve", "Registrar solo los compromisos y acuerdos que se tomaron, y guardar lo íntimo en privado: lo íntimo es sagrado", "Registrar todo, incluso lo íntimo, para no perder nada", "No registrar nada de lo que hablaron, porque \"nada se ve\""], 1,
+         "Lo que se hace y se acuerda se ve; lo íntimo no se registra: la ciudad no mira la vida privada."),
+    ],
+    "etica_decidir_juntos": [
+        ("En la asamblea del barrio proponen pintar las fachadas de azul. Tú piensas que el verde combina mejor con las casas. ¿Qué es lo correcto?",
+         ["Callarte para no armar problema, porque la mayoría ya votó", "Decir lo que ves, aunque te quedes solo: la voz disidente tiene silla y puede ver lo que otros no ven", "Irte de la asamblea para no pelearte", "Convencer a tu familia para que protesten afuera"], 1,
+         "La voz que piensa distinto no es un estorbo: tiene silla, porque muchas veces ve el riesgo o el detalle que los demás no ven."),
+        ("Mañana hay votación para decidir si el fondo común se usa para el arreglo de la cancha o para la sede de salud. Tú habías dicho \"cancha\", pero esta tarde leíste datos que te hicieron cambiar. ¿Qué se espera de ti?",
+         ["Mantenerte en \"cancha\" para no quedar como que cambias de opinión", "No volver a hablar del tema, porque ya te pronunciaste", "Cambiar de opinión sin vergüenza y explicar por qué: a veces cambiar es virtud, no debilidad", "Dejar que decidan los demás para no comprometerte"], 2,
+         "Cambiar de opinión cuando aparece nueva información no es un papelón: es rectificar, y eso es una virtud."),
+        ("En la votación, tu grupo de amigos salió con tu candidato, pero gana el otro. En la asamblea siguiente todos deben decidir cómo usar el espacio. ¿Qué manda?",
+         ["Tu candidato, porque fue tu opción", "La decisión que se tomó entre todos, aunque no sea la tuya; manda la decisión, no la persona", "Los amigos, porque son mayoría en tu mesa", "Quien más hable en la asamblea"], 1,
+         "Cuando se decide en común, manda la decisión tomada, no la persona que la propuso y tampoco la que la perdió."),
+    ],
+    "etica_cuidar_sin_cronometro": [
+        ("Tu abuela está triste tras una pérdida y te va a visitar. Unos te dicen \"quédate una hora y te vas, no más\". ¿Qué es lo correcto?",
+         ["Medir exactamente la visita para no \"perder tiempo\"", "Quedarte el tiempo que tu abuela necesite: el duelo y el cariño cronometrados se mueren", "No ir, porque eso no se puede medir", "Ir solo si puedes registrar el tiempo como una tarea"], 1,
+         "Cuidar y acompañar en el duelo no se mide con reloj: son de las cosas sin medida, y al cronometrarlas se pierden."),
+        ("Tú y tu vecina cuidan por turnos a un señor enfermo del barrio. La vecina se pasó una tarde entera y tú solo pudiste una hora. ¿Cómo se valora eso?",
+         ["La vecina aportó más, así que merece más reconocimiento", "Ni cuenta tiene, porque \"cuidar no vale nada\"", "No se cronometra como un turno de fábrica: también cuenta la atención y el cariño, que no se miden con hora", "Lo justo es que todos cuiden exactamente la misma cantidad de horas"], 2,
+         "Hay economía que da vida: cuidar no se mide en minutos; cuenta la presencia y el afecto, que no caben en un cronómetro."),
+        ("Después de una pelea familiar, alguien te dice \"perdónalo ya, hace una semana que no le hablas\". ¿Qué es lo correcto?",
+         ["Perdonar porque ya pasó el tiempo justo", "Apurar el perdón para que \"quede dentro del plazo\"", "No perdonar nunca, porque el perdón se mide", "Perdonar cuando de verdad estés listo: el perdón no se apura con cronómetro, necesita su tiempo"], 3,
+         "El perdón es de las cosas que no se cronometran; forzarlo con medida lo echa a perder."),
+    ],
+    "etica_la_casa_grande": [
+        ("En tu barrio hay quien cuida a los niños, quien barre la plaza, quien cultiva la huerta y quien enseña a leer. ¿Todos son parte de la casa grande?",
+         ["No, solo quien \"trabaja de verdad\", es decir, quien construye", "No, lo que cuenta es producir para fuera del barrio", "Sí, todos los oficios hacen la casa: cuidar, construir, cultivar, enseñar y limpiar son igual de necesarios", "Solo quienes reciben pago por su tarea"], 2,
+         "Ningún oficio sobra: cada uno sostiene la casa grande, y todos tienen su lugar en la mesa."),
+        ("Tú sabes arreglar cañerías, pero este año nadie te lo ha pedido y te sientes sin lugar. En la asamblea, ¿qué te devuelve tu lugar en la mesa?",
+         ["Quejarte de que nadie te valora", "Dejar de ir a la asamblea porque \"no aportas\"", "Recordar tu oficio y ofrecerlo: quien deja de ver su oficio pierde su lugar en la mesa", "Pedir que te paguen por adelantado"], 2,
+         "Ver tu oficio y ponerlo al servicio de la casa te mantiene en la mesa; no importa que no lo pidan todos los días."),
+        ("Don José, que cuidó la huerta toda su vida, ahora está viejo y casi no puede trabajar. Un vecino dice \"ya no sirve para nada\". ¿Qué es lo correcto?",
+         ["Tiene razón: si no puede trabajar, no aporta", "En la casa grande no se pierde a quien llevó su oficio: su saber, su historia y su ejemplo siguen siendo parte de la mesa", "Don José debería irse a vivir a otra parte", "Solo importa lo que hace hoy, no lo que hizo toda la vida"], 1,
+         "En la casa grande, el oficio y el saber de toda una vida no se borran: quien dio su oficio nunca pierde del todo su lugar."),
+    ],
+    "etica_el_idioma_de_la_ciudad": [
+        ("\"Una actividad que duró 3 horas, fue de verdad y me llevó adelante deja una VHV.\" ¿Qué describe esta frase?",
+         ["El agradecimiento que se cuenta", "La huella en tiempo, verdad y rumbo, que en la ciudad se llama VHV", "El piso que nadie cruza hacia abajo", "La palabra que obliga con verificación"], 1,
+         "El tiempo que usaste, con lo que fue de verdad y hacia dónde te llevó, deja una huella: esa huella es la VHV."),
+        ("Si \"tu tiempo propio\" es la medida con que valoras lo que haces, y en la ciudad eso tiene nombre, ¿cómo se llama?",
+         ["TVI — el tiempo propio como medida de valor", "Maxo — el agradecimiento que se cuenta", "SDV — el piso que nadie cruza hacia abajo", "OEV — la casa grande de aprendizaje"], 0,
+         "Usar tu tiempo propio para medir cuánto vale algo es la TVI: cada hora vivida cuenta como medida de valor."),
+        ("En la ciudad existe \"el piso que nadie cruza hacia abajo\": si algo te deja por debajo de ese piso, no se va a hacer, aunque digan que conviene. ¿Cómo se llama ese piso?",
+         ["EIR — el dar y recibir con medida", "VHV — la huella en tiempo, verdad y rumbo", "SDV — el piso que nadie cruza hacia abajo", "MaxoContract — la palabra que obliga con verificación"], 2,
+         "Ese piso de no-humillación que protege a todos por igual se llama SDV: nadie cae por debajo de él."),
+    ],
+}
 
 
 def _seed_materials(db_conn):
@@ -492,6 +735,28 @@ def _migrate_db(conn):
         except sqlite3.OperationalError:
             pass
 
+    # Idioma de la persona (M16): la biblioteca se sirve en su lengua.
+    cursor = conn.execute("PRAGMA table_info(users)")
+    user_columns = [row["name"] for row in cursor.fetchall()]
+    if "idioma" not in user_columns:
+        try:
+            conn.execute(
+                "ALTER TABLE users ADD COLUMN idioma TEXT NOT NULL DEFAULT 'es'"
+            )
+        except sqlite3.OperationalError:
+            pass
+
+    # Idioma del material (M16): los idiomas conviven por material_key.
+    cursor = conn.execute("PRAGMA table_info(materials)")
+    material_columns = [row["name"] for row in cursor.fetchall()]
+    if "idioma" not in material_columns:
+        try:
+            conn.execute(
+                "ALTER TABLE materials ADD COLUMN idioma TEXT NOT NULL DEFAULT 'es'"
+            )
+        except sqlite3.OperationalError:
+            pass
+
 
 def init_db(app):
     """Crea las tablas y siembra el árbol sobre la base configurada."""
@@ -500,6 +765,7 @@ def init_db(app):
     conn.executescript(SCHEMA)
     _migrate_db(conn)
     _seed(conn)
+    _seed_etica(conn)
     _seed_materials(conn)
     conn.commit()
     conn.close()

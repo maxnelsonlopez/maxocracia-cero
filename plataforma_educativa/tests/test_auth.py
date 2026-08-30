@@ -57,7 +57,7 @@ def test_login_and_me_with_token(client):
     assert me.status_code == 200
     body = me.get_json()
     assert body["user"]["username"] == "ana"
-    assert len(body["branches"]) == 8
+    assert len(body["branches"]) == 9
 
 
 def test_me_without_token_returns_401(client):

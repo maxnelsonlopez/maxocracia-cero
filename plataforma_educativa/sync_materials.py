@@ -70,10 +70,14 @@ def parse_material_file(text):
         orden = int(meta.get("orden") or 1)
     except (TypeError, ValueError):
         orden = 1
+    idioma = (meta.get("idioma") or "es").strip()[:2].lower() or "es"
+    if not idioma.isalpha():
+        idioma = "es"
     return {
         "titulo": titulo[:200],
         "tema": tema,
         "orden": max(1, orden),
+        "idioma": idioma,
         "autor": (meta.get("autor") or "siembra").strip()[:80] or "siembra",
         "contenido": contenido,
     }
@@ -130,17 +134,17 @@ def sync_materials(db_path=None, materials_dir=None):
                     f"{filename}: tema '{parsed['tema']}' no existe (se ignora)"
                 )
                 continue
-            key = f"{parsed['tema']}#g{parsed['orden']}"
+            key = f"{parsed['tema']}#{parsed['idioma']}g{parsed['orden']}"
             before = conn.execute(
                 "SELECT contenido FROM materials WHERE material_key = ?", (key,)
             ).fetchone()
             conn.execute(
                 "INSERT INTO materials "
-                "(topic_id, material_key, titulo, tipo, fuente, url, contenido, autor, orden, created_at) "
-                "VALUES (?, ?, ?, 'guia', 'oev', NULL, ?, ?, ?, ?) "
+                "(topic_id, material_key, titulo, tipo, fuente, url, contenido, autor, orden, idioma, created_at) "
+                "VALUES (?, ?, ?, 'guia', 'oev', NULL, ?, ?, ?, ?, ?) "
                 "ON CONFLICT(material_key) DO UPDATE SET "
                 "titulo = excluded.titulo, contenido = excluded.contenido, "
-                "autor = excluded.autor, orden = excluded.orden",
+                "autor = excluded.autor, orden = excluded.orden, idioma = excluded.idioma",
                 (
                     topic_id,
                     key,
@@ -148,6 +152,7 @@ def sync_materials(db_path=None, materials_dir=None):
                     parsed["contenido"],
                     parsed["autor"],
                     parsed["orden"],
+                    parsed["idioma"],
                     _now(),
                 ),
             )

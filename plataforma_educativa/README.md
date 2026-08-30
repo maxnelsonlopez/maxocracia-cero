@@ -139,18 +139,25 @@ memoria) que se envía en la cabecera `X-Auth-Token`.
 | POST | `/api/meetings/<id>/attend` | El monitor/coordinador marca asistencias |
 | GET | `/api/meetings/monitor-queue` | Temas que necesitan monitor |
 | GET | `/api/monitors?branch=` | Usuarios calificados para enseñar por rama |
-| GET | `/api/topics/<id>/materials` | La biblioteca del lote (guías + enlaces) |
+| GET | `/api/topics/<id>/materials` | La biblioteca del lote (guías + enlaces; en la lengua de la persona, `?lang=` sobreescribe) |
 | GET | `/api/materials/<id>` | Guía completa en markdown (para leerla) |
 | GET | `/api/community/lights` | El muro de luces (opt-in, sin ranking) |
 | POST | `/api/me/share-progress` | Interruptor de la luz (`{on: bool}`) |
+| POST | `/api/me/idioma` | Preferencia de idioma para la biblioteca (`{idioma: "es"}`) |
 
 ## Modelo de datos (SQLite)
 
-`users`, `branches` (8 ramas), `topics` (35 temas, con `prereq_ids` JSON y
-`dificultad` 1-5), `questions` (≥3 por tema), `user_topics` (progreso con
-`estado` y `mentor_rounds`), `meetings`, `meeting_participants`, `availability`,
-`materials` (la Biblioteca: guías propias y enlaces del mundo; llave única
-`material_key`), `users.share_progress` (opt-in de la luz, default 0).
+`users`, `branches` (9 ramas: **Ética** — orden 0, los valores primero — + 8 del saber),
+`topics` (47 temas, con `prereq_ids` JSON y `dificultad` 1-5), `questions` (≥3 por tema),
+`user_topics` (progreso con `estado` y `mentor_rounds`), `meetings`,
+`meeting_participants`, `availability`, `materials` (la Biblioteca: guías y enlaces,
+con `idioma` para convivencia de lenguas; llave única `material_key`),
+`users.share_progress` (opt-in de la luz) y `users.idioma` (lengua de la persona).
+
+La **categoría Ética** (M16) enseña los fundamentos del sistema en lenguaje común:
+12 temas en el orden de los capítulos del libro, con la jerga propia (VHV, TVI, SDV,
+Maxo, MaxoContract, EIR, OEV) reservada al puente final *El idioma de la ciudad*.
+Diseño: `docs/architecture/ETICA_LENGUAJE_COMUN_CATEGORIA.md`.
 
 Estados de progreso: `not_seen` → `learning` → `test_passed` → `mastered`.
 `mastered` exige aprobar el test **y** haber participado como monitor de ≥1

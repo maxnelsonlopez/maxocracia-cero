@@ -45,7 +45,7 @@ def test_jwt_auth_bearer_header_and_jit_provisioning(client):
     assert body["user"]["maxo_user_id"] == 101
     assert body["user"]["is_federated"] is True
     assert body["user"]["is_coordinator"] is False
-    assert len(body["branches"]) == 8
+    assert len(body["branches"]) == 9
 
 
 def test_jwt_auth_with_x_auth_token_header(client):
