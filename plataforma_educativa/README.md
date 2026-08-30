@@ -47,6 +47,31 @@ best-effort: si el puente está caído, el nodo sigue vivo:
 $env:EDU_BRIDGE_URL = "http://127.0.0.1:5001"   # el :5001 de Maxocracia
 ```
 
+## La Biblioteca de la Ciudad (M15): material educativo
+
+Cada lote (tema) tiene material junto al test: **guías propias** en markdown
+(carga instantánea, sin red) y **enlaces al mundo** (Wikipedia verificado +
+búsquedas Kahn/YouTube). La inserción es por archivo — el tejido se fork, no se
+rasca:
+
+```powershell
+# 1. Escribir el .md con mini front-matter:
+#    titulo: Conteo, la llave
+#    tema: conteo
+#    orden: 1
+#    <contenido markdown>
+#    ...en plataforma_educativa/materials/conteo.md
+
+# 2. Sincronizar (idempotente: repite sin duplicar; el tejido muta en git):
+python sync_materials.py
+```
+
+Reglas de la biblioteca (ver
+`docs/architecture/BIBLIOTECA_CIUDAD_MATERIAL_EDUCATIVO.md`): el material acompaña
+pero **no sustituye la obra** (la validez sigue siendo el test + la vacuación);
+cero rankings; los enlaces se verifican antes de sembrar; "compartir la luz" es
+opt-in voluntario y retractable (nada se publica sin permiso).
+
 ## Cómo correr (Windows)
 
 Desde la carpeta `plataforma_educativa/`:
@@ -86,7 +111,6 @@ Desde la raíz del repositorio (o desde `plataforma_educativa/`):
 
 ```powershell
 python -m pytest plataforma_educativa/tests/ -q
-# → 25 passed
 ```
 
 Los tests usan `tmp_path`, así que **no dejan bases de datos ni artefactos**.
@@ -115,12 +139,18 @@ memoria) que se envía en la cabecera `X-Auth-Token`.
 | POST | `/api/meetings/<id>/attend` | El monitor/coordinador marca asistencias |
 | GET | `/api/meetings/monitor-queue` | Temas que necesitan monitor |
 | GET | `/api/monitors?branch=` | Usuarios calificados para enseñar por rama |
+| GET | `/api/topics/<id>/materials` | La biblioteca del lote (guías + enlaces) |
+| GET | `/api/materials/<id>` | Guía completa en markdown (para leerla) |
+| GET | `/api/community/lights` | El muro de luces (opt-in, sin ranking) |
+| POST | `/api/me/share-progress` | Interruptor de la luz (`{on: bool}`) |
 
 ## Modelo de datos (SQLite)
 
 `users`, `branches` (8 ramas), `topics` (35 temas, con `prereq_ids` JSON y
 `dificultad` 1-5), `questions` (≥3 por tema), `user_topics` (progreso con
-`estado` y `mentor_rounds`), `meetings`, `meeting_participants`, `availability`.
+`estado` y `mentor_rounds`), `meetings`, `meeting_participants`, `availability`,
+`materials` (la Biblioteca: guías propias y enlaces del mundo; llave única
+`material_key`), `users.share_progress` (opt-in de la luz, default 0).
 
 Estados de progreso: `not_seen` → `learning` → `test_passed` → `mastered`.
 `mastered` exige aprobar el test **y** haber participado como monitor de ≥1

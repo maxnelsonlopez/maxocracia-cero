@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS users (
     email TEXT,
     is_coordinator INTEGER NOT NULL DEFAULT 0,
     maxo_user_id INTEGER UNIQUE,
+    share_progress INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL
 );
 
@@ -107,6 +108,23 @@ CREATE TABLE IF NOT EXISTS mentorship_triadas (
     outcome TEXT NOT NULL CHECK(outcome IN ('pending', 'validated', 'vetoed')),
     created_at TEXT NOT NULL,
     UNIQUE(user_id, topic_id)
+);
+
+-- La Biblioteca de la Ciudad (M15): material educativo por tema.
+-- 'guia' = contenido propio en markdown (carga local instantánea);
+-- 'enlace' = URL verificada al mundo compartido (Wikipedia, Khan, YouTube).
+CREATE TABLE IF NOT EXISTS materials (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    topic_id INTEGER NOT NULL REFERENCES topics(id),
+    material_key TEXT NOT NULL UNIQUE,
+    titulo TEXT NOT NULL,
+    tipo TEXT NOT NULL DEFAULT 'guia' CHECK(tipo IN ('guia', 'enlace')),
+    fuente TEXT NOT NULL DEFAULT 'oev',
+    url TEXT,
+    contenido TEXT,
+    autor TEXT NOT NULL DEFAULT 'siembra',
+    orden INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL
 );
 """
 
@@ -321,6 +339,71 @@ TOPIC_SEEDS = [
 ]
 
 
+# Enlaces del mundo (M15): un artículo de Wikipedia por tema, VERIFICADO
+# (estado HTTP 200, 30-08-2026). El mundo compartido no se siembra a ciegas:
+# cada URL pasó la comprobación. La siembra es idempotente por material_key.
+# (topic_slug, título del material, fuente, url)
+MATERIAL_LINKS = [
+    ("conteo", "Conteo — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Conteo"),
+    ("sumas_y_restas", "Suma — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Suma"),
+    ("multiplicacion", "Multiplicación — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Multiplicaci%C3%B3n"),
+    ("fracciones", "Fracción — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Fracci%C3%B3n"),
+    ("algebra_basica", "Álgebra elemental — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/%C3%81lgebra_elemental"),
+    ("geometria", "Geometría — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Geometr%C3%ADa"),
+    ("lavado_manos_agua", "Higiene de manos — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Higiene_de_manos"),
+    ("alimentacion_saludable", "Dieta saludable — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Dieta_saludable"),
+    ("sueno", "Sueño — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Sue%C3%B1o"),
+    ("salud_mental", "Salud mental — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Salud_mental"),
+    ("primeros_auxilios", "Primeros auxilios — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Primeros_auxilios"),
+    ("escucha_activa", "Escucha activa — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Escucha_activa"),
+    ("resolucion_conflictos", "Resolución de conflictos — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Resoluci%C3%B3n_de_conflictos"),
+    ("empatia", "Empatía — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Empat%C3%ADa"),
+    ("comunicacion_no_violenta", "Comunicación no violenta — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Comunicaci%C3%B3n_no_violenta"),
+    ("trabajo_equipo", "Trabajo en equipo — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Trabajo_en_equipo"),
+    ("comprension_lectora", "Comprensión lectora — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Comprensi%C3%B3n_lectora"),
+    ("lectura_critica", "Lectura crítica — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Lectura_cr%C3%ADtica"),
+    ("analisis_textos", "Análisis del discurso — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/An%C3%A1lisis_del_discurso"),
+    ("ortografia", "Ortografía — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Ortograf%C3%ADa"),
+    ("redaccion", "Redacción — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Redacci%C3%B3n"),
+    ("narrativa", "Narrativa — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Narrativa"),
+    ("argumentacion", "Argumentación — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Argumentaci%C3%B3n"),
+    ("espanol_basico", "Idioma español — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Idioma_espa%C3%B1ol"),
+    ("ingles_inicial", "Idioma inglés — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Idioma_ingl%C3%A9s"),
+    ("oratoria", "Oratoria — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Oratoria"),
+    ("ecosistemas", "Ecosistema — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Ecosistema"),
+    ("plantas", "Planta — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Planta"),
+    ("animales", "Animal — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Animal"),
+    ("astronomia", "Astronomía — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Astronom%C3%ADa"),
+    ("cambio_climatico", "Cambio climático — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Cambio_clim%C3%A1tico"),
+    ("uso_basico_archivos", "Archivo informático — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Archivo_inform%C3%A1tico"),
+    ("internet_seguro", "Seguridad de la información — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Seguridad_de_la_informaci%C3%B3n"),
+    ("programacion_inicial", "Programación — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Programaci%C3%B3n"),
+    ("ia_aliada", "Inteligencia artificial — Wikipedia", "wikipedia", "https://es.wikipedia.org/wiki/Inteligencia_artificial"),
+]
+
+
+def _seed_materials(db_conn):
+    """Siembra los enlaces del mundo (M15), idempotente por material_key.
+
+    Se ejecuta en cada arranque para migrar también las bases existentes;
+    INSERT OR IGNORE evita duplicar lo sembrado.
+    """
+    topic_ids = {
+        row["slug"]: row["id"]
+        for row in db_conn.execute("SELECT id, slug FROM topics").fetchall()
+    }
+    for slug, titulo, fuente, url in MATERIAL_LINKS:
+        topic_id = topic_ids.get(slug)
+        if topic_id is None:
+            continue
+        db_conn.execute(
+            "INSERT OR IGNORE INTO materials "
+            "(topic_id, material_key, titulo, tipo, fuente, url, contenido, autor, orden, created_at) "
+            "VALUES (?, ?, ?, 'enlace', ?, ?, NULL, 'siembra', 50, ?)",
+            (topic_id, f"{slug}#w1", titulo, fuente, url, _now()),
+        )
+
+
 def _seed(db_conn):
     """Siembra el árbol solo si la tabla de ramas está vacía (idempotente)."""
     count = db_conn.execute("SELECT COUNT(*) AS n FROM branches").fetchone()["n"]
@@ -397,6 +480,18 @@ def _migrate_db(conn):
         except sqlite3.OperationalError:
             pass
 
+    # Compartir la luz (M15): opt-in voluntario y retractable; 0 = la ciudad
+    # no ve mi progreso (default; compartir es una decisión, nunca un default).
+    cursor = conn.execute("PRAGMA table_info(users)")
+    user_columns = [row["name"] for row in cursor.fetchall()]
+    if "share_progress" not in user_columns:
+        try:
+            conn.execute(
+                "ALTER TABLE users ADD COLUMN share_progress INTEGER NOT NULL DEFAULT 0"
+            )
+        except sqlite3.OperationalError:
+            pass
+
 
 def init_db(app):
     """Crea las tablas y siembra el árbol sobre la base configurada."""
@@ -405,6 +500,7 @@ def init_db(app):
     conn.executescript(SCHEMA)
     _migrate_db(conn)
     _seed(conn)
+    _seed_materials(conn)
     conn.commit()
     conn.close()
 

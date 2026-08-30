@@ -358,6 +358,7 @@ def me():
                     "is_coordinator": bool(user["is_coordinator"]),
                     "maxo_user_id": user["maxo_user_id"] if "maxo_user_id" in user.keys() else None,
                     "is_federated": getattr(g, "is_federated", False),
+                    "share_progress": bool(user["share_progress"]) if "share_progress" in user.keys() else False,
                 },
                 "branches": progress,
             }
@@ -407,6 +408,9 @@ def tree():
             q_count = db.execute(
                 "SELECT COUNT(*) AS n FROM questions WHERE topic_id = ?", (topic["id"],)
             ).fetchone()["n"]
+            m_count = db.execute(
+                "SELECT COUNT(*) AS n FROM materials WHERE topic_id = ?", (topic["id"],)
+            ).fetchone()["n"]
             topic_list.append(
                 {
                     "id": topic["id"],
@@ -416,6 +420,7 @@ def tree():
                     "dificultad": topic["dificultad"],
                     "prereq_ids": prereq_ids,
                     "questions": q_count,
+                    "materials": m_count,
                     "estado": st["estado"],
                     "score": st["score"],
                     "mentor_rounds": st["mentor_rounds"],
@@ -1049,3 +1054,145 @@ def monitors():
 def _username(user_id):
     row = get_db().execute("SELECT username FROM users WHERE id = ?", (user_id,)).fetchone()
     return row["username"] if row else None
+
+
+# --------------------------------------------------------------------------
+# La Biblioteca de la Ciudad (M15): material educativo por tema.
+# Guías propias ('guia', markdown, carga local) y enlaces al mundo ('enlace').
+# --------------------------------------------------------------------------
+
+def _fmt_material(row):
+    """Material listo para el cliente (el contenido de una guía va aparte)."""
+    return {
+        "id": row["id"],
+        "titulo": row["titulo"],
+        "tipo": row["tipo"],
+        "fuente": row["fuente"],
+        "url": row["url"],
+        "autor": row["autor"],
+        "orden": row["orden"],
+        "tiene_contenido": bool(row["contenido"]),
+        "created_at": row["created_at"],
+    }
+
+
+def _topic_materials(topic_id):
+    rows = get_db().execute(
+        "SELECT * FROM materials WHERE topic_id = ? ORDER BY orden, id", (topic_id,)
+    ).fetchall()
+    return [_fmt_material(r) for r in rows]
+
+
+@api_bp.route("/api/topics/<int:topic_id>/materials", methods=["GET"])
+@login_required
+def topic_materials(topic_id):
+    """La biblioteca del lote: guías + enlaces del tema (M15)."""
+    if _get_topic_or_404(topic_id) is None:
+        return jsonify({"error": "El tema no existe."}), 404
+    return jsonify({"topic_id": topic_id, "materials": _topic_materials(topic_id)}), 200
+
+
+@api_bp.route("/api/materials/<int:material_id>", methods=["GET"])
+@login_required
+def material_detail(material_id):
+    """Guía completa (markdown) o enlace. Devuelve solo ese material."""
+    row = get_db().execute(
+        "SELECT * FROM materials WHERE id = ?", (material_id,)
+    ).fetchone()
+    if row is None:
+        return jsonify({"error": "El material no existe."}), 404
+    detail = _fmt_material(row)
+    detail["contenido"] = row["contenido"]
+    return jsonify({"material": detail}), 200
+
+
+# --------------------------------------------------------------------------
+# Compartir la luz (M15): progreso y notas en espacio compartido, voluntario
+# y retractable. Guardarraíles: SIN RANKING (orden alfabético), solo lo que
+# la persona publica, y al apagar el interruptor la luz desaparece al instante.
+# --------------------------------------------------------------------------
+
+@api_bp.route("/api/me/share-progress", methods=["POST"])
+@login_required
+def me_share_progress():
+    """Interruptor de la luz: on=true para que la ciudad vea mi progreso."""
+    data = request.get_json(silent=True) or {}
+    on = bool(data.get("on", False))
+    db = get_db()
+    db.execute(
+        "UPDATE users SET share_progress = ? WHERE id = ?", (1 if on else 0, g.user_id)
+    )
+    db.commit()
+    user = _user_row()
+    return jsonify({"share_progress": bool(user["share_progress"])}), 200
+
+
+@api_bp.route("/api/community/lights", methods=["GET"])
+@login_required
+def community_lights():
+    """El muro de luces: quién comparte su progreso (opt-in), sin ranking.
+
+    Devuelve solo lo publicado: nombre, progreso por barrio, temas dominados,
+    mejor nota; nada de datos de contacto ni de respuestas. Orden alfabético.
+    """
+    db = get_db()
+    branches = db.execute("SELECT * FROM branches ORDER BY orden").fetchall()
+    users = db.execute(
+        "SELECT id, username FROM users WHERE share_progress = 1 ORDER BY username COLLATE NOCASE"
+    ).fetchall()
+
+    lights = []
+    for user in users:
+        branch_progress = []
+        best_score = None
+        mastered = 0
+        for branch in branches:
+            topics = db.execute(
+                "SELECT id FROM topics WHERE branch_id = ?", (branch["id"],)
+            ).fetchall()
+            total = len(topics)
+            passed = 0
+            branch_mastered = 0
+            for topic in topics:
+                st = _user_state(user["id"], topic["id"])
+                if st["estado"] in ("test_passed", "mastered"):
+                    passed += 1
+                if st["estado"] == "mastered":
+                    branch_mastered += 1
+                if st["score"] and st["estado"] in ("test_passed", "mastered"):
+                    best_score = max(best_score or 0, st["score"])
+            mastered += branch_mastered
+            branch_progress.append(
+                {
+                    "slug": branch["slug"],
+                    "nombre": branch["nombre"],
+                    "pct": round(100 * passed / total) if total else 0,
+                    "mastered": branch_mastered,
+                }
+            )
+        lights.append(
+            {
+                "username": user["username"],
+                "branches": branch_progress,
+                "mastered_total": mastered,
+                "best_score": best_score,
+            }
+        )
+
+    # Conteos por barrio (cuántas luces tienen obras en cada rama) y total.
+    by_branch = {b["slug"]: {"nombre": b["nombre"], "lights": 0} for b in branches}
+    for light in lights:
+        for bp in light["branches"]:
+            if bp["pct"] > 0:
+                by_branch[bp["slug"]]["lights"] += 1
+
+    return (
+        jsonify(
+            {
+                "total_lights": len(lights),
+                "lights": lights,
+                "by_branch": list(by_branch.values()),
+            }
+        ),
+        200,
+    )
