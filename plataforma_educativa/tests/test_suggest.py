@@ -73,8 +73,23 @@ def test_suggest_prioriza_la_rama_en_construccion(client, app):
     assert sug["topic_id"] not in (t1[0], t2[0])
 
 
+def test_suggest_no_repite_obra_en_curso(client, app):
+    """Tras empezar un lote, el compañero no lo vuelve a sugerir (no insiste)."""
+    token = _register(client, "obrera")
+    sug1 = client.get("/api/suggest", headers={"X-Auth-Token": token}).get_json()["suggestion"]
+    assert sug1 is not None
+    client.post(f"/api/topics/{sug1['topic_id']}/start", headers={"X-Auth-Token": token}, json={})
+
+    sug2 = client.get("/api/suggest", headers={"X-Auth-Token": token}).get_json()["suggestion"]
+    assert sug2 is None or sug2["topic_id"] != sug1["topic_id"]
+    # El lote empezado quedó en obra y jamás se vuelve a sugerir como libre.
+    tree = client.get("/api/tree", headers={"X-Auth-Token": token}).get_json()
+    estados = [t["estado"] for b in tree["branches"] for t in b["topics"] if t["id"] == sug1["topic_id"]]
+    assert estados == ["learning"]
+
+
 def test_suggest_sin_disponibles_devuelve_none(client, app):
-    """Ciudad por hoy: todos los temas bloqueados o aprobados -> None amable."""
+    """Ciudad por hoy: todos los temas aprobados -> None amable."""
     token = _register(client, "designer")
     with app.app_context():
         db = get_db()

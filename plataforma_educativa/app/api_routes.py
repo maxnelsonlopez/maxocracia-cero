@@ -233,7 +233,9 @@ def suggest_next_topic(user_id):
         if not _prereqs_ok(user_id, prereq_ids):
             continue
         st = _user_state(user_id, row["id"])
-        if st["estado"] in ("not_seen", "learning"):
+        # Solo lotes sin empezar: la obra en curso NO se repite (el compañero
+        # no insiste en lo que ya está construyendo — cero presión psicológica).
+        if st["estado"] == "not_seen":
             candidatos.append((dict(row), st["estado"]))
 
     if not candidatos:

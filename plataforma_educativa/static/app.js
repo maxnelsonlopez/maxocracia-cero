@@ -258,7 +258,7 @@ function bindTopicButtons() {
     btn.addEventListener("click", function () {
       var action = btn.getAttribute("data-action");
       var topicId = Number(btn.getAttribute("data-topic"));
-      if (action === "start") startTopic(topicId);
+      if (action === "start") startTopic(topicId, btn);
       else if (action === "test") openTest(topicId);
       else if (action === "mentor") requestMentorship(topicId);
       else if (action === "evidence") openEvidence(topicId);
@@ -274,11 +274,15 @@ function toggleCoordinator(isCoordinator) {
 // ------------------------------------------------------------------
 // Acciones de tema
 // ------------------------------------------------------------------
-function startTopic(topicId) {
+function startTopic(topicId, btn) {
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Construyendo…";
+  }
   api("/api/topics/" + topicId + "/start", { method: "POST", body: {} })
     .then(function (data) {
       if (data.__status === 403) { alert(data.error); return; }
-      loadAll();
+      loadAll();  // el lote pasa a 🔨 y el compañero propone lo siguiente
     })
     .catch(console.error);
 }
