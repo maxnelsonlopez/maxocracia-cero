@@ -48,6 +48,94 @@ var estadoLabel = {
   not_seen: "Sin ver", learning: "En curso", test_passed: "Aprobado", mastered: "Dominado"
 };
 
+// ------------------------------------------------------------------
+// La ciudad del saber (M14): el conocimiento como mapa que se ilumina.
+// Niebla: los barrios lejanos se insinúan; cada lote construido alumbre.
+// Lore: la historia del barrio se revela al entrar (motor de curiosidad).
+// ------------------------------------------------------------------
+var CITY_LORE = {
+  matematicas: "Los números fueron la primera lengua de la ciudad: medir, repartir, contar lo que importa. Cada fórmula es un puente entre dos veredas.",
+  naturaleza: "El barrio verde: la ciudad no está SOBRE la tierra, está EN ella. Aquí se estudia el agua, el suelo y los ciclos que nos sostienen.",
+  higiene: "Las murallas de la salud: pequeñas decisiones diarias que protegen al barrio entero. Limpiar, dormir, moverte: eso también es arquitectura.",
+  relaciones: "Las plazas y los salones: la ciudad se hace entre personas. Empatía, escucha y palabra: el cemento invisible de todo lo demás.",
+  computadores: "El barrio de los inventos: máquinas que aprenden a trabajar con nosotros. La llave es el criterio, no el aparato.",
+  escritura: "Los escribanos de la ciudad: el pensamiento se vuelve cosa cuando se escribe. Quien escribe, deja mapa.",
+  lectura: "La biblioteca central: leer es caminar por la cabeza de otros sin salir de la plaza. Se aprende a preguntar, no a repetir.",
+  lenguaje: "El mercado de las palabras: hablar, escuchar, persuadir. La oratoria es la plaza hablada; el idioma, la moneda compartida."
+};
+
+var cityView = "tree";
+var cityBranches = null;
+
+function toggleCity() {
+  cityView = cityView === "tree" ? "city" : "tree";
+  $("btn-city-toggle").textContent = cityView === "tree" ? "🗺 La ciudad" : "🌳 El árbol";
+  renderView();
+}
+
+function renderView() {
+  if (!cityBranches) return;
+  if (cityView === "city") renderCity(cityBranches);
+  else renderTree(cityBranches);
+}
+
+function renderCity(branches) {
+  var search = ($("tree-search").value || "").toLowerCase();
+  var html = "";
+  branches.forEach(function (br) {
+    var iluminado = br.topics.some(function (t) { return t.estado !== "not_seen" || t.unlocked; });
+    var visibles = br.topics.filter(function (t) {
+      return !search || t.titulo.toLowerCase().indexOf(search) !== -1;
+    });
+    html += '<div class="city-district' + (iluminado ? " lit" : " fog") + '">' +
+      '<h3>' + esc(br.nombre) + (iluminado ? "" : " <span class='muted'>· barrio por descubrir</span>") + "</h3>" +
+      (iluminado ? "<p class='muted'>" + esc(br.descripcion) + "</p>" +
+        "<p class='city-lore'>" + esc(CITY_LORE[br.slug] || "") + "</p>" : "");
+    html += '<div class="city-lots">';
+    visibles.forEach(function (t) {
+      var icon = t.estado === "mastered" ? "🏛" : (t.ready_to_teach ? "✨" : t.estado === "test_passed" ? "✅" : t.estado === "learning" ? "🔨" : t.unlocked ? "◽" : "🔒");
+      html += '<button class="city-lot" data-action="lot" data-topic="' + t.id + '" title="' + esc(t.titulo) + '">' +
+        icon + '<span>' + esc(t.titulo) + "</span>" +
+        (t.dificultad ? '<small>' + "★".repeat(t.dificultad) + "</small>" : "") + "</button>";
+    });
+    html += "</div></div>";
+  });
+  $("tree").innerHTML = html || '<p class="muted">Sin barrios.</p>';
+  bindTopicButtons();
+}
+
+function loadSuggestion() {
+  api("/api/suggest").then(function (data) {
+    var el = $("city-guide");
+    if (!data.suggestion) {
+      el.hidden = true;
+      return;
+    }
+    var s = data.suggestion;
+    el.innerHTML =
+      '<b class="city-guide-label">🧭 El compañero de la ciudad sugiere:</b> ' +
+      esc(s.titulo) + ' <span class="muted">· barrio de ' + esc(s.branch_nombre) +
+      (s.dificultad ? ' · ' + "★".repeat(s.dificultad) : "") + "</span> " +
+      '<button class="small primary" data-action="start" data-topic="' + s.topic_id + '">Empezar a construir</button>';
+    el.hidden = false;
+    bindTopicButtons();
+  }).catch(function () { $("city-guide").hidden = true; });
+}
+
+function showTopicHint(topicId) {
+  var topic = null;
+  (cityBranches || []).some(function (b) {
+    return b.topics.some(function (t) {
+      if (t.id === topicId) { topic = t; return true; }
+      return false;
+    });
+  });
+  if (!topic) return;
+  if (topic.estado === "not_seen" && topic.unlocked) startTopic(topicId);
+  else if (topic.estado === "learning") openTest(topicId);
+  else toggleCity(); // construir detalles, obras y triada en la vista árbol
+}
+
 var AVAILABLE_SLOTS = ["LUN 19:00", "MIE 19:00", "VIE 18:00", "SÁB 10:00"];
 var selectedSlots = {};
 
@@ -78,7 +166,9 @@ function loadAll() {
   ]).then(function (res) {
     renderUser(res[0].user);
     renderProgress(res[0].branches);
-    renderTree(res[1].branches);
+    cityBranches = res[1].branches;
+    renderView();
+    loadSuggestion();
     renderAvailability(res[2].availability || []);
     renderMeetings(res[3].meetings || []);
     toggleCoordinator(res[0].user.is_coordinator);
@@ -172,6 +262,7 @@ function bindTopicButtons() {
       else if (action === "test") openTest(topicId);
       else if (action === "mentor") requestMentorship(topicId);
       else if (action === "evidence") openEvidence(topicId);
+      else if (action === "lot") showTopicHint(topicId);
     });
   });
 }

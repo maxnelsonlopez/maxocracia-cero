@@ -212,6 +212,68 @@ def _prereqs_ok(user_id, prereq_ids):
     return True
 
 
+def suggest_next_topic(user_id):
+    """El compañero de la ciudad: el siguiente lote a construir (M14).
+
+    Prioridad: el barrio (rama) donde la persona ya construye más, con lotes
+    desbloqueados y libres; dentro, primero lo más sencillo. Cero presión:
+    es una sugerencia de la mano, nunca un mandato; sin ranking ni tiempo.
+    Devuelve dict (sugerencia) o None si la ciudad está completa por hoy.
+    """
+    db = get_db()
+    rows = db.execute(
+        "SELECT t.id, t.slug, t.titulo, t.dificultad, t.orden, t.prereq_ids, t.branch_id, "
+        "b.slug AS branch_slug, b.nombre AS branch_nombre, b.descripcion AS branch_descripcion "
+        "FROM topics t JOIN branches b ON b.id = t.branch_id ORDER BY t.orden ASC, t.id ASC"
+    ).fetchall()
+
+    candidatos = []
+    for row in rows:
+        prereq_ids = json.loads(row["prereq_ids"] or "[]")
+        if not _prereqs_ok(user_id, prereq_ids):
+            continue
+        st = _user_state(user_id, row["id"])
+        if st["estado"] in ("not_seen", "learning"):
+            candidatos.append((dict(row), st["estado"]))
+
+    if not candidatos:
+        return None
+
+    # Progreso por rama: lote iluminado = aprobados/mastered sobre el total.
+    by_branch = {}
+    for row in rows:
+        by_branch.setdefault(row["branch_id"], {"total": 0, "hechos": 0})
+        by_branch[row["branch_id"]]["total"] += 1
+        st = _user_state(user_id, row["id"])
+        if st["estado"] in ("test_passed", "mastered"):
+            by_branch[row["branch_id"]]["hechos"] += 1
+
+    def score(cand):
+        b = by_branch[cand[0]["branch_id"]]
+        progreso = (b["hechos"] / b["total"]) if b["total"] else 0.0
+        return (progreso, -cand[0]["dificultad"])
+
+    mejor = max(candidatos, key=score)
+    tema = mejor[0]
+    return {
+        "topic_id": tema["id"],
+        "slug": tema["slug"],
+        "titulo": tema["titulo"],
+        "dificultad": tema["dificultad"],
+        "branch_slug": tema["branch_slug"],
+        "branch_nombre": tema["branch_nombre"],
+        "branch_descripcion": tema["branch_descripcion"],
+        "estado": mejor[1],
+    }
+
+
+@api_bp.route("/api/suggest", methods=["GET"])
+@login_required
+def api_suggest():
+    """El compañero de la ciudad sugiere el siguiente lote (M14, guía de la mano)."""
+    return jsonify({"suggestion": suggest_next_topic(g.user_id)}), 200
+
+
 # --------------------------------------------------------------------------
 # Helpers de semana (formato ISO "YYYY-Www")
 # --------------------------------------------------------------------------

@@ -114,6 +114,30 @@ hr { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
 .badge.passed { background: #dff3e6; color: var(--ok); }
 .badge.mastered { background: #cfe4f3; color: #1d6fa5; }
 .badge.ready { background: #efe4c3; color: #8a6100; }
+
+/* La ciudad del saber (M14) */
+.city-guide {
+  background: #f4f8ef; border: 1px dashed var(--ok); border-radius: 12px;
+  padding: 10px 14px; margin-bottom: 12px; font-size: 0.88rem;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.city-guide-label { color: var(--ok); }
+.city-district {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px;
+  margin-bottom: 12px; background: #fff;
+}
+.city-district.fog { background: #f0f2f6; color: #9aa3af; }
+.city-district.lit { box-shadow: 0 2px 10px rgba(15,107,107,0.06); }
+.city-district h3 { margin: 0 0 4px; font-size: 1rem; }
+.city-lore { font-size: 0.82rem; color: var(--muted); font-style: italic; margin: 4px 0 10px; }
+.city-lots { display: flex; flex-wrap: wrap; gap: 6px; }
+.city-lot {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--line); border-radius: 8px; background: #fff;
+  padding: 6px 10px; font-size: 0.8rem; cursor: pointer;
+}
+.city-lot:hover { border-color: var(--brand); color: var(--brand); }
+.city-lot small { color: var(--warn); }
 .score { font-size: 0.8rem; color: var(--warn); min-width: 42px; text-align: right; }
 .topic-actions { display: flex; gap: 6px; }
 
