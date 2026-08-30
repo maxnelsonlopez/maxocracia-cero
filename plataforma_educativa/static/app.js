@@ -54,6 +54,7 @@ var estadoLabel = {
 // Lore: la historia del barrio se revela al entrar (motor de curiosidad).
 // ------------------------------------------------------------------
 var CITY_LORE = {
+  etica: "La casa en común: el barrio donde la ciudad aprende PARA QUÉ se construye. Aquí se habla claro y sin disfraces; los nombres elegantes viven al final de la calle.",
   matematicas: "Los números fueron la primera lengua de la ciudad: medir, repartir, contar lo que importa. Cada fórmula es un puente entre dos veredas.",
   naturaleza: "El barrio verde: la ciudad no está SOBRE la tierra, está EN ella. Aquí se estudia el agua, el suelo y los ciclos que nos sostienen.",
   higiene: "Las murallas de la salud: pequeñas decisiones diarias que protegen al barrio entero. Limpiar, dormir, moverte: eso también es arquitectura.",
