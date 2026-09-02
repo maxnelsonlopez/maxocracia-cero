@@ -33,7 +33,7 @@ Conceptos clave: **VHV** (Vector de Huella Vital [T,V,R]), **TVI** (Tiempo Vital
   **`architecture/requisitos_fase2_ola4.md`**: re-lista de RF/NFR de la fase con backlog de conexión
   (pilares A-L, incluye votación, parlamento, atribuciones sintéticas e invitaciones).
   **`architecture/mapa_frontend_ola4.md`**: páginas → blueprints + secciones desconectadas.
-  **`SESION_NEXT_PROMPT.md`**: handoff entre sesiones (estado, pendientes, prompt de continuidad).
+  **`docs/SESION_NEXT_PROMPT.md`**: handoff entre sesiones (estado, pendientes, prompt de continuidad).
 - `tests/` — ~40 archivos pytest con `conftest.py` y `INSTRUCCIONES_TESTS.md`.
 - `scripts/` — migraciones, seeds, `list_routes.py`, `local_oracle.py`, `verify_setup.py`.
 - `simulator/` — Nexus Simulator (VHV interactivo). `seeds/`, `migrations/`, `data-model/`, `dashboard-spec/`.
