@@ -12,7 +12,7 @@ from app.utils import init_db
 @pytest.fixture
 def client():
     # Configurar variables de entorno para pruebas
-    os.environ["SECRET_KEY"] = "test-secret-key-123"
+    os.environ["SECRET_KEY"] = "test-secret-key-maxocracia-0123456789abcdef"
     os.environ["FLASK_ENV"] = "testing"
 
     # Crear base de datos temporal
@@ -24,7 +24,7 @@ def client():
     app.config.update(
         {
             "TESTING": True,
-            "SECRET_KEY": "test-secret-key-123",
+            "SECRET_KEY": "test-secret-key-maxocracia-0123456789abcdef",
             "WTF_CSRF_ENABLED": False,
         }
     )

@@ -16,7 +16,7 @@ def app():
     db_fd, db_path = tempfile.mkstemp(prefix="test_db_", suffix=".db")
 
     # Configurar las variables de entorno para pruebas
-    os.environ["SECRET_KEY"] = "test-secret-key-123"
+    os.environ["SECRET_KEY"] = "test-secret-key-maxocracia-0123456789abcdef"
     os.environ["FLASK_ENV"] = "testing"
 
     # Crear la aplicación con la ruta de la base de datos temporal

@@ -38,7 +38,18 @@ def create_app(db_path=None):
     app.config["DATABASE"] = db_path or os.path.join(
         os.path.dirname(__file__), "..", "comun.db"
     )
-    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret")
+    # Fail-closed: en producción la SECRET_KEY no puede caer a un fallback
+    # conocido (con ella se firman JWTs e invitaciones). Fuera de producción
+    # el fallback de desarrollo mantiene la conveniencia documentada.
+    secret_key = os.environ.get("SECRET_KEY")
+    if not secret_key:
+        if os.environ.get("FLASK_ENV") == "production":
+            raise RuntimeError(
+                "ERROR DE SEGURIDAD: SECRET_KEY no definida en producción. "
+                "Defínela en el entorno antes de crear la aplicación."
+            )
+        secret_key = "dev-secret"
+    app.config["SECRET_KEY"] = secret_key
 
     # Inicializar rate limiter
     init_limiter(app)
@@ -158,6 +169,20 @@ def create_app(db_path=None):
     # placeholder imports to ensure modules loaded
     # other optional blueprints can be imported here
 
+    # HTTPS forzado (opt-in de producción): waitress no habla TLS, el
+    # frontend lo termina un proxy inverso; X-Forwarded-Proto dice el
+    # esquema real que vio el proxy. Actívalo con FORCE_HTTPS=1.
+    @app.before_request
+    def force_https():
+        if (
+            os.environ.get("FORCE_HTTPS") == "1"
+            and request.headers.get("X-Forwarded-Proto", "http") != "https"
+        ):
+            from flask import redirect
+
+            return redirect(request.url.replace("http://", "https://", 1), code=308)
+        return None
+
     # Add security headers
     @app.after_request
     def add_security_headers(response):
@@ -170,14 +195,19 @@ def create_app(db_path=None):
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
 
-        # Content Security Policy
+        # Content Security Policy. El WebSocket de localhost solo existe en
+        # desarrollo (HMR de Next.js); en producción la exportación estática
+        # no lo necesita y se lo niega.
+        connect_src = "'self' https://api.stripe.com"
+        if os.environ.get("FLASK_ENV") != "production":
+            connect_src += " ws://localhost:* wss://localhost:*"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "img-src 'self' data: blob: https:; "
             "font-src 'self' data: https://fonts.gstatic.com; "
-            "connect-src 'self' https://api.stripe.com ws://localhost:* wss://localhost:*;"
+            f"connect-src {connect_src};"
         )
 
         # Strict Transport Security (always in tests, only over HTTPS in production)

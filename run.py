@@ -9,11 +9,18 @@ try:
 except Exception as e:
     print(f"ADVERTENCIA: No se pudo cargar .env: {e}")
 
-# FALLBACKS DE SEGURIDAD (Para desbloquear al usuario)
-# Si no hay SECRET_KEY, lo forzamos.
+# FALLBACKS DE SEGURIDAD (Para desbloquear al usuario en DESARROLLO).
+# En producción la SECRET_KEY es obligatoria: una clave conocida permitiría
+# forjar JWTs e invitaciones firmadas (escalera de confianza, Cap. 13).
 if not os.environ.get("SECRET_KEY"):
+    if os.environ.get("FLASK_ENV") == "production":
+        print(
+            "ERROR DE SEGURIDAD: SECRET_KEY no definida en producción. "
+            "Defínela en el entorno (openssl rand -hex 32) y reintenta."
+        )
+        raise SystemExit(1)
     print("AVISO: Forzando SECRET_KEY temporal para desarrollo.")
-    os.environ["SECRET_KEY"] = "dev-fallback-key-12345"
+    os.environ["SECRET_KEY"] = "dev-fallback-key-maxocracia-0123456789abcdef"
 
 # Si no hay FLASK_ENV, lo ponemos en development para ver errores detallados
 if not os.environ.get("FLASK_ENV"):

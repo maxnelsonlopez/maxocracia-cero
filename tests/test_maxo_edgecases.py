@@ -15,14 +15,14 @@ def client():
     os.close(db_fd)
 
     # Configurar la aplicación para pruebas
-    os.environ["SECRET_KEY"] = "test-secret-key-123"
+    os.environ["SECRET_KEY"] = "test-secret-key-maxocracia-0123456789abcdef"
     os.environ["FLASK_ENV"] = "testing"
 
     app = create_app(db_path)
     app.config.update(
         {
             "TESTING": True,
-            "SECRET_KEY": "test-secret-key-123",
+            "SECRET_KEY": "test-secret-key-maxocracia-0123456789abcdef",
             "WTF_CSRF_ENABLED": False,
         }
     )

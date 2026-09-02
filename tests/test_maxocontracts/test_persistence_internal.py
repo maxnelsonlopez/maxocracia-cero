@@ -11,7 +11,7 @@ from app.utils import get_db
 @pytest.fixture
 def client():
     db_fd, db_path = tempfile.mkstemp()
-    os.environ["SECRET_KEY"] = "test-secret-key-123"
+    os.environ["SECRET_KEY"] = "test-secret-key-maxocracia-0123456789abcdef"
 
     app = create_app(db_path)
     app.config["TESTING"] = True

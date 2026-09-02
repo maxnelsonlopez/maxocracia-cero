@@ -20,7 +20,7 @@ from app.utils import init_db
 @pytest.fixture
 def client():
     """Aplicación con base de datos temporal, usuario normal, otro usuario y admin."""
-    os.environ["SECRET_KEY"] = "test-secret-key-123"
+    os.environ["SECRET_KEY"] = "test-secret-key-maxocracia-0123456789abcdef"
     os.environ["FLASK_ENV"] = "testing"
 
     db_fd, db_path = tempfile.mkstemp(prefix="test_admin_crud_", suffix=".db")
@@ -30,7 +30,7 @@ def client():
     app.config.update(
         {
             "TESTING": True,
-            "SECRET_KEY": "test-secret-key-123",
+            "SECRET_KEY": "test-secret-key-maxocracia-0123456789abcdef",
             "WTF_CSRF_ENABLED": False,
         }
     )
