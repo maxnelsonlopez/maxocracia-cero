@@ -228,6 +228,32 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   15 documentos de `integraciones_pendientes/` antes de editar; verificación por grep de cada estado
   afirmado; validador conceptual en verde (7319 archivos) tras los cambios.
 
+### GLM (Z.ai) — "el guardián del perímetro"
+- **Endurecimiento de seguridad — fase inmediata (2/9/2026, sesión con Max; metas dictadas por GLM
+  en interfaz web y ejecutadas/verificadas contra el código real)**:
+  - **Auditoría de dependencias**: `pip-audit` incorporado al repo (`requirements.txt` +
+    `scripts/security_audit.ps1` como auditoría recurrente en un comando). Backend: PyJWT 2.10.1→2.13.0
+    (firma de JWTs), Werkzeug 3.1.3→3.1.6, Flask-CORS 5.0.0→6.0.0, idna, requests, urllib3,
+    python-dotenv al día. Frontend: `next` 16.1.6→16.3.4 cierra 4 vulnerabilidades high (SSRF en
+    Server Actions, DoS, cache confusion) + `npm audit fix` de dev-deps — **0 vulnerabilidades** al
+    cerrar la jornada. Verificación: `tsc --noEmit` limpio + build estático completo + suite.
+  - **Cadena de secretos fail-closed**: hallazgo real corregido — con `FLASK_ENV=production` sin
+    `SECRET_KEY`, `run.py` forzaba una clave conocida y hardcodeada con la que se firman JWTs
+    (`jwt_utils`) e invitaciones (`arrivals._secret`): la escalera de confianza era comprable. Ahora
+    `run.py` y `create_app()` abortan en producción sin clave (`run.py`, `app/__init__.py::create_app`);
+    el fallback de desarrollo se conserva (deliberado) con clave de 32+ bytes, y las claves de test se
+    alargaron (PyJWT 2.13 advierte claves HMAC < 32 bytes, RFC 7518 §3.2).
+  - **HTTPS forzado opt-in**: `FORCE_HTTPS=1` redirige 308 http→https según `X-Forwarded-Proto`
+    (el TLS lo termina el proxy inverso; waitress no habla TLS) — `app/__init__.py`.
+  - **CSP de producción endurecido**: `ws://localhost:*` (HMR de Next) solo se anuncia fuera de
+    producción — `app/__init__.py::add_security_headers`.
+  - **9 tests nuevos** en `tests/test_security_hardening.py`; suite raíz **885/885**, plataforma
+    educativa **78/78**, puente **8/8**, validador conceptual OK (7443 archivos).
+  - **Plan canónico**: `docs/architecture/PLAN_ENDURECIMIENTO_SEGURIDAD.md` — lo ya existente
+    (rate limiting Flask-Limiter, cabeceras, CORS, secretos fuera de git, verificado línea a línea),
+    lo ejecutado, receta de producción y roadmap 30-90 días (PostgreSQL, Redis, SAST, SIEM, rotación
+    de claves). Deuda menor documentada: pytest 8.4.2→9.x (PYSEC solo dev).
+
 ### MiniMax (MiniMax) — "la pluma de la plaza"
 - **Guía del Foro Abierto** (28-08-2026): `docs/guides/guia_foro_abierto.md` — documento de la
   rama educativa (OEV §1.7-1.8): qué es la plaza, los cuatro tipos canónicos, los guardarraíles
