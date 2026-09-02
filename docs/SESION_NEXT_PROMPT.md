@@ -1,4 +1,4 @@
-# SESIÓN NEXT — Handoff de la jornada (última actualización: 30-08-2026, DeepSeek + OpenRouter)
+# SESIÓN NEXT — Handoff de la jornada (última actualización: 02-09-2026, GLM + Max)
 
 Documento de continuidad entre sesiones. Léelo al iniciar la próxima sesión
 antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
@@ -8,38 +8,27 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 ## 1. Prompt para Max (pegar en la próxima sesión)
 
 > Continuamos la Maxocracia desde donde quedamos (ver `docs/SESION_NEXT_PROMPT.md`).
-> Contexto: Fase 2 — Ola 4 "El Puente", versión 5.6+. **La rama educativa
-> M1-M16 está COMPLETA**: M9 (parlamento del umbral) y M12 (síntesis de
-> identidad OEV :5001↔:5050) cerrados; **M15 (30-08-2026) — La Biblioteca de la
-> Ciudad**: 35 guías propias (markdown, redactadas por agentes OpenRouter
-> `:free` + revisión del director) + 35 enlaces a Wikipedia VERIFICADOS
-> (HTTP 200 real) + lectura en la UI (📖 por lote) + celebración al aprobar
-> (sin rankings) + **la luz de la ciudad** (progreso/notas compartidas con
-> opt-in voluntario y retractable, muro SIN ranking — orden alfabético).
-> **M16 (30-08-2026) — la categoría Ética**: los fundamentos del sistema en
-> lenguaje común (12 temas en el orden del libro; la jerga propia VHV/TVI/SDV/
-> Maxo/EIR/OEV SOLO en el puente final "El idioma de la ciudad"); estructura
-> para traducciones (idioma en materiales y personas).
-> Diseño canónico: `docs/architecture/BIBLIOTECA_CIUDAD_MATERIAL_EDUCATIVO.md`
-> y `docs/architecture/ETICA_LENGUAJE_COMUN_CATEGORIA.md`.
-> **Siguiente paso natural**: traducciones reales de la Ética (fase 2 i18n) o
-> Fase 2 de la Ciudad (Rondas anti-δ — la base nunca se gradúa; las guías ya
-> dan material de repaso) — ver
-> `docs/architecture/GAMIFICACION_CIUDAD_APRENDIZAJE.md` §4.
-> Patrón de trabajo: RLM navega + director verifica + teoría decide (guía en el
-> repo local_models: `docs/GUIA_RLM_COLABORADOR.md`).
-> **Delegación OpenRouter gratuita**: apóyate intensamente en subagentes con
-> proveedor `openrouter` y modelos `:free` declarados en el harness
-> (`minimax/minimax-m3:free` y `nvidia/nemotron-3-super-120b-a12b:free`); el
-> pool compartido satura con 429 — reintentar o cambiar de modelo (Nemotron es
-> el más estable en tareas cortas; ambas fallan en tareas largas con tools;
-> MiniMax sostiene mejor los informes largos). M15 demostró el pipeline:
-> subagente redacta guías (formato `=== ARCHIVO: <slug>.md ===`), el director
-> revisa/normaliza y las escribe como `plataforma_educativa/materials/*.md`.
-> El orquestador implementa y verifica siempre con ojos propios antes de
-> commitear — el subagente redacta, el director decide.
-> Revisa los pendientes del §4 y elige el siguiente paso con criterio; commits
-> regulares en español; respeta el principio "la teoría tiene prioridad".
+> Contexto: Fase 2 — Ola 4 "El Puente", versión 5.6+. La rama educativa
+> M1-M16 está COMPLETA. **Jornada del 02-09-2026 (GLM): endurecimiento de
+> seguridad — fase inmediata ejecutada** (metas dictadas por GLM web):
+> auditoría de dependencias (`pip-audit` en el repo + `scripts/security_audit.ps1`;
+> backend al día: PyJWT 2.13, Werkzeug 3.1.6, Flask-CORS 6; frontend `next`
+> 16.3.4 cierra 4 high — **0 vulnerabilidades** npm en prod y dev), cadena de
+> secretos fail-closed (producción sin `SECRET_KEY` aborta en `run.py` y
+> `create_app`; antes forzaba una clave hardcodeada con la que se firmaban
+> JWTs e invitaciones), `FORCE_HTTPS=1` (redirige 308 según
+> `X-Forwarded-Proto`), CSP sin `ws://localhost` en producción y 9 tests
+> nuevos (`tests/test_security_hardening.py`). Suite **885/885** raíz,
+> **78/78** plataforma, **8/8** puente, tsc + build limpios, validador OK.
+> Plan canónico con el roadmap 30-90 días (PostgreSQL, Redis, SAST, SIEM,
+> rotación de claves):
+> `docs/architecture/PLAN_ENDURECIMIENTO_SEGURIDAD.md`.
+> **Siguientes pasos naturales**: los pendientes del §4 (traducciones Ética,
+> Rondas anti-δ) o la fase 30-90 días del plan de seguridad (§3 del plan:
+> empezar por rate limiting con Redis al desplegar multi-worker, o logging
+> JSON sin datos sensibles). Patrón de trabajo: RLM navega + director
+> verifica + teoría decide. Commits regulares en español; respeta el
+> principio "la teoría tiene prioridad".
 
 ## 2. Briefing para el agente (opencode / DeepSeek)
 
@@ -86,7 +75,8 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 | **M14 Ciudad del Saber** (29-08-2026, idea de Max: el conocimiento como ciudad): vista de mapa-ciudad con niebla por barrio, lore (8 barrios), compañero de sugerencias (`GET /api/suggest` — rama con más progreso, lo sencillo primero, cero presión) y estados de lote (🔒◽🔨✅✨🏛) con la verdad sin engaño: aprobado+material = ✨, no 🏛 | ✅ (doc `GAMIFICACION_CIUDAD_APRENDIZAJE.md`; fase 2: Rondas anti-δ) |
 | **M15 La Biblioteca de la Ciudad** (30-08-2026, petición de Max: material educativo real, insertable, propio + enlaces al mundo; apariencia que provoque volver; progreso y notas compartidas voluntarias y retractables): tabla `materials` (guia markdown | enlace) + `users.share_progress` (opt-in default 0); **35 guías propias** (250-320 palabras, redactadas por agentes OpenRouter `:free` bajo plantilla + revisión y normalización del director; humanas: analogías de cocina/tienda/huerta/plaza, cero rankings, "la ciudad se ilumina…") + **35 enlaces a Wikipedia verificados** (HTTP 200 real, 30-08-2026); inserción por archivo: `materials/<slug>.md` + `sync_materials.py` (idempotente por `material_key`, reporta huérfanos, autocontenido); endpoints `GET /api/topics/<id>/materials`, `GET /api/materials/<id>`, `GET /api/community/lights` (muro SIN ranking — orden alfabético, solo lo publicado: T13), `POST /api/me/share-progress` (retracta al instante); UI: 📖 por lote/árbol (gueías primero, enlaces al fondo, búsquedas Khan/YouTube por título), lector mini-markdown seguro, 🎁 Ver mi material (M13), celebración con confeti (adiós `alert()`), interruptor de la luz | ✅ (72/72 plataforma +23 tests; 875/875 raíz; validador OK; 70 materiales vivos en la DB; commits `4351acb`/`28d41ff`/`1cdc8e7`/`567ee8c`) |
 | **M16 La categoría Ética** (30-08-2026, decisión de Max: enseñar la Maxocracia dejando la jerga propia PARA EL FINAL; categoría "Ética"; canon implícito puramente maxocrático; capítulos del libro como orden; estructura para traducciones): rama `etica` (orden 0 — los valores primero) con **12 temas** en el orden del libro (El dinero que nos manda → ¿Qué vale la pena? → La vida se cuenta y no se vende → El mínimo que todos merecen → Tu tiempo es tuyo → La palabra que obliga → Dar y recibir con medida → Lo que se hace, se ve → Decidir juntos y rectificar → Cuidar sin cronómetro → La casa grande → **El idioma de la ciudad** — puente final que nombra VHV/TVI/SDV/Maxo/MaxoContract/EIR/OEV, "ya lo entendías"); 12 guías de biblioteca + 36 preguntas de **situaciones concretas** (nunca doctrina) + 12 enlaces Wikipedia verificados; **estructura i18n desde ya** (`materials.idioma`, `users.idioma`, `material_key <slug>#<idioma>g<orden>`, archivos `<slug>.<idioma>.md`, `POST /api/me/idioma`, biblioteca por lengua); auditoría anti-jerga DETERMINISTA en los tests (regex sobre las 12 guías: cero términos propios fuera del puente, que sí los nombra) | ✅ (78/78 plataforma +6; 875/875 raíz; validador OK; 129 materiales vivos: 47 guías + 82 enlaces; commits `1b31803`/`a7f4192`/`7c82cbe`) |
-| Suite de tests | **875/875** (raíz, 30-08-2026) · **78/78** plataforma educativa · 8/8 puente · tsc limpio · validador conceptual OK |
+| **Endurecimiento de seguridad — fase inmediata** (02-09-2026, GLM bajo harness ZCode; metas dictadas por GLM web): auditoría de dependencias completa (`pip-audit` al repo + `scripts/security_audit.ps1`; PyJWT 2.10.1→2.13.0, Werkzeug→3.1.6, Flask-CORS→6.0.0, idna/requests/urllib3/dotenv al día; `next` 16.1.6→16.3.4 cierra 4 high + dev-deps → **0 vulnerabilidades npm**); **SECRET_KEY fail-closed en producción** (hallazgo: `run.py` forzaba clave hardcodeada con la que se firmaban JWTs e invitaciones — la escalera era comprable; ahora aborta `run.py` Y `create_app`); `FORCE_HTTPS=1` (redirige 308 por `X-Forwarded-Proto`; TLS en proxy inverso); CSP sin `ws://localhost:*` en producción; claves de test y fallback dev a 32+ bytes (PyJWT 2.13, RFC 7518 §3.2); 9 tests nuevos `tests/test_security_hardening.py` · plan canónico y roadmap 30-90 días: `docs/architecture/PLAN_ENDURECIMIENTO_SEGURIDAD.md` | ✅ (885/885 raíz; 78/78 plataforma; 8/8 puente; tsc + build limpios; validador OK 7443 archivos) |
+| Suite de tests | **885/885** (raíz, 02-09-2026) · **78/78** plataforma educativa · 8/8 puente · tsc limpio · validador conceptual OK |
 
 **Decisiones canónicas a respetar:**
 - **La teoría (libro) tiene prioridad**: T0-T15 son canónicos; T16=Minimizar Daño, T17=Reciprocidad
@@ -142,6 +132,13 @@ npx tsc --noEmit
 
 **La rama educativa M1-M16 está CERRADA (30-08-2026)** — identidad federada OEV implementada y blindada, Ciudad del Saber (M14), **Biblioteca de la Ciudad** (M15) y **la categoría Ética en lenguaje común (M16)** vivos en la plataforma. Lo que sigue:
 
+0. **Seguridad 30-90 días** (`docs/architecture/PLAN_ENDURECIMIENTO_SEGURIDAD.md` §3):
+   rate limiting con Redis al pasar a multi-worker (`RATELIMIT_STORAGE_URI`
+   ya soportado), logging JSON sin datos sensibles (nunca tokens, γ de
+   protegidos, contenido ESI — solo hash T13), SAST (`bandit` + npm audit en
+   CI), PostgreSQL cuando la comunidad real lo exija, rotación de claves (§5
+   del plan). Deuda menor: pytest 8.4.2→9.x (PYSEC solo dev, salto mayor).
+
 1. **Traducciones reales (fase 2 de la estructura i18n)**: empezar por la Ética —
    la comunidad traduce `materials/<slug>.<idioma>.md` y el director verifica
    (el tema 12 se re-explica, no se traduce literal); UI i18n (diccionario de
@@ -187,7 +184,15 @@ open), 3 violaciones INV1 sin alerta. TODO.md actualizado (Semana 9-12 parcial).
 ## 5. Historia reciente (git log, maxocracia)
 
 ```
-1380488 docs(handoff): M15 biblioteca de la ciudad y la luz compartida
+f7a9f26 fix(deps): sube dependencias python con vulnerabilidades + auditoria recurrente
+4def0dc fix(security): SECRET_KEY fail-closed en produccion, FORCE_HTTPS y CSP sin websocket de dev
+c8f3a4d fix(deps): next 16.3.4 cierra las vulnerabilidades high del frontend
+3433829 docs(agents): corrige la ruta del handoff de sesion en AGENTS.md
+2591288 docs(security): plan canonico de endurecimiento y atribucion de GLM
+9e26d5e docs(handoff): M16 la categoria Etica y el barrio de la casa
+7c82cbe docs(educacion): la categoria Etica en lenguaje comun - diseno canonico (M16)
+a7f4192 feat(edu-ux): el barrio de la casa - lore de la categoria Etica en la ciudad
+1b31803 feat(edu-plataforma): la categoria Etica - fundamentos en lenguaje comun (M16)
 567ee8c docs(educacion): biblioteca de la ciudad y la luz - diseno canonico (M15)
 1cdc8e7 feat(edu-ux): biblioteca, celebracion y luz de la ciudad en la UI (M15)
 28d41ff feat(edu-plataforma): 35 guias propias del saber - la ciudad ya tiene material (M15)
@@ -229,4 +234,4 @@ c59f608 feat(voting): votacion comunitaria (Cap 14) - categorias, quorum, consen
 ```
 
 ---
-**Mantenido por**: Max + DeepSeek (harness) · **Próxima actualización**: al cierre de la siguiente sesión
+**Mantenido por**: Max + el agente de la jornada (harness) · **Próxima actualización**: al cierre de la siguiente sesión
