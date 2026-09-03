@@ -10,8 +10,10 @@ import os
 from flask import Flask
 
 from . import db, schema
+from . import buscador as buscador_engine
 from .api_routes import api_bp
 from .auth_routes import auth_bp
+from .buscador_routes import buscador_bp
 from .frontend_routes import frontend_bp
 
 # Ruta por defecto de la base SQLite (junto a este módulo, en la carpeta raíz
@@ -48,7 +50,18 @@ def create_app(db_path=None):
     db.init_app(app)
     schema.init_db(app)
 
+    # Buscador educativo (B1): parámetros canon y semillas canónicas
+    # (seeds/maxocracia.json), ambos idempotentes. Fail-open (P2): si la
+    # siembra falla, la plataforma arranca igual — el buscador se degrada
+    # con honestidad, nunca rompe la casa.
+    try:
+        buscador_engine.sync_parametros_db(app.config["DATABASE"])
+        buscador_engine.sync_seeds_file(app.config["DATABASE"])
+    except Exception:
+        app.logger.warning("Buscador (B1): siembra canónica falló (fail-open).")
+
     app.register_blueprint(auth_bp)
     app.register_blueprint(api_bp)
+    app.register_blueprint(buscador_bp)
     app.register_blueprint(frontend_bp)
     return app

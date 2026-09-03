@@ -130,6 +130,37 @@ CREATE TABLE IF NOT EXISTS materials (
     idioma TEXT NOT NULL DEFAULT 'es',
     created_at TEXT NOT NULL
 );
+
+-- Buscador educativo independiente (B1): semillas verificadas + parámetros
+-- gobernable. Diseño: docs/architecture/DISENO_BUSCADOR_EDUCATIVO_GRATUITO.md
+-- Regla M15: una semilla nace CANDIDATA (verificada = 0); solo la verificación
+-- humana del coordinador la siembra de verdad. Las semillas verificadas son el
+-- bloque GARANTIZADO del buscador (su identidad vive en identidad_id: grafo
+-- de coherencia propio, B2).
+CREATE TABLE IF NOT EXISTS buscador_seeds (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    seed_key TEXT NOT NULL UNIQUE,
+    tipo TEXT NOT NULL DEFAULT 'web' CHECK(tipo IN ('paper', 'software', 'video', 'hilo', 'blog', 'oer', 'web')),
+    titulo TEXT NOT NULL,
+    url TEXT NOT NULL UNIQUE,
+    resumen TEXT,
+    fuente TEXT NOT NULL DEFAULT 'web',
+    identidad_id TEXT,
+    etiquetas TEXT,
+    idioma TEXT NOT NULL DEFAULT 'es',
+    verificada INTEGER NOT NULL DEFAULT 0,
+    fecha TEXT,
+    created_at TEXT NOT NULL
+);
+
+-- Parámetros del buscador: en B4 los vota el Parlamento Educativo (patrón M9:
+-- procedencia trazable T13; el voto escribe valor + procedencia con cooldown).
+CREATE TABLE IF NOT EXISTS buscador_parameters (
+    parametro TEXT PRIMARY KEY,
+    valor TEXT NOT NULL,
+    procedencia TEXT NOT NULL DEFAULT 'canon',
+    updated_at TEXT NOT NULL
+);
 """
 
 

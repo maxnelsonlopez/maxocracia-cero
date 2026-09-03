@@ -1,0 +1,109 @@
+{
+  "_leeme": "Semillas canónicas del buscador educativo (B1). Descubiertas vía API pública de Zenodo el 03-09-2026 (los DOI y autores salen de los metadatos de los registros). La regla M15 manda: las semillas nacen candidatas y solo la verificación humana las siembra. Para añadir semillas nuevas (canal de YouTube con su channel_id, hilos de X, blogs independientes) basta agregar entradas aquí y resincronizar, o POST /api/buscador/seeds desde la UI.",
+  "semillas": [
+    {
+      "seed_key": "zenodo:10.5281/zenodo.17526611",
+      "tipo": "paper",
+      "titulo": "La Maxocracia: fundamentos axiológicos y metodológicos de una contabilidad ética del valor",
+      "url": "https://doi.org/10.5281/zenodo.17526611",
+      "resumen": "Paper fundacional: la contabilidad de la vida en vez del dinero fiduciario. Autores: Lopez Restrepo, Max Nelson Hernando (con asistentes sintéticos declarados).",
+      "fuente": "zenodo",
+      "identidad_id": "maxocracia:lopez_restrepo_max",
+      "etiquetas": "maxocracia,contabilidad,valor,axiologia,vhv,tvi,sdv,maxo,libro",
+      "idioma": "es",
+      "verificada": 1,
+      "fecha": "2025-11-04"
+    },
+    {
+      "seed_key": "zenodo:10.5281/zenodo.17544993",
+      "tipo": "paper",
+      "titulo": "Arquitectura Temporal de la Coherencia Vital: Un Marco Operativo para la Epistemología del Tiempo en la Maxocracia",
+      "url": "https://doi.org/10.5281/zenodo.17544993",
+      "resumen": "Marco operativo de la epistemología del tiempo: el tiempo vital como medida y la coherencia como arquitectura.",
+      "fuente": "zenodo",
+      "identidad_id": "maxocracia:lopez_restrepo_max",
+      "etiquetas": "maxocracia,tiempo,coherencia,epistemologia,tvi,vhv",
+      "idioma": "es",
+      "verificada": 1,
+      "fecha": "2025-11-06"
+    },
+    {
+      "seed_key": "zenodo:10.5281/zenodo.17607492",
+      "tipo": "paper",
+      "titulo": "Ontometría Vital: El Huevo como Paradigma Cuantitativo de la Coherencia Existencial",
+      "url": "https://doi.org/10.5281/zenodo.17607492",
+      "resumen": "Tercer paper: la ontometría vital y el huevo como paradigma cuantitativo de la coherencia existencial.",
+      "fuente": "zenodo",
+      "identidad_id": "maxocracia:lopez_restrepo_max",
+      "etiquetas": "maxocracia,ontometria,vital,huevo,coherencia,ontologia",
+      "idioma": "es",
+      "verificada": 1,
+      "fecha": "2025-11-14"
+    },
+    {
+      "seed_key": "zenodo:10.5281/zenodo.17605635",
+      "tipo": "software",
+      "titulo": "maxnelsonlopez/maxocracia-cero: Maxocracia 0.3",
+      "url": "https://doi.org/10.5281/zenodo.17605635",
+      "resumen": "Registro de software en Zenodo del repositorio maxocracia-cero: el Sistema Operativo para una Civilización Coherente.",
+      "fuente": "zenodo",
+      "identidad_id": "maxocracia:lopez_restrepo_max",
+      "etiquetas": "maxocracia,software,codigo,repositorio",
+      "idioma": "es",
+      "verificada": 1,
+      "fecha": "2025-11-14"
+    },
+    {
+      "seed_key": "zenodo:10.5281/zenodo.17662902",
+      "tipo": "paper",
+      "titulo": "Floor of Vital Dignity for Humans (SDV-H): Integral Proposal for Quantifying Existential Minimums within the Framework of Maxocracy",
+      "url": "https://doi.org/10.5281/zenodo.17662902",
+      "resumen": "Paper SDV-H en inglés: el Suelo de Dignidad Vital humano cuantificado dentro del marco de la Maxocracia.",
+      "fuente": "zenodo",
+      "identidad_id": "maxocracia:lopez_restrepo_max",
+      "etiquetas": "maxocracia,sdv,dignidad,vital,minimo,floor,humans,en",
+      "idioma": "en",
+      "verificada": 1,
+      "fecha": "2025-11-20"
+    },
+    {
+      "seed_key": "web:github.com/maxocracia-cero",
+      "tipo": "software",
+      "titulo": "Repositorio maxocracia-cero (GitHub)",
+      "url": "https://github.com/maxnelsonlopez/maxocracia-cero",
+      "resumen": "Código vivo del proyecto: motor MaxoContracts, backend Flask, frontend Next.js y la Plataforma Educativa con este buscador.",
+      "fuente": "github",
+      "identidad_id": "maxocracia:lopez_restrepo_max",
+      "etiquetas": "maxocracia,codigo,github,open source,plataforma",
+      "idioma": "es",
+      "verificada": 1,
+      "fecha": "2025-11-14"
+    },
+    {
+      "seed_key": "video:youtube:H0erSu3377Y",
+      "tipo": "video",
+      "titulo": "Maxocracia ¿Un Sistema con Mejores Fallas? (YouTube)",
+      "url": "https://www.youtube.com/watch?v=H0erSu3377Y",
+      "resumen": "Video sobre maxocracia encontrado en la web (candidata: confirmar que el canal es propio para verificarla y sembrar el channel_id completo).",
+      "fuente": "youtube",
+      "identidad_id": null,
+      "etiquetas": "maxocracia,video,youtube",
+      "idioma": "es",
+      "verificada": 0,
+      "fecha": null
+    },
+    {
+      "seed_key": "web:grokipedia.com/page/Maxocracia",
+      "tipo": "web",
+      "titulo": "Maxocracia — Grokipedia",
+      "url": "https://grokipedia.com/page/Maxocracia",
+      "resumen": "Cobertura de terceros sobre maxocracia (candidata: revisar exactitud antes de verificar; la cobertura externa también cuenta, con su banda honesta).",
+      "fuente": "grokipedia",
+      "identidad_id": null,
+      "etiquetas": "maxocracia,cobertura,terceros,enciclopedia",
+      "idioma": "en",
+      "verificada": 0,
+      "fecha": null
+    }
+  ]
+}

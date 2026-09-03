@@ -144,6 +144,38 @@ memoria) que se envía en la cabecera `X-Auth-Token`.
 | GET | `/api/community/lights` | El muro de luces (opt-in, sin ranking) |
 | POST | `/api/me/share-progress` | Interruptor de la luz (`{on: bool}`) |
 | POST | `/api/me/idioma` | Preferencia de idioma para la biblioteca (`{idioma: "es"}`) |
+| GET | `/api/buscador?q=` | **B1**: búsqueda unificada (semillas verificadas + Zenodo + SearXNG opcional); `&format=searx` para federar desde una lente SearXNG |
+| GET | `/api/buscador/score?url=` | Score de confiabilidad Nivel 1 (banda + razones + motor) |
+| GET | `/api/buscador/archivo?url=` | Rescate Wayback Machine (snapshot más cercano) |
+| GET | `/api/buscador/seeds` | Semillas del buscador (verificadas primero) |
+| POST | `/api/buscador/seeds` | Siembra una semilla candidata (solo coordinador; regla M15) |
+| POST | `/api/buscador/seeds/<id>/verificar` | Verificación humana de una semilla (solo coordinador) |
+| GET | `/api/buscador/parametros` | Parámetros vigentes (gobernable; votación en B4) |
+
+## El Buscador educativo (B1)
+
+Buscador independiente sin ads ni tracking: **semillas verificadas primero**
+(bloque garantizado), capa académica abierta (Zenodo, API pública sin token)
+y capa web opcional vía SearXNG auto-hospedado. Principios (diseño canónico en
+`docs/architecture/DISENO_BUSCADOR_EDUCATIVO_GRATUITO.md`): $0 para el
+proyecto y la persona, fail-open (un motor caído se reporta, no rompe),
+**etiqueta-no-censura** (bandas con razones, nunca oculta resultados), y
+regla M15 (las semillas nacen candidatas; solo la verificación humana las
+siembra). Todo con la librería estándar — cero dependencias nuevas.
+
+```powershell
+# Opcional: capa web general con lente educativa (ver searxng/README.md)
+$env:BUSCADOR_SEARXNG_URL = "http://127.0.0.1:8888"   # sin esto, no hay capa web
+$env:BUSCADOR_UPSTREAM_TIMEOUT = "6"                   # timeout de motores (seg.)
+$env:BUSCADOR_ZENODO_SIZE = "5"                        # resultados por consulta
+```
+
+Las semillas canónicas viven en `seeds/maxocracia.json` (5 DOI reales de
+Zenodo descubiertos por API + GitHub). Para sembrar más (canal de YouTube con
+su `channel_id`, hilos de X, blogs independientes): añade entradas al JSON, o
+usa `POST /api/buscador/seeds` + `POST /api/buscador/seeds/<id>/verificar`
+como coordinador.
+
 
 ## Modelo de datos (SQLite)
 

@@ -253,6 +253,25 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
     (rate limiting Flask-Limiter, cabeceras, CORS, secretos fuera de git, verificado línea a línea),
     lo ejecutado, receta de producción y roadmap 30-90 días (PostgreSQL, Redis, SAST, SIEM, rotación
     de claves). Deuda menor documentada: pytest 8.4.2→9.x (PYSEC solo dev).
+- **Buscador educativo — estado del arte y B1 (3/9/2026, sesión con Max; petición: un buscador
+  mejor que Google para la educación, sin ads, que sí reconozca el contenido independiente de
+  maxocracia)**:
+  - **Estado del arte**: `docs/architecture/ESTADO_DEL_ARTE_BUSCADOR_EDUCATIVO.md` — investigación
+    con fuentes verificadas del día (estudio Leipzig/Weimar ACM 2024, cierre de Bing APIs 2025,
+    Marginalia/Kagi Small Web/Mwmbl/Stract, EUSP-Staan, Common Crawl, Qwen3-Embedding, límites
+    reales de las APIs de Zenodo/YouTube/X) y la tabla operativa de fuentes gratuitas.
+  - **Diseño $0**: `docs/architecture/DISENO_BUSCADOR_EDUCATIVO_GRATUITO.md` — principios P1-P8
+    ($0, local-primero, etiqueta-no-censura, transparencia, gobernanza), Internet Archive/Wayback
+    priorizada (4 roles), blogs por feeds con rastreador de confianza, análisis honesto de la
+    infraestructura de distorsión (documentado vs. no documentado), score de confiabilidad en dos
+    niveles (heurístico + LLM juez local→OpenRouter free, fail-open) e hitos B1-B4.
+  - **B1 implementado** en `plataforma_educativa/`: `app/buscador.py` (motores semillas/Zenodo/
+    SearXNG con fail-open, score Nivel 1 heurístico, rescate Wayback, sincronizador de semillas
+    idempotente que nunca revierte verificación humana), `app/buscador_routes.py` (lectura pública,
+    siembra/verificación solo coordinador — regla M15), semillas canónicas reales en
+    `seeds/maxocracia.json` (5 DOI de Zenodo descubiertos vía API pública + GitHub), lente
+    SearXNG opcional (`searxng/`), 18 tests nuevos (`tests/test_buscador.py`); plataforma
+    educativa **99/99** en verde. Cero dependencias nuevas (solo stdlib).
 
 ### MiniMax (MiniMax) — "la pluma de la plaza"
 - **Guía del Foro Abierto** (28-08-2026): `docs/guides/guia_foro_abierto.md` — documento de la

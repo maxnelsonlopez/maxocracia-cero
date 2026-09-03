@@ -83,6 +83,22 @@
 
 **Semántica:** la aspiración de plenitud es política votable (12-30); la ley ≥ 12 años es axioma del motor (`SDV.educacion_anos_minimos`) y no se toca. El parlamento ya sabe qué hacer: `_apply_passed_action` ejecuta y el analizador SDV recalibra los índices con el canónico vigente.
 
+## B1 ✅ Buscador educativo — lente + semillas (03-09-2026)
+
+**Problema resuelto:** la plataforma no tenía forma de encontrar material educativo independiente (ni el propio contenido maxocracia disperso en Zenodo/YouTube/X): los buscadores comerciales lo entierran bajo ads y SEO. Estado del arte y diseño canónico en `ESTADO_DEL_ARTE_BUSCADOR_EDUCATIVO.md` y `DISENO_BUSCADOR_EDUCATIVO_GRATUITO.md` (hitos B1-B4; principios P1-P8: $0, local-primero, etiqueta-no-censura, gobernanza).
+
+| Archivo | Cambio |
+|---|---|
+| `plataforma_educativa/app/buscador.py` | Motores con fail-open (semillas, Zenodo público, SearXNG opcional vía `BUSCADOR_SEARXNG_URL`), score de confiabilidad Nivel 1 (bandas verificada/rastreable/desconocida con razones — procedencia, nunca conformidad), rescate Wayback (availability), sincronizador de semillas idempotente que nunca revierte verificación humana, parámetros canon |
+| `plataforma_educativa/app/buscador_routes.py` | Blueprint `buscador_bp`: `GET /api/buscador` (lectura pública; `&format=searx` para que SearXNG federe las semillas), `GET /api/buscador/score`, `GET /api/buscador/archivo`, `GET /api/buscador/seeds|parametros`, `POST /api/buscador/seeds` + `POST /api/buscador/seeds/<id>/verificar` (solo coordinador, regla M15: nace candidata) |
+| `plataforma_educativa/app/schema.py` | Tablas `buscador_seeds` (seed_key UNIQUE, verificada=0 por defecto, identidad_id para el grafo de coherencia B2) y `buscador_parameters` (procedencia T13; votable en B4 con patrón M9) |
+| `plataforma_educativa/app/__init__.py` | Registro del blueprint + siembra canónica al arrancar (fail-open con warning) |
+| `plataforma_educativa/seeds/maxocracia.json` | Semillas reales descubiertas vía API pública de Zenodo (5 DOI de Lopez Restrepo + registro de software) + GitHub + candidatas (video de YouTube, cobertura de Grokipedia). Pendiente de Max: channel_id del canal propio y handle de X (no indexados en la web abierta) |
+| `plataforma_educativa/searxng/` | Lente educativa opcional: `settings.maxocracia.yml` (motores de ads fuera; Marginalia/Mojeek/Wikipedia dentro; semillas federadas vía `json_engine`) + README |
+| Tests | `plataforma_educativa/tests/test_buscador.py` (18, sin red: fail-open, bandas, idempotencia, M15, formato searx) — plataforma **99/99** |
+
+**Coherencia:** el buscador ordena MATERIAL, nunca personas (guardarraíl M14/M15 intacto); sin dependencias nuevas (solo stdlib); sin APIs de pago (P1).
+
 ---
 
 ## Orden recomendado de sesiones

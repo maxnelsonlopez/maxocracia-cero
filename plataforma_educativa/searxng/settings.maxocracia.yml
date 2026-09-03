@@ -1,0 +1,53 @@
+# Lente educativa de la Plataforma Educativa (B1) — fragmento para settings.yml
+# de SearXNG. Mezclar en el bloque `engines:` de tu instancia. Documentación:
+# plataforma_educativa/searxng/README.md
+#
+# La capa `maxocracia-semillas` apunta a la API de ESTA plataforma: cualquier
+# instancia SearXNG puede federar nuestras semillas verificadas (el buscador
+# expone ?format=searx con el formato del motor json_engine).
+
+use_default_settings: true
+
+server:
+  secret_key: "CAMBIAR_POR_UNA_CLAVE_LARGA_Y_ALEATORIA"
+  limiter: false  # instancia privada/local; detrás de un proxy público, activar
+
+search:
+  safe_search: 0
+  autocomplete: "duckduckgo"
+  formats:
+    - html
+    - json   # requerido para la API interna del buscador (BUSCADOR_SEARXNG_URL)
+
+engines:
+  # ---- Lente educativa: lo comercial/promocional, fuera ----
+  - name: duckduckgo
+    disabled: true   # resultados sintéticos de ads/promoción en la lente
+  - name: bing
+    disabled: true
+  - name: google
+    disabled: true   # la lente educativa no delega en el ad-tech
+
+  # ---- Motores independientes (índices no comerciales) ----
+  - name: marginalia
+    disabled: false
+    categories: [general, educacion]
+  - name: mojeek
+    disabled: false
+    categories: [general, educacion]
+  - name: wikipedia
+    disabled: false
+    language: es
+
+  # ---- Semillas federadas de la Plataforma Educativa ----
+  - name: maxocracia-semillas
+    engine: json_engine
+    shortcut: maxo
+    categories: [educacion]
+    paging: false
+    search_url: http://127.0.0.1:5050/api/buscador?format=searx&q={query}
+    url_query: url
+    title_query: title
+    content_query: content
+    timeout: 6
+    disabled: false
