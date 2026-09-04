@@ -308,10 +308,18 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   (referencia, URL canónica con tildes codificadas) + `engine_openalex`
   (academia con DOI, autores, año y citas; resumen reconstruido del índice
   invertido) en `app/buscador.py`, con tamaños por entorno
-  (`BUSCADOR_WIKIPEDIA_SIZE`, `BUSCADOR_OPENALEX_SIZE`) y fail-open por motor:
+  (  `BUSCADOR_WIKIPEDIA_SIZE`, `BUSCADOR_OPENALEX_SIZE`) y fail-open por motor:
   commits `10e2551` + `1aabb07` (`tests/test_buscador_b5.py`, 5 pruebas sin
   red). **Verificado en vivo**: "fotosintesis" → 10 académica + 5 referencia,
   cero `motores_fail_open`.
+- **Buscador — orden propio + hermanas Wikimedia (4/9/2026, decisión del
+  orquestador a pedido de Max: Wikipedia primero, pero la memoria propia
+  manda)**: motor genérico `engine_wikimedia` + `engine_wikibooks` /
+  `engine_wikiversity` (mismo código, solo cambia el dominio), orden canónico
+  semillas→corpus→referencia→académica→web con `orden_capas` en la respuesta
+  (ranking auditable, P4) y el orden visible en el "¿Por qué veo esto?" de la
+  UI: commits `0d12132` + `74ce5c6` + `cd366b7`. **Verificado en vivo** en
+  `:5050`: "fotosintesis" → Wikipedia primero, luego hermanas y academia.
 
 ### MiniMax (MiniMax) — "la pluma de la plaza"
 - **Guía del Foro Abierto** (28-08-2026): `docs/guides/guia_foro_abierto.md` — documento de la

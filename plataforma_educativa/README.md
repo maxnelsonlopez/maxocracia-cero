@@ -183,6 +183,12 @@ banda verificada, feed verificado, longevidad Wayback). La UI (🔍 El buscador
 de la ciudad) muestra cada resultado con su banda de color + razones y un
 "¿Por qué veo esto?" con capas, motores caídos y principios — cero censura.
 
+**B5 — Búsqueda general sin docker**: Wikipedia + Wikibooks + Wikiversidad
+(referencia, mismo motor) y OpenAlex (academia con DOI/citas), APIs públicas
+sin clave. **Orden canónico**: semillas → corpus → referencia → académica →
+web — la memoria propia manda (§5.3) y la respuesta trae `orden_capas` para
+que el orden sea auditable (P4).
+
 ```powershell
 # Opcional: capa web general con lente educativa (ver searxng/README.md)
 $env:BUSCADOR_SEARXNG_URL = "http://127.0.0.1:8888"   # sin esto, no hay capa web
@@ -190,6 +196,7 @@ $env:BUSCADOR_UPSTREAM_TIMEOUT = "6"                   # timeout de motores (seg
 $env:BUSCADOR_ZENODO_SIZE = "5"                        # resultados por consulta
 $env:BUSCADOR_OPENALEX_SIZE = "5"                      # papers de OpenAlex (B5, sin clave)
 $env:BUSCADOR_WIKIPEDIA_SIZE = "5"                     # artículos de referencia (B5, sin clave)
+$env:BUSCADOR_WIKIMEDIA_SIZE = "3"                      # Wikibooks + Wikiversidad (mismo motor)
 ```
 
 Las semillas canónicas viven en `seeds/maxocracia.json` (5 DOI reales de
