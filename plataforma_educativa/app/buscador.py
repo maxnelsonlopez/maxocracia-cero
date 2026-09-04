@@ -39,10 +39,9 @@ from datetime import datetime, timezone
 ZENODO_API = "https://zenodo.org/api/records"
 WAYBACK_AVAILABILITY = "https://archive.org/wayback/available"
 WAYBACK_CDX = "https://web.archive.org/cdx/search/cdx"
-# Capas abiertas directas (B5): APIs públicas, sin clave, $0. Wikipedia como
-# referencia general (la que la biblioteca M15 ya siembra verificada) y
-# OpenAlex como academia con DOI y citas (diseño §3C).
-WIKIPEDIA_API = "https://es.wikipedia.org/w/api.php"
+# Capas abiertas directas (B5): APIs públicas, sin clave, $0. La familia
+# Wikimedia como referencia general (la que la biblioteca M15 ya siembra
+# verificada) y OpenAlex como academia con DOI y citas (diseño §3C).
 OPENALEX_API = "https://api.openalex.org/works"
 
 # Infraestructura educativa abierta: basta con pertenecer a estos dominios
@@ -256,12 +255,12 @@ def engine_zenodo(query, size=None):
     return resultados
 
 
-def engine_wikipedia(query, size=None):
-    """Capa referencia: búsqueda en Wikipedia en español (API pública, sin
-    clave). Lo que la biblioteca M15 ya verifica, ahora también se encuentra."""
-    if size is None:
-        size = int(os.environ.get("BUSCADOR_WIKIPEDIA_SIZE", "5"))
-    url = WIKIPEDIA_API + "?" + urllib.parse.urlencode(
+def engine_wikimedia(query, dominio, fuente, size):
+    """Motor genérico de la familia Wikimedia (misma API pública, sin clave;
+    solo cambia el dominio). Lo que la biblioteca M15 ya verifica, ahora
+    también se encuentra — y las hermanas que enseñan (Wikibooks,
+    Wikiversidad) entran con el mismo código."""
+    url = "https://" + dominio + "/w/api.php?" + urllib.parse.urlencode(
         {
             "action": "query",
             "list": "search",
@@ -281,14 +280,35 @@ def engine_wikipedia(query, size=None):
             {
                 "capa": "referencia",
                 "titulo": titulo,
-                "url": "https://es.wikipedia.org/wiki/"
+                "url": "https://" + dominio + "/wiki/"
                 + urllib.parse.quote(titulo.replace(" ", "_")),
                 "resumen": _limpia_html(h.get("snippet") or ""),
-                "fuente": "wikipedia",
+                "fuente": fuente,
                 "tipo": "referencia",
             }
         )
     return resultados
+
+
+def engine_wikipedia(query, size=None):
+    """Capa referencia: Wikipedia en español (API pública, sin clave)."""
+    if size is None:
+        size = int(os.environ.get("BUSCADOR_WIKIPEDIA_SIZE", "5"))
+    return engine_wikimedia(query, "es.wikipedia.org", "wikipedia", size)
+
+
+def engine_wikibooks(query, size=None):
+    """Capa referencia: Wikibooks en español (libros de texto libres)."""
+    if size is None:
+        size = int(os.environ.get("BUSCADOR_WIKIMEDIA_SIZE", "3"))
+    return engine_wikimedia(query, "es.wikibooks.org", "wikibooks", size)
+
+
+def engine_wikiversity(query, size=None):
+    """Capa referencia: Wikiversidad en español (recursos de aprendizaje)."""
+    if size is None:
+        size = int(os.environ.get("BUSCADOR_WIKIMEDIA_SIZE", "3"))
+    return engine_wikimedia(query, "es.wikiversity.org", "wikiversidad", size)
 
 
 def _resumen_openalex(indice, max_palabras=40):
@@ -761,13 +781,19 @@ def enriquecer_corpus(conn, resultado):
 # --------------------------------------------------------------------------
 
 def buscar(conn, query):
-    """Fusiona las capas con transparencia total:
+    """Fusiona las capas con transparencia total.
 
-    - semillas verificadas primero (bloque garantizado, §5.3 del diseño);
-    - luego académico (Zenodo) y web (SearXNG, si está configurada);
-    - todo resultado lleva banda + razones (P3/P4);
-    - un motor caído NO rompe nada: se lista en ``motores_fail_open``.
+    Orden canónico (la memoria propia manda, §5.3; la referencia general
+    sigue, la academia después, la web al fondo):
+
+    1. semillas (bloque garantizado) · 2. corpus · 3. referencia (Wikipedia
+    y hermanas) · 4. académica (Zenodo + OpenAlex) · 5. web (SearXNG).
+
+    Todo resultado lleva banda + razones (P3/P4); un motor caído NO rompe
+    nada: se lista en ``motores_fail_open``.
     """
+
+    ORDEN = ("semillas", "corpus", "referencia", "academica", "web")
     resultados = []
     por_capa = {}
     fail_open = []
@@ -793,6 +819,16 @@ def buscar(conn, query):
     except Exception as exc:  # el corpus es local: si falla, se reporta
         fail_open.append(f"corpus: {exc.__class__.__name__}")
 
+    for motor, nombre in (
+        (engine_wikipedia, "wikipedia"),
+        (engine_wikibooks, "wikibooks"),
+        (engine_wikiversity, "wikiversidad"),
+    ):
+        try:
+            _agregar(motor(query))
+        except Exception as exc:  # fail-open: la búsqueda sigue sin la hermana
+            fail_open.append(f"{nombre}: {exc.__class__.__name__}")
+
     try:
         _agregar(engine_zenodo(query))
     except Exception as exc:  # fail-open: la búsqueda sigue sin Zenodo
@@ -802,11 +838,6 @@ def buscar(conn, query):
         _agregar(engine_openalex(query))
     except Exception as exc:  # fail-open: la búsqueda sigue sin OpenAlex
         fail_open.append(f"openalex: {exc.__class__.__name__}")
-
-    try:
-        _agregar(engine_wikipedia(query))
-    except Exception as exc:  # fail-open: la búsqueda sigue sin Wikipedia
-        fail_open.append(f"wikipedia: {exc.__class__.__name__}")
 
     try:
         _agregar(engine_searxng(query))
@@ -824,6 +855,7 @@ def buscar(conn, query):
         "query": query,
         "resultados": resultados,
         "por_capa": por_capa,
+        "orden_capas": list(ORDEN),
         "motores_fail_open": fail_open,
         "principios": (
             "etiqueta-no-censura: ningún resultado se oculta; las bandas "
