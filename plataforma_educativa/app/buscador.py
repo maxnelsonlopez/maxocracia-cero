@@ -39,6 +39,11 @@ from datetime import datetime, timezone
 ZENODO_API = "https://zenodo.org/api/records"
 WAYBACK_AVAILABILITY = "https://archive.org/wayback/available"
 WAYBACK_CDX = "https://web.archive.org/cdx/search/cdx"
+# Capas abiertas directas (B5): APIs públicas, sin clave, $0. Wikipedia como
+# referencia general (la que la biblioteca M15 ya siembra verificada) y
+# OpenAlex como academia con DOI y citas (diseño §3C).
+WIKIPEDIA_API = "https://es.wikipedia.org/w/api.php"
+OPENALEX_API = "https://api.openalex.org/works"
 
 # Infraestructura educativa abierta: basta con pertenecer a estos dominios
 # para la banda "rastreable" (la plataforma M15 ya verifica estos enlaces).
@@ -245,6 +250,96 @@ def engine_zenodo(query, size=None):
                 "tipo": "paper",
                 "autores": autores,
                 "fecha": meta.get("publication_date"),
+                "doi": doi,
+            }
+        )
+    return resultados
+
+
+def engine_wikipedia(query, size=None):
+    """Capa referencia: búsqueda en Wikipedia en español (API pública, sin
+    clave). Lo que la biblioteca M15 ya verifica, ahora también se encuentra."""
+    if size is None:
+        size = int(os.environ.get("BUSCADOR_WIKIPEDIA_SIZE", "5"))
+    url = WIKIPEDIA_API + "?" + urllib.parse.urlencode(
+        {
+            "action": "query",
+            "list": "search",
+            "srsearch": query,
+            "srlimit": max(1, size),
+            "format": "json",
+            "formatversion": "2",
+        }
+    )
+    data = _http_get_json(url) or {}
+    resultados = []
+    for h in (data.get("query") or {}).get("search") or []:
+        titulo = (h.get("title") or "").strip()
+        if not titulo:
+            continue
+        resultados.append(
+            {
+                "capa": "referencia",
+                "titulo": titulo,
+                "url": "https://es.wikipedia.org/wiki/"
+                + urllib.parse.quote(titulo.replace(" ", "_")),
+                "resumen": _limpia_html(h.get("snippet") or ""),
+                "fuente": "wikipedia",
+                "tipo": "referencia",
+            }
+        )
+    return resultados
+
+
+def _resumen_openalex(indice, max_palabras=40):
+    """Reconstruye el inicio del resumen desde el índice invertido de
+    OpenAlex (stdlib: ordenar posiciones y cortar)."""
+    if not isinstance(indice, dict) or not indice:
+        return ""
+    colocadas = {}
+    for palabra, posiciones in indice.items():
+        for p in posiciones or []:
+            colocadas[p] = palabra
+    texto = " ".join(colocadas[p] for p in sorted(colocadas))
+    palabras = texto.split()
+    return (" ".join(palabras[:max_palabras]) + ("…" if len(palabras) > max_palabras else ""))
+
+
+def engine_openalex(query, size=None):
+    """Capa académica (II): OpenAlex, API pública sin clave (diseño §3C).
+    DOI + citas + año: procedencia rastreable por construcción."""
+    if size is None:
+        size = int(os.environ.get("BUSCADOR_OPENALEX_SIZE", "5"))
+    url = OPENALEX_API + "?" + urllib.parse.urlencode(
+        {
+            "search": query,
+            "per-page": max(1, size),
+            "select": "id,doi,title,publication_year,authorships,abstract_inverted_index,cited_by_count",
+        }
+    )
+    data = _http_get_json(url) or {}
+    resultados = []
+    for w in data.get("results") or []:
+        titulo = (w.get("title") or "").strip()
+        doi = (w.get("doi") or "").strip()
+        enlace = doi or (w.get("id") or "").strip()
+        if not titulo or not enlace:
+            continue
+        autores = [a.get("author", {}).get("display_name", "") for a in w.get("authorships") or []]
+        autores = [a for a in autores if a][:3]
+        resumen = _resumen_openalex(w.get("abstract_inverted_index"))
+        if w.get("cited_by_count"):
+            resumen = (resumen + " " if resumen else "") + f"[{w['cited_by_count']} citas]"
+        resultados.append(
+            {
+                "capa": "academica",
+                "titulo": titulo,
+                "url": enlace,
+                "resumen": resumen,
+                "fuente": "openalex",
+                "tipo": "paper",
+                "autores": ", ".join(autores),
+                "fecha": str(w.get("publication_year") or ""),
                 "doi": doi,
             }
         )
@@ -702,6 +797,16 @@ def buscar(conn, query):
         _agregar(engine_zenodo(query))
     except Exception as exc:  # fail-open: la búsqueda sigue sin Zenodo
         fail_open.append(f"zenodo: {exc.__class__.__name__}")
+
+    try:
+        _agregar(engine_openalex(query))
+    except Exception as exc:  # fail-open: la búsqueda sigue sin OpenAlex
+        fail_open.append(f"openalex: {exc.__class__.__name__}")
+
+    try:
+        _agregar(engine_wikipedia(query))
+    except Exception as exc:  # fail-open: la búsqueda sigue sin Wikipedia
+        fail_open.append(f"wikipedia: {exc.__class__.__name__}")
 
     try:
         _agregar(engine_searxng(query))
