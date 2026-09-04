@@ -56,7 +56,13 @@ def score():
     url = (request.args.get("url") or "").strip()
     if not url:
         return jsonify({"error": "Falta la URL (?url=)."}), 400
-    veredicto = buscador.score_con_cache(get_db(), url)
+    n2 = buscador.score_cache_get(get_db(), url, 2)
+    if n2 is not None:
+        veredicto = {"banda": n2["banda"], "razones": n2["razones"],
+                     "motor": n2["motor"], "nivel": 2, "cache": "hit"}
+    else:
+        veredicto = buscador.score_con_cache(get_db(), url)
+        veredicto["nivel"] = 1
     pseudo = {"capa": "corpus", "url": url, "banda": veredicto["banda"],
               "razones": list(veredicto["razones"])}
     try:
@@ -120,10 +126,11 @@ def corpus():
         return jsonify({"query": q, "resultados": [], "fail_open": f"corpus: {exc.__class__.__name__}"}), 200
     for r in items:
         if "banda" not in r:
-            veredicto = buscador.score_nivel1(get_db(), r["url"])
+            veredicto = buscador.mejor_score(get_db(), r["url"])
             r["banda"] = veredicto["banda"]
             r["razones"] = veredicto["razones"]
             r["motor_score"] = veredicto["motor"]
+            r["nivel_score"] = veredicto["nivel"]
         try:
             buscador.enriquecer_corpus(get_db(), r)
         except Exception:
@@ -260,6 +267,68 @@ def materializar_seed(seed_id):
     except PermissionError as exc:
         return jsonify({"error": str(exc)}), 403
     return jsonify({"doc": dict(doc)}), 201
+
+
+# --------------------------------------------------------------------------
+# B4: el juez trabaja de noche + el parlamento gobierna los parámetros
+# --------------------------------------------------------------------------
+
+@buscador_bp.route("/api/buscador/scoring/estado", methods=["GET"])
+def scoring_estado():
+    """Foto pública de la cola nocturna y los veredictos Nivel 2 vigentes."""
+    return jsonify(buscador.estado_cola(get_db())), 200
+
+
+@buscador_bp.route("/api/buscador/scoring/encolar", methods=["POST"])
+@login_required
+def scoring_encolar():
+    """Encola el tejido sin Nivel 2 para la ronda del juez (coordinador)."""
+    if not _es_coordinador():
+        return jsonify({"error": "Solo el coordinador encola (regla M15)."}), 403
+    n = buscador.encolar_pendientes_nivel2(get_db())
+    return jsonify({"encoladas": n}), 200
+
+
+@buscador_bp.route("/api/buscador/scoring/ejecutar", methods=["POST"])
+@login_required
+def scoring_ejecutar():
+    """Procesa UN lote con el juez (local → OpenRouter → nada). 502 con
+    fail_open si no hay juez: la noche puede esperar, el día sigue."""
+    if not _es_coordinador():
+        return jsonify({"error": "Solo el coordinador ejecuta (regla M15)."}), 403
+    try:
+        return jsonify(buscador.ejecutar_cola_nivel2(get_db())), 200
+    except Exception as exc:
+        return jsonify({"error": "juez no disponible", "fail_open": str(exc)[:200]}), 502
+
+
+@buscador_bp.route("/api/buscador/resoluciones", methods=["GET"])
+def listar_resoluciones():
+    """Historial vinculante: lo resuelto por la asamblea, por orden."""
+    filas = buscador.listar_resoluciones(get_db())
+    return jsonify({"resoluciones": [dict(f) for f in filas]}), 200
+
+
+@buscador_bp.route("/api/buscador/parametros/<nombre>/resolver", methods=["POST"])
+@login_required
+def resolver_parametro(nombre):
+    """Registra lo resuelto por la asamblea (patrón M9): valor + procedencia
+    obligatoria + cooldown de 14 días. 409 si la prisa quiere gobernar."""
+    if not _es_coordinador():
+        return jsonify({"error": "Solo el coordinador registra (regla M15)."}), 403
+    body = request.get_json(silent=True) or {}
+    try:
+        fila = buscador.resolver_parametro(
+            get_db(), (nombre or "").strip(),
+            body.get("valor"), body.get("resolucion"),
+        )
+    except LookupError:
+        return jsonify({"error": "Parámetro no gobernable."}), 404
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    except PermissionError as exc:
+        return jsonify({"error": str(exc)}), 409
+    return jsonify({"resolucion": dict(fila)}), 201
 
 
 @buscador_bp.route("/api/buscador/seeds/<int:seed_id>/verificar", methods=["POST"])
