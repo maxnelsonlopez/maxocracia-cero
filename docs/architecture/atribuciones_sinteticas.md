@@ -320,6 +320,18 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   (ranking auditable, P4) y el orden visible en el "¿Por qué veo esto?" de la
   UI: commits `0d12132` + `74ce5c6` + `cd366b7`. **Verificado en vivo** en
   `:5050`: "fotosintesis" → Wikipedia primero, luego hermanas y academia.
+- **Buscador — B4 el juez trabaja de noche (4/9/2026, el hito grande)**:
+  `app/score_engine.py` (stdlib, sin dependencias: Jan local con las variables
+  del oráculo + OpenRouter `:free` con throttle 1.8s, rúbrica fija de
+  procedencia, JSON estricto tolerante a prosa, `SinJuez` como señal fail-open),
+  cola `buscador_score_queue` + `mejor_score` (el Nivel 2 refina, nunca
+  bloquea), `buscador_parameter_resolutions` con cooldown de 14 días
+  (`resolver_parametro`, 409 anti-flip-flop) e insignia 🤖 del juez en la UI:
+  commits `870a013` + `654a198` + `f96bbe8` + `fd4a3b9`
+  (`tests/test_buscador_b4.py`, 10 pruebas sin red). Suite **136/136**.
+  **Verificado en vivo** en `:5050`: M15 403 vigente, `scoring/estado`
+  público, federación searx con 11 resultados y 502 honesto al ejecutar sin
+  juez (no hay hub en este entorno — el día sigue con Nivel 1).
 
 ### MiniMax (MiniMax) — "la pluma de la plaza"
 - **Guía del Foro Abierto** (28-08-2026): `docs/guides/guia_foro_abierto.md` — documento de la

@@ -157,6 +157,11 @@ memoria) que se envía en la cabecera `X-Auth-Token`.
 | POST | `/api/buscador/feeds/<id>/verificar` | **B2**: verificación HTTP+parse real (solo coordinador) |
 | POST | `/api/buscador/feeds/<id>/ingerir` | **B2**: ingiere feed verificado al corpus (solo coordinador) |
 | POST | `/api/buscador/seeds/<id>/materializar` | **B2**: materializa semilla verificada al corpus (solo coordinador) |
+| GET | `/api/buscador/scoring/estado` | **B4**: foto pública de la cola nocturna y veredictos Nivel 2 |
+| POST | `/api/buscador/scoring/encolar` | **B4**: encola el tejido sin Nivel 2 (solo coordinador) |
+| POST | `/api/buscador/scoring/ejecutar` | **B4**: procesa un lote con el juez; 502 fail-open sin juez |
+| GET | `/api/buscador/resoluciones` | **B4**: historial vinculante del parlamento |
+| POST | `/api/buscador/parametros/<nombre>/resolver` | **B4**: registra lo resuelto (valor + procedencia, cooldown 14 días; 409 si hay prisa) |
 
 ## El Buscador educativo (B1 + B2 + B3)
 
@@ -189,6 +194,14 @@ sin clave. **Orden canónico**: semillas → corpus → referencia → académic
 web — la memoria propia manda (§5.3) y la respuesta trae `orden_capas` para
 que el orden sea auditable (P4).
 
+**B4 — El juez trabaja de noche + parlamento**: el Nivel 1 responde al
+instante; el juez LLM (Jan local → OpenRouter `:free` → nada, rúbrica fija de
+procedencia, ~10 urls por llamada) puntúa la cola nocturna y sus veredictos
+Nivel 2 refinan al heurístico con motor trazable (🤖 en la UI). Sin juez, todo
+sigue (fail-open total, verificado en vivo: 502 honesto). Los parámetros los
+gobierna la asamblea: valor + procedencia obligatoria + cooldown de 14 días
+(409 si hay prisa).
+
 ```powershell
 # Opcional: capa web general con lente educativa (ver searxng/README.md)
 $env:BUSCADOR_SEARXNG_URL = "http://127.0.0.1:8888"   # sin esto, no hay capa web
@@ -197,6 +210,12 @@ $env:BUSCADOR_ZENODO_SIZE = "5"                        # resultados por consulta
 $env:BUSCADOR_OPENALEX_SIZE = "5"                      # papers de OpenAlex (B5, sin clave)
 $env:BUSCADOR_WIKIPEDIA_SIZE = "5"                     # artículos de referencia (B5, sin clave)
 $env:BUSCADOR_WIKIMEDIA_SIZE = "3"                      # Wikibooks + Wikiversidad (mismo motor)
+$env:BUSCADOR_JUEZ_LOTE = "10"                          # urls por llamada al juez (B4)
+$env:BUSCADOR_JUEZ_TIMEOUT = "60"                       # el juez piensa despacio (seg.)
+$env:BUSCADOR_OPENROUTER_MODEL = "deepseek/deepseek-r1:free"  # respaldo :free (B4)
+# El juez preferente es local y reuse las variables del oráculo: LOCAL_ORACLE_BASE_URL,
+# LOCAL_ORACLE_MODEL, LOCAL_ORACLE_ENABLED. Respaldo: OPENROUTER_API_KEY. Sin ambos,
+# el buscador sigue con Nivel 1 (fail-open total).
 ```
 
 Las semillas canónicas viven en `seeds/maxocracia.json` (5 DOI reales de
