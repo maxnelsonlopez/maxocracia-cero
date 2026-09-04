@@ -833,8 +833,10 @@ function renderBuscador(data) {
     return esc(c) + " (" + data.por_capa[c] + ")";
   }).join(", ") || "ninguna";
   var fallos = (data.motores_fail_open || []).map(esc).join(", ") || "ninguno (todo en pie)";
+  var orden = (data.orden_capas || []).map(esc).join(" → ") || "";
   $("buscador-porque-body").innerHTML =
     "<p>Capas que respondieron: <strong>" + capas + "</strong></p>" +
+    (orden ? "<p>Orden: lo propio primero — <strong>" + orden + "</strong></p>" : "") +
     "<p>Motores caídos (siguió sin ellos): <strong>" + fallos + "</strong></p>" +
     "<p>" + esc(data.principios || "") + "</p>";
   $("buscador-porque").hidden = false;
