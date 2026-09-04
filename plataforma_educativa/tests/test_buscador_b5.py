@@ -46,7 +46,7 @@ OPENALEX_PAYLOAD = {
 @pytest.fixture(autouse=True)
 def _sin_red(monkeypatch):
     def _falsa(url, timeout=None):
-        if "wikipedia" in url:
+        if "wiki" in url:
             return WIKI_PAYLOAD
         if "openalex" in url:
             return OPENALEX_PAYLOAD
@@ -86,6 +86,25 @@ def test_buscar_incluye_referencia_y_academica(client):
     assert wiki["banda"] == "rastreable"  # dominio abierto, honestidad intacta
     for r in data["resultados"]:
         assert r["url"] and r["banda"] in buscador.BANDAS and r["razones"]
+
+
+def test_hermanas_wikimedia_comparten_motor():
+    books = buscador.engine_wikibooks("fotosintesis")
+    versi = buscador.engine_wikiversity("fotosintesis")
+    assert books and books[0]["fuente"] == "wikibooks"
+    assert books[0]["url"].startswith("https://es.wikibooks.org/wiki/")
+    assert versi and versi[0]["fuente"] == "wikiversidad"
+    assert versi[0]["url"].startswith("https://es.wikiversity.org/wiki/")
+
+
+def test_orden_canonico_referencia_antes_que_academia(client):
+    data = client.get("/api/buscador?q=fotosintesis").get_json()
+    assert data["orden_capas"] == ["semillas", "corpus", "referencia", "academica", "web"]
+    capas = [r["capa"] for r in data["resultados"]]
+    assert "referencia" in capas and "academica" in capas
+    assert capas.index("referencia") < capas.index("academica")
+    fuentes = {r["fuente"] for r in data["resultados"] if r["capa"] == "referencia"}
+    assert {"wikipedia", "wikibooks", "wikiversidad"} <= fuentes
 
 
 def test_motores_caidos_son_fail_open(monkeypatch, client):
