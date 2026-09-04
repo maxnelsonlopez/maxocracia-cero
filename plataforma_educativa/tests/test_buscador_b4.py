@@ -151,6 +151,15 @@ def test_ejecutar_sin_juez_502_fail_open(monkeypatch, client):
     assert "fail_open" in resp.get_json()
 
 
+def test_ui_muestra_insignia_del_juez():
+    """La UI distingue el veredicto del juez LLM (B4 visible)."""
+    import os
+
+    raiz = os.path.join(os.path.dirname(__file__), "..")
+    js = open(os.path.join(raiz, "static", "app.js"), encoding="utf-8").read()
+    assert "nivel_score" in js and "juez" in js
+
+
 def test_scoring_requiere_coordinador(client):
     _token_coordinador(client)
     otro = _token_otro(client)

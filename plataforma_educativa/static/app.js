@@ -824,7 +824,8 @@ function renderBuscador(data) {
         '<a class="muted" href="' + esc(r.url) + '" target="_blank" rel="noopener noreferrer">' + esc(r.url) + "</a>" +
         (r.resumen ? "<p class='muted'>" + esc(r.resumen) + "</p>" : "") +
         '<ul class="razones">' + razones + "</ul>" +
-        "<p class='muted'>Capa: " + esc(r.capa) + (r.fuente ? " · Fuente: " + esc(r.fuente) : "") + "</p>" +
+        "<p class='muted'>Capa: " + esc(r.capa) + (r.fuente ? " · Fuente: " + esc(r.fuente) : "") +
+        (r.nivel_score === 2 && r.motor_score ? " · 🤖 juez: " + esc(r.motor_score) : "") + "</p>" +
         "</div></div>";
     });
   }
