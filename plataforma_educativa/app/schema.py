@@ -161,6 +161,66 @@ CREATE TABLE IF NOT EXISTS buscador_parameters (
     procedencia TEXT NOT NULL DEFAULT 'canon',
     updated_at TEXT NOT NULL
 );
+
+-- B2: corpus verificado. Feeds registrados (blogs, canal de YouTube): nacen
+-- CANDIDATOS (verificada = 0) y solo la verificación HTTP+parse real los
+-- habilita para ingesta (regla M15: los enlaces se verifican antes de sembrar).
+CREATE TABLE IF NOT EXISTS buscador_feeds (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    url TEXT NOT NULL UNIQUE,
+    tipo TEXT NOT NULL DEFAULT 'blog' CHECK(tipo IN ('blog', 'youtube', 'web')),
+    titulo TEXT NOT NULL DEFAULT '',
+    idioma TEXT NOT NULL DEFAULT 'es',
+    verificada INTEGER NOT NULL DEFAULT 0,
+    last_fetch TEXT,
+    last_status INTEGER,
+    created_at TEXT NOT NULL
+);
+
+-- Documentos ingeridos del corpus (feeds verificados + papers de semillas
+-- Zenodo materializados). wayback_ts = primera captura Wayback (CDX): señal
+-- de longevidad del dominio (diseño §3A).
+CREATE TABLE IF NOT EXISTS buscador_docs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    url TEXT NOT NULL UNIQUE,
+    feed_id INTEGER REFERENCES buscador_feeds(id),
+    seed_id INTEGER REFERENCES buscador_seeds(id),
+    capa TEXT NOT NULL DEFAULT 'corpus',
+    titulo TEXT NOT NULL,
+    resumen TEXT,
+    texto TEXT,
+    idioma TEXT NOT NULL DEFAULT 'es',
+    tipo TEXT NOT NULL DEFAULT 'web',
+    fecha TEXT,
+    wayback_ts TEXT,
+    indexed_at TEXT NOT NULL
+);
+"""
+
+# B2: índice de texto completo sobre el corpus (tabla de contenido externo,
+# rowid = buscador_docs.id, triggers de sincronización). FTS5 puede no estar
+# compilado en algunos SQLite: se crea en try/except y el buscador degrada a
+# LIKE (fail-open documentado en engine_corpus).
+FTS_DDL = """
+CREATE VIRTUAL TABLE IF NOT EXISTS buscador_docs_fts USING fts5(
+    titulo, resumen, texto,
+    content='buscador_docs', content_rowid='id',
+    tokenize='unicode61 remove_diacritics 2'
+);
+CREATE TRIGGER IF NOT EXISTS buscador_docs_ai AFTER INSERT ON buscador_docs BEGIN
+  INSERT INTO buscador_docs_fts(rowid, titulo, resumen, texto)
+  VALUES (new.id, new.titulo, new.resumen, new.texto);
+END;
+CREATE TRIGGER IF NOT EXISTS buscador_docs_ad AFTER DELETE ON buscador_docs BEGIN
+  INSERT INTO buscador_docs_fts(buscador_docs_fts, rowid, titulo, resumen, texto)
+  VALUES ('delete', old.id, old.titulo, old.resumen, old.texto);
+END;
+CREATE TRIGGER IF NOT EXISTS buscador_docs_au AFTER UPDATE ON buscador_docs BEGIN
+  INSERT INTO buscador_docs_fts(buscador_docs_fts, rowid, titulo, resumen, texto)
+  VALUES ('delete', old.id, old.titulo, old.resumen, old.texto);
+  INSERT INTO buscador_docs_fts(rowid, titulo, resumen, texto)
+  VALUES (new.id, new.titulo, new.resumen, new.texto);
+END;
 """
 
 
@@ -794,6 +854,10 @@ def init_db(app):
     conn = sqlite3.connect(app.config["DATABASE"])
     conn.row_factory = sqlite3.Row
     conn.executescript(SCHEMA)
+    try:
+        conn.executescript(FTS_DDL)
+    except sqlite3.OperationalError:
+        pass  # sin FTS5 compilado: el buscador degrada a LIKE (fail-open)
     _migrate_db(conn)
     _seed(conn)
     _seed_etica(conn)
