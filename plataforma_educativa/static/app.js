@@ -752,6 +752,10 @@ function init() {
     $("celebrate-modal").hidden = true;
   });
   $("tree-search").addEventListener("input", function () { loadAll(); });
+  $("btn-buscar").addEventListener("click", buscarCiudad);
+  $("buscador-q").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); buscarCiudad(); }
+  });
 
   // Puerta del OEV (M12): la identidad llega por el FRAGMENTO de la URL
   // (#jwt=...), que nunca viajó al servidor (no quedó en logs). Se captura una
@@ -778,6 +782,62 @@ function captureFederatedJwt() {
   } catch (e) {
     console.warn("Fragmento federado inválido, se ignora.", e);
   }
+}
+
+// ------------------------------------------------------------------
+// El buscador de la ciudad (B3): lo propio primero, todo etiquetado.
+// Bandas con razones (P3/P4) y "por qué veo esto" siempre a la vista.
+// ------------------------------------------------------------------
+var BANDA_LABEL = {
+  verificada: "✅ Verificada",
+  rastreable: "🔎 Rastreable",
+  desconocida: "❓ Desconocida"
+};
+
+function buscarCiudad() {
+  var q = ($("buscador-q").value || "").trim();
+  if (!q) {
+    $("buscador-resultados").innerHTML = '<p class="muted">Escribe qué quieres aprender y pulsa Buscar.</p>';
+    $("buscador-porque").hidden = true;
+    return;
+  }
+  $("buscador-resultados").innerHTML = '<p class="muted">Buscando en la ciudad…</p>';
+  api("/api/buscador?q=" + encodeURIComponent(q)).then(renderBuscador).catch(function (e) {
+    $("buscador-resultados").innerHTML = '<p class="error">La búsqueda falló: ' + esc(e.message) + "</p>";
+  });
+}
+
+function renderBuscador(data) {
+  var items = data.resultados || [];
+  var html = "";
+  if (!items.length) {
+    html = '<p class="muted">La ciudad aún no sabe de eso. Prueba con otra palabra — o siembra el tema en tu lote.</p>';
+  } else {
+    items.forEach(function (r) {
+      var razones = (r.razones || []).map(function (z) {
+        return "<li>" + esc(z) + "</li>";
+      }).join("");
+      html += '<div class="lib-item buscador-item"><div class="lib-item-main">' +
+        '<div><span class="banda banda-' + esc(r.banda || "desconocida") + '">' +
+        esc(BANDA_LABEL[r.banda] || r.banda) + "</span> " +
+        "<strong>" + esc(r.titulo) + "</strong></div>" +
+        '<a class="muted" href="' + esc(r.url) + '" target="_blank" rel="noopener noreferrer">' + esc(r.url) + "</a>" +
+        (r.resumen ? "<p class='muted'>" + esc(r.resumen) + "</p>" : "") +
+        '<ul class="razones">' + razones + "</ul>" +
+        "<p class='muted'>Capa: " + esc(r.capa) + (r.fuente ? " · Fuente: " + esc(r.fuente) : "") + "</p>" +
+        "</div></div>";
+    });
+  }
+  $("buscador-resultados").innerHTML = html;
+  var capas = Object.keys(data.por_capa || {}).map(function (c) {
+    return esc(c) + " (" + data.por_capa[c] + ")";
+  }).join(", ") || "ninguna";
+  var fallos = (data.motores_fail_open || []).map(esc).join(", ") || "ninguno (todo en pie)";
+  $("buscador-porque-body").innerHTML =
+    "<p>Capas que respondieron: <strong>" + capas + "</strong></p>" +
+    "<p>Motores caídos (siguió sin ellos): <strong>" + fallos + "</strong></p>" +
+    "<p>" + esc(data.principios || "") + "</p>";
+  $("buscador-porque").hidden = false;
 }
 
 function showError(msg) {

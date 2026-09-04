@@ -191,6 +191,17 @@ hr { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
 .lib-list .link-btn { margin-left: 10px; }
 .prewrap { white-space: pre-wrap; }
 
+/* El buscador de la ciudad (B3): bandas con razones, nunca censura */
+.banda {
+  display: inline-block; font-size: 0.78rem; font-weight: 700;
+  border-radius: 999px; padding: 2px 10px; margin-right: 6px;
+}
+.banda-verificada { background: #e3f4e5; color: #1d6b2f; border: 1px solid #9ed3a7; }
+.banda-rastreable { background: #fdf3dd; color: #8a5d00; border: 1px solid #ecd28f; }
+.banda-desconocida { background: #eef0f2; color: #4a5560; border: 1px solid #c9cfd6; }
+.razones { margin: 6px 0; padding-left: 20px; font-size: 0.85rem; color: #555; }
+.buscador-item { margin-bottom: 10px; }
+
 /* Compartir la luz (M15) */
 .lights-toggle { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .lights-toggle p { flex: 1 1 280px; margin: 0 0 6px; }

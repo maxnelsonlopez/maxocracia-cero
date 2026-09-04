@@ -73,6 +73,22 @@
         <div id="tree" class="tree"></div>
       </div>
     </div>
+
+    <!-- El buscador de la ciudad (B3): lo propio primero, todo etiquetado -->
+    <div class="panel wide">
+      <h2>🔍 El buscador de la ciudad</h2>
+      <p class="muted">Lo de la ciudad primero, el mundo después — y todo con su
+      etiqueta: nada se oculta, todo se explica.</p>
+      <div class="toolbar">
+        <input type="text" id="buscador-q" placeholder="¿Qué quieres aprender? (ej. huerta, conteo)" aria-label="Buscar en la ciudad">
+        <button id="btn-buscar" class="primary small">Buscar</button>
+      </div>
+      <div id="buscador-resultados" class="list"></div>
+      <details id="buscador-porque" hidden>
+        <summary>¿Por qué veo esto?</summary>
+        <div id="buscador-porque-body" class="muted"></div>
+      </details>
+    </div>
   </section>
 
   <!-- Ventana de test -->

@@ -122,6 +122,22 @@ def test_score_endpoint_suma_razones_del_corpus(monkeypatch, client):
     assert any("20200101000000" in z for z in body["razones"])
 
 
+def test_ui_buscador_con_bandas_y_porque():
+    """La UI muestra bandas, razones y el por-qué-veo-esto (B3 visible)."""
+    import os
+
+    raiz = os.path.join(os.path.dirname(__file__), "..")
+    html = open(os.path.join(raiz, "templates", "index.html"), encoding="utf-8").read()
+    js = open(os.path.join(raiz, "static", "app.js"), encoding="utf-8").read()
+    css = open(os.path.join(raiz, "static", "style.css"), encoding="utf-8").read()
+    for pedazo in ("buscador-q", "btn-buscar", "buscador-resultados", "buscador-porque"):
+        assert pedazo in html
+    for pedazo in ("buscarCiudad", "renderBuscador", "BANDA_LABEL", "motores_fail_open"):
+        assert pedazo in js
+    for pedazo in ("banda-verificada", "banda-rastreable", "banda-desconocida", "razones"):
+        assert pedazo in css
+
+
 def test_cero_ocultacion_todas_las_capas_presentes(monkeypatch, client):
     tok = _token_coordinador(client)
     _siembra_feed_con_memoria(monkeypatch, client, tok)
