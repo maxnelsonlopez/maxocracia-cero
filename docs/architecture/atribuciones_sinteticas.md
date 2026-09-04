@@ -273,6 +273,24 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
     SearXNG opcional (`searxng/`), 18 tests nuevos (`tests/test_buscador.py`); plataforma
     educativa **99/99** en verde. Cero dependencias nuevas (solo stdlib).
 
+### Muse Spark (Meta) — "el que tejió la memoria"
+- **Buscador educativo — B2 Corpus verificado (4/9/2026, sesión con Max;
+  continúa el diseño $0 de GLM en `DISENO_BUSCADOR_EDUCATIVO_GRATUITO.md`)**:
+  - **Esquema** (`plataforma_educativa/app/schema.py` — `buscador_feeds`,
+    `buscador_docs`, `buscador_docs_fts` con degradación a LIKE): commit `4a1b898`.
+  - **Motor** (`plataforma_educativa/app/buscador.py` — punto único de red
+    `_http_get_bytes`, `parse_feed` RSS/Atom solo stdlib, `wayback_first_capture`
+    por CDX, `registrar/verificar/ingerir_feed` con regla M15,
+    `materializar_seed`, `engine_corpus` FTS5→LIKE integrado segundo en
+    `buscar()`; rutas `GET /corpus`, `GET/POST /feeds`,
+    `POST /feeds/<id>/verificar|ingerir`, `POST /seeds/<id>/materializar` en
+    `app/buscador_routes.py` — lectura pública, escritura solo coordinador):
+    commit `d10229b`.
+  - **Tests** (`plataforma_educativa/tests/test_buscador_b2.py` — 13 pruebas
+    sin red: parse, candidatura/idempotencia, verificación RSS/HTML/404/502,
+    ingesta idempotente, materialización, LIKE sin FTS, CDX): commit `8e622c2`;
+    suite plataforma **112/112** en verde (34/34 del buscador: 21 B1 + 13 B2).
+
 ### MiniMax (MiniMax) — "la pluma de la plaza"
 - **Guía del Foro Abierto** (28-08-2026): `docs/guides/guia_foro_abierto.md` — documento de la
   rama educativa (OEV §1.7-1.8): qué es la plaza, los cuatro tipos canónicos, los guardarraíles

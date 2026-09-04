@@ -151,8 +151,14 @@ memoria) que se envía en la cabecera `X-Auth-Token`.
 | POST | `/api/buscador/seeds` | Siembra una semilla candidata (solo coordinador; regla M15) |
 | POST | `/api/buscador/seeds/<id>/verificar` | Verificación humana de una semilla (solo coordinador) |
 | GET | `/api/buscador/parametros` | Parámetros vigentes (gobernable; votación en B4) |
+| GET | `/api/buscador/corpus?q=` | **B2**: solo el corpus propio (memoria local, sin red) |
+| GET | `/api/buscador/feeds` | **B2**: feeds registrados (candidatos + verificados) |
+| POST | `/api/buscador/feeds` | **B2**: registra un feed candidato (solo coordinador; M15) |
+| POST | `/api/buscador/feeds/<id>/verificar` | **B2**: verificación HTTP+parse real (solo coordinador) |
+| POST | `/api/buscador/feeds/<id>/ingerir` | **B2**: ingiere feed verificado al corpus (solo coordinador) |
+| POST | `/api/buscador/seeds/<id>/materializar` | **B2**: materializa semilla verificada al corpus (solo coordinador) |
 
-## El Buscador educativo (B1)
+## El Buscador educativo (B1 + B2)
 
 Buscador independiente sin ads ni tracking: **semillas verificadas primero**
 (bloque garantizado), capa académica abierta (Zenodo, API pública sin token)
@@ -162,6 +168,13 @@ proyecto y la persona, fail-open (un motor caído se reporta, no rompe),
 **etiqueta-no-censura** (bandas con razones, nunca oculta resultados), y
 regla M15 (las semillas nacen candidatas; solo la verificación humana las
 siembra). Todo con la librería estándar — cero dependencias nuevas.
+
+**B2 — Corpus verificado**: los feeds (blogs, YouTube, web) nacen candidatos
+y solo la verificación HTTP + parse real los habilita para ingesta (regla
+M15); los documentos viven en `buscador_docs` con índice FTS5 (degrada a LIKE
+si el SQLite no lo trae compilado) y la búsqueda unificada los pone segundos,
+tras las semillas y antes de Zenodo/SearXNG. Longevidad Wayback (CDX) como
+señal guardada en `wayback_ts`; rescate de 404 en `/archivo`.
 
 ```powershell
 # Opcional: capa web general con lente educativa (ver searxng/README.md)
