@@ -97,6 +97,33 @@ def parametros():
     return jsonify({"parametros": buscador.get_parametros(get_db())}), 200
 
 
+@buscador_bp.route("/api/buscador/corpus", methods=["GET"])
+def corpus():
+    """Búsqueda solo en el corpus propio (memoria local, sin red aguas
+    arriba). Pública: la memoria de la ciudad se lee sin pedir papeles."""
+    q = (request.args.get("q") or "").strip()
+    if not q:
+        return jsonify({"error": "Falta la consulta (?q=)."}), 400
+    try:
+        items = buscador.engine_corpus(get_db(), q)
+    except Exception as exc:
+        return jsonify({"query": q, "resultados": [], "fail_open": f"corpus: {exc.__class__.__name__}"}), 200
+    for r in items:
+        if "banda" not in r:
+            veredicto = buscador.score_nivel1(get_db(), r["url"])
+            r["banda"] = veredicto["banda"]
+            r["razones"] = veredicto["razones"]
+            r["motor_score"] = veredicto["motor"]
+    return jsonify({"query": q, "resultados": items}), 200
+
+
+@buscador_bp.route("/api/buscador/feeds", methods=["GET"])
+def listar_feeds():
+    """Feeds registrados (candidatos + verificados, con su estado)."""
+    filas = get_db().execute("SELECT * FROM buscador_feeds ORDER BY id ASC").fetchall()
+    return jsonify({"feeds": [dict(f) for f in filas]}), 200
+
+
 # --------------------------------------------------------------------------
 # Escritura (solo coordinador — regla M15)
 # --------------------------------------------------------------------------
@@ -146,6 +173,79 @@ def crear_seed():
         "SELECT * FROM buscador_seeds WHERE id = ?", (nueva["id"],)
     ).fetchone()
     return jsonify({"seed": dict(fila), "nota": "candidata: verificar antes de sembrar (M15)"}), 201
+
+
+@buscador_bp.route("/api/buscador/feeds", methods=["POST"])
+@login_required
+def crear_feed():
+    """Registra un feed candidato (nace sin verificar, regla M15)."""
+    if not _es_coordinador():
+        return jsonify({"error": "Solo el coordinador siembra feeds (regla M15)."}), 403
+    body = request.get_json(silent=True) or {}
+    url = (body.get("url") or "").strip()
+    if not url.startswith(("http://", "https://")):
+        return jsonify({"error": "URL inválida (se espera http/https)."}), 400
+    try:
+        fila = buscador.registrar_feed(
+            get_db(),
+            url,
+            tipo=(body.get("tipo") or "blog"),
+            titulo=(body.get("titulo") or ""),
+            idioma=(body.get("idioma") or "es"),
+        )
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    return jsonify({"feed": dict(fila), "nota": "candidato: verificar antes de ingerir (M15)"}), 201
+
+
+@buscador_bp.route("/api/buscador/feeds/<int:feed_id>/verificar", methods=["POST"])
+@login_required
+def verificar_feed(feed_id):
+    """Verificación HTTP + parse real del feed (regla M15). Fail-open: si
+    la red falla, se informa con 502 sin romper nada."""
+    if not _es_coordinador():
+        return jsonify({"error": "Solo el coordinador verifica (regla M15)."}), 403
+    try:
+        fila = buscador.verificar_feed(get_db(), feed_id)
+    except LookupError:
+        return jsonify({"error": "Feed no encontrado."}), 404
+    except Exception as exc:
+        return jsonify({"error": "verificación", "fail_open": f"red: {exc.__class__.__name__}"}), 502
+    return jsonify({"feed": dict(fila)}), 200
+
+
+@buscador_bp.route("/api/buscador/feeds/<int:feed_id>/ingerir", methods=["POST"])
+@login_required
+def ingerir_feed(feed_id):
+    """Ingiere un feed VERIFICADO al corpus (idempotente por URL).
+    403 si es candidato (M15); 502 si la red falla (fail-open)."""
+    if not _es_coordinador():
+        return jsonify({"error": "Solo el coordinador ingiere (regla M15)."}), 403
+    try:
+        n = buscador.ingerir_feed(get_db(), feed_id)
+    except LookupError:
+        return jsonify({"error": "Feed no encontrado."}), 404
+    except PermissionError as exc:
+        return jsonify({"error": str(exc)}), 403
+    except Exception as exc:
+        return jsonify({"error": "ingesta", "fail_open": f"red: {exc.__class__.__name__}"}), 502
+    return jsonify({"ingeridos": n}), 200
+
+
+@buscador_bp.route("/api/buscador/seeds/<int:seed_id>/materializar", methods=["POST"])
+@login_required
+def materializar_seed(seed_id):
+    """Materializa una semilla verificada al corpus (P8: la memoria vive
+    en casa). 403 si es candidata (M15)."""
+    if not _es_coordinador():
+        return jsonify({"error": "Solo el coordinador materializa (regla M15)."}), 403
+    try:
+        doc = buscador.materializar_seed(get_db(), seed_id)
+    except LookupError:
+        return jsonify({"error": "Semilla no encontrada."}), 404
+    except PermissionError as exc:
+        return jsonify({"error": str(exc)}), 403
+    return jsonify({"doc": dict(doc)}), 201
 
 
 @buscador_bp.route("/api/buscador/seeds/<int:seed_id>/verificar", methods=["POST"])

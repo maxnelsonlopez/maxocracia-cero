@@ -38,6 +38,7 @@ from datetime import datetime, timezone
 
 ZENODO_API = "https://zenodo.org/api/records"
 WAYBACK_AVAILABILITY = "https://archive.org/wayback/available"
+WAYBACK_CDX = "https://web.archive.org/cdx/search/cdx"
 
 # Infraestructura educativa abierta: basta con pertenecer a estos dominios
 # para la banda "rastreable" (la plataforma M15 ya verifica estos enlaces).
@@ -75,14 +76,36 @@ def _timeout():
     return float(os.environ.get("BUSCADOR_UPSTREAM_TIMEOUT", "6"))
 
 
+def _http_get_bytes(url, timeout=None, accept="*/*"):
+    """GET crudo con User-Agent propio. Punto único de red (testeable):
+
+    devuelve ``(status, bytes, content_type)``. Levanta excepción si algo
+    falla — el fail-open de cada motor la captura y la reporta (nunca
+    silencio). Los tests reemplazan esta función por dobles (sin red real).
+    """
+    req = urllib.request.Request(
+        url, headers={"User-Agent": _USER_AGENT, "Accept": accept}
+    )
+    with urllib.request.urlopen(req, timeout=timeout or _timeout()) as resp:
+        return (
+            getattr(resp, "status", 200) or 200,
+            resp.read(),
+            (resp.headers.get("Content-Type") or "").split(";")[0].strip().lower(),
+        )
+
+
 def _http_get_json(url, timeout=None):
     """GET JSON con User-Agent propio. Levanta excepción si algo falla —
     el fail-open de cada motor la captura y la reporta (nunca silencio)."""
-    req = urllib.request.Request(
-        url, headers={"User-Agent": _USER_AGENT, "Accept": "application/json"}
-    )
-    with urllib.request.urlopen(req, timeout=timeout or _timeout()) as resp:
-        return json.loads(resp.read().decode("utf-8", "replace"))
+    _status, raw, _ctype = _http_get_bytes(url, timeout=timeout, accept="application/json")
+    return json.loads(raw.decode("utf-8", "replace"))
+
+
+def _http_get_text(url, timeout=None):
+    """GET texto (RSS/Atom/HTML) con User-Agent propio. Devuelve
+    ``(status, texto)`` con decodificación tolerante."""
+    status, raw, _ctype = _http_get_bytes(url, timeout=timeout, accept="*/*")
+    return status, raw.decode("utf-8", "replace")
 
 
 # --------------------------------------------------------------------------
@@ -271,6 +294,272 @@ def wayback_rescate(url):
 
 
 # --------------------------------------------------------------------------
+# B2 — Corpus verificado: feeds + ingesta + índice local (todo stdlib, $0)
+#
+# Regla M15: un feed nace CANDIDATO (verificada = 0); solo la verificación
+# HTTP + parse real lo habilita para ingesta. La ingesta es idempotente por
+# URL del documento. La búsqueda del corpus es local (FTS5, con fallback a
+# LIKE si el SQLite no trae FTS5 compilado) — fail-open documentado.
+# --------------------------------------------------------------------------
+
+def parse_feed(xml_texto):
+    """Parsea un feed RSS o Atom (stdlib xml.etree) y devuelve items
+    ``[{titulo, url, resumen, fecha}]``. Sin red, función pura (testeable).
+
+    Acepta RSS 2.0 (channel/item) y Atom (entry). Los namespaces se ignoran
+    por sufijo (``{ns}tag`` → ``tag``) para no depender de prefijos.
+    """
+    import xml.etree.ElementTree as ET
+
+    def _local(tag):
+        return tag.rsplit("}", 1)[-1] if "}" in tag else tag
+
+    def _texto(el, nombres):
+        for hijo in el:
+            if _local(hijo.tag).lower() in nombres:
+                return (hijo.text or "").strip()
+        return ""
+
+    def _enlace(el):
+        for hijo in el:
+            if _local(hijo.tag).lower() == "link":
+                href = (hijo.get("href") or "").strip()
+                if href:
+                    return href
+                if (hijo.text or "").strip().startswith("http"):
+                    return (hijo.text or "").strip()
+        return ""
+
+    raiz = ET.fromstring((xml_texto or "").strip() or "<vacio/>")
+    items = []
+    for el in raiz.iter():
+        nombre = _local(el.tag).lower()
+        if nombre not in ("item", "entry"):
+            continue
+        titulo = _texto(el, {"title"}) or "(sin título)"
+        url = _enlace(el) or _texto(el, {"link", "id", "guid"})
+        if not url.startswith("http"):
+            continue
+        items.append(
+            {
+                "titulo": titulo,
+                "url": url.strip(),
+                "resumen": _limpia_html(_texto(el, {"description", "summary", "content", "encoded"})),
+                "fecha": _texto(el, {"pubdate", "published", "updated", "date"}),
+            }
+        )
+    return items
+
+
+def wayback_first_capture(url):
+    """Primera captura Wayback (CDX) de una URL/dominio: señal de longevidad
+    del diseño §3A. Devuelve el timestamp o None. Fail-open: levanta
+    excepción y el llamador la reporta (la memoria no bloquea el presente)."""
+    q = WAYBACK_CDX + "?" + urllib.parse.urlencode(
+        {"url": url, "limit": 1, "output": "json"}
+    )
+    data = _http_get_json(q) or []
+    if isinstance(data, list) and len(data) > 1 and isinstance(data[1], list):
+        return str(data[1][0]) if len(data[1]) > 0 else None
+    if isinstance(data, dict):
+        return None
+    return None
+
+
+def registrar_feed(conn, url, tipo="blog", titulo="", idioma="es"):
+    """Registra un feed candidato (verificada = 0). Idempotente por URL."""
+    u = (url or "").strip()
+    if not u.startswith(("http://", "https://")):
+        raise ValueError("URL inválida (se espera http/https).")
+    if tipo not in ("blog", "youtube", "web"):
+        tipo = "blog"
+    fila = conn.execute(
+        "INSERT INTO buscador_feeds (url, tipo, titulo, idioma, verificada, created_at) "
+        "VALUES (?, ?, ?, ?, 0, ?) "
+        "ON CONFLICT(url) DO UPDATE SET tipo = excluded.tipo, titulo = excluded.titulo "
+        "RETURNING id",
+        (u, tipo, (titulo or "").strip(), (idioma or "es")[:2], _now()),
+    ).fetchone()
+    conn.commit()
+    return conn.execute("SELECT * FROM buscador_feeds WHERE id = ?", (fila["id"],)).fetchone()
+
+
+def verificar_feed(conn, feed_id):
+    """Verificación HTTP + parse real (regla M15). Solo con 200 y contenido
+    parseable (feed con ≥1 item, o HTML con <title>) marca verificada = 1.
+    Actualiza last_fetch/last_status siempre (memoria del intento)."""
+    fila = conn.execute("SELECT * FROM buscador_feeds WHERE id = ?", (feed_id,)).fetchone()
+    if fila is None:
+        raise LookupError("Feed no encontrado.")
+    try:
+        status, texto = _http_get_text(fila["url"])
+    except Exception:
+        conn.execute(
+            "UPDATE buscador_feeds SET last_fetch = ?, last_status = NULL WHERE id = ?",
+            (_now(), feed_id),
+        )
+        conn.commit()
+        raise
+    conn.execute(
+        "UPDATE buscador_feeds SET last_fetch = ?, last_status = ? WHERE id = ?",
+        (_now(), status, feed_id),
+    )
+    ok = False
+    if status == 200 and texto:
+        try:
+            ok = len(parse_feed(texto)) >= 1
+        except Exception:
+            ok = False
+        if not ok:
+            m = re.search(r"<title[^>]*>(.*?)</title>", texto, re.IGNORECASE | re.DOTALL)
+            ok = bool(m and _limpia_html(m.group(1)))
+    if ok:
+        conn.execute("UPDATE buscador_feeds SET verificada = 1 WHERE id = ?", (feed_id,))
+    conn.commit()
+    return conn.execute("SELECT * FROM buscador_feeds WHERE id = ?", (feed_id,)).fetchone()
+
+
+def _wayback_mejor_esfuerzo(url):
+    """Primera captura Wayback sin romper la ingesta (fail-open → None)."""
+    try:
+        return wayback_first_capture(url)
+    except Exception:
+        return None
+
+
+def ingerir_feed(conn, feed_id, max_items=20):
+    """Ingiere los items de un feed VERIFICADO al corpus (idempotente por
+    URL del documento). Falla con PermissionError si no está verificado
+    (M15); la red que falle levanta excepción (el endpoint la reporta)."""
+    fila = conn.execute("SELECT * FROM buscador_feeds WHERE id = ?", (feed_id,)).fetchone()
+    if fila is None:
+        raise LookupError("Feed no encontrado.")
+    if not fila["verificada"]:
+        raise PermissionError("Feed candidato: verificar antes de ingerir (M15).")
+    _status, texto = _http_get_text(fila["url"])
+    items = parse_feed(texto)[: max(1, max_items)]
+    n = 0
+    for it in items:
+        conn.execute(
+            "INSERT INTO buscador_docs "
+            "(url, feed_id, capa, titulo, resumen, texto, idioma, tipo, fecha, wayback_ts, indexed_at) "
+            "VALUES (?, ?, 'corpus', ?, ?, ?, ?, 'web', ?, ?, ?) "
+            "ON CONFLICT(url) DO UPDATE SET titulo = excluded.titulo, resumen = excluded.resumen",
+            (
+                it["url"],
+                feed_id,
+                it["titulo"],
+                it.get("resumen", ""),
+                it.get("resumen", ""),
+                fila["idioma"],
+                it.get("fecha") or None,
+                _wayback_mejor_esfuerzo(it["url"]),
+                _now(),
+            ),
+        )
+        n += 1
+    conn.execute(
+        "UPDATE buscador_feeds SET last_fetch = ?, last_status = 200 WHERE id = ?",
+        (_now(), feed_id),
+    )
+    conn.commit()
+    return n
+
+
+def materializar_seed(conn, seed_id):
+    """Materializa una semilla al corpus (el texto propio vive en casa, P8):
+    copia verificada del registro con el resumen como texto inicial.
+    Idempotente por URL. Solo semillas verificadas (M15)."""
+    semilla = conn.execute("SELECT * FROM buscador_seeds WHERE id = ?", (seed_id,)).fetchone()
+    if semilla is None:
+        raise LookupError("Semilla no encontrada.")
+    if not semilla["verificada"]:
+        raise PermissionError("Semilla candidata: verificar antes de materializar (M15).")
+    conn.execute(
+        "INSERT INTO buscador_docs "
+        "(url, seed_id, capa, titulo, resumen, texto, idioma, tipo, fecha, wayback_ts, indexed_at) "
+        "VALUES (?, ?, 'corpus', ?, ?, ?, ?, ?, ?, ?, ?) "
+        "ON CONFLICT(url) DO UPDATE SET titulo = excluded.titulo, resumen = excluded.resumen",
+        (
+            semilla["url"],
+            seed_id,
+            semilla["titulo"],
+            semilla["resumen"] or "",
+            semilla["resumen"] or "",
+            semilla["idioma"] or "es",
+            semilla["tipo"] or "web",
+            semilla["fecha"],
+            _wayback_mejor_esfuerzo(semilla["url"]),
+            _now(),
+        ),
+    )
+    conn.commit()
+    return conn.execute("SELECT * FROM buscador_docs WHERE url = ?", (semilla["url"],)).fetchone()
+
+
+def _fts_disponible(conn):
+    fila = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'buscador_docs_fts'"
+    ).fetchone()
+    return fila is not None
+
+
+def _tokens_fts(query):
+    toks = [re.sub(r'["*:.^()\[\]]', "", t) for t in re.split(r"\s+", (query or "").lower()) if t]
+    return [t for t in toks if t]
+
+
+def engine_corpus(conn, query, limite=10):
+    """Capa corpus: el tejido propio (feeds verificados + semillas
+    materializadas). FTS5 si está compilado; si no, LIKE (fail-open).
+
+    Devuelve resultados normalizados con capa = 'corpus'. Nunca hace red:
+    es memoria local, siempre disponible (P2).
+    """
+    tokens = _tokens_fts(query)
+    if not tokens:
+        return []
+    filas = []
+    if _fts_disponible(conn):
+        try:
+            match = " AND ".join(f'"{t}"*' for t in tokens)
+            filas = conn.execute(
+                "SELECT d.* FROM buscador_docs_fts f "
+                "JOIN buscador_docs d ON d.id = f.rowid "
+                "WHERE buscador_docs_fts MATCH ? LIMIT ?",
+                (match, limite),
+            ).fetchall()
+        except sqlite3.OperationalError:
+            filas = []  # el LIKE de abajo es el suelo (fail-open)
+    if not filas:
+        like = "%" + "%".join(tokens) + "%"
+        conds = " AND ".join(["(titulo || ' ' || resumen || ' ' || texto) LIKE ?"] * len(tokens))
+        params = [f"%{t}%" for t in tokens] if len(tokens) > 1 else [like]
+        try:
+            filas = conn.execute(
+                f"SELECT * FROM buscador_docs WHERE {conds} LIMIT ?",
+                (*params, limite),
+            ).fetchall()
+        except sqlite3.OperationalError:
+            return []
+    resultados = []
+    for f in filas:
+        resultados.append(
+            {
+                "capa": "corpus",
+                "titulo": f["titulo"],
+                "url": f["url"],
+                "resumen": f["resumen"] or "",
+                "fuente": ("feed:" + str(f["feed_id"])) if f["feed_id"] else ("seed:" + str(f["seed_id"] or "")),
+                "tipo": f["tipo"],
+                "fecha": f["fecha"],
+                "wayback_ts": f["wayback_ts"],
+            }
+        )
+    return resultados
+
+
+# --------------------------------------------------------------------------
 # Búsqueda unificada (fusión de capas con transparencia)
 # --------------------------------------------------------------------------
 
@@ -301,6 +590,11 @@ def buscar(conn, query):
             por_capa[r["capa"]] = por_capa.get(r["capa"], 0) + 1
 
     _agregar(engine_semasillas(conn, query))
+
+    try:
+        _agregar(engine_corpus(conn, query))
+    except Exception as exc:  # el corpus es local: si falla, se reporta
+        fail_open.append(f"corpus: {exc.__class__.__name__}")
 
     try:
         _agregar(engine_zenodo(query))
