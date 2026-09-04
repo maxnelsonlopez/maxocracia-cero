@@ -560,6 +560,108 @@ def engine_corpus(conn, query, limite=10):
 
 
 # --------------------------------------------------------------------------
+# B3 — Score con memoria: cache con TTL + razones del corpus (todo local)
+#
+# El Nivel 1 es barato, pero el Nivel 2 (B4, LLM juez) no: por eso el score
+# vive en ``buscador_scores`` con caducidad. El TTL se lee del parámetro
+# gobernable ``buscador_score_ttl_dias`` (90 días, canon-B1). Transparencia
+# total (P4): el endpoint dice si el veredicto vino de cache o se calculó.
+#
+# Además el corpus enriquece sus resultados con memoria PROPIA (sin red):
+# procedencia verificada (semilla/feed) y longevidad Wayback guardada en
+# ``wayback_ts`` (diseño §5.2: antigüedad como señal anti-spam honesta).
+# --------------------------------------------------------------------------
+
+def _ttl_dias(conn):
+    try:
+        return int((get_parametros(conn).get("buscador_score_ttl_dias") or {}).get("valor", 90))
+    except (TypeError, ValueError):
+        return 90
+
+
+def score_cache_get(conn, url, nivel=1):
+    """Lee el score cacheado. Devuelve None si no existe o caducó (la
+    entrada caducada se borra: la memoria caduca, no miente)."""
+    fila = conn.execute(
+        "SELECT * FROM buscador_scores WHERE url = ? AND nivel = ?", (url, nivel)
+    ).fetchone()
+    if fila is None:
+        return None
+    try:
+        edad = (datetime.now(timezone.utc) - datetime.fromisoformat(fila["scored_at"])).days
+    except (TypeError, ValueError):
+        return None
+    if edad > max(_ttl_dias(conn), 0):
+        conn.execute("DELETE FROM buscador_scores WHERE url = ? AND nivel = ?", (url, nivel))
+        conn.commit()
+        return None
+    try:
+        razones = json.loads(fila["razones_json"] or "[]")
+    except (TypeError, ValueError):
+        razones = []
+    return {"banda": fila["banda"], "razones": razones, "motor": fila["motor"]}
+
+
+def score_cache_set(conn, url, nivel, banda, razones, motor):
+    """Guarda un score (idempotente por url+nivel)."""
+    conn.execute(
+        "INSERT INTO buscador_scores (url, nivel, banda, razones_json, motor, scored_at, ttl_dias) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?) "
+        "ON CONFLICT(url, nivel) DO UPDATE SET "
+        "banda = excluded.banda, razones_json = excluded.razones_json, "
+        "motor = excluded.motor, scored_at = excluded.scored_at, ttl_dias = excluded.ttl_dias",
+        (url, nivel, banda, json.dumps(list(razones or [])), motor, _now(), _ttl_dias(conn)),
+    )
+    conn.commit()
+
+
+def score_con_cache(conn, url, nivel=1):
+    """Score Nivel 1 con memoria: cache vigente o cómputo + guardado.
+    Devuelve el veredicto más ``cache: hit|miss`` (trazabilidad P4)."""
+    u = (url or "").strip()
+    hit = score_cache_get(conn, u, nivel)
+    if hit is not None:
+        return {"banda": hit["banda"], "razones": hit["razones"], "motor": hit["motor"], "cache": "hit"}
+    veredicto = score_nivel1(conn, u)
+    score_cache_set(conn, u, nivel, veredicto["banda"], veredicto["razones"], veredicto["motor"])
+    return {"banda": veredicto["banda"], "razones": veredicto["razones"],
+            "motor": veredicto["motor"], "cache": "miss"}
+
+
+def enriquecer_corpus(conn, resultado):
+    """Añade al resultado del corpus sus razones propias (local, sin red):
+
+    - semilla verificada materializada → banda verificada;
+    - feed verificado → razón de procedencia comunitaria;
+    - ``wayback_ts`` → razón de longevidad (memoria larga, §3A).
+    Mutación in-situ; devuelve el mismo dict."""
+    if resultado.get("capa") != "corpus":
+        return resultado
+    fila = conn.execute("SELECT * FROM buscador_docs WHERE url = ?", (resultado["url"],)).fetchone()
+    if fila is None:
+        return resultado
+    razones = list(resultado.get("razones") or [])
+    if fila["seed_id"]:
+        sem = conn.execute(
+            "SELECT verificada FROM buscador_seeds WHERE id = ?", (fila["seed_id"],)
+        ).fetchone()
+        if sem and sem["verificada"]:
+            resultado["banda"] = "verificada"
+            razones.insert(0, "semilla verificada materializada en el corpus (B2)")
+    elif fila["feed_id"]:
+        feed = conn.execute(
+            "SELECT verificada, titulo FROM buscador_feeds WHERE id = ?", (fila["feed_id"],)
+        ).fetchone()
+        if feed and feed["verificada"]:
+            nombre = (feed["titulo"] or "").strip() or ("feed " + str(fila["feed_id"]))
+            razones.insert(0, f"del corpus verificado de la comunidad ({nombre})")
+    if fila["wayback_ts"]:
+        razones.append(f"memoria larga: archivado desde {fila['wayback_ts']} (Wayback, §3A)")
+    resultado["razones"] = razones
+    return resultado
+
+
+# --------------------------------------------------------------------------
 # Búsqueda unificada (fusión de capas con transparencia)
 # --------------------------------------------------------------------------
 
@@ -605,6 +707,13 @@ def buscar(conn, query):
         _agregar(engine_searxng(query))
     except Exception as exc:  # fail-open: la búsqueda sigue sin SearXNG
         fail_open.append(f"searxng: {exc.__class__.__name__}")
+
+    for r in resultados:  # B3: el corpus aporta sus razones propias (local)
+        if r.get("capa") == "corpus":
+            try:
+                enriquecer_corpus(conn, r)
+            except Exception as exc:
+                fail_open.append(f"corpus-enriquecer: {exc.__class__.__name__}")
 
     return {
         "query": query,

@@ -51,11 +51,21 @@ def buscar():
 
 @buscador_bp.route("/api/buscador/score", methods=["GET"])
 def score():
-    """Score de confiabilidad Nivel 1 de una URL (banda + razones + motor)."""
+    """Score de confiabilidad Nivel 1 de una URL (banda + razones + motor +
+    cache: hit|miss). Si la URL vive en el corpus, suma sus razones propias."""
     url = (request.args.get("url") or "").strip()
     if not url:
         return jsonify({"error": "Falta la URL (?url=)."}), 400
-    return jsonify(buscador.score_nivel1(get_db(), url)), 200
+    veredicto = buscador.score_con_cache(get_db(), url)
+    pseudo = {"capa": "corpus", "url": url, "banda": veredicto["banda"],
+              "razones": list(veredicto["razones"])}
+    try:
+        buscador.enriquecer_corpus(get_db(), pseudo)
+    except Exception:
+        pass  # el enriquecimiento nunca rompe el score (fail-open)
+    veredicto["banda"] = pseudo["banda"]
+    veredicto["razones"] = pseudo["razones"]
+    return jsonify(veredicto), 200
 
 
 @buscador_bp.route("/api/buscador/archivo", methods=["GET"])
@@ -114,6 +124,10 @@ def corpus():
             r["banda"] = veredicto["banda"]
             r["razones"] = veredicto["razones"]
             r["motor_score"] = veredicto["motor"]
+        try:
+            buscador.enriquecer_corpus(get_db(), r)
+        except Exception:
+            pass  # el enriquecimiento nunca rompe la memoria (fail-open)
     return jsonify({"query": q, "resultados": items}), 200
 
 

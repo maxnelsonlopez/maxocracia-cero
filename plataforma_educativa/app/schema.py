@@ -162,6 +162,20 @@ CREATE TABLE IF NOT EXISTS buscador_parameters (
     updated_at TEXT NOT NULL
 );
 
+-- B3: cache de scores de confiabilidad (Nivel 1 heurístico hoy, Nivel 2 LLM
+-- en B4). El TTL vive en buscador_parameters (buscador_score_ttl_dias, 90):
+-- la memoria caduca, la procedencia queda (P4/P8).
+CREATE TABLE IF NOT EXISTS buscador_scores (
+    url TEXT NOT NULL,
+    nivel INTEGER NOT NULL DEFAULT 1,
+    banda TEXT NOT NULL,
+    razones_json TEXT NOT NULL DEFAULT '[]',
+    motor TEXT NOT NULL,
+    scored_at TEXT NOT NULL,
+    ttl_dias INTEGER NOT NULL DEFAULT 90,
+    PRIMARY KEY (url, nivel)
+);
+
 -- B2: corpus verificado. Feeds registrados (blogs, canal de YouTube): nacen
 -- CANDIDATOS (verificada = 0) y solo la verificación HTTP+parse real los
 -- habilita para ingesta (regla M15: los enlaces se verifican antes de sembrar).
