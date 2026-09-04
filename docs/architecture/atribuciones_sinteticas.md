@@ -290,6 +290,19 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
     sin red: parse, candidatura/idempotencia, verificación RSS/HTML/404/502,
     ingesta idempotente, materialización, LIKE sin FTS, CDX): commit `8e622c2`;
     suite plataforma **112/112** en verde (34/34 del buscador: 21 B1 + 13 B2).
+- **Buscador educativo — B3 Score con memoria + UI (4/9/2026, sesión con Max)**:
+  - **Motor** (`buscador_scores` en `app/schema.py`; `score_cache_get/set`,
+    `score_con_cache` con `cache: hit|miss`, `enriquecer_corpus` — procedencia
+    verificada y longevidad Wayback, todo local — en `app/buscador.py`;
+    `GET /score` y `GET /corpus` enriquecidos en `app/buscador_routes.py`):
+    commit `d00b4df`.
+  - **Tests** (`plataforma_educativa/tests/test_buscador_b3.py` — miss→hit,
+    caducidad por TTL, razones de feed/semilla, cero ocultación):
+    commit `a10ec75`.
+  - **UI** (🔍 El buscador de la ciudad en `templates/index.html` +
+    `static/app.js` — bandas ✅/🔎/❓, razones y "¿Por qué veo esto?" con capas
+    y motores caídos — + `static/style.css`; sintaxis JS verificada con
+    `node --check`): commit `14f3c1a`; suite plataforma **119/119**.
 
 ### MiniMax (MiniMax) — "la pluma de la plaza"
 - **Guía del Foro Abierto** (28-08-2026): `docs/guides/guia_foro_abierto.md` — documento de la

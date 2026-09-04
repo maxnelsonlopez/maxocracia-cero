@@ -158,7 +158,7 @@ memoria) que se envía en la cabecera `X-Auth-Token`.
 | POST | `/api/buscador/feeds/<id>/ingerir` | **B2**: ingiere feed verificado al corpus (solo coordinador) |
 | POST | `/api/buscador/seeds/<id>/materializar` | **B2**: materializa semilla verificada al corpus (solo coordinador) |
 
-## El Buscador educativo (B1 + B2)
+## El Buscador educativo (B1 + B2 + B3)
 
 Buscador independiente sin ads ni tracking: **semillas verificadas primero**
 (bloque garantizado), capa académica abierta (Zenodo, API pública sin token)
@@ -175,6 +175,13 @@ M15); los documentos viven en `buscador_docs` con índice FTS5 (degrada a LIKE
 si el SQLite no lo trae compilado) y la búsqueda unificada los pone segundos,
 tras las semillas y antes de Zenodo/SearXNG. Longevidad Wayback (CDX) como
 señal guardada en `wayback_ts`; rescate de 404 en `/archivo`.
+
+**B3 — Score con memoria + UI**: el score Nivel 1 vive en `buscador_scores`
+con TTL gobernable (`buscador_score_ttl_dias`, 90 días; `GET /score` dice
+`cache: hit|miss`); el corpus suma razones propias (semilla materializada →
+banda verificada, feed verificado, longevidad Wayback). La UI (🔍 El buscador
+de la ciudad) muestra cada resultado con su banda de color + razones y un
+"¿Por qué veo esto?" con capas, motores caídos y principios — cero censura.
 
 ```powershell
 # Opcional: capa web general con lente educativa (ver searxng/README.md)

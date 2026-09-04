@@ -228,7 +228,7 @@ tests + entrada en `atribuciones_sinteticas.md`.
 |---|---|---|
 | **B1 — Lente + semillas** ✅ (03-09-2026) | SearXNG configurado (lente educativa), tabla `buscador_seeds` con las identidades maxocracia (Zenodo DOIs, canal, hilos, libro), motor de semillas como engine custom de SearXNG, endpoint proxy `/api/buscador` | proxy, fail-open sin SearXNG, semillas — **implementado: `app/buscador.py` + `app/buscador_routes.py` + `seeds/maxocracia.json` (5 DOI reales de Zenodo) + `searxng/`; 18 tests, plataforma 99/99** |
 | **B2 — Corpus verificado** | Ingestores: Zenodo API, RSS/yt-dlp, blogs por feed, Wayback (CDX/availability/SPN); verificación HTTP previa (regla M15); índice SQLite FTS5 (o Meilisearch si hay 1 GB RAM de sobra) | idempotencia de ingestores, verificación obligatoria, wayback rescue de 404 |
-| **B3 — Score Nivel 1 + UI** | Heurísticas de confiabilidad, bandas + razones en la UI de resultados, "por qué veo esto" | señales, TTL de cache, cero ocultación de resultados |
+| **B3 — Score Nivel 1 + UI** ✅ (04-09-2026) | Heurísticas de confiabilidad, bandas + razones en la UI de resultados, "por qué veo esto" | señales, TTL de cache, cero ocultación de resultados — **implementado: `buscador_scores` con TTL gobernable + `enriquecer_corpus` (procedencia/longevidad local) + UI 🔍 con bandas y por-qué-veo-esto; 7 tests, plataforma 119/119** |
 | **B4 — LLM juez + parlamento** | `ScoreEngine` local→OpenRouter free→nada; cola nocturna; `buscador_parameters` votable en el Parlamento Educativo (cooldown 14 días) | fail-open en 429/timeout, rúbrica JSON estricta, votación de pesos |
 
 ---
