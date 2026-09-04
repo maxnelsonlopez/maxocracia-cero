@@ -176,6 +176,27 @@ CREATE TABLE IF NOT EXISTS buscador_scores (
     PRIMARY KEY (url, nivel)
 );
 
+-- B4: cola nocturna del juez LLM (solo urls nuevas; el Nivel 1 nunca espera)
+-- y registro vinculante de resoluciones del parlamento (patrón M9: valor +
+-- procedencia con cooldown de 14 días; la deliberación vive en la asamblea,
+-- aquí queda lo resuelto y cuándo).
+CREATE TABLE IF NOT EXISTS buscador_score_queue (
+    url TEXT PRIMARY KEY,
+    titulo TEXT NOT NULL DEFAULT '',
+    estado TEXT NOT NULL DEFAULT 'pendiente'
+        CHECK(estado IN ('pendiente', 'procesada', 'fallida')),
+    intentos INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS buscador_parameter_resolutions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    parametro TEXT NOT NULL,
+    valor TEXT NOT NULL,
+    resolucion TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+
 -- B2: corpus verificado. Feeds registrados (blogs, canal de YouTube): nacen
 -- CANDIDATOS (verificada = 0) y solo la verificación HTTP+parse real los
 -- habilita para ingesta (regla M15: los enlaces se verifican antes de sembrar).

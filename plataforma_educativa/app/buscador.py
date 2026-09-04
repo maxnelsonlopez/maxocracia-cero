@@ -777,6 +777,176 @@ def enriquecer_corpus(conn, resultado):
 
 
 # --------------------------------------------------------------------------
+# B4 — El juez trabaja de noche: cola del Nivel 2 + parámetros vinculantes
+#
+# La búsqueda NUNCA espera al LLM: el Nivel 1 responde al instante y el juez
+# puntúa por lotes las urls nuevas (cola ``buscador_score_queue``). Cuando el
+# Nivel 2 existe y está vigente, refina al Nivel 1 (``mejor_score``); si
+# caducó o nunca existió, el heurístico sigue (fail-open).
+#
+# Los parámetros los gobierna el parlamento: el voto escribe valor +
+# procedencia con cooldown de 14 días (patrón M9). La deliberación vive en la
+# asamblea; aquí queda registrado lo resuelto, por quién y cuándo (T13).
+# --------------------------------------------------------------------------
+
+COOLDOWN_RESOLUCION_DIAS = 14
+
+
+def _lote_juez():
+    try:
+        return max(1, int(os.environ.get("BUSCADOR_JUEZ_LOTE", "10")))
+    except (TypeError, ValueError):
+        return 10
+
+
+def encolar_pendientes_nivel2(conn, limite=200):
+    """Encola las urls del tejido propio (semillas + corpus) sin veredicto
+    Nivel 2 vigente. Idempotente por url. Devuelve cuántas quedaron pendientes."""
+    candidatas = {}
+    for fila in conn.execute("SELECT url, titulo FROM buscador_seeds").fetchall():
+        candidatas[fila["url"]] = fila["titulo"] or ""
+    for fila in conn.execute("SELECT url, titulo FROM buscador_docs").fetchall():
+        candidatas.setdefault(fila["url"], fila["titulo"] or "")
+    nuevas = 0
+    for url, titulo in list(candidatas.items())[: max(1, limite)]:
+        if score_cache_get(conn, url, 2) is not None:
+            continue
+        conn.execute(
+            "INSERT INTO buscador_score_queue (url, titulo, estado, intentos, created_at, updated_at) "
+            "VALUES (?, ?, 'pendiente', 0, ?, ?) "
+            "ON CONFLICT(url) DO UPDATE SET updated_at = excluded.updated_at",
+            (url, titulo, _now(), _now()),
+        )
+        nuevas += 1
+    conn.commit()
+    return nuevas
+
+
+def ejecutar_cola_nivel2(conn, lote=None):
+    """Procesa UN lote de la cola con el juez (lote = BUSCADOR_JUEZ_LOTE).
+    Guarda cada veredicto como Nivel 2 (motor trazable) y marca la url
+    procesada o fallida (con intentos). Levanta ``SinJuez`` si no hay juez:
+    la noche puede esperar, el día sigue con Nivel 1."""
+    from . import score_engine
+
+    lote = lote or _lote_juez()
+    pendientes = conn.execute(
+        "SELECT * FROM buscador_score_queue WHERE estado = 'pendiente' ORDER BY created_at LIMIT ?",
+        (lote,),
+    ).fetchall()
+    if not pendientes:
+        return {"procesadas": 0, "fallidas": 0, "motor": "ninguno"}
+    items = []
+    for p in pendientes:
+        fila = conn.execute("SELECT titulo, resumen, fuente FROM buscador_seeds WHERE url = ?", (p["url"],)).fetchone()
+        if fila is None:
+            fila = conn.execute(
+                "SELECT titulo, resumen, 'corpus' AS fuente FROM buscador_docs WHERE url = ?", (p["url"],)
+            ).fetchone()
+        items.append(
+            {
+                "url": p["url"],
+                "titulo": (fila["titulo"] if fila else None) or p["titulo"] or "",
+                "resumen": (fila["resumen"] if fila else None) or "",
+                "fuente": (fila["fuente"] if fila else None) or "",
+            }
+        )
+    veredictos, motor = score_engine.juzgar_lote(items)
+    procesadas = fallidas = 0
+    for v in veredictos:
+        try:
+            score_cache_set(conn, v["url"], 2, v["banda"], v["razones"], motor)
+            conn.execute(
+                "UPDATE buscador_score_queue SET estado = 'procesada', updated_at = ? WHERE url = ?",
+                (_now(), v["url"]),
+            )
+            procesadas += 1
+        except Exception:
+            conn.execute(
+                "UPDATE buscador_score_queue SET estado = 'fallida', intentos = intentos + 1, updated_at = ? "
+                "WHERE url = ?",
+                (_now(), v["url"]),
+            )
+            fallidas += 1
+    conn.commit()
+    return {"procesadas": procesadas, "fallidas": fallidas, "motor": motor}
+
+
+def mejor_score(conn, url):
+    """El mejor veredicto vigente: Nivel 2 si existe, si no Nivel 1.
+    Devuelve banda + razones + motor + nivel (P4: el refinamiento se nota)."""
+    n2 = score_cache_get(conn, (url or "").strip(), 2)
+    if n2 is not None:
+        return {"banda": n2["banda"], "razones": n2["razones"], "motor": n2["motor"], "nivel": 2}
+    v1 = score_nivel1(conn, url)
+    return {"banda": v1["banda"], "razones": v1["razones"], "motor": v1["motor"], "nivel": 1}
+
+
+def estado_cola(conn):
+    """Foto de la cola nocturna + veredictos Nivel 2 vigentes (pública)."""
+    filas = conn.execute(
+        "SELECT estado, COUNT(*) AS n FROM buscador_score_queue GROUP BY estado"
+    ).fetchall()
+    conteo = {f["estado"]: f["n"] for f in filas}
+    n2 = conn.execute("SELECT COUNT(*) AS n FROM buscador_scores WHERE nivel = 2").fetchone()["n"]
+    return {
+        "pendientes": conteo.get("pendiente", 0),
+        "procesadas": conteo.get("procesada", 0),
+        "fallidas": conteo.get("fallida", 0),
+        "veredictos_nivel2": n2,
+    }
+
+
+def resolver_parametro(conn, parametro, valor, resolucion):
+    """Registra lo resuelto por la asamblea sobre un parámetro (patrón M9):
+    valor + procedencia obligatoria + cooldown de 14 días por parámetro.
+    Levanta LookupError (parámetro ajeno), ValueError (sin procedencia) o
+    PermissionError (cooldown vigente: la prisa no gobierna)."""
+    actual = conn.execute(
+        "SELECT * FROM buscador_parameters WHERE parametro = ?", (parametro,)
+    ).fetchone()
+    if actual is None:
+        raise LookupError("Parámetro no gobernable.")
+    if not (resolucion or "").strip():
+        raise ValueError("Toda resolución cita su procedencia (T13).")
+    ultima = conn.execute(
+        "SELECT * FROM buscador_parameter_resolutions WHERE parametro = ? "
+        "ORDER BY id DESC LIMIT 1",
+        (parametro,),
+    ).fetchone()
+    if ultima is not None:
+        try:
+            edad = (datetime.now(timezone.utc) - datetime.fromisoformat(ultima["created_at"])).days
+        except (TypeError, ValueError):
+            edad = COOLDOWN_RESOLUCION_DIAS + 1
+        if edad < COOLDOWN_RESOLUCION_DIAS:
+            raise PermissionError(
+                f"cooldown vigente: faltan {COOLDOWN_RESOLUCION_DIAS - edad} días (anti-flip-flop)"
+            )
+    cursor = conn.execute(
+        "INSERT INTO buscador_parameter_resolutions (parametro, valor, resolucion, created_at) "
+        "VALUES (?, ?, ?, ?)",
+        (parametro, (valor or "").strip(), resolucion.strip(), _now()),
+    )
+    conn.execute(
+        "UPDATE buscador_parameters SET valor = ?, procedencia = ?, updated_at = ? WHERE parametro = ?",
+        ((valor or "").strip(), f"parlamento-B4#{cursor.lastrowid}", _now(), parametro),
+    )
+    conn.commit()
+    return conn.execute(
+        "SELECT * FROM buscador_parameter_resolutions WHERE id = ?", (cursor.lastrowid,)
+    ).fetchone()
+
+
+def listar_resoluciones(conn, limite=50):
+    """Historial vinculante del parlamento (lo resuelto, por orden)."""
+    return conn.execute(
+        "SELECT * FROM buscador_parameter_resolutions ORDER BY id DESC LIMIT ?",
+        (max(1, limite),),
+    ).fetchall()
+
+
+# --------------------------------------------------------------------------
 # Búsqueda unificada (fusión de capas con transparencia)
 # --------------------------------------------------------------------------
 
@@ -805,10 +975,11 @@ def buscar(conn, query):
                 continue
             r["url"] = u
             if "banda" not in r:
-                veredicto = score_nivel1(conn, u)
+                veredicto = mejor_score(conn, u)  # B4: Nivel 2 vigente refina
                 r["banda"] = veredicto["banda"]
                 r["razones"] = veredicto["razones"]
                 r["motor_score"] = veredicto["motor"]
+                r["nivel_score"] = veredicto["nivel"]
             resultados.append(r)
             por_capa[r["capa"]] = por_capa.get(r["capa"], 0) + 1
 
