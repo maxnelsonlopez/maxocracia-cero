@@ -144,7 +144,7 @@ memoria) que se envía en la cabecera `X-Auth-Token`.
 | GET | `/api/community/lights` | El muro de luces (opt-in, sin ranking) |
 | POST | `/api/me/share-progress` | Interruptor de la luz (`{on: bool}`) |
 | POST | `/api/me/idioma` | Preferencia de idioma para la biblioteca (`{idioma: "es"}`) |
-| GET | `/api/buscador?q=` | **B1**: búsqueda unificada (semillas verificadas + Zenodo + SearXNG opcional); `&format=searx` para federar desde una lente SearXNG |
+| GET | `/api/buscador?q=` | **B1+B2+B3+B5**: búsqueda unificada (semillas + corpus + Zenodo + OpenAlex + Wikipedia + SearXNG opcional); `&format=searx` para federar desde una lente SearXNG |
 | GET | `/api/buscador/score?url=` | Score de confiabilidad Nivel 1 (banda + razones + motor) |
 | GET | `/api/buscador/archivo?url=` | Rescate Wayback Machine (snapshot más cercano) |
 | GET | `/api/buscador/seeds` | Semillas del buscador (verificadas primero) |
@@ -188,6 +188,8 @@ de la ciudad) muestra cada resultado con su banda de color + razones y un
 $env:BUSCADOR_SEARXNG_URL = "http://127.0.0.1:8888"   # sin esto, no hay capa web
 $env:BUSCADOR_UPSTREAM_TIMEOUT = "6"                   # timeout de motores (seg.)
 $env:BUSCADOR_ZENODO_SIZE = "5"                        # resultados por consulta
+$env:BUSCADOR_OPENALEX_SIZE = "5"                      # papers de OpenAlex (B5, sin clave)
+$env:BUSCADOR_WIKIPEDIA_SIZE = "5"                     # artículos de referencia (B5, sin clave)
 ```
 
 Las semillas canónicas viven en `seeds/maxocracia.json` (5 DOI reales de

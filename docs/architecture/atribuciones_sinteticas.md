@@ -303,6 +303,15 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
     `static/app.js` — bandas ✅/🔎/❓, razones y "¿Por qué veo esto?" con capas
     y motores caídos — + `static/style.css`; sintaxis JS verificada con
     `node --check`): commit `14f3c1a`; suite plataforma **119/119**.
+- **Buscador educativo — B5 Capas abiertas directas (4/9/2026, a petición de
+  Max: buscar cualquier tema, no solo Maxocracia, sin docker)**: `engine_wikipedia`
+  (referencia, URL canónica con tildes codificadas) + `engine_openalex`
+  (academia con DOI, autores, año y citas; resumen reconstruido del índice
+  invertido) en `app/buscador.py`, con tamaños por entorno
+  (`BUSCADOR_WIKIPEDIA_SIZE`, `BUSCADOR_OPENALEX_SIZE`) y fail-open por motor:
+  commits `10e2551` + `1aabb07` (`tests/test_buscador_b5.py`, 5 pruebas sin
+  red). **Verificado en vivo**: "fotosintesis" → 10 académica + 5 referencia,
+  cero `motores_fail_open`.
 
 ### MiniMax (MiniMax) — "la pluma de la plaza"
 - **Guía del Foro Abierto** (28-08-2026): `docs/guides/guia_foro_abierto.md` — documento de la
