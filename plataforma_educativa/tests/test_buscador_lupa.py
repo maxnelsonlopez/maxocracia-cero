@@ -12,7 +12,7 @@ from app import lupa
 
 
 def _rev(rid, usuario, resumen, tamano, fecha="2026-09-01T00:00:00Z"):
-    return {"id": rid, "timestamp": fecha, "user": usuario,
+    return {"revid": rid, "timestamp": fecha, "user": usuario,
             "comment": resumen, "size": tamano}
 
 
@@ -63,6 +63,7 @@ def test_panorama_cuenta_hechos(monkeypatch):
     assert pano["indicios_guerra"] is False  # n < 10: el indicio exige muestra
     for r in pano["revisiones"]:
         assert {"revid", "fecha", "usuario", "resumen", "tamano", "reversion", "anonimo"} <= set(r)
+    assert all(isinstance(r["revid"], int) for r in pano["revisiones"])  # revid real, nunca nulo
 
 
 def test_panorama_guerra_con_muestra(monkeypatch):

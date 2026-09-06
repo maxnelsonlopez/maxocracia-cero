@@ -85,7 +85,7 @@ def panorama(titulo, limite=50):
 
     revisiones = [
         {
-            "revid": r.get("id"),
+            "revid": r.get("revid"),
             "fecha": r.get("timestamp"),
             "usuario": r.get("user") or "",
             "resumen": r.get("comment") or "",
