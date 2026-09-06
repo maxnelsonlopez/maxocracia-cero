@@ -756,6 +756,10 @@ function init() {
   $("buscador-q").addEventListener("keydown", function (e) {
     if (e.key === "Enter") { e.preventDefault(); buscarCiudad(); }
   });
+  $("btn-lupa").addEventListener("click", function () { abrirLupa($("lupa-q").value); });
+  $("lupa-q").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); abrirLupa($("lupa-q").value); }
+  });
 
   // Puerta del OEV (M12): la identidad llega por el FRAGMENTO de la URL
   // (#jwt=...), que nunca viajó al servidor (no quedó en logs). Se captura una
@@ -826,10 +830,14 @@ function renderBuscador(data) {
         '<ul class="razones">' + razones + "</ul>" +
         "<p class='muted'>Capa: " + esc(r.capa) + (r.fuente ? " · Fuente: " + esc(r.fuente) : "") +
         (r.nivel_score === 2 && r.motor_score ? " · 🤖 juez: " + esc(r.motor_score) : "") + "</p>" +
+        (r.capa === "referencia" ? '<button class="small ghost" data-lupa-url="' + esc(r.url) + '">🔍 lupa</button>' : "") +
         "</div></div>";
     });
   }
   $("buscador-resultados").innerHTML = html;
+  document.querySelectorAll("[data-lupa-url]").forEach(function (btn) {
+    btn.addEventListener("click", function () { abrirLupa(btn.getAttribute("data-lupa-url")); });
+  });
   var capas = Object.keys(data.por_capa || {}).map(function (c) {
     return esc(c) + " (" + data.por_capa[c] + ")";
   }).join(", ") || "ninguna";
@@ -841,6 +849,79 @@ function renderBuscador(data) {
     "<p>Motores caídos (siguió sin ellos): <strong>" + fallos + "</strong></p>" +
     "<p>" + esc(data.principios || "") + "</p>";
   $("buscador-porque").hidden = false;
+}
+
+// ------------------------------------------------------------------
+// La Lupa de la ciudad (B6: Ojo Claro + Disenso) — meta-panorama y diff.
+// Hechos contados, lectura humana: la máquina muestra, tú juzgas.
+// ------------------------------------------------------------------
+function tituloLupa(url) {
+  var m = String(url || "").split("/wiki/")[1] || "";
+  try { m = decodeURIComponent(m); } catch (e) { /* se usa crudo */ }
+  return m.split("#")[0].split("?")[0].replace(/_/g, " ").trim();
+}
+
+function abrirLupa(titulo) {
+  var t = (titulo || "").trim();
+  if (t.indexOf("/wiki/") >= 0) t = tituloLupa(t);
+  if (!t) return;
+  $("lupa-q").value = t;
+  $("lupa-resultado").innerHTML = '<p class="muted">Examinando el historial…</p>';
+  var panel = document.querySelector("#lupa-resultado").closest(".panel");
+  if (panel && panel.scrollIntoView) panel.scrollIntoView({ behavior: "smooth", block: "start" });
+  api("/api/buscador/lupa?titulo=" + encodeURIComponent(t) + "&limite=50").then(renderLupa).catch(function (e) {
+    $("lupa-resultado").innerHTML = '<p class="error">La lupa falló: ' + esc(e.message) + "</p>";
+  });
+}
+
+function renderLupa(p) {
+  var html = "<h3>" + esc(p.titulo) + "</h3>";
+  if ((p.proteccion || []).length) {
+    html += '<p><span class="banda banda-rastreable">🔒 Protegido: ' +
+      esc(p.proteccion.map(function (x) { return x.tipo + "/" + x.nivel; }).join(", ")) + "</span></p>";
+  }
+  html += "<p class='muted'>Muestra: " + p.muestra + " revisiones · " +
+    esc(p.ultima_vista || "?") + " → " + esc(p.primera_vista || "?") + "<br>" +
+    "Revertidas: <strong>" + p.revertidas + "</strong> (" + (p.proporcion_reversiones * 100).toFixed(1) + "%) · " +
+    "Anónimas: <strong>" + p.anonimas + "</strong></p>";
+  if (p.indicios_guerra) {
+    html += '<p><span class="banda banda-desconocida">⚔️ Indicios de guerra de ediciones: muchas reversiones — lee con lupa doble</span></p>';
+  }
+  html += "<p class='muted'>Top editores: " + p.top_editores.map(function (e) {
+    return esc(e.usuario) + " (" + e.ediciones + (e.bot ? ", bot" : "") + ")";
+  }).join(" · ") + "</p>";
+  if ((p.saltos_tamano || []).length) {
+    html += "<p class='muted'>Saltos de tamaño: " + p.saltos_tamano.map(function (s) {
+      return (s.delta > 0 ? "+" : "") + s.delta + " por " + esc(s.usuario);
+    }).join(" · ") + "</p>";
+  }
+  html += '<div class="lib-list">' + (p.revisiones || []).map(function (r, i) {
+    return '<div class="lib-item"><div class="lib-item-main">' +
+      "<label><input type='radio' name='lupa-de' value='" + r.revid + "'> de</label> " +
+      "<label><input type='radio' name='lupa-a' value='" + r.revid + "'" + (i === 0 ? " checked" : "") + "> a</label> " +
+      "<strong>" + esc(r.usuario) + (r.anonimo ? " (anónimo)" : "") + "</strong> " +
+      "<span class='muted'>" + esc(r.fecha || "") + " · " + esc(r.resumen || "(sin resumen)") + "</span>" +
+      (r.reversion ? ' <span class="banda banda-rastreable">↩ reversión</span>' : "") +
+      "</div></div>";
+  }).join("") + "</div>" +
+    '<button class="secondary small" id="btn-lupa-diff">Comparar revisiones</button>' +
+    '<div id="lupa-diff"></div>';
+  $("lupa-resultado").innerHTML = html;
+  $("btn-lupa-diff").addEventListener("click", function () {
+    var de = document.querySelector("input[name='lupa-de']:checked");
+    var a = document.querySelector("input[name='lupa-a']:checked");
+    if (!de || !a) return;
+    $("lupa-diff").innerHTML = '<p class="muted">Comparando…</p>';
+    api("/api/buscador/lupa/diff?de=" + de.value + "&a=" + a.value).then(function (d) {
+      var q = d.quitadas.map(function (t) { return "<li>− " + esc(t) + "</li>"; }).join("");
+      var s = d.puestas.map(function (t) { return "<li>+ " + esc(t) + "</li>"; }).join("");
+      $("lupa-diff").innerHTML = "<h4>Lo quitado (" + d.n_quitadas_total + " palabras)</h4><ul class='razones'>" + (q || "<li>(nada)</li>") + "</ul>" +
+        "<h4>Lo puesto (" + d.n_puestas_total + " palabras)</h4><ul class='razones'>" + (s || "<li>(nada)</li>") + "</ul>" +
+        (d.truncado ? "<p class='muted'>Muestra truncada: el cambio real es mayor.</p>" : "");
+    }).catch(function (e) {
+      $("lupa-diff").innerHTML = '<p class="error">El diff falló: ' + esc(e.message) + "</p>";
+    });
+  });
 }
 
 function showError(msg) {

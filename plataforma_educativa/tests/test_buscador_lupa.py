@@ -119,6 +119,19 @@ def test_endpoints_lupa(client):
     assert client.get("/api/buscador/lupa?titulo=Prueba").status_code == 502
 
 
+def test_ui_lupa_con_timeline_y_diff():
+    """La UI ofrece lupa en la referencia y visor de historial (B6 visible)."""
+    import os
+
+    raiz = os.path.join(os.path.dirname(__file__), "..")
+    html = open(os.path.join(raiz, "templates", "index.html"), encoding="utf-8").read()
+    js = open(os.path.join(raiz, "static", "app.js"), encoding="utf-8").read()
+    for pedazo in ("lupa-q", "btn-lupa", "lupa-resultado"):
+        assert pedazo in html
+    for pedazo in ("abrirLupa", "renderLupa", "lupa/diff", "indicios_guerra"):
+        assert pedazo in js
+
+
 def test_lupa_acepta_url(client, monkeypatch):
     monkeypatch.setattr(buscador, "_http_get_json", lambda url, timeout=None: PANORAMA_PAYLOAD)
     resp = client.get("/api/buscador/lupa?url=https://es.wikipedia.org/wiki/Prueba")
