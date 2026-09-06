@@ -331,6 +331,56 @@ def resolver_parametro(nombre):
     return jsonify({"resolucion": dict(fila)}), 201
 
 
+# --------------------------------------------------------------------------
+# B6: la Lupa (Ojo Claro + Disenso) — meta-panorama y diff de un artículo
+# --------------------------------------------------------------------------
+
+@buscador_bp.route("/api/buscador/lupa", methods=["GET"])
+def lupa():
+    """Meta-panorama de un artículo de Wikipedia (?titulo= o ?url=):
+    protección, reversiones, anonimato, concentración de editores y saltos
+    de tamaño. Hechos contados, lectura humana. Fail-open con 502."""
+    from . import lupa as lupa_engine
+
+    titulo = (request.args.get("titulo") or "").strip()
+    if not titulo:
+        titulo = lupa_engine.titulo_desde_url(request.args.get("url") or "")
+    if not titulo:
+        return jsonify({"error": "Falta el artículo (?titulo= o ?url=)."}), 400
+    try:
+        limite = int(request.args.get("limite") or 50)
+    except (TypeError, ValueError):
+        limite = 50
+    try:
+        return jsonify(lupa_engine.panorama(titulo, limite)), 200
+    except LookupError as exc:
+        return jsonify({"error": str(exc)}), 404
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    except Exception as exc:
+        return jsonify({"error": "lupa", "fail_open": f"wikipedia: {exc.__class__.__name__}"}), 502
+
+
+@buscador_bp.route("/api/buscador/lupa/diff", methods=["GET"])
+def lupa_diff():
+    """Diff palabra por palabra entre dos revisiones (?de=<revid>&a=<revid>):
+    lo quitado y lo puesto, Verbo Justo. Fail-open con 502."""
+    from . import lupa as lupa_engine
+
+    de = (request.args.get("de") or "").strip()
+    a = (request.args.get("a") or "").strip()
+    if not de or not a:
+        return jsonify({"error": "Faltan revisiones (?de=<revid>&a=<revid>)."}), 400
+    try:
+        return jsonify(lupa_engine.comparar(de, a)), 200
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    except LookupError as exc:
+        return jsonify({"error": str(exc)}), 404
+    except Exception as exc:
+        return jsonify({"error": "diff", "fail_open": f"wikipedia: {exc.__class__.__name__}"}), 502
+
+
 @buscador_bp.route("/api/buscador/seeds/<int:seed_id>/verificar", methods=["POST"])
 @login_required
 def verificar_seed(seed_id):
