@@ -162,6 +162,8 @@ memoria) que se envía en la cabecera `X-Auth-Token`.
 | POST | `/api/buscador/scoring/ejecutar` | **B4**: procesa un lote con el juez; 502 fail-open sin juez |
 | GET | `/api/buscador/resoluciones` | **B4**: historial vinculante del parlamento |
 | POST | `/api/buscador/parametros/<nombre>/resolver` | **B4**: registra lo resuelto (valor + procedencia, cooldown 14 días; 409 si hay prisa) |
+| GET | `/api/buscador/lupa?titulo=` | **B6**: meta-panorama del artículo (reversiones, anonimato, guerra, top editores) |
+| GET | `/api/buscador/lupa/diff?de=&a=` | **B6**: diff palabra por palabra entre revisiones (Verbo Justo) |
 
 ## El Buscador educativo (B1 + B2 + B3)
 
@@ -201,6 +203,12 @@ Nivel 2 refinan al heurístico con motor trazable (🤖 en la UI). Sin juez, tod
 sigue (fail-open total, verificado en vivo: 502 honesto). Los parámetros los
 gobierna la asamblea: valor + procedencia obligatoria + cooldown de 14 días
 (409 si hay prisa).
+
+**B6 — La Lupa (Ojo Claro + Disenso, caps. 1-4 del canon)**: cada resultado de
+referencia trae su 🔍 lupa — historial del artículo (protección, reversiones,
+anonimato, indicios de guerra, top editores, saltos de tamaño) y diff palabra
+por palabra entre revisiones. Hechos contados, lectura humana: la máquina
+muestra, tú juzgas.
 
 ```powershell
 # Opcional: capa web general con lente educativa (ver searxng/README.md)

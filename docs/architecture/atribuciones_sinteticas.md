@@ -329,9 +329,20 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   (`resolver_parametro`, 409 anti-flip-flop) e insignia 🤖 del juez en la UI:
   commits `870a013` + `654a198` + `f96bbe8` + `fd4a3b9`
   (`tests/test_buscador_b4.py`, 10 pruebas sin red). Suite **136/136**.
-  **Verificado en vivo** en `:5050`: M15 403 vigente, `scoring/estado`
+  **Verificado en vivo** en   `:5050`: M15 403 vigente, `scoring/estado`
   público, federación searx con 11 resultados y 502 honesto al ejecutar sin
   juez (no hay hub en este entorno — el día sigue con Nivel 1).
+- **Buscador — B6 La Lupa (4/9/2026, a petición de Max tras repasar los caps.
+  1-4 del canon: Ojo Claro Ax5, Verbo Justo Ax6, Disenso T15, inmune cultural
+  Cap. 1 §1.3, Accesibilidad Cap. 4)**: `app/lupa.py` (historial + contenido
+  de revisiones con APIs públicas sin clave, diff de palabras con difflib
+  local; heurísticas documentadas como indicios, nunca veredictos) + 2
+  endpoints + UI 🔍 con timeline, insignias de guerra y visor de diff:
+  commits `b2b639f` + `1fde110` + `2fcd9da` + `9c9ad03`
+  (`tests/test_buscador_lupa.py`, 10 pruebas sin red, incl. regresión del
+  `revid` real). Suite **146/146**. **Verificado en vivo**: Fotosíntesis →
+  14/30 reversiones, guerra=True, diff 174904595→175198350 con miles de
+  palabras contadas.
 
 ### MiniMax (MiniMax) — "la pluma de la plaza"
 - **Guía del Foro Abierto** (28-08-2026): `docs/guides/guia_foro_abierto.md` — documento de la
