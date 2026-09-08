@@ -323,12 +323,12 @@ ya encapsula un arnés con ~90 tools: invocable como subproceso contra `scratch/
 
 **Día 2 — Primer ciclo real completo**
 
-1. F1–F2 con los oráculos registrados sobre el backlog (candidatos naturales: traducciones Ética /
-   pendientes §4 de `SESION_NEXT_PROMPT.md`, o el inicio del plan 30–90 días de seguridad — rate
-   limiting con Redis).
-2. F3 en `scratch/concilio/` (una tarea acotada) + F4 (suite verde, revisión cruzada).
-3. F5: propuesta de merge a Max, con informe firmado; si Max ratifica, merge + atribuciones + mapas
-   si cambió teoría↔implementación.
+1. ✅ **F3 ejecutada (03-09-2026)**: el Concilio eligió "Plaza Hablable" y se implementó —
+   InfoTip + lenguaje civil en `/matching`, `/vhv/calculator`, `/vhv/parameters`, `/micromax` y
+   `/contracts` (tsc limpio; registro en `mapa_frontend_ola4.md` §6).
+2. F4 (revisión cruzada) y F5 (ratificación del custodio) — el merge espera a Max: el trabajo vive
+   en el working tree con commit convencional; revertible.
+3. Pendientes del ciclo votado: seguridad 30-90 días (logging JSON + Redis), Rondas anti-δ.
 
 **Criterios de éxito del piloto**: ≥1 ciclo completo con firma T13; ≥2 proveedores distintos votando;
 suite en verde; ≥1 aporte ratificado por el custodio; cero mutaciones sin revisión; bitácora auditable.

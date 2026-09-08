@@ -100,4 +100,23 @@ Get-Content frontend\app\lib\api.ts
 ```
 
 ---
-**Última actualización**: 19-08-2026 · **Método**: RLM + verificación determinista (Patrón Puente)
+**Última actualización**: 03-09-2026 · **Método**: RLM + verificación determinista (Patrón Puente)
+
+## 6. Patrón transversal: Plaza Hablable (lenguaje civil + InfoTip)
+
+La UI habla en lenguaje de calle; el concepto complejo vive en la ayuda emergente ℹ️
+(`frontend/app/components/ui/InfoTip.tsx`, hover/clic, T13 "el cálculo se explica, no se confiesa").
+
+- **Rama educativa (M10, 29-08-2026)**: `/foro`, `/talleres`, `/grupos`, `/guia`, `/votaciones` (+ `Input hint`).
+- **Concilio (F3, ejecutado por el Concilio y ratificado el 03-09-2026)**:
+  - `/matching` — "Termómetro social" (antes "Termómetro SDV") + InfoTip SDV/dimensiones dignidad.
+  - `/vhv/calculator` — título con InfoTip VHV, "Valor vital calculado (Maxo)", subtítulo civil.
+  - `/vhv/parameters` — InfoTip sobre la fórmula α·T + β·V^γ + δ·R (γ ≥ 1 en lenguaje común).
+  - `/micromax` — pestaña "Registrar aporte de casa"; "Trabajo doméstico"/"Dinero que entró a casa"/
+    "Tu energía libre" con InfoTip CDD/CEH/TED; "Bienestar de la casa" (γ) + "¿Cómo estás? (1 = bien)";
+    "Registrar aporte doméstico"; "Huella vital de la tarea"; "Modo de la cuenta económica".
+  - `/contracts` — banner "¿Qué es un acuerdo de la plaza…?" con InfoTip MaxoContract (Maxo, SDV,
+    retractación ética).
+
+Queda pendiente en áreas avanzadas (vista legal `contracts/[id]`, builder con glosario propio): review
+de jerga estructural — el glosario del builder ya cumple su función educativa.
