@@ -4,10 +4,24 @@ from flask import jsonify
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
+
+def get_storage_uri() -> str:
+    """URI de almacenamiento del limiter (uso en multi-worker).
+
+    Orden: RATELIMIT_STORAGE_URI (plan de seguridad §4) → REDIS_URL
+    (compatibilidad histórica) → memory:// (desarrollo, límites por proceso).
+    """
+    return (
+        os.environ.get("RATELIMIT_STORAGE_URI")
+        or os.environ.get("REDIS_URL")
+        or "memory://"
+    )
+
+
 # Configuración del limiter
 limiter = Limiter(
     key_func=get_remote_address,
-    storage_uri=os.environ.get("REDIS_URL", "memory://"),
+    storage_uri=get_storage_uri(),
     strategy="fixed-window",
     default_limits=["10000 per day", "5000 per hour"],
 )

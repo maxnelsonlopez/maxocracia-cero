@@ -54,6 +54,12 @@ def create_app(db_path=None):
     # Inicializar rate limiter
     init_limiter(app)
 
+    # Logging JSON sanitizado (plan de seguridad §3.4) — opt-in en producción
+    if os.environ.get("LOG_JSON") == "1":
+        from .logging_config import setup_json_logging
+
+        setup_json_logging()
+
     # Permitir CORS en desarrollo y para el dev server de Next.js
     from flask_cors import CORS
 
