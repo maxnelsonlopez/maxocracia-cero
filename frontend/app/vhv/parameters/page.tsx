@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Settings, Save, AlertTriangle, ShieldCheck, RotateCcw } from "lucide-react";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
+import InfoTip from "../../components/ui/InfoTip";
 
 import { VHVParametersInput } from "../../lib/api";
 
@@ -107,8 +108,7 @@ export default function VHVParametersPage() {
                 </h2>
                 
                 <div className="bg-black/40 p-6 rounded-2xl border border-slate-800 mb-8 text-center font-serif italic text-2xl text-slate-300">
-                   Precio = <span className="text-coral-400 font-bold">α</span>·T + <span className="text-emerald-400 font-bold">β</span>·V<sup className="text-indigo-400 font-bold">γ</sup> + <span className="text-amber-500 font-bold">δ</span>·R
-                </div>
+                   Precio = <span className="text-coral-400 font-bold">α</span>·T + <span className="text-emerald-400 font-bold">β</span>·V<sup className="text-indigo-400 font-bold">γ</sup> + <span className="text-amber-500 font-bold">δ</span>·R <InfoTip text="El valor Maxo = lo que cuesta en TIEMPO (α·T) + lo que cuesta en VIDAS tocadas (β·V^γ) + lo que cuesta en RECURSOS del planeta (δ·R). El exponente γ garantiza que dañar la vida de alguien sale carísimo — nunca rentable." /></div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                    <div className="space-y-6">

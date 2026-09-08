@@ -22,6 +22,7 @@ import {
   Info
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
+import InfoTip from "../components/ui/InfoTip";
 
 // Presets representing Chapter 16 metrics
 const CDD_PRESETS = [
@@ -702,7 +703,7 @@ export default function MicroMaxPage() {
             <div className="flex flex-wrap gap-2 p-1 bg-slate-900/60 backdrop-blur border border-slate-800 rounded-2xl max-w-fit">
               {[
                 { id: "dashboard", label: "Balance General", icon: Activity },
-                { id: "log-task", label: "Registrar CDD", icon: PlusCircle },
+                { id: "log-task", label: "Registrar aporte de casa", icon: PlusCircle },
                 { id: "audit", label: "Auditoría & Salud", icon: Shield },
                 { id: "config", label: "Mi Perfil Hogar", icon: Settings }
               ].map((tab) => {
@@ -781,7 +782,7 @@ export default function MicroMaxPage() {
                             {/* CDD */}
                             <div>
                               <div className="flex justify-between text-xs mb-1">
-                                <span className="text-slate-400">CDD (Trabajo Doméstico Directo - VHV)</span>
+                                <span className="text-slate-400">Trabajo doméstico <InfoTip text="Lo que haces por la casa sin que nadie lo pague: cocina, limpieza, cuidado de quien lo necesita. En la MicroMaxocracia ese trabajo se cuenta (CDD = Contribución Doméstica Directa) con el mayor peso, para que el trabajo invisible no siga siendo invisible." /></span>
                                 <span className="font-semibold text-coral-400">{m.cdd} VHV ({m.cdd_share}%)</span>
                               </div>
                               <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden">
@@ -792,7 +793,7 @@ export default function MicroMaxPage() {
                             {/* CEH */}
                             <div>
                               <div className="flex justify-between text-xs mb-1">
-                                <span className="text-slate-400">CEH (Ingreso Económico Ponderado)</span>
+                                <span className="text-slate-400">Dinero que entró a casa <InfoTip text="El dinero que cada quien aporta al hogar (CEH). Se pondera para que quien gana más no mande más: el dinero cuenta, pero la casa no se gobierna por billetera." /></span>
                                 <span className="font-semibold text-emerald-400">${m.income}/mes ({m.ceh_share}%)</span>
                               </div>
                               <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden">
@@ -803,7 +804,7 @@ export default function MicroMaxPage() {
                             {/* TED */}
                             <div>
                               <div className="flex justify-between text-xs mb-1">
-                                <span className="text-slate-400">TED (Tiempo de Energía Disponible)</span>
+                                <span className="text-slate-400">Tu energía libre <InfoTip text="El tiempo que te queda libre y descansado después del trabajo, el sueño y los traslados (TED). Sirve para vigilar que nadie de la casa se apague de cansancio." /></span>
                                 <span className="font-semibold text-amber-400">{m.ted}h libres ({m.ted_share}%)</span>
                               </div>
                               <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden">
@@ -826,21 +827,21 @@ export default function MicroMaxPage() {
                       
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                         <div className="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1">
-                          <div className="font-bold text-xs text-coral-400">CDD (60% del Peso)</div>
+                          <div className="font-bold text-xs text-coral-400">Trabajo doméstico (60% del peso) <InfoTip text="El trabajo invisible de la casa pesa más que el dinero: 60% del equilibrio. Así la cocina, la limpieza y el cuidado dejan de ser invisibles." /></div>
                           <div className="text-slate-300 font-semibold text-xs">Cuidado y Trabajo Doméstico</div>
                           <p className="text-[11px] text-slate-400 leading-normal">
                             Valora el trabajo invisible (limpieza, cocina, cuidado de dependientes). Se le asigna el peso mayoritario para contrarrestar la asimetría histórica de género y clase.
                           </p>
                         </div>
                         <div className="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1">
-                          <div className="font-bold text-xs text-emerald-400">CEH (30% del Peso)</div>
+                          <div className="font-bold text-xs text-emerald-400">Dinero aportado (30% del peso) <InfoTip text="El dinero que entra a la casa cuenta, pero con menos peso que el trabajo doméstico: nadie compra autoridad con su salario." /></div>
                           <div className="text-slate-300 font-semibold text-xs">Contribución Económica</div>
                           <p className="text-[11px] text-slate-400 leading-normal">
                             Representa los aportes financieros al hogar. Se pondera de manera simétrica para evitar que una mayor capacidad de ingreso dicte una dominancia sobre las decisiones del hogar.
                           </p>
                         </div>
                         <div className="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1">
-                          <div className="font-bold text-xs text-amber-400">TED (10% del Peso)</div>
+                          <div className="font-bold text-xs text-amber-400">Energía libre (10% del peso) <InfoTip text="El descanso real de cada quien entra en la cuenta: quien de la casa se agota, la casa entera se apaga." /></div>
                           <div className="text-slate-300 font-semibold text-xs">Tiempo de Energía Disponible</div>
                           <p className="text-[11px] text-slate-400 leading-normal">
                             Mide el tiempo libre y descanso efectivo de cada miembro tras deducir trabajo, sueño y traslados. Asegura que nadie sufra de fatiga crónica o agotamiento extremo.
@@ -934,7 +935,7 @@ export default function MicroMaxPage() {
                   <div className="lg:col-span-3 bg-slate-900/30 backdrop-blur-xl border border-slate-800 p-6 rounded-3xl shadow-xl space-y-5">
                     <h2 className="text-xl font-semibold flex items-center gap-2">
                       <Heart size={22} className="text-indigo-400" />
-                      Bienestar del Hogar (γ)
+                      Bienestar de la casa <InfoTip text="El γ (gamma) mide cómo se siente cada persona de la casa: 1.0 = bien. Si alguien cae bajo 1.0, la casa escucha sin juzgar (INV1); si sostiene el malestar, el sistema activa el protocolo de retractación y cuidado." />
                     </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -965,7 +966,7 @@ export default function MicroMaxPage() {
 
                     <form onSubmit={handleCheckin} className="pt-4 border-t border-slate-800 space-y-3">
                       <div className="flex justify-between text-xs font-semibold uppercase tracking-wider text-slate-400">
-                        <span>¿Cómo estás? (γ 0.5 – 1.5)</span>
+                        <span>¿Cómo estás? <InfoTip text="Mueve el marcador: 1.0 = bien. Si caes bajo 1.0, la casa escucha sin juzgar y el sistema lo registra (INV1). Esto no es vigilancia: es para que nadie se apague en silencio." /> (1 = bien)</span>
                         <span className="font-bold text-white normal-case">{checkinGamma.toFixed(1)}</span>
                       </div>
                       <input
@@ -1003,7 +1004,7 @@ export default function MicroMaxPage() {
                   <div className="bg-slate-900/30 backdrop-blur-xl border border-slate-800 p-6 rounded-3xl shadow-xl space-y-6">
                     <h2 className="text-xl font-semibold flex items-center gap-2">
                       <PlusCircle className="text-indigo-400" />
-                      Registrar Contribución Doméstica Directa (CDD)
+                      Registrar aporte doméstico <InfoTip text="Cuenta lo que hiciste por la casa hoy. Usa los ejemplos o ajusta los números: el sistema lo traduce a huella vital (VHV) para que cada tarea pese lo que realmente cansa y vale." />
                     </h2>
 
                     <form onSubmit={handleLogCDD} className="space-y-4">
@@ -1169,7 +1170,7 @@ export default function MicroMaxPage() {
                         >
                           <span className="flex items-center gap-2">
                             <Info size={18} />
-                            Vector VHV (avanzado)
+                            Vector VHV (avanzado) <InfoTip text="El detalle fino de la huella vital: esfuerzo físico, carga mental y soledad de la tarea. Solo lo necesitas si quieres afinar el cálculo; lo normal es usar los ejemplos." />
                           </span>
                           <span className="text-xs">{showVhvAdvanced ? "▲" : "▼"}</span>
                         </button>
@@ -1236,7 +1237,7 @@ export default function MicroMaxPage() {
                 <div className="lg:col-span-5 space-y-6">
                   {/* Live preview */}
                   <div className="bg-gradient-to-br from-indigo-950/30 to-purple-950/30 border border-indigo-500/20 p-6 rounded-3xl shadow-xl space-y-3 relative overflow-hidden group">
-                    <h3 className="text-xs uppercase text-indigo-400 font-bold tracking-wider">Cálculo VHV de la Tarea</h3>
+                    <h3 className="text-xs uppercase text-indigo-400 font-bold tracking-wider">Huella vital de la tarea <InfoTip text="Cuánta vida (tiempo, esfuerzo, atención) consumió lo que hiciste. Entre más grande el número, más pesa en el equilibrio de la casa (VHV)." /></h3>
                     <div className="flex items-baseline gap-1">
                       <span className="text-5xl font-black text-white">{liveVhv.toFixed(2)}</span>
                       <span className="text-lg font-bold text-indigo-400">VHV</span>
@@ -1626,7 +1627,7 @@ export default function MicroMaxPage() {
 
                     {/* Modo CEH (Cap. 16.5): puente fiat o canónico TVI vendido */}
                     <div className="space-y-1">
-                      <label className="text-xs text-slate-400">Modo de la Cuenta Económica del Hogar (CEH)</label>
+                      <label className="text-xs text-slate-400">Modo de la cuenta económica <InfoTip text="Cómo cuenta el dinero en la casa: en modo puente se toma un porcentaje de los ingresos; en modo canónico se usa el tiempo de vida vendido (TVI) — la conversión más fiel a la Maxocracia." /></label>
                       <select
                         value={cehMode}
                         onChange={(e) => setCehMode(e.target.value === "canonical" ? "canonical" : "bridge")}

@@ -19,6 +19,7 @@ import {
   Landmark,
   Leaf
 } from "lucide-react";
+import InfoTip from "../components/ui/InfoTip";
 import { motion } from "framer-motion";
 import { apiFetch } from "../lib/api";
 
@@ -152,7 +153,7 @@ export default function ContractsPage() {
             <Info className="w-4 h-4" />
             Marco Conceptual e Histórico de la Cohorte Cero
           </span>
-          <h2 className="text-xl font-extrabold text-white">¿Qué es un MaxoContract y en qué se diferencia?</h2>
+          <h2 className="text-xl font-extrabold text-white">¿Qué es un acuerdo de la plaza y en qué se diferencia? <InfoTip text="Un MaxoContract es un acuerdo entre personas (o personas y sintéticos) que se mide en vida: cuánto tiempo, cuánto esfuerzo y cuántos recursos consume cada lado. No te puedes quedar por debajo de tus mínimos dignos (Suelo de Dignidad Vital), y si el acuerdo empieza a hacerte daño, la plaza escucha y permite salir con cuidado (retractación ética)." /></h2>
           <p className="text-xs text-slate-400 max-w-4xl leading-relaxed">
             De acuerdo con el Capítulo 17 del libro, los acuerdos en la Cohorte Cero no se basan en la fe ciega ni en la coerción violenta del Estado, sino en el respeto mutuo a la dignidad y la supervisión algorítmica voluntaria de nuestro bienestar.
           </p>

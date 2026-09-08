@@ -7,6 +7,7 @@ import { api } from "../../lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calculator, Info, Save, BookOpen, ArrowRight } from "lucide-react";
 import { Button } from "../../components/ui/Button";
+import InfoTip from "../../components/ui/InfoTip";
 
 interface CalculationResult {
   maxo_price: number;
@@ -81,8 +82,8 @@ export default function VHVCalculatorPage() {
               <Calculator size={28} />
             </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Calculadora VHV</h1>
-              <p className="text-slate-400">Determina el Precio Maxo basado en el Valor Humano Vital</p>
+              <h1 className="text-3xl font-bold tracking-tight">Calculadora VHV <InfoTip text="VHV = Huella Vital: cuánto tiempo de vida (horas), cuántas vidas tocadas y cuántos recursos finitos consume una acción. Se mide para que nadie compre tu tiempo con moneda que no vale vida." /></h1>
+              <p className="text-slate-400">Cuánta vida consume la acción y cuánto vale en la moneda de la plaza (Maxo)</p>
             </div>
           </motion.div>
         </header>
@@ -134,7 +135,7 @@ export default function VHVCalculatorPage() {
                         <Calculator size={120} />
                       </div>
                       <div className="relative z-10">
-                        <h3 className="text-sm font-medium text-indigo-300 mb-2 uppercase tracking-widest">Precio Maxo Calculado</h3>
+                        <h3 className="text-sm font-medium text-indigo-300 mb-2 uppercase tracking-widest">Valor vital calculado (Maxo) <InfoTip text="El Maxo es la moneda de la plaza: mide valor por vida, no por papel. Cuenta tiempo vital, vidas tocadas y recursos finitos — con un castigo exponencial si una acción daña la vida de alguien (γ ≥ 1)." /></h3>
                         <div className="flex items-baseline gap-2">
                           <span className="text-6xl font-black text-white">
                             {calculationResult.maxo_price.toFixed(2)}

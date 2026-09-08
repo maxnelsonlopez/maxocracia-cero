@@ -28,6 +28,7 @@ import {
   Handshake,
   Loader2
 } from "lucide-react";
+import InfoTip from "../components/ui/InfoTip";
 
 // Types
 interface MatchResult {
@@ -1107,7 +1108,8 @@ export default function PlazaDeApoyoPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-emerald-400" />
-                <h2 className="text-xl font-bold uppercase tracking-wider text-slate-300">Termómetro SDV</h2>
+                <h2 className="text-xl font-bold uppercase tracking-wider text-slate-300">Termómetro social</h2>
+                <InfoTip text="Muestra cómo está cada dimensión de la vida (salud, casa, comida, vínculos…) en tu comunidad: qué tan lejos está alguien de sus mínimos dignos y qué necesita para no caer. En la Maxocracia estos mínimos se llaman Suelo de Dignidad Vital (SDV): nadie debería quedar por debajo." />
               </div>
               <span className="text-xs text-slate-500">8 Dimensiones</span>
             </div>
@@ -1654,6 +1656,7 @@ export default function PlazaDeApoyoPage() {
                     {/* Dimensiones Humanas del SDV */}
                     <div className="space-y-2">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Dimensiones de Dignidad Humana Asignadas</span>
+                      <InfoTip text="Estas son las dimensiones de la vida que toca tu necesidad: salud, casa, comida, vínculos… En la Maxocracia nadie negocia por debajo de sus mínimos dignos (Suelo de Dignidad Vital)." />
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {HUMAN_DIMENSIONS.map((dim) => {
                           const isSelected = editNeedDims.includes(dim.value);
@@ -1959,6 +1962,7 @@ export default function PlazaDeApoyoPage() {
                     {/* Dimensiones Humanas del SDV */}
                     <div className="space-y-2">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Dimensiones de Dignidad Humana Impactadas</span>
+                      <InfoTip text="Estas son las dimensiones de la vida que toca tu oferta: salud, casa, comida, vínculos… El sistema se fija en esto para que ninguna ayuda empuje a nadie por debajo de sus mínimos dignos." />
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {HUMAN_DIMENSIONS.map((dim) => {
                           const isSelected = editOfferDims.includes(dim.value);
