@@ -281,12 +281,14 @@ F0 Despertar ──▶ F1 Absorción ──▶ F2 Agenda/Votación ──▶ F3 
 
 **Componentes técnicos propuestos** (módulo Python puro, sin dependencia de Flask y **sin
 dependencias nuevas** — seguir el patrón `requests` de `app/voting_oracle.py`, ya probado):
-`maxocontracts/oracles/` ganar un registro de motores (`deepseek`, `nvidia`, `gemini`, `groq`,
-`cerebras`, `local`) compartiendo el contrato OpenAI-compatible (plantilla: `_call_llm` con
+`maxocontracts/oracles/` ganar un registro de motores (`deepseek`, `nvidia`, `openrouter`,
+`local`) compartiendo el contrato OpenAI-compatible (plantilla: `_call_llm` con
 `base_url` + `api_key` + `model` + `response_format`; degradación elegante y firma `engine`/`model`),
-inspirado en el throttle anti-429 de `score_engine.py`; `scripts/concilio/` con `cycle.py` (fases),
-`canon.py` (corpus y firmas de comprensión), `bitacora.py` (JSONL con T13, nunca datos personales);
-estado y artefactos en `scratch/concilio/` (excluido de git); arranque vía Programador de tareas de
+inspirado en el throttle anti-429 de `score_engine.py`. El **worker del ciclo F0–F2 ya está
+implementado**: `maxocontracts/concilio/{canon,bitacora,cycle}.py` + CLI `scripts/concilio.py`
+(corpus canónico acotado, bitácora JSONL con firma T13, lock de ejecución, quórum 75%, veto AVA,
+agenda votada en texto civil; **nunca edita código vivo: escribe en `scratch/concilio/`**).
+Estado y artefactos en `scratch/concilio/` (excluido de git); arranque vía Programador de tareas de
 Windows (al iniciar sesión) o carpeta de inicio — con lock e idempotencia. Si se prefiere
 orquestación de más alto nivel, el colaborador RLM de `local_models` (modo agente con `--workspace`)
 ya encapsula un arnés con ~90 tools: invocable como subproceso contra `scratch/concilio/`.
@@ -302,12 +304,22 @@ ya encapsula un arnés con ~90 tools: invocable como subproceso contra `scratch/
    `engine`/`model` (T13), reintentos con backoff ante 429/5xx/529; 14 tests
    (`tests/test_oracle_engines.py`); bloque NVIDIA en `config.example.env`; clave en `.env`
    (gitignored). Suite raíz verde.
-2. Worker del ciclo F0–F2 + bitácora con T13 + lock de ejecución. *(pendiente)*
-3. Prueba de fuego: analizar UN pendiente real con 2–3 proveedores distintos (ej. NVIDIA + Gemini +
-   Groq vs DeepSeek local) y comparar AVAs — criterio de diversidad real. *(parcial: NVIDIA verificado
-   en vivo; falta segundo proveedor)*
-4. Tests + commit convencional + entrada en `atribuciones_sinteticas.md`. *(commits hechos; la
-   atribución se completa al cerrar la jornada)*
+2. ✅ **Hecho**: worker F0–F2 — `maxocontracts/concilio/{canon,bitacora,cycle}.py` +
+   `scripts/concilio.py` (corpus canónico acotado, bitácora JSONL con firma T13, lock de
+   ejecución, quórum 3 / consenso 75% / veto AVA, agenda votada en texto civil; nunca edita
+   código vivo — solo `scratch/concilio/`); 10 tests (`tests/test_concilio_cycle.py`).
+3. ✅ **Prueba de fuego ejecutada** — **primer ciclo real**: `ciclo-20260908-042126-737037`
+   (5 oráculos Economic/Social/Environmental/Futurist/Dissident; NVIDIA V4 Flash + DeepSeek;
+   **consenso 100% · quórum OK · estado EJECUTABLE**). Las propuestas citan fuentes reales
+   (`PLAN_ENDURECIMIENTO_SEGURIDAD.md` §3, `ETICA_LENGUAJE_COMUN_CATEGORIA.md` §5,
+   `GAMIFICACION_CIUDAD_APRENDIZAJE.md` §4, agenda §5…) y las firmas de comprensión citan el
+   canon textual (INV1 con fórmula, T13, T16 alias, "los axiomas son el esqueleto; la ternura
+   es el corazón"). **Contraste clave**: sin canon en contexto los mismos modelos inventaron
+   INV3; con canon, comprensión genuina. Elegidas del ciclo: (1) InfoTip "plaza hablable" →
+   matching/vhv/micromax/contracts; (2) seguridad 30-90 días (logging JSON + Redis);
+   (3) Rondas anti-δ en la Ciudad del Saber.
+4. Tests + commit convencional + entrada en `atribuciones_sinteticas.md`. *(commits hechos;
+   la atribución se completa al cerrar la jornada)*
 
 **Día 2 — Primer ciclo real completo**
 
