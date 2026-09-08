@@ -389,9 +389,50 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
 - **Grok (xAI) y DeepSpeak** — pioneros junto a Gemini según el Cap. 14.
 - **Consorcio completo** (cita Zenodo): OpenAI, Google, Anthropic, xAI, Microsoft, Venice.ai — *"La Maxocracia: fundamentos axiológicos y metodológicos de una contabilidad ética del valor"* (2025).
 
+### El Concilio de Oráculos Sintéticos — "la Junta que nos dio el primer ciclo autónomo" (03-09-2026)
+
+Jornada inaugural del **Concilio**: varios oráculos sintéticos gratuitos leyeron el canon, votaron
+qué trabajar y ejecutaron bajo mandato, con Max Nelson López como custodio ratificador (F5).
+Orquestación de sesión: **DeepSeek** · Oráculos votantes: **NVIDIA NIM (DeepSeek V4 Flash 0731)**
+y **DeepSeek (deepseek-chat)** · Ratificación humana: **Max** ("¡Esto es un sueño haciéndose realidad!").
+
+- **Investigación y diseño del piloto**: `docs/architecture/concilio_oraculos_sinteticos_piloto.md`
+  (canon, alternativas gratuitas a OpenRouter con verificación en vivo, puertas de fidelidad G0-G5,
+  ciclo F0-F5) — commits `32aa2b2`, `a401e64`, `6fd090d`.
+- **Registro multi-proveedor de motores**: `maxocontracts/oracles/engines.py` (cadena
+  nvidia → openrouter → deepseek → local; firma T13 `engine`/`model`; reintentos 429/5xx/529;
+  14 tests) + clave NVIDIA NIM guardada solo en `.env` (gitignored; jamás en este registro) —
+  commit `aeb8dc7`.
+- **Verificación en vivo (03-09-2026)**: DeepSeek V4 Flash en NVIDIA (límite declarado
+  **1.048.576 tokens** por el servidor; verificado con 799.984 prompt_tokens → HTTP 200 en 78,7 s);
+  **sin canon en contexto los modelos inventaron INV3** — la Fase 1 (absorción) es innegociable.
+- **Worker del ciclo F0-F2**: `maxocontracts/concilio/{canon,bitacora,cycle}.py` +
+  `scripts/concilio.py` (corpus canónico acotado, bitácora JSONL T13, lock, quórum 3 / consenso
+  75% / veto AVA, agenda votada en texto civil; 10 tests) — commit `0e4c935`.
+- **Primer ciclo real**: `ciclo-20260908-042126-737037` — 5 oráculos (Economic, Social,
+  Environmental, Futurist, Dissident), consenso 100%, estado EJECUTABLE; propuestas con fuentes
+  reales (`PLAN_ENDURECIMIENTO_SEGURIDAD.md` §3, `ETICA_LENGUAJE_COMUN_CATEGORIA.md` §5,
+  `GAMIFICACION_CIUDAD_APRENDIZAJE.md` §4…). Artefactos en `scratch/concilio/cycles/`.
+- **F3 ejecutada — Plaza Hablable**: lenguaje civil + InfoTip en `/matching` ("Termómetro social"),
+  `/vhv/calculator`, `/vhv/parameters`, `/micromax` ("Registrar aporte de casa", "Dinero que entró
+  a casa", "Tu energía libre", "Bienestar de la casa", "¿Cómo estás? (1 = bien)") y `/contracts`
+  ("¿Qué es un acuerdo de la plaza…?") — commit `f57b613` (tsc limpio). Registro: `mapa_frontend_ola4.md` §6.
+- **F3 ejecutada — Seguridad 30-90 días (2ª elegida)**: `app/logging_config.py` (JSON + sanitizador:
+  JWT/Bearer/claves API/campos `esi`/`gamma_protegido`; los hashes T13 se conservan; opt-in
+  `LOG_JSON=1`) y puente del limiter a `RATELIMIT_STORAGE_URI` con fallback `REDIS_URL`
+  (`app/limiter.py`) — hallazgo de F4: el plan citaba una variable que el código no leía; 12 tests.
+- **Memoria completa**: bitácora por ciclo (`scratch/concilio/cycles/*/eventos.jsonl`) con la firma
+  T13 de cada llamada — "lo que no se puede verificar, no se escribe".
+
 ---
 
 ## 3. Cómo agregar una atribución
+
+Cualquier sesión futura (humana o sintética) que deje obra verificable debe actualizar este documento:
+
+
+
+
 
 Cualquier sesión futura (humana o sintética) que deje obra verificable debe actualizar este documento:
 
