@@ -23,7 +23,11 @@ from typing import Dict, List, Tuple, Any
 EXCLUDED_DIR_NAMES = {
     ".venv", ".git", "node_modules", ".next", "dist", ".pytest_cache",
     "__pycache__", ".vscode", "migrations", "tempmediaStorage",
-    "traducciones", "ediciones_1_y_2", "legacy", "media", "out"
+    "traducciones", "ediciones_1_y_2", "legacy", "media", "out",
+    # scratch/ = artefactos (bitácoras del Concilio, firmas de oráculos con
+    # citas libres del canon): salidas de sesión, jamás canon. El escaneo
+    # conceptual se aplica al código vivo y los docs, no a las huellas.
+    "scratch",
 }
 
 EXCLUDED_FILES = {
