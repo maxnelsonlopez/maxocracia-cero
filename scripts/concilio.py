@@ -99,14 +99,23 @@ def cmd_mensaje(args) -> int:
 
 def cmd_revisar(args) -> int:
     """F4: revisión multi-modelo de un candidato (resultado, no voto)."""
+    import os
+
     from maxocontracts.concilio.revision import revisar_candidato
 
+    orden = None
+    raw = os.environ.get("CONCILIO_ENGINE_ORDER", "").strip()
+    if raw:
+        orden = tuple(n.strip() for n in raw.split(",") if n.strip())
     try:
+        diff_text = args.diff
+        if diff_text.startswith("@"):  # conveniencia: leer el diff desde un archivo
+            diff_text = Path(diff_text[1:]).read_text(encoding="utf-8")
         revisiones = revisar_candidato(
             proposal=args.propuesta,
-            diff=args.diff or "(diff no proporcionado: revisar en el diff real)",
+            diff=diff_text or "(diff no proporcionado: revisar en el diff real)",
             evidence=args.evidencia or "(sin evidencia determinista)",
-            engine_order=None,
+            order=orden,
         )
     except Exception as exc:  # noqa: BLE001
         print(f"[concilio] F4 error: {exc}", file=sys.stderr)
@@ -124,7 +133,7 @@ def cmd_revisar(args) -> int:
             print(f"    incertidumbre: {str(u)[:180]}")
         if r.get("changed_mind"):
             cm = r["changed_mind"]
-            print(f"    changed_mind: {cm.get('desde')} → {str(cm.get('hacia'))[:120]}")
+            print(f"    changed_mind: {cm.get('desde')} -> {str(cm.get('hacia'))[:120]}")
     return 0
 
 
