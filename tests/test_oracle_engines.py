@@ -71,11 +71,62 @@ def test_resolve_engine_desconocido_devuelve_none():
 
 def test_available_engines_filtra_y_respeta_orden():
     engines = available_engines(env=_fake_env(), order=DEFAULT_ORDER)
-    assert [e.name for e in engines] == ["nvidia", "deepseek"]
+    assert [e.name for e in engines] == ["deepseek", "nvidia"]  # decreto: DeepSeek principal
     engines2 = available_engines(
         env=_fake_env(), order=("deepseek", "nvidia", "local")
     )
     assert [e.name for e in engines2] == ["deepseek", "nvidia"]
+
+
+def test_default_order_empieza_en_deepseek():
+    """Decreto del custodio (09-09): el proveedor propio va primero."""
+    assert DEFAULT_ORDER[0] == "deepseek"
+
+
+def test_openrouter_carga_alternativas_de_modelo():
+    """OpenRouter rota sus :free; el motor trae alternativas probables."""
+    env = dict(_fake_env(), OPENROUTER_API_KEY="or-test")
+    cfg = resolve_engine("openrouter", env=env)
+    assert cfg.model.endswith(":free")
+    assert len(cfg.model_alternatives) >= 2
+
+
+def test_call_engine_404_free_cambia_a_alternativa(monkeypatch):
+    """Retiro de un :free → la llamada se recupera con la siguiente gratuita."""
+    state = {"n": 0}
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        state["n"] += 1
+        if state["n"] == 1:
+            return SimpleNamespace(
+                status_code=404,
+                text=(
+                    '{"error":{"message":"This model is unavailable for free. '
+                    'Use this slug instead: z-ai/glm-4.5-air"}}'
+                ),
+                json=lambda: {},
+            )
+        return _fake_response("sobrevivio con la alternativa", 200)
+
+    monkeypatch.setattr("maxocontracts.oracles.engines.requests.post", fake_post)
+    monkeypatch.setattr("maxocontracts.oracles.engines.time.sleep", lambda *a: None)
+    env = dict(_fake_env(), OPENROUTER_API_KEY="or-test")
+    cfg = resolve_engine("openrouter", env=env)
+    text = call_engine(cfg, [{"role": "user", "content": "hola"}], max_retries=0)
+    assert text == "sobrevivio con la alternativa"
+    # la firma T13 posterior será verdad: el cfg quedó con el modelo que sirvió
+    assert cfg.model == cfg.model_alternatives[0]
+
+
+def test_call_engine_404_sin_alternativas_lanza(monkeypatch):
+    monkeypatch.setattr(
+        "maxocontracts.oracles.engines.requests.post",
+        lambda *a, **k: _fake_response("model not found", 404),
+    )
+    cfg = resolve_engine("nvidia", env=_fake_env())
+    cfg.model_alternatives = ()
+    with pytest.raises(EngineError, match="HTTP 404"):
+        call_engine(cfg, [{"role": "user", "content": "hola"}], max_retries=0)
 
 
 def test_call_engine_devuelve_contenido(monkeypatch):
@@ -155,26 +206,27 @@ def test_call_engine_respuesta_ilegible_lanza_engineerror(monkeypatch):
 def test_chain_call_falls_back_al_segundo_motor_y_firma_el_que_uso(monkeypatch):
     """El primero falla (cuota/red) y la cadena responde con el segundo.
 
-    La firma (engine, model) debe ser la del motor que realmente respondió.
+    Con el decreto (DeepSeek principal): deepseek cae → nvidia responde y
+    la firma T13 es la del motor que realmente respondió.
     """
     attempts = []
 
     def fake_post(url, json=None, headers=None, timeout=None):
         attempts.append(json["model"])
-        if json["model"].startswith("deepseek-ai"):
-            return _fake_response("", 503)  # nvidia cae siempre
-        return _fake_response("texto del deepseek", 200)  # deepseek responde
+        if json["model"] == "deepseek-chat":
+            return _fake_response("", 503)  # deepseek (principal) cae
+        return _fake_response("texto del nvidia", 200)  # nvidia responde
 
     monkeypatch.setattr("maxocontracts.oracles.engines.requests.post", fake_post)
     monkeypatch.setattr("maxocontracts.oracles.engines.time.sleep", lambda *a: None)
     env = _fake_env()
     text, cfg = chain_call("sistema", "usuario", env=env)
-    assert text == "texto del deepseek"
-    assert cfg.name == "deepseek"
-    assert cfg.model == "deepseek-chat"
-    # nvidia intentó 3 veces (2 reintentos del 503) y luego la cadena pasó a deepseek
-    assert attempts[:3] == ["deepseek-ai/deepseek-v4-flash-0731"] * 3
-    assert attempts[3] == "deepseek-chat"
+    assert text == "texto del nvidia"
+    assert cfg.name == "nvidia"
+    assert cfg.model == "deepseek-ai/deepseek-v4-flash-0731"
+    # deepseek intentó 3 veces (2 reintentos del 503) y la cadena pasó a nvidia
+    assert attempts[:3] == ["deepseek-chat"] * 3
+    assert attempts[3] == "deepseek-ai/deepseek-v4-flash-0731"
 
 
 def test_chain_call_sin_motores_lanza_error():

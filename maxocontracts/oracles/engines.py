@@ -51,6 +51,7 @@ class EngineConfig:
     model: str
     json_mode: bool = True
     timeout: int = DEFAULT_TIMEOUT
+    model_alternatives: Tuple[str, ...] = ()
 
     def endpoint(self) -> str:
         return f"{self.base_url.rstrip('/')}/chat/completions"
@@ -72,6 +73,15 @@ ENGINE_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "model_env": "OPENROUTER_MODEL",
         "default_base_url": "https://openrouter.ai/api/v1",
         "default_model": "z-ai/glm-4.5-air:free",
+        # Los modelos :free de OpenRouter ROTAN y se retiran sin aviso (09-09:
+        # glm-4.5-air:free respondió 404 "unavailable for free"). La cadena
+        # prueba alternativas gratuitas y deja la config con la que respondió.
+        "model_alternatives": (
+            "deepseek/deepseek-r1-0528:free",
+            "qwen/qwen3.6-plus:free",
+            "nvidia/nemotron-3-super-120b-a12b:free",
+            "google/gemma-4-31b-it:free",
+        ),
         "json_mode": True,
     },
     "deepseek": {
@@ -92,8 +102,10 @@ ENGINE_DEFAULTS: Dict[str, Dict[str, Any]] = {
     },
 }
 
-# Orden preferido de la cadena: gratuito-talla completa → agregador → propio → local.
-DEFAULT_ORDER: Tuple[str, ...] = ("nvidia", "openrouter", "deepseek", "local")
+# Orden preferido de la cadena (decreto del custodio 09-09-2026: DeepSeek
+# principal — el proveedor propio y fiable; los gratuitos rotan y a veces
+# caen, y la cadena los releva con la firma T13 del motor que respondió).
+DEFAULT_ORDER: Tuple[str, ...] = ("deepseek", "nvidia", "openrouter", "local")
 
 
 def resolve_engine(name: str, env: Optional[Dict[str, str]] = None) -> Optional[EngineConfig]:
@@ -119,6 +131,7 @@ def resolve_engine(name: str, env: Optional[Dict[str, str]] = None) -> Optional[
         model=model,
         json_mode=bool(spec["json_mode"]),
         timeout=timeout,
+        model_alternatives=tuple(spec.get("model_alternatives", ())),
     )
 
 
@@ -169,7 +182,9 @@ def call_engine(
     }
 
     last_error: Optional[str] = None
-    for attempt in range(max_retries + 1):
+    alternatives = list(cfg.model_alternatives)
+    extra_tries = len(alternatives)
+    for attempt in range(max_retries + 1 + extra_tries):
         if attempt:
             time.sleep(backoff_seconds * attempt)
         try:
@@ -183,6 +198,20 @@ def call_engine(
             last_error = f"[{cfg.name}] no se pudo contactar: {exc}"
             logger.warning("%s (intento %d/%d)", last_error, attempt, max_retries)
             continue
+        # Modelo retirado/cambiado (OpenRouter :free rota sin aviso): probar
+        # la siguiente alternativa gratuita y actualizar cfg.model — así la
+        # firma T13 posterior sigue siendo la verdad del motor que respondió.
+        if resp.status_code == 404 and alternatives:
+            body = resp.text.lower()
+            if "unavailable" in body or "not found" in body or "model" in body:
+                nuevo = alternatives.pop(0)
+                logger.warning(
+                    "[%s] modelo %s no disponible (404: %s); probando %s",
+                    cfg.name, cfg.model, resp.text[:120], nuevo,
+                )
+                cfg.model = nuevo
+                payload["model"] = nuevo
+                continue
         if resp.status_code in RETRYABLE_STATUS and attempt < max_retries:
             last_error = f"[{cfg.name}] HTTP {resp.status_code}: {resp.text[:200]}"
             logger.warning(
