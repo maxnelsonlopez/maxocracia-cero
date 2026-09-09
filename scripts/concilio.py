@@ -97,6 +97,83 @@ def cmd_mensaje(args) -> int:
     return 0
 
 
+def cmd_revisar(args) -> int:
+    """F4: revisión multi-modelo de un candidato (resultado, no voto)."""
+    from maxocontracts.concilio.revision import revisar_candidato
+
+    try:
+        revisiones = revisar_candidato(
+            proposal=args.propuesta,
+            diff=args.diff or "(diff no proporcionado: revisar en el diff real)",
+            evidence=args.evidencia or "(sin evidencia determinista)",
+            engine_order=None,
+        )
+    except Exception as exc:  # noqa: BLE001
+        print(f"[concilio] F4 error: {exc}", file=sys.stderr)
+        return 1
+    print("=== F4 — REVISIÓN MULTI-MODELO ===")
+    for r in revisiones:
+        print(
+            f"- {r['role']} [{r['engine']}/{r['model']}"
+            f"{' (fallback)' if r.get('fallback') else ''}]: {r['verdict']} "
+            f"({r['confidence']:.0%})"
+        )
+        for c in r.get("criticisms", []):
+            print(f"    crítica: {str(c)[:180]}")
+        for u in r.get("uncertainties", []):
+            print(f"    incertidumbre: {str(u)[:180]}")
+        if r.get("changed_mind"):
+            cm = r["changed_mind"]
+            print(f"    changed_mind: {cm.get('desde')} → {str(cm.get('hacia'))[:120]}")
+    return 0
+
+
+def cmd_decidir(args) -> int:
+    """F5: RATIFY / REVOKE / QUEUE — escribe el aprendizaje (memoria causal)."""
+    from maxocontracts.concilio import (
+        RegistroAprendizajeError,
+        registrar_aprendizaje,
+    )
+
+    decision = args.decision.lower()
+    try:
+        path = registrar_aprendizaje(
+            args.workspace,
+            {
+                "cycle_id": args.cycle,
+                "candidate_id": args.candidato,
+                "hypothesis": args.hipotesis or "(hipótesis no registrada)",
+                "expected_signal": args.señal or "",
+                "decision": decision,
+                "outcome": args.outcome or "",
+                "evidence": args.evidencia.split(",") if args.evidencia else [],
+                "changed_mind": [],
+                "next_hypothesis": args.siguiente_hipotesis or "",
+            },
+        )
+    except RegistroAprendizajeError as exc:
+        print(f"[concilio] F5 error: {exc}", file=sys.stderr)
+        return 1
+    print(f"[OK] aprendizaje registrado ({decision}): {path}")
+    if decision == "revoke":
+        print("  > La investigación NO se borra: queda en el registro y su historia.")
+        print("  > Integra la reversión con git revert (nunca --force; el guard vigila).")
+    elif decision == "queue":
+        print("  > 'No sabemos' es un estado constitucional: conservar, no integrar, no destruir.")
+    return 0
+
+
+def cmd_metricas(args) -> int:
+    """Métricas de la memoria causal (señales, nunca objetivos)."""
+    from maxocontracts.concilio import metricas_aprendizaje
+
+    m = metricas_aprendizaje(args.workspace)
+    print("=== MÉTRICAS DE APRENDIZAJE (observación, no metas) ===")
+    for k, v in m.items():
+        print(f"- {k}: {v}")
+    return 0
+
+
 def cmd_ciclo(args) -> int:
     try:
         manifest = run_cycle(
@@ -151,6 +228,23 @@ def main(argv=None) -> int:
     p_msg = sub.add_parser("mensaje", help="encola una directiva del custodio")
     p_msg.add_argument("texto")
 
+    p_rev = sub.add_parser("revisar", help="F4: revisión multi-modelo del resultado")
+    p_rev.add_argument("--propuesta", required=True, help="propuesta aprobada en F2")
+    p_rev.add_argument("--diff", default="", help="diff real (o ruta al archivo)")
+    p_rev.add_argument("--evidencia", default="", help="evidencia determinista (resumen)")
+
+    p_dec = sub.add_parser("decidir", help="F5: ratify|revoke|queue + registro de aprendizaje")
+    p_dec.add_argument("--cycle", required=True, help="cycle_id")
+    p_dec.add_argument("--candidato", required=True, help="título o id del candidato")
+    p_dec.add_argument("--decision", required=True, choices=["ratify", "revoke", "queue"])
+    p_dec.add_argument("--hipotesis", default="")
+    p_dec.add_argument("--senal", dest="señal", default="")
+    p_dec.add_argument("--outcome", default="")
+    p_dec.add_argument("--evidencia", default="")
+    p_dec.add_argument("--siguiente-hipotesis", dest="siguiente_hipotesis", default="")
+
+    sub.add_parser("metricas", help="métricas de la memoria causal")
+
     args = parser.parse_args(argv)
     if args.accion is None:
         # compatibilidad: sin subcomando = ciclo
@@ -173,6 +267,12 @@ def main(argv=None) -> int:
         return cmd_state_op(args, "detener")
     if args.accion == "mensaje":
         return cmd_mensaje(args)
+    if args.accion == "revisar":
+        return cmd_revisar(args)
+    if args.accion == "decidir":
+        return cmd_decidir(args)
+    if args.accion == "metricas":
+        return cmd_metricas(args)
     print(f"acción desconocida: {args.accion}", file=sys.stderr)
     return 2
 

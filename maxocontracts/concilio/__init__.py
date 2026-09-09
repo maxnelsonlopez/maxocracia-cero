@@ -21,7 +21,10 @@ from .memoria import (
     VALID_DECISIONS,
     RegistroAprendizajeError,
     leer_aprendizajes,
+    leer_desacuerdos,
+    metricas_aprendizaje,
     registrar_aprendizaje,
+    registrar_desacuerdo,
 )
 from .verificacion import evidencia_determinista
 
@@ -39,4 +42,8 @@ __all__ = [
     "leer_aprendizajes",
     "VALID_DECISIONS",
     "evidencia_determinista",
+    "registrar_desacuerdo",
+    "leer_desacuerdos",
+    "metricas_aprendizaje",
+    "RegistroAprendizajeError",
 ]

@@ -81,15 +81,28 @@ EjecutorGuardado.
 4. **F4 determinista** (`verificacion.py`): `evidencia_determinista()` ejecuta la suite y mide el
    diff (archivos/inserciones/borrados) contra el base_commit.
 
+**v0.3 (09-09-2026, 66/66 tests):**
+
+5. **Revisión multi-modelo (F4 conceptual)** (`revision.py`): `revisar_candidato()` — Revisor A
+   (motor 1), Revisor B (motor 2), Disidente (motor 3): auditan el RESULTADO contra el mandato
+   (no repiten el voto), capturan críticas, incertidumbres y **changed_mind**; CLI `revisar`.
+6. **F5 operativo** (CLI `decidir`): `ratify|revoke|queue` escriben el aprendizaje en la memoria
+   causal; REVOKE deja la investigación conservada (git revert normal, nunca --force) y QUEUE
+   declara "no sabemos" como estado constitucional.
+7. **Cuarta dimensión — memoria de desacuerdos** (idea de Aster): `desacuerdos.jsonl` (alternativa
+   descartada, quién la defendió, por qué, evidencia) y `read_agenda()` la inyecta como
+   "Objeciones históricas (no re-proponer sin evidencia nueva)" — anti-amnesia institucional.
+8. **Métricas de observación** (CLI `metricas`): total/por decisión, `reversal_rate`,
+   `changed_mind_rate`, `valid_learnings_per_cycle_provisional` — con la advertencia explícita de
+   que son señales (latencia epistemológica), nunca objetivos (doctrina anti-gamificación).
+
 **Plan siguiente (por fases, según el orden de Aster):**
 
-- 5. F4 conceptual (comparación propuesta↔diff real — detección de divergencia con modelo) y
-  multi-modelo (revisor A/B + Disidente sobre el RESULTADO, con `changed_mind` registrado).
-- 6. F5 operativo: `scripts/concilio.py decidir <candidate> ratify|revoke|queue` → integra/cierra
-  rama + escribe el aprendizaje (RATIFY solo si evidencia determinista pasó).
-- 7. Clases de impacto en el manifest + routing de F5 (LOW auto).
-- 8. Métricas (con la definición del §3.2) + informe por ciclo (`metricas.md`).
-- 9. Varios ciclos reales en dominio LOW (los propios tests/docs del Concilio) para calibrar
+- 9. **Clases de impacto automáticas** en el manifest (LOW → auto-RATIFY con evidencia
+  determinista; NORMAL → circuito completo; CRITICAL → humano): el routing hoy es manual en la
+  CLI; la regla ya está escrita (§3.1).
+- 10. Integración de rama (fast-forward o merge) desde `decidir ratify` con el guard activo.
+- 11. Varios ciclos reales en dominio LOW (los propios tests/docs del Concilio) para calibrar
   `reversal_rate` y `changed_mind_rate` antes de tocar dominios NORMAL.
 
 **Regla final (mejor que maximizar autonomía):** autonomía verificable — cada incremento de

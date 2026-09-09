@@ -122,4 +122,32 @@ def read_agenda(
             "\n\n## Memoria del Concilio (NO repitas lo ya aprendido; "
             "constrúyelo):\n" + bloque
         )
+
+    # Cuarta dimensión (Aster): memoria de desacuerdos — "esto ya se intentó
+    # y se descartó porque…". Contra la amnesia institucional: una civilización
+    # puede cometer dos veces el mismo error si solo guarda la decisión final.
+    from .memoria import leer_desacuerdos
+
+    desacuerdos = leer_desacuerdos(workspace, n=5)
+    bloque_d = "".join(
+        (
+            f"\n### OBJECIÓN {i + 1} ({a.get('cycle_id', '?')})\n"
+            f"- cuestión: {str(a.get('question', ''))[:200]}\n"
+            f"- alternativa descartada: {str(a.get('discarded_alternative', ''))[:200]}\n"
+            f"- defendida por: {str(a.get('defended_by', ''))[:80]} · razón: "
+            f"{str(a.get('reason', ''))[:200]}\n"
+            + (
+                f"- evidencia que la descartó: {str(a.get('evidence', ''))[:200]}"
+                if a.get("evidence")
+                else ""
+            )
+            + "\n"
+        )
+        for i, a in enumerate(desacuerdos)
+    )
+    if bloque_d:
+        section += (
+            "\n\n## Objeciones históricas (CUIDADO: no re-proponer sin evidencia "
+            "nueva):\n" + bloque_d
+        )
     return section

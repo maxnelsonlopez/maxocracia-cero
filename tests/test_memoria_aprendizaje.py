@@ -14,12 +14,15 @@ from maxocontracts.concilio import (
     VALID_DECISIONS,
     evidencia_determinista,
     leer_aprendizajes,
+    leer_desacuerdos,
+    metricas_aprendizaje,
     registrar_aprendizaje,
+    registrar_desacuerdo,
 )
 from maxocontracts.concilio import RegistroAprendizajeError
 from maxocontracts.concilio import canon as canon_mod
 from maxocontracts.concilio import verificacion as verif_mod
-from maxocontracts.concilio.memoria import FICHA
+from maxocontracts.concilio.memoria import FICHA, FICHA_DESACUERDOS
 
 
 def _registro(workspace, decision="ratify", outcome="mejoró el flujo"):
@@ -74,6 +77,53 @@ def test_agenda_incluye_aprendizajes_previos(tmp_path):
     agenda = canon_mod.read_agenda(str(repo), workspace=str(ws))
     assert "Memoria del Concilio" in agenda
     assert "A no produjo mejora medible" in agenda
+
+
+def test_memoria_de_desacuerdos_anti_amnesia(tmp_path):
+    """Aster §4ª dimensión: la objeción histórica se conserva y se recupera."""
+    ws = str(tmp_path)
+    registrar_desacuerdo(
+        ws,
+        {
+            "cycle_id": "ciclo-1",
+            "question": "¿Optimizar A o B?",
+            "discarded_alternative": "Optimizar A",
+            "defended_by": "Aster",
+            "reason": "A no produjo mejora medible",
+            "evidence": "suite 968/968 sin cambio de rendimiento",
+        },
+    )
+    with pytest.raises(RegistroAprendizajeError):
+        registrar_desacuerdo(ws, {"question": "incompleto"})
+    objs = leer_desacuerdos(ws)
+    assert len(objs) == 1
+    assert objs[0]["discarded_alternative"] == "Optimizar A"
+    assert (tmp_path / FICHA_DESACUERDOS).exists()
+
+    # la agenda del siguiente ciclo la ve ("esto ya se intentó")
+    repo = tmp_path / "repo2"
+    (repo / "docs").mkdir(parents=True)
+    (repo / "docs" / "SESION_NEXT_PROMPT.md").write_text(
+        "## 4. Pendientes priorizados\n\n0. Tarea A\n", encoding="utf-8"
+    )
+    agenda = canon_mod.read_agenda(str(repo), workspace=ws)
+    assert "Objeciones históricas" in agenda
+    assert "no re-proponer" in agenda.lower()
+
+
+def test_metricas_aprendizaje_son_observacion_no_meta(tmp_path):
+    ws = str(tmp_path)
+    _registro(ws, decision="ratify", outcome="mejoró el flujo")
+    _registro(ws, decision="revoke", outcome="no funcionó")
+    _registro(ws, decision="queue")
+    m = metricas_aprendizaje(ws)
+    assert m["total"] == 3
+    assert m["por_decision"]["ratify"] == 1
+    assert m["reversal_rate"] == pytest.approx(0.333, abs=0.001)
+    assert m["valid_learnings_per_cycle_provisional"] == 1  # ratify + hipótesis + outcome
+    assert "latencia epistemológica" in m["advertencia"]
+    # señales, no objetivos: la métrica lo dice explícitamente
+    assert "no objetivos" in m["advertencia"]
 
 
 # --- Verificación determinista (F4) ---

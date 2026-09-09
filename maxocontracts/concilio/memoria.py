@@ -69,3 +69,93 @@ def leer_aprendizajes(workspace: str, n: int = 5) -> List[Dict[str, Any]]:
                 except (ValueError, TypeError):
                     continue
     return registros[-n:]
+
+
+# --- Cuarta dimensión: memoria de desacuerdos (Aster, 09-09-2026) ---
+# No solo guardamos lo que decidimos: guardamos qué alternativas se
+# descartaron, quién las defendió y por qué. Un civilización puede cometer
+# dos veces el mismo error si solo conserva la decisión final.
+
+FICHA_DESACUERDOS = Path("desacuerdos.jsonl")
+
+
+def registrar_desacuerdo(workspace: str, record: Dict[str, Any]) -> Path:
+    """Registra una alternativa descartada (memoria institucional anti-amnesia)."""
+    for campo in ("question", "discarded_alternative", "defended_by", "reason"):
+        if not str(record.get(campo, "") or "").strip():
+            raise RegistroAprendizajeError(
+                f"Falta el campo obligatorio '{campo}' del desacuerdo"
+            )
+    record.setdefault("ts", time.time())
+    path = Path(workspace) / FICHA_DESACUERDOS
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+    return path
+
+
+def leer_desacuerdos(workspace: str, n: int = 5) -> List[Dict[str, Any]]:
+    """Últimos desacuerdos registrados (contra la amnesia institucional)."""
+    path = Path(workspace) / FICHA_DESACUERDOS
+    if not path.exists():
+        return []
+    registros: List[Dict[str, Any]] = []
+    with open(path, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if line:
+                try:
+                    registros.append(json.loads(line))
+                except (ValueError, TypeError):
+                    continue
+    return registros[-n:]
+
+
+# --- Métricas de aprendizaje (Aster §8, con la defensa anti-gamificación) ---
+# Regla: un aprendizaje necesita SOBREVIVIR al ciclo que lo produjo
+# (latencia epistemológica). Estas métricas son SEÑALES de observación,
+# jamás objetivos: quien las convierta en meta estará jugando el juego.
+
+
+def metricas_aprendizaje(workspace: str) -> Dict[str, Any]:
+    """Contadores honestos de la memoria causal.
+
+    `valid_learnings_per_cycle` (provisional): aprendizajes ratificados con
+    hipótesis y outcome registrado — la definición completa exige citación
+    posterior o ratificación humana (v0.2 doc §3.2); se reporta como
+    "provisional" hasta que exista uso en ciclos posteriores.
+    """
+    registros = leer_aprendizajes(workspace, n=10_000)
+    total = len(registros)
+    por_decision = {d: 0 for d in VALID_DECISIONS}
+    changed_mind = 0
+    olvido = ("revoke", "queue")
+    for r in registros:
+        por_decision[str(r.get("decision", ""))] = (
+            por_decision.get(str(r.get("decision", "")), 0) + 1
+        )
+        if r.get("changed_mind"):
+            changed_mind += 1
+    ratificados = por_decision["ratify"]
+    validos = sum(
+        1
+        for r in registros
+        if r.get("decision") == "ratify"
+        and r.get("hypothesis")
+        and r.get("outcome")
+    )
+    revisiones = 0
+    for r in registros:
+        revisiones += len(r.get("evidence", []) if isinstance(r.get("evidence"), list) else [])
+    return {
+        "total": total,
+        "por_decision": por_decision,
+        "valid_learnings_per_cycle_provisional": validos,
+        "reversal_rate": round(por_decision["revoke"] / total, 3) if total else 0.0,
+        "changed_mind_rate": round(changed_mind / total, 3) if total else 0.0,
+        "reviews_registradas": revisiones,
+        "advertencia": (
+            "señales de observación, no objetivos; valid_learnings exige "
+            "latencia epistemológica (citación posterior o ratificación humana)"
+        ),
+    }
