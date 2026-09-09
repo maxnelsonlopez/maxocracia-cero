@@ -129,11 +129,17 @@ AGENDA (pendientes reales del proyecto):
 
 Responde ÚNICAMENTE JSON:
 {{"axioms": {{"ok": true, "reasoning": "..."}},
-"proposals": [{{"title": "...", "source": "cita fuente", "why": "...",
+"proposals": [{{"title": "...", "hypothesis": "Creemos que X mejorará Y bajo estas condiciones",
+"expected_signal": "Z (lo observable que confirmaría la hipótesis)",
+"source": "cita fuente", "why": "...",
 "risks": "...", "tests": "...", "axioms": ["..."], "vote": "approve|reject|modify",
 "confidence": 0.0}}],
 "veto": null}}
 """
+
+# El Concilio vota experimentos, no ocurrencias (Aster, sesión 09-09-2026):
+# cada propuesta declara su hipótesis y la señal observable que la probaría.
+# Sin hipótesis no hay aprendizaje; sin señal observable no hay evidencia.
 
 
 def _firma_user(canon: str) -> str:
@@ -385,7 +391,7 @@ def run_cycle(
             raise CorpoUnavailableError("Ningún motor configurado (faltan API keys)")
 
         canon = read_canon(str(root_path), total_max_chars=canon_max_chars)
-        agenda = read_agenda(str(root_path))
+        agenda = read_agenda(str(root_path), workspace=str(workspace_path))
         bitacora.log(
             {"fase": "F1", "evento": "corpus", "canon_chars": len(canon), "agenda_chars": len(agenda)}
         )
@@ -453,6 +459,9 @@ def run_cycle(
                     "proposals": [
                         {
                             "title": str(p.get("title", "")),
+                            "hypothesis": str(p.get("hypothesis", "") or "").strip()
+                            or str(p.get("why", "")),
+                            "expected_signal": str(p.get("expected_signal", "") or "").strip(),
                             "source": str(p.get("source", "")),
                             "why": str(p.get("why", "")),
                             "risks": str(p.get("risks", "")),

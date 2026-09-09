@@ -64,12 +64,15 @@ def read_canon(root: str, total_max_chars: int = DEFAULT_MAX_CHARS) -> str:
     return "\n".join(parts)
 
 
-def read_agenda(root: str, max_chars: int = 12_000) -> str:
-    """Extrae la sección de pendientes del handoff (fuente de la agenda).
+def read_agenda(
+    root: str, workspace: str = "scratch/concilio", max_chars: int = 12_000
+) -> str:
+    """Agenda del Concilio: pendientes del handoff + aprendizajes previos.
 
-    Si el handoff no existe, devuelve el texto vacío (el oráculo igual puede
-    proponer desde el corpus). Se lee la sección '## 4. Pendientes priorizados'
-    de `docs/SESION_NEXT_PROMPT.md`.
+    El bucle de aprendizaje (Aster §7): el próximo F2 lee lo que los ciclos
+    anteriores aprendieron — "optimizar A no produjo mejora" se vuelve regla
+    explícita para no repetir A y probar B. Los aprendizajes viven en
+    `scratch/concilio/aprendizaje.jsonl` (memoria causal).
     """
     path = Path(root) / "docs" / "SESION_NEXT_PROMPT.md"
     try:
@@ -79,14 +82,44 @@ def read_agenda(root: str, max_chars: int = 12_000) -> str:
     marker = "## 4. Pendientes priorizados"
     idx = text.find(marker)
     if idx == -1:
-        return ""
-    section = text[idx:]
-    # la sección termina en el siguiente "## " de nivel 2
-    for next_marker in ("\n## 5.", "\n## ", "\n---"):
-        end = section.find(next_marker, len(marker))
-        if end != -1:
-            section = section[:end]
-            break
-    if len(section) > max_chars:
-        section = section[:max_chars] + "\n… [recortado]"
+        section = ""
+    else:
+        section = text[idx:]
+        # la sección termina en el siguiente "## " de nivel 2
+        for next_marker in ("\n## 5.", "\n## ", "\n---"):
+            end = section.find(next_marker, len(marker))
+            if end != -1:
+                section = section[:end]
+                break
+        if len(section) > max_chars:
+            section = section[:max_chars] + "\n… [recortado]"
+
+    # Memoria causal: lo aprendido en ciclos anteriores (hipótesis → resultado).
+    from .memoria import leer_aprendizajes
+
+    aprendizajes = leer_aprendizajes(workspace, n=5)
+    bloque = "".join(
+        (
+            f"\n### APRENDIZAJE {i + 1} (ciclo {a.get('cycle_id', '?')} · "
+            f"{a.get('decision', '?')})\n"
+            f"- hipótesis: {str(a.get('hypothesis', ''))[:300]}\n"
+            + (
+                f"- aprendido: {str(a.get('outcome', ''))[:300]}"
+                if a.get("outcome")
+                else ""
+            )
+            + (
+                f"\n- próxima hipótesis: {str(a.get('next_hypothesis', ''))[:300]}"
+                if a.get("next_hypothesis")
+                else ""
+            )
+            + "\n"
+        )
+        for i, a in enumerate(aprendizajes)
+    )
+    if bloque:
+        section += (
+            "\n\n## Memoria del Concilio (NO repitas lo ya aprendido; "
+            "constrúyelo):\n" + bloque
+        )
     return section

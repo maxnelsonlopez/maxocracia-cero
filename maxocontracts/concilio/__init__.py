@@ -17,6 +17,13 @@ from .control import ACTIVE, PAUSED, STOPPED, Control
 from .cycle import CycleLockError, run_cycle
 from .executor import EjecutorGuardado, GuardDeniedError
 from .git_guard import guard_git_command
+from .memoria import (
+    VALID_DECISIONS,
+    RegistroAprendizajeError,
+    leer_aprendizajes,
+    registrar_aprendizaje,
+)
+from .verificacion import evidencia_determinista
 
 __all__ = [
     "run_cycle",
@@ -28,4 +35,8 @@ __all__ = [
     "EjecutorGuardado",
     "GuardDeniedError",
     "guard_git_command",
+    "registrar_aprendizaje",
+    "leer_aprendizajes",
+    "VALID_DECISIONS",
+    "evidencia_determinista",
 ]
