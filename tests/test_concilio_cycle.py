@@ -59,36 +59,44 @@ def fake_engine(monkeypatch):
         def _fake_call(engine_cfg, system, user, want_json=True):
             role = next((r for r in ORACLE_ROLES if r in system), "Economic")
             if "CANON (léelo" in user:
-                return json.dumps(
-                    {
-                        "firma": {
-                            "summary": f"resumen {role}",
-                            "axiom_quotes": ["INV1"],
-                            "critical_question": "¿qué cambia?",
-                            "confidence": 0.9,
-                        }
-                    }
-                )
-            return json.dumps(
-                {
-                    "axioms": {
-                        "ok": axioms_ok.get(role, True),
-                        "reasoning": "verificado contra el corpus",
-                    },
-                    "proposals": [
+                return (
+                    json.dumps(
                         {
-                            "title": f"Tarea del {role}",
-                            "source": "SESION_NEXT_PROMPT §4",
-                            "why": "avanza la coherencia",
-                            "risks": "bajos",
-                            "tests": "pytest",
-                            "axioms": ["INV1"],
-                            "vote": votes.get(role, "approve"),
-                            "confidence": 0.8,
+                            "firma": {
+                                "summary": f"resumen {role}",
+                                "axiom_quotes": ["INV1"],
+                                "critical_question": "¿qué cambia?",
+                                "confidence": 0.9,
+                            }
                         }
-                    ],
-                    "veto": None,
-                }
+                    ),
+                    engine_cfg,
+                    False,
+                )
+            return (
+                json.dumps(
+                    {
+                        "axioms": {
+                            "ok": axioms_ok.get(role, True),
+                            "reasoning": "verificado contra el corpus",
+                        },
+                        "proposals": [
+                            {
+                                "title": f"Tarea del {role}",
+                                "source": "SESION_NEXT_PROMPT §4",
+                                "why": "avanza la coherencia",
+                                "risks": "bajos",
+                                "tests": "pytest",
+                                "axioms": ["INV1"],
+                                "vote": votes.get(role, "approve"),
+                                "confidence": 0.8,
+                            }
+                        ],
+                        "veto": None,
+                    }
+                ),
+                engine_cfg,
+                False,
             )
 
         monkeypatch.setattr(cycle_mod, "_call", _fake_call)
@@ -133,6 +141,27 @@ def test_lock_stale_permite_adquirir(tmp_path):
     os.utime(lock, (viejo, viejo))
     lock2 = _acquire_lock(ws)  # no debe lanzar
     _release_lock(lock2)
+
+
+def test_lock_pid_muerto_permite_adquirir(tmp_path):
+    """Un lock huérfano (proceso dueño muerto) no paraliza al Concilio."""
+    ws = tmp_path / "ws"
+    lock_path = ws / "concilio.lock"
+    ws.mkdir(parents=True, exist_ok=True)
+    lock_path.write_text(json.dumps({"pid": 999_999_999, "ts": time.time()}), encoding="utf-8")
+    lock = _acquire_lock(ws)  # no debe lanzar
+    _release_lock(lock)
+
+
+def test_lock_pid_vivo_bloquea(tmp_path):
+    """Un lock con PID vivo bloquea (un solo Concilio a la vez)."""
+    ws = tmp_path / "ws"
+    lock = _acquire_lock(ws)  # pid del propio proceso de test
+    try:
+        with pytest.raises(CycleLockError):
+            _acquire_lock(ws)
+    finally:
+        _release_lock(lock)
 
 
 # --- Ciclo completo ---

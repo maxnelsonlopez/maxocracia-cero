@@ -13,6 +13,19 @@ Reglas del paquete (canon):
 - No imprime ni persiste claves; solo nombres de motores y modelos.
 """
 
+from .control import ACTIVE, PAUSED, STOPPED, Control
 from .cycle import CycleLockError, run_cycle
+from .executor import EjecutorGuardado, GuardDeniedError
+from .git_guard import guard_git_command
 
-__all__ = ["run_cycle", "CycleLockError"]
+__all__ = [
+    "run_cycle",
+    "CycleLockError",
+    "Control",
+    "ACTIVE",
+    "PAUSED",
+    "STOPPED",
+    "EjecutorGuardado",
+    "GuardDeniedError",
+    "guard_git_command",
+]

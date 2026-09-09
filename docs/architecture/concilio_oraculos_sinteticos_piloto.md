@@ -337,6 +337,18 @@ suite en verde; ≥1 aporte ratificado por el custodio; cero mutaciones sin revi
 
 ## 7. Riesgos y guardarraíles
 
+**Decreto de autonomía del custodio (03-09-2026, Max):** *"el Concilio puede tocar código solo;
+blindar la plataforma contra comandos que atenten contra el historial de git; del resto, por ahora
+confiamos."* — traducido a arquitectura (commit `b4033b9`):
+
+- `maxocontracts/concilio/git_guard.py`: bloquea push `--force`/`-f`/`--force-with-lease`, refspec
+  `+rama`, borrado de refs, `commit --amend`, `rebase`, `reset --hard`, `clean -f*`,
+  `checkout --force`, `fetch --force`, `reflog delete|expire`, `gc --prune`, `filter-branch/-repo`.
+- `maxocontracts/concilio/executor.py`: ejecuta comandos con el guard activo y bitácora T13
+  (bloquea antes de ejecutar: `GuardDeniedError`; fail-closed ante comillas rotas).
+- Hook `pre-push` (instalado vía `scripts/instalar_guardas_git.py`): bloquea cualquier push que no
+  sea fast-forward (reescritura) o que borre una ref remota — **la memoria publicada no se destruye**.
+
 | Riesgo | Guardarraíl (fuente canónica) |
 |---|---|
 | **Alineación cínica** (los modelos se copian entre sí en consultas encadenadas) | Consultas independientes antes de mostrar consenso (el patrón Disidente de segunda pasada de `voting_oracle.py` debe usarse con cuidado aquí); proveedores de familias distintas; el AVA exige razonamiento propio (G3) |
