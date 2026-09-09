@@ -423,6 +423,18 @@ y **DeepSeek (deepseek-chat)** · Ratificación humana: **Max** ("¡Esto es un s
   (`app/limiter.py`) — hallazgo de F4: el plan citaba una variable que el código no leía; 12 tests.
 - **Memoria completa**: bitácora por ciclo (`scratch/concilio/cycles/*/eventos.jsonl`) con la firma
   T13 de cada llamada — "lo que no se puede verificar, no se escribe".
+- **Ciclo primigenio con 3 proveedores (09-09-2026)**: `ciclo-20260909-024012-108c6c` — DeepSeek
+  (principal) + NVIDIA V4 Flash + **OpenRouter GLM-4.5-Air** (clave nueva del custodio); consenso
+  100%, EJECUTABLE. **Misión votada e implementada sin intervención humana**: fix del N+1 de
+  `reply_count` en el foro (`app/forum_bp.py`: `_reply_counts` con GROUP BY + paginación por cursor
+  keyset; 5 tests) — `535704c`. Ajustes del ciclo: dedupe de elegidas por título (`c69d18d`) y
+  `scratch/` excluido del escaneo conceptual (`c2a7f15`).
+- **Control remoto del custodio (09-09-2026)**: `maxocontracts/concilio/control.py` —
+  pausar/reanudar/detener/mensaje con nonce T13; fallback de motores con firma del motor real;
+  resumen.md por ciclo; orden de motores configurable (DeepSeek → NVIDIA → OpenRouter). Además,
+  **hallazgo técnico fatal documentado**: en Windows `os.kill(pid, 0)` **mata** el proceso en vez de
+  consultar (TerminateProcess) — el test del lock suicidaba al propio pytest y tumbaba el arnés;
+  corregido con `OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION)` en `_pid_alive` — `ad39136`.
 
 ---
 
