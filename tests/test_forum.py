@@ -420,3 +420,89 @@ class TestBusquedaTextual:
         assert data["count"] == 0
         data = auth_client.get("/forum/posts?q=tvi&type=question").get_json()
         assert data["count"] == 1
+
+
+# ---------------------------------------------------------------------------
+# Concilio primigenio (ciclo 20260909-024012): N+1 de reply_count + cursor.
+# Misión votada por los oráculos: COUNT GROUP BY + paginación por cursor.
+# ---------------------------------------------------------------------------
+
+
+def _create_posts(auth_client, n, kind="question"):
+    ids = []
+    for i in range(n):
+        r = auth_client.post(
+            "/forum/posts",
+            json={"kind": kind, "title": f"Post {i}", "body": "cuerpo"},
+        )
+        assert r.status_code == 201
+        ids.append(r.get_json()["post"]["id"])
+    return ids
+
+
+def test_reply_counts_group_by_una_consulta(auth_client, app):
+    """El conteo agregado llega en una sola consulta y devuelve todos los ids."""
+    ids = _create_posts(auth_client, 3)
+    for pid in ids[:2]:
+        auth_client.post(f"/forum/posts/{pid}/replies", json={"body": "resp 1"})
+        auth_client.post(f"/forum/posts/{pid}/replies", json={"body": "resp 2"})
+    with app.app_context():
+        from app.forum_bp import _reply_counts
+        from app.utils import get_db
+
+        db = get_db()
+        assert _reply_counts(db, []) == {}
+        # contrato esparso: sin respuestas = clave ausente (el listado usa .get(...,0))
+        assert _reply_counts(db, ids) == {ids[0]: 2, ids[1]: 2}
+        assert _reply_counts(db, [ids[2]]) == {}  # los conteos se resuelven en .get
+
+
+def test_list_posts_conteos_grupo_por_en_respuesta(auth_client):
+    """El listado (antes N+1) devuelve los conteos correctos por post."""
+    ids = _create_posts(auth_client, 2)
+    auth_client.post(f"/forum/posts/{ids[0]}/replies", json={"body": "una"})
+    data = auth_client.get("/forum/posts").get_json()
+    posts = {p["id"]: p for p in data["posts"]}
+    assert posts[ids[0]]["reply_count"] == 1
+    assert posts[ids[1]]["reply_count"] == 0
+
+
+def test_list_posts_cursor_paginacion(auth_client, app):
+    """Keyset pagination: sin duplicados ni saltos, en orden DESC estable."""
+    ids = _create_posts(auth_client, 5)
+    with app.app_context():
+        from app.utils import get_db
+
+        db = get_db()
+        for i, pid in enumerate(ids):
+            db.execute(
+                "UPDATE forum_posts SET created_at = ? WHERE id = ?",
+                (f"2026-01-0{i + 1} 00:00:00", pid),
+            )
+        db.commit()
+    recolectados = []
+    cursor = None
+    for _ in range(10):
+        url = "/forum/posts?limit=2" + (f"&cursor={cursor}" if cursor else "")
+        data = auth_client.get(url).get_json()
+        assert data["success"] is True
+        recolectados.extend(p["id"] for p in data["posts"])
+        cursor = data["next_cursor"]
+        if not cursor:
+            break
+    assert len(recolectados) == 5
+    assert len(set(recolectados)) == 5
+    assert recolectados[0] == ids[-1]  # más reciente primero
+    assert recolectados[-1] == ids[0]
+
+
+def test_list_posts_cursor_invalido(auth_client):
+    assert auth_client.get("/forum/posts?cursor=malo").status_code == 400
+    assert auth_client.get("/forum/posts?cursor=a|b").status_code == 400
+
+
+def test_list_posts_cursor_final_none(auth_client):
+    """Sin más próxima página, next_cursor es null (contrato claro)."""
+    _create_posts(auth_client, 1)
+    data = auth_client.get("/forum/posts?limit=10").get_json()
+    assert data["next_cursor"] is None

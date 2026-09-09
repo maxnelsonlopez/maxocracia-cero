@@ -69,12 +69,41 @@ def _parse_tags(raw: Optional[str]) -> List[str]:
         return []
 
 
-def _post_to_dict(db: Any, row: Any) -> Dict[str, Any]:
-    """Serialización T13 de un post del foro (procedencia y estado legibles)."""
-    replies_count = db.execute(
-        "SELECT COUNT(*) FROM forum_replies WHERE post_id = ?",
-        (row["id"],),
-    ).fetchone()[0]
+def _reply_counts(db: Any, post_ids: List[int]) -> Dict[int, int]:
+    """Conteo de respuestas con UNA consulta (GROUP BY) — fin del N+1.
+
+    Antes `_post_to_dict` ejecutaba un COUNT por cada post del listado
+    (N+1); ahora el listado pide todos los conteos al foro de una vez.
+    """
+    ids = [int(i) for i in post_ids if i is not None]
+    if not ids:
+        return {}
+    placeholders = ",".join("?" * len(ids))
+    rows = db.execute(
+        f"""
+        SELECT post_id, COUNT(*) AS n
+        FROM forum_replies
+        WHERE post_id IN ({placeholders})
+        GROUP BY post_id
+        """,
+        tuple(ids),
+    ).fetchall()
+    return {int(r["post_id"]): int(r["n"] or 0) for r in rows}
+
+
+def _post_to_dict(db: Any, row: Any, reply_counts: Optional[Dict[int, int]] = None) -> Dict[str, Any]:
+    """Serialización T13 de un post del foro (procedencia y estado legibles).
+
+    `reply_counts` (post_id → n) viene precalculado por el listado con
+    GROUP BY; si no llega (detalle/creación), se cuenta en una consulta.
+    """
+    if reply_counts is None:
+        replies_count = db.execute(
+            "SELECT COUNT(*) FROM forum_replies WHERE post_id = ?",
+            (row["id"],),
+        ).fetchone()[0]
+    else:
+        replies_count = reply_counts.get(row["id"], 0)
     return {
         "id": row["id"],
         "kind": row["kind"],
@@ -266,11 +295,18 @@ def create_post(current_user):
 @forum_bp.route("/posts", methods=["GET"])
 @token_required
 def list_posts(current_user):
-    """Listar la plaza con filtros opcionales (type, tag, status, q, limit)."""
+    """Listar la plaza con filtros opcionales (type, tag, status, q, limit).
+
+    Paginación por cursor (keyset): `cursor=<created_at>|<id>` — las páginas
+    nunca repiten ni saltan posts aunque la plaza se mueva (a diferencia del
+    OFFSET, que se desfasa). El conteo de respuestas llega en UNA consulta
+    GROUP BY (fin del N+1 del foro).
+    """
     kind = (request.args.get("type") or "").strip()
     tag = (request.args.get("tag") or "").strip()
     status = (request.args.get("status") or "").strip()
     term = (request.args.get("q") or "").strip()
+    cursor = (request.args.get("cursor") or "").strip()
     try:
         limit = min(max(int(request.args.get("limit", 50)), 1), 100)
     except ValueError:
@@ -306,6 +342,16 @@ def list_posts(current_user):
             "(LOWER(fp.title) LIKE ? ESCAPE '\\' OR LOWER(fp.body) LIKE ? ESCAPE '\\')"
         )
         params.extend([pattern, pattern])
+    if cursor:
+        parts = cursor.split("|", 1)
+        if len(parts) != 2 or not parts[0].strip() or not parts[1].strip():
+            return jsonify({"error": "cursor inválido: espera <created_at>|<id>"}), 400
+        try:
+            cursor_id = int(parts[1])
+        except ValueError:
+            return jsonify({"error": "cursor inválido: el id no es entero"}), 400
+        clauses.append("(fp.created_at, fp.id) < (?, ?)")
+        params.extend([parts[0], cursor_id])
 
     where = ("WHERE " + " AND ".join(clauses)) if clauses else ""
     db = get_db()
@@ -319,8 +365,14 @@ def list_posts(current_user):
         """,
         (*params, limit),
     ).fetchall()
-    posts = [_post_to_dict(db, r) for r in rows]
-    return jsonify({"success": True, "count": len(posts), "posts": posts})
+    counts = _reply_counts(db, [r["id"] for r in rows])
+    posts = [_post_to_dict(db, r, counts) for r in rows]
+    next_cursor = (
+        f"{rows[-1]['created_at']}|{rows[-1]['id']}" if len(rows) == limit else None
+    )
+    return jsonify(
+        {"success": True, "count": len(posts), "next_cursor": next_cursor, "posts": posts}
+    )
 
 
 @forum_bp.route("/posts/<int:post_id>", methods=["GET"])
