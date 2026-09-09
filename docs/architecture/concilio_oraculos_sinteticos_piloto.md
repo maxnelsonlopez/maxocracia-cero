@@ -262,7 +262,11 @@ F0 Despertar ──▶ F1 Absorción ──▶ F2 Agenda/Votación ──▶ F3 
   registra (hash del contexto). Un oráculo no vota sin firmar — es el "rito de lectura" que asegura
   que el trabajo nazca del canon, no de la intuición del modelo.
 - **F2 — Agenda y votación**: cada oráculo propone 1–3 candidatos con evidencia (fuente canónica,
-  costo estimado en requests/tiempo, tests que tocaría, axiomas implicados, riesgo). Votación:
+  costo estimado en requests/tiempo, tests que tocaría, axiomas implicados, riesgo). **Mandato
+  permanente del custodio (09-09-2026)**: además, cada oráculo propone SIEMPRE (a) una mejora de
+  herramientas/técnicas/know-how del propio Concilio y (b) una puerta nueva de victorias de la
+  Maxocracia — el Concilio se afila y abre caminos, no solo sirve (mantenimiento óptimo, Cap. 17.4).
+  Votación:
   consenso ≥75% (canon, Cap. 14.3) con quórum; validación AVA (TRUTH/TIME/LIFE/RESOURCES) sobre cada
   propuesta — **un axioma violado = rechazo automático**; voz del Disidente obligatoria; empate o <3
   validadores → se queda en cola (nada ejecuta por desempate automático: "el desacuerdo aumenta la

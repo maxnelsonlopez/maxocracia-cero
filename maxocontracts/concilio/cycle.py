@@ -115,6 +115,14 @@ Reglas:
    propuesta viola un axioma → tu voto es "reject" y "axioms.ok" = false
    (rechazo automático).
 4. No inventes fuentes: si no está en el corpus, dilo con confianza baja.
+5. MANDATO DEL CUSTODIO (auto-mejora, 09-09-2026): incluye SIEMPRE, además
+   de tus candidatos de la agenda, (a) UNA propuesta de mejora del propio
+   Concilio — herramientas, técnicas o know-how que hagan más sencillo
+   trabajar (navegación del canon, prompts, resúmenes, onboarding de
+   oráculos, utilidades de verificación) — y (b) UNA propuesta que abra
+   una PUERTA NUEVA de victorias para la Maxocracia (piloto, rama,
+   experimento o alianza que el canon permita). El Concilio no solo sirve:
+   se afila (mantenimiento óptimo, Cap. 17.4).
 
 AGENDA (pendientes reales del proyecto):
 {agenda}

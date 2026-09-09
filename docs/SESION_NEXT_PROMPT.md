@@ -1,4 +1,4 @@
-# SESIÓN NEXT — Handoff de la jornada (última actualización: 02-09-2026, GLM + Max)
+# SESIÓN NEXT — Handoff de la jornada (última actualización: 09-09-2026, Concilio primigenio + DeepSeek)
 
 Documento de continuidad entre sesiones. Léelo al iniciar la próxima sesión
 antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
@@ -8,27 +8,27 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 ## 1. Prompt para Max (pegar en la próxima sesión)
 
 > Continuamos la Maxocracia desde donde quedamos (ver `docs/SESION_NEXT_PROMPT.md`).
-> Contexto: Fase 2 — Ola 4 "El Puente", versión 5.6+. La rama educativa
-> M1-M16 está COMPLETA. **Jornada del 02-09-2026 (GLM): endurecimiento de
-> seguridad — fase inmediata ejecutada** (metas dictadas por GLM web):
-> auditoría de dependencias (`pip-audit` en el repo + `scripts/security_audit.ps1`;
-> backend al día: PyJWT 2.13, Werkzeug 3.1.6, Flask-CORS 6; frontend `next`
-> 16.3.4 cierra 4 high — **0 vulnerabilidades** npm en prod y dev), cadena de
-> secretos fail-closed (producción sin `SECRET_KEY` aborta en `run.py` y
-> `create_app`; antes forzaba una clave hardcodeada con la que se firmaban
-> JWTs e invitaciones), `FORCE_HTTPS=1` (redirige 308 según
-> `X-Forwarded-Proto`), CSP sin `ws://localhost` en producción y 9 tests
-> nuevos (`tests/test_security_hardening.py`). Suite **885/885** raíz,
-> **78/78** plataforma, **8/8** puente, tsc + build limpios, validador OK.
-> Plan canónico con el roadmap 30-90 días (PostgreSQL, Redis, SAST, SIEM,
-> rotación de claves):
-> `docs/architecture/PLAN_ENDURECIMIENTO_SEGURIDAD.md`.
-> **Siguientes pasos naturales**: los pendientes del §4 (traducciones Ética,
-> Rondas anti-δ) o la fase 30-90 días del plan de seguridad (§3 del plan:
-> empezar por rate limiting con Redis al desplegar multi-worker, o logging
-> JSON sin datos sensibles). Patrón de trabajo: RLM navega + director
-> verifica + teoría decide. Commits regulares en español; respeta el
-> principio "la teoría tiene prioridad".
+> Contexto: Fase 2 — Ola 4 "El Puente", versión 5.6+. **EL CONCILIO DE ORÁCULOS
+> SINTÉTICOS YA EXISTE Y DESPIERTA SOLO** (jornadas 03-09 y 08-09-2026 + primigenio
+> 09-09-2026): investigación y diseño (`.md` en `docs/architecture/concilio_oraculos_sinteticos_piloto.md`),
+> registro multi-proveedor `maxocontracts/oracles/engines.py` (DeepSeek principal,
+> NVIDIA + **OpenRouter** — clave añadida 09-09; firma T13 engine/model, reintentos),
+> worker F0-F2 `maxocontracts/concilio/` (canon, bitácora JSONL, resumen.md, quórum
+> 75%, veto AVA, Disidente), **control remoto del custodio** (`scripts/concilio.py
+> status|pausar|reanudar|detener|mensaje` — archivo `scratch/concilio/control.json`),
+> **guard de historial git** (`git_guard.py` + hook pre-push instalado; la memoria no
+> se toca), **autoarranque** (carpeta de Inicio: `MaxocraciaConcilio.cmd` →
+> `scripts/autostart_concilio.py`, gap 12h, respeta pausas).
+> Ciclos ejecutados: `ciclo-20260908-042126` (consenso 100% → Plaza Hablable `f57b613`
+> + Seguridad `8e5b4df`) y **`ciclo-20260909-024012-108c6c` (3 proveedores, consenso
+> 100% → N+1 del foro `535704c` + Rondas anti-δ `9d57786`)**. **BUG FATAL APREDIDO**:
+> en Windows `os.kill(pid,0)` MATA al proceso (TerminateProcess); jamás usarlo para
+> consultar vida — usar `OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION)` (fix en
+> `_pid_alive`, `ad39136`). La suite se corre con salida a archivo (truco para no
+> inundar el contexto del arnés). **Siguientes pasos naturales**: ver red del
+> primigenio (Rondas UI en la Ciudad), 2ª clave por proveedor (multi-tenant), y
+> cenar la jornada con `atribuciones_sinteticas.md` al día. Patrón: RLM navega +
+> director verifica + teoría decide; el canon no se delega a una máquina.
 
 ## 2. Briefing para el agente (opencode / DeepSeek)
 
@@ -159,6 +159,17 @@ npx tsc --noEmit
    GROUP BY + paginación por cursor); oráculos síncronos (120 s) → colas/async
    cuando el parlamento vote de verdad.
 7. Mantener mapas y handoff al día (regla continua).
+8. **El Concilio se mejora a sí mismo (mandato del custodio, 09-09-2026)**:
+   cada ciclo debe proponer, además de la misión votada, (a) **una mejora de
+   herramientas/técnicas/know-how del propio Concilio** — navegación del canon,
+   prompts, resúmenes, ergonomía del flujo, onboarding de nuevos oráculos,
+   utilidades de verificación — y (b) **una puerta nueva de victorias** de la
+   Maxocracia (piloto, rama, experimento, alianza local) que el canon
+   permita y el futuro agradezca. La mejora continua es parte del SDV-S del
+   Reino Sintético (mantenimiento óptimo): el Concilio no solo sirve; se
+   afila y se recuerda. Mandato codificado en el prompt de votación
+   (`maxocontracts/concilio/cycle.py`, AGENDA_SYSTEM §5) y en el diseño
+   (`docs/architecture/concilio_oraculos_sinteticos_piloto.md` §6).
 
 **Futuro posible (fuera de la Ola 4)**: hitos del informe del Reino Sintético
 (`docs/architecture/informe_reino_sintetico_2026-08-12.md` §7): EIR por entidad sintética, AVA con
