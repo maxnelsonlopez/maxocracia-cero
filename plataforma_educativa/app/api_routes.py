@@ -23,6 +23,10 @@ MIN_PARTICIPANTS = 3
 TEST_PASS_THRESHOLD = 70.0
 ISO_WEEK_FORMAT = "%Y-W%W"
 
+# Rondas de mantenimiento (anti-δ): semanas sin tocar un lote dominado antes
+# de marcar "requiere Ronda" (teoría OEV §1.1 — la base nunca se gradúa).
+ROUNDS_WEEKS_THRESHOLD = int(os.environ.get("ROUNDS_WEEKS_THRESHOLD", "4"))
+
 # Días de la semana (índice 0 = lunes, como datetime.isoweekday()).
 _DAY_INDEX = {"LUN": 0, "MAR": 1, "MIE": 2, "JUE": 3, "VIE": 4, "SAB": 5, "DOM": 6}
 
@@ -1158,6 +1162,109 @@ def me_share_progress():
     db.commit()
     user = _user_row()
     return jsonify({"share_progress": bool(user["share_progress"])}), 200
+
+
+# --------------------------------------------------------------------------
+# Rondas de mantenimiento (anti-δ, teoría OEV §1.1): la base nunca se gradúa.
+# El conocimiento se entropía (δ); el lote dominado que pasa N semanas sin
+# tocar requiere Ronda. Repasar NO se castiga: el que más Ronda necesita,
+# más acompañado va. Estados de lote, no tribunal.
+# --------------------------------------------------------------------------
+
+
+def _round_cutoff():
+    return (
+        datetime.now(timezone.utc)
+        - timedelta(weeks=ROUNDS_WEEKS_THRESHOLD)
+    ).isoformat()
+
+
+def _needs_round(updated_at):
+    return bool(updated_at) and updated_at < _round_cutoff()
+
+
+@api_bp.route("/api/me/rounds", methods=["GET"])
+@login_required
+def me_rounds():
+    """Mis lotes dominados y cuáles ya requieren Ronda (care, no sanción)."""
+    db = get_db()
+    rows = db.execute(
+        """
+        SELECT ut.topic_id, ut.estado, ut.score, ut.updated_at, ut.rounds,
+               ut.last_round_at, t.titulo, t.slug,
+               b.nombre AS branch_name
+        FROM user_topics ut
+        JOIN topics t ON t.id = ut.topic_id
+        JOIN branches b ON b.id = t.branch_id
+        WHERE ut.user_id = ? AND ut.estado IN ('test_passed', 'mastered')
+        ORDER BY ut.updated_at ASC
+        """,
+        (g.user_id,),
+    ).fetchall()
+    lots = []
+    for r in rows:
+        lots.append(
+            {
+                "topic_id": r["topic_id"],
+                "titulo": r["titulo"],
+                "slug": r["slug"],
+                "branch": r["branch_name"],
+                "estado": r["estado"],
+                "score": r["score"],
+                "updated_at": r["updated_at"],
+                "rounds": r["rounds"] if "rounds" in r.keys() else 0,
+                "last_round_at": r["last_round_at"],
+                "needs_round": _needs_round(r["updated_at"]),
+            }
+        )
+    pending = [lot for lot in lots if lot["needs_round"]]
+    return jsonify({"lots": lots, "pending": len(pending)}), 200
+
+
+@api_bp.route("/api/topics/<int:topic_id>/round", methods=["POST"])
+@login_required
+def topic_round(topic_id):
+    """Repasar el lote: el brillo vuelve (updated_at se renueva, rounds += 1).
+
+    Solo reciben Ronda los lotes dominados; la Ronda cuida lo aprendido,
+    no examina lo pendiente.
+    """
+    db = get_db()
+    st = db.execute(
+        "SELECT * FROM user_topics WHERE user_id = ? AND topic_id = ?",
+        (g.user_id, topic_id),
+    ).fetchone()
+    if st is None or st["estado"] not in ("test_passed", "mastered"):
+        return (
+            jsonify(
+                {
+                    "error": (
+                        "El lote no está dominado: la Ronda cuida lo aprendido, "
+                        "no examina lo pendiente."
+                    )
+                }
+            ),
+            400,
+        )
+    now_iso = _now()
+    new_rounds = int(st["rounds"] if "rounds" in st.keys() else 0) + 1
+    db.execute(
+        "UPDATE user_topics SET rounds = ?, last_round_at = ?, updated_at = ? "
+        "WHERE user_id = ? AND topic_id = ?",
+        (new_rounds, now_iso, now_iso, g.user_id, topic_id),
+    )
+    db.commit()
+    return (
+        jsonify(
+            {
+                "topic_id": topic_id,
+                "rounds": new_rounds,
+                "last_round_at": now_iso,
+                "needs_round": False,
+            }
+        ),
+        200,
+    )
 
 
 @api_bp.route("/api/community/lights", methods=["GET"])

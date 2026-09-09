@@ -849,6 +849,24 @@ def _migrate_db(conn):
         except sqlite3.OperationalError:
             pass
 
+    # Rondas de mantenimiento (anti-δ, OEV §1.1): la base nunca se gradúa.
+    # El lote dominado que pasa N semanas sin tocar se marca "requiere Ronda";
+    # repasarlo (POST round) devuelve el brillo sin castigo (cuento, no tribunal).
+    cursor = conn.execute("PRAGMA table_info(user_topics)")
+    topic_columns = [row["name"] for row in cursor.fetchall()]
+    if "rounds" not in topic_columns:
+        try:
+            conn.execute(
+                "ALTER TABLE user_topics ADD COLUMN rounds INTEGER NOT NULL DEFAULT 0"
+            )
+        except sqlite3.OperationalError:
+            pass
+    if "last_round_at" not in topic_columns:
+        try:
+            conn.execute("ALTER TABLE user_topics ADD COLUMN last_round_at TEXT")
+        except sqlite3.OperationalError:
+            pass
+
     # Compartir la luz (M15): opt-in voluntario y retractable; 0 = la ciudad
     # no ve mi progreso (default; compartir es una decisión, nunca un default).
     cursor = conn.execute("PRAGMA table_info(users)")
