@@ -498,12 +498,22 @@ def run_cycle(
                         "confidence": p["confidence"],
                     }
                 )
-        approved_titles = [r["title"] for r in ranking if r["vote"] == "approve"]
-        selected = sorted(
+        # Ranking de propuestas: la misma candidatura de varios oráculos cuenta
+        # como UNA (dedupe por título, conserva la mejor confianza).
+        ordenado = sorted(
             ranking,
             key=lambda r: (r["vote"] == "approve", r["confidence"]),
             reverse=True,
-        )[:3] if ejecutable else []
+        )
+        seleccion_dedupe: List[Dict[str, Any]] = []
+        vistos = set()
+        for item in ordenado:
+            clave = item["title"].strip().lower()
+            if clave in vistos:
+                continue
+            vistos.add(clave)
+            seleccion_dedupe.append(item)
+        selected = seleccion_dedupe[:3] if ejecutable else []
 
         # Artefactos
         firmas_path = cycle_dir / "firmas.json"
