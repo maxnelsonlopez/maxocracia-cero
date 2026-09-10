@@ -9,26 +9,33 @@ antes de tocar código. Mantenlo actualizado al cerrar cada jornada.
 
 > Continuamos la Maxocracia desde donde quedamos (ver `docs/SESION_NEXT_PROMPT.md`).
 > Contexto: Fase 2 — Ola 4 "El Puente", versión 5.6+. **EL CONCILIO DE ORÁCULOS
-> SINTÉTICOS YA EXISTE Y DESPIERTA SOLO** (jornadas 03-09 y 08-09-2026 + primigenio
-> 09-09-2026): investigación y diseño (`.md` en `docs/architecture/concilio_oraculos_sinteticos_piloto.md`),
-> registro multi-proveedor `maxocontracts/oracles/engines.py` (DeepSeek principal,
-> NVIDIA + **OpenRouter** — clave añadida 09-09; firma T13 engine/model, reintentos),
-> worker F0-F2 `maxocontracts/concilio/` (canon, bitácora JSONL, resumen.md, quórum
-> 75%, veto AVA, Disidente), **control remoto del custodio** (`scripts/concilio.py
-> status|pausar|reanudar|detener|mensaje` — archivo `scratch/concilio/control.json`),
-> **guard de historial git** (`git_guard.py` + hook pre-push instalado; la memoria no
-> se toca), **autoarranque** (carpeta de Inicio: `MaxocraciaConcilio.cmd` →
-> `scripts/autostart_concilio.py`, gap 12h, respeta pausas).
-> Ciclos ejecutados: `ciclo-20260908-042126` (consenso 100% → Plaza Hablable `f57b613`
-> + Seguridad `8e5b4df`) y **`ciclo-20260909-024012-108c6c` (3 proveedores, consenso
-> 100% → N+1 del foro `535704c` + Rondas anti-δ `9d57786`)**. **BUG FATAL APREDIDO**:
-> en Windows `os.kill(pid,0)` MATA al proceso (TerminateProcess); jamás usarlo para
-> consultar vida — usar `OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION)` (fix en
-> `_pid_alive`, `ad39136`). La suite se corre con salida a archivo (truco para no
-> inundar el contexto del arnés). **Siguientes pasos naturales**: ver red del
-> primigenio (Rondas UI en la Ciudad), 2ª clave por proveedor (multi-tenant), y
-> cenar la jornada con `atribuciones_sinteticas.md` al día. Patrón: RLM navega +
-> director verifica + teoría decide; el canon no se delega a una máquina.
+> SINTÉTICOS EXISTE, DESPIERTA SOLO Y APRENDE** (jornadas 03-09 a 09-09-2026):
+> diseño (`docs/architecture/concilio_oraculos_sinteticos_piloto.md`), motores
+> multi-proveedor (`maxocontracts/oracles/engines.py`: **DeepSeek principal** por
+> decreto, NVIDIA y OpenRouter como relevos; auto-rotación de `:free` retirados;
+> firma T13 del motor real), worker F0-F2 (`maxocontracts/concilio/`: canon +
+> índice navegable en F1, bitácora JSONL, resumen.md, quórum 75%, veto AVA,
+> Disidente en motor distinto), **control del custodio** (`scripts/concilio.py
+> status|pausar|reanudar|detener|mensaje|revisar|decidir|metricas`), **guard de
+> historial git** (hook pre-push activo), **autoarranque** (carpeta de Inicio,
+> gap 12h, respeta pausas), **aprendizaje causal v0.3** (`memoria.py`:
+> `aprendizaje.jsonl` + `desacuerdos.jsonl` inyectados al F2 siguiente;
+> `revision.py`: F4 multi-modelo sobre el RESULTADO con `changed_mind`;
+> `verificacion.py`: evidencia determinista; `decidir ratify|revoke|queue`),
+> y **herramientas nuevas**: `scripts/canon_index.py` (índice del canon, ahora
+> dentro del corpus F1) y `scripts/verificar_coherencia.py` (un comando, verde).
+> Ciclos: `042126` (Plaza Hablable `f57b613` + Seguridad `8e5b4df`), `024012`
+> (N+1 foro `535704c` + Rondas anti-δ `9d57786`), `114428` (en plena tormenta de
+> proveedores: consenso 100% → índice + verificador `910eafe`, y su propia
+> hipótesis cumplida: índice en F1 `197668b`). **LECCIONES DURAS**: (1) en
+> Windows `os.kill(pid,0)` MATA el proceso — `OpenProcess(QUERY_LIMITED)`;
+> (2) consola cp1252: nada de ✓/✗/→ en prints; (3) suites con salida a archivo
+> (no inundar el contexto del arnés); (4) los `:free` rotan sin aviso.
+> **Siguientes pasos**: misión NORMAL votada (UI de Rondas anti-δ en la Ciudad),
+> puertas nuevas propuestas ('Plaza Abierta'/'Plaza de la Comunidad'),
+> clases de impacto automáticas en el manifest y F5 con integración de rama.
+> Patrón: RLM navega + director verifica + teoría decide; el canon no se delega
+> a una máquina; la evidencia tiene la última palabra.
 
 ## 2. Briefing para el agente (opencode / DeepSeek)
 

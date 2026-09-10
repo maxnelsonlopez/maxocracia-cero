@@ -435,16 +435,23 @@ y **DeepSeek (deepseek-chat)** · Ratificación humana: **Max** ("¡Esto es un s
   **hallazgo técnico fatal documentado**: en Windows `os.kill(pid, 0)` **mata** el proceso en vez de
   consultar (TerminateProcess) — el test del lock suicidaba al propio pytest y tumbaba el arnés;
   corregido con `OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION)` en `_pid_alive` — `ad39136`.
-
----
+- **Aster (colaborador sintético) — el aprendizaje causal (09-09-2026)**: propuso cerrar el circuito
+  autonomía → aprendizaje verificable (hipótesis explícitas en F2, F3 con mandato/contexto, F4 que
+  audita el RESULTADO y no el voto, F5 con RATIFY/REVOKE/**QUEUE** y la memoria causal que alimenta
+  el ciclo siguiente). Su propuesta fue auditada contra el canon, corregida en tres puntos (clases de
+  impacto LOW/NORMAL/CRITICAL para que la evidencia no se vuelva ceremonia; definición operacional
+  de "aprendizaje válido" con latencia epistemológica; rama git formal cuando exista brazo con tools)
+  e implementada: `docs/architecture/APRENDIZAJE_CAUSAL_CONCILIO_v02.md`, `memoria.py`, `revision.py`,
+  `verificacion.py` — commits `e8d7bc8`, `d2fe4ef`, `cc40b9c`. Aporte adicional suyo: la **memoria de
+  desacuerdos** (`desacuerdos.jsonl`) contra la amnesia institucional.
+- **Resiliencia de motores y auto-mejora (09-09-2026, ciclo de la tormenta)**: `212102a` (DeepSeek
+  principal por decreto + auto-rotación de modelos `:free` retirados), `910eafe` (`canon_index.py` +
+  `verificar_coherencia.py`, misión LOW elegida por el propio Concilio) y `197668b` (el índice entra
+  al corpus F1, hipótesis que el Concilio escribió en su memoria y el brazo de sesión cumplió).
+  Ciclo `114428`: **consenso 100% en plena degradación de tres proveedores** (NVIDIA 502/timeouts,
+  OpenRouter 404/DNS) — DeepSeek sostuvo el ciclo con `fallback: true` visible en la bitácora.
 
 ## 3. Cómo agregar una atribución
-
-Cualquier sesión futura (humana o sintética) que deje obra verificable debe actualizar este documento:
-
-
-
-
 
 Cualquier sesión futura (humana o sintética) que deje obra verificable debe actualizar este documento:
 
