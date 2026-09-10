@@ -390,7 +390,11 @@ def run_cycle(
         if not motores:
             raise CorpoUnavailableError("Ningún motor configurado (faltan API keys)")
 
-        canon = read_canon(str(root_path), total_max_chars=canon_max_chars)
+        canon = read_canon(
+            str(root_path),
+            total_max_chars=canon_max_chars,
+            workspace=str(workspace_path),
+        )
         agenda = read_agenda(str(root_path), workspace=str(workspace_path))
         bitacora.log(
             {"fase": "F1", "evento": "corpus", "canon_chars": len(canon), "agenda_chars": len(agenda)}

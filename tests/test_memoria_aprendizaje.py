@@ -79,6 +79,27 @@ def test_agenda_incluye_aprendizajes_previos(tmp_path):
     assert "A no produjo mejora medible" in agenda
 
 
+def test_corpus_incluye_indice_si_existe(tmp_path):
+    """La hipótesis que el Concilio escribió: el índice entra a F1."""
+    repo = tmp_path / "repo"
+    (repo / "docs" / "architecture").mkdir(parents=True)
+    (repo / "docs" / "architecture" / "mapa_coherencia_ola4.md").write_text(
+        "# Mapa\nINV1 gamma >= 1\n", encoding="utf-8"
+    )
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    sin_indice = canon_mod.read_canon(str(repo), workspace=str(ws))
+    assert "INDICE NAVEGABLE" not in sin_indice
+
+    (ws / "canon_index.md").write_text(
+        "# Índice navegable del canon\n## Teoría\n- idea.md · 100 caracteres\n",
+        encoding="utf-8",
+    )
+    con_indice = canon_mod.read_canon(str(repo), workspace=str(ws))
+    assert "INDICE NAVEGABLE" in con_indice
+    assert "Índice navegable del canon" in con_indice
+
+
 def test_memoria_de_desacuerdos_anti_amnesia(tmp_path):
     """Aster §4ª dimensión: la objeción histórica se conserva y se recupera."""
     ws = str(tmp_path)

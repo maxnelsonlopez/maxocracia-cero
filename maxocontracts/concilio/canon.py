@@ -41,7 +41,31 @@ def _read_head(path: Path, max_chars: int) -> str:
     return text[:max_chars] + "\n… [recortado por el Concilio]"
 
 
-def read_canon(root: str, total_max_chars: int = DEFAULT_MAX_CHARS) -> str:
+def _indice_resumen(root: Path, workspace: str, max_chars: int = 5_000) -> str:
+    """Primeras entradas del índice navegable (si fue generado), para F1.
+
+    El Concilio escribió esta hipótesis en su propia memoria (ciclo
+    20260909-114428): que el índice generado por `scripts/canon_index.py`
+    entre al corpus de absorción — así cada oráculo se orienta antes de
+    leer el corpus completo. Si no existe el artefacto, no pasa nada.
+    """
+    path = Path(workspace) / "canon_index.md"
+    if not path.exists():
+        return ""
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return ""
+    if len(text) > max_chars:
+        text = text[:max_chars] + "\n… [índice recortado; regenerar con scripts/canon_index.py]"
+    return text
+
+
+def read_canon(
+    root: str,
+    total_max_chars: int = DEFAULT_MAX_CHARS,
+    workspace: str = "scratch/concilio",
+) -> str:
     """Ensambla el corpus canónico con cabeceras por archivo."""
     root_path = Path(root)
     parts = [
@@ -50,6 +74,11 @@ def read_canon(root: str, total_max_chars: int = DEFAULT_MAX_CHARS) -> str:
         "Regla: solo cita lo que aqui aparece; si algo no esta, no lo inventes.",
         "",
     ]
+    indice = _indice_resumen(root_path, workspace)
+    if indice:
+        parts.append(
+            "\n### INDICE NAVEGABLE (generado; para orientarte antes de leer)\n" + indice
+        )
     used = 0
     for rel, cap in CANON_FILES:
         if used >= total_max_chars:
