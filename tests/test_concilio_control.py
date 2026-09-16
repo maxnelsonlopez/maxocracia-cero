@@ -39,7 +39,7 @@ def fake_engine(monkeypatch):
     def install(seen=None):
         seen = seen if seen is not None else []
 
-        def _fake_call(engine_cfg, system, user, want_json=True):
+        def _fake_call(engine_cfg, system, user, want_json=True, max_tokens=2000, **kwargs):
             seen.append((system, user))
             role = next((r for r in ORACLE_ROLES if r in system), "Economic")
             if "CANON (léelo" in user:
@@ -111,7 +111,7 @@ def test_ciclo_pausado_no_llama_a_motores(repo, tmp_path, monkeypatch):
     # el lock se liberó: se puede reanudar y correr
     Control(ws).reanudar()
 
-    def _mock_call(engine_cfg, system, user, want_json=True):
+    def _mock_call(engine_cfg, system, user, want_json=True, max_tokens=2000, **kwargs):
         cfg = type("C", (), {"name": "nv", "model": "m"})()
         if "CANON (léelo" in user:
             return (

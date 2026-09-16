@@ -72,15 +72,23 @@ ENGINE_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "base_url_env": "OPENROUTER_BASE_URL",
         "model_env": "OPENROUTER_MODEL",
         "default_base_url": "https://openrouter.ai/api/v1",
-        "default_model": "z-ai/glm-4.5-air:free",
+        "default_model": "nvidia/nemotron-3-ultra-550b-a55b:free",
         # Los modelos :free de OpenRouter ROTAN y se retiran sin aviso (09-09:
-        # glm-4.5-air:free respondió 404 "unavailable for free"). La cadena
-        # prueba alternativas gratuitas y deja la config con la que respondió.
+        # glm-4.5-air:free respondió 404 "unavailable for free"; 15-09-2026:
+        # deepseek-r1-0528:free y qwen3.6-plus:free también cayeron). Lista
+        # vigente según https://openrouter.ai/collections/free-models (09-2026).
+        # La cadena prueba alternativas gratuitas y deja la config con la que
+        # respondió. Límites free: 20 RPM; 50/día sin créditos, 1000/día con
+        # 10+ créditos (docs/api-reference/limits). Cada 404/429 fallido TAMBIÉN
+        # consume cuota: por eso la lista prioriza modelos vivos y el ciclo
+        # pausa entre llamadas (CONCILIO_PAUSA_SEGUNDOS).
         "model_alternatives": (
-            "deepseek/deepseek-r1-0528:free",
-            "qwen/qwen3.6-plus:free",
             "nvidia/nemotron-3-super-120b-a12b:free",
-            "google/gemma-4-31b-it:free",
+            "nvidia/nemotron-3.5-lightning:free",
+            "poolside/laguna-s-2.1:free",
+            "thinkingmachines/inkling:free",
+            "cohere/north-mini-code:free",
+            "openrouter/free",
         ),
         "json_mode": True,
     },
@@ -102,10 +110,20 @@ ENGINE_DEFAULTS: Dict[str, Dict[str, Any]] = {
     },
 }
 
-# Orden preferido de la cadena (decreto del custodio 09-09-2026: DeepSeek
-# principal — el proveedor propio y fiable; los gratuitos rotan y a veces
-# caen, y la cadena los releva con la firma T13 del motor que respondió).
-DEFAULT_ORDER: Tuple[str, ...] = ("deepseek", "nvidia", "openrouter", "local")
+# Orden preferido de la cadena (decisión del custodio 15-09-2026, temporal:
+# OpenRouter principal mientras no hay ingresos para recargar DeepSeek
+# —antes 09-09: DeepSeek principal—. Los gratuitos rotan y a veces caen,
+# y la cadena los releva con la firma T13 del motor que respondió).
+# Se puede forzar sin tocar código con CONCILIO_ENGINE_ORDER.
+DEFAULT_ORDER: Tuple[str, ...] = ("openrouter", "nvidia", "deepseek", "local")
+
+# Límites de los modelos :free de OpenRouter (docs/api-reference/limits):
+# 20 req/min siempre; 50 req/día sin créditos, 1000/día con 10+ créditos.
+# Un ciclo F0-F2 son 10 llamadas (5 firmas + 5 votos) + 3 de F4: cabe en la
+# cuota free con 1 ciclo/día, siempre que no se queme cuota en reintentos.
+OPENROUTER_FREE_RPM = 20
+OPENROUTER_FREE_RPD_SIN_CREDITOS = 50
+OPENROUTER_FREE_RPD_CON_CREDITOS = 1000
 
 
 def resolve_engine(name: str, env: Optional[Dict[str, str]] = None) -> Optional[EngineConfig]:
@@ -148,6 +166,40 @@ def available_engines(
     return engines
 
 
+def _retry_after_seconds(resp: Any, default: float = 0.0) -> float:
+    """Segundos de espera que pide el proveedor (header Retry-After).
+
+    OpenRouter devuelve 429 con `Retry-After` (y `X-RateLimit-Reset` en los
+    límites de plataforma). Best-effort: cualquier valor ilegible → default.
+    """
+    try:
+        headers = getattr(resp, "headers", None) or {}
+        raw = (
+            headers.get("Retry-After", "")
+            or headers.get("retry-after", "")
+            or headers.get("X-RateLimit-Reset", "")
+        )
+        return max(0.0, float(str(raw).strip().split(",")[0]))
+    except (TypeError, ValueError, AttributeError):
+        return default
+
+
+def _request_headers(cfg: EngineConfig) -> Dict[str, str]:
+    """Cabeceras por motor. OpenRouter recomienda HTTP-Referer + X-Title."""
+    headers = {
+        "Authorization": f"Bearer {cfg.api_key}",
+        "Content-Type": "application/json",
+    }
+    if cfg.name == "openrouter":
+        ref = (os.environ.get("OPENROUTER_SITE_URL") or "https://localhost/maxocracia").strip()
+        title = (os.environ.get("OPENROUTER_APP_TITLE") or "Maxocracia-Concilio").strip()
+        if ref:
+            headers["HTTP-Referer"] = ref
+        if title:
+            headers["X-Title"] = title
+    return headers
+
+
 def call_engine(
     cfg: EngineConfig,
     messages: List[Dict[str, str]],
@@ -162,9 +214,11 @@ def call_engine(
 
     Reintenta con backoff ante errores transitorios (429/5xx, incluido el
     529 "Service temporarily overloaded" observado en NVIDIA NIM) y ante
-    fallos de conexión. Lanza EngineError al agotar los intentos; la firma
-    externa (engine, model) la reporta el llamador, que es quien sabe qué
-    motor pidió.
+    fallos de conexión. En 429 honra `Retry-After`; en OpenRouter, agotados
+    los reintentos del mismo modelo, rota a la siguiente alternativa :free
+    (los límites free son por cuenta, pero repartir entre modelos evita
+    el model-level throttling del proveedor). Lanza EngineError al agotar
+    los intentos; la firma externa (engine, model) la reporta el llamador.
     """
     payload: Dict[str, Any] = {
         "model": cfg.model,
@@ -176,10 +230,7 @@ def call_engine(
     # sin él; aquí se evita enviarlo cuando el motor lo declara inseguro).
     if want_json and cfg.json_mode:
         payload["response_format"] = {"type": "json_object"}
-    headers = {
-        "Authorization": f"Bearer {cfg.api_key}",
-        "Content-Type": "application/json",
-    }
+    headers = _request_headers(cfg)
 
     last_error: Optional[str] = None
     alternatives = list(cfg.model_alternatives)
@@ -212,12 +263,31 @@ def call_engine(
                 cfg.model = nuevo
                 payload["model"] = nuevo
                 continue
-        if resp.status_code in RETRYABLE_STATUS and attempt < max_retries:
+        if resp.status_code in RETRYABLE_STATUS:
+            espera = _retry_after_seconds(resp)
             last_error = f"[{cfg.name}] HTTP {resp.status_code}: {resp.text[:200]}"
-            logger.warning(
-                "%s (intento %d/%d)", last_error, attempt + 1, max_retries
-            )
-            continue
+            if attempt < max_retries:
+                logger.warning(
+                    "%s (intento %d/%d)", last_error, attempt + 1, max_retries
+                )
+                if espera:
+                    time.sleep(min(espera, 60.0))
+                continue
+            # Reintentos del mismo modelo agotados: en OpenRouter se rota al
+            # siguiente :free (cada 429/5xx fallido también consume cuota
+            # diaria: no tiene sentido insistir en el mismo modelo caído).
+            if alternatives:
+                nuevo = alternatives.pop(0)
+                logger.warning(
+                    "[%s] %s persistente; rotando %s -> %s",
+                    cfg.name, resp.status_code, cfg.model, nuevo,
+                )
+                cfg.model = nuevo
+                payload["model"] = nuevo
+                if espera:
+                    time.sleep(min(espera, 60.0))
+                continue
+            raise EngineError(last_error)
         if resp.status_code != 200:
             raise EngineError(f"[{cfg.name}] HTTP {resp.status_code}: {resp.text[:200]}")
         try:
@@ -237,11 +307,14 @@ def chain_call(
     temperature: float = 0.2,
     max_tokens: int = DEFAULT_MAX_TOKENS,
     timeout: Optional[int] = None,
+    max_retries: int = 2,
 ) -> Tuple[str, EngineConfig]:
     """Prueba los motores disponibles en orden y devuelve (texto, motor usado).
 
     La identidad del motor (name/model) es la firma T13 del resultado:
-    el llamador debe persistirla junto al análisis.
+    el llamador debe persistirla junto al análisis. `max_retries` acota los
+    reintentos por motor (el fallback del Concilio usa 1: cada intento de
+    120s en un proveedor caído alarga el ciclo minutos).
     """
     messages = [
         {"role": "system", "content": system},
@@ -260,6 +333,7 @@ def chain_call(
                 max_tokens=max_tokens,
                 want_json=want_json,
                 timeout=timeout,
+                max_retries=max_retries,
             )
             logger.info("motor %s/%s respondió (%d chars)", cfg.name, cfg.model, len(text))
             return text, cfg

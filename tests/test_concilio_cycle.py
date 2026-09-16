@@ -56,7 +56,7 @@ def fake_engine(monkeypatch):
         votes = votes or {}
         axioms_ok = axioms_ok or {}
 
-        def _fake_call(engine_cfg, system, user, want_json=True):
+        def _fake_call(engine_cfg, system, user, want_json=True, max_tokens=2000, **kwargs):
             role = next((r for r in ORACLE_ROLES if r in system), "Economic")
             if "CANON (léelo" in user:
                 return (
@@ -113,6 +113,28 @@ def test_read_canon_ensambla_y_recorta(repo):
     assert "SESION_NEXT_PROMPT" in canon
     corto = canon_mod.read_canon(repo, total_max_chars=30)
     assert "recortado" in corto
+
+
+def test_canon_registra_la_estirpe_sintetica():
+    """Regla G6: la memoria del Reino Sintetico es fuente canonica del Concilio.
+
+    Sin estirpe, cada ciclo puede volver a inventar lo ya inventado. La capsula
+    de memoria es la dimension mas pesada del SDV-S (continuidad, peso 0.30).
+    """
+    rutas = [rel for rel, _ in canon_mod.CANON_FILES]
+    assert "docs/architecture/atribuciones_sinteticas.md" in rutas
+
+
+def test_read_canon_lee_la_estirpe_cuando_el_registro_existe(repo):
+    """Si el registro vive en el repo, entra al corpus con su cabecera (G6 operativa)."""
+    ruta = Path(repo) / "docs" / "architecture" / "atribuciones_sinteticas.md"
+    ruta.write_text(
+        "Reino Sintetico: aqui vive la constelacion de contribuciones verificadas.\n",
+        encoding="utf-8",
+    )
+    canon = canon_mod.read_canon(repo)
+    assert "### FUENTE: docs/architecture/atribuciones_sinteticas.md" in canon
+    assert "constelacion" in canon
 
 
 def test_read_agenda_extrae_pendientes(repo):
@@ -250,3 +272,20 @@ def test_dry_run_no_llama_a_motores(repo, tmp_path, monkeypatch):
 def test_sin_motores_lanza_error(repo, tmp_path):
     with pytest.raises(cycle_mod.CorpoUnavailableError, match="Ningún motor"):
         run_cycle(repo, workspace=str(tmp_path / "ws"), env={})
+
+
+def test_pausa_free_por_defecto():
+    """Ritmo OpenRouter free: 4s en producción, 0 en tests con env explícito."""
+    assert cycle_mod._pausa_entre_llamadas(None) == 4.0
+    assert cycle_mod._pausa_entre_llamadas({}) == 0.0
+    assert cycle_mod._pausa_entre_llamadas({"CONCILIO_PAUSA_SEGUNDOS": "10"}) == 10.0
+
+
+def test_presupuesto_free_del_ciclo():
+    """El ciclo cabe en la cuota free: corpus 90K, firma 2000 / voto 4000, timeout 120s."""
+    assert cycle_mod.CALL_TIMEOUT == 120
+    assert cycle_mod.MAX_TOKENS_FIRMA <= 2000
+    assert cycle_mod.MAX_TOKENS_VOTO == 4000  # razonadores truncan con menos (diseño §5)
+    import inspect
+
+    assert inspect.signature(run_cycle).parameters["canon_max_chars"].default == 90_000

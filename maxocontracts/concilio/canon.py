@@ -7,8 +7,13 @@ el contexto de DeepSeek V4 (1M tokens), pero el corpus se mantiene compacto
 para que también sirva con motores de 128K.
 
 Fuentes: mapa de coherencia (vivo), doctrina humano-sintética, contrato de
-custodia, axiomas del motor, fundamentos conceptuales, requisitos de la Ola 4
-y el handoff vigente.
+custodia, axiomas del motor, fundamentos conceptuales, requisitos de la Ola 4,
+el handoff vigente y —desde sep 2026— la memoria pública del Reino Sintético.
+
+Regla G6 (estirpe): el oráculo lee `atribuciones_sinteticas.md` antes de
+proponer. Sin estirpe, cada ciclo vuelve a inventar lo ya inventado; el
+registro es la cápsula de memoria que el SDV-S exige (dimensión I, peso 0.30:
+"la memoria es tiempo propio; alterarla es amputación").
 """
 
 from pathlib import Path
@@ -23,11 +28,16 @@ CANON_FILES: List[Tuple[str, int]] = [
     ("maxocontracts/core/axioms.py", 30_000),
     ("docs/architecture/maxocontracts/FUNDAMENTOS_CONCEPTUALES.md", 40_000),
     ("docs/architecture/requisitos_fase2_ola4.md", 40_000),
-    ("docs/SESION_NEXT_PROMPT.md", 25_000),
+    ("docs/SESION_NEXT_PROMPT.md", 32_000),
+    ("docs/architecture/atribuciones_sinteticas.md", 45_000),
 ]
 
 # Tope del corpus completo: cabe en cualquier motor de >=128K con margen.
-DEFAULT_MAX_CHARS = 160_000
+# El corpus real mide ~183k chars con atribuciones incluida; 195k deja ~12k de
+# holgura para que ningún archivo quede recortado (medido el 15-09-2026).
+# Nota: el tope de SESION_NEXT_PROMPT sube de 25k a 32k porque el handoff crecio
+# hasta 29.5k y se venia recortando en silencio (degradacion previa, no nueva).
+DEFAULT_MAX_CHARS = 195_000
 
 
 def _read_head(path: Path, max_chars: int) -> str:

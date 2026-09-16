@@ -26,10 +26,17 @@ from .bitacora import Bitacora
 from .canon import read_agenda, read_canon
 from .control import ACTIVE, Control
 
-# Presupuesto de una llamada del Concilio (canon de 40K tokens + razonamiento):
-# con un proveedor degradado (529/timeouts) el fallback debe activarse rápido:
-# 1 reintento con 180s y luego la cadena cambia de motor.
-CALL_TIMEOUT = 180
+# Presupuesto de una llamada del Concilio. Con OpenRouter :free como principal
+# (decisión del custodio 15-09-2026, sin ingresos aún para DeepSeek): timeout
+# corto para rotar rápido ante 529/timeouts, respuestas acotadas (el JSON de
+# firma/voto cabe en 2000 tokens) y pausa entre oráculos para respetar los
+# 20 req/min free (50/día sin créditos, 1000/día con 10+). Cada intento
+# fallido también consume cuota: no insistir, rotar.
+CALL_TIMEOUT = 120
+MAX_TOKENS_FIRMA = 2000
+# El voto F2 necesita 4000: los modelos de razonamiento dejan `content` vacío
+# o truncan el JSON con presupuestos cortos (diseño §5: `max_tokens ≥ 4000`).
+MAX_TOKENS_VOTO = 4000
 
 # Roles del AVA (Cap 14.3/14.4): el Disidente es un rol, no un contreras.
 ORACLE_ROLES = ("Economic", "Social", "Environmental", "Futurist", "Dissident")
@@ -241,7 +248,7 @@ def _release_lock(lock_path: Path) -> None:
 # --- Punto de llamada (mockeable en tests) ---
 
 def _engine_order_from_env(env: Optional[Dict[str, str]] = None) -> Tuple[str, ...]:
-    """Orden de motores: CONCILIO_ENGINE_ORDER (ej. 'deepseek,nvidia,openrouter').
+    """Orden de motores: CONCILIO_ENGINE_ORDER (ej. 'openrouter,nvidia,deepseek').
 
     Diseño del custodio (futuro): varios proveedores y varias claves por
     proveedor; este orden permite priorizar el más fiable del momento sin
@@ -256,7 +263,28 @@ def _engine_order_from_env(env: Optional[Dict[str, str]] = None) -> Tuple[str, .
     return tuple(valid) if valid else engines.DEFAULT_ORDER
 
 
-def _call(engine_cfg, system: str, user: str, want_json: bool = True):
+def _pausa_entre_llamadas(env: Optional[Dict[str, str]] = None) -> float:
+    """Pausa en segundos entre llamadas a oráculos (ritmo free de OpenRouter).
+
+    Lee CONCILIO_PAUSA_SEGUNDOS. En producción (env None → os.environ) el
+    default es 4.0s (20 req/min = 1 cada 3s + margen; la latencia LLM ya
+    aporta el resto). En tests (env dict explícito sin la clave) el default
+    es 0 para no ralentizar la suite.
+    """
+    import os
+
+    if env is not None:
+        try:
+            return max(0.0, float(env.get("CONCILIO_PAUSA_SEGUNDOS", 0) or 0))
+        except (TypeError, ValueError):
+            return 0.0
+    try:
+        return max(0.0, float(os.environ.get("CONCILIO_PAUSA_SEGUNDOS", 4.0) or 4.0))
+    except (TypeError, ValueError):
+        return 4.0
+
+
+def _call(engine_cfg, system: str, user: str, want_json: bool = True, max_tokens: int = MAX_TOKENS_VOTO):
     """Llamada con motor designado y fallback a la cadena.
 
     Devuelve (texto, motor_que_respondio, hubo_fallback). La firma T13 es
@@ -271,7 +299,7 @@ def _call(engine_cfg, system: str, user: str, want_json: bool = True):
             engine_cfg,
             messages,
             want_json=want_json,
-            max_tokens=4000,
+            max_tokens=max_tokens,
             timeout=CALL_TIMEOUT,
             max_retries=1,
             backoff_seconds=3.0,
@@ -287,8 +315,9 @@ def _call(engine_cfg, system: str, user: str, want_json: bool = True):
             user,
             order=order or None,
             want_json=want_json,
-            max_tokens=4000,
+            max_tokens=max_tokens,
             timeout=CALL_TIMEOUT,
+            max_retries=1,
         )
         return text, cfg, True
 
@@ -331,10 +360,17 @@ def run_cycle(
     env: Optional[Dict[str, str]] = None,
     max_oracles: int = 5,
     dry_run: bool = False,
-    canon_max_chars: int = 160_000,
+    canon_max_chars: int = 90_000,
     engine_order: Optional[Tuple[str, ...]] = None,
+    pausa_segundos: Optional[float] = None,
 ) -> Dict[str, Any]:
-    """Ejecuta F0-F2 y devuelve el resumen del ciclo (con rutas de artefactos)."""
+    """Ejecuta F0-F2 y devuelve el resumen del ciclo (con rutas de artefactos).
+
+    Presupuesto free (OpenRouter principal): 10 llamadas F0-F2 con corpus de
+    90K chars (~22K tokens); firmas de 2000 tokens, votos de 4000 (los modelos
+    de razonamiento truncan el JSON con menos); pausa entre oráculos (default
+    4s en producción, 0 en tests con env explícito) para los 20 RPM.
+    """
     root_path = Path(root)
     workspace_path = Path(workspace)
 
@@ -419,16 +455,21 @@ def run_cycle(
                 ]
 
         # F1 — Firma de comprensión (por oráculo, sin ver el trabajo ajeno)
+        pausa = pausa_segundos if pausa_segundos is not None else _pausa_entre_llamadas(env)
         firmas: List[Dict[str, Any]] = []
-        for role, engine in roles:
+        for i, (role, engine) in enumerate(roles):
             _gate(control, bitacora, "F1")
+            if i and pausa and not dry_run:
+                time.sleep(pausa)
             system = FIRMA_SYSTEM.format(role=role)
             user = _firma_user(canon)
             if dry_run:
                 firma = {"summary": "[dry-run]", "axiom_quotes": [], "critical_question": "", "confidence": 0.0}
                 t13 = {"engine": engine.name, "model": engine.model, "dry_run": True}
             else:
-                text, engine_used, fallback = _call(engine, system, user, want_json=True)
+                text, engine_used, fallback = _call(
+                    engine, system, user, want_json=True, max_tokens=MAX_TOKENS_FIRMA
+                )
                 parsed = _parse_json(text)
                 firma = parsed.get("firma") or {"summary": text[:400], "axiom_quotes": [], "critical_question": "", "confidence": 0.0}
                 t13 = {"engine": engine_used.name, "model": engine_used.model, "fallback": fallback}
@@ -439,15 +480,19 @@ def run_cycle(
 
         # F2 — Propuestas y votación (independientes entre sí)
         votos: List[Dict[str, Any]] = []
-        for role, engine in roles:
+        for i, (role, engine) in enumerate(roles):
             _gate(control, bitacora, "F2")
+            if i and pausa and not dry_run:
+                time.sleep(pausa)
             system = AGENDA_SYSTEM.format(role=role, agenda=agenda or "(sin agenda: propón desde el canon)")
             user = _agenda_user(canon, agenda, directivas)
             if dry_run:
                 resp = {"axioms": {"ok": True, "reasoning": "[dry-run]"}, "proposals": [], "veto": None}
                 t13 = {"engine": engine.name, "model": engine.model, "dry_run": True}
             else:
-                text, engine_used, fallback = _call(engine, system, user, want_json=True)
+                text, engine_used, fallback = _call(
+                    engine, system, user, want_json=True, max_tokens=MAX_TOKENS_VOTO
+                )
                 resp = _parse_json(text)
                 t13 = {"engine": engine_used.name, "model": engine_used.model, "fallback": fallback}
             axioms_ok = bool(resp.get("axioms", {}).get("ok", False))

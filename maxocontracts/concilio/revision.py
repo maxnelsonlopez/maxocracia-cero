@@ -124,15 +124,18 @@ def revisar_candidato(
 
 
 def _call_revision(engine_cfg, system: str, user: str):
-    """Motor designado con fallback a la cadena (igual que el ciclo F1/F2)."""
+    """Motor designado con fallback a la cadena (igual que el ciclo F1/F2).
+
+    Presupuesto free: 2000 tokens de veredicto, timeout 120s, 1 reintento.
+    """
     messages = [
         {"role": "system", "content": system},
         {"role": "user", "content": user},
     ]
     try:
         text = engines.call_engine(
-            engine_cfg, messages, want_json=True, max_tokens=3000,
-            timeout=180, max_retries=1, backoff_seconds=3.0,
+            engine_cfg, messages, want_json=True, max_tokens=2000,
+            timeout=120, max_retries=1, backoff_seconds=3.0,
         )
         return text, engine_cfg, False
     except engines.EngineError:
@@ -141,6 +144,6 @@ def _call_revision(engine_cfg, system: str, user: str):
         )
         text, cfg = engines.chain_call(
             system, user, order=order or None, want_json=True,
-            max_tokens=3000, timeout=180,
+            max_tokens=2000, timeout=120, max_retries=1,
         )
         return text, cfg, True

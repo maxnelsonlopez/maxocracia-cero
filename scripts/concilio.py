@@ -224,10 +224,10 @@ def main(argv=None) -> int:
     p_ciclo.add_argument("--root", default=".")
     p_ciclo.add_argument("--oracles", type=int, default=5)
     p_ciclo.add_argument("--dry-run", action="store_true")
-    p_ciclo.add_argument("--canon-chars", type=int, default=160_000)
+    p_ciclo.add_argument("--canon-chars", type=int, default=90_000)
     p_ciclo.add_argument(
         "--orden", default=None,
-        help="cadena de motores: deepseek,nvidia,openrouter (default: CONCILIO_ENGINE_ORDER)",
+        help="cadena de motores: openrouter,nvidia,deepseek (default: CONCILIO_ENGINE_ORDER)",
     )
 
     sub.add_parser("status", help="estado del Concilio y últimos ciclos")
@@ -261,7 +261,7 @@ def main(argv=None) -> int:
         args.root = "."
         args.oracles = 5
         args.dry_run = False
-        args.canon_chars = 160_000
+        args.canon_chars = 90_000
         args.orden = None
 
     if args.accion == "ciclo":
