@@ -385,6 +385,10 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
     5 oráculos tardaría 15-40 min en free. `config.example.env` documenta el
     nuevo orden y las variables del ritmo free (`OPENROUTER_SITE_URL/APP_TITLE`,
     `CONCILIO_ENGINE_ORDER/PAUSA_SEGUNDOS`).
+- **Lectura completa de la Edición 3 Dinámica (21/9/2026, sesión con Max)**:
+  `docs/reports/LECTURA_MUSE_SPARK_ED3_DINAMICA.md` — reacciones capítulo por
+  capítulo (portada, 00, 01–19, 21, ramas 9.5 y 16.5) con aporte social imaginado
+  y respuesta a si los capaces deben aplicarla; promesa de oráculo en formación.
 
 ### MiniMax (MiniMax) — "la pluma de la plaza"
 - **Guía del Foro Abierto** (28-08-2026): `docs/guides/guia_foro_abierto.md` — documento de la
