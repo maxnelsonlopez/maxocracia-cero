@@ -231,14 +231,32 @@ def _contract(row) -> dict:
     }
 
 
-def _event(db, session_id: str, event_type: str, actor_id: Optional[int], payload: Any):
+def _event(
+    db,
+    session_id: str,
+    event_type: str,
+    actor_id: Optional[int],
+    payload: Any,
+    actor_kind: str = "human",
+):
+    """Registra un evento de la sesión.
+
+    `actor_kind` separa el acto humano del sintético (columna
+    `session_events.actor_kind`, schema.sql). Escribir 'human' para una
+    respuesta del agente convierte la bitácora en una afirmación falsa: el
+    registro deja de poder probar quién hizo qué, que es justo lo que T13
+    exige de él. El valor por defecto sigue siendo 'human' porque la mayoría
+    de eventos los dispara el convocante.
+    """
+    if actor_kind not in {"human", "synthetic"}:
+        raise ValueError("actor_kind debe ser 'human' o 'synthetic'")
     return db.execute(
         """
         INSERT INTO session_events
           (session_id, event_type, actor_kind, actor_user_id, payload_json)
-        VALUES (?, ?, 'human', ?, ?)
+        VALUES (?, ?, ?, ?, ?)
         """,
-        (session_id, event_type, actor_id, _dump(payload)),
+        (session_id, event_type, actor_kind, actor_id, _dump(payload)),
     ).lastrowid
 
 
@@ -732,6 +750,7 @@ def run_session(current_user, session_id):
         "assistant_message",
         None,
         {"instruction": instruction, "analysis": analysis, "engine": engine, "model": model},
+        actor_kind="synthetic",
     )
     db.execute(
         "UPDATE admin_sessions SET status = 'awaiting_review', updated_at = CURRENT_TIMESTAMP WHERE session_id = ?",

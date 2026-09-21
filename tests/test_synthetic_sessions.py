@@ -147,3 +147,56 @@ def test_budget_and_revocation_stop_future_runs(monkeypatch, admin_client):
         json={"instruction": "No debe ejecutarse."},
     )
     assert response.status_code == 409
+
+
+def test_bitacora_distingue_actor_humano_de_sintetico(monkeypatch, admin_client, app):
+    """T13: la bitácora debe poder probar QUIÉN actuó.
+
+    Antes de este arreglo, `_event` escribía `actor_kind = 'human'` fijo: todo
+    acto del agente quedaba registrado como acto humano, y el registro no
+    servía como prueba de autoría (ni como defensa ante una suplantación).
+    """
+    session = _create(admin_client)
+    monkeypatch.setattr(
+        synthetic_sessions,
+        "_call_session_oracle",
+        lambda messages: ({"opinion": "ok"}, "deepseek", "deepseek-chat"),
+    )
+    response = admin_client.post(
+        f"/api/synthetic-sessions/{session['session_id']}/run",
+        json={"instruction": "Resume."},
+    )
+    assert response.status_code == 200
+
+    with app.app_context():
+        from app.utils import get_db
+
+        db = get_db()
+        respuesta = db.execute(
+            "SELECT actor_kind, actor_user_id FROM session_events "
+            "WHERE session_id = ? AND event_type = 'assistant_message'",
+            (session["session_id"],),
+        ).fetchone()
+        creacion = db.execute(
+            "SELECT actor_kind FROM session_events "
+            "WHERE session_id = ? AND event_type = 'session_created'",
+            (session["session_id"],),
+        ).fetchone()
+
+    assert respuesta["actor_kind"] == "synthetic"
+    assert respuesta["actor_user_id"] is None
+    assert creacion["actor_kind"] == "human"
+
+
+def test_actor_kind_invalido_es_rechazado(app):
+    with app.app_context():
+        from app.utils import get_db
+
+        try:
+            synthetic_sessions._event(
+                get_db(), "ADM-NOEXISTE", "prueba", 1, {}, actor_kind="robot"
+            )
+        except ValueError as exc:
+            assert "actor_kind" in str(exc)
+        else:  # pragma: no cover - no debería llegar
+            raise AssertionError("actor_kind inválido debió rechazarse")
