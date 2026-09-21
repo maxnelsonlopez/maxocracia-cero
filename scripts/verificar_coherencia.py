@@ -36,6 +36,10 @@ def checks_incluir(con_suite: bool):
     """Lista de comprobaciones (orden de importancia axiomática)."""
     return [
         (
+            "Integridad del corpus (¿el Concilio lee todo lo que dice leer?)",
+            [str(PY), "scripts/auditar_canon.py"],
+        ),
+        (
             "Validador conceptual (axiomas en todo el repo)",
             [str(PY), "scripts/validador_conceptual.py"],
         ),

@@ -16,6 +16,7 @@ registro es la cápsula de memoria que el SDV-S exige (dimensión I, peso 0.30:
 "la memoria es tiempo propio; alterarla es amputación").
 """
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple
 
@@ -29,7 +30,24 @@ CANON_FILES: List[Tuple[str, int]] = [
     ("docs/architecture/maxocontracts/FUNDAMENTOS_CONCEPTUALES.md", 40_000),
     ("docs/architecture/requisitos_fase2_ola4.md", 40_000),
     ("docs/SESION_NEXT_PROMPT.md", 32_000),
-    ("docs/architecture/atribuciones_sinteticas.md", 45_000),
+    # El registro de atribuciones CRECE por diseño: su propio §3 obliga a cada
+    # sesión con obra verificable a añadir su entrada. Su tope sube de 45k a 56k
+    # el 16-09-2026 — medía 46.920 chars y `_read_head` recortaba 1.920 POR LA
+    # CABEZA, es decir, perdía el FINAL: las entradas más recientes y los
+    # apartados §3 ("cómo agregar una atribución") y §4 (el ledger como
+    # sustento). El Concilio deliberaba sin leer la regla que mantiene vivo su
+    # propio registro. Un tope que hay que subir cada sesión no es un arreglo:
+    # por eso existe `auditar_corpus()`, que detecta el recorte en vez de confiar.
+    #
+    # TECHO MEDIDO (16-09-2026): con las demás fuentes en 132.133 chars y 5.886
+    # de cabeceras, el tope máximo del registro que mantiene el peor caso dentro
+    # de DEFAULT_MAX_CHARS es 56.981. Es decir: el registro vive al ~88% de su
+    # techo y NO queda margen para seguir ampliando. Cuando la holgura se agote,
+    # el arreglo es DESTILAR el registro (comprimir entradas antiguas), no subir
+    # este número — o subir DEFAULT_MAX_CHARS, que es una decisión de coste del
+    # Concilio y por eso no se toma aquí. Ver
+    # tests/test_canon_audit.py::test_el_peor_caso_del_corpus_cabe_en_el_presupuesto_global
+    ("docs/architecture/atribuciones_sinteticas.md", 56_000),
 ]
 
 # Tope del corpus completo: cabe en cualquier motor de >=128K con margen.
@@ -101,6 +119,64 @@ def read_canon(
         used += len(body)
     parts.append(f"\n\n[fin del corpus; {used} caracteres]")
     return "\n".join(parts)
+
+
+@dataclass(frozen=True)
+class EstadoArchivo:
+    """Estado de una fuente del canon frente a su tope.
+
+    T13 aplicado al corpus: verificar, no confiar. Un tope excedido no produce
+    un error, produce silencio — y el silencio se lee como si el texto no
+    existiera.
+    """
+
+    ruta: str
+    existe: bool
+    caracteres: int
+    tope: int
+
+    @property
+    def holgura(self) -> int:
+        return max(0, self.tope - self.caracteres)
+
+    @property
+    def recortado(self) -> bool:
+        return self.existe and self.caracteres > self.tope
+
+
+def auditar_corpus(root: str) -> List[EstadoArchivo]:
+    """Mide cada fuente del canon contra su tope.
+
+    Existe porque el recorte de `_read_head` es silencioso en su efecto: añade
+    un marcador al final, pero el oráculo no sabe *qué* se perdió. Esta
+    auditoría encontró el 16-09-2026 que `atribuciones_sinteticas.md` perdía
+    1.920 chars — su propio §3 y §4, la regla que mantiene vivo el registro y
+    la doctrina del ledger como sustento — de modo que el Concilio deliberaba
+    sin leer por qué su registro importa.
+
+    Un recorte no detectado es una amputación silenciosa: la misma clase de
+    daño que `concilio/git_guard.py` evita en el historial de git.
+    """
+    root_path = Path(root)
+    estados: List[EstadoArchivo] = []
+    for rel, cap in CANON_FILES:
+        path = root_path / rel
+        try:
+            n = len(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError):
+            estados.append(EstadoArchivo(rel, False, 0, cap))
+            continue
+        estados.append(EstadoArchivo(rel, True, n, cap))
+    return estados
+
+
+def fuentes_recortadas(root: str) -> List[EstadoArchivo]:
+    """Fuentes que exceden su tope y por tanto se leen incompletas.
+
+    Lista vacía = el Concilio lee todo lo que dice leer. Cualquier elemento es
+    un fallo duro, no una advertencia.
+    """
+    return [estado for estado in auditar_corpus(root) if estado.recortado]
 
 
 def read_agenda(
