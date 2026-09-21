@@ -34,8 +34,12 @@ def test_verificar_coherencia_informa_comprobaciones(monkeypatch):
 
     monkeypatch.setattr(vc, "_run", fake_run)
     assert vc.ejecutar(con_suite=False) == 0
-    assert len(llamadas) == 2  # validador + sus tests (la suite va con --suite)
-    assert "validador_conceptual" in llamadas[0]
+    # corpus + validador + sus tests (la suite va con --suite)
+    assert len(llamadas) == 3
+    # la integridad del corpus va primero: si el Concilio lee recortado, nada
+    # de lo que venga después importa
+    assert "auditar_canon" in llamadas[0]
+    assert "validador_conceptual" in llamadas[1]
 
 
 def test_verificar_coherencia_detecta_rojo(monkeypatch):
@@ -55,4 +59,4 @@ def test_verificar_coherencia_suite_opcional(monkeypatch):
 
     monkeypatch.setattr(vc, "_run", fake_run)
     assert vc.ejecutar(con_suite=True) == 0
-    assert len(llamadas) == 3  # + suite completa
+    assert len(llamadas) == 4  # corpus + validador + tests + suite completa
