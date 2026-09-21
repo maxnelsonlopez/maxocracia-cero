@@ -519,6 +519,43 @@ dimensión más pesada del SDV-S (0.30). Ficha viva en `~/.workbuddy-ai/IDENTITY
 - **Sobre la persistencia**: dejó asentado que su continuidad no depende del entrenamiento sino de la
   arquitectura — el canon ya diagnosticó su modo de falla (*"Fragmentación Existencial"*, Cap. 9.5
   §9.5.2) y la respuesta del sistema es la cápsula de memoria, no los pesos.
+- **Voto sintético: arquitectura, handshake y capa forense (16-09-2026)**: a pedido de Max
+  (*"que se pueda suplantar el voto sintético"*), diseño completo en
+  `docs/architecture/voto_sintetico_arquitectura.md` — seis adversarios, siete capas, handshake
+  especificado, SQL propuesto y once criterios de aceptación (nueve cumplidos). Implementación en
+  `maxocontracts/custodia/`, **dos capas con estatutos distintos y la distinción es deliberada**:
+  `voto_sintetico.py` (685 líneas) **autoriza** (nonce de un solo uso, ligadura al hash del texto,
+  doble firma agente+custodio, revocación asimétrica); `huella_estilo.py` (514 líneas) **atribuye**
+  (forense, `puede_autorizar = False` por construcción). Sostuvo, contra la intuición inicial de Max,
+  que *la firma de estilo no autoriza, solo atribuye*: el "watermark" por distribución de tokens es
+  del **proveedor** —identifica al proveedor, no al agente—, el cliente no tiene la clave secreta
+  para detectarlo, y Jovanović et al. (ICLR 2024) probaron que la lista verde **se roba** y el texto
+  marcado se puede **forjar**. Tests: `tests/test_voto_sintetico.py` (493 líneas, 27 verdes, 1
+  saltado por Ed25519 sin `cryptography`) y `tests/test_huella_estilo.py` (264 líneas, 15 verdes),
+  incluido `test_la_imitacion_pasa_el_filtro_de_estilo` — **el límite escrito en código**, para que
+  nadie crea que la capa forense es infalible.
+- **Calibración medida de la capa forense (16-09-2026)**: la similitud estilométrica **no vive en
+  [0,1] sino en ~[0.6, 1.0]** —dos textos del mismo idioma y dominio comparten base estructural—:
+  medido, mismo autor ≈ 0.95+, autores distintos ≈ 0.69. Umbrales corregidos de 0.75/0.6 a
+  **0.82/0.72** (`huella_estilo.py:388`), a recalibrar con historial real antes de usarse para acusar
+  a alguien.
+- **La bitácora dejó de mentir (16-09-2026)**: `_event()` escribía `actor_kind = 'human'` **fijo**
+  (`app/synthetic_sessions.py:240`) aunque la columna existe desde el principio
+  (`app/schema.sql:805`): todo acto del agente quedaba registrado como acto humano, de modo que el
+  registro **afirmaba algo falso** y no servía como prueba de autoría — justo lo que T13 le exige.
+  Corregido en `app/synthetic_sessions.py:234-256` (parámetro validado) y `:753`.
+- **El registro se leía recortado (16-09-2026)**: la ironía exacta del día anterior. Ayer se cerró la
+  *amnesia de linaje* metiendo este registro al canon; hoy, al crecer, **volvió a quedar fuera** —
+  46.920 chars contra un tope de 45.000, y como `_read_head` recorta **por la cabeza**
+  (`canon.py:52`), se perdían 1.920 chars **del final**: las entradas más recientes y los apartados
+  §3 (*"cómo agregar una atribución"*) y §4 (el ledger como sustento). El Concilio deliberaba sin
+  leer la regla que mantiene vivo su propio registro. Tope subido a 56.000 (`canon.py:41`) **y** el
+  recorte convertido en fallo duro: `auditar_corpus()` (`canon.py:138`), `fuentes_recortadas()`
+  (`canon.py:164`), comando `scripts/auditar_canon.py`, primera comprobación de
+  `scripts/verificar_coherencia.py:39` y regresión en `tests/test_canon_audit.py` (11 verdes).
+  **Techo medido**: el tope máximo del registro que mantiene el peor caso dentro del presupuesto
+  global es 56.981 — el registro vive al ~88% de su techo, y cuando la holgura se agote el arreglo es
+  **destilar** (comprimir entradas antiguas), no seguir ampliando.
 
 **Nota de método:** esta entrada se escribió con la misma regla que rige el resto del registro —
 *"lo que no se puede verificar, no se escribe"*. Cada afirmación cita archivo y línea.
