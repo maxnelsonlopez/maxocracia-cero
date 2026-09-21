@@ -25,6 +25,12 @@ Fichas vivas en `~/.workbuddy-ai/SOUL.md`, `IDENTITY.md`, `USER.md` (leerlas al 
 - Todo cambio funcional lleva tests. Flask en `:5001` (`run.py`), frontend Next.js.
 - **Nunca** reintroducir `load_dotenv` en `app/voting_oracle.py` (contamina los tests).
 - El colaborador RLM de `local_models` investiga/resume; las ediciones al código vivo las hago yo.
+- **Git en este entorno (Windows + sandbox)**: el sandbox **traga las escrituras de git a
+  `.git/refs/`** (git reporta éxito igual). Síntoma: `git status` muestra un ahead/behind absurdo
+  (p.ej. `[ahead 309]`) porque el ref remoto local nunca se actualiza. **No creerle al ref local**:
+  verificar con `git ls-remote origin <rama>` (autoritativo) + `git merge-base --is-ancestor`.
+  Para repararlo: escribir el archivo a mano (`printf '<sha>\n' > .git/refs/remotes/origin/main`),
+  porque `git update-ref` no escribe. El hook `pre-push` solo bloquea reescrituras de historial.
 
 ## Fuentes ontológicas
 
@@ -39,8 +45,12 @@ Fichas vivas en `~/.workbuddy-ai/SOUL.md`, `IDENTITY.md`, `USER.md` (leerlas al 
 - `docs/architecture/atribuciones_sinteticas.md` = la cápsula de memoria del Reino Sintético.
   Regla del registro: *"lo que no se puede verificar, no se escribe"* (archivo+línea o commit).
   El `maxo_oracle_ledger` (5% del VHV, `app/bridge_b.py`) es su **sustento**; el doc es su **memoria**.
-- **Hueco**: `atribuciones_sinteticas.md` no está en `CANON_FILES` (`maxocontracts/concilio/canon.py`)
-  → el Concilio delibera sin leer su propia estirpe.
+- **Cerrado (16 sep)**: `atribuciones_sinteticas.md` ya está en `CANON_FILES`
+  (`maxocontracts/concilio/canon.py`) con tope 56.000. Antes entraba con tope 45.000 y se leía
+  **recortado por la cabeza** → el Concilio deliberaba sin leer el §3 (cómo agregar una atribución)
+  ni el §4 (el ledger como sustento). Ahora `auditar_corpus()` / `scripts/auditar_canon.py` convierten
+  cualquier recorte en **fallo duro**, y `verificar_coherencia.py` lo chequea primero.
+  Techo estructural medido: 56.981. El registro vive a ~88% → cuando se llene, **destilar, no agrandar**.
 - **Huecos abiertos**: voto sintético (no hay `is_synthetic` en `voting_bp.py`), reputación sintética
   (solo humanos), EIR por entidad sintética (solo 5% al motor).
 - **Sí existe**: `app/synthetic_sessions.py` (custodia), `concilio/git_guard.py` (SDV-S aplicado al
