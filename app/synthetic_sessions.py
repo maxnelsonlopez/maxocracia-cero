@@ -172,7 +172,9 @@ def _normalise_context(raw: Any) -> Tuple[Optional[dict], Optional[str]]:
     if not isinstance(raw, dict):
         return None, "context debe ser un objeto"
     documents = raw.get("documents", [])
-    if not isinstance(documents, list) or any(not isinstance(v, str) for v in documents):
+    if not isinstance(documents, list) or any(
+        not isinstance(v, str) for v in documents
+    ):
         return None, "context.documents debe ser una lista de textos"
     if len(documents) > 10:
         return None, "context.documents no puede superar 10 elementos"
@@ -329,9 +331,15 @@ def _execute_tool(db, tool: str, args: dict) -> dict:
             "privacy": "resumen agregado; no incluye nombres, contactos ni identificadores",
             "active_consented_participants": int(total or 0),
             "need_urgency": {row["value"]: int(row["total"]) for row in urgency},
-            "cities_with_at_least_two": {row["city"]: int(row["total"]) for row in cities},
-            "offer_categories_with_at_least_two": _category_counts(db, "offer_categories"),
-            "need_categories_with_at_least_two": _category_counts(db, "need_categories"),
+            "cities_with_at_least_two": {
+                row["city"]: int(row["total"]) for row in cities
+            },
+            "offer_categories_with_at_least_two": _category_counts(
+                db, "offer_categories"
+            ),
+            "need_categories_with_at_least_two": _category_counts(
+                db, "need_categories"
+            ),
         }
 
     if tool == "read_followup_alerts":
@@ -363,7 +371,9 @@ def _execute_tool(db, tool: str, args: dict) -> dict:
             (participant_id,),
         ).fetchone()
         if exists is None:
-            raise ValueError("participante no encontrado o sin consentimiento operativo")
+            raise ValueError(
+                "participante no encontrado o sin consentimiento operativo"
+            )
         priority = str(args.get("follow_up_priority") or "medium")
         if priority not in {"high", "medium", "low"}:
             raise ValueError("follow_up_priority debe ser high, medium o low")
@@ -405,7 +415,9 @@ def _call_endpoint(base_url: str, api_key: str, model: str, messages: list) -> d
         timeout=int(os.environ.get("SYNTHETIC_SESSION_TIMEOUT", ORACLE_TIMEOUT)),
     )
     if response.status_code >= 400:
-        raise RuntimeError(f"{model} respondió {response.status_code}: {response.text[:200]}")
+        raise RuntimeError(
+            f"{model} respondió {response.status_code}: {response.text[:200]}"
+        )
     try:
         content = response.json()["choices"][0]["message"].get("content") or "{}"
         return json.loads(content)
@@ -430,7 +442,11 @@ def _call_session_oracle(messages: list) -> Tuple[dict, str, str]:
             errors.append("deepseek")
     if local_enabled:
         try:
-            return _call_endpoint(local_base, "", local_model, messages), "local", local_model
+            return (
+                _call_endpoint(local_base, "", local_model, messages),
+                "local",
+                local_model,
+            )
         except Exception as exc:
             logger.warning("Oráculo local no disponible para sesión sintética: %s", exc)
             errors.append("local")
@@ -536,7 +552,10 @@ def create_session(current_user):
     except (TypeError, ValueError):
         return jsonify({"error": "budget debe contener números válidos"}), 400
     if not 1 <= max_requests <= MAX_REQUESTS:
-        return jsonify({"error": f"max_requests debe estar entre 1 y {MAX_REQUESTS}"}), 400
+        return (
+            jsonify({"error": f"max_requests debe estar entre 1 y {MAX_REQUESTS}"}),
+            400,
+        )
     if not 0 <= max_cost_usd <= MAX_COST_USD:
         return jsonify({"error": f"max_cost_usd no puede superar {MAX_COST_USD}"}), 400
 
@@ -604,7 +623,10 @@ def create_session(current_user):
         },
     )
     db.commit()
-    return jsonify({"success": True, "session": _contract(_session(db, session_id))}), 201
+    return (
+        jsonify({"success": True, "session": _contract(_session(db, session_id))}),
+        201,
+    )
 
 
 @synthetic_sessions_bp.get("")
@@ -660,7 +682,13 @@ def run_tool(current_user, session_id):
         result = _execute_tool(db, tool, args)
     except ValueError as exc:
         return jsonify({"error": "tool_invalid_args", "detail": str(exc)}), 400
-    _event(db, session_id, "tool_call", _user_id(current_user), {"tool": tool, "result": result})
+    _event(
+        db,
+        session_id,
+        "tool_call",
+        _user_id(current_user),
+        {"tool": tool, "result": result},
+    )
     db.commit()
     return jsonify({"success": True, "result": result, "mutated": False})
 
@@ -681,7 +709,10 @@ def run_session(current_user, session_id):
     tools = payload.get("tools") or []
     tool_args = payload.get("tool_args") or {}
     if not isinstance(tools, list) or len(tools) > 3:
-        return jsonify({"error": "tools debe ser una lista de hasta tres herramientas"}), 400
+        return (
+            jsonify({"error": "tools debe ser una lista de hasta tres herramientas"}),
+            400,
+        )
     if not isinstance(tool_args, dict):
         return jsonify({"error": "tool_args debe ser un objeto"}), 400
     outputs = []
@@ -689,13 +720,22 @@ def run_session(current_user, session_id):
         if not isinstance(tool, str) or tool not in ALL_TOOLS:
             return jsonify({"error": "tool no permitido", "tool": tool}), 400
         if not _allowed(row, tool):
-            return jsonify({"error": "tool fuera del alcance de la sesión", "tool": tool}), 403
+            return (
+                jsonify({"error": "tool fuera del alcance de la sesión", "tool": tool}),
+                403,
+            )
         try:
             result = _execute_tool(db, tool, tool_args.get(tool) or {})
         except ValueError as exc:
             return jsonify({"error": "tool_invalid_args", "detail": str(exc)}), 400
         outputs.append(result)
-        _event(db, session_id, "tool_call", _user_id(current_user), {"tool": tool, "result": result})
+        _event(
+            db,
+            session_id,
+            "tool_call",
+            _user_id(current_user),
+            {"tool": tool, "result": result},
+        )
 
     updated = db.execute(
         """
@@ -734,13 +774,25 @@ def run_session(current_user, session_id):
         raw, engine, model = _call_session_oracle(messages)
         analysis = _sanitise_analysis(raw)
     except RuntimeError as exc:
-        _event(db, session_id, "oracle_failure", _user_id(current_user), {"error": str(exc)[:200]})
+        _event(
+            db,
+            session_id,
+            "oracle_failure",
+            _user_id(current_user),
+            {"error": str(exc)[:200]},
+        )
         db.commit()
         if "oracle_disabled" in str(exc):
             return jsonify({"error": "oracle_disabled"}), 503
         return jsonify({"error": "oracle_failure"}), 502
     except ValueError as exc:
-        _event(db, session_id, "oracle_bad_response", _user_id(current_user), {"error": str(exc)[:200]})
+        _event(
+            db,
+            session_id,
+            "oracle_bad_response",
+            _user_id(current_user),
+            {"error": str(exc)[:200]},
+        )
         db.commit()
         return jsonify({"error": "oracle_bad_json"}), 502
 
@@ -749,7 +801,12 @@ def run_session(current_user, session_id):
         session_id,
         "assistant_message",
         None,
-        {"instruction": instruction, "analysis": analysis, "engine": engine, "model": model},
+        {
+            "instruction": instruction,
+            "analysis": analysis,
+            "engine": engine,
+            "model": model,
+        },
         actor_kind="synthetic",
     )
     db.execute(
@@ -779,7 +836,10 @@ def review_session(current_user, session_id):
     if row["convener_user_id"] != _user_id(current_user):
         return jsonify({"error": "session_forbidden"}), 403
     if row["status"] not in {"active", "awaiting_review"}:
-        return jsonify({"error": "session_not_reviewable", "status": row["status"]}), 409
+        return (
+            jsonify({"error": "session_not_reviewable", "status": row["status"]}),
+            409,
+        )
     if not db.execute(
         "SELECT 1 FROM session_events WHERE session_id = ? AND event_type = 'assistant_message' LIMIT 1",
         (session_id,),
@@ -792,12 +852,22 @@ def review_session(current_user, session_id):
         return jsonify({"error": "decision no permitido"}), 400
     if not reason:
         return jsonify({"error": "reason es requerido para la auditoría"}), 400
-    new_status = {"approve": "approved", "reject": "rejected", "request_changes": "active"}[decision]
+    new_status = {
+        "approve": "approved",
+        "reject": "rejected",
+        "request_changes": "active",
+    }[decision]
     db.execute(
         "INSERT INTO session_reviews (session_id, reviewer_user_id, decision, reason) VALUES (?, ?, ?, ?)",
         (session_id, _user_id(current_user), decision, reason),
     )
-    _event(db, session_id, "review", _user_id(current_user), {"decision": decision, "reason": reason})
+    _event(
+        db,
+        session_id,
+        "review",
+        _user_id(current_user),
+        {"decision": decision, "reason": reason},
+    )
     db.execute(
         "UPDATE admin_sessions SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE session_id = ?",
         (new_status, session_id),
@@ -816,7 +886,10 @@ def revoke_session(current_user, session_id):
     if row["convener_user_id"] != _user_id(current_user):
         return jsonify({"error": "session_forbidden"}), 403
     if row["status"] in {"approved", "rejected", "revoked", "expired", "closed"}:
-        return jsonify({"error": "session_already_closed", "status": row["status"]}), 409
+        return (
+            jsonify({"error": "session_already_closed", "status": row["status"]}),
+            409,
+        )
     reason = _redact((request.get_json(silent=True) or {}).get("reason"), 1200)
     if not reason:
         return jsonify({"error": "reason es requerido"}), 400
@@ -846,5 +919,7 @@ def export_audit(current_user, session_id):
         "reviews": _review_list(db, session_id),
     }
     response = make_response(jsonify(audit))
-    response.headers["Content-Disposition"] = f'attachment; filename="{session_id}.json"'
+    response.headers["Content-Disposition"] = (
+        f'attachment; filename="{session_id}.json"'
+    )
     return response

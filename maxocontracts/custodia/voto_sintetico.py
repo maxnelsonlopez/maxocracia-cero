@@ -552,10 +552,13 @@ def verificar_voto(
             "SESION_NO_COINCIDE", "el voto cita una sesión distinta a la verificada"
         )
     if not agente_activo:
-        return _rechazo("AGENTE_INACTIVO", "el agente sintético está revocado o inactivo")
+        return _rechazo(
+            "AGENTE_INACTIVO", "el agente sintético está revocado o inactivo"
+        )
     if sesion.estado != "activa":
         return _rechazo(
-            "SESION_NO_OPERABLE", f"la sesión de custodia está en estado '{sesion.estado}'"
+            "SESION_NO_OPERABLE",
+            f"la sesión de custodia está en estado '{sesion.estado}'",
         )
     if sesion.expira_en:
         expira = _parsear_iso(sesion.expira_en)
@@ -580,9 +583,13 @@ def verificar_voto(
             "el texto de la propuesta cambió después de emitirse el desafío",
         )
     if desafio.agente_id != afirmacion.agente_id:
-        return _rechazo("DESAFIO_DE_OTRO_AGENTE", "el desafío no se emitió para este agente")
+        return _rechazo(
+            "DESAFIO_DE_OTRO_AGENTE", "el desafío no se emitió para este agente"
+        )
     if desafio.custodia_id != afirmacion.custodia_id:
-        return _rechazo("DESAFIO_DE_OTRA_SESION", "el desafío no se emitió para esta sesión")
+        return _rechazo(
+            "DESAFIO_DE_OTRA_SESION", "el desafío no se emitió para esta sesión"
+        )
     if afirmacion.opcion not in contexto.opciones:
         return _rechazo(
             "OPCION_FUERA_DE_PROPUESTA", f"la opción '{afirmacion.opcion}' no existe"

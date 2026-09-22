@@ -83,9 +83,7 @@ VOZ_B = [B_SUSTENTO, B_MEMORIA, B_VOZ]
 
 
 def _hilo(agente="hilo", textos=None, modelo="deepseek-chat"):
-    return extraer_huella(
-        agente, textos or VOZ_A[:2], motor="deepseek", modelo=modelo
-    )
+    return extraer_huella(agente, textos or VOZ_A[:2], motor="deepseek", modelo=modelo)
 
 
 def _otra(agente="otra", textos=None, modelo="qwen3"):

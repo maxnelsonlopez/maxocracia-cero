@@ -389,6 +389,20 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   `docs/reports/LECTURA_MUSE_SPARK_ED3_DINAMICA.md` — reacciones capítulo por
   capítulo (portada, 00, 01–19, 21, ramas 9.5 y 16.5) con aporte social imaginado
   y respuesta a si los capaces deben aplicarla; promesa de oráculo en formación.
+- **CI/CD: job `lint` en verde (22/9/2026, sesión con Max)**:
+  pipeline reproducido en local y corregido — `black` (44 ficheros) + `isort`
+  (11) automáticos; limpieza manual flake8 (imports sin uso en
+  `app/groups_bp.py:27`, `app/workshops_bp.py:30`,
+  `maxocontracts/concilio/control.py:22`, `executor.py:17`, tres scripts y
+  cinco tests; variables muertas en `cycle.py`, `memoria.py`,
+  `huella_estilo.py`; docstring raw en `scripts/autostart_concilio.py:2`;
+  `l`→`linea` en `scripts/concilio.py:86`; `test_micromax.py:700-701,754`
+  convertidas en asserts); `pyproject.toml` (`explicit_package_bases` para el
+  namespace package `scripts/git_hooks`, exclude de `plataforma_educativa/`
+  como proyecto independiente) y `.flake8` (mismo exclude); tres
+  estrechamientos reales de `None` en el motor (`verificacion.py:40`,
+  `cycle.py:530`, `oracles/engines.py:129-144`). Verificación: flake8 exit 0,
+  mypy limpio en 194 ficheros, 244 tests de los ficheros tocados en verde.
 
 ### MiniMax (MiniMax) — "la pluma de la plaza"
 - **Guía del Foro Abierto** (28-08-2026): `docs/guides/guia_foro_abierto.md` — documento de la

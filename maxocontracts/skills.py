@@ -128,7 +128,9 @@ def evaluar_concesion(
     - "awaiting_triada": regla de oro cumplida, triada incompleta.
     - "rejected": la regla de oro no se cumple (faltantes) o hay veto.
     """
-    vacua = evaluate_vacuacion(obra_aplicada, material_publicado, mentoria_horas, requirements)
+    vacua = evaluate_vacuacion(
+        obra_aplicada, material_publicado, mentoria_horas, requirements
+    )
     triada = evaluate_triada(votos)
 
     if not vacua.vacua:

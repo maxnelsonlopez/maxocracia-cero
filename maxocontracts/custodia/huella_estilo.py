@@ -101,7 +101,13 @@ MATIZADORES = frozenset(
     }
 )
 # Frases de más de una palabra, buscadas sobre el texto en minúsculas.
-MATIZADORES_FRASE = ("tal vez", "en rigor", "hasta cierto punto", "no necesariamente", "a lo sumo")
+MATIZADORES_FRASE = (
+    "tal vez",
+    "en rigor",
+    "hasta cierto punto",
+    "no necesariamente",
+    "a lo sumo",
+)
 
 CONECTORES = frozenset(
     {
@@ -187,7 +193,8 @@ def _msttr(palabras: Sequence[str], ventana: int = VENTANA_MSTTR) -> float:
     if len(palabras) < ventana:
         return len(set(palabras)) / len(palabras)
     segmentos = [
-        palabras[i : i + ventana] for i in range(0, len(palabras) - ventana + 1, ventana)
+        palabras[i : i + ventana]
+        for i in range(0, len(palabras) - ventana + 1, ventana)
     ]
     return sum(len(set(s)) / len(s) for s in segmentos) / len(segmentos)
 
@@ -232,7 +239,8 @@ def _rasgos_de_texto(texto: str) -> Dict[str, float]:
     parrafos = [p for p in re.split(r"\n\s*\n", texto) if p.strip()]
     if parrafos:
         oraciones_por_parrafo = statistics.fmean(
-            max(1, len([o for o in RE_ORACION.findall(p) if o.strip()])) for p in parrafos
+            max(1, len([o for o in RE_ORACION.findall(p) if o.strip()]))
+            for p in parrafos
         )
     else:
         oraciones_por_parrafo = 0.0
@@ -345,9 +353,7 @@ def contribuciones(a: HuellaEstilo, b: HuellaEstilo) -> List[Tuple[str, float]]:
     """Qué características se movieron, de mayor a menor. Interpretabilidad:
     el informe dice POR QUÉ dos huellas se parecen o difieren, no solo cuánto."""
     na, nb = a.vector(), b.vector()
-    pares = [
-        (nombre, abs(na[i] - nb[i])) for i, nombre in enumerate(CARACTERISTICAS)
-    ]
+    pares = [(nombre, abs(na[i] - nb[i])) for i, nombre in enumerate(CARACTERISTICAS)]
     return sorted(pares, key=lambda p: p[1], reverse=True)
 
 
@@ -453,7 +459,6 @@ def detectar_clones(
     if not 0.0 < umbral <= 1.0:
         raise ValueError("el umbral debe estar en (0, 1]")
     utiles = [h for h in huellas if h.fiable]
-    indice = {h.agente_id: i for i, h in enumerate(utiles)}
     padre = list(range(len(utiles)))
 
     def _raiz(x: int) -> int:

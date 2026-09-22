@@ -14,7 +14,7 @@ Uso:
 
 import subprocess
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 from .git_guard import guard_git_command, parse_command
 

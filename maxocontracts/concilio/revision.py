@@ -54,10 +54,15 @@ DISSIDENTE_PARRAFO = (
 )
 
 
-def _prompt_revisor(role: str, proposal: str, diff: str, evidence: str) -> Tuple[str, str]:
+def _prompt_revisor(
+    role: str, proposal: str, diff: str, evidence: str
+) -> Tuple[str, str]:
     parrafo = DISSIDENTE_PARRAFO if role.lower().startswith("dissident") else ""
     system = REVISOR_SYSTEM.format(
-        role=role, proposal=proposal, diff=diff, evidence=evidence,
+        role=role,
+        proposal=proposal,
+        diff=diff,
+        evidence=evidence,
         dissidente_parrafo=parrafo,
     )
     user = (
@@ -99,7 +104,9 @@ def revisar_candidato(
                     "engine": motor.name,
                     "model": motor.model,
                     "verdict": "reject",
-                    "criticisms": ["El revisor no pudo ser consultado (fallo de motor)"],
+                    "criticisms": [
+                        "El revisor no pudo ser consultado (fallo de motor)"
+                    ],
                     "uncertainties": ["infra"],
                     "confidence": 0.0,
                     "fallback": True,
@@ -134,8 +141,13 @@ def _call_revision(engine_cfg, system: str, user: str):
     ]
     try:
         text = engines.call_engine(
-            engine_cfg, messages, want_json=True, max_tokens=2000,
-            timeout=120, max_retries=1, backoff_seconds=3.0,
+            engine_cfg,
+            messages,
+            want_json=True,
+            max_tokens=2000,
+            timeout=120,
+            max_retries=1,
+            backoff_seconds=3.0,
         )
         return text, engine_cfg, False
     except engines.EngineError:
@@ -143,7 +155,12 @@ def _call_revision(engine_cfg, system: str, user: str):
             m.name for m in engines.available_engines() if m.name != engine_cfg.name
         )
         text, cfg = engines.chain_call(
-            system, user, order=order or None, want_json=True,
-            max_tokens=2000, timeout=120, max_retries=1,
+            system,
+            user,
+            order=order or None,
+            want_json=True,
+            max_tokens=2000,
+            timeout=120,
+            max_retries=1,
         )
         return text, cfg, True

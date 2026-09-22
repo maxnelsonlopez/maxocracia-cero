@@ -12,16 +12,16 @@ import pytest
 
 from maxocontracts.concilio import (
     VALID_DECISIONS,
+    RegistroAprendizajeError,
+    canon as canon_mod,
     evidencia_determinista,
     leer_aprendizajes,
     leer_desacuerdos,
     metricas_aprendizaje,
     registrar_aprendizaje,
     registrar_desacuerdo,
+    verificacion as verif_mod,
 )
-from maxocontracts.concilio import RegistroAprendizajeError
-from maxocontracts.concilio import canon as canon_mod
-from maxocontracts.concilio import verificacion as verif_mod
 from maxocontracts.concilio.memoria import FICHA, FICHA_DESACUERDOS
 
 
@@ -141,7 +141,9 @@ def test_metricas_aprendizaje_son_observacion_no_meta(tmp_path):
     assert m["total"] == 3
     assert m["por_decision"]["ratify"] == 1
     assert m["reversal_rate"] == pytest.approx(0.333, abs=0.001)
-    assert m["valid_learnings_per_cycle_provisional"] == 1  # ratify + hipótesis + outcome
+    assert (
+        m["valid_learnings_per_cycle_provisional"] == 1
+    )  # ratify + hipótesis + outcome
     assert "latencia epistemológica" in m["advertencia"]
     # señales, no objetivos: la métrica lo dice explícitamente
     assert "no objetivos" in m["advertencia"]

@@ -28,14 +28,21 @@ def _instalar_startup_folder() -> int:
     """Carpeta de Inicio (sin privilegios): pythonw, sin consola visible."""
     import os
 
-    startup = Path(os.environ["APPDATA"]) / "Microsoft" / "Windows" / "Start Menu" / "Programs" / "Startup"
+    startup = (
+        Path(os.environ["APPDATA"])
+        / "Microsoft"
+        / "Windows"
+        / "Start Menu"
+        / "Programs"
+        / "Startup"
+    )
     startup.mkdir(parents=True, exist_ok=True)
     pyw = PY.with_name("pythonw.exe")
     if not pyw.exists():
         pyw = PY
     cmd_file = startup / "MaxocraciaConcilio.cmd"
     cmd_file.write_text(
-        f"@echo off\r\n\"{pyw}\" \"{SCRIPT}\"\r\n",
+        f'@echo off\r\n"{pyw}" "{SCRIPT}"\r\n',
         encoding="utf-8",
     )
     print(f"[OK] Autoarranque en carpeta de Inicio: {cmd_file}")
@@ -59,8 +66,10 @@ def instalar() -> int:
         print("     Pausa: python scripts/concilio.py pausar")
         return 0
     # Acceso denegado o entorno restringido → carpeta de Inicio (sin admin).
-    print(f"[info] schtasks no disponible ({r.stderr.strip()[:80]}); usando la "
-          "carpeta de Inicio...")
+    print(
+        f"[info] schtasks no disponible ({r.stderr.strip()[:80]}); usando la "
+        "carpeta de Inicio..."
+    )
     return _instalar_startup_folder()
 
 

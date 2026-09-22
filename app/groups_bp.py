@@ -24,7 +24,7 @@ Endpoints:
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 from flask import Blueprint, jsonify, request
 
@@ -75,7 +75,10 @@ def _group_to_dict(db, row: Any, include_members: bool = False) -> Dict[str, Any
         "need_id": row["need_id"],
         "status": row["status"],
         "member_count": len(members),
-        "creator": {"user_id": row["user_id"], "name": creator["name"] if creator else "desconocido"},
+        "creator": {
+            "user_id": row["user_id"],
+            "name": creator["name"] if creator else "desconocido",
+        },
         "children": [
             {"id": c["id"], "name": c["name"], "kind": c["kind"], "status": c["status"]}
             for c in children
@@ -187,13 +190,19 @@ def create_group(current_user):
     if len(name) > MAX_NAME:
         return jsonify({"error": f"name no puede superar {MAX_NAME} caracteres"}), 400
     if len(description) > MAX_DESCRIPTION:
-        return jsonify(
-            {"error": f"description no puede superar {MAX_DESCRIPTION} caracteres"}
-        ), 400
+        return (
+            jsonify(
+                {"error": f"description no puede superar {MAX_DESCRIPTION} caracteres"}
+            ),
+            400,
+        )
     if kind == "solution_group" and not need_title:
-        return jsonify(
-            {"error": "need_title es requerido: el ECE nace de una necesidad real"}
-        ), 400
+        return (
+            jsonify(
+                {"error": "need_title es requerido: el ECE nace de una necesidad real"}
+            ),
+            400,
+        )
     if need_id is not None and (not isinstance(need_id, int) or need_id <= 0):
         return jsonify({"error": "need_id debe ser un entero positivo"}), 400
 
@@ -390,5 +399,7 @@ def close_group(current_user, group_id):
         (group_id,),
     )
     db.commit()
-    updated = db.execute("SELECT * FROM edu_groups WHERE id = ?", (group_id,)).fetchone()
+    updated = db.execute(
+        "SELECT * FROM edu_groups WHERE id = ?", (group_id,)
+    ).fetchone()
     return jsonify({"success": True, "group": _group_to_dict(db, updated)})

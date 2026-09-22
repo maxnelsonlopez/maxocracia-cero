@@ -1,7 +1,5 @@
 import os
 
-import os
-
 from flask import Flask, request
 
 from .limiter import init_limiter
@@ -105,6 +103,7 @@ def create_app(db_path=None):
     from .auth import bp as auth_bp
     from .bridge_b import bridge_bp
     from .contracts_bp import contracts_bp, init_contracts_metrics_tables
+    from .edu_bridge_bp import edu_bridge_bp, init_edu_bridge_tables
     from .forms_bp import forms_bp
     from .forms_manager import init_multi_offers_needs_tables
     from .forum_bp import forum_bp, init_forum_tables
@@ -120,17 +119,16 @@ def create_app(db_path=None):
     from .resources_bp import bp as resources_bp
     from .stripe_integration import stripe_bp
     from .subscriptions import init_subscription_tables, subscriptions_bp
+    from .synthetic_sessions import (
+        init_synthetic_session_tables,
+        synthetic_sessions_bp,
+    )
     from .tvi_bp import tvi_bp
     from .users import bp as users_bp
     from .verifier_bp import verifier_bp
     from .vhv_bp import vhv_bp
     from .voting_bp import voting_bp
     from .workshops_bp import init_workshops_tables, workshops_bp
-    from .edu_bridge_bp import init_edu_bridge_tables, edu_bridge_bp
-    from .synthetic_sessions import (
-        init_synthetic_session_tables,
-        synthetic_sessions_bp,
-    )
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
@@ -170,7 +168,6 @@ def create_app(db_path=None):
     init_groups_tables(app)
     init_edu_bridge_tables(app)
     init_synthetic_session_tables(app)
-
 
     # placeholder imports to ensure modules loaded
     # other optional blueprints can be imported here

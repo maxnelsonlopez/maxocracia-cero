@@ -25,7 +25,9 @@ from .utils import get_db
 
 edu_bridge_bp = Blueprint("edu_bridge", __name__, url_prefix="/edu-bridge")
 
-_DEFAULT_OEV_NODE_URL = os.environ.get("EDUCATIONAL_PLATFORM_URL", "http://localhost:5050")
+_DEFAULT_OEV_NODE_URL = os.environ.get(
+    "EDUCATIONAL_PLATFORM_URL", "http://localhost:5050"
+)
 
 # Token de servicio del nodo OEV: la sincronización NO la declara el usuario,
 # la reporta el nodo educativo con su propio secreto (procedencia verificable).
@@ -75,7 +77,9 @@ def status(current_user: Dict[str, Any]):
                 "user_id": user["id"],
                 "email": user["email"],
                 "alias": user["alias"] if "alias" in user.keys() else None,
-                "trust_level": user["trust_level"] if "trust_level" in user.keys() else 0,
+                "trust_level": (
+                    user["trust_level"] if "trust_level" in user.keys() else 0
+                ),
                 "oev_node_url": _DEFAULT_OEV_NODE_URL,
             }
         ),
@@ -147,9 +151,14 @@ def sync_mastery():
             400,
         )
     db = get_db()
-    target = db.execute("SELECT id FROM users WHERE id = ?", (target_user_id,)).fetchone()
+    target = db.execute(
+        "SELECT id FROM users WHERE id = ?", (target_user_id,)
+    ).fetchone()
     if target is None:
-        return jsonify({"error": f"user_id {target_user_id} no existe en Maxocracia"}), 404
+        return (
+            jsonify({"error": f"user_id {target_user_id} no existe en Maxocracia"}),
+            404,
+        )
 
     topic_slug = (data.get("topic_slug") or "").strip()
     branch_slug = (data.get("branch_slug") or "").strip()

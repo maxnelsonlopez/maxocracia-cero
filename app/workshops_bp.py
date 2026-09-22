@@ -27,15 +27,15 @@ Endpoints:
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 from flask import Blueprint, jsonify, request
 
-from .jwt_utils import token_required
-from .utils import get_db
-
 from maxocontracts.skills import TriadaVotos, evaluar_concesion
 from maxocontracts.tree import is_valid_node_id
+
+from .jwt_utils import token_required
+from .utils import get_db
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,10 @@ workshops_bp = Blueprint("workshops", __name__, url_prefix="/workshops")
 
 MIN_CAPACITY = 5
 MAX_CAPACITY = 12
-OUTPUT_KINDS = ("material", "obra")  # material = enseñanza abierta; obra = hecho aplicado
+OUTPUT_KINDS = (
+    "material",
+    "obra",
+)  # material = enseñanza abierta; obra = hecho aplicado
 WORKSHOP_STATUSES = ("open", "running", "closed")
 AWARD_OUTCOMES = ("awaiting_triada", "awarded", "rejected")
 MAX_TITLE = 200
@@ -201,22 +204,36 @@ def create_workshop(current_user):
     if len(title) > MAX_TITLE:
         return jsonify({"error": f"title no puede superar {MAX_TITLE} caracteres"}), 400
     if not skill_node:
-        return jsonify({"error": "skill_node es requerido (nodo del árbol de habilidades)"}), 400
+        return (
+            jsonify(
+                {"error": "skill_node es requerido (nodo del árbol de habilidades)"}
+            ),
+            400,
+        )
     if not is_valid_node_id(skill_node):
-        return jsonify(
-            {
-                "error": "skill_node debe ser un nodo del árbol: 'rama' o 'rama/nodo' "
-                "(slugs minúsculos, sin espacios ni apostrofes)"
-            }
-        ), 400
+        return (
+            jsonify(
+                {
+                    "error": "skill_node debe ser un nodo del árbol: 'rama' o 'rama/nodo' "
+                    "(slugs minúsculos, sin espacios ni apostrofes)"
+                }
+            ),
+            400,
+        )
     if len(description) > MAX_DESCRIPTION:
-        return jsonify(
-            {"error": f"description no puede superar {MAX_DESCRIPTION} caracteres"}
-        ), 400
+        return (
+            jsonify(
+                {"error": f"description no puede superar {MAX_DESCRIPTION} caracteres"}
+            ),
+            400,
+        )
     if capacity < MIN_CAPACITY or capacity > MAX_CAPACITY:
-        return jsonify(
-            {"error": f"capacity debe estar entre {MIN_CAPACITY} y {MAX_CAPACITY}"}
-        ), 400
+        return (
+            jsonify(
+                {"error": f"capacity debe estar entre {MIN_CAPACITY} y {MAX_CAPACITY}"}
+            ),
+            400,
+        )
 
     uid = current_user.get("user_id")
     db = get_db()
@@ -407,7 +424,10 @@ def add_output(current_user, workshop_id):
         ).fetchone()
     )
     if not (is_facilitator or is_enrolled):
-        return jsonify({"error": "debes estar inscrito en el taller para publicar obras"}), 403
+        return (
+            jsonify({"error": "debes estar inscrito en el taller para publicar obras"}),
+            403,
+        )
 
     cur = db.execute(
         """
@@ -572,5 +592,7 @@ def close_workshop(current_user, workshop_id):
         (workshop_id,),
     )
     db.commit()
-    updated = db.execute("SELECT * FROM workshops WHERE id = ?", (workshop_id,)).fetchone()
+    updated = db.execute(
+        "SELECT * FROM workshops WHERE id = ?", (workshop_id,)
+    ).fetchone()
     return jsonify({"success": True, "workshop": _workshop_to_dict(db, updated)})

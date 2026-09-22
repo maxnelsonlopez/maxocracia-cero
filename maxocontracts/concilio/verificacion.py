@@ -38,8 +38,10 @@ def _run(cmd, cwd: str, timeout: int):
 
 
 def _parse_pytest(output: str, returncode: int) -> Dict[str, Any]:
-    total = int(PASSED_RE.search(output).group(1)) if PASSED_RE.search(output) else 0
-    failed = int(FAILED_RE.search(output).group(1)) if FAILED_RE.search(output) else 0
+    passed = PASSED_RE.search(output)
+    failed_match = FAILED_RE.search(output)
+    total = int(passed.group(1)) if passed else 0
+    failed = int(failed_match.group(1)) if failed_match else 0
     return {
         "ran": True,
         "status": "pass" if returncode == 0 and failed == 0 else "fail",
@@ -83,7 +85,13 @@ def evidencia_determinista(
         tests = _parse_pytest(proc.stdout, proc.returncode)
         tests["duration_s"] = round(time.time() - t0, 1)
     except (subprocess.TimeoutExpired, OSError) as exc:
-        tests = {"ran": False, "status": "fail", "total": 0, "failed": 0, "error": str(exc)[:200]}
+        tests = {
+            "ran": False,
+            "status": "fail",
+            "total": 0,
+            "failed": 0,
+            "error": str(exc)[:200],
+        }
 
     diff_cmd = ["git", "diff", "--stat"]
     if base_commit:

@@ -19,7 +19,7 @@ control es una comprobación barata (archivo) en cada frontera de fase.
 import json
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 ACTIVE = "activo"
 PAUSED = "pausado"

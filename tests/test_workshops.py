@@ -112,7 +112,11 @@ def test_enroll_full_workshop(auth_client):
         for i in range(2):
             db.execute(
                 "INSERT INTO users (email, name, is_admin, password_hash) VALUES (?, ?, 0, ?)",
-                (f"fill{i}@example.com", f"Fill {i}", generate_password_hash("ValidPass123!")),
+                (
+                    f"fill{i}@example.com",
+                    f"Fill {i}",
+                    generate_password_hash("ValidPass123!"),
+                ),
             )
         # Además de test2 y admin, 3 nuevos llenan el cupo 5.
         db.execute(
@@ -243,9 +247,11 @@ def test_grant_skill_violates_golden_rule(auth_client):
     assert resp.status_code == 200
     award = resp.get_json()["award"]
     assert award["outcome"] == "rejected"
-    assert {"obra aplicada", "material de enseñanza publicado", "mentoría mínima (1 h de TVI)"} <= set(
-        award["vacua_faltantes"]
-    )
+    assert {
+        "obra aplicada",
+        "material de enseñanza publicado",
+        "mentoría mínima (1 h de TVI)",
+    } <= set(award["vacua_faltantes"])
 
 
 def test_grant_skill_awaiting_with_veto(auth_client):
@@ -384,7 +390,12 @@ def test_workshop_detail_includes_enrollments(auth_client):
     created = _create_workshop(auth_client)
     workshop_id = created.get_json()["workshop"]["id"]
     headers2 = _login_as(auth_client, "test2@example.com")
-    assert auth_client.post(f"/workshops/{workshop_id}/enroll", headers=headers2).status_code == 200
+    assert (
+        auth_client.post(
+            f"/workshops/{workshop_id}/enroll", headers=headers2
+        ).status_code
+        == 200
+    )
 
     detail = auth_client.get(f"/workshops/{workshop_id}").get_json()["workshop"]
     assert detail["enrollments"] == [{"user_id": 2, "name": "Test User 2"}]

@@ -62,10 +62,14 @@ def test_forbidden_tool_is_rejected_and_audited(admin_client, app):
     with app.app_context():
         from app.utils import get_db
 
-        row = get_db().execute(
-            "SELECT COUNT(*) AS total FROM session_events WHERE session_id = ? AND event_type = 'tool_denied'",
-            (session["session_id"],),
-        ).fetchone()
+        row = (
+            get_db()
+            .execute(
+                "SELECT COUNT(*) AS total FROM session_events WHERE session_id = ? AND event_type = 'tool_denied'",
+                (session["session_id"],),
+            )
+            .fetchone()
+        )
         assert row["total"] == 1
 
 

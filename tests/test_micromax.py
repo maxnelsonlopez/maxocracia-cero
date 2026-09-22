@@ -269,7 +269,10 @@ def test_escudo_rojo_no_silencia_el_registro_propio(client, auth_headers):
         content_type="application/json",
     )
     invite_code = res.get_json()["household"]["invite_code"]
-    assert _join(client, auth_headers, 2, "bob@example.com", invite_code).status_code == 200
+    assert (
+        _join(client, auth_headers, 2, "bob@example.com", invite_code).status_code
+        == 200
+    )
 
     res = client.post(
         "/api/micromax/safety-survey",
@@ -306,21 +309,35 @@ def test_escudo_oculta_cifras_a_los_demas_pero_no_a_la_persona(client, auth_head
         content_type="application/json",
     )
     invite_code = res.get_json()["household"]["invite_code"]
-    assert _join(client, auth_headers, 2, "bob@example.com", invite_code).status_code == 200
+    assert (
+        _join(client, auth_headers, 2, "bob@example.com", invite_code).status_code
+        == 200
+    )
 
     # Config de Alice para tener CEH en la mezcla
     client.post(
         "/api/micromax/member/config",
         headers=auth_headers(1, "alice@example.com"),
         data=json.dumps(
-            {"monthly_income": 1000, "work_hours": 40, "travel_hours": 5, "sleep_hours": 56}
+            {
+                "monthly_income": 1000,
+                "work_hours": 40,
+                "travel_hours": 5,
+                "sleep_hours": 56,
+            }
         ),
         content_type="application/json",
     )
 
     # Bob (protegido) registra trabajo; Alice tambien
-    assert _log_cdd(client, auth_headers, 2, "bob@example.com", hours=4.0).status_code == 201
-    assert _log_cdd(client, auth_headers, 1, "alice@example.com", hours=1.0).status_code == 201
+    assert (
+        _log_cdd(client, auth_headers, 2, "bob@example.com", hours=4.0).status_code
+        == 201
+    )
+    assert (
+        _log_cdd(client, auth_headers, 1, "alice@example.com", hours=1.0).status_code
+        == 201
+    )
 
     client.post(
         "/api/micromax/safety-survey",
@@ -331,7 +348,9 @@ def test_escudo_oculta_cifras_a_los_demas_pero_no_a_la_persona(client, auth_head
 
     # Vista de ALICE (no protegida): Bob aparece protegido y sin cifras;
     # los totales solo contienen a Alice.
-    res = client.get("/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com"))
+    res = client.get(
+        "/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com")
+    )
     assert res.status_code == 200
     members = {m["name"]: m for m in res.get_json()["three_accounts"]["members"]}
     bob_view = members["Bob"]
@@ -343,7 +362,9 @@ def test_escudo_oculta_cifras_a_los_demas_pero_no_a_la_persona(client, auth_head
     assert res.get_json()["three_accounts"]["totals"]["total_cdd"] == 1.0
 
     # Vista de BOB (el protegido): ve todo, incluidas sus propias cifras
-    res = client.get("/api/micromax/dashboard", headers=auth_headers(2, "bob@example.com"))
+    res = client.get(
+        "/api/micromax/dashboard", headers=auth_headers(2, "bob@example.com")
+    )
     assert res.status_code == 200
     members = {m["name"]: m for m in res.get_json()["three_accounts"]["members"]}
     assert members["Bob"]["cdd"] == 4.0
@@ -361,7 +382,10 @@ def test_esi_wants_support_es_privado_y_opt_in(client, auth_headers):
         content_type="application/json",
     )
     invite_code = res.get_json()["household"]["invite_code"]
-    assert _join(client, auth_headers, 2, "bob@example.com", invite_code).status_code == 200
+    assert (
+        _join(client, auth_headers, 2, "bob@example.com", invite_code).status_code
+        == 200
+    )
 
     answers = {f"q{i}": False for i in range(1, 7)}
     res = client.post(
@@ -382,7 +406,9 @@ def test_esi_wants_support_es_privado_y_opt_in(client, auth_headers):
     assert res.get_json()["wants_support"] is True
 
     # La vista del hogar (de Alice) jamas incluye la encuesta de Bob
-    res = client.get("/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com"))
+    res = client.get(
+        "/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com")
+    )
     survey = res.get_json().get("safety_survey")
     assert survey is None or survey.get("member_id") != 2
 
@@ -501,7 +527,10 @@ def test_ceh_canonica_tvi_homogeneiza_las_cuentas(client, auth_headers):
         content_type="application/json",
     )
     invite_code = res.get_json()["household"]["invite_code"]
-    assert _join(client, auth_headers, 2, "bob@example.com", invite_code).status_code == 200
+    assert (
+        _join(client, auth_headers, 2, "bob@example.com", invite_code).status_code
+        == 200
+    )
 
     # Alice gana 1000 con tarifa 50/h -> 20 h vendidas; Bob gana 400 con tarifa 20/h -> 20 h.
     # En fiat la brecha es 71/29; en TVI vendido es 50/50.
@@ -527,7 +556,9 @@ def test_ceh_canonica_tvi_homogeneiza_las_cuentas(client, auth_headers):
         assert res.status_code == 200
         assert res.get_json()["ceh_mode"] == "canonical"
 
-    res = client.get("/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com"))
+    res = client.get(
+        "/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com")
+    )
     assert res.status_code == 200
     ta = res.get_json()["three_accounts"]
     members = {m["name"]: m for m in ta["members"]}
@@ -553,7 +584,9 @@ def test_ceh_canonica_tvi_homogeneiza_las_cuentas(client, auth_headers):
         ),
         content_type="application/json",
     )
-    res = client.get("/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com"))
+    res = client.get(
+        "/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com")
+    )
     ta = res.get_json()["three_accounts"]
     assert ta["totals"]["ceh_unit"] == "fiat"
     members = {m["name"]: m for m in ta["members"]}
@@ -610,19 +643,25 @@ def test_gamma_domestica_latido_e_inv1_hogar(client, auth_headers):
     assert res.get_json()["inv1"] is True
 
     # Serie propia completa
-    res = client.get("/api/micromax/checkins", headers=auth_headers(1, "alice@example.com"))
+    res = client.get(
+        "/api/micromax/checkins", headers=auth_headers(1, "alice@example.com")
+    )
     serie = res.get_json()
     assert len(serie) == 2
     assert serie[0]["gamma"] == 0.8  # la mas reciente primero
 
     # Dashboard: ultimo gamma + alerta INV1-Hogar activa
-    res = client.get("/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com"))
+    res = client.get(
+        "/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com")
+    )
     wb = res.get_json()["wellbeing"]
     assert wb["inv1_hogar_alert"] is True
     assert wb["members"][0]["gamma"] == 0.8
 
 
-def test_escudo_oculta_el_angusto_ajeno_pero_la_persona_se_ve_su_propio(client, auth_headers):
+def test_escudo_oculta_el_angusto_ajeno_pero_la_persona_se_ve_su_propio(
+    client, auth_headers
+):
     """El gamma de un protegido nunca cruza la pantalla de sus convivientes;
     ella si se ve a si misma y su INV1 propio."""
     res = client.post(
@@ -632,7 +671,10 @@ def test_escudo_oculta_el_angusto_ajeno_pero_la_persona_se_ve_su_propio(client, 
         content_type="application/json",
     )
     invite_code = res.get_json()["household"]["invite_code"]
-    assert _join(client, auth_headers, 2, "bob@example.com", invite_code).status_code == 200
+    assert (
+        _join(client, auth_headers, 2, "bob@example.com", invite_code).status_code
+        == 200
+    )
 
     client.post(
         "/api/micromax/safety-survey",
@@ -650,16 +692,21 @@ def test_escudo_oculta_el_angusto_ajeno_pero_la_persona_se_ve_su_propio(client, 
     assert res.status_code == 201 and res.get_json()["inv1"] is True
 
     # Vista de ALICE: el angusto de Bob no existe en su pantalla
-    res = client.get("/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com"))
+    res = client.get(
+        "/api/micromax/dashboard", headers=auth_headers(1, "alice@example.com")
+    )
     wb = res.get_json()["wellbeing"]
     bob_view = next(m for m in wb["members"] if m["name"] == "Bob")
     alice_view = next(m for m in wb["members"] if m["name"] == "Alice")
+    assert alice_view["protegido"] is False  # ella sí se ve a sí misma
     assert bob_view["protegido"] is True
     assert bob_view["gamma"] is None and bob_view["inv1"] is None
     assert wb["inv1_hogar_alert"] is False  # nada filtrado por inferencia
 
     # Vista de BOB: ve su propio angusto y su INV1 personal
-    res = client.get("/api/micromax/dashboard", headers=auth_headers(2, "bob@example.com"))
+    res = client.get(
+        "/api/micromax/dashboard", headers=auth_headers(2, "bob@example.com")
+    )
     wb = res.get_json()["wellbeing"]
     bob_view = next(m for m in wb["members"] if m["name"] == "Bob")
     assert bob_view["gamma"] == 0.6
@@ -675,7 +722,11 @@ def test_puente_apoyo_opt_in_y_ofertas_ordenadas(client, auth_headers):
         "/resources",
         headers=auth_headers(1, "alice@example.com"),
         data=json.dumps(
-            {"title": "Asesoria legal gratuita", "description": "orientacion", "category": "legal"}
+            {
+                "title": "Asesoria legal gratuita",
+                "description": "orientacion",
+                "category": "legal",
+            }
         ),
         content_type="application/json",
     )
@@ -689,7 +740,9 @@ def test_puente_apoyo_opt_in_y_ofertas_ordenadas(client, auth_headers):
     )
 
     # Sin opt-in: canal cerrado con mensaje neutro
-    res = client.get("/api/micromax/support/offers", headers=auth_headers(2, "bob@example.com"))
+    res = client.get(
+        "/api/micromax/support/offers", headers=auth_headers(2, "bob@example.com")
+    )
     assert res.status_code == 403
 
     res = client.post(
@@ -698,7 +751,7 @@ def test_puente_apoyo_opt_in_y_ofertas_ordenadas(client, auth_headers):
         data=json.dumps({"name": "Hogar Privado de Bob"}),
         content_type="application/json",
     )
-    invite_unused = res.get_json()["household"]["invite_code"]
+    assert res.get_json()["household"]["invite_code"]
 
     # Bob responde rojo con señal legal (q3) y da su consentimiento
     answers = dict(RED_ANSWERS)
@@ -710,7 +763,9 @@ def test_puente_apoyo_opt_in_y_ofertas_ordenadas(client, auth_headers):
     )
     assert res.status_code == 200
 
-    res = client.get("/api/micromax/support/offers", headers=auth_headers(2, "bob@example.com"))
+    res = client.get(
+        "/api/micromax/support/offers", headers=auth_headers(2, "bob@example.com")
+    )
     assert res.status_code == 200
     data = res.get_json()
     assert data["offers"][0]["title"] == "Asesoria legal gratuita"

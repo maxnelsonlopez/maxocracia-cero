@@ -112,7 +112,10 @@ def _validate_vhv_params(params: dict) -> Optional[str]:
         delta = float(params["delta"])
     except (KeyError, ValueError, TypeError):
         return "se requieren alpha, beta, gamma y delta numéricos"
-    if any(isinstance(v, bool) for v in (params["alpha"], params["beta"], params["gamma"], params["delta"])):
+    if any(
+        isinstance(v, bool)
+        for v in (params["alpha"], params["beta"], params["gamma"], params["delta"])
+    ):
         return "los parámetros deben ser números, no booleanos"
     if not all(math.isfinite(v) for v in (alpha, beta, gamma, delta)):
         return "los parámetros deben ser números finitos"
@@ -994,7 +997,9 @@ def propose_edu_umbral(current_user):
 
     current, provenance = _current_edu_umbral(db)
     umbral = float(params["umbral_anios"])
-    direction = "sube" if umbral > current else ("baja" if umbral < current else "queda igual")
+    direction = (
+        "sube" if umbral > current else ("baja" if umbral < current else "queda igual")
+    )
 
     # Lenguaje civil: la comunidad entiende qué decide (T13). La ley no se
     # toca: 12 años (INV2-EDU) siguen siendo el piso de todo cálculo.
@@ -1010,9 +1015,7 @@ def propose_edu_umbral(current_user):
         "violación. Si se aprueba, el nuevo umbral se aplica a todos los "
         "análisis con registro público."
     )
-    reason = (
-        data.get("reason") or ""
-    ).strip() or "propuesta del Parlamento Educativo"
+    reason = (data.get("reason") or "").strip() or "propuesta del Parlamento Educativo"
 
     deadline_hours = max(1, min(int(data.get("deadline_hours", 72)), 24 * 30))
     deadline = (

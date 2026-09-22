@@ -171,6 +171,7 @@ def _agenda_user(canon: str, agenda: str, directivas=None) -> str:
 
 # --- Lock ---
 
+
 def _pid_alive(pid: int) -> bool:
     """True si el proceso con `pid` sigue vivo (Windows y POSIX).
 
@@ -187,7 +188,6 @@ def _pid_alive(pid: int) -> bool:
         import ctypes
 
         PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
-        last_error = 0
         ctypes.windll.kernel32.SetLastError(0)
         handle = ctypes.windll.kernel32.OpenProcess(
             PROCESS_QUERY_LIMITED_INFORMATION, False, int(pid)
@@ -247,6 +247,7 @@ def _release_lock(lock_path: Path) -> None:
 
 # --- Punto de llamada (mockeable en tests) ---
 
+
 def _engine_order_from_env(env: Optional[Dict[str, str]] = None) -> Tuple[str, ...]:
     """Orden de motores: CONCILIO_ENGINE_ORDER (ej. 'openrouter,nvidia,deepseek').
 
@@ -284,7 +285,13 @@ def _pausa_entre_llamadas(env: Optional[Dict[str, str]] = None) -> float:
         return 4.0
 
 
-def _call(engine_cfg, system: str, user: str, want_json: bool = True, max_tokens: int = MAX_TOKENS_VOTO):
+def _call(
+    engine_cfg,
+    system: str,
+    user: str,
+    want_json: bool = True,
+    max_tokens: int = MAX_TOKENS_VOTO,
+):
     """Llamada con motor designado y fallback a la cadena.
 
     Devuelve (texto, motor_que_respondio, hubo_fallback). La firma T13 es
@@ -416,9 +423,7 @@ def run_cycle(
                 "fase": "F0",
                 "evento": "despertar",
                 "cycle_id": cycle_id,
-                "motores": [
-                    {"engine": m.name, "model": m.model} for m in motores
-                ],
+                "motores": [{"engine": m.name, "model": m.model} for m in motores],
                 "git_head": _git_head(str(root_path)),
                 "dry_run": dry_run,
             }
@@ -433,10 +438,17 @@ def run_cycle(
         )
         agenda = read_agenda(str(root_path), workspace=str(workspace_path))
         bitacora.log(
-            {"fase": "F1", "evento": "corpus", "canon_chars": len(canon), "agenda_chars": len(agenda)}
+            {
+                "fase": "F1",
+                "evento": "corpus",
+                "canon_chars": len(canon),
+                "agenda_chars": len(agenda),
+            }
         )
         if not canon.strip():
-            raise CorpoUnavailableError("Corpus canónico vacío (¿root del repo correcto?)")
+            raise CorpoUnavailableError(
+                "Corpus canónico vacío (¿root del repo correcto?)"
+            )
 
         # Asignación de roles a motores: diversidad primero (el Disidente
         # jamás comparte motor con el Economic si hay más de un motor).
@@ -450,12 +462,18 @@ def run_cycle(
                 first_engine = roles[0][1].name
                 alt = next(m for m in motores if m.name != first_engine)
                 roles = [
-                    (r, alt) if (r == "Dissident" and e.name == first_engine) else (r, e)
+                    (
+                        (r, alt)
+                        if (r == "Dissident" and e.name == first_engine)
+                        else (r, e)
+                    )
                     for r, e in roles
                 ]
 
         # F1 — Firma de comprensión (por oráculo, sin ver el trabajo ajeno)
-        pausa = pausa_segundos if pausa_segundos is not None else _pausa_entre_llamadas(env)
+        pausa = (
+            pausa_segundos if pausa_segundos is not None else _pausa_entre_llamadas(env)
+        )
         firmas: List[Dict[str, Any]] = []
         for i, (role, engine) in enumerate(roles):
             _gate(control, bitacora, "F1")
@@ -464,18 +482,38 @@ def run_cycle(
             system = FIRMA_SYSTEM.format(role=role)
             user = _firma_user(canon)
             if dry_run:
-                firma = {"summary": "[dry-run]", "axiom_quotes": [], "critical_question": "", "confidence": 0.0}
+                firma = {
+                    "summary": "[dry-run]",
+                    "axiom_quotes": [],
+                    "critical_question": "",
+                    "confidence": 0.0,
+                }
                 t13 = {"engine": engine.name, "model": engine.model, "dry_run": True}
             else:
                 text, engine_used, fallback = _call(
                     engine, system, user, want_json=True, max_tokens=MAX_TOKENS_FIRMA
                 )
                 parsed = _parse_json(text)
-                firma = parsed.get("firma") or {"summary": text[:400], "axiom_quotes": [], "critical_question": "", "confidence": 0.0}
-                t13 = {"engine": engine_used.name, "model": engine_used.model, "fallback": fallback}
+                firma = parsed.get("firma") or {
+                    "summary": text[:400],
+                    "axiom_quotes": [],
+                    "critical_question": "",
+                    "confidence": 0.0,
+                }
+                t13 = {
+                    "engine": engine_used.name,
+                    "model": engine_used.model,
+                    "fallback": fallback,
+                }
             firmas.append({"role": role, **t13, "firma": firma})
             bitacora.log(
-                {"fase": "F1", "evento": "firma", "role": role, **t13, "confidence": firma.get("confidence")}
+                {
+                    "fase": "F1",
+                    "evento": "firma",
+                    "role": role,
+                    **t13,
+                    "confidence": firma.get("confidence"),
+                }
             )
 
         # F2 — Propuestas y votación (independientes entre sí)
@@ -484,33 +522,45 @@ def run_cycle(
             _gate(control, bitacora, "F2")
             if i and pausa and not dry_run:
                 time.sleep(pausa)
-            system = AGENDA_SYSTEM.format(role=role, agenda=agenda or "(sin agenda: propón desde el canon)")
+            system = AGENDA_SYSTEM.format(
+                role=role, agenda=agenda or "(sin agenda: propón desde el canon)"
+            )
             user = _agenda_user(canon, agenda, directivas)
             if dry_run:
-                resp = {"axioms": {"ok": True, "reasoning": "[dry-run]"}, "proposals": [], "veto": None}
+                resp: Dict[str, Any] = {
+                    "axioms": {"ok": True, "reasoning": "[dry-run]"},
+                    "proposals": [],
+                    "veto": None,
+                }
                 t13 = {"engine": engine.name, "model": engine.model, "dry_run": True}
             else:
                 text, engine_used, fallback = _call(
                     engine, system, user, want_json=True, max_tokens=MAX_TOKENS_VOTO
                 )
                 resp = _parse_json(text)
-                t13 = {"engine": engine_used.name, "model": engine_used.model, "fallback": fallback}
+                t13 = {
+                    "engine": engine_used.name,
+                    "model": engine_used.model,
+                    "fallback": fallback,
+                }
             axioms_ok = bool(resp.get("axioms", {}).get("ok", False))
-            proposals = [
-                p for p in resp.get("proposals", []) if isinstance(p, dict)
-            ]
+            proposals = [p for p in resp.get("proposals", []) if isinstance(p, dict)]
             votos.append(
                 {
                     "role": role,
                     **t13,
                     "axioms_ok": axioms_ok,
-                    "axioms_reasoning": str(resp.get("axioms", {}).get("reasoning", "")),
+                    "axioms_reasoning": str(
+                        resp.get("axioms", {}).get("reasoning", "")
+                    ),
                     "proposals": [
                         {
                             "title": str(p.get("title", "")),
                             "hypothesis": str(p.get("hypothesis", "") or "").strip()
                             or str(p.get("why", "")),
-                            "expected_signal": str(p.get("expected_signal", "") or "").strip(),
+                            "expected_signal": str(
+                                p.get("expected_signal", "") or ""
+                            ).strip(),
                             "source": str(p.get("source", "")),
                             "why": str(p.get("why", "")),
                             "risks": str(p.get("risks", "")),
@@ -545,7 +595,6 @@ def run_cycle(
                 continue
             if any(p["vote"] == "approve" for p in v["proposals"]):
                 approves += 1
-        validos = [v for v in votos if v["axioms_ok"]]
         consensus = (approves / len(votos)) if votos else 0.0
         ejecutable = quorum_ok and consensus >= CONSENSUS_MIN
 
@@ -600,8 +649,10 @@ def run_cycle(
             "",
         ]
         for v in votos:
-            lines.append(f"### {v['role']} · {v['engine']}/{v['model']} · AVA: "
-                         f"{'OK' if v['axioms_ok'] else 'RECHAZO AXIOMÁTICO'}")
+            lines.append(
+                f"### {v['role']} · {v['engine']}/{v['model']} · AVA: "
+                f"{'OK' if v['axioms_ok'] else 'RECHAZO AXIOMÁTICO'}"
+            )
             if not v["proposals"]:
                 lines.append("- (sin propuestas) ")
             for p in v["proposals"]:
@@ -616,8 +667,10 @@ def run_cycle(
         if ejecutable:
             lines.append("\n## Elegidas (orden de prioridad)")
             for i, s in enumerate(selected, 1):
-                lines.append(f"{i}. {s['title']} — {s['vote']} ({s['confidence']:.0%}) "
-                             f"[{s['engine']}/{s['model']}]")
+                lines.append(
+                    f"{i}. {s['title']} — {s['vote']} ({s['confidence']:.0%}) "
+                    f"[{s['engine']}/{s['model']}]"
+                )
             lines.append(
                 "\n> La ejecución (F3) exige mandato de sesión de custodia, trabajo "
                 "en scratch/, suite en verde y revisión cruzada antes de F5."
@@ -625,11 +678,15 @@ def run_cycle(
         else:
             lines.append("\n## Resultado")
             if not quorum_ok:
-                lines.append("Quórum insuficiente (mínimo 3 oráculos): la agenda queda en cola "
-                             "— ningún desempate automático (canon: el desacuerdo es calidad).")
+                lines.append(
+                    "Quórum insuficiente (mínimo 3 oráculos): la agenda queda en cola "
+                    "— ningún desempate automático (canon: el desacuerdo es calidad)."
+                )
             else:
-                lines.append("Sin consenso ≥75%: la agenda queda en cola. El Disidente tiene "
-                             "registrado su análisis en firmas.json.")
+                lines.append(
+                    "Sin consenso ≥75%: la agenda queda en cola. El Disidente tiene "
+                    "registrado su análisis en firmas.json."
+                )
         with open(agenda_path, "w", encoding="utf-8") as fh:
             fh.write("\n".join(lines) + "\n")
 
@@ -648,7 +705,10 @@ def run_cycle(
             "|---|---|---|---|---|",
         ]
         for v in votos:
-            votos_txt = ", ".join(f"{p['vote']}({p['title'][:40]})" for p in v["proposals"]) or "—"
+            votos_txt = (
+                ", ".join(f"{p['vote']}({p['title'][:40]})" for p in v["proposals"])
+                or "—"
+            )
             resumen_lines.append(
                 f"| {v['role']} | {v['engine']}/{v['model']}"
                 f"{' (fallback)' if v.get('fallback') else ''} | "
@@ -657,9 +717,13 @@ def run_cycle(
         if ejecutable:
             resumen_lines.append("\n**Elegidas:**")
             for i, s in enumerate(selected, 1):
-                resumen_lines.append(f"{i}. {s['title']} — {s['vote']} ({s['confidence']:.0%})")
-        resumen_lines.append("\n> Bitácora completa (firma T13 por llamada): eventos.jsonl · " 
-                             "firmas: firmas.json · agenda: agenda_votada.md")
+                resumen_lines.append(
+                    f"{i}. {s['title']} — {s['vote']} ({s['confidence']:.0%})"
+                )
+        resumen_lines.append(
+            "\n> Bitácora completa (firma T13 por llamada): eventos.jsonl · "
+            "firmas: firmas.json · agenda: agenda_votada.md"
+        )
         with open(resumen_path, "w", encoding="utf-8") as fh:
             fh.write("\n".join(resumen_lines) + "\n")
 
@@ -683,7 +747,14 @@ def run_cycle(
             },
         }
         manifest_path = bitacora.write_manifest(manifest)
-        bitacora.log({"fase": "CIERRE", "evento": "manifest", "ejecutable": ejecutable, "manifest": str(manifest_path)})
+        bitacora.log(
+            {
+                "fase": "CIERRE",
+                "evento": "manifest",
+                "ejecutable": ejecutable,
+                "manifest": str(manifest_path),
+            }
+        )
         return manifest
     except _ControlStop as stop:
         # El custodio pausó/detuvo: cierre limpio, sin más llamadas.
@@ -700,7 +771,9 @@ def run_cycle(
             },
         }
         bitacora.write_manifest(parcial)
-        bitacora.log({"fase": "CIERRE", "evento": "CONTROL_STOP", "estado": stop.estado})
+        bitacora.log(
+            {"fase": "CIERRE", "evento": "CONTROL_STOP", "estado": stop.estado}
+        )
         return parcial
     finally:
         _release_lock(lock_path)

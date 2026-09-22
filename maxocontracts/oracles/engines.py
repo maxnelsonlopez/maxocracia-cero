@@ -24,7 +24,7 @@ import logging
 import os
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 import requests
 
@@ -126,20 +126,22 @@ OPENROUTER_FREE_RPD_SIN_CREDITOS = 50
 OPENROUTER_FREE_RPD_CON_CREDITOS = 1000
 
 
-def resolve_engine(name: str, env: Optional[Dict[str, str]] = None) -> Optional[EngineConfig]:
+def resolve_engine(
+    name: str, env: Optional[Mapping[str, str]] = None
+) -> Optional[EngineConfig]:
     """Resuelve un motor desde el entorno; None si falta su API key."""
     spec = ENGINE_DEFAULTS.get(name)
     if spec is None:
         return None
-    env = env if env is not None else os.environ
-    api_key = (env.get(spec["api_key_env"]) or "").strip()
+    entorno: Mapping[str, str] = env if env is not None else os.environ
+    api_key = (entorno.get(spec["api_key_env"]) or "").strip()
     if not api_key:
         return None
-    base_url = env.get(spec["base_url_env"]) or spec["default_base_url"]
-    model = env.get(spec["model_env"]) or spec["default_model"]
+    base_url = entorno.get(spec["base_url_env"]) or spec["default_base_url"]
+    model = entorno.get(spec["model_env"]) or spec["default_model"]
     timeout = DEFAULT_TIMEOUT
     try:
-        timeout = int(env.get(f"{name.upper()}_TIMEOUT") or DEFAULT_TIMEOUT)
+        timeout = int(entorno.get(f"{name.upper()}_TIMEOUT") or DEFAULT_TIMEOUT)
     except (TypeError, ValueError):
         pass
     return EngineConfig(
@@ -191,8 +193,12 @@ def _request_headers(cfg: EngineConfig) -> Dict[str, str]:
         "Content-Type": "application/json",
     }
     if cfg.name == "openrouter":
-        ref = (os.environ.get("OPENROUTER_SITE_URL") or "https://localhost/maxocracia").strip()
-        title = (os.environ.get("OPENROUTER_APP_TITLE") or "Maxocracia-Concilio").strip()
+        ref = (
+            os.environ.get("OPENROUTER_SITE_URL") or "https://localhost/maxocracia"
+        ).strip()
+        title = (
+            os.environ.get("OPENROUTER_APP_TITLE") or "Maxocracia-Concilio"
+        ).strip()
         if ref:
             headers["HTTP-Referer"] = ref
         if title:
@@ -258,7 +264,10 @@ def call_engine(
                 nuevo = alternatives.pop(0)
                 logger.warning(
                     "[%s] modelo %s no disponible (404: %s); probando %s",
-                    cfg.name, cfg.model, resp.text[:120], nuevo,
+                    cfg.name,
+                    cfg.model,
+                    resp.text[:120],
+                    nuevo,
                 )
                 cfg.model = nuevo
                 payload["model"] = nuevo
@@ -280,7 +289,10 @@ def call_engine(
                 nuevo = alternatives.pop(0)
                 logger.warning(
                     "[%s] %s persistente; rotando %s -> %s",
-                    cfg.name, resp.status_code, cfg.model, nuevo,
+                    cfg.name,
+                    resp.status_code,
+                    cfg.model,
+                    nuevo,
                 )
                 cfg.model = nuevo
                 payload["model"] = nuevo
@@ -289,7 +301,9 @@ def call_engine(
                 continue
             raise EngineError(last_error)
         if resp.status_code != 200:
-            raise EngineError(f"[{cfg.name}] HTTP {resp.status_code}: {resp.text[:200]}")
+            raise EngineError(
+                f"[{cfg.name}] HTTP {resp.status_code}: {resp.text[:200]}"
+            )
         try:
             data = resp.json()
             return str(data["choices"][0]["message"]["content"] or "")
@@ -335,7 +349,9 @@ def chain_call(
                 timeout=timeout,
                 max_retries=max_retries,
             )
-            logger.info("motor %s/%s respondió (%d chars)", cfg.name, cfg.model, len(text))
+            logger.info(
+                "motor %s/%s respondió (%d chars)", cfg.name, cfg.model, len(text)
+            )
             return text, cfg
         except EngineError as exc:
             errors.append(str(exc))

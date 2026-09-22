@@ -311,7 +311,10 @@ class FormsManager:
                     update_data["educacion_anos"] = float(update_data["educacion_anos"])
                 except (TypeError, ValueError):
                     return False, "educacion_anos debe ser un número"
-                if update_data["educacion_anos"] < 0 or update_data["educacion_anos"] > 60:
+                if (
+                    update_data["educacion_anos"] < 0
+                    or update_data["educacion_anos"] > 60
+                ):
                     return False, "educacion_anos debe estar entre 0 y 60 años"
 
         # Validate status

@@ -129,24 +129,22 @@ def metricas_aprendizaje(workspace: str) -> Dict[str, Any]:
     total = len(registros)
     por_decision = {d: 0 for d in VALID_DECISIONS}
     changed_mind = 0
-    olvido = ("revoke", "queue")
     for r in registros:
         por_decision[str(r.get("decision", ""))] = (
             por_decision.get(str(r.get("decision", "")), 0) + 1
         )
         if r.get("changed_mind"):
             changed_mind += 1
-    ratificados = por_decision["ratify"]
     validos = sum(
         1
         for r in registros
-        if r.get("decision") == "ratify"
-        and r.get("hypothesis")
-        and r.get("outcome")
+        if r.get("decision") == "ratify" and r.get("hypothesis") and r.get("outcome")
     )
     revisiones = 0
     for r in registros:
-        revisiones += len(r.get("evidence", []) if isinstance(r.get("evidence"), list) else [])
+        revisiones += len(
+            r.get("evidence", []) if isinstance(r.get("evidence"), list) else []
+        )
     return {
         "total": total,
         "por_decision": por_decision,

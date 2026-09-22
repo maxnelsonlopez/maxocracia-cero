@@ -116,9 +116,7 @@ class TestValidacionAxiomatica:
         assert resp.status_code == 201
 
     def test_sin_auth_rechazado(self, client):
-        resp = client.post(
-            "/voting/parliament/educativo", json={"umbral_anios": 14}
-        )
+        resp = client.post("/voting/parliament/educativo", json={"umbral_anios": 14})
         assert resp.status_code == 401
 
     def test_recien_llegado_n0_no_puede_proponer(self, client, auth):

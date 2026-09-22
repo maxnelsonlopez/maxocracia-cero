@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Arranque del Concilio con el PC — semilla de autonomía (decreto 09-09-2026).
+r"""Arranque del Concilio con el PC — semilla de autonomía (decreto 09-09-2026).
 
 Registrado como tarea de Windows al iniciar sesión (MaxocraciaConcilio):
 
@@ -47,7 +47,9 @@ def main() -> int:
     # 1. El custodio manda: pausa/parada = silencio.
     if CONTROL.exists():
         try:
-            estado = json.loads(CONTROL.read_text(encoding="utf-8")).get("estado", "activo")
+            estado = json.loads(CONTROL.read_text(encoding="utf-8")).get(
+                "estado", "activo"
+            )
         except (OSError, ValueError):
             estado = "activo"
         if estado != "activo":
@@ -64,7 +66,13 @@ def main() -> int:
     with open(log, "a", encoding="utf-8") as fh:
         fh.write(f"\n===== {time.strftime('%Y-%m-%d %H:%M:%S')} =====\n")
         result = subprocess.run(
-            [str(PY), "scripts/concilio.py", "ciclo", "--orden", "deepseek,nvidia,openrouter"],
+            [
+                str(PY),
+                "scripts/concilio.py",
+                "ciclo",
+                "--orden",
+                "deepseek,nvidia,openrouter",
+            ],
             cwd=REPO,
             stdout=fh,
             stderr=subprocess.STDOUT,

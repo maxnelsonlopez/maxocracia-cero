@@ -2,10 +2,8 @@
 """Tests de las herramientas del Concilio (misión del ciclo 114428, LOW)."""
 
 from types import SimpleNamespace
-from pathlib import Path
 
-from scripts import canon_index as ci
-from scripts import verificar_coherencia as vc
+from scripts import canon_index as ci, verificar_coherencia as vc
 
 
 def test_canon_index_enumera_areas_y_encabezados(tmp_path):

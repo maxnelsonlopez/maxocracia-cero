@@ -87,8 +87,12 @@ class TestValidacionDeArbol:
         with pytest.raises(SkillTreeError, match="ciclo"):
             SkillTree(
                 [
-                    SkillNode(id="rama/a", name="a", branch="rama", prereq_ids=("rama/b",)),
-                    SkillNode(id="rama/b", name="b", branch="rama", prereq_ids=("rama/a",)),
+                    SkillNode(
+                        id="rama/a", name="a", branch="rama", prereq_ids=("rama/b",)
+                    ),
+                    SkillNode(
+                        id="rama/b", name="b", branch="rama", prereq_ids=("rama/a",)
+                    ),
                 ]
             )
 
@@ -155,9 +159,7 @@ class TestCanonicalYForks:
     def test_duplicado_en_fork(self):
         tree = build_canonical_tree()
         with pytest.raises(SkillTreeError, match="duplicado"):
-            tree.with_node(
-                SkillNode(id="naturaleza", name="X", branch="naturaleza")
-            )
+            tree.with_node(SkillNode(id="naturaleza", name="X", branch="naturaleza"))
 
 
 class TestNodoId:

@@ -147,7 +147,6 @@ def login():
         }
     )
 
-
     # Generate refresh token (expires in 30 days)
     jti = str(uuid4())
     raw_refresh = generate_refresh_token_raw()
@@ -323,7 +322,6 @@ def refresh():
             "alias": user["alias"] if "alias" in user.keys() else None,
         }
     )
-
 
     # Prepare response data
     response_data = {

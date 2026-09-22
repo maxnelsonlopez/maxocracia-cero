@@ -85,7 +85,10 @@ def _indice_resumen(root: Path, workspace: str, max_chars: int = 5_000) -> str:
     except (OSError, UnicodeDecodeError):
         return ""
     if len(text) > max_chars:
-        text = text[:max_chars] + "\n… [índice recortado; regenerar con scripts/canon_index.py]"
+        text = (
+            text[:max_chars]
+            + "\n… [índice recortado; regenerar con scripts/canon_index.py]"
+        )
     return text
 
 
@@ -105,7 +108,8 @@ def read_canon(
     indice = _indice_resumen(root_path, workspace)
     if indice:
         parts.append(
-            "\n### INDICE NAVEGABLE (generado; para orientarte antes de leer)\n" + indice
+            "\n### INDICE NAVEGABLE (generado; para orientarte antes de leer)\n"
+            + indice
         )
     used = 0
     for rel, cap in CANON_FILES:

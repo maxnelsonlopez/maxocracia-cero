@@ -6,7 +6,6 @@
 # Uso: .venv\Scripts\python.exe scripts\instalar_guardas_git.py
 #      (o .venv\Scripts\python.exe scripts\instalar_guardas_git.py --quitar)
 
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -18,7 +17,11 @@ GUARD = REPO / "scripts" / "git_hooks" / "pre_push_guard.py"
 
 def git_dir() -> Path:
     out = subprocess.run(
-        ["git", "rev-parse", "--git-dir"], cwd=REPO, capture_output=True, text=True, timeout=15
+        ["git", "rev-parse", "--git-dir"],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+        timeout=15,
     ).stdout.strip()
     if not out:
         raise SystemExit("No se detectó repo git en " + str(REPO))
@@ -39,7 +42,10 @@ def instalar() -> None:
     )
     (hooks / "pre-push").write_text(shim, encoding="utf-8")
     head = subprocess.run(
-        ["git", "rev-parse", "--short", "HEAD"], cwd=REPO, capture_output=True, text=True
+        ["git", "rev-parse", "--short", "HEAD"],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
     ).stdout.strip()
     print(f"[OK] Guarda instalada: {hooks / 'pre-push'}")
     print(f"     Core: {GUARD} (commit {head})")

@@ -5,14 +5,12 @@ maxocontracts/skills.py es lógica pura: los veredictos se verifican sin
 Flask, con razones explícitas (T13).
 """
 
-import pytest
-
 from maxocontracts.skills import (
-    VacuacionRequirements,
     TriadaVotos,
+    VacuacionRequirements,
+    evaluar_concesion,
     evaluate_triada,
     evaluate_vacuacion,
-    evaluar_concesion,
 )
 
 

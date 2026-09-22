@@ -20,7 +20,10 @@ python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
-exclude = "scratch/|docs/|frontend/|simulator/|validador_conceptual\\.py$"
+# scripts/ y scripts/git_hooks/ son namespace packages (sin __init__.py):
+# sin esto mypy ve pre_push_guard con dos nombres de módulo y aborta.
+explicit_package_bases = true
+exclude = "scratch/|docs/|frontend/|simulator/|plataforma_educativa/|validador_conceptual\\.py$"
 # La capa Flask (app/) es legacy sin tipado estricto: desactivamos códigos de
 # errores que generan ruido allí (atributos ad-hoc, Any|None, vars sin anotar).
 # El motor puro (maxocontracts/) se mantiene tipado al 100%.

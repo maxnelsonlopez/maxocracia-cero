@@ -3,8 +3,6 @@
 
 import json
 
-import pytest
-
 from maxocontracts.concilio import revision as rev_mod
 from maxocontracts.concilio.revision import revisar_candidato
 
@@ -34,7 +32,11 @@ def test_revision_multimodelo_diversidad_y_firma(monkeypatch):
 
     def _fake_call(engine_cfg, system, user, want_json=True):
         llamadas.append(engine_cfg.name)
-        role = "Dissident" if "Disidente" in system else ("Revisor A" if llamadas[-1] == "nv" else "Revisor B")
+        role = (
+            "Dissident"
+            if "Disidente" in system
+            else ("Revisor A" if llamadas[-1] == "nv" else "Revisor B")
+        )
         return _respuesta(role), engine_cfg, False
 
     monkeypatch.setattr(rev_mod, "_call_revision", _fake_call)
@@ -53,8 +55,11 @@ def test_revision_captura_changed_mind(monkeypatch):
 
     def _fake_call(engine_cfg, system, user, want_json=True):
         return (
-            _respuesta("Dissident", verdict="modify",
-                       changed={"desde": "approve", "hacia": "modify: evidencia nueva"}),
+            _respuesta(
+                "Dissident",
+                verdict="modify",
+                changed={"desde": "approve", "hacia": "modify: evidencia nueva"},
+            ),
             engine_cfg,
             False,
         )

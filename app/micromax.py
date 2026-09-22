@@ -459,7 +459,10 @@ class MicroMaxManager:
         return [dict(row) for row in cursor.fetchall()]
 
     def save_safety_survey(
-        self, user_id: int, answers: Dict[str, bool], wants_support: Optional[bool] = None
+        self,
+        user_id: int,
+        answers: Dict[str, bool],
+        wants_support: Optional[bool] = None,
     ) -> Dict:
         """Saves ESI safety survey, counts score and activates Modo Escudo when red.
 
@@ -499,7 +502,9 @@ class MicroMaxManager:
             "member_id": member["id"],
             "score": score,
             "answers": answers,
-            "wants_support": bool(wants_support) if wants_support is not None else False,
+            "wants_support": (
+                bool(wants_support) if wants_support is not None else False
+            ),
             "protection_mode": "shielded" if score >= 3 else "standard",
             "blocked": False,
             "can_log": True,
@@ -677,13 +682,14 @@ class MicroMaxManager:
         def _member_mode(m):
             return m.get("ceh_mode") or "bridge"
 
-        contributing = [m for m in visible_members if (m.get("monthly_income") or 0) > 0]
+        contributing = [
+            m for m in visible_members if (m.get("monthly_income") or 0) > 0
+        ]
         ceh_unit = (
             "tvi"
             if contributing
             and all(
-                _member_mode(m) == "canonical"
-                and (m.get("hourly_rate") or 0) > 0
+                _member_mode(m) == "canonical" and (m.get("hourly_rate") or 0) > 0
                 for m in contributing
             )
             else "fiat"

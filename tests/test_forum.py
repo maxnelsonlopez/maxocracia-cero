@@ -10,7 +10,9 @@ def test_requires_token(client):
     """Sin token, el foro niega el acceso."""
     resp = client.get("/forum/posts")
     assert resp.status_code == 401
-    resp = client.post("/forum/posts", json={"kind": "topic", "title": "x", "body": "y"})
+    resp = client.post(
+        "/forum/posts", json={"kind": "topic", "title": "x", "body": "y"}
+    )
     assert resp.status_code == 401
 
 
@@ -18,7 +20,11 @@ def test_create_post_ok(auth_client):
     """Un miembro publica una pregunta en la plaza."""
     resp = auth_client.post(
         "/forum/posts",
-        json={"kind": "question", "title": "¿Qué es un TVI?", "body": "No lo entiendo aún."},
+        json={
+            "kind": "question",
+            "title": "¿Qué es un TVI?",
+            "body": "No lo entiendo aún.",
+        },
     )
     assert resp.status_code == 201
     data = resp.get_json()
@@ -179,7 +185,11 @@ def test_forum_needs_gate(auth_client):
     """/forum/needs expone solo necesidades abiertas (puerta al matching)."""
     need_create = auth_client.post(
         "/forum/posts",
-        json={"kind": "need", "title": "Necesitamos agua limpia", "body": "en la vereda"},
+        json={
+            "kind": "need",
+            "title": "Necesitamos agua limpia",
+            "body": "en la vereda",
+        },
     )
     auth_client.post(
         "/forum/posts", json={"kind": "topic", "title": "Opinión", "body": "otro"}
@@ -200,7 +210,8 @@ def test_forum_needs_gate(auth_client):
 
 def test_get_post_detail(auth_client):
     created = auth_client.post(
-        "/forum/posts", json={"kind": "workshop_offer", "title": "Ofrezco mates", "body": "b"}
+        "/forum/posts",
+        json={"kind": "workshop_offer", "title": "Ofrezco mates", "body": "b"},
     )
     post_id = created.get_json()["post"]["id"]
     resp = auth_client.get(f"/forum/posts/{post_id}")
@@ -321,7 +332,11 @@ def test_need_links_to_plaza_when_participant_exists(auth_client):
     _register_participant(auth_client)
     resp = auth_client.post(
         "/forum/posts",
-        json={"kind": "need", "title": "Quiero aprender huertas", "body": "Necesito aprender huertas con la comunidad."},
+        json={
+            "kind": "need",
+            "title": "Quiero aprender huertas",
+            "body": "Necesito aprender huertas con la comunidad.",
+        },
     )
     assert resp.status_code == 201
     post = resp.get_json()["post"]
@@ -372,11 +387,19 @@ class TestBusquedaTextual:
     def _posts(self, auth_client):
         auth_client.post(
             "/forum/posts",
-            json={"kind": "question", "title": "¿Qué es un TVI?", "body": "Primer cuerpo."},
+            json={
+                "kind": "question",
+                "title": "¿Qué es un TVI?",
+                "body": "Primer cuerpo.",
+            },
         )
         auth_client.post(
             "/forum/posts",
-            json={"kind": "topic", "title": "Huertas urbanas", "body": "Cultivar en comunidad."},
+            json={
+                "kind": "topic",
+                "title": "Huertas urbanas",
+                "body": "Cultivar en comunidad.",
+            },
         )
 
     def test_busqueda_por_titulo(self, auth_client):
@@ -406,7 +429,11 @@ class TestBusquedaTextual:
         """% y _ se escapan: el término se busca tal cual, no como patrón."""
         auth_client.post(
             "/forum/posts",
-            json={"kind": "topic", "title": "Costos vitales", "body": "El costo es 10% de la vida."},
+            json={
+                "kind": "topic",
+                "title": "Costos vitales",
+                "body": "El costo es 10% de la vida.",
+            },
         )
         literal = auth_client.get("/forum/posts?q=10%25").get_json()
         assert literal["count"] == 1

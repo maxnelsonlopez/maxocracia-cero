@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from maxocontracts.blocks.action import ActionBlock, CommonActions
 from maxocontracts.blocks.condition import CommonConditions, ConditionBlock
 from maxocontracts.blocks.sdv_validator import SDVValidatorBlock
-from maxocontracts.core.types import Participant, SDV, VHV
+from maxocontracts.core.types import SDV, VHV, Participant
 
 # --- ConditionBlock Tests ---
 

@@ -24,7 +24,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from maxocontracts.concilio import (  # noqa: E402
-    ACTIVE,
     Control,
     CycleLockError,
     run_cycle,
@@ -61,23 +60,31 @@ def cmd_status(args) -> int:
     print(f"orden de la cadena   : {', '.join(engines.DEFAULT_ORDER)}")
     cycles_dir = Path(args.workspace) / "cycles"
     if cycles_dir.exists():
-        ciclos = sorted(cycles_dir.iterdir(), key=lambda p: p.stat().st_mtime, reverse=True)[:3]
+        ciclos = sorted(
+            cycles_dir.iterdir(), key=lambda p: p.stat().st_mtime, reverse=True
+        )[:3]
         print(f"últimos ciclos ({len(ciclos)}):")
         for ciclo in ciclos:
             resumen = ciclo / "resumen.md"
             estado = "?"
             if (ciclo / "ciclo.json").exists():
                 try:
-                    estado = json.loads((ciclo / "ciclo.json").read_text(encoding="utf-8")).get(
-                        "ejecutable", "?"
+                    estado = json.loads(
+                        (ciclo / "ciclo.json").read_text(encoding="utf-8")
+                    ).get("ejecutable", "?")
+                    estado = (
+                        "EJECUTABLE"
+                        if estado is True
+                        else ("en cola" if estado is False else estado)
                     )
-                    estado = "EJECUTABLE" if estado is True else ("en cola" if estado is False else estado)
                 except (OSError, ValueError):
                     pass
             primera = ""
             if resumen.exists():
                 lineas = resumen.read_text(encoding="utf-8").splitlines()
-                primera = next((l for l in lineas if l.startswith("- Quórum")), "")[:110]
+                primera = next(
+                    (linea for linea in lineas if linea.startswith("- Quórum")), ""
+                )[:110]
             print(f"  • {ciclo.name} · {estado} · {primera}")
     return 0
 
@@ -133,7 +140,9 @@ def cmd_revisar(args) -> int:
             print(f"    incertidumbre: {str(u)[:180]}")
         if r.get("changed_mind"):
             cm = r["changed_mind"]
-            print(f"    changed_mind: {cm.get('desde')} -> {str(cm.get('hacia'))[:120]}")
+            print(
+                f"    changed_mind: {cm.get('desde')} -> {str(cm.get('hacia'))[:120]}"
+            )
     return 0
 
 
@@ -166,9 +175,13 @@ def cmd_decidir(args) -> int:
     print(f"[OK] aprendizaje registrado ({decision}): {path}")
     if decision == "revoke":
         print("  > La investigación NO se borra: queda en el registro y su historia.")
-        print("  > Integra la reversión con git revert (nunca --force; el guard vigila).")
+        print(
+            "  > Integra la reversión con git revert (nunca --force; el guard vigila)."
+        )
     elif decision == "queue":
-        print("  > 'No sabemos' es un estado constitucional: conservar, no integrar, no destruir.")
+        print(
+            "  > 'No sabemos' es un estado constitucional: conservar, no integrar, no destruir."
+        )
     return 0
 
 
@@ -191,7 +204,9 @@ def cmd_ciclo(args) -> int:
             max_oracles=max(1, min(5, args.oracles)),
             dry_run=args.dry_run,
             canon_max_chars=args.canon_chars,
-            engine_order=tuple(a.strip() for a in args.orden.split(",")) if args.orden else None,
+            engine_order=(
+                tuple(a.strip() for a in args.orden.split(",")) if args.orden else None
+            ),
         )
     except CycleLockError as exc:
         print(f"[concilio] lock: {exc}", file=sys.stderr)
@@ -201,11 +216,15 @@ def cmd_ciclo(args) -> int:
         return 1
     if manifest.get("pausado"):
         print(f"=== CICLO PAUSADO POR EL CUSTODIO ({manifest.get('estado')}) ===")
-        print(f"cycle_id: {manifest['cycle_id']} · bitácora: {manifest['artefactos'].get('bitacora')}")
+        print(
+            f"cycle_id: {manifest['cycle_id']} · bitácora: {manifest['artefactos'].get('bitacora')}"
+        )
         return 0
     print("=== CICLO COMPLETADO ===")
     print(f"cycle_id: {manifest['cycle_id']}")
-    print(f"motores: {', '.join(m['engine'] + '/' + m['model'] for m in manifest['motores'])}")
+    print(
+        f"motores: {', '.join(m['engine'] + '/' + m['model'] for m in manifest['motores'])}"
+    )
     print(f"oráculos: {len(manifest['oraculos'])} ({', '.join(manifest['oraculos'])})")
     print(f"consenso: {manifest['consensus']:.0%} · quórum OK: {manifest['quorum_ok']}")
     print(f"estado: {'EJECUTABLE' if manifest['ejecutable'] else 'EN COLA'}")
@@ -217,7 +236,9 @@ def cmd_ciclo(args) -> int:
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Concilio de la Maxocracia")
-    parser.add_argument("--workspace", default="scratch/concilio", help="workspace de artefactos")
+    parser.add_argument(
+        "--workspace", default="scratch/concilio", help="workspace de artefactos"
+    )
     sub = parser.add_subparsers(dest="accion")
 
     p_ciclo = sub.add_parser("ciclo", help="ejecuta el ciclo F0-F2")
@@ -226,7 +247,8 @@ def main(argv=None) -> int:
     p_ciclo.add_argument("--dry-run", action="store_true")
     p_ciclo.add_argument("--canon-chars", type=int, default=90_000)
     p_ciclo.add_argument(
-        "--orden", default=None,
+        "--orden",
+        default=None,
         help="cadena de motores: openrouter,nvidia,deepseek (default: CONCILIO_ENGINE_ORDER)",
     )
 
@@ -240,12 +262,18 @@ def main(argv=None) -> int:
     p_rev = sub.add_parser("revisar", help="F4: revisión multi-modelo del resultado")
     p_rev.add_argument("--propuesta", required=True, help="propuesta aprobada en F2")
     p_rev.add_argument("--diff", default="", help="diff real (o ruta al archivo)")
-    p_rev.add_argument("--evidencia", default="", help="evidencia determinista (resumen)")
+    p_rev.add_argument(
+        "--evidencia", default="", help="evidencia determinista (resumen)"
+    )
 
-    p_dec = sub.add_parser("decidir", help="F5: ratify|revoke|queue + registro de aprendizaje")
+    p_dec = sub.add_parser(
+        "decidir", help="F5: ratify|revoke|queue + registro de aprendizaje"
+    )
     p_dec.add_argument("--cycle", required=True, help="cycle_id")
     p_dec.add_argument("--candidato", required=True, help="título o id del candidato")
-    p_dec.add_argument("--decision", required=True, choices=["ratify", "revoke", "queue"])
+    p_dec.add_argument(
+        "--decision", required=True, choices=["ratify", "revoke", "queue"]
+    )
     p_dec.add_argument("--hipotesis", default="")
     p_dec.add_argument("--senal", dest="señal", default="")
     p_dec.add_argument("--outcome", default="")

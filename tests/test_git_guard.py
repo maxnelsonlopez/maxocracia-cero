@@ -12,8 +12,8 @@ import pytest
 
 from maxocontracts.concilio.executor import EjecutorGuardado, GuardDeniedError
 from maxocontracts.concilio.git_guard import (
-    guard_git_command,
     git_denial,
+    guard_git_command,
     parse_command,
 )
 from scripts.git_hooks.pre_push_guard import check_ancestor, parse_push_lines
@@ -76,7 +76,9 @@ def test_guard_git_command_fail_closed_en_comillas_rotas():
 
 def test_parse_command_divide_tokens():
     assert parse_command('git add "maxocontracts/ oracles"') == [
-        "git", "add", "maxocontracts/ oracles",
+        "git",
+        "add",
+        "maxocontracts/ oracles",
     ]
 
 

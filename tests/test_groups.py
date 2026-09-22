@@ -62,9 +62,7 @@ def test_create_mother_cell(auth_client):
 
 
 def test_invalid_kind(auth_client):
-    resp = auth_client.post(
-        "/groups", json={"kind": "comite", "name": "x"}
-    )
+    resp = auth_client.post("/groups", json={"kind": "comite", "name": "x"})
     assert resp.status_code == 400
 
 
@@ -120,10 +118,18 @@ def test_child_registers_fractality(auth_client):
     detail = auth_client.get(f"/groups/{mother['id']}")
     data = detail.get_json()["group"]
     assert data["children"] == [
-        {"id": child["id"], "name": child["name"], "kind": "solution_group", "status": "active"}
+        {
+            "id": child["id"],
+            "name": child["name"],
+            "kind": "solution_group",
+            "status": "active",
+        }
     ]
     assert data["skill_nodes"][0]["skill_node"] == "facilitacion"
-    assert "réplica" in data["skill_nodes"][0]["evidence"] or "replica" in data["skill_nodes"][0]["evidence"]
+    assert (
+        "réplica" in data["skill_nodes"][0]["evidence"]
+        or "replica" in data["skill_nodes"][0]["evidence"]
+    )
 
 
 def test_child_requires_mother_cell(auth_client):

@@ -6,8 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from maxocontracts.concilio import ACTIVE, PAUSED, Control
-from maxocontracts.concilio import cycle as cycle_mod
+from maxocontracts.concilio import ACTIVE, PAUSED, Control, cycle as cycle_mod
 from maxocontracts.concilio.control import STOPPED
 from maxocontracts.concilio.cycle import ORACLE_ROLES, run_cycle
 
@@ -39,14 +38,22 @@ def fake_engine(monkeypatch):
     def install(seen=None):
         seen = seen if seen is not None else []
 
-        def _fake_call(engine_cfg, system, user, want_json=True, max_tokens=2000, **kwargs):
+        def _fake_call(
+            engine_cfg, system, user, want_json=True, max_tokens=2000, **kwargs
+        ):
             seen.append((system, user))
             role = next((r for r in ORACLE_ROLES if r in system), "Economic")
             if "CANON (léelo" in user:
                 return (
                     json.dumps(
-                        {"firma": {"summary": role, "axiom_quotes": ["INV1"],
-                                   "critical_question": "?", "confidence": 0.9}}
+                        {
+                            "firma": {
+                                "summary": role,
+                                "axiom_quotes": ["INV1"],
+                                "critical_question": "?",
+                                "confidence": 0.9,
+                            }
+                        }
                     ),
                     engine_cfg,
                     False,
@@ -56,9 +63,16 @@ def fake_engine(monkeypatch):
                     {
                         "axioms": {"ok": True, "reasoning": "ok"},
                         "proposals": [
-                            {"title": f"Tarea {role}", "source": "agenda §0", "why": "w",
-                             "risks": "r", "tests": "t", "axioms": ["INV1"],
-                             "vote": "approve", "confidence": 0.8}
+                            {
+                                "title": f"Tarea {role}",
+                                "source": "agenda §0",
+                                "why": "w",
+                                "risks": "r",
+                                "tests": "t",
+                                "axioms": ["INV1"],
+                                "vote": "approve",
+                                "confidence": 0.8,
+                            }
                         ],
                         "veto": None,
                     }
@@ -115,15 +129,38 @@ def test_ciclo_pausado_no_llama_a_motores(repo, tmp_path, monkeypatch):
         cfg = type("C", (), {"name": "nv", "model": "m"})()
         if "CANON (léelo" in user:
             return (
-                json.dumps({"firma": {"summary": "s", "axiom_quotes": [],
-                                      "critical_question": "", "confidence": 0.5}}),
+                json.dumps(
+                    {
+                        "firma": {
+                            "summary": "s",
+                            "axiom_quotes": [],
+                            "critical_question": "",
+                            "confidence": 0.5,
+                        }
+                    }
+                ),
                 cfg,
                 False,
             )
         return (
-            json.dumps({"axioms": {"ok": True, "reasoning": "ok"}, "proposals": [
-                {"title": "p", "source": "s", "why": "w", "risks": "r", "tests": "t",
-                 "axioms": ["INV1"], "vote": "approve", "confidence": 0.8}], "veto": None}),
+            json.dumps(
+                {
+                    "axioms": {"ok": True, "reasoning": "ok"},
+                    "proposals": [
+                        {
+                            "title": "p",
+                            "source": "s",
+                            "why": "w",
+                            "risks": "r",
+                            "tests": "t",
+                            "axioms": ["INV1"],
+                            "vote": "approve",
+                            "confidence": 0.8,
+                        }
+                    ],
+                    "veto": None,
+                }
+            ),
             cfg,
             False,
         )

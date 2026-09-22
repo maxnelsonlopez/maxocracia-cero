@@ -39,9 +39,7 @@ def test_ninguna_fuente_del_canon_esta_recortada():
     una amputación silenciosa de la memoria del sistema.
     """
     recortadas = fuentes_recortadas(str(REPO))
-    detalle = "; ".join(
-        f"{e.ruta} ({e.caracteres} > {e.tope})" for e in recortadas
-    )
+    detalle = "; ".join(f"{e.ruta} ({e.caracteres} > {e.tope})" for e in recortadas)
     assert recortadas == [], f"fuentes del canon recortadas: {detalle}"
 
 
@@ -81,7 +79,8 @@ def test_el_registro_tiene_margen_para_la_proxima_entrada():
     recorta sola tarde o temprano.
     """
     registro = next(
-        e for e in auditar_corpus(str(REPO))
+        e
+        for e in auditar_corpus(str(REPO))
         if e.ruta.endswith("atribuciones_sinteticas.md")
     )
     assert registro.existe

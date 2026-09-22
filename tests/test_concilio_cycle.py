@@ -8,9 +8,12 @@ from pathlib import Path
 
 import pytest
 
-from maxocontracts.concilio import CycleLockError, run_cycle
-from maxocontracts.concilio import canon as canon_mod
-from maxocontracts.concilio import cycle as cycle_mod
+from maxocontracts.concilio import (
+    CycleLockError,
+    canon as canon_mod,
+    cycle as cycle_mod,
+    run_cycle,
+)
 from maxocontracts.concilio.bitacora import load_cycle
 from maxocontracts.concilio.cycle import ORACLE_ROLES, _acquire_lock, _release_lock
 
@@ -56,7 +59,9 @@ def fake_engine(monkeypatch):
         votes = votes or {}
         axioms_ok = axioms_ok or {}
 
-        def _fake_call(engine_cfg, system, user, want_json=True, max_tokens=2000, **kwargs):
+        def _fake_call(
+            engine_cfg, system, user, want_json=True, max_tokens=2000, **kwargs
+        ):
             role = next((r for r in ORACLE_ROLES if r in system), "Economic")
             if "CANON (léelo" in user:
                 return (
@@ -170,7 +175,9 @@ def test_lock_pid_muerto_permite_adquirir(tmp_path):
     ws = tmp_path / "ws"
     lock_path = ws / "concilio.lock"
     ws.mkdir(parents=True, exist_ok=True)
-    lock_path.write_text(json.dumps({"pid": 999_999_999, "ts": time.time()}), encoding="utf-8")
+    lock_path.write_text(
+        json.dumps({"pid": 999_999_999, "ts": time.time()}), encoding="utf-8"
+    )
     lock = _acquire_lock(ws)  # no debe lanzar
     _release_lock(lock)
 
@@ -207,7 +214,13 @@ def test_ciclo_completo_ejecutable(repo, tmp_path, fake_engine, monkeypatch):
     guardado = load_cycle(Path(manifest["artefactos"]["manifest"]).parent)
     assert guardado["cycle_id"] == manifest["cycle_id"]
     eventos = _bitacora_lines(manifest)
-    assert {e["evento"] for e in eventos} >= {"despertar", "corpus", "firma", "voto", "manifest"}
+    assert {e["evento"] for e in eventos} >= {
+        "despertar",
+        "corpus",
+        "firma",
+        "voto",
+        "manifest",
+    }
 
 
 def _bitacora_lines(manifest):
@@ -248,9 +261,7 @@ def test_sin_quorum_no_se_ejecuta(repo, tmp_path, fake_engine):
         NVIDIA_NIM_API_KEY="nv-test",
         DEEPSEEK_API_KEY="ds-test",
     )  # solo 2 motores → quórum 3 no alcanzado
-    manifest = run_cycle(
-        repo, workspace=str(tmp_path / "ws"), env=env, max_oracles=2
-    )
+    manifest = run_cycle(repo, workspace=str(tmp_path / "ws"), env=env, max_oracles=2)
     assert manifest["quorum_ok"] is False
     assert manifest["ejecutable"] is False
 
@@ -261,7 +272,11 @@ def test_dry_run_no_llama_a_motores(repo, tmp_path, monkeypatch):
 
     monkeypatch.setattr(cycle_mod, "_call", boom)
     manifest = run_cycle(
-        repo, workspace=str(tmp_path / "ws"), env=_make_env(), max_oracles=3, dry_run=True
+        repo,
+        workspace=str(tmp_path / "ws"),
+        env=_make_env(),
+        max_oracles=3,
+        dry_run=True,
     )
     assert manifest["dry_run"] is True
     assert manifest["ejecutable"] is False
@@ -285,7 +300,9 @@ def test_presupuesto_free_del_ciclo():
     """El ciclo cabe en la cuota free: corpus 90K, firma 2000 / voto 4000, timeout 120s."""
     assert cycle_mod.CALL_TIMEOUT == 120
     assert cycle_mod.MAX_TOKENS_FIRMA <= 2000
-    assert cycle_mod.MAX_TOKENS_VOTO == 4000  # razonadores truncan con menos (diseño §5)
+    assert (
+        cycle_mod.MAX_TOKENS_VOTO == 4000
+    )  # razonadores truncan con menos (diseño §5)
     import inspect
 
     assert inspect.signature(run_cycle).parameters["canon_max_chars"].default == 90_000

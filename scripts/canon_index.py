@@ -11,7 +11,6 @@ completo. Determinista: solo lee el repo, nunca escribe fuera del out.
 import argparse
 import re
 import subprocess
-import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -35,8 +34,11 @@ SKIP_PARTS = {"__pycache__", "node_modules", ".venv", ".git", ".next"}
 def _git_head() -> str:
     try:
         out = subprocess.run(
-            ["git", "rev-parse", "--short", "HEAD"], cwd=REPO,
-            capture_output=True, text=True, timeout=10,
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=REPO,
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
         return out.stdout.strip() or "?"
     except Exception:  # noqa: BLE001
@@ -75,7 +77,9 @@ def build_index(root: Path, max_files: int = 60) -> str:
                 lines.append(f"  - {h[:90]}")
             encontrados += 1
             if encontrados >= max_files:
-                lines.append(f"- … (resto del área no mostrado; límite {max_files} por área)")
+                lines.append(
+                    f"- … (resto del área no mostrado; límite {max_files} por área)"
+                )
                 break
     return "\n".join(lines) + "\n"
 
@@ -83,7 +87,8 @@ def build_index(root: Path, max_files: int = 60) -> str:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Índice navegable del canon")
     parser.add_argument(
-        "--out", default="scratch/concilio/canon_index.md",
+        "--out",
+        default="scratch/concilio/canon_index.md",
         help="ruta de salida (default: scratch/concilio/canon_index.md)",
     )
     parser.add_argument("--stdout", action="store_true", help="imprime en consola")

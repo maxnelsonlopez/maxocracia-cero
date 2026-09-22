@@ -13,7 +13,6 @@ el validador conceptual + sus tests, que es la coherencia axiomática en sí).
 
 import argparse
 import subprocess
-import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -83,8 +82,12 @@ def ejecutar(con_suite: bool) -> int:
 
 
 def main(argv=None) -> int:
-    parser = argparse.ArgumentParser(description="Verificación de coherencia en un comando")
-    parser.add_argument("--suite", action="store_true", help="incluye la suite completa de pytest")
+    parser = argparse.ArgumentParser(
+        description="Verificación de coherencia en un comando"
+    )
+    parser.add_argument(
+        "--suite", action="store_true", help="incluye la suite completa de pytest"
+    )
     args = parser.parse_args(argv)
     return ejecutar(con_suite=args.suite)
 

@@ -91,7 +91,9 @@ def _reply_counts(db: Any, post_ids: List[int]) -> Dict[int, int]:
     return {int(r["post_id"]): int(r["n"] or 0) for r in rows}
 
 
-def _post_to_dict(db: Any, row: Any, reply_counts: Optional[Dict[int, int]] = None) -> Dict[str, Any]:
+def _post_to_dict(
+    db: Any, row: Any, reply_counts: Optional[Dict[int, int]] = None
+) -> Dict[str, Any]:
     """Serialización T13 de un post del foro (procedencia y estado legibles).
 
     `reply_counts` (post_id → n) viene precalculado por el listado con
@@ -334,9 +336,7 @@ def list_posts(current_user):
     # escapan para que el término sea literal y no un pattern (T13: la plaza
     # se busca y se entiende; nada se interpreta de más).
     if term:
-        escaped = (
-            term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-        )
+        escaped = term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
         pattern = f"%{escaped.lower()}%"
         clauses.append(
             "(LOWER(fp.title) LIKE ? ESCAPE '\\' OR LOWER(fp.body) LIKE ? ESCAPE '\\')"
@@ -371,7 +371,12 @@ def list_posts(current_user):
         f"{rows[-1]['created_at']}|{rows[-1]['id']}" if len(rows) == limit else None
     )
     return jsonify(
-        {"success": True, "count": len(posts), "next_cursor": next_cursor, "posts": posts}
+        {
+            "success": True,
+            "count": len(posts),
+            "next_cursor": next_cursor,
+            "posts": posts,
+        }
     )
 
 

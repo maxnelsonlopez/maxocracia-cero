@@ -9,9 +9,8 @@ Contrato de gobernanza (29-08-2026):
   asunto del primer acuerdo (Cap. 13).
 """
 
-import os
-
 import pytest
+
 from app.jwt_utils import create_token
 
 BRIDGE_TOKEN = "test-bridge-secret"
@@ -35,6 +34,7 @@ def auth_header(app, client):
     """Crea un usuario en el sistema principal y devuelve cabecera Bearer con su token."""
     with app.app_context():
         from app.utils import get_db
+
         db = get_db()
         cur = db.execute(
             "INSERT INTO users (email, name, alias, password_hash, trust_level) VALUES (?, ?, ?, ?, ?)",
@@ -43,7 +43,9 @@ def auth_header(app, client):
         db.commit()
         user_id = cur.lastrowid
 
-    token = create_token({"user_id": user_id, "email": "viajero@maxocracia.org", "is_admin": 0})
+    token = create_token(
+        {"user_id": user_id, "email": "viajero@maxocracia.org", "is_admin": 0}
+    )
     return {"Authorization": f"Bearer {token}"}, user_id
 
 
@@ -51,7 +53,9 @@ def _sync(client, headers, bridge_token=None, **payload):
     extra = {}
     if bridge_token:
         extra["X-Edu-Bridge-Token"] = bridge_token
-    return client.post("/edu-bridge/sync-mastery", headers={**headers, **extra}, json=payload)
+    return client.post(
+        "/edu-bridge/sync-mastery", headers={**headers, **extra}, json=payload
+    )
 
 
 def test_edu_bridge_status_unauthorized_returns_401(client):

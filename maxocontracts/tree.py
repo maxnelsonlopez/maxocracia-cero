@@ -27,9 +27,9 @@ from dataclasses import dataclass, field
 from typing import Dict, FrozenSet, Iterable, List, Optional, Set, Tuple
 
 from .skills import (
+    DEFAULT_VACUACION_REQUIREMENTS,
     TriadaVotos,
     VacuacionRequirements,
-    DEFAULT_VACUACION_REQUIREMENTS,
     evaluate_triada,
     evaluate_vacuacion,
 )
@@ -255,9 +255,7 @@ def evaluate_unlock(
 
     razones: List[str] = []
     if not prereqs_ok:
-        faltantes = [
-            p for p in node.prereq_ids if p not in state.mastered
-        ]
+        faltantes = [p for p in node.prereq_ids if p not in state.mastered]
         razones.append(f"prerrequisitos no dominados: {', '.join(faltantes)}")
     if not vacua.vacua:
         razones.append("regla de oro incompleta: " + ", ".join(vacua.faltantes))

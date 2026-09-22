@@ -53,7 +53,9 @@ def test_register_rejects_invalid_years(auth_client):
     assert resp.status_code == 400
     resp = auth_client.post("/forms/participant", json=_form_data(educacion_anos=70))
     assert resp.status_code == 400
-    resp = auth_client.post("/forms/participant", json=_form_data(educacion_anos="años"))
+    resp = auth_client.post(
+        "/forms/participant", json=_form_data(educacion_anos="años")
+    )
     assert resp.status_code == 400
 
 

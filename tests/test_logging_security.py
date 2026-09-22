@@ -7,8 +7,6 @@ Nunca se usan claves reales: los secretos de prueba son cadenas falsas.
 import json
 import logging
 
-import pytest
-
 from app.limiter import get_storage_uri
 from app.logging_config import (
     REDACTED,
@@ -69,8 +67,13 @@ def test_sanitize_value_redacta_campos_sensibles():
 
 def _record(msg, extra=None):
     record = logging.LogRecord(
-        name="app.test", level=logging.INFO, pathname=__file__, lineno=1,
-        msg=msg, args=(), exc_info=None,
+        name="app.test",
+        level=logging.INFO,
+        pathname=__file__,
+        lineno=1,
+        msg=msg,
+        args=(),
+        exc_info=None,
     )
     if extra:
         record.extra = extra

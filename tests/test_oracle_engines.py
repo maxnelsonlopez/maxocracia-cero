@@ -71,10 +71,11 @@ def test_resolve_engine_desconocido_devuelve_none():
 
 def test_available_engines_filtra_y_respeta_orden():
     engines = available_engines(env=_fake_env(), order=DEFAULT_ORDER)
-    assert [e.name for e in engines] == ["nvidia", "deepseek"]  # OpenRouter principal (15-09, sin ingresos para DeepSeek)
-    engines2 = available_engines(
-        env=_fake_env(), order=("deepseek", "nvidia", "local")
-    )
+    assert [e.name for e in engines] == [
+        "nvidia",
+        "deepseek",
+    ]  # OpenRouter principal (15-09, sin ingresos para DeepSeek)
+    engines2 = available_engines(env=_fake_env(), order=("deepseek", "nvidia", "local"))
     assert [e.name for e in engines2] == ["deepseek", "nvidia"]
 
 
@@ -195,9 +196,7 @@ def test_call_engine_respuesta_ilegible_lanza_engineerror(monkeypatch):
     def connection_down(*a, **k):
         raise _requests.exceptions.ConnectionError("red caida")
 
-    monkeypatch.setattr(
-        "maxocontracts.oracles.engines.requests.post", connection_down
-    )
+    monkeypatch.setattr("maxocontracts.oracles.engines.requests.post", connection_down)
     cfg = resolve_engine("nvidia", env=_fake_env())
     with pytest.raises(EngineError, match="no se pudo contactar"):
         call_engine(cfg, [{"role": "user", "content": "hola"}])
@@ -265,7 +264,9 @@ def test_openrouter_default_es_modelo_vivo_sept2026():
     assert default not in muertos
     alternativas = set(ENGINE_DEFAULTS["openrouter"]["model_alternatives"])
     assert not (alternativas & muertos)
-    assert "nvidia/nemotron-3-super-120b-a12b:free" in alternativas  # verificado vivo el 13-09
+    assert (
+        "nvidia/nemotron-3-super-120b-a12b:free" in alternativas
+    )  # verificado vivo el 13-09
 
 
 def test_call_engine_429_rota_a_siguiente_free(monkeypatch):
@@ -279,7 +280,9 @@ def test_call_engine_429_rota_a_siguiente_free(monkeypatch):
     def fake_post(url, json=None, headers=None, timeout=None):
         state["n"] += 1
         if state["n"] <= 2:
-            return SimpleNamespace(status_code=429, text="Rate limit exceeded", json=lambda: {})
+            return SimpleNamespace(
+                status_code=429, text="Rate limit exceeded", json=lambda: {}
+            )
         return _fake_response("sobrevivio rotando", 200)
 
     monkeypatch.setattr("maxocontracts.oracles.engines.requests.post", fake_post)
@@ -296,7 +299,9 @@ def test_call_engine_429_sin_alternativas_lanza(monkeypatch):
     """Sin alternativas (nvidia/deepseek) el 429 persistente sigue lanzando."""
     monkeypatch.setattr(
         "maxocontracts.oracles.engines.requests.post",
-        lambda *a, **k: SimpleNamespace(status_code=429, text="Rate limit", json=lambda: {}),
+        lambda *a, **k: SimpleNamespace(
+            status_code=429, text="Rate limit", json=lambda: {}
+        ),
     )
     monkeypatch.setattr("maxocontracts.oracles.engines.time.sleep", lambda *a: None)
     cfg = resolve_engine("nvidia", env=_fake_env())
@@ -311,7 +316,8 @@ def test_retry_after_se_honra(monkeypatch):
     def fake_post(url, json=None, headers=None, timeout=None):
         if len(dormido) == 0:
             return SimpleNamespace(
-                status_code=429, text="slow down",
+                status_code=429,
+                text="slow down",
                 headers={"Retry-After": "7"},
                 json=lambda: {},
             )
@@ -322,7 +328,10 @@ def test_retry_after_se_honra(monkeypatch):
         "maxocontracts.oracles.engines.time.sleep", lambda s: dormido.append(s)
     )
     cfg = resolve_engine("nvidia", env=_fake_env())
-    assert call_engine(cfg, [{"role": "user", "content": "hola"}], max_retries=2) == "ok tras espera"
+    assert (
+        call_engine(cfg, [{"role": "user", "content": "hola"}], max_retries=2)
+        == "ok tras espera"
+    )
     assert any(abs(s - 7.0) < 0.01 for s in dormido)
 
 
