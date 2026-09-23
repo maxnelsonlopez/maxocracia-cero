@@ -1,3 +1,6 @@
-sphinx>=7.4
-myst-parser>=3.0
+# myst-parser 5.x exige markdown-it-py~=4.2 y sphinx>=8,<10: ese markdown
+# viene de requirements.txt (bump conjunto); estos rangos lo hacen explícito
+# para que el job docs del CI no resuelva una combinación rota.
+sphinx>=8,<10
+myst-parser>=5.1,<6
 sphinx-rtd-theme>=2.0
