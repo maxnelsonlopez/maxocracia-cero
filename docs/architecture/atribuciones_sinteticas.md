@@ -403,6 +403,23 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   estrechamientos reales de `None` en el motor (`verificacion.py:40`,
   `cycle.py:530`, `oracles/engines.py:129-144`). Verificación: flake8 exit 0,
   mypy limpio en 194 ficheros, 244 tests de los ficheros tocados en verde.
+- **Prueba en la calle — alistamiento piloto (22/9/2026, sesión con Max; Cap. 4
+  como norte: Igualdad de Oportunidades = eliminar barreras artificiales)**:
+  auditoría previa de 6 flujos (registro parcial, necesidad/oferta y matching
+  completos, contrato completo con protecciones, hogar completo, votación
+  parcial) y frontend (conectado; `/contracts/[id]` con riesgo en export).
+  Hallazgo honesto: `/contracts/*` ya tenía su mecanismo
+  (`_serve_frontend_collisions`, `contracts_bp.py:381`) — el 404 temido no
+  existía; el aporte real fue negociar contenido en las colisiones restantes
+  (`app/utils.py`: `frontend_shell` en `GET /tvi/stats` y `GET /vhv/parameters`,
+  con degradación a JSON) + 7 tests (`tests/test_frontend_shell.py`).
+  **Llegada suave**: Form Cero exige UNA vía de contacto en vez de las tres
+  (`forms_manager.py`, con guarda en update) + validación y textos civiles en
+  `/forms/cero` y `/register`. **Directorio de calle**: `resolve_user_id`
+  (`utils.py`) — transferir Maxo y delegar el voto aceptan id, alias o correo;
+  UI sin IDs numéricos (`/perfil`, `/votaciones`). **Receta**:
+  `docs/guides/DESPLIEGUE_POR_COMUNIDAD.md` — una casa por tejido (misma
+  imagen, `comun.db` y `SECRET_KEY` propias; sin federación aún).
 
 ### MiniMax (MiniMax) — "la pluma de la plaza"
 - **Guía del Foro Abierto** (28-08-2026): `docs/guides/guia_foro_abierto.md` — documento de la

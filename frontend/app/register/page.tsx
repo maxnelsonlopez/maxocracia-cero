@@ -134,6 +134,8 @@ export default function RegisterPage() {
                 className="pl-10"
               />
               <Mail className="w-5 h-5 text-slate-500 absolute left-3 top-9" />
+              <p className="text-xs text-slate-500 mt-1 ml-1">Es tu llave en la red: con él se enlazan tus necesidades, tus acuerdos y tu voz. Si llegaste por invitación, ya viene prellenado.</p>
+              <p className="text-xs text-slate-500 mt-1 ml-1">¿Sin correo? Pide a tu facilitador una invitación en la plaza y llegan juntos.</p>
             </div>
 
             <div className="relative">

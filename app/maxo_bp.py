@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 
 from .jwt_utils import token_required
 from .maxo import get_balance
-from .utils import get_db
+from .utils import get_db, resolve_user_id
 
 bp = Blueprint("maxo", __name__, url_prefix="/maxo")
 
@@ -91,10 +91,16 @@ def _transfer_impl():
     reason = data.get("reason", "")
 
     db = get_db()
-    # normalize ids
+    # normalize ids (el destino acepta id, alias o correo: directorio de calle;
+    # el id numérico conserva su semántica: desconocido -> 404 abajo)
+    try:
+        to_id = int(to_id)
+    except (ValueError, TypeError):
+        to_id = resolve_user_id(db, to_id)
+    if to_id is None:
+        return jsonify({"error": "invalid user ids"}), 400
     try:
         from_id = int(from_id)
-        to_id = int(to_id)
     except Exception:
         return jsonify({"error": "invalid user ids"}), 400
 

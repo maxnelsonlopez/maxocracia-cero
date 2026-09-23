@@ -28,7 +28,7 @@ from typing import Dict, Optional
 from flask import Blueprint, jsonify, request
 
 from .jwt_utils import admin_required, token_required
-from .utils import get_db
+from .utils import get_db, resolve_user_id
 
 voting_bp = Blueprint("voting", __name__, url_prefix="/voting")
 
@@ -673,18 +673,24 @@ def set_delegation(current_user):
     """
     Delega el voto comunitario a otro usuario (democracia líquida, profundidad 1).
 
-    Body JSON: {"delegatee_user_id": int}
+    Body JSON: {"delegatee_user_id": int | alias | email}
     El delegatario debe existir y no puede ser uno mismo. El voto directo
     siempre manda sobre la delegación. Registro público (T13).
     """
-    delegatee = (request.get_json() or {}).get("delegatee_user_id")
-    if not isinstance(delegatee, int) or delegatee <= 0:
-        return jsonify({"error": "delegatee_user_id (int) obligatorio"}), 400
+    raw = (request.get_json() or {}).get("delegatee_user_id")
+    if raw is None or (isinstance(raw, str) and not raw.strip()):
+        return (
+            jsonify({"error": "delegatee_user_id (id, alias o correo) obligatorio"}),
+            400,
+        )
+    db = get_db()
+    delegatee = resolve_user_id(db, raw)
+    if delegatee is None:
+        return jsonify({"error": "el delegatario no existe"}), 404
     delegator = current_user["user_id"]
     if delegatee == delegator:
         return jsonify({"error": "no puedes delegar tu voto a ti mismo"}), 400
 
-    db = get_db()
     exists = db.execute("SELECT id FROM users WHERE id = ?", (delegatee,)).fetchone()
     if exists is None:
         return jsonify({"error": "el delegatario no existe"}), 404

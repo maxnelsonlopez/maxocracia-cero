@@ -95,9 +95,6 @@ class FormsManager:
         required_fields = [
             "name",
             "email",
-            "phone_call",
-            "phone_whatsapp",
-            "telegram_handle",
             "city",
             "neighborhood",
             "personal_values",
@@ -110,6 +107,21 @@ class FormsManager:
         for field in required_fields:
             if not data.get(field):
                 return False, f"Campo requerido faltante: {field}", None
+
+        # Llegada suave (Cap. 4, Igualdad de Oportunidades: eliminar barreras
+        # artificiales): basta UNA vía de contacto, no las tres. Quien solo
+        # tiene llamadas entra igual que quien solo tiene Telegram.
+        contactos = [
+            str(data.get("phone_call") or "").strip(),
+            str(data.get("phone_whatsapp") or "").strip(),
+            str(data.get("telegram_handle") or "").strip(),
+        ]
+        if not any(contactos):
+            return (
+                False,
+                "Comparte al menos una vía de contacto: llamada, WhatsApp o Telegram",
+                None,
+            )
 
         # Consent must be explicit; do not silently default it for public registration.
         if not data.get("consent_given"):
@@ -153,9 +165,9 @@ class FormsManager:
                     data["name"],
                     data["email"],
                     data.get("referred_by"),
-                    data["phone_call"],
-                    data["phone_whatsapp"],
-                    data["telegram_handle"],
+                    data.get("phone_call"),
+                    data.get("phone_whatsapp"),
+                    data.get("telegram_handle"),
                     data["city"],
                     data["neighborhood"],
                     data["personal_values"],
@@ -341,10 +353,31 @@ class FormsManager:
 
             # Check if participant exists
             cursor.execute(
-                "SELECT id FROM participants WHERE id = ?", (participant_id,)
+                "SELECT id, phone_call, phone_whatsapp, telegram_handle"
+                " FROM participants WHERE id = ?",
+                (participant_id,),
             )
-            if not cursor.fetchone():
+            row = cursor.fetchone()
+            if not row:
                 return False, "Participante no encontrado"
+
+            # Llegada suave: no se puede quedar sin ninguna vía de contacto.
+            # (Índices, no nombres: vale con Row y con tupla cruda.)
+            if any(
+                c in update_data
+                for c in ("phone_call", "phone_whatsapp", "telegram_handle")
+            ):
+                contactos = [
+                    str(update_data.get("phone_call", row[1]) or "").strip(),
+                    str(update_data.get("phone_whatsapp", row[2]) or "").strip(),
+                    str(update_data.get("telegram_handle", row[3]) or "").strip(),
+                ]
+                if not any(contactos):
+                    return (
+                        False,
+                        "Conserva al menos una vía de contacto:"
+                        " llamada, WhatsApp o Telegram",
+                    )
 
             # Construct query dynamically
             set_clause = ", ".join([f"{field} = ?" for field in update_data.keys()])

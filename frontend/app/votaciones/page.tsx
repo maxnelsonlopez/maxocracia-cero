@@ -84,12 +84,14 @@ export default function VotacionesPage() {
   }, [loadDelegations]);
 
   const setDelegation = async () => {
-    const uid = parseInt(delegateInput);
-    if (!uid) return;
+    // Directorio de calle: alias, correo o id — el servidor resuelve.
+    const ref = delegateInput.trim();
+    if (!ref) return;
     setError(null);
+    const asId = /^\d+$/.test(ref) ? parseInt(ref) : ref;
     const res = await apiFetch("/voting/delegations", {
       method: "POST",
-      body: JSON.stringify({ delegatee_user_id: uid }),
+      body: JSON.stringify({ delegatee_user_id: asId }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -207,7 +209,7 @@ export default function VotacionesPage() {
                 <input
                   value={delegateInput}
                   onChange={(e) => setDelegateInput(e.target.value)}
-                  placeholder="ID de usuario delegatario"
+                  placeholder="Alias, correo o #"
                   className="w-40 px-3 py-1.5 text-xs rounded-lg bg-slate-950 border border-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-white font-mono placeholder:text-slate-600"
                 />
                 <button onClick={setDelegation} className="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 transition-all">

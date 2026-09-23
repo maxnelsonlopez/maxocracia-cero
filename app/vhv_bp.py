@@ -17,7 +17,7 @@ from flask import Blueprint, g, jsonify, request
 from .jwt_utils import admin_required, token_required
 from .maxo import clear_vhv_params_cache
 from .tvi import TVIManager
-from .utils import get_db
+from .utils import frontend_shell, get_db
 from .vhv_calculator import (
     CASE_STUDY_HUEVO_ETICO,
     CASE_STUDY_HUEVO_INDUSTRIAL,
@@ -654,6 +654,7 @@ def compare_products():
 
 
 @vhv_bp.route("/parameters", methods=["GET"])
+@frontend_shell("vhv/parameters.html")
 def get_parameters():
     """
     Get current VHV valuation parameters.

@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 
 from .jwt_utils import token_required
 from .tvi import TVIManager
+from .utils import frontend_shell
 
 tvi_bp = Blueprint("tvi", __name__, url_prefix="/tvi")
 tvi_manager = TVIManager()
@@ -54,6 +55,7 @@ def get_tvis(current_user):
 
 
 @tvi_bp.route("/stats", methods=["GET"])
+@frontend_shell("tvi/stats.html")
 @token_required
 def get_stats(current_user):
     tvi_manager = TVIManager()  # Instantiate per request

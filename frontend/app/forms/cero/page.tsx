@@ -76,9 +76,6 @@ export default function CeroFormPage() {
       const requiredFields: Array<[string, string]> = [
         [formData.name, "tu nombre o alias"],
         [formData.email, "tu correo electrónico"],
-        [formData.phone_call, "un teléfono para llamadas"],
-        [formData.phone_whatsapp, "un número de WhatsApp"],
-        [formData.telegram_handle, "tu usuario de Telegram"],
         [formData.city, "tu ciudad"],
         [formData.neighborhood, "tu barrio o localidad"],
         [formData.personal_values, "los valores que te representan"],
@@ -87,6 +84,17 @@ export default function CeroFormPage() {
 
       if (missingField) {
         return `Completa ${missingField[1]} para continuar.`;
+      }
+
+      // Llegada suave: basta UNA vía de contacto, no las tres.
+      const tieneContacto = [
+        formData.phone_call,
+        formData.phone_whatsapp,
+        formData.telegram_handle,
+      ].some((v) => v.trim());
+
+      if (!tieneContacto) {
+        return "Comparte al menos una vía de contacto: llamada, WhatsApp o Telegram.";
       }
 
       if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) {
@@ -235,15 +243,14 @@ export default function CeroFormPage() {
               name="phone_call"
               value={formData.phone_call}
               onChange={handleChange}
-              required
               placeholder="+57..."
+              hint="Basta con una vía: la que uses en la calle."
             />
             <Input
               label="WhatsApp"
               name="phone_whatsapp"
               value={formData.phone_whatsapp}
               onChange={handleChange}
-              required
               placeholder="+57..."
             />
           </div>
@@ -252,7 +259,6 @@ export default function CeroFormPage() {
             name="telegram_handle"
             value={formData.telegram_handle}
             onChange={handleChange}
-            required
             placeholder="@maxocrata"
           />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

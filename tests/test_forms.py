@@ -124,6 +124,64 @@ class TestFormsManager:
         json_data = response2.get_json()
         assert "email ya está registrado" in json_data["error"]
 
+    def _llegada_base(self, email):
+        """Payload mínimo de llegada: una sola vía de contacto (llamada)."""
+        return {
+            "name": "Llegada Suave",
+            "email": email,
+            "phone_call": "+57 300 111 2233",
+            "phone_whatsapp": "",
+            "telegram_handle": "",
+            "city": "Medellín",
+            "neighborhood": "Comuna 13",
+            "personal_values": "Cuidado",
+            "offer_description": "Puedo acompañar",
+            "need_description": "Necesito orientación",
+            "need_urgency": "Media",
+            "consent_given": 1,
+        }
+
+    def test_register_participant_una_sola_via_de_contacto(self, app, client):
+        """Llegada suave: basta una vía (llamada), no las tres."""
+        response = client.post(
+            "/forms/participant",
+            data=json.dumps(self._llegada_base("suave@example.com")),
+            content_type="application/json",
+        )
+        assert response.status_code == 201
+        assert response.get_json()["success"] is True
+
+    def test_register_participant_sin_contacto_rechaza(self, app, client):
+        """Sin ninguna vía de contacto la red no puede responder: 400 claro."""
+        data = self._llegada_base("sincontacto@example.com")
+        data["phone_call"] = ""
+        response = client.post(
+            "/forms/participant",
+            data=json.dumps(data),
+            content_type="application/json",
+        )
+        assert response.status_code == 400
+        assert "vía de contacto" in response.get_json()["error"]
+
+    def test_update_participant_no_puede_quedarse_sin_contacto(
+        self, app, client, auth_headers
+    ):
+        """Quitar la última vía de contacto por update también se rechaza."""
+        response = client.post(
+            "/forms/participant",
+            data=json.dumps(self._llegada_base("testauth@example.com")),
+            content_type="application/json",
+        )
+        participant_id = response.get_json()["participant_id"]
+        response = client.put(
+            f"/forms/participants/{participant_id}",
+            headers=auth_headers,
+            data=json.dumps({"phone_call": "", "phone_whatsapp": ""}),
+            content_type="application/json",
+        )
+        assert response.status_code == 400
+        assert "vía de contacto" in response.get_json()["error"]
+
 
 class TestFormsAPI:
     """Test Forms API endpoints."""

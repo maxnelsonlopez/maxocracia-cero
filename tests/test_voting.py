@@ -360,6 +360,39 @@ def test_delegacion_a_si_mismo_rechazada(client, auth):
     assert resp.status_code == 400
 
 
+def test_delegacion_por_alias_y_correo(client, auth):
+    """Directorio de calle: delegar por alias o correo, no solo por id."""
+    resp = client.post(
+        "/auth/register",
+        json={
+            "name": "Vecina",
+            "alias": "@vecina",
+            "email": "vecina@test.com",
+            "password": "ValidPass123!",
+        },
+    )
+    assert resp.status_code == 201
+
+    resp = client.post(
+        "/voting/delegations", json={"delegatee_user_id": "@vecina"}, headers=auth(1)
+    )
+    assert resp.status_code == 200
+    assert resp.get_json()["delegatee_user_id"] == 5
+
+    resp = client.post(
+        "/voting/delegations",
+        json={"delegatee_user_id": "ANA@test.com"},
+        headers=auth(1),
+    )
+    assert resp.status_code == 200
+    assert resp.get_json()["delegatee_user_id"] == 2
+
+    resp = client.post(
+        "/voting/delegations", json={"delegatee_user_id": "@nadie"}, headers=auth(1)
+    )
+    assert resp.status_code == 404
+
+
 def test_delegacion_publica_t13(client, auth):
     client.post("/voting/delegations", json={"delegatee_user_id": 2}, headers=auth(1))
     resp = client.get("/voting/delegations")

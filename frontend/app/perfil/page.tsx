@@ -177,15 +177,16 @@ export default function PerfilPage() {
   const doTransfer = async () => {
     if (!user) return;
     setTransferMsg(null);
-    const to_id = parseInt(transferForm.to_user_id);
+    // Directorio de calle: alias, correo o id — el servidor resuelve.
+    const to = transferForm.to_user_id.trim();
     const amount = parseFloat(transferForm.amount);
-    if (!to_id || !amount || amount <= 0) {
-      setTransferMsg("Indica un destinatario (id) y un monto positivo.");
+    if (!to || !amount || amount <= 0) {
+      setTransferMsg("Indica un destinatario (alias, correo o #) y un monto positivo.");
       return;
     }
     const res = await apiFetch("/maxo/transfer", {
       method: "POST",
-      body: JSON.stringify({ from_user_id: user.id, to_user_id: to_id, amount, reason: transferForm.reason }),
+      body: JSON.stringify({ from_user_id: user.id, to_user_id: to, amount, reason: transferForm.reason }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
@@ -332,8 +333,8 @@ export default function PerfilPage() {
             <div className="glass rounded-xl border border-slate-700 p-4 mb-4 space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <input
-                  type="number"
-                  placeholder="Destinatario (usuario #)"
+                  type="text"
+                  placeholder="Destinatario (alias, correo o #)"
                   value={transferForm.to_user_id}
                   onChange={(e) => setTransferForm({ ...transferForm, to_user_id: e.target.value })}
                   className="bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"

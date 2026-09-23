@@ -121,6 +121,47 @@ def _login(client, email, password="Password1"):
     return resp.get_json()["access_token"]
 
 
+def test_transfer_por_alias_y_correo(client):
+    """Directorio de calle: el destino acepta alias o correo, no solo id."""
+    db_path = client.application.config["DATABASE"]
+    a = seed_user(db_path, "calle_a@example.test", "A")
+    b = seed_user(db_path, "calle_b@example.test", "B")
+    conn = sqlite3.connect(db_path)
+    conn.execute("UPDATE users SET alias = '@vecinob' WHERE id = ?", (b,))
+    conn.execute(
+        "INSERT INTO maxo_ledger (user_id, change_amount, reason) VALUES (?, ?, ?)",
+        (a, 10.0, "seed credit"),
+    )
+    conn.commit()
+    conn.close()
+    token = _login(client, "calle_a@example.test")
+
+    resp = client.post(
+        "/maxo/transfer",
+        json={"from_user_id": a, "to_user_id": "@vecinob", "amount": 4.0},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 200
+
+    resp = client.post(
+        "/maxo/transfer",
+        json={
+            "from_user_id": a,
+            "to_user_id": "CALLE_B@example.test",
+            "amount": 3.0,
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 200
+
+    resp = client.post(
+        "/maxo/transfer",
+        json={"from_user_id": a, "to_user_id": "@nadie", "amount": 1.0},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 400
+
+
 def test_ledger_propio(client):
     db_path = client.application.config["DATABASE"]
     a = seed_user(db_path, "ledger_a@example.test", "LedgerA")
