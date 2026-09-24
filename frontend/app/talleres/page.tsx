@@ -17,6 +17,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
 import InfoTip from "../components/ui/InfoTip";
+import Pregunta from "../components/ui/Pregunta";
 
 interface Workshop {
   id: number;
@@ -63,6 +64,10 @@ export default function TalleresPage() {
     capacity: 8,
   });
   const [submitting, setSubmitting] = useState(false);
+  const [publicando, setPublicando] = useState<{
+    id: number;
+    kind: "material" | "obra";
+  } | null>(null);
   const [tree, setTree] = useState<TreeBranch[] | null>(null);
   const [openBranch, setOpenBranch] = useState<string | null>(null);
   const [triada, setTriada] = useState<TriadaState | null>(null);
@@ -173,20 +178,23 @@ export default function TalleresPage() {
   };
 
   const addOutput = async (id: number, kind: "material" | "obra") => {
-    const title = prompt(
-      kind === "material" ? "Título del material de enseñanza (abierto, forkable):" : "Título de la obra aplicada:"
-    );
-    if (!title) return;
+    setPublicando({ id, kind });
+  };
+
+  const confirmarOutput = async (title: string) => {
+    const pub = publicando;
+    setPublicando(null);
+    if (!pub || !title.trim()) return;
     try {
-      const res = await apiFetch(`/workshops/${id}/outputs`, {
+      const res = await apiFetch(`/workshops/${pub.id}/outputs`, {
         method: "POST",
-        body: JSON.stringify({ kind, title }),
+        body: JSON.stringify({ kind: pub.kind, title: title.trim() }),
       });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || "No se pudo publicar");
       }
-      await openDetail(id);
+      await openDetail(pub.id);
       await load();
     } catch (e: any) {
       setError(e.message);
@@ -646,6 +654,20 @@ export default function TalleresPage() {
           </div>
         )}
       </div>
+      {publicando && (
+        <Pregunta
+          titulo={
+            publicando.kind === "material"
+              ? "Material de enseñanza (abierto, forkable)"
+              : "Obra aplicada"
+          }
+          texto="¿Qué le dejas a la red?"
+          placeholder="Título…"
+          confirmar="Publicar"
+          onConfirmar={confirmarOutput}
+          onCancelar={() => setPublicando(null)}
+        />
+      )}
     </div>
   );
 }

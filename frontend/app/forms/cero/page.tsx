@@ -42,11 +42,20 @@ const URGENCY_LEVELS = [
   { label: "Baja", value: "Baja", emoji: "🟢" },
 ];
 
+function leerReferidoGuardado(): string {
+  // Modo facilitador: quien te trajo viaja desde /register?referred_by=.
+  try {
+    return window.localStorage.getItem("mc_referred_by") || "";
+  } catch {
+    return "";
+  }
+}
+
 export default function CeroFormPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    referred_by: "",
+    referred_by: typeof window !== "undefined" ? leerReferidoGuardado() : "",
     phone_call: "",
     phone_whatsapp: "",
     telegram_handle: "",

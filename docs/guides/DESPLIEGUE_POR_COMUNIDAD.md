@@ -63,6 +63,9 @@ Flask sirve `app/static/dist/` y resuelve las rutas dinámicas
    a mano o dictado: es corto a propósito).
 3. Cada vecino: `/register` → `/forms/cero` (basta **una** vía de contacto:
    llamada, WhatsApp o Telegram) → publica necesidad y oferta en `/matching`.
+   **Modo facilitador**: acompaña desde tu celular con el link
+   `/register?referred_by=<tu-alias>` — el referido viaja solo al Form Cero
+   ("¿Quién te invitó?") y el tejido queda trazado desde la primera llegada.
 4. Del match al acuerdo: botón "Contrato Ético" → el borrador vive en
    `/contracts/<id>` → aceptar → activar → check-ins semanales.
 5. Lee `docs/guides/GUIA_FACILITADOR.md` y `docs/guides/semana_de_la_verdad.md`

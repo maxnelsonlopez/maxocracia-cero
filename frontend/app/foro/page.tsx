@@ -17,6 +17,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
 import InfoTip from "../components/ui/InfoTip";
+import Pregunta from "../components/ui/Pregunta";
 
 interface ForumPost {
   id: number;
@@ -56,6 +57,7 @@ export default function ForoPage() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ kind: "question", title: "", body: "", tags: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [cerrando, setCerrando] = useState<ForumPost | null>(null);
   const [repliesOpen, setRepliesOpen] = useState<Record<number, boolean>>({});
   const [repliesByPost, setRepliesByPost] = useState<
     Record<number, { id: number; body: string; author: { name: string }; created_at: string }[]>
@@ -138,11 +140,10 @@ export default function ForoPage() {
     }
   };
 
-  const closePost = async (post: ForumPost) => {
-    const resolution = prompt(
-      "Resolución (opcional): ¿qué salió de esta conversación?"
-    );
-    if (resolution === null) return;
+  const closePost = async (resolution: string) => {
+    const post = cerrando;
+    setCerrando(null);
+    if (!post) return;
     try {
       const res = await apiFetch(`/forum/posts/${post.id}/close`, {
         method: "POST",
@@ -406,7 +407,7 @@ export default function ForoPage() {
                 </div>
                 {post.status === "open" && user && post.author.user_id === user.id && (
                   <button
-                    onClick={() => closePost(post)}
+                    onClick={() => setCerrando(post)}
                     className="mt-3 px-3 py-1.5 rounded-lg border border-slate-600 text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
                   >
                     Cerrar con resolución
@@ -476,6 +477,17 @@ export default function ForoPage() {
           </div>
         )}
       </div>
+      {cerrando && (
+        <Pregunta
+          titulo="Cerrar la conversación"
+          texto="¿Qué salió de esta conversación? (opcional)"
+          placeholder="Resolución…"
+          confirmar="Cerrar"
+          confirmarVacio
+          onConfirmar={closePost}
+          onCancelar={() => setCerrando(null)}
+        />
+      )}
     </div>
   );
 }

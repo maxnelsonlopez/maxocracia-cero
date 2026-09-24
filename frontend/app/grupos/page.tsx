@@ -7,6 +7,7 @@ import { Network, Plus, Loader2, Users, GitFork, Award, Lock } from "lucide-reac
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
 import InfoTip from "../components/ui/InfoTip";
+import Pregunta from "../components/ui/Pregunta";
 
 interface EduGroup {
   id: number;
@@ -36,6 +37,7 @@ export default function GruposPage() {
     need_title: "",
   });
   const [submitting, setSubmitting] = useState(false);
+  const [replicaDe, setReplicaDe] = useState<EduGroup | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -121,8 +123,14 @@ export default function GruposPage() {
   };
 
   const registerChild = async (mother: EduGroup) => {
-    const childId = Number(prompt("Número del grupo que nació de esta célula (ver su detalle):"));
-    if (!childId) return;
+    setReplicaDe(mother);
+  };
+
+  const confirmarReplica = async (valor: string) => {
+    const mother = replicaDe;
+    setReplicaDe(null);
+    const childId = Number(valor);
+    if (!mother || !childId) return;
     try {
       const res = await apiFetch(`/groups/${mother.id}/child`, {
         method: "POST",
@@ -352,6 +360,17 @@ export default function GruposPage() {
           </div>
         )}
       </div>
+      {replicaDe && (
+        <Pregunta
+          titulo="Registrar réplica fractal"
+          texto={`¿Qué grupo nació de la célula "${replicaDe.name}"?`}
+          placeholder="Número del grupo…"
+          tipo="number"
+          confirmar="Registrar"
+          onConfirmar={confirmarReplica}
+          onCancelar={() => setReplicaDe(null)}
+        />
+      )}
     </div>
   );
 }

@@ -29,6 +29,7 @@ import {
   Loader2
 } from "lucide-react";
 import InfoTip from "../components/ui/InfoTip";
+import Pregunta from "../components/ui/Pregunta";
 
 // Types
 interface MatchResult {
@@ -171,6 +172,12 @@ export default function PlazaDeApoyoPage() {
 
   // Profile edit modal state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  // Confirmación en página (nada de ventanas del navegador, hostiles en celular).
+  const [confirmar, setConfirmar] = useState<{
+    titulo: string;
+    texto: string;
+    accion: () => void;
+  } | null>(null);
   const [activeTab, setActiveTab] = useState<"general" | "needs" | "offers">("general");
 
   // Bridge B: creación de contrato ético desde una necesidad (M4 fase 2)
@@ -402,7 +409,14 @@ export default function PlazaDeApoyoPage() {
   };
 
   const handleDeleteSecondaryNeed = async (id: number) => {
-    if (!confirm("¿Está seguro de que desea eliminar esta necesidad secundaria?")) return;
+    setConfirmar({
+      titulo: "Eliminar necesidad",
+      texto: "¿Eliminar esta necesidad de la red?",
+      accion: () => borrarNeed(id),
+    });
+  };
+
+  const borrarNeed = async (id: number) => {
     try {
       const res = await apiFetch(`/forms/needs/${id}`, {
         method: "DELETE",
@@ -480,7 +494,14 @@ export default function PlazaDeApoyoPage() {
   };
 
   const handleDeleteSecondaryOffer = async (id: number) => {
-    if (!confirm("¿Está seguro de que desea eliminar esta oferta secundaria?")) return;
+    setConfirmar({
+      titulo: "Eliminar oferta",
+      texto: "¿Eliminar esta oferta de la red?",
+      accion: () => borrarOffer(id),
+    });
+  };
+
+  const borrarOffer = async (id: number) => {
     try {
       const res = await apiFetch(`/forms/offers/${id}`, {
         method: "DELETE",
@@ -514,13 +535,17 @@ export default function PlazaDeApoyoPage() {
 
   const handleDeleteProfile = async () => {
     if (!myProfile) return;
-    if (!confirm("⚠️ ¡ADVERTENCIA CRÍTICA!\n\n¿Estás completamente seguro de que deseas darte de baja de la Red de Apoyo de la Maxocracia? Esta acción eliminará permanentemente tu perfil, todas tus ofertas y necesidades, y tu historial de coincidencias. Esto es irreversible.")) {
-      return;
-    }
-    if (!confirm("Confirmación final: ¿Realmente deseas eliminar todos tus datos de la Red de Apoyo?")) {
-      return;
-    }
+    // Una sola confirmación clara (antes eran dos ventanas del navegador).
+    setConfirmar({
+      titulo: "Darte de baja de la Red",
+      texto:
+        "Esto elimina tu perfil, tus ofertas y necesidades y tu historial. Es irreversible.",
+      accion: darDeBaja,
+    });
+  };
 
+  const darDeBaja = async () => {
+    if (!myProfile) return;
     try {
       const res = await apiFetch(`/forms/participants/${myProfile.id}`, {
         method: "DELETE",
@@ -2208,6 +2233,19 @@ export default function PlazaDeApoyoPage() {
 
           </div>
         </div>
+      )}
+      {confirmar && (
+        <Pregunta
+          titulo={confirmar.titulo}
+          texto={confirmar.texto}
+          confirmar="Confirmar"
+          onConfirmar={() => {
+            const accion = confirmar.accion;
+            setConfirmar(null);
+            accion();
+          }}
+          onCancelar={() => setConfirmar(null)}
+        />
       )}
     </div>
   );

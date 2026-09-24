@@ -21,10 +21,20 @@ export default function RegisterPage() {
   const { login } = useAuth();
   const router = useRouter();
 
-  // Invitación del Puente de Llegada: email pre-llenado, sin prisa
+  // Invitación del Puente de Llegada: email pre-llenado, sin prisa.
+  // Modo facilitador: ?referred_by= guarda quién te trajo y viaja al Form Cero.
   useEffect(() => {
-    const invited = new URLSearchParams(window.location.search).get("email");
+    const params = new URLSearchParams(window.location.search);
+    const invited = params.get("email");
     if (invited && !email) setEmail(invited);
+    const ref = params.get("referred_by");
+    if (ref) {
+      try {
+        window.localStorage.setItem("mc_referred_by", ref);
+      } catch {
+        /* sin almacenamiento: la llegada sigue */
+      }
+    }
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

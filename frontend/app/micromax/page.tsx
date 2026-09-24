@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import InfoTip from "../components/ui/InfoTip";
+import Pregunta from "../components/ui/Pregunta";
 
 // Presets representing Chapter 16 metrics
 const CDD_PRESETS = [
@@ -85,6 +86,13 @@ export default function MicroMaxPage() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isCamouflaged, setIsCamouflaged] = useState(false);
   const [showSecuritySupport, setShowSecuritySupport] = useState(false);
+  // Confirmaciones en página (nada de ventanas del navegador, hostiles en celular).
+  const [confirmar, setConfirmar] = useState<{
+    titulo: string;
+    texto: string;
+    confirmar: string;
+    accion: (() => void) | null;
+  } | null>(null);
   const [showESIGuide, setShowESIGuide] = useState(false);
 
   // Modo Escudo Domestico (Cap. 16.5): el registro propio nunca se bloquea.
@@ -152,6 +160,27 @@ export default function MicroMaxPage() {
   const [checkinNote, setCheckinNote] = useState("");
 
   // Load basic data
+  const reiniciarEncuesta = async () => {
+    setLoading(true);
+    setShowSecuritySupport(false);
+    try {
+      const newAnswers = { q1: false, q2: false, q3: false, q4: false, q5: false, q6: false };
+      setSurveyAnswers(newAnswers);
+      const res = await api.saveMicroMaxSafetySurvey(newAnswers);
+      setSurvey(res);
+      await loadInitialData();
+    } catch (err: any) {
+      setConfirmar({
+        titulo: "No se pudo restablecer",
+        texto: "Error al restablecer: " + err.message,
+        confirmar: "Entendido",
+        accion: null,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const loadInitialData = async () => {
     setLoading(true);
     setError(null);
@@ -1675,12 +1704,15 @@ export default function MicroMaxPage() {
 
                   <div className="pt-4 border-t border-slate-800 text-center">
                     <Button
-                      onClick={async () => {
-                        if (confirm("¿Estás seguro de que deseas desvincularte de este hogar?")) {
-                          // In a real database we could set household_id = null or similar
-                          alert("Para cambiar de hogar o salirte de manera permanente, contacta al administrador del sistema.");
-                        }
-                      }}
+                      onClick={() =>
+                        setConfirmar({
+                          titulo: "Desvincularse del hogar",
+                          texto:
+                            "Para cambiar de hogar o salirte de manera permanente, contacta al administrador del sistema.",
+                          confirmar: "Entendido",
+                          accion: null,
+                        })
+                      }
                       variant="outline"
                       className="border-red-500/30 hover:bg-red-500/10 text-red-400 text-xs font-semibold"
                     >
@@ -1772,23 +1804,15 @@ export default function MicroMaxPage() {
                     Si necesitas volver a responder la encuesta ESI para reconfigurar el acceso al ledger del hogar, puedes hacerlo a continuación.
                   </p>
                   <Button
-                    onClick={async () => {
-                      if (confirm("¿Estás seguro de que deseas reiniciar la encuesta de seguridad?")) {
-                        setLoading(true);
-                        setShowSecuritySupport(false);
-                        try {
-                          const newAnswers = { q1: false, q2: false, q3: false, q4: false, q5: false, q6: false };
-                          setSurveyAnswers(newAnswers);
-                          const res = await api.saveMicroMaxSafetySurvey(newAnswers);
-                          setSurvey(res);
-                          await loadInitialData();
-                        } catch(err: any) {
-                          alert("Error al restablecer: " + err.message);
-                        } finally {
-                          setLoading(false);
-                        }
-                      }
-                    }}
+                    onClick={() =>
+                      setConfirmar({
+                        titulo: "Reiniciar encuesta de seguridad",
+                        texto:
+                          "Volverás a responder la encuesta ESI para reconfigurar el acceso.",
+                        confirmar: "Reiniciar",
+                        accion: reiniciarEncuesta,
+                      })
+                    }
                     className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold py-2 rounded-xl text-xs"
                   >
                     Reiniciar Encuesta ESI
@@ -1808,7 +1832,19 @@ export default function MicroMaxPage() {
           </div>
         )}
       </AnimatePresence>
-
+      {confirmar && (
+        <Pregunta
+          titulo={confirmar.titulo}
+          texto={confirmar.texto}
+          confirmar={confirmar.confirmar}
+          onConfirmar={() => {
+            const accion = confirmar.accion;
+            setConfirmar(null);
+            if (accion) accion();
+          }}
+          onCancelar={() => setConfirmar(null)}
+        />
+      )}
     </div>
   );
 }
