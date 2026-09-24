@@ -420,6 +420,13 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   UI sin IDs numéricos (`/perfil`, `/votaciones`). **Receta**:
   `docs/guides/DESPLIEGUE_POR_COMUNIDAD.md` — una casa por tejido (misma
   imagen, `comun.db` y `SECRET_KEY` propias; sin federación aún).
+- **Modo facilitador + diálogos de calle (24/9/2026, sesión con Max)**:
+  `/register?referred_by=` viaja por `localStorage` al Form Cero
+  (`register/page.tsx`, `forms/cero/page.tsx`; sin backend: la trazabilidad
+  de la llegada sin cirugía de identidad) y componente `Pregunta`
+  (`components/ui/Pregunta.tsx`, hoja inferior en página) que reemplaza
+  `prompt`/`confirm` en `/foro`, `/talleres`, `/grupos`, `/matching` (la baja,
+  de doble a simple) y `/micromax`. Verificado: `tsc` + `next build` limpios.
 
 ### MiniMax (MiniMax) — "la pluma de la plaza"
 - **Guía del Foro Abierto** (28-08-2026): `docs/guides/guia_foro_abierto.md` — documento de la
