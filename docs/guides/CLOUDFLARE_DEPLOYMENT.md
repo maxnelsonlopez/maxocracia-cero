@@ -52,3 +52,17 @@ Verás que el mensaje indica: `Iniciando servidor de PRODUCCIÓN con Waitress en
 
 ## ¡Listo!
 Entra a `https://tudominio.com` (o el subdominio que configuraste). El tráfico llegará seguro hasta tu máquina mediante HTTPS oficial provisto por Cloudflare.
+
+## Anexo (24-09-2026): topología real de este PC
+
+- **Dos proyectos, dos túneles, cero cruces**: `fano` (juego, solo VPS) y
+  `maxocracia-server` (este repo, solo este PC). Nunca corras el túnel del
+  otro proyecto en esta máquina: un túnel compartido con dos orígenes cruza
+  el tráfico y ambos sitios fallan de forma intermitente (530 vacíos).
+- **Credenciales**: `C:\Users\DARKM\.cloudflared\<tunnel-id>.json` +
+  `config-maxocracia.yml` (ingress `start.maxocracia.com → localhost:5001`).
+- **Supervivencia a reinicios** (sin admin): tareas programadas de usuario
+  `MaxocraciaApp` (run.py, 45 s tras inicio de sesión) y `MaxocraciaTunnel`
+  (cloudflared, 90 s). Con admin, preferible servicio:
+  `cloudflared service uninstall` (quita instalaciones viejas por token) y
+  `cloudflared service install` (usa `config.yml` por defecto).
