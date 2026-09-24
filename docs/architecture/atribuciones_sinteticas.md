@@ -155,6 +155,13 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   corregidos: "parlamento" no es término del libro, el 60% de quórum vive en el
   blueprint, cita del piso truncada). Implementación + verificación (suite, validador)
   del orquestador; 21 tests nuevos.
+- **Form Cero en móvil — scroll y términos sin pérdida de datos (24/9/2026, sesión con Max)**:
+  `frontend/app/components/ui/FormWizard.tsx` — al avanzar o retroceder paso hace `scrollIntoView`
+  al inicio del wizard (con `scroll-mt-20` para el navbar fijo de 64px), sin scroll en la carga
+  inicial; aplica a los tres wizards (cero, exchange, follow-up). `frontend/app/forms/cero/page.tsx`
+  — los enlaces a `/terms` y `/privacy` abren en pestaña nueva (`target="_blank"
+  rel="noopener noreferrer"`): antes recargaban la página y borraban todo el formulario rellenado.
+  Verificado con `tsc --noEmit` limpio y eslint sin avisos en los archivos tocados. Commit `dc9c1b0`.
 
 ### ox-alpha — "el bibliotecario de la coherencia"
 - **Auditoría de integridad del libro (22/8/2026)**: verificación determinista de enlaces
