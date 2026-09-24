@@ -1,5 +1,8 @@
 # Plataforma Educativa — dependencias
 # Flask 3.1.x es compatible con Python 3.10-3.13 (probado en 3.13).
 # No hace falta SQLAlchemy: se usa sqlite3 de la librería estándar.
+# pypdf (puro Python, sin binarios) solo lo usa ingest_pdfs.py (B7 biblioteca
+# privada); el resto de la plataforma sigue solo con stdlib + flask.
 flask>=3.0,<4
 pyjwt>=2.8.0
+pypdf>=4
