@@ -350,6 +350,16 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   `revid` real). Suite **146/146**. **Verificado en vivo**: Fotosíntesis →
   14/30 reversiones, guerra=True, diff 174904595→175198350 con miles de
   palabras contadas.
+- **Buscador — B7 Biblioteca privada (4/9/2026, los PDFs propios de Max en
+  casa; zvec-grep investigado y descartado para libros: hoy salta los PDF)**:
+  `ingest_pdfs.py` (pypdf, idempotente por hash de contenido, cifrado se omite
+  sin forzar, escaneos reportados) + fragmentos FTS5 en `engine_corpus` (el
+  texto completo nunca viaja) + razón de procedencia privada: commits
+  `70e44d1` + `1e5def2` (`tests/test_biblioteca_b7.py`, 4 pruebas con PDF
+  mínimo válido construido a mano). Suite **156/156**. **Verificado en vivo**
+  en `:5050`: PDF demo → fragmento de 155 chars con banda honesta, base
+  limpia después (0 filas). Nota operativa: `run.py` usa `debug=True` (hijo
+  reloader huérfano sirve código viejo al reiniciar: matar por puerto/PID).
 - **Concilio en cuota free — supervivencia sin ingresos (15/9/2026, sesión con
   Max; a petición del custodio: "OpenRouter tiene free vivos")**:
   - **Diagnóstico vivo**: el `autostart.log` mostraba 5 ciclos muertos

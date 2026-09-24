@@ -165,7 +165,7 @@ memoria) que se envía en la cabecera `X-Auth-Token`.
 | GET | `/api/buscador/lupa?titulo=` | **B6**: meta-panorama del artículo (reversiones, anonimato, guerra, top editores) |
 | GET | `/api/buscador/lupa/diff?de=&a=` | **B6**: diff palabra por palabra entre revisiones (Verbo Justo) |
 
-## El Buscador educativo (B1 + B2 + B3)
+## El Buscador educativo (B1–B7)
 
 Buscador independiente sin ads ni tracking: **semillas verificadas primero**
 (bloque garantizado), capa académica abierta (Zenodo, API pública sin token)
@@ -209,6 +209,14 @@ referencia trae su 🔍 lupa — historial del artículo (protección, reversion
 anonimato, indicios de guerra, top editores, saltos de tamaño) y diff palabra
 por palabra entre revisiones. Hechos contados, lectura humana: la máquina
 muestra, tú juzgas.
+
+**B7 — Biblioteca privada**: tus PDFs propios (Springer y demás) se ingieren
+en casa con `ingest_pdfs.py` (`$env:BIBLIOTECA_PDF_DIR` al disco; requiere
+`pypdf`, única dependencia nueva) a `buscador_docs` capa `biblioteca`,
+idempotente por hash de contenido. Reglas duras: cifrado se omite (jamás se
+fuerza), escaneos sin OCR se reportan, y la API solo sirve FRAGMENTOS
+(snippet FTS5 o recorte) — el libro nunca sale de tu disco. Solo archivos
+propios sin DRM; la base no se commitea.
 
 ```powershell
 # Opcional: capa web general con lente educativa (ver searxng/README.md)
