@@ -198,7 +198,7 @@ export default function CeroFormPage() {
           <p className="text-sm text-slate-300 leading-relaxed">
             <strong className="text-emerald-300">Antes de empezar:</strong> necesitarás unos minutos para contarnos quién eres, qué puedes ofrecer y qué necesitas. Los campos marcados con <span className="text-emerald-400">*</span> son necesarios para contactarte.
           </p>
-          <a href="/privacy" className="mt-2 inline-block text-sm text-emerald-400 underline decoration-emerald-500/40 underline-offset-4 hover:text-emerald-300">
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm text-emerald-400 underline decoration-emerald-500/40 underline-offset-4 hover:text-emerald-300">
             Conoce cómo protegemos tus datos →
           </a>
         </div>
@@ -380,7 +380,7 @@ export default function CeroFormPage() {
                 required
               />
               <span className="text-slate-300 text-sm leading-relaxed group-hover:text-white transition-colors">
-                Acepto los <a href="/terms" className="text-emerald-400 underline decoration-emerald-500/40 underline-offset-4 hover:text-emerald-300">términos y condiciones</a> de la Red de Apoyo Maxocracia y autorizo el manejo de mis datos personales para ser contactado por facilitadores y otros participantes de la red con el fin de gestionar intercambios de ayuda. Puedo conocer el detalle en la <a href="/privacy" className="text-emerald-400 underline decoration-emerald-500/40 underline-offset-4 hover:text-emerald-300">política de privacidad</a> y solicitar el borrado de mis datos.
+                Acepto los <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline decoration-emerald-500/40 underline-offset-4 hover:text-emerald-300">términos y condiciones</a> de la Red de Apoyo Maxocracia y autorizo el manejo de mis datos personales para ser contactado por facilitadores y otros participantes de la red con el fin de gestionar intercambios de ayuda. Puedo conocer el detalle en la <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline decoration-emerald-500/40 underline-offset-4 hover:text-emerald-300">política de privacidad</a> y solicitar el borrado de mis datos.
               </span>
             </label>
           </div>

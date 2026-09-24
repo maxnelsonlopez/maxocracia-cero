@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { Button } from "./Button";
@@ -21,6 +21,17 @@ export const FormWizard: React.FC<FormWizardProps> = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [stepError, setStepError] = useState("");
   const totalSteps = steps.length;
+  const rootRef = useRef<HTMLDivElement>(null);
+  const isInitialRender = useRef(true);
+
+  useEffect(() => {
+    if (isInitialRender.current) {
+      isInitialRender.current = false;
+      return;
+    }
+
+    rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [currentStep]);
 
   const handleNext = () => {
     const validationError = validateStep?.(currentStep) ?? null;
@@ -47,7 +58,7 @@ export const FormWizard: React.FC<FormWizardProps> = ({
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div ref={rootRef} className="w-full max-w-2xl mx-auto scroll-mt-20">
       <div className="mb-8" aria-label="Progreso del formulario">
         <div className="flex justify-between mb-2">
           {steps.map((step, index) => (
