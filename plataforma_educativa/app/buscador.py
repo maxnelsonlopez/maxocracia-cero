@@ -624,9 +624,28 @@ def _tokens_fts(query):
     return [t for t in toks if t]
 
 
+def _fragmento(texto, tokens, ventana=300):
+    """Recorte honesto alrededor del primer hallazgo (suelo sin FTS5)."""
+    bajo = (texto or "").lower()
+    pos = -1
+    for t in tokens:
+        i = bajo.find(t.lower())
+        if i >= 0 and (pos < 0 or i < pos):
+            pos = i
+    if pos < 0:
+        return (texto or "")[:ventana]
+    inicio = max(0, pos - 120)
+    trozo = (texto or "")[inicio : inicio + ventana]
+    return ("…" if inicio > 0 else "") + trozo + ("…" if inicio + ventana < len(texto or "") else "")
+
+
 def engine_corpus(conn, query, limite=10):
     """Capa corpus: el tejido propio (feeds verificados + semillas
-    materializadas). FTS5 si está compilado; si no, LIKE (fail-open).
+    materializadas + biblioteca privada B7). FTS5 si está compilado; si no,
+    LIKE (fail-open).
+
+    Regla B7: la biblioteca privada solo muestra FRAGMENTOS (snippet FTS5 o
+    recorte): el texto completo nunca sale del disco del dueño.
 
     Devuelve resultados normalizados con capa = 'corpus'. Nunca hace red:
     es memoria local, siempre disponible (P2).
@@ -635,15 +654,18 @@ def engine_corpus(conn, query, limite=10):
     if not tokens:
         return []
     filas = []
+    fragmentos = {}
     if _fts_disponible(conn):
         try:
             match = " AND ".join(f'"{t}"*' for t in tokens)
             filas = conn.execute(
-                "SELECT d.* FROM buscador_docs_fts f "
+                "SELECT d.*, snippet(buscador_docs_fts, 2, '', '', ' … ', 24) AS frag "
+                "FROM buscador_docs_fts f "
                 "JOIN buscador_docs d ON d.id = f.rowid "
                 "WHERE buscador_docs_fts MATCH ? LIMIT ?",
                 (match, limite),
             ).fetchall()
+            fragmentos = {f["id"]: (f["frag"] or "") for f in filas}
         except sqlite3.OperationalError:
             filas = []  # el LIKE de abajo es el suelo (fail-open)
     if not filas:
@@ -659,13 +681,19 @@ def engine_corpus(conn, query, limite=10):
             return []
     resultados = []
     for f in filas:
+        if (f["capa"] or "") == "biblioteca":
+            resumen = fragmentos.get(f["id"]) or _fragmento(f["texto"], tokens)
+            fuente = "biblioteca privada"
+        else:
+            resumen = f["resumen"] or ""
+            fuente = ("feed:" + str(f["feed_id"])) if f["feed_id"] else ("seed:" + str(f["seed_id"] or ""))
         resultados.append(
             {
                 "capa": "corpus",
                 "titulo": f["titulo"],
                 "url": f["url"],
-                "resumen": f["resumen"] or "",
-                "fuente": ("feed:" + str(f["feed_id"])) if f["feed_id"] else ("seed:" + str(f["seed_id"] or "")),
+                "resumen": resumen,
+                "fuente": fuente,
                 "tipo": f["tipo"],
                 "fecha": f["fecha"],
                 "wayback_ts": f["wayback_ts"],
@@ -770,6 +798,10 @@ def enriquecer_corpus(conn, resultado):
         if feed and feed["verificada"]:
             nombre = (feed["titulo"] or "").strip() or ("feed " + str(fila["feed_id"]))
             razones.insert(0, f"del corpus verificado de la comunidad ({nombre})")
+    elif (fila["capa"] or "") == "biblioteca":
+        razones.insert(
+            0, "📚 biblioteca privada del dueño: solo fragmentos, nunca el texto completo (B7)"
+        )
     if fila["wayback_ts"]:
         razones.append(f"memoria larga: archivado desde {fila['wayback_ts']} (Wayback, §3A)")
     resultado["razones"] = razones
