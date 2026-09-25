@@ -42,7 +42,8 @@ def get(url, headers=None, timeout=20):
 
 def post(url, datos, headers=None, timeout=20):
     req = urllib.request.Request(
-        url, data=json.dumps(datos).encode("utf-8"),
+        url,
+        data=json.dumps(datos).encode("utf-8"),
         headers={**UA, "Content-Type": "application/json", **(headers or {})},
         method="POST",
     )
@@ -64,7 +65,11 @@ def main(argv):
     def linea(nombre, bien, detalle=""):
         nonlocal ok
         ok = ok and bien
-        print(("PASS " if bien else "FAIL ") + nombre + (f" — {detalle}" if detalle else ""))
+        print(
+            ("PASS " if bien else "FAIL ")
+            + nombre
+            + (f" — {detalle}" if detalle else "")
+        )
 
     # 1. DNS de ambos.
     try:
@@ -82,27 +87,39 @@ def main(argv):
     linea("escuela parametros 200", st == 200, f"HTTP {st} params={claves}")
 
     # 3. Millora del buscador desplegado (capas + motores caídos = egreso).
-    st, b = get(ESCUELA + "/api/buscador?" + urllib.parse.urlencode({"q": "maxocracia"}))
+    st, b = get(
+        ESCUELA + "/api/buscador?" + urllib.parse.urlencode({"q": "maxocracia"})
+    )
     capas = b.get("por_capa") if isinstance(b, dict) else None
     linea("escuela buscador responde", st == 200 and bool(capas), f"capas={capas}")
     if isinstance(b, dict):
-        linea("escuela egreso sano", not b.get("motores_fail_open"),
-              f"fail_open={b.get('motores_fail_open') or 'ninguno'}")
+        linea(
+            "escuela egreso sano",
+            not b.get("motores_fail_open"),
+            f"fail_open={b.get('motores_fail_open') or 'ninguno'}",
+        )
 
     # 4. Fail-closed del puente (sin credenciales).
     st, _ = get(START + "/edu-bridge/status")
     linea("puente status sin token -> 401", st == 401, f"HTTP {st}")
     st, cuerpo = post(START + "/edu-bridge/sync-mastery", {"user_id": 1})
-    linea("puente sync sin token -> 403", st == 403,
-          f"HTTP {st} code={(cuerpo or {}).get('code')}")
+    linea(
+        "puente sync sin token -> 403",
+        st == 403,
+        f"HTTP {st} code={(cuerpo or {}).get('code')}",
+    )
 
     # 5. Identidad unificada (opcional, con JWT humano de start).
     jwt = os.environ.get("MAXO_JWT", "").strip()
     if jwt:
-        st, cuerpo = get(START + "/edu-bridge/status",
-                          headers={"Authorization": f"Bearer {jwt}"})
-        linea("puente status con JWT", st == 200 and (cuerpo or {}).get("unified_identity") is True,
-              f"HTTP {st}")
+        st, cuerpo = get(
+            START + "/edu-bridge/status", headers={"Authorization": f"Bearer {jwt}"}
+        )
+        linea(
+            "puente status con JWT",
+            st == 200 and (cuerpo or {}).get("unified_identity") is True,
+            f"HTTP {st}",
+        )
     else:
         print("SKIP puente con JWT (sin MAXO_JWT)")
 
@@ -113,13 +130,25 @@ def main(argv):
         for a in argv:
             if a.startswith("--user-id="):
                 uid = a.split("=", 1)[1]
-        st, cuerpo = post(START + "/edu-bridge/sync-mastery",
-                          {"user_id": int(uid), "topic_slug": "prueba-puente",
-                           "branch_slug": "etica", "score": 100},
-                          headers={"X-Edu-Bridge-Token": svc})
-        linea("puente sync con token -> 201", st == 201, f"HTTP {st} event={(cuerpo or {}).get('event_id')}")
+        st, cuerpo = post(
+            START + "/edu-bridge/sync-mastery",
+            {
+                "user_id": int(uid),
+                "topic_slug": "prueba-puente",
+                "branch_slug": "etica",
+                "score": 100,
+            },
+            headers={"X-Edu-Bridge-Token": svc},
+        )
+        linea(
+            "puente sync con token -> 201",
+            st == 201,
+            f"HTTP {st} event={(cuerpo or {}).get('event_id')}",
+        )
     else:
-        print("SKIP escritura real (requiere EDU_BRIDGE_SERVICE_TOKEN + --escribir-prueba --user-id=N)")
+        print(
+            "SKIP escritura real (requiere EDU_BRIDGE_SERVICE_TOKEN + --escribir-prueba --user-id=N)"
+        )
 
     print()
     print("Para federación completa (operación en el hosting):")
