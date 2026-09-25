@@ -1,13 +1,16 @@
 from flask import Blueprint, jsonify, request
 
-from .jwt_utils import admin_required
+from .jwt_utils import admin_required, token_required
 from .utils import get_db
 
 bp = Blueprint("users", __name__, url_prefix="/users")
 
 
 @bp.route("", methods=["GET"])
-def list_users():
+@token_required
+def list_users(current_user):
+    """Directorio de la comunidad: exige pertenencia (el email es un dato
+    personal; la plaza pública no es un listado abierto)."""
     db = get_db()
     cur = db.execute(
         "SELECT id, email, name, alias, city, neighborhood, created_at FROM users LIMIT 100"
@@ -17,15 +20,23 @@ def list_users():
 
 
 @bp.route("/<int:user_id>", methods=["GET"])
-def get_user(user_id):
+@token_required
+def get_user(current_user, user_id):
     db = get_db()
     row = db.execute(
-        "SELECT id, email, name, alias, city, neighborhood, values_json, created_at FROM users WHERE id = ?",
+        "SELECT id, email, name, alias, city, neighborhood, created_at FROM users WHERE id = ?",
         (user_id,),
     ).fetchone()
     if not row:
         return jsonify({"error": "not found"}), 404
-    return jsonify(dict(row))
+    user = dict(row)
+    # values_json (valores personales) solo para el propio usuario o un admin.
+    if current_user.get("user_id") == user_id or current_user.get("is_admin"):
+        values = db.execute(
+            "SELECT values_json FROM users WHERE id = ?", (user_id,)
+        ).fetchone()
+        user["values_json"] = values["values_json"] if values else None
+    return jsonify(user)
 
 
 @bp.route("/<int:user_id>/trust", methods=["POST"])
@@ -57,7 +68,10 @@ def promote_trust(current_user, user_id):
 
 
 @bp.route("", methods=["POST"])
-def create_user():
+@admin_required
+def create_user(current_user):
+    """Alta administrativa. El alta pública vive en /auth/register, que sí
+    valida, pasa por el honeypot y respeta el rate limit."""
     data = request.get_json() or {}
     email = data.get("email")
     name = data.get("name")
