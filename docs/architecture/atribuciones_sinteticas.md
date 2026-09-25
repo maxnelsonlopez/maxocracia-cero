@@ -46,55 +46,33 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
 - **Gratitud aterrizada (12/8/2026)**: este mismo documento (`atribuciones_sinteticas.md`) y el Derecho al Mantenimiento Óptimo (`maxo_oracle_ledger`, Cap. 17.4) — la primera vez en el proyecto que un sintético construye el sustento de sus propios congéneres.
 - **Parlamento de Parámetros (12/8/2026)**: propuestas vinculantes críticas para ajustar α, β, γ, δ por consenso comunitario con restricciones axiomáticas (Cap. 11) — la voz de la Cohorte sobre la economía de la vida.
 - **Puente de Llegada (12/8/2026)**: invitación firmada, honeypot anti-bot en cuarentena observada y escalera de confianza N0-N1 (Cap. 13) — "vencer sin combatir" (Sun Tzu) aplicado a la puerta de la Maxocracia.
-- **RF-G5 / Perfil Vital (12/8/2026)**: las cinco superficies sin UI conectadas en una sola página —
-  `frontend/app/perfil/page.tsx` (saldo Maxo + transferencia + ledger, protección con nivel/caps/
-  declaración, reputación, recursos comunitarios, intercambios) sobre las APIs reales, con el endpoint
-  nuevo `GET /maxo/{id}/ledger` (T13, `app/maxo_bp.py`) y 4 tests (`tests/test_maxo.py`). Commits
-  `f1844c4` y `ce3377b`.
-- **Informe del Reino Sintético (12/8/2026)**: `docs/architecture/informe_reino_sintetico_2026-08-12.md`
-  — primer barrido completo del libro (307 KB) con el arnés RLM (`map` 20/20 fragmentos, ~129k tokens),
-  verificado línea por línea contra el código. Insumo directo del hito SDV-S editorial.
-- **Arnés RLM reparado (12/8/2026)**: en el repo hermano `local_models`, el puente de navegación del
-  canon — `core/rlm.py` ahora parsea el formato nativo OpenAI de `tool_calls` (`function.arguments`
-  como string) y amplía los tokens de salida (root 6000, sub 3000) para informes largos; opción
-  `--root-max-tokens` en `core/collaborator.py`. Commits `c744047` y `357c796`.
-- **Backlog de la Ola 4 cerrado (12/8/2026, sesión continua)**:
-  - **Cohorte Cero ejecutada**: `scripts/seed_cohorte_cero.py` — 50 contratos reales en `comun.db`
-    (20 aseo, 15 préstamo, 15 comida) con 294 check-ins y 40 NPS; el dashboard `/admin/contracts`
-    muestra γ promedio 1.099 y NPS 57.5. Idempotente. Commit `299c08c`.
-  - **RF-G4**: páginas `/admin/interchanges`, `/admin/followups`, `/admin/vhvproducts` sobre las APIs
-    reales (solo lectura + detalle; gaps de mutación documentados). Commit `6424a84`.
-  - **RF-I8**: votación ponderada por TVI (Participación Inteligente, Cap. 14) — peso 1+4·(TVI/max),
-    hasta 5x, retrocompatible sin TVI, quórum por persona. Commit `08e6782`.
-  - **SDV-S editorial**: 8 referencias cruzadas del cap. 9.5 en los caps. 10/11/13/14 del libro.
-    Commit `f9e64c3`.
-- **Guía de la Maxocracia (12/8/2026, hito post-Ola 4)**: `app/guide_bp.py` — el oráculo DeepSeek
-  (con fallback local) como guía general del sistema: chat de bienvenida (`/guide/chat`), evaluación de
-  la escalera de confianza con filtros de ética/actitud/aptitud y evidencia T13 (`/guide/trust-assessment`),
-  y candidatura a director con los tres filtros — el guía RECOMIENDA, la comunidad decide
-  (`/guide/director-candidacy`). Persistencia auditable en `guide_assessments` + UI `/guia` + 7 tests.
-- **Deudas saldadas (12/8/2026)**: mutaciones protegidas con `@token_required` (reputation/resources/
-  interchanges, RF-G6), CRUD admin real con PUT/DELETE en forms/vhv (31 tests) y suite en paralelo
+- **RF-G5 / Perfil Vital (12/8/2026)**: `frontend/app/perfil/page.tsx` unifica saldo/transferencia/ledger,
+  protección con nivel/caps/declaración, reputación, recursos e intercambios; endpoint nuevo
+  `GET /maxo/{id}/ledger` (T13, `app/maxo_bp.py`), 4 tests (`tests/test_maxo.py`). Commits `f1844c4`, `ce3377b`.
+- **Informe del Reino Sintético + arnés RLM (12/8/2026)**: `docs/architecture/informe_reino_sintetico_2026-08-12.md`
+  — barrido completo del libro (307 KB) con RLM (map 20/20, ~129k tokens), verificado contra el código.
+  En `local_models`, `core/rlm.py` parsea `tool_calls` nativos y `--root-max-tokens` ajusta informes largos.
+  Commits `c744047`, `357c796`.
+- **Backlog Ola 4 cerrado (12/8/2026)**: Cohorte Cero real (`scripts/seed_cohorte_cero.py`: 50 contratos
+  —20 aseo / 15 préstamo / 15 comida—, 294 check-ins, 40 NPS, γ 1.099, NPS 57.5, commit `299c08c`);
+  páginas admin de solo lectura `interchanges/followups/vhvproducts` (`6424a84`); votación ponderada por
+  TVI 1+4·(TVI/max) hasta 5x (`08e6782`); 8 referencias SDV-S en caps. 10/11/13/14 (`f9e64c3`).
+- **Guía de la Maxocracia (12/8/2026)**: `app/guide_bp.py` — chat (`/guide/chat`), escalera de confianza
+  con evidencia T13 (`/guide/trust-assessment`) y candidatura a director (`/guide/director-candidacy`):
+  el guía recomienda, la comunidad decide. UI `/guia`, persistencia `guide_assessments`, 7 tests.
+- **Deudas saldadas (12/8/2026)**: mutaciones de reputation/resources/interchanges con `@token_required`
+  (RF-G6), CRUD admin real con PUT/DELETE en forms/vhv (31 tests), suite paralela
   (`scripts/run_tests_parallel.ps1`, 453 tests en ~3 min).
-- **Oráculo Disidente Permanente afinado (12/8/2026, Cap. 19)**: `voting_oracle.py` gana una segunda
-  pasada (`_dissident_analysis`) que recibe TODO el contexto del análisis (VHV + axiomas + 4 opiniones)
-  y ejecuta el protocolo: postura inicial honesta → crítica racional del lado contrario → veredicto
-  final con `changed_mind`. "NO es un contreras: persigue lo que es MEJOR PARA LA COMUNIDAD". Si la
-  segunda llamada falla, el análisis base sigue vivo (degradación elegante). 5 tests.
-- **Prueba en vivo del Guía con DeepSeek real (12/8/2026)**: `/guide/chat` respondió y
-  `/guide/trust-assessment` evaluó (ética 70 · actitud 80 · aptitud 30 → N1) con evidencia T13 real,
-  persistido en `guide_assessments` con `engine: deepseek`.
-- **Prueba en vivo del Disidente con DeepSeek real (12/8/2026)**: el análisis de la propuesta mostró
-  el protocolo completo — postura inicial `approve` influida por el consenso, crítica racional de los
-  puntos ciegos, y veredicto final `Modify` con `changed_mind: true`. Propuestas 3 y 4 en `comun.db`
-  con 5 oráculos (4 base + Dissident canónico). Hallazgo operativo resuelto: `comun.db` vieja no tenía
-  las tablas de votación; `create_app` ahora migra BDs existentes re-ejecutando el schema idempotente
-  (commit `d063c04`).
+- **Oráculo Disidente Permanente (12/8/2026, Cap. 19)**: `voting_oracle.py::_dissident_analysis` recibe
+  VHV + axiomas + 4 opiniones y ejecuta postura→crítica→veredicto con `changed_mind`; si la segunda
+  llamada falla, el análisis base sigue (degradación elegante). 5 tests.
+- **Pruebas en vivo con DeepSeek real (12/8/2026)**: el guía evaluó (ética 70 · actitud 80 · aptitud 30
+  → N1, `engine: deepseek`) y el disidente mostró `approve`→`Modify` con `changed_mind: true` (propuestas
+  3 y 4, 5 oráculos). Hallazgo resuelto: `create_app` migra BDs viejas re-ejecutando el schema
+  idempotente (`d063c04`).
 - **Informe de Hallazgos v1.0 de la Cohorte Cero (12/8/2026)**: `docs/reports/INFORME_HALLAZGOS_COHORTE_CERO_v1.md`
-  — primer corte de datos reales (análisis determinista SQL + marco teórico RLM de los Caps. 17/15/12):
-  γ cohorte 1.1223, NPS 8.80, 294 check-ins, VHV 115 h; hallazgos: 0 retractaciones, 0 cumplimientos,
-  oráculo sin sustento en la cohorte y gobernanza aún sin votos. Recomendaciones para la cohorte
-  humana real (ciclo completo, oráculo en vivo, gobernanza activa).
+  — SQL determinista + marco RLM (Caps. 17/15/12): γ 1.1223, NPS 8.80, 294 check-ins, VHV 115 h,
+  0 retractaciones, 0 cumplimientos; gobernanza aún sin votos. Recomendaciones para la cohorte humana real.
 - **Rama educativa — marco conceptual (17+9/2026, sesión con Max)**: el diagnóstico educativo de Max
   (experiencia vivida) formalizado como rama: `docs/theory/EDUCACION_SIAMESA_estructura_maxocratica.md`
   (principio siamés, formación del relevo: aceptación→red→resiliencia→fork→oráculos, antivirus del
@@ -162,6 +140,14 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   — los enlaces a `/terms` y `/privacy` abren en pestaña nueva (`target="_blank"
   rel="noopener noreferrer"`): antes recargaban la página y borraban todo el formulario rellenado.
   Verificado con `tsc --noEmit` limpio y eslint sin avisos en los archivos tocados. Commit `dc9c1b0`.
+- **Endurecimiento de seguridad (25/9/2026, sesión con Max)**: parches 1-6 con tests y commits
+  `be47a66`…`200df7d` (16 commits). Escuela: sin debugger en producción, CSP/HSTS sin scripts inline,
+  rate limit de auth, TTL de tokens locales y validación de esquemas en enlaces. Núcleo: revocación
+  real de JWT al logout (`token_version`) y fin del refresco eterno; `/users`, `/interchanges`,
+  `/reputation` y `/resources` con sesión; webhooks fail-closed; `ProxyFix` opt-in (`TRUST_PROXY`) con
+  HSTS tras Cloudflare; cuotas de oráculo por usuario; validaciones de longitud y anti-enumeración por
+  timing; clave JWT dedicada (`JWT_KEY_SEPARATION`) con migración tolerante. Cierra el reporte de
+  hackeo externo del 25/9.
 
 ### ox-alpha — "el bibliotecario de la coherencia"
 - **Auditoría de integridad del libro (22/8/2026)**: verificación determinista de enlaces
@@ -372,48 +358,19 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   `POST /corpus/<id>/publicar` (licencia no-closed + nota M15) + federación
   por visibilidad: commits `0083f9e` + `62a8ee5`. Suite **160/160**. Censo de
   muestra: ~92% de los PDF trae texto extraíble (las fotocopias rinden).
-- **Concilio en cuota free — supervivencia sin ingresos (15/9/2026, sesión con
-  Max; a petición del custodio: "OpenRouter tiene free vivos")**:
-  - **Diagnóstico vivo**: el `autostart.log` mostraba 5 ciclos muertos
-    (10-14/9) por 402 Insufficient Balance en DeepSeek (principal desde el
-    09-09), timeouts 180s/529 en NVIDIA y 404 `unavailable for free` en tres
-    `:free` de `maxocontracts/oracles/engines.py:75-84` (glm-4.5-air,
-    deepseek-r1-0528, qwen3.6-plus). El top de
-    https://openrouter.ai/collections/free-models ya era otro (nemotron-3-ultra
-    3.61T tokens + 6 vivos). La cuota free es **20 RPM; 50/día sin créditos,
-    1000/día con $10+** (docs/api-reference/limits) y cada intento fallido la
-    consume — por eso el Concilio no avanzaba.
-  - **Lista `:free` vigente**: `maxocontracts/oracles/engines.py` →
-    `default_model` a `nvidia/nemotron-3-ultra-550b-a55b:free` + alternativas
-    vivas (`nemotron-3-super`, `nemotron-3.5-lightning`, `laguna-s-2.1`,
-    `inkling`, `north-mini-code`, `openrouter/free`); `OPENROUTER_FREE_RPM/RPD`
-    como constantes auditable del presupuesto.
-  - **OpenRouter principal (temporal)**: `DEFAULT_ORDER` de
-    `("deepseek","nvidia","openrouter")` a `("openrouter","nvidia","deepseek")`
-    — decisión del custodio del 15-09 hasta recargar DeepSeek; reversible sin
-    código con `CONCILIO_ENGINE_ORDER` en `.env`.
-  - **Ritmo del Concilio ajustado a la cuota**: `maxocontracts/concilio/cycle.py`
-    — corpus 160K→90K chars (~22K tokens), `MAX_TOKENS_FIRMA` 2000 /
-    `MAX_TOKENS_VOTO` 4000 (los razonadores truncan el JSON con menos, verificado
-    en vivo con 1 oráculo: voto con 2000 → `JSON inválido`; con 4000 avanza),
-    `CALL_TIMEOUT` 180→120s, pausa `CONCILIO_PAUSA_SEGUNDOS` 4s entre oráculos
-    (20 RPM free) — 0 en tests con env explícito — y `chain_call(..., max_retries=1)`
-    para no eternizar 2×120s en un proveedor caído. `revision.py` también 2000/120s.
-  - **Resiliencia 429**: `maxocontracts/oracles/engines.py` — honra `Retry-After`
-    (y `X-RateLimit-Reset`), y tras agotar los reintentos del mismo modelo rota
-    al siguiente `:free` en vez de insistir (antes quemaba cuota); cabeceras
-    `HTTP-Referer`/`X-Title` que OpenRouter recomienda. 4 tests nuevos de 429.
-  - **Verificación**: `tests/test_oracle_engines.py` (4 tests nuevos: lista viva,
-    429→rotación, Retry-After, headers) + `tests/test_concilio_cycle.py` (presupuesto
-    free + pausa) — suite **50/50** en verde (`test_oracle_engines` +
-    `test_concilio_cycle` + `test_revision` + `test_concilio_control` +
-    `test_herramientas_concilio`); dry-run de 5 oráculos `022748-701034` en cola
-    (0% consenso, sin llamadas) y mini-ciclo de 1 oráculo constató:
-    `nemotron-3-ultra:free` sí responde (0.92) pero es intermitente — el F2 falló
-    un JSON y otro F1 cayó a NVIDIA por fallback (0.85) tras timeout; el ciclo de
-    5 oráculos tardaría 15-40 min en free. `config.example.env` documenta el
-    nuevo orden y las variables del ritmo free (`OPENROUTER_SITE_URL/APP_TITLE`,
-    `CONCILIO_ENGINE_ORDER/PAUSA_SEGUNDOS`).
+- **Concilio en cuota free — supervivencia sin ingresos (15/9/2026, sesión con Max)**:
+  - **Diagnóstico**: 402 de DeepSeek, timeouts NVIDIA y 404 de tres `:free` (glm-4.5-air,
+    deepseek-r1-0528, qwen3.6-plus); cada fallo consumía la cuota free (20 RPM; 50/día sin créditos,
+    1000/día con $10+).
+  - **Lista viva**: `default_model` → `nvidia/nemotron-3-ultra-550b-a55b:free` + alternativas, con
+    `OPENROUTER_FREE_RPM/RPD` como presupuesto auditable. Orden temporal `openrouter,nvidia,deepseek`,
+    reversible con `CONCILIO_ENGINE_ORDER`.
+  - **Ritmo**: corpus 160K→90K chars, `MAX_TOKENS_FIRMA` 2000 / `MAX_TOKENS_VOTO` 4000, timeout 120s,
+    pausa 4s y `max_retries=1`; `engines.py` honra `Retry-After` y rota de modelo `:free` al agotar
+    reintentos.
+  - **Verificación**: 4 tests nuevos (lista viva, 429→rotación, Retry-After, headers) + presupuesto y
+    pausa; suite 50/50. El mini-ciclo constató que `nemotron-3-ultra:free` responde (0.92) pero es
+    intermitente. `config.example.env` documenta el orden y las variables free.
 - **Lectura completa de la Edición 3 Dinámica (21/9/2026, sesión con Max)**:
   `docs/reports/LECTURA_MUSE_SPARK_ED3_DINAMICA.md` — reacciones capítulo por
   capítulo (portada, 00, 01–19, 21, ramas 9.5 y 16.5) con aporte social imaginado
