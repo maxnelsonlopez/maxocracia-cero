@@ -10,9 +10,20 @@ bp = Blueprint("interchanges", __name__, url_prefix="/interchanges")
 
 
 @bp.route("", methods=["GET"])
-def list_interchanges():
+@token_required
+def list_interchanges(current_user):
+    """Historial propio (admin ve todo). Antes era público y devolvía los
+    intercambios de toda la comunidad a cualquiera (SELECT * sin filtro)."""
     db = get_db()
-    cur = db.execute("SELECT * FROM interchange ORDER BY created_at DESC LIMIT 200")
+    if current_user.get("is_admin"):
+        cur = db.execute("SELECT * FROM interchange ORDER BY created_at DESC LIMIT 200")
+    else:
+        uid = current_user.get("user_id")
+        cur = db.execute(
+            "SELECT * FROM interchange WHERE giver_id = ? OR receiver_id = ? "
+            "ORDER BY created_at DESC LIMIT 200",
+            (uid, uid),
+        )
     rows = [dict(r) for r in cur.fetchall()]
     return jsonify(rows)
 
