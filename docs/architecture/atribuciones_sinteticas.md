@@ -360,6 +360,9 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   en `:5050`: PDF demo → fragmento de 155 chars con banda honesta, base
   limpia después (0 filas). Nota operativa: `run.py` usa `debug=True` (hijo
   reloader huérfano sirve código viejo al reiniciar: matar por puerto/PID).
+  Ampliación (`ingest_biblioteca.py`: .txt/.md sin dependencias, reporte total
+  sin silencios, biblioteca excluida de `?format=searx`): commits `1a4e6e9` +
+  `1596914`. Suite **157/157**.
 - **Concilio en cuota free — supervivencia sin ingresos (15/9/2026, sesión con
   Max; a petición del custodio: "OpenRouter tiene free vivos")**:
   - **Diagnóstico vivo**: el `autostart.log` mostraba 5 ciclos muertos
