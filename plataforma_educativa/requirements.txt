@@ -6,3 +6,5 @@
 flask>=3.0,<4
 pyjwt>=2.8.0
 pypdf>=4
+# Servidor WSGI de producción para run.py (sin debugger de Werkzeug).
+waitress>=3.0

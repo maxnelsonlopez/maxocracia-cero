@@ -8,6 +8,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from .auth import issue_token
 from .db import get_db
+from .rate_limit import rate_limit
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -21,6 +22,7 @@ def _count_users():
 
 
 @auth_bp.route("/api/auth/register", methods=["POST"])
+@rate_limit("register", username_field="username")
 def register():
     """Crea un usuario. El email es opcional (columna nullable)."""
     data = request.get_json(silent=True) or {}
@@ -73,6 +75,7 @@ def register():
 
 
 @auth_bp.route("/api/auth/login", methods=["POST"])
+@rate_limit("login", username_field="username")
 def login():
     """Valida credenciales y devuelve un token nuevo."""
     data = request.get_json(silent=True) or {}
@@ -80,9 +83,7 @@ def login():
     password = data.get("password") or ""
 
     db = get_db()
-    user = db.execute(
-        "SELECT * FROM users WHERE username = ?", (username,)
-    ).fetchone()
+    user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
     if user is None or not check_password_hash(user["password_hash"], password):
         return jsonify({"error": "Credenciales inválidas."}), 401
 

@@ -717,6 +717,10 @@ function init() {
 
   $("btn-logout").addEventListener("click", function () { clearToken(); showAuth(); });
 
+  // Sin onclick inline (la CSP no permite scripts inline): el árbol/ciudad
+  // se alterna con un listener propio.
+  $("btn-city-toggle").addEventListener("click", toggleCity);
+
   $("btn-save-availability").addEventListener("click", function () {
     var slots = Object.keys(selectedSlots).filter(function (s) { return selectedSlots[s]; });
     api("/api/availability", {

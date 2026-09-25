@@ -7,10 +7,9 @@ con Maxocracia. Vive por completo dentro de ``plataforma_educativa/``.
 
 import os
 
-from flask import Flask
+from flask import Flask, request
 
-from . import db, schema
-from . import buscador as buscador_engine
+from . import buscador as buscador_engine, db, schema
 from .api_routes import api_bp
 from .auth_routes import auth_bp
 from .buscador_routes import buscador_bp
@@ -19,7 +18,8 @@ from .frontend_routes import frontend_bp
 # Ruta por defecto de la base SQLite (junto a este módulo, en la carpeta raíz
 # de la plataforma).
 _DEFAULT_DB = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "plataforma_educativa.db"
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "plataforma_educativa.db",
 )
 
 
@@ -46,6 +46,29 @@ def create_app(db_path=None):
 
     # Almacén de tokens en memoria, por instancia (aislado entre tests).
     app.extensions["auth_tokens"] = {}
+
+    # Cabeceras de seguridad (la escuela se sirve tras el túnel TLS de
+    # Cloudflare): sin scripts inline, sin enmarcado y con HSTS cuando el
+    # proxy confirma HTTPS.
+    @app.after_request
+    def _security_headers(response):
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault(
+            "Referrer-Policy", "strict-origin-when-cross-origin"
+        )
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            "default-src 'self'; script-src 'self'; style-src 'self'; "
+            "img-src 'self' data:; connect-src 'self'; font-src 'self'; "
+            "object-src 'none'; base-uri 'self'; frame-ancestors 'none'",
+        )
+        proto = request.headers.get("X-Forwarded-Proto", request.scheme)
+        if proto == "https":
+            response.headers.setdefault(
+                "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
+            )
+        return response
 
     db.init_app(app)
     schema.init_db(app)
