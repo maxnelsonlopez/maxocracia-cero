@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from uuid import uuid4
 
@@ -23,6 +24,26 @@ from .validators import (
 )
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
+
+_DUMMY_HASH = None
+
+
+def _dummy_password_hash() -> str:
+    """Hash señuelo: cuando el email no existe se verifica igual para gastar
+    el mismo tiempo y no permitir enumerar cuentas por latencia."""
+    global _DUMMY_HASH
+    if _DUMMY_HASH is None:
+        _DUMMY_HASH = generate_password_hash("maxocracia-timing-dummy")
+    return _DUMMY_HASH
+
+
+def _refresh_in_body() -> bool:
+    """El refresh token vive en cookie HttpOnly; solo se expone en el cuerpo
+    en testing/desarrollo (clientes sin navegador). En producción, un XSS no
+    puede leerlo de la respuesta."""
+    return bool(current_app.config.get("TESTING", False)) or (
+        os.environ.get("FLASK_ENV") == "development"
+    )
 
 
 @bp.route("/register", methods=["POST"])
@@ -130,7 +151,12 @@ def login():
     db = get_db()
     user = db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
 
-    if user is None or not check_password_hash(user["password_hash"], password):
+    if user is None:
+        check_password_hash(_dummy_password_hash(), password)
+        return jsonify({"error": "invalid credentials"}), 401
+    if not check_password_hash(
+        user["password_hash"] or _dummy_password_hash(), password
+    ):
         return jsonify({"error": "invalid credentials"}), 401
 
     # Clear any existing session
@@ -160,12 +186,14 @@ def login():
     # Combine jti and raw token for the client
     refresh_token = f"{jti}.{raw_refresh}"
 
-    # Prepare response
+    # Prepare response: el refresh token solo va en el cuerpo fuera de
+    # producción (en el navegador vive en la cookie HttpOnly).
     response_data = {
         "access_token": access_token,
-        "refresh_token": refresh_token,
         "expires_in": 3600,  # 1 hour in seconds
     }
+    if _refresh_in_body():
+        response_data["refresh_token"] = refresh_token
 
     # In testing mode, return the tokens in the response body
     if current_app.config.get("TESTING", False):
@@ -173,7 +201,7 @@ def login():
 
     # In production/development, set the refresh token as an HttpOnly cookie
     resp = make_response(jsonify(response_data))
-    secure = current_app.config.get("ENV") != "development"
+    secure = bool(current_app.config.get("SESSION_COOKIE_SECURE", False))
     resp.set_cookie(
         "mc_refresh",
         refresh_token,
@@ -249,7 +277,7 @@ def logout():
 
     resp = make_response(jsonify({"message": "logged out"}))
     # clear cookie
-    secure = current_app.config.get("ENV") != "development"
+    secure = bool(current_app.config.get("SESSION_COOKIE_SECURE", False))
     resp.set_cookie(
         "mc_refresh", "", httponly=True, samesite="Lax", secure=secure, expires=0
     )
@@ -359,12 +387,15 @@ def refresh():
         }
     )
 
-    # Prepare response data
+    # Prepare response data (el refresh solo viaja en el cuerpo fuera de
+    # producción; en el navegador vive en la cookie HttpOnly).
+    new_refresh_token = f"{new_jti}.{new_raw}"
     response_data = {
         "access_token": access_token,
-        "refresh_token": f"{new_jti}.{new_raw}",
         "expires_in": 3600,  # 1 hour in seconds
     }
+    if _refresh_in_body():
+        response_data["refresh_token"] = new_refresh_token
 
     # In testing mode, return the tokens in the response body
     if current_app.config.get("TESTING", False):
@@ -372,10 +403,10 @@ def refresh():
 
     # In production/development, set the refresh token as an HttpOnly cookie
     resp = make_response(jsonify(response_data))
-    secure = current_app.config.get("ENV") != "development"
+    secure = bool(current_app.config.get("SESSION_COOKIE_SECURE", False))
     resp.set_cookie(
         "mc_refresh",
-        response_data["refresh_token"],
+        new_refresh_token,
         httponly=True,
         samesite="Lax",
         secure=secure,

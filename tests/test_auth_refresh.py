@@ -95,6 +95,33 @@ def test_refresh_rejects_expired_token(client):
     assert resp.status_code == 401
 
 
+def test_refresh_token_solo_cookie_en_produccion(client):
+    """En producción el refresh token no se expone en el cuerpo: vive en la
+    cookie HttpOnly (un XSS no puede leerlo de la respuesta)."""
+    db_path = client.application.config["DATABASE"]
+    seed_user(db_path, "r4@example.test", "R4")
+    client.application.config["TESTING"] = False
+
+    resp = client.post(
+        "/auth/login",
+        json={"email": "r4@example.test", "password": "Password1"},
+    )
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["access_token"]
+    assert "refresh_token" not in body
+
+    cookie = resp.headers.get("Set-Cookie", "")
+    assert "mc_refresh=" in cookie
+    assert "HttpOnly" in cookie
+
+    # La cookie basta para renovar, y el nuevo refresh tampoco se expone.
+    refresh = client.post("/auth/refresh")
+    assert refresh.status_code == 200
+    assert "refresh_token" not in refresh.get_json()
+    assert refresh.get_json()["access_token"]
+
+
 def test_refresh_with_valid_bearer_rereads_user(client):
     """El flujo legacy sigue vivo para tokens vigentes y reemite releyendo
     la BD (rol y token_version actuales, no los del token viejo)."""
