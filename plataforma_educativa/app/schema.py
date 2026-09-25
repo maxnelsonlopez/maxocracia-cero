@@ -228,7 +228,16 @@ CREATE TABLE IF NOT EXISTS buscador_docs (
     tipo TEXT NOT NULL DEFAULT 'web',
     fecha TEXT,
     wayback_ts TEXT,
-    indexed_at TEXT NOT NULL
+    indexed_at TEXT NOT NULL,
+    -- B8 biblioteca curada (3 niveles): licencia explícita por ítem (nunca
+    -- global; sin licencia no hay nivel 1), visibilidad (privada por defecto;
+    -- solo el curador publica, M15), curaduría del dueño (obra propia,
+    -- publicable) y categoría de la carpeta de origen.
+    licencia TEXT NOT NULL DEFAULT 'closed',
+    visibilidad TEXT NOT NULL DEFAULT 'privada'
+        CHECK(visibilidad IN ('privada', 'publica')),
+    curaduria TEXT NOT NULL DEFAULT '',
+    categoria TEXT NOT NULL DEFAULT ''
 );
 """
 
@@ -889,6 +898,22 @@ def _migrate_db(conn):
             )
         except sqlite3.OperationalError:
             pass
+
+    # Biblioteca curada (B8): licencia, visibilidad, curaduría y categoría
+    # en BDs existentes (las nuevas ya las trae el SCHEMA).
+    cursor = conn.execute("PRAGMA table_info(buscador_docs)")
+    docs_columns = [row["name"] for row in cursor.fetchall()]
+    for columna, ddl in (
+        ("licencia", "ALTER TABLE buscador_docs ADD COLUMN licencia TEXT NOT NULL DEFAULT 'closed'"),
+        ("visibilidad", "ALTER TABLE buscador_docs ADD COLUMN visibilidad TEXT NOT NULL DEFAULT 'privada'"),
+        ("curaduria", "ALTER TABLE buscador_docs ADD COLUMN curaduria TEXT NOT NULL DEFAULT ''"),
+        ("categoria", "ALTER TABLE buscador_docs ADD COLUMN categoria TEXT NOT NULL DEFAULT ''"),
+    ):
+        if columna not in docs_columns:
+            try:
+                conn.execute(ddl)
+            except sqlite3.OperationalError:
+                pass
 
     # Idioma del material (M16): los idiomas conviven por material_key.
     cursor = conn.execute("PRAGMA table_info(materials)")

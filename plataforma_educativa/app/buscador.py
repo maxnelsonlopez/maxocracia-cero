@@ -684,9 +684,11 @@ def engine_corpus(conn, query, limite=10):
         if (f["capa"] or "") == "biblioteca":
             resumen = fragmentos.get(f["id"]) or _fragmento(f["texto"], tokens)
             fuente = "biblioteca privada"
+            visibilidad = f["visibilidad"] or "privada"
         else:
             resumen = f["resumen"] or ""
             fuente = ("feed:" + str(f["feed_id"])) if f["feed_id"] else ("seed:" + str(f["seed_id"] or ""))
+            visibilidad = "publica"
         resultados.append(
             {
                 "capa": "corpus",
@@ -694,6 +696,7 @@ def engine_corpus(conn, query, limite=10):
                 "url": f["url"],
                 "resumen": resumen,
                 "fuente": fuente,
+                "visibilidad": visibilidad,
                 "tipo": f["tipo"],
                 "fecha": f["fecha"],
                 "wayback_ts": f["wayback_ts"],
@@ -799,9 +802,14 @@ def enriquecer_corpus(conn, resultado):
             nombre = (feed["titulo"] or "").strip() or ("feed " + str(fila["feed_id"]))
             razones.insert(0, f"del corpus verificado de la comunidad ({nombre})")
     elif (fila["capa"] or "") == "biblioteca":
-        razones.insert(
-            0, "📚 biblioteca privada del dueño: solo fragmentos, nunca el texto completo (B7)"
-        )
+        if (fila["visibilidad"] or "privada") == "publica":
+            razones.insert(
+                0, f"🌍 publicada por el curador (licencia: {fila['licencia'] or 'closed'})"
+            )
+        else:
+            razones.insert(
+                0, "📚 biblioteca privada del dueño: solo fragmentos, nunca el texto completo (B7)"
+            )
     if fila["wayback_ts"]:
         razones.append(f"memoria larga: archivado desde {fila['wayback_ts']} (Wayback, §3A)")
     resultado["razones"] = razones
@@ -978,6 +986,28 @@ def listar_resoluciones(conn, limite=50):
     ).fetchall()
 
 
+def publicar_doc(conn, doc_id, licencia, nota=""):
+    """Interruptor del curador (M15): publica un documento de la biblioteca
+    con licencia explícita y nota de procedencia. Sin licencia no-closed no
+    hay nivel 1: levanta ValueError. Solo cambia visibilidad + licencia (el
+    texto completo jamás se sirve por API)."""
+    fila = conn.execute("SELECT * FROM buscador_docs WHERE id = ?", (doc_id,)).fetchone()
+    if fila is None:
+        raise LookupError("Documento no encontrado.")
+    lic = (licencia or "").strip() or "closed"
+    if lic.lower() == "closed":
+        raise ValueError("Sin licencia explícita no hay nivel 1 (fail-closed).")
+    curaduria = (fila["curaduria"] or "").strip()
+    if (nota or "").strip():
+        curaduria = (curaduria + "\n" if curaduria else "") + f"[Publicado: {nota.strip()} — {_now()}]"
+    conn.execute(
+        "UPDATE buscador_docs SET licencia = ?, visibilidad = 'publica', curaduria = ? WHERE id = ?",
+        (lic, curaduria, doc_id),
+    )
+    conn.commit()
+    return conn.execute("SELECT * FROM buscador_docs WHERE id = ?", (doc_id,)).fetchone()
+
+
 # --------------------------------------------------------------------------
 # Búsqueda unificada (fusión de capas con transparencia)
 # --------------------------------------------------------------------------
@@ -1071,13 +1101,14 @@ def format_searx(data):
     """Formato compatible con el motor ``json_engine`` de SearXNG: así la
     lente educativa de cualquier instancia puede federar nuestras semillas.
 
-    La biblioteca privada NUNCA se federa: lo privado no sale de casa ni en
-    fragmentos (Opacidad Sagrada, Cap. 16.5)."""
+    Lo privado NUNCA se federa: solo cruza lo publicado por el curador
+    (visibilidad publica + licencia no closed). Opacidad Sagrada, Cap. 16.5."""
     return {
         "results": [
             {"title": r["titulo"], "url": r["url"], "content": r["resumen"]}
             for r in data.get("resultados", [])
-            if r.get("fuente") != "biblioteca privada"
+            if not (r.get("fuente") == "biblioteca privada"
+                    and r.get("visibilidad", "privada") != "publica")
         ]
     }
 

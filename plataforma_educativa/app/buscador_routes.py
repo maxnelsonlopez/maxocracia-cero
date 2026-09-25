@@ -381,6 +381,23 @@ def lupa_diff():
         return jsonify({"error": "diff", "fail_open": f"wikipedia: {exc.__class__.__name__}"}), 502
 
 
+@buscador_bp.route("/api/buscador/corpus/<int:doc_id>/publicar", methods=["POST"])
+@login_required
+def publicar_doc(doc_id):
+    """Interruptor del curador (M15): publica con licencia explícita.
+    403 no coordinador, 404 inexistente, 400 licencia closed/ausente."""
+    if not _es_coordinador():
+        return jsonify({"error": "Solo el curador publica (regla M15)."}), 403
+    body = request.get_json(silent=True) or {}
+    try:
+        fila = buscador.publicar_doc(get_db(), doc_id, body.get("licencia"), body.get("nota"))
+    except LookupError:
+        return jsonify({"error": "Documento no encontrado."}), 404
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    return jsonify({"doc": dict(fila)}), 200
+
+
 @buscador_bp.route("/api/buscador/seeds/<int:seed_id>/verificar", methods=["POST"])
 @login_required
 def verificar_seed(seed_id):
