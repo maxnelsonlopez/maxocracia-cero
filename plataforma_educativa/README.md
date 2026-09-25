@@ -210,13 +210,15 @@ anonimato, indicios de guerra, top editores, saltos de tamaño) y diff palabra
 por palabra entre revisiones. Hechos contados, lectura humana: la máquina
 muestra, tú juzgas.
 
-**B7 — Biblioteca privada**: tus PDFs propios (Springer y demás) se ingieren
-en casa con `ingest_pdfs.py` (`$env:BIBLIOTECA_PDF_DIR` al disco; requiere
-`pypdf`, única dependencia nueva) a `buscador_docs` capa `biblioteca`,
+**B7 — Biblioteca privada**: tus archivos propios (PDF Springer y demás +
+texto plano `.txt`/`.md`, recursivo) se ingieren en casa con
+`ingest_biblioteca.py` (`$env:BIBLIOTECA_PDF_DIR` al disco; `pypdf` solo para
+PDF, única dependencia nueva) a `buscador_docs` capa `biblioteca`,
 idempotente por hash de contenido. Reglas duras: cifrado se omite (jamás se
-fuerza), escaneos sin OCR se reportan, y la API solo sirve FRAGMENTOS
-(snippet FTS5 o recorte) — el libro nunca sale de tu disco. Solo archivos
-propios sin DRM; la base no se commitea.
+fuerza), lo no indexable se reporta (nada en silencio), y la API solo sirve
+FRAGMENTOS (snippet FTS5 o recorte) — el libro nunca sale de tu disco, ni
+siquiera vía federación searx (Opacidad Sagrada). Solo archivos propios sin
+DRM; la base no se commitea.
 
 ```powershell
 # Opcional: capa web general con lente educativa (ver searxng/README.md)
