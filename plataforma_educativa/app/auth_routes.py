@@ -14,6 +14,10 @@ auth_bp = Blueprint("auth", __name__)
 
 # Roles: el primer usuario registrado es coordinador (ve "generar semana").
 MAX_EMAIL_LEN = 254
+USERNAME_MIN_LEN = 2
+USERNAME_MAX_LEN = 50
+PASSWORD_MIN_LEN = 6
+PASSWORD_MAX_LEN = 128
 
 
 def _count_users():
@@ -32,6 +36,32 @@ def register():
 
     if not username or not password:
         return jsonify({"error": "username y password son obligatorios."}), 400
+    if not (USERNAME_MIN_LEN <= len(username) <= USERNAME_MAX_LEN) or any(
+        c in username for c in "\r\n\t"
+    ):
+        return (
+            jsonify(
+                {
+                    "error": (
+                        f"username inválido: entre {USERNAME_MIN_LEN} y "
+                        f"{USERNAME_MAX_LEN} caracteres, sin saltos de línea."
+                    )
+                }
+            ),
+            400,
+        )
+    if not (PASSWORD_MIN_LEN <= len(password) <= PASSWORD_MAX_LEN):
+        return (
+            jsonify(
+                {
+                    "error": (
+                        f"password inválido: entre {PASSWORD_MIN_LEN} y "
+                        f"{PASSWORD_MAX_LEN} caracteres."
+                    )
+                }
+            ),
+            400,
+        )
     if email and len(email) > MAX_EMAIL_LEN:
         return jsonify({"error": "email demasiado largo."}), 400
 

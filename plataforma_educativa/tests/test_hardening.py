@@ -38,7 +38,9 @@ def test_hsts_only_with_https_proxy_o_cloudflare(client):
 def test_token_local_expira(client, monkeypatch):
     """El token local ya no vive para siempre: TTL configurable."""
     monkeypatch.setenv("PLATAFORMA_EDUCATIVA_TOKEN_TTL", "0")
-    resp = client.post("/api/auth/register", json={"username": "ttl", "password": "x"})
+    resp = client.post(
+        "/api/auth/register", json={"username": "ttl", "password": "secreto"}
+    )
     assert resp.status_code == 201
     token = resp.get_json()["token"]
 
@@ -52,12 +54,12 @@ def test_login_rate_limited_by_ip(client, app):
 
     for _ in range(3):
         resp = client.post(
-            "/api/auth/login", json={"username": "nadie", "password": "x"}
+            "/api/auth/login", json={"username": "nadie", "password": "secreto"}
         )
         assert resp.status_code == 401
 
     blocked = client.post(
-        "/api/auth/login", json={"username": "nadie", "password": "x"}
+        "/api/auth/login", json={"username": "nadie", "password": "secreto"}
     )
     assert blocked.status_code == 429
     assert "Retry-After" in blocked.headers
@@ -69,24 +71,41 @@ def test_login_rate_limited_by_username_across_ips(client, app):
 
     first = client.post(
         "/api/auth/login",
-        json={"username": "ana", "password": "x"},
+        json={"username": "ana", "password": "secreto"},
         headers={"CF-Connecting-IP": "203.0.113.1"},
     )
     assert first.status_code == 401
 
     second = client.post(
         "/api/auth/login",
-        json={"username": "ana", "password": "x"},
+        json={"username": "ana", "password": "secreto"},
         headers={"CF-Connecting-IP": "203.0.113.2"},
     )
     assert second.status_code == 401
 
     third = client.post(
         "/api/auth/login",
-        json={"username": "ana", "password": "x"},
+        json={"username": "ana", "password": "secreto"},
         headers={"CF-Connecting-IP": "203.0.113.3"},
     )
     assert third.status_code == 429
+
+
+def test_registro_rechaza_password_corta(client):
+    resp = client.post(
+        "/api/auth/register", json={"username": "corta", "password": "abc"}
+    )
+    assert resp.status_code == 400
+    assert "password" in resp.get_json()["error"]
+
+
+def test_registro_rechaza_username_invalido(client):
+    resp = client.post(
+        "/api/auth/register",
+        json={"username": "x" * 60, "password": "secreto"},
+    )
+    assert resp.status_code == 400
+    assert "username" in resp.get_json()["error"]
 
 
 def test_register_rate_limited(client, app):
@@ -95,17 +114,17 @@ def test_register_rate_limited(client, app):
 
     assert (
         client.post(
-            "/api/auth/register", json={"username": "n1", "password": "x"}
+            "/api/auth/register", json={"username": "n1", "password": "secreto"}
         ).status_code
         == 201
     )
     assert (
         client.post(
-            "/api/auth/register", json={"username": "n2", "password": "x"}
+            "/api/auth/register", json={"username": "n2", "password": "secreto"}
         ).status_code
         == 201
     )
     blocked = client.post(
-        "/api/auth/register", json={"username": "n3", "password": "x"}
+        "/api/auth/register", json={"username": "n3", "password": "secreto"}
     )
     assert blocked.status_code == 429

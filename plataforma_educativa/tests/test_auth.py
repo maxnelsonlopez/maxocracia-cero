@@ -34,7 +34,7 @@ def test_register_with_email_works(client):
 def test_register_duplicate_username_returns_409(client):
     """Un username ya usado responde 409."""
     _register(client, "ana", "secreto")
-    resp = _register(client, "ana", "otra")
+    resp = _register(client, "ana", "otra123")
     assert resp.status_code == 409
     assert "error" in resp.get_json()
 
