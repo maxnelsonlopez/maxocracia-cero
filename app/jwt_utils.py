@@ -72,7 +72,7 @@ def create_token(payload, expires_in: Optional[int] = None):
 
 def verify_token(token, allow_expired: bool = False):
     """Verify token signature and expiration. If allow_expired is True, signature is still verified
-    but expiration is ignored and payload is returned (useful for refresh flows).
+    but expiration is ignored and payload is returned.
     Returns payload dict or None on failure.
     """
     # Asegurar que SECRET esté inicializado
@@ -94,6 +94,39 @@ def verify_token(token, allow_expired: bool = False):
         return None
     except Exception:
         return None
+
+
+def user_token_version(user_id):
+    """Versión de tokens vigente del usuario (0 si la fila no existe)."""
+    from .utils import get_db
+
+    row = (
+        get_db()
+        .execute("SELECT token_version FROM users WHERE id = ?", (user_id,))
+        .fetchone()
+    )
+    if row is None:
+        return None
+    try:
+        return int(row["token_version"] or 0)
+    except (TypeError, ValueError, IndexError):
+        return 0
+
+
+def token_is_current(data) -> bool:
+    """True si el JWT pertenece a un usuario existente y su token_version
+    coincide con la vigente. El logout incrementa la versión y así los
+    access tokens robados dejan de servir (revocación real, T13)."""
+    if not data or data.get("user_id") is None:
+        return False
+    current = user_token_version(data["user_id"])
+    if current is None:
+        return False
+    try:
+        claimed = int(data.get("token_version", 0) or 0)
+    except (TypeError, ValueError):
+        return False
+    return claimed == current
 
 
 def token_required(f):
@@ -127,6 +160,8 @@ def token_required(f):
         data = verify_token(token)
         if data is None:
             return jsonify({"error": "invalid token"}), 401
+        if not token_is_current(data):
+            return jsonify({"error": "token revoked"}), 401
 
         # Attach user info to request
         request.user = data
@@ -145,6 +180,8 @@ def admin_required(f):
         data = verify_token(token)
         if data is None:
             return jsonify({"error": "invalid token"}), 401
+        if not token_is_current(data):
+            return jsonify({"error": "token revoked"}), 401
 
         # Check for admin flag in JWT payload
         if not data.get("is_admin"):

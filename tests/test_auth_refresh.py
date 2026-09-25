@@ -79,7 +79,9 @@ def test_refresh_requires_token(client):
     assert resp.status_code == 401
 
 
-def test_refresh_allows_expired_token(client):
+def test_refresh_rejects_expired_token(client):
+    """Endurecimiento: un access token expirado ya no se puede refrescar
+    (antes permitía renovar indefinidamente un token robado)."""
     db_path = client.application.config["DATABASE"]
     uid = seed_user(db_path, "r2@example.test", "R2")
     # create a token that expires immediately using jwt_utils.create_token
@@ -90,6 +92,26 @@ def test_refresh_allows_expired_token(client):
 
     time.sleep(2)
     resp = client.post("/auth/refresh", headers={"Authorization": f"Bearer {tok}"})
+    assert resp.status_code == 401
+
+
+def test_refresh_with_valid_bearer_rereads_user(client):
+    """El flujo legacy sigue vivo para tokens vigentes y reemite releyendo
+    la BD (rol y token_version actuales, no los del token viejo)."""
+    db_path = client.application.config["DATABASE"]
+    uid = seed_user(db_path, "r3@example.test", "R3")
+    from app.jwt_utils import create_token
+
+    tok = create_token({"user_id": uid, "email": "r3@example.test", "is_admin": 1})
+    resp = client.post("/auth/refresh", headers={"Authorization": f"Bearer {tok}"})
     assert resp.status_code == 200
-    j = resp.get_json()
-    assert "token" in j
+    new_token = resp.get_json().get("token")
+    assert new_token
+
+    from app.jwt_utils import verify_token
+
+    claims = verify_token(new_token)
+    assert claims is not None
+    # El usuario no es admin en la BD: el reclamo no se hereda del token viejo.
+    assert not claims.get("is_admin")
+    assert claims.get("token_version") == 0

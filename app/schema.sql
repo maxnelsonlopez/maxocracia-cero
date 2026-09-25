@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
   values_json TEXT,
   is_admin INTEGER DEFAULT 0,
   trust_level INTEGER DEFAULT 0,  -- Escalera de confianza (Cap. 13 N0-N4): 0 recién llegado, 1 integrado
+  token_version INTEGER NOT NULL DEFAULT 0,  -- Revocación de JWT: logout lo incrementa (T13)
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 

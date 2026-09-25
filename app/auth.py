@@ -4,7 +4,7 @@ from uuid import uuid4
 from flask import Blueprint, current_app, jsonify, make_response, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .jwt_utils import create_token, token_required, verify_token
+from .jwt_utils import create_token, token_is_current, token_required, verify_token
 from .limiter import LOGIN_LIMITS, REFRESH_LIMITS, REGISTER_LIMITS, limiter
 from .refresh_utils import (
     generate_refresh_token_raw,
@@ -91,6 +91,7 @@ def register():
                 "is_admin": 0,
                 "name": name,
                 "alias": alias,
+                "token_version": 0,
             }
         )
 
@@ -144,6 +145,9 @@ def login():
             "is_admin": user["is_admin"],
             "name": user["name"] if "name" in user.keys() else None,
             "alias": user["alias"] if "alias" in user.keys() else None,
+            "token_version": (
+                int(user["token_version"] or 0) if "token_version" in user.keys() else 0
+            ),
         }
     )
 
@@ -193,6 +197,12 @@ def logout():
     data = request.get_json(silent=True) or {}
     refresh_token = data.get("refresh_token") or request.cookies.get("mc_refresh")
 
+    # Final fallback: session user (leer ANTES de limpiar la sesión)
+    user_ids = set()
+    uid = session.get("user_id")
+    if uid:
+        user_ids.add(uid)
+
     # Clear session regardless
     session.clear()
 
@@ -205,8 +215,7 @@ def logout():
 
             rec = find_refresh_token_record(jti)
             if rec:
-                # Revoke all tokens for this user
-                revoke_user_tokens(rec["user_id"])
+                user_ids.add(rec["user_id"])
         except Exception as e:
             # Log error but don't expose it - logout should still succeed
             print(f"Warning: Failed to revoke refresh token: {e}")
@@ -218,24 +227,31 @@ def logout():
             token = auth.split(" ", 1)[1]
             from .jwt_utils import verify_token
 
-            data = verify_token(token)
+            data = verify_token(token, allow_expired=True)
             if data and "user_id" in data:
-                revoke_user_tokens(data["user_id"])
+                user_ids.add(data["user_id"])
         except Exception as e:
             print(f"Warning: Failed to revoke via access token: {e}")
 
-    # Final fallback: try to revoke based on session (for backward compatibility)
-    uid = session.get("user_id")
-    if uid:
+    # Revoca refresh tokens y sube token_version: los access tokens ya
+    # emitidos dejan de valer aunque no hayan expirado (T13, sin zona ciega).
+    db = get_db()
+    for user_id in user_ids:
         try:
-            revoke_user_tokens(uid)
+            revoke_user_tokens(user_id)
+            db.execute(
+                "UPDATE users SET token_version = token_version + 1 WHERE id = ?",
+                (user_id,),
+            )
         except Exception as e:
-            print(f"Warning: Failed to revoke tokens for user {uid}: {e}")
+            print(f"Warning: Failed to revoke tokens for user {user_id}: {e}")
+    db.commit()
 
     resp = make_response(jsonify({"message": "logged out"}))
     # clear cookie
+    secure = current_app.config.get("ENV") != "development"
     resp.set_cookie(
-        "mc_refresh", "", httponly=True, samesite="Lax", secure=False, expires=0
+        "mc_refresh", "", httponly=True, samesite="Lax", secure=secure, expires=0
     )
     return resp
 
@@ -261,22 +277,39 @@ def me(current_user):
 @limiter.limit(REFRESH_LIMITS)
 def refresh():
     # Support two modes:
-    # 1) Legacy: Authorization: Bearer <access_token> -> verify signature allowing expired and return new access token
+    # 1) Legacy: Authorization: Bearer <access_token> (NO expirado) -> nuevo
+    #    access token releyendo la BD (rol/token_version vigentes). Un token
+    #    expirado ya no sirve para refrescar: la renovación vive en el refresh
+    #    token rotado, que sí se puede revocar.
     # 2) Rotation: JSON body {"refresh_token": "<jti>.<raw>"} -> validate stored hash, rotate, and return new access + refresh
     auth = request.headers.get("Authorization", "")
     if auth.startswith("Bearer "):
         token = auth.split(" ", 1)[1]
-        data = verify_token(token, allow_expired=True)
-        if data is None:
+        data = verify_token(token)
+        if data is None or data.get("user_id") is None:
             return jsonify({"error": "invalid token"}), 401
-        payload = {
-            "user_id": data.get("user_id"),
-            "email": data.get("email"),
-            "is_admin": data.get("is_admin", 0),
-            "name": data.get("name"),
-            "alias": data.get("alias"),
-        }
-        new_token = create_token(payload)
+        if not token_is_current(data):
+            return jsonify({"error": "token revoked"}), 401
+        db = get_db()
+        user = db.execute(
+            "SELECT * FROM users WHERE id = ?", (data["user_id"],)
+        ).fetchone()
+        if not user:
+            return jsonify({"error": "invalid token"}), 401
+        new_token = create_token(
+            {
+                "user_id": user["id"],
+                "email": user["email"],
+                "is_admin": user["is_admin"],
+                "name": user["name"] if "name" in user.keys() else None,
+                "alias": user["alias"] if "alias" in user.keys() else None,
+                "token_version": (
+                    int(user["token_version"] or 0)
+                    if "token_version" in user.keys()
+                    else 0
+                ),
+            }
+        )
         return jsonify({"token": new_token})
 
     # Rotation flow: accept refresh token from JSON body OR HttpOnly cookie
@@ -320,6 +353,9 @@ def refresh():
             "is_admin": user["is_admin"],
             "name": user["name"] if "name" in user.keys() else None,
             "alias": user["alias"] if "alias" in user.keys() else None,
+            "token_version": (
+                int(user["token_version"] or 0) if "token_version" in user.keys() else 0
+            ),
         }
     )
 

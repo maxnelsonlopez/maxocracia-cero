@@ -29,6 +29,14 @@ def init_db(app=None):
     conn = sqlite3.connect(db_path)
     with open(schema_path, "r", encoding="utf-8") as f:
         conn.executescript(f.read())
+    # Migración idempotente para BDs existentes: token_version permite
+    # revocar los JWT al cerrar sesión (CREATE TABLE IF NOT EXISTS no altera).
+    user_cols = [row[1] for row in conn.execute("PRAGMA table_info(users)").fetchall()]
+    if "token_version" not in user_cols:
+        conn.execute(
+            "ALTER TABLE users ADD COLUMN token_version INTEGER NOT NULL DEFAULT 0"
+        )
+    conn.commit()
     conn.close()
     print("Initialized DB at", db_path)
 
