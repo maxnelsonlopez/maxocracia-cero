@@ -96,6 +96,43 @@ def test_register_rate_limit(client):
         assert False, "No se alcanzó el límite de rate limiting después de 150 intentos"
 
 
+def test_login_rate_limit_por_cuenta(client):
+    """Fuerza bruta distribuida: rotar IPs no libra el límite por cuenta."""
+    from app.limiter import limiter
+
+    limiter.reset()
+    client.application.config["RATELIMIT_LOGIN_LIMIT"] = "1000 per minute"
+    client.application.config["RATELIMIT_LOGIN_ACCOUNT_LIMIT"] = "3 per minute"
+
+    db_path = client.application.config["DATABASE"]
+    seed_user(db_path, "cuenta@example.com", "Cuenta")
+
+    payload = {"email": "cuenta@example.com", "password": "Password1-mala"}
+    for i in range(3):
+        resp = client.post(
+            "/auth/login",
+            json=payload,
+            environ_base={"REMOTE_ADDR": f"203.0.113.{i + 1}"},
+        )
+        assert resp.status_code == 401
+
+    blocked = client.post(
+        "/auth/login",
+        json=payload,
+        environ_base={"REMOTE_ADDR": "203.0.113.99"},
+    )
+    assert blocked.status_code == 429
+
+    # Otra cuenta no queda castigada por el ataque a la primera.
+    seed_user(db_path, "otra@example.com", "Otra")
+    otra = client.post(
+        "/auth/login",
+        json={"email": "otra@example.com", "password": "Password1"},
+        environ_base={"REMOTE_ADDR": "203.0.113.100"},
+    )
+    assert otra.status_code == 200
+
+
 def test_refresh_rate_limit(client):
     """Prueba que el rate limiting funciona en la ruta de refresh."""
     # 1. Primero creamos un usuario de prueba

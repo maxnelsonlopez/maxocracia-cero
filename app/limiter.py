@@ -33,6 +33,17 @@ def get_user_or_ip_key() -> str:
     return get_client_address()
 
 
+def get_account_key() -> str:
+    """Clave por cuenta (huella del email del cuerpo): frena la fuerza bruta
+    distribuida que rota IPs contra un mismo usuario. No guarda el email."""
+    data = request.get_json(silent=True) or {}
+    email = str(data.get("email") or "").strip().lower()
+    if email:
+        digest = hashlib.sha256(email.encode("utf-8")).hexdigest()
+        return "acct:" + digest[:32]
+    return get_client_address()
+
+
 def get_storage_uri() -> str:
     """URI de almacenamiento del limiter (uso en multi-worker).
 
@@ -118,6 +129,20 @@ def get_refresh_limits():
     return "20 per hour"
 
 
+def get_login_account_limits():
+    """Segundo límite de login: por cuenta, no por IP (anti botnet)."""
+    from flask import current_app
+
+    override = current_app.config.get(
+        "RATELIMIT_LOGIN_ACCOUNT_LIMIT"
+    ) or os.environ.get("RATELIMIT_LOGIN_ACCOUNT_LIMIT")
+    if override:
+        return override
+    if current_app.config.get("TESTING"):
+        return "100 per minute"
+    return "10 per 15 minutes"
+
+
 def get_oracle_limits():
     """Cuota de los endpoints que llaman al oráculo (costo real por token).
 
@@ -140,6 +165,7 @@ def get_oracle_limits():
 AUTH_LIMITS = get_auth_limits
 API_GENERAL_LIMITS = get_api_limits
 LOGIN_LIMITS = get_login_limits
+LOGIN_ACCOUNT_LIMITS = get_login_account_limits
 REGISTER_LIMITS = get_register_limits
 REFRESH_LIMITS = get_refresh_limits
 ORACLE_LIMITS = get_oracle_limits

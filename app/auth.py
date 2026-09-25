@@ -6,7 +6,14 @@ from flask import Blueprint, current_app, jsonify, make_response, request, sessi
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .jwt_utils import create_token, token_is_current, token_required, verify_token
-from .limiter import LOGIN_LIMITS, REFRESH_LIMITS, REGISTER_LIMITS, limiter
+from .limiter import (
+    LOGIN_ACCOUNT_LIMITS,
+    LOGIN_LIMITS,
+    REFRESH_LIMITS,
+    REGISTER_LIMITS,
+    get_account_key,
+    limiter,
+)
 from .refresh_utils import (
     generate_refresh_token_raw,
     revoke_user_tokens,
@@ -142,6 +149,7 @@ def register():
 
 @bp.route("/login", methods=["POST"])
 @limiter.limit(LOGIN_LIMITS)
+@limiter.limit(LOGIN_ACCOUNT_LIMITS, key_func=get_account_key)
 @validate_json_request({"email": validate_email, "password": validate_password})
 def login():
     data = request.get_json() or {}
