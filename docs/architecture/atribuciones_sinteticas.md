@@ -363,6 +363,15 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   Ampliación (`ingest_biblioteca.py`: .txt/.md sin dependencias, reporte total
   sin silencios, biblioteca excluida de `?format=searx`): commits `1a4e6e9` +
   `1596914`. Suite **157/157**.
+- **Buscador — B8 Biblioteca curada (4/9/2026, con DeepSeek: la biblioteca de
+  Max —478 archivos, 1.11 GB, 9 categorías— ordenada para el bienestar sin
+  redistribuir)**: `catalogo_biblioteca.py` (inventario REAL desde el disco:
+  nombres, tamaños, hashes, 3 OA-candidatos a verificar uno a uno; corrección
+  honesta: 09_Varios tiene 5, no 52) + licencia/visibilidad/curaduría/
+  categoría en `buscador_docs` (migración incluida) + interruptor
+  `POST /corpus/<id>/publicar` (licencia no-closed + nota M15) + federación
+  por visibilidad: commits `0083f9e` + `62a8ee5`. Suite **160/160**. Censo de
+  muestra: ~92% de los PDF trae texto extraíble (las fotocopias rinden).
 - **Concilio en cuota free — supervivencia sin ingresos (15/9/2026, sesión con
   Max; a petición del custodio: "OpenRouter tiene free vivos")**:
   - **Diagnóstico vivo**: el `autostart.log` mostraba 5 ciclos muertos

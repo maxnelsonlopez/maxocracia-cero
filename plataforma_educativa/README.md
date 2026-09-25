@@ -220,6 +220,13 @@ FRAGMENTOS (snippet FTS5 o recorte) — el libro nunca sale de tu disco, ni
 siquiera vía federación searx (Opacidad Sagrada). Solo archivos propios sin
 DRM; la base no se commitea.
 
+**B8 — Biblioteca curada en 3 niveles**: `catalogo_biblioteca.py` inventaría
+la fuente real (`catalogo.json`: ruta, hash, categoría, licencia, curaduría —
+nada inventado); el ingestor lo lee (sin catálogo, todo nace `closed` +
+privada: fail-closed). El curador publica con `POST /corpus/<id>/publicar`
+(licencia explícita no-closed + nota de procedencia, M15): lo publicado cruza
+al nivel 1 y a la federación; lo demás jamás sale de casa.
+
 ```powershell
 # Opcional: capa web general con lente educativa (ver searxng/README.md)
 $env:BUSCADOR_SEARXNG_URL = "http://127.0.0.1:8888"   # sin esto, no hay capa web
