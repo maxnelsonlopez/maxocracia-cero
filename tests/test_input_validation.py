@@ -23,6 +23,8 @@ def test_email_validation():
     assert validate_email("@dominio.com") is False
     assert validate_email("usuario dominio.com") is False
     assert validate_email(123) is False
+    # Tope anti abuso: emails de longitud absurda no se procesan
+    assert validate_email("a" * 250 + "@dominio.com") is False
 
 
 def test_password_validation():
@@ -43,6 +45,8 @@ def test_password_validation():
     assert validate_password("password123") is False  # Sin mayúscula
     assert validate_password("PASSWORD123") is False  # Sin minúscula
     assert validate_password("Password") is False  # Sin números
+    # Tope anti DoS de hashing: un password gigante no se procesa
+    assert validate_password("Aa1" + "x" * 126) is False
 
 
 def test_name_validation():

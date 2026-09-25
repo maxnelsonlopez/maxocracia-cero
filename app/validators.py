@@ -6,13 +6,19 @@ from flask import jsonify, request
 # Patrones de validación
 EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 PASSWORD_MIN_LENGTH = 8
+# Tope: un password gigante dispara el costo de scrypt/argon y es un vector
+# de agotamiento de CPU en /auth/register y /auth/login.
+PASSWORD_MAX_LENGTH = 128
+EMAIL_MAX_LENGTH = 254
 NAME_MAX_LENGTH = 100
 ALIAS_MAX_LENGTH = 50
 
 
 def validate_email(email):
-    """Valida que el email tenga un formato correcto"""
+    """Valida que el email tenga un formato correcto y longitud razonable."""
     if not email or not isinstance(email, str):
+        return False
+    if len(email) > EMAIL_MAX_LENGTH:
         return False
     return bool(EMAIL_PATTERN.match(email))
 
@@ -21,13 +27,17 @@ def validate_password(password):
     """Valida que la contraseña cumpla con requisitos mínimos de seguridad
 
     La contraseña debe tener al menos 8 caracteres, incluyendo al menos
-    una letra mayúscula, una minúscula y un número.
+    una letra mayúscula, una minúscula y un número (y como máximo 128).
     """
     if not password or not isinstance(password, str):
         return False
 
     # Verificar longitud mínima
     if len(password) < PASSWORD_MIN_LENGTH:
+        return False
+
+    # Verificar longitud máxima (anti DoS de hashing)
+    if len(password) > PASSWORD_MAX_LENGTH:
         return False
 
     # Verificar que tenga al menos una mayúscula, una minúscula y un número
