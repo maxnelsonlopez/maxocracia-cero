@@ -232,8 +232,15 @@ def create_app(db_path=None):
             f"connect-src {connect_src};"
         )
 
-        # Strict Transport Security (always in tests, only over HTTPS in production)
-        if request.is_secure or app.config.get("TESTING", False):
+        # Strict Transport Security: siempre en tests, y en producción cuando
+        # el proxy confirma HTTPS (X-Forwarded-Proto con ProxyFix) o cuando la
+        # petición llega por el borde de Cloudflare (CF-Connecting-IP, que solo
+        # el túnel inyecta). Los navegadores ignoran HSTS servido por http.
+        if (
+            request.is_secure
+            or app.config.get("TESTING", False)
+            or request.headers.get("CF-Connecting-IP")
+        ):
             response.headers["Strict-Transport-Security"] = (
                 "max-age=31536000; includeSubDomains"
             )

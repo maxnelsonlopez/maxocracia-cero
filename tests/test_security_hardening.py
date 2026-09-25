@@ -119,3 +119,21 @@ def test_hsts_presente_con_testing(restore_env, app):
     client = app.test_client()
     resp = client.get("/favicon.ico")
     assert "max-age=31536000" in resp.headers.get("Strict-Transport-Security", "")
+
+
+def test_hsts_presente_tras_tunel_cloudflare(restore_env):
+    """El túnel no siempre manda X-Forwarded-Proto; CF-Connecting-IP basta."""
+    import tempfile
+
+    fd, db_path = tempfile.mkstemp(prefix="test_hsts_", suffix=".db")
+    os.close(fd)
+    try:
+        app = create_app(db_path=db_path)  # sin TESTING
+        client = app.test_client()
+        resp = client.get("/favicon.ico", headers={"CF-Connecting-IP": "203.0.113.5"})
+        assert "max-age=31536000" in resp.headers.get("Strict-Transport-Security", "")
+    finally:
+        try:
+            os.unlink(db_path)
+        except OSError:
+            pass
