@@ -10,6 +10,15 @@ from flask import current_app, jsonify, request
 
 # Generar una clave secreta fuerte si no está definida en el entorno
 def get_secure_key():
+    # Separación de claves (recomendada): con JWT_KEY_SEPARATION=1 la firma
+    # de JWT usa JWT_SECRET_KEY (distinta de la SECRET_KEY de sesión/HMAC),
+    # de modo que una fuga en un uso no compromete el otro. Se activa solo
+    # cuando ambos nodos de la federación ya conocen la clave dedicada.
+    if os.environ.get("JWT_KEY_SEPARATION") == "1":
+        jwt_key = os.environ.get("JWT_SECRET_KEY")
+        if jwt_key:
+            return jwt_key
+
     env_key = os.environ.get("SECRET_KEY")
     if env_key:
         return env_key

@@ -25,23 +25,38 @@ _STORE_KEY = "auth_tokens"
 JWT_ALGORITHM = "HS256"
 
 
-def _get_secret_key():
-    """Obtiene la clave secreta compartida (config de la app o variables de entorno).
+def _candidate_secrets():
+    """Claves con las que se acepta verificar un JWT de Maxocracia.
 
-    Sin clave configurada NO hay federación: una constante pública en el código
-    permitiría forjar JWTs de Maxocracia. El modo autónomo (tokens locales en
-    memoria) no la necesita y sigue funcionando.
+    Orden: JWT_SECRET_KEY (clave dedicada de firma, migración recomendada) y
+    SECRET_KEY (compatibilidad). Sin ninguna, la federación queda fail-closed:
+    una constante pública en el código permitiría forjar JWTs.
     """
+    candidates = []
+    sources = []
     if current_app:
-        secret = current_app.config.get("SECRET_KEY")
-        if secret:
-            return secret
-    secret = os.environ.get("SECRET_KEY")
-    if secret:
-        return secret
+        sources.extend(
+            [
+                current_app.config.get("JWT_SECRET_KEY"),
+                os.environ.get("JWT_SECRET_KEY"),
+                current_app.config.get("SECRET_KEY"),
+            ]
+        )
+    sources.append(os.environ.get("SECRET_KEY"))
+    for value in sources:
+        if value and value not in candidates:
+            candidates.append(value)
+    return candidates
+
+
+def _get_secret_key():
+    """Primera clave candidata (o error si la federación no está configurada)."""
+    candidate_keys = _candidate_secrets()
+    if candidate_keys:
+        return candidate_keys[0]
     raise RuntimeError(
         "SECRET_KEY no configurada en la Plataforma Educativa: la federación JWT "
-        "requiere compartir la clave de Maxocracia (misma SECRET_KEY en ambos nodos)."
+        "requiere compartir la clave de Maxocracia (JWT_SECRET_KEY o SECRET_KEY)."
     )
 
 
@@ -94,14 +109,27 @@ def _resolve_jwt_user(token):
     Returns:
         tuple (local_user_id, maxo_user_id) o None si el token es inválido.
     """
-    secret = _get_secret_key()
-    try:
-        payload = jwt.decode(token, secret, algorithms=[JWT_ALGORITHM])
-    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-        return None
-    except RuntimeError:
-        raise
-    except Exception:
+    candidate_keys = _candidate_secrets()
+    if not candidate_keys:
+        raise RuntimeError(
+            "SECRET_KEY no configurada en la Plataforma Educativa: la federación "
+            "JWT requiere compartir la clave de Maxocracia (JWT_SECRET_KEY o "
+            "SECRET_KEY)."
+        )
+
+    payload = None
+    for secret in candidate_keys:
+        try:
+            payload = jwt.decode(token, secret, algorithms=[JWT_ALGORITHM])
+            break
+        except jwt.ExpiredSignatureError:
+            # Firma válida pero vencida: no insistir con otra clave.
+            return None
+        except jwt.InvalidTokenError:
+            continue
+        except Exception:
+            continue
+    if payload is None:
         return None
 
     maxo_user_id = payload.get("user_id")

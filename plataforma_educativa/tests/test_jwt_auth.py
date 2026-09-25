@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-"""Tests para la síntesis de identidad: autenticación híbrida con JWT de Maxocracia."""
+﻿# -*- coding: utf-8 -*-
+"""Tests para la sÃ­ntesis de identidad: autenticaciÃ³n hÃ­brida con JWT de Maxocracia."""
 
 import os
 import time
@@ -30,10 +30,11 @@ def _generate_maxo_jwt(
     return jwt.encode(payload, secret, algorithm="HS256")
 
 
-
 def test_jwt_auth_bearer_header_and_jit_provisioning(client):
     """Un usuario con JWT de Maxocracia es autenticado y aprovisionado JIT."""
-    token = _generate_maxo_jwt(user_id=101, email="alicia@vital.org", alias="alicia", is_admin=0)
+    token = _generate_maxo_jwt(
+        user_id=101, email="alicia@vital.org", alias="alicia", is_admin=0
+    )
 
     headers = {"Authorization": f"Bearer {token}"}
     resp = client.get("/api/me", headers=headers)
@@ -49,7 +50,7 @@ def test_jwt_auth_bearer_header_and_jit_provisioning(client):
 
 
 def test_jwt_auth_with_x_auth_token_header(client):
-    """El JWT de Maxocracia también es aceptado en la cabecera X-Auth-Token."""
+    """El JWT de Maxocracia tambiÃ©n es aceptado en la cabecera X-Auth-Token."""
     token = _generate_maxo_jwt(user_id=102, email="beto@vital.org", alias="beto")
 
     headers = {"X-Auth-Token": token}
@@ -62,7 +63,9 @@ def test_jwt_auth_with_x_auth_token_header(client):
 
 def test_jwt_admin_becomes_coordinator(client):
     """Un administrador de Maxocracia es reconocido como coordinador en el OEV."""
-    token = _generate_maxo_jwt(user_id=1, email="admin@vital.org", alias="director", is_admin=1)
+    token = _generate_maxo_jwt(
+        user_id=1, email="admin@vital.org", alias="director", is_admin=1
+    )
 
     headers = {"Authorization": f"Bearer {token}"}
     resp = client.get("/api/me", headers=headers)
@@ -74,16 +77,22 @@ def test_jwt_admin_becomes_coordinator(client):
 
 def test_jwt_links_to_existing_email_user(client):
     """Si ya existe un usuario local con el mismo email, se vincula sin duplicar."""
-    # 1. Registrar usuario local clásico
+    # 1. Registrar usuario local clÃ¡sico
     reg_resp = client.post(
         "/api/auth/register",
-        json={"username": "carlos_local", "password": "mipassword123", "email": "carlos@vital.org"},
+        json={
+            "username": "carlos_local",
+            "password": "mipassword123",
+            "email": "carlos@vital.org",
+        },
     )
     assert reg_resp.status_code == 201
     local_id = reg_resp.get_json()["user"]["id"]
 
     # 2. Entrar con JWT de Maxocracia que tiene el mismo email
-    token = _generate_maxo_jwt(user_id=77, email="carlos@vital.org", alias="carlos_maxo")
+    token = _generate_maxo_jwt(
+        user_id=77, email="carlos@vital.org", alias="carlos_maxo"
+    )
     headers = {"Authorization": f"Bearer {token}"}
     resp = client.get("/api/me", headers=headers)
     assert resp.status_code == 200
@@ -102,7 +111,7 @@ def test_jwt_expired_returns_401(client):
 
 
 def test_jwt_invalid_signature_returns_401(client):
-    """Un JWT con firma inválida (secreto incorrecto) es rechazado con 401."""
+    """Un JWT con firma invÃ¡lida (secreto incorrecto) es rechazado con 401."""
     bad_token = _generate_maxo_jwt(user_id=99, secret="wrong-secret-key")
     headers = {"Authorization": f"Bearer {bad_token}"}
     resp = client.get("/api/me", headers=headers)
@@ -114,7 +123,7 @@ def test_local_memory_token_and_jwt_coexist(client):
     # Usuario local 1
     reg_resp = client.post(
         "/api/auth/register",
-        json={"username": "local_user", "password": "pass"},
+        json={"username": "local_user", "password": "pass123"},
     )
     assert reg_resp.status_code == 201
     local_token = reg_resp.get_json()["token"]
@@ -133,20 +142,39 @@ def test_local_memory_token_and_jwt_coexist(client):
     assert resp_jwt.get_json()["user"]["maxo_user_id"] == 200
 
 
+def test_jwt_con_clave_dedicada_es_aceptado(client, monkeypatch):
+    """Con JWT_SECRET_KEY configurada (clave de firma dedicada) los tokens
+    firmados con ella se aceptan, y SECRET_KEY sigue sirviendo de respaldo."""
+    monkeypatch.setenv("JWT_SECRET_KEY", "clave-firma-dedicada-32-bytes-ok")
+    dedicada = _generate_maxo_jwt(
+        user_id=300, alias="dedicada", secret="clave-firma-dedicada-32-bytes-ok"
+    )
+    resp = client.get("/api/me", headers={"Authorization": f"Bearer {dedicada}"})
+    assert resp.status_code == 200
+    assert resp.get_json()["user"]["maxo_user_id"] == 300
+
+    historica = _generate_maxo_jwt(user_id=301, alias="historica")
+    resp = client.get("/api/me", headers={"Authorization": f"Bearer {historica}"})
+    assert resp.status_code == 200
+    assert resp.get_json()["user"]["maxo_user_id"] == 301
+
+
 def test_jwt_without_secret_fails_closed(client, monkeypatch):
-    """Sin SECRET_KEY configurada la federación NO abre con una constante pública:
+    """Sin SECRET_KEY configurada la federaciÃ³n NO abre con una constante pÃºblica:
     el JWT falla con 503 FEDERATION_NOT_CONFIGURED (fail-closed, no inseguro)."""
     monkeypatch.delenv("SECRET_KEY", raising=False)
-    # El modo autónomo local sigue vivo sin clave.
+    # El modo autÃ³nomo local sigue vivo sin clave.
     reg_resp = client.post(
         "/api/auth/register",
-        json={"username": "autonomo", "password": "pass"},
+        json={"username": "autonomo", "password": "pass123"},
     )
     assert reg_resp.status_code == 201
     local_token = reg_resp.get_json()["token"]
-    assert client.get("/api/me", headers={"X-Auth-Token": local_token}).status_code == 200
+    assert (
+        client.get("/api/me", headers={"X-Auth-Token": local_token}).status_code == 200
+    )
 
-    # El JWT federado, en cambio, se rechaza de forma explícita.
+    # El JWT federado, en cambio, se rechaza de forma explÃ­cita.
     token = _generate_maxo_jwt(user_id=999, alias="forjado")
     resp = client.get("/api/me", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 503
