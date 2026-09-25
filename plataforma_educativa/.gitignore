@@ -3,6 +3,11 @@
 *.sqlite
 *.sqlite3
 
+# Secretos locales (clave de federación, etc.): NUNCA a Git.
+.env
+.env.local
+.env.*.local
+
 # Cachés y artefactos de Python.
 __pycache__/
 *.py[cod]

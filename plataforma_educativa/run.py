@@ -26,6 +26,21 @@ import os
 
 from app import create_app
 
+
+def _load_env():
+    """Carga .env local (misma comodidad que el run.py principal).
+
+    Opcional: sin python-dotenv o sin archivo, la plataforma arranca igual y
+    las variables se leen del entorno del proceso.
+    """
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv(encoding="utf-8")
+    except Exception:
+        pass
+
+
 # Ruta por defecto de la base de datos.
 DEFAULT_DB = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "plataforma_educativa.db"
@@ -33,6 +48,8 @@ DEFAULT_DB = os.path.join(
 
 
 def main():
+    _load_env()
+
     # Se lee la variable de entorno (con encoding por defecto utf-8 en Python 3).
     db_path = os.environ.get("PLATAFORMA_EDUCATIVA_DB", DEFAULT_DB)
     app = create_app(db_path=db_path)
