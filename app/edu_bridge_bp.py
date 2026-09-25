@@ -26,7 +26,7 @@ from .utils import get_db
 edu_bridge_bp = Blueprint("edu_bridge", __name__, url_prefix="/edu-bridge")
 
 _DEFAULT_OEV_NODE_URL = os.environ.get(
-    "EDUCATIONAL_PLATFORM_URL", "http://localhost:5050"
+    "EDUCATIONAL_PLATFORM_URL", "https://escuela.maxocracia.com"
 )
 
 # Token de servicio del nodo OEV: la sincronización NO la declara el usuario,

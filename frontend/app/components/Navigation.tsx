@@ -78,7 +78,7 @@ const navSections = [
 ];
 
 // Nodo educativo del OEV (espejo del default del backend `EDUCATIONAL_PLATFORM_URL`).
-const OEV_URL = process.env.NEXT_PUBLIC_EDU_PLATFORM_URL || "http://localhost:5050";
+const OEV_URL = process.env.NEXT_PUBLIC_EDU_PLATFORM_URL || "https://escuela.maxocracia.com";
 
 // Puerta del OEV (:5050): el JWT viaja en el FRAGMENTO de la URL (#jwt=...),
 // que nunca llega al servidor (no queda en logs); el nodo lo captura una vez

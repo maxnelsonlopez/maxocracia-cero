@@ -15,12 +15,6 @@ import { apiFetch } from "../../lib/api";
 import MetricCard from "@/app/components/admin/MetricCard";
 import TrendChart from "@/app/components/admin/TrendChart";
 
-interface TrendPoint {
-    date: string;
-    exchanges: number;
-    uth: number;
-}
-
 interface DashboardData {
     financials: {
         total_users: number;
@@ -32,7 +26,7 @@ interface DashboardData {
     operational: {
         total_participants: number;
         total_exchanges: number;
-        uth_mobilized: number;
+        total_uth: number;
         resolution_rate: number;
         urgency_distribution: Record<string, number>;
     };
@@ -65,20 +59,33 @@ export default function AdminDashboard() {
                     apiFetch("/forms/dashboard/alerts")
                 ]);
 
-                if (!finRes.ok || !opRes.ok) throw new Error("Error al obtener datos del servidor");
+                const failed = [finRes, opRes, trendRes, alertRes].find((res) => !res.ok);
+                if (failed) {
+                    throw new Error(
+                        failed.status === 403
+                            ? "Permisos insuficientes"
+                            : `Error de sincronización con el servidor (HTTP ${failed.status})`
+                    );
+                }
 
                 const financials = await finRes.json();
                 const operational = await opRes.json();
                 const trends = await trendRes.json();
                 const alertsData = await alertRes.json();
 
+                const exchangesByWeek = new Map<string, number>(trends.exchanges_per_week || []);
+                const uthByWeek = new Map<string, number>(trends.uth_per_week || []);
+                const weeks = Array.from(
+                    new Set([...exchangesByWeek.keys(), ...uthByWeek.keys()])
+                ).sort();
+
                 setData({
                     financials,
                     operational,
                     trends: {
-                        dates: trends.map((t: TrendPoint) => t.date),
-                        exchanges: trends.map((t: TrendPoint) => t.exchanges),
-                        uth: trends.map((t: TrendPoint) => t.uth)
+                        dates: weeks,
+                        exchanges: weeks.map((week) => exchangesByWeek.get(week) || 0),
+                        uth: weeks.map((week) => uthByWeek.get(week) || 0)
                     },
                     alerts: alertsData.alerts || []
                 });
@@ -111,7 +118,7 @@ export default function AdminDashboard() {
             <AlertCircle className="w-6 h-6" />
             <div>
                 <h3 className="font-bold uppercase tracking-wider">Fallo de Sincronización</h3>
-                <p className="text-sm opacity-80">{error}. Verifica tus credenciales de Administrador.</p>
+                <p className="text-sm opacity-80">{error}</p>
             </div>
         </div>
     );
@@ -122,7 +129,7 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <MetricCard
                     label="UTH Movilizado"
-                    value={data?.operational.uth_mobilized || 0}
+                    value={data?.operational.total_uth || 0}
                     icon={Zap}
                     trend={{ value: "+12.5%", direction: "up" }}
                     color="amber"
