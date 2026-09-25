@@ -94,22 +94,32 @@ class TestStripeWebhookSecurity:
         assert resp.status_code == 405
 
     def test_webhook_validates_payload(self, client):
-        """Rechaza payloads inválidos."""
+        """Fail-closed: sin STRIPE_WEBHOOK_SECRET no procesa nada."""
         resp = client.post(
             "/stripe/webhook", data="invalid json", content_type="application/json"
         )
-        # Aunque devuelva 200 (para no reintentar), no debería procesar
-        assert resp.status_code in [200, 400]
+        assert resp.status_code == 503
+        assert resp.get_json()["error"] == "webhook_not_configured"
 
-    def test_webhook_handles_missing_signature(self, client):
-        """Maneja webhooks sin firma."""
+    def test_webhook_without_secret_fail_closed(self, client):
+        """Sin STRIPE_WEBHOOK_SECRET responde 503 y no procesa el evento."""
         resp = client.post(
             "/stripe/webhook",
             json={"type": "test.event", "data": {"object": {}}},
             headers={},
-        )  # Sin Stripe-Signature
-        # En modo desarrollo sin webhook secret, debería aceptar
-        assert resp.status_code in [200, 400]
+        )
+        assert resp.status_code == 503
+
+    def test_webhook_with_secret_rejects_unsigned(self, client, monkeypatch):
+        """Con STRIPE_WEBHOOK_SECRET, un POST sin firma válida es 400."""
+        from app import stripe_integration
+
+        monkeypatch.setattr(stripe_integration, "STRIPE_WEBHOOK_SECRET", "whsec_test")
+        resp = client.post(
+            "/stripe/webhook",
+            json={"type": "test.event", "data": {"object": {}}},
+        )
+        assert resp.status_code == 400
 
 
 class TestCustomerPortal:

@@ -429,18 +429,20 @@ def transparency_report():
 @subscriptions_bp.route("/webhook/github", methods=["POST"])
 def github_webhook():
     """
-    Webhook para GitHub Sponsors.
-    Activa suscripciones basadas en el evento de 'sponsorship'.
+    Webhook para GitHub Sponsors (aún no implementado).
+
+    Fail-closed: sin verificación de firma (X-Hub-Signature-256) no se
+    procesa nada; responder "recibido" simularía una integración inexistente.
     """
-    # TODO: Validar firma de GitHub (X-Hub-Signature-256)
-    data = request.get_json() or {}
-    action = data.get("action")
-
-    if action in ["created", "tier_changed"]:
-        # Lógica de activación basada en el email o username de GitHub
-        pass
-
-    return jsonify({"status": "received", "source": "github"}), 200
+    return (
+        jsonify(
+            {
+                "status": "not_implemented",
+                "message": "Valida X-Hub-Signature-256 antes de activar este webhook.",
+            }
+        ),
+        501,
+    )
 
 
 @subscriptions_bp.route("/webhook/stripe", methods=["POST"])
@@ -467,21 +469,20 @@ def stripe_webhook_placeholder():
 @subscriptions_bp.route("/webhook/wompi", methods=["POST"])
 def wompi_webhook():
     """
-    Webhook para Wompi (Colombia).
-    Maneja pagos locales por PSE, Nequi, etc.
+    Webhook para Wompi (aún no implementado).
+
+    Fail-closed: sin validar la firma de Wompi no se activa nada; responder
+    "recibido" con el flujo vacío daría falsa sensación de integración.
     """
-    # TODO: Validar firma de Wompi
-    data = request.get_json() or {}
-    # Wompi envía evento en data.event
-    event_type = data.get("event")
-
-    if event_type == "transaction.updated":
-        transaction = data.get("data", {}).get("transaction", {})
-        if transaction.get("status") == "APPROVED":
-            # Activar suscripción
-            pass
-
-    return jsonify({"status": "received", "source": "wompi"}), 200
+    return (
+        jsonify(
+            {
+                "status": "not_implemented",
+                "message": "Valida la firma de Wompi antes de activar este webhook.",
+            }
+        ),
+        501,
+    )
 
 
 @subscriptions_bp.route("/register-crypto", methods=["POST"])

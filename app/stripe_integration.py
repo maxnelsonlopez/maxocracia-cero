@@ -415,34 +415,32 @@ def stripe_webhook():
     payload = request.get_data(as_text=True)
     sig_header = request.headers.get("Stripe-Signature", "")
 
-    # Verificar firma del webhook
-    if STRIPE_WEBHOOK_SECRET and stripe:
-        try:
-            event = stripe.Webhook.construct_event(
-                payload, sig_header, STRIPE_WEBHOOK_SECRET
-            )
-        except ValueError:
-            # Payload inválido
-            return jsonify({"error": "invalid_payload"}), 400
-        except stripe.error.SignatureVerificationError:
-            # Firma inválida
-            return jsonify({"error": "invalid_signature"}), 400
-    else:
-        # Sin webhook secret, parsear manualmente (solo desarrollo)
-        try:
-            json_data = request.get_json()
-            if not json_data:
-                return jsonify({"error": "invalid_payload"}), 400
-            # Crear un objeto simple que funcione como el evento de Stripe
-            from types import SimpleNamespace
+    # Fail-closed: sin secreto de firma NO se procesa nada. Antes, al faltar
+    # STRIPE_WEBHOOK_SECRET se parseaba el JSON sin verificar y un POST
+    # anónimo podía mutar suscripciones (cancelar/expirar/activar).
+    if not (STRIPE_WEBHOOK_SECRET and stripe):
+        return (
+            jsonify(
+                {
+                    "error": "webhook_not_configured",
+                    "message": "Configura STRIPE_WEBHOOK_SECRET para procesar eventos.",
+                }
+            ),
+            503,
+        )
 
-            event = SimpleNamespace(**json_data)
-            if not hasattr(event, "type"):
-                event.type = json_data.get("type", "unknown")
-            if not hasattr(event, "data"):
-                event.data = {"object": json_data.get("data", {}).get("object", {})}
-        except (ValueError, AttributeError):
-            return jsonify({"error": "invalid_payload"}), 400
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError:
+        # Payload inválido
+        return jsonify({"error": "invalid_payload"}), 400
+    except Exception as exc:  # firma inválida (nombre según versión de Stripe)
+        current_app.logger.warning(
+            "[STRIPE WEBHOOK] Firma inválida: %s", exc.__class__.__name__
+        )
+        return jsonify({"error": "invalid_signature"}), 400
 
     # Procesar evento (manejar tanto dict como StripeObject)
     if hasattr(event, "get"):

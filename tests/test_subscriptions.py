@@ -258,6 +258,21 @@ class TestStripeIntegration:
         assert data["status"] == "not_implemented"
         assert "required_setup" in data
 
+    def test_github_webhook_fail_closed(self, client):
+        """Sin verificación de firma no simula integración (501)."""
+        resp = client.post("/subscriptions/webhook/github", json={"action": "created"})
+        assert resp.status_code == 501
+        assert resp.get_json()["status"] == "not_implemented"
+
+    def test_wompi_webhook_fail_closed(self, client):
+        """Sin validar la firma de Wompi no activa nada (501)."""
+        resp = client.post(
+            "/subscriptions/webhook/wompi",
+            json={"event": "transaction.updated"},
+        )
+        assert resp.status_code == 501
+        assert resp.get_json()["status"] == "not_implemented"
+
 
 class TestAxiomaticAlignment:
     """Pruebas de alineación con axiomas de la Maxocracia."""
