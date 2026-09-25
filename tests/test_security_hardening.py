@@ -95,22 +95,30 @@ def test_force_https_apagado_por_defecto(restore_env, app):
 
 
 def test_csp_produccion_sin_websocket_localhost(restore_env, app):
-    """En producción el CSP no anuncia ws://localhost:* (solo dev)."""
+    """En producción el CSP no anuncia ws://localhost:* (solo dev), no permite
+    eval y cierra object/base/frames/formularios."""
     os.environ["FLASK_ENV"] = "production"
     client = app.test_client()
     resp = client.get("/favicon.ico")
     csp = resp.headers["Content-Security-Policy"]
     assert "ws://localhost" not in csp
     assert "https://api.stripe.com" in csp
+    assert "'unsafe-eval'" not in csp
+    assert "'unsafe-inline'" in csp  # Next inyecta el bootstrap RSC inline
+    assert "object-src 'none'" in csp
+    assert "base-uri 'self'" in csp
+    assert "frame-ancestors 'none'" in csp
+    assert "form-action 'self'" in csp
 
 
 def test_csp_desarrollo_mantiene_websocket_localhost(restore_env, app):
-    """En desarrollo el HMR de Next.js sigue permitido."""
+    """En desarrollo el HMR de Next.js sigue permitido (ws + eval)."""
     os.environ["FLASK_ENV"] = "development"
     client = app.test_client()
     resp = client.get("/favicon.ico")
     csp = resp.headers["Content-Security-Policy"]
     assert "ws://localhost:*" in csp
+    assert "'unsafe-eval'" in csp
 
 
 def test_hsts_presente_con_testing(restore_env, app):

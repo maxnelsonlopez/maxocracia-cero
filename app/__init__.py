@@ -217,19 +217,25 @@ def create_app(db_path=None):
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
 
-        # Content Security Policy. El WebSocket de localhost solo existe en
-        # desarrollo (HMR de Next.js); en producción la exportación estática
-        # no lo necesita y se lo niega.
+        # Content Security Policy. El WebSocket de localhost y eval solo
+        # existen en desarrollo (HMR de Next.js); en producción la exportación
+        # estática no los necesita (verificado: sin eval/new Function en los
+        # chunks) y se los niega. 'unsafe-inline' es inevitable: Next inyecta
+        # el bootstrap RSC inline en cada HTML exportado.
         connect_src = "'self' https://api.stripe.com"
+        script_src = "'self' 'unsafe-inline'"
         if os.environ.get("FLASK_ENV") != "production":
             connect_src += " ws://localhost:* wss://localhost:*"
+            script_src += " 'unsafe-eval'"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+            f"script-src {script_src}; "
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "img-src 'self' data: blob: https:; "
             "font-src 'self' data: https://fonts.gstatic.com; "
-            f"connect-src {connect_src};"
+            f"connect-src {connect_src}; "
+            "object-src 'none'; base-uri 'self'; frame-ancestors 'none'; "
+            "form-action 'self';"
         )
 
         # Strict Transport Security: siempre en tests, y en producción cuando
