@@ -122,6 +122,79 @@ def test_busqueda_muestra_fragmento_no_el_libro(app, client, biblioteca):
     assert len(fila["texto"]) > len(pdf["resumen"]) * 5  # el texto vive en casa, no viaja
 
 
+def test_catalogo_generado_desde_archivos_reales(tmp_path):
+    import json
+
+    import catalogo_biblioteca
+
+    d = tmp_path / "mini"
+    (d / "sub").mkdir(parents=True)
+    (d / "a.pdf").write_bytes(b"%PDF-falso")
+    (d / "v55n1a16.pdf").write_bytes(b"%PDF-falso")
+    (d / "sub" / "n.txt").write_text("hola mundo, esto es largo suficiente para pasar el umbral minimo", encoding="utf-8")
+    cat = catalogo_biblioteca.generar_catalogo(str(d))
+    assert cat["n_items"] == 3
+    por_ruta = {i["ruta_relativa"]: i for i in cat["items"]}
+    assert por_ruta["sub/n.txt"]["categoria"] == "sub"
+    assert por_ruta["sub/n.txt"]["indexable"] is True
+    assert por_ruta["v55n1a16.pdf"]["oa_candidato"] is True
+    assert por_ruta["a.pdf"]["oa_candidato"] is False
+    assert all(i["licencia"] == "closed" and i["visibilidad"] == "privada" for i in cat["items"])
+
+
+def test_ingesta_lee_catalogo_del_curador(app, biblioteca):
+    import json
+
+    with open(os.path.join(biblioteca, "catalogo.json"), "w", encoding="utf-8") as fh:
+        json.dump({"items": [{
+            "ruta_relativa": "fotosintesis.pdf", "licencia": "CC-BY-4.0",
+            "visibilidad": "publica", "curaduria": "Base de la unidad de biología.",
+            "categoria": "03_Ciencias",
+        }]}, fh)
+    ingest_biblioteca.ingest_biblioteca(db_path=app.config["DATABASE"], pdf_dir=biblioteca)
+    conn = sqlite3.connect(app.config["DATABASE"])
+    conn.row_factory = sqlite3.Row
+    fila = conn.execute(
+        "SELECT * FROM buscador_docs WHERE titulo = 'fotosintesis'").fetchone()
+    conn.close()
+    assert fila["licencia"] == "CC-BY-4.0" and fila["visibilidad"] == "publica"
+    assert fila["curaduria"] == "Base de la unidad de biología."
+    assert fila["categoria"] == "03_Ciencias"
+
+
+def test_interruptor_publicar_con_licencia(app, client, biblioteca):
+    tok = client.post("/api/auth/register", json={"username": "cur", "password": "clave-1"}).get_json()
+    tok = client.post("/api/auth/login", json={"username": "cur", "password": "clave-1"}).get_json()["token"]
+    ingest_biblioteca.ingest_biblioteca(db_path=app.config["DATABASE"], pdf_dir=biblioteca)
+    conn = sqlite3.connect(app.config["DATABASE"])
+    conn.row_factory = sqlite3.Row
+    doc_id = conn.execute(
+        "SELECT id FROM buscador_docs WHERE titulo = 'fotosintesis'").fetchone()["id"]
+    conn.close()
+
+    assert client.post(
+        f"/api/buscador/corpus/{doc_id}/publicar", json={"licencia": "closed"},
+        headers={"X-Auth-Token": tok}).status_code == 400
+    resp = client.post(
+        f"/api/buscador/corpus/{doc_id}/publicar",
+        json={"licencia": "CC-BY-SA-4.0", "nota": "Asamblea: texto liberado por el autor"},
+        headers={"X-Auth-Token": tok})
+    assert resp.status_code == 200
+    assert resp.get_json()["doc"]["visibilidad"] == "publica"
+
+    data = client.get("/api/buscador/corpus?q=fotosintesis").get_json()
+    doc = next(r for r in data["resultados"] if r["titulo"] == "fotosintesis")
+    assert any("publicada por el curador" in z for z in doc["razones"])
+    federado = client.get("/api/buscador?q=fotosintesis&format=searx").get_json()
+    assert any("biblioteca-privada:" in r["url"] for r in federado["results"])
+
+    client.post("/api/auth/register", json={"username": "otro", "password": "clave-2"})
+    otro = client.post("/api/auth/login", json={"username": "otro", "password": "clave-2"}).get_json()["token"]
+    assert client.post(
+        f"/api/buscador/corpus/{doc_id}/publicar", json={"licencia": "MIT"},
+        headers={"X-Auth-Token": otro}).status_code == 403
+
+
 def test_biblioteca_no_se_federa(app, client, biblioteca):
     """Lo privado no sale de casa ni en fragmentos (Opacidad Sagrada)."""
     ingest_biblioteca.ingest_biblioteca(db_path=app.config["DATABASE"], pdf_dir=biblioteca)

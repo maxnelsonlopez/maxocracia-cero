@@ -135,7 +135,8 @@ def ingest_biblioteca(db_path=None, pdf_dir=None, limite_texto=MAX_TEXTO):
                 if visibilidad not in ("privada", "publica"):
                     visibilidad = "privada"
                 curaduria = (entrada.get("curaduria") or "").strip()
-                categoria = (entrada.get("categoria") or rel.split("/")[0] if "/" in rel else "").strip()
+                categoria = ((entrada.get("categoria") or "")
+                             or (rel.split("/")[0] if "/" in rel else "")).strip()
                 existe = conn.execute(
                     "SELECT id FROM buscador_docs WHERE url = ?", (url,)
                 ).fetchone()
