@@ -9,7 +9,7 @@ import os
 
 from flask import Flask, request
 
-from . import buscador as buscador_engine, db, schema
+from . import actividad, buscador as buscador_engine, db, schema
 from .api_routes import api_bp
 from .auth_routes import auth_bp
 from .buscador_routes import buscador_bp
@@ -69,6 +69,9 @@ def create_app(db_path=None):
                 "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
             )
         return response
+
+    # Narrador humano de la actividad (terminal; silenciable con LOG_HUMANO=0)
+    actividad.init_actividad(app)
 
     db.init_app(app)
     schema.init_db(app)

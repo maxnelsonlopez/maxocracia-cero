@@ -147,7 +147,9 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   refresco eterno; `/users`, `/interchanges`, `/reputation` y `/resources` con sesión; webhooks
   fail-closed; `TRUST_PROXY` con HSTS tras Cloudflare; cuotas de oráculo por usuario; anti-enumeración
   por timing; CSP sin `unsafe-eval`; clave JWT dedicada (`JWT_KEY_SEPARATION`) con rotación tolerante
-  (`JWT_SECRET_KEY_PREVIOUS`) y receta 30-90 días actualizada (`PLAN_ENDURECIMIENTO_SEGURIDAD.md`).
+  (`JWT_SECRET_KEY_PREVIOUS`), receta 30-90 días actualizada
+  (`PLAN_ENDURECIMIENTO_SEGURIDAD.md`) y narrador humano de actividad en terminal
+  (`LOG_HUMANO`/`LOG_METRICAS_CADA`) para start y escuela.
 
 ### ox-alpha — "el bibliotecario de la coherencia"
 - **Auditoría de integridad del libro (22/8/2026)**: verificación determinista de enlaces
