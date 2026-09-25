@@ -71,6 +71,11 @@ def create_app(db_path=None):
     # Inicializar rate limiter
     init_limiter(app)
 
+    # Narrador humano de la actividad (terminal; silenciable con LOG_HUMANO=0)
+    from .actividad import init_actividad
+
+    init_actividad(app)
+
     # Logging JSON sanitizado (plan de seguridad §3.4) — opt-in en producción
     if os.environ.get("LOG_JSON") == "1":
         from .logging_config import setup_json_logging
