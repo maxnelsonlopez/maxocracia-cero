@@ -69,22 +69,29 @@ Cada ítem merece su propia sesión con la cultura del repo (teoría primero, te
 
 ```env
 FLASK_ENV=production
-SECRET_KEY=<openssl rand -hex 32>        # obligatoria: fail-closed si falta
-JWT_SECRET_KEY=<openssl rand -hex 32>    # distinta de SECRET_KEY
+SECRET_KEY=<openssl rand -hex 32>        # sesión/invitaciones; fail-closed si falta
+JWT_SECRET_KEY=<openssl rand -hex 32>    # firma de JWT (federación start<->escuela)
+JWT_KEY_SEPARATION=1                     # firma con JWT_SECRET_KEY, no con SECRET_KEY
+TRUST_PROXY=1                            # detrás de cloudflared (IP real + HSTS)
 FORCE_HTTPS=1                            # detrás de proxy TLS (Caddy/nginx)
 FRONTEND_URL=https://tu-dominio.org
 RATELIMIT_STORAGE_URI=redis://localhost:6379/0   # cuando haya multi-worker
 ```
 
-El proxy inverso termina TLS y pasa `X-Forwarded-Proto: https`; Flask redirige y emite HSTS.
+En la escuela, `JWT_SECRET_KEY` debe tener el MISMO valor que en start; su
+`SECRET_KEY` es propia del nodo. Sin coordinador en una BD vacía, se funda
+desde casa o con `PLATAFORMA_EDUCATIVA_BOOTSTRAP_TOKEN`.
+
+El proxy inverso termina TLS y pasa `X-Forwarded-Proto: https`; Flask redirige y emite HSTS (o detecta el borde de Cloudflare por `CF-Connecting-IP`).
 
 ## 5. Procedimiento de rotación de claves
 
 1. Generar clave nueva (`openssl rand -hex 32`), 32+ bytes.
-2. Actualizar `SECRET_KEY` en el entorno del nodo y reiniciar. Efecto: los JWT existentes dejan de validar (los usuarios vuelven a hacer login) y las invitaciones firmadas con la clave vieja se invalidan — reemitir con `POST /invite`.
-3. Los refresh tokens viven en `refresh_tokens` (BD) con jti propio — sobreviven si su verificación no depende de la SECRET_KEY; verificar en el momento de rotar.
-4. Rotar cuando: se sospeche filtración, cada 90 días en producción, o al rotar personal con acceso al servidor.
-5. La rotación se registra como evidencia T13 en la bitácora del nodo (hash de la decisión, nunca la clave).
+2. **JWT de federación (sin corte)**: en la escuela, poner `JWT_SECRET_KEY=<nueva>` y `JWT_SECRET_KEY_PREVIOUS=<vieja>`; en start, `JWT_SECRET_KEY=<nueva>` y `JWT_KEY_SEPARATION=1`. Reiniciar escuela y luego start. La clave vieja sigue validando como gracia; retirar `JWT_SECRET_KEY_PREVIOUS` al día siguiente (los access tokens duran 15 min–1 h) y reiniciar la escuela.
+3. **SECRET_KEY (sesión/invitaciones/HMAC)**: con `JWT_KEY_SEPARATION=1` rotarla NO invalida access/refresh tokens (esos viven en `JWT_SECRET_KEY`); sí invalida sesiones de Flask-Admin e invitaciones `/invite` — reemitir. Reiniciar.
+4. **API keys (DeepSeek/NVIDIA/OpenRouter/Gemini)**: rotar en el panel del proveedor, actualizar `.env`, reiniciar y verificar con una llamada real del oráculo. Nunca pasan por git.
+5. Rotar cuando: se sospeche filtración, cada 90 días en producción, o al rotar personal con acceso al servidor.
+6. La rotación se registra como evidencia T13 en la bitácora del nodo (hash de la decisión, nunca la clave).
 
 ---
 
