@@ -64,7 +64,7 @@ def create_app(db_path=None):
             "object-src 'none'; base-uri 'self'; frame-ancestors 'none'",
         )
         proto = request.headers.get("X-Forwarded-Proto", request.scheme)
-        if proto == "https":
+        if proto == "https" or request.headers.get("CF-Connecting-IP"):
             response.headers.setdefault(
                 "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
             )

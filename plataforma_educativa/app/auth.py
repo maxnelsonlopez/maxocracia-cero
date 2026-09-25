@@ -12,6 +12,7 @@ Soporta dos modalidades de acceso:
 import functools
 import os
 import secrets
+import time
 from datetime import datetime, timezone
 
 import jwt
@@ -48,16 +49,38 @@ def _store():
     return current_app.extensions.setdefault(_STORE_KEY, {})
 
 
+def _token_ttl():
+    """Vida útil del token local en segundos (default 30 días).
+
+    ``PLATAFORMA_EDUCATIVA_TOKEN_TTL=0`` lo expira de inmediato (tests).
+    """
+    raw = os.environ.get("PLATAFORMA_EDUCATIVA_TOKEN_TTL", str(30 * 24 * 3600))
+    try:
+        return max(0.0, float(raw))
+    except (TypeError, ValueError):
+        return 30 * 24 * 3600.0
+
+
 def issue_token(user_id):
-    """Emite un token nuevo para el usuario y lo registra en memoria."""
+    """Emite un token nuevo para el usuario y lo registra en memoria con su
+    fecha de emisión (antes vivía para siempre)."""
     token = secrets.token_hex(24)
-    _store()[token] = user_id
+    _store()[token] = {"user_id": user_id, "issued_at": time.time()}
     return token
 
 
 def resolve_token(token):
-    """Devuelve el user_id asociado a un token local en memoria, o ``None``."""
-    return _store().get(token)
+    """Devuelve el user_id asociado a un token local vigente, o ``None``.
+
+    Un token expirado se elimina del almacén y no vuelve a servir.
+    """
+    entry = _store().get(token)
+    if not entry:
+        return None
+    if time.time() - entry["issued_at"] > _token_ttl():
+        _store().pop(token, None)
+        return None
+    return entry["user_id"]
 
 
 def revoke_token(token):
@@ -91,7 +114,9 @@ def _resolve_jwt_user(token):
 
     db = get_db()
     # 1. Buscar por maxo_user_id vinculado
-    row = db.execute("SELECT * FROM users WHERE maxo_user_id = ?", (maxo_user_id,)).fetchone()
+    row = db.execute(
+        "SELECT * FROM users WHERE maxo_user_id = ?", (maxo_user_id,)
+    ).fetchone()
     if row:
         # Sincronizar rol de coordinador si el usuario es admin en Maxocracia
         if is_admin and not row["is_coordinator"]:
@@ -111,7 +136,9 @@ def _resolve_jwt_user(token):
             return row["id"], maxo_user_id
 
     # 3. Aprovisionamiento JIT de nuevo usuario federado
-    base_username = (alias or (email.split("@")[0] if email else f"user_{maxo_user_id}")).strip()
+    base_username = (
+        alias or (email.split("@")[0] if email else f"user_{maxo_user_id}")
+    ).strip()
     if not base_username:
         base_username = f"user_{maxo_user_id}"
 
@@ -178,7 +205,10 @@ def login_required(fn):
         try:
             jwt_result = _resolve_jwt_user(token)
         except RuntimeError as exc:
-            return jsonify({"error": str(exc), "code": "FEDERATION_NOT_CONFIGURED"}), 503
+            return (
+                jsonify({"error": str(exc), "code": "FEDERATION_NOT_CONFIGURED"}),
+                503,
+            )
         if jwt_result is not None:
             g.user_id, g.maxo_user_id = jwt_result
             g.is_federated = True
@@ -187,4 +217,3 @@ def login_required(fn):
         return jsonify({"error": "Autenticación requerida."}), 401
 
     return wrapper
-

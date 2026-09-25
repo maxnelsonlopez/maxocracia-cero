@@ -35,6 +35,13 @@ function esc(s) {
   });
 }
 
+// esc() neutraliza HTML pero no esquemas peligrosos (javascript:, data:).
+// Todo href construido con datos del servidor pasa por aquí.
+function safeUrl(u) {
+  var s = String(u == null ? "" : u).trim();
+  return /^https?:\/\//i.test(s) ? s : "#";
+}
+
 function isoWeek(d) {
   var date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
   var day = date.getUTCDay() || 7;
@@ -479,7 +486,7 @@ function renderLibraryList(materials) {
       html += '<h3 class="lib-section">🌍 El mundo <span class="muted">(fuentes externas)</span></h3><div class="lib-list">';
       enlaces.forEach(function (e) {
         html += '<div class="lib-item"><strong>' + esc(e.titulo) + "</strong>" +
-          '<a class="link-btn" href="' + esc(e.url) + '" target="_blank" rel="noopener noreferrer">Abrir ↗</a></div>';
+          '<a class="link-btn" href="' + esc(safeUrl(e.url)) + '" target="_blank" rel="noopener noreferrer">Abrir ↗</a></div>';
       });
       html += "</div>";
     }
@@ -529,7 +536,7 @@ function openEvidenceView(topicId) {
   } else {
     html = '<div class="lib-read"><h3>' + esc(ev.titulo) + "</h3>" +
       "<p class='muted'>Tipo: " + esc(ev.tipo) + "</p>" +
-      '<a class="link-btn" href="' + esc(ev.url || "#") + '" target="_blank" rel="noopener noreferrer">Abrir mi material ↗</a></div>';
+      '<a class="link-btn" href="' + esc(safeUrl(ev.url)) + '" target="_blank" rel="noopener noreferrer">Abrir mi material ↗</a></div>';
   }
   $("evidence-view-body").innerHTML = html;
   $("evidence-view-modal").hidden = false;
@@ -829,7 +836,7 @@ function renderBuscador(data) {
         '<div><span class="banda banda-' + esc(r.banda || "desconocida") + '">' +
         esc(BANDA_LABEL[r.banda] || r.banda) + "</span> " +
         "<strong>" + esc(r.titulo) + "</strong></div>" +
-        '<a class="muted" href="' + esc(r.url) + '" target="_blank" rel="noopener noreferrer">' + esc(r.url) + "</a>" +
+        '<a class="muted" href="' + esc(safeUrl(r.url)) + '" target="_blank" rel="noopener noreferrer">' + esc(r.url) + "</a>" +
         (r.resumen ? "<p class='muted'>" + esc(r.resumen) + "</p>" : "") +
         '<ul class="razones">' + razones + "</ul>" +
         "<p class='muted'>Capa: " + esc(r.capa) + (r.fuente ? " · Fuente: " + esc(r.fuente) : "") +

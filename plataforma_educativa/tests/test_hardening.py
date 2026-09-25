@@ -22,12 +22,28 @@ def test_security_headers_present(client):
     assert "frame-ancestors 'none'" in csp
 
 
-def test_hsts_only_with_https_proxy(client):
+def test_hsts_only_with_https_proxy_o_cloudflare(client):
+    """HSTS con proxy TLS o con petición venida del borde de Cloudflare
+    (CF-Connecting-IP solo lo inyecta el túnel)."""
     resp = client.get("/")
     assert "Strict-Transport-Security" not in resp.headers
 
     resp = client.get("/", headers={"X-Forwarded-Proto": "https"})
     assert "Strict-Transport-Security" in resp.headers
+
+    resp = client.get("/", headers={"CF-Connecting-IP": "203.0.113.5"})
+    assert "Strict-Transport-Security" in resp.headers
+
+
+def test_token_local_expira(client, monkeypatch):
+    """El token local ya no vive para siempre: TTL configurable."""
+    monkeypatch.setenv("PLATAFORMA_EDUCATIVA_TOKEN_TTL", "0")
+    resp = client.post("/api/auth/register", json={"username": "ttl", "password": "x"})
+    assert resp.status_code == 201
+    token = resp.get_json()["token"]
+
+    me = client.get("/api/me", headers={"X-Auth-Token": token})
+    assert me.status_code == 401
 
 
 def test_login_rate_limited_by_ip(client, app):
