@@ -39,6 +39,10 @@ def _candidate_secrets():
             [
                 current_app.config.get("JWT_SECRET_KEY"),
                 os.environ.get("JWT_SECRET_KEY"),
+                # Gracia de rotación: la clave anterior sigue validando
+                # mientras los clientes renuevan (se retira tras el periodo).
+                current_app.config.get("JWT_SECRET_KEY_PREVIOUS"),
+                os.environ.get("JWT_SECRET_KEY_PREVIOUS"),
                 current_app.config.get("SECRET_KEY"),
             ]
         )

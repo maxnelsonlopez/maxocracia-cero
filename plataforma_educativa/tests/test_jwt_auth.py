@@ -159,6 +159,19 @@ def test_jwt_con_clave_dedicada_es_aceptado(client, monkeypatch):
     assert resp.get_json()["user"]["maxo_user_id"] == 301
 
 
+def test_jwt_con_clave_previa_es_aceptado(client, monkeypatch):
+    """Rotación: la clave anterior sigue validando como gracia mientras los
+    clientes renuevan (se retira al cerrar la ventana)."""
+    monkeypatch.setenv("JWT_SECRET_KEY", "clave-nueva-32-bytes-para-firmar")
+    monkeypatch.setenv("JWT_SECRET_KEY_PREVIOUS", "clave-vieja-32-bytes-rotada")
+    viejo = _generate_maxo_jwt(
+        user_id=400, alias="gracia", secret="clave-vieja-32-bytes-rotada"
+    )
+    resp = client.get("/api/me", headers={"Authorization": f"Bearer {viejo}"})
+    assert resp.status_code == 200
+    assert resp.get_json()["user"]["maxo_user_id"] == 400
+
+
 def test_jwt_without_secret_fails_closed(client, monkeypatch):
     """Sin SECRET_KEY configurada la federaciÃ³n NO abre con una constante pÃºblica:
     el JWT falla con 503 FEDERATION_NOT_CONFIGURED (fail-closed, no inseguro)."""
