@@ -49,6 +49,25 @@ def create_app(db_path=None):
         secret_key = "dev-secret"
     app.config["SECRET_KEY"] = secret_key
 
+    # Cookies de sesión (Flask-Admin usa session): nunca en claro ni en
+    # peticiones cruzadas. Secure solo en producción para no romper el
+    # desarrollo local sobre http://localhost.
+    is_production = os.environ.get("FLASK_ENV") == "production"
+    app.config.update(
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE="Lax",
+        SESSION_COOKIE_SECURE=is_production,
+    )
+
+    # Proxy inverso (cloudflared/Cloudflare): con TRUST_PROXY=1 se confía en
+    # exactamente un salto (X-Forwarded-For / X-Forwarded-Proto). Así el
+    # rate limiting ve la IP real (CF-Connecting-IP) y no la de cloudflared.
+    # NO activar si la app queda expuesta sin proxy delante.
+    if os.environ.get("TRUST_PROXY") == "1":
+        from werkzeug.middleware.proxy_fix import ProxyFix
+
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
     # Inicializar rate limiter
     init_limiter(app)
 

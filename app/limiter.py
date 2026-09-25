@@ -1,8 +1,23 @@
 import os
 
-from flask import jsonify
+from flask import jsonify, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+
+
+def get_client_address() -> str:
+    """IP real del cliente detrás del túnel de Cloudflare.
+
+    Con TRUST_PROXY=1 se prefiere CF-Connecting-IP (lo inyecta el borde de
+    Cloudflare y no es falsificable a través del túnel); si no está, ProxyFix
+    ya dejó X-Forwarded-For en request.remote_addr. Sin TRUST_PROXY no se
+    confía en cabeceras (evita spoofing si el puerto queda expuesto).
+    """
+    if os.environ.get("TRUST_PROXY") == "1":
+        cf = request.headers.get("CF-Connecting-IP")
+        if cf and cf.strip():
+            return cf.strip()
+    return get_remote_address()
 
 
 def get_storage_uri() -> str:
@@ -20,7 +35,7 @@ def get_storage_uri() -> str:
 
 # Configuración del limiter
 limiter = Limiter(
-    key_func=get_remote_address,
+    key_func=get_client_address,
     storage_uri=get_storage_uri(),
     strategy="fixed-window",
     default_limits=["10000 per day", "5000 per hour"],
