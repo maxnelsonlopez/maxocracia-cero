@@ -91,6 +91,41 @@ def test_login_rate_limited_by_username_across_ips(client, app):
     assert third.status_code == 429
 
 
+def test_primer_usuario_local_es_coordinador(client):
+    """Desde casa el primer registro funda el rol de coordinador."""
+    resp = client.post(
+        "/api/auth/register", json={"username": "fundadora", "password": "secreto"}
+    )
+    assert resp.status_code == 201
+    assert resp.get_json()["user"]["is_coordinator"] is True
+
+
+def test_primer_usuario_por_tunel_no_funda_coordinador(client):
+    """Por la puerta pública el primer registro NO reclama el mando."""
+    resp = client.post(
+        "/api/auth/register",
+        json={"username": "visitante", "password": "secreto"},
+        headers={"CF-Connecting-IP": "203.0.113.10"},
+    )
+    assert resp.status_code == 201
+    assert resp.get_json()["user"]["is_coordinator"] is False
+
+
+def test_bootstrap_token_funda_coordinador_desde_el_tunel(client, monkeypatch):
+    """Con el token de servicio sí se puede fundar remoto (operación real)."""
+    monkeypatch.setenv("PLATAFORMA_EDUCATIVA_BOOTSTRAP_TOKEN", "llave-fundacion")
+    resp = client.post(
+        "/api/auth/register",
+        json={"username": "operadora", "password": "secreto"},
+        headers={
+            "CF-Connecting-IP": "203.0.113.11",
+            "X-Bootstrap-Token": "llave-fundacion",
+        },
+    )
+    assert resp.status_code == 201
+    assert resp.get_json()["user"]["is_coordinator"] is True
+
+
 def test_registro_rechaza_password_corta(client):
     resp = client.post(
         "/api/auth/register", json={"username": "corta", "password": "abc"}

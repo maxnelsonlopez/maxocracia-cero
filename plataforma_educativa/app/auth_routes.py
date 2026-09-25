@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """Rutas de autenticación: registro y login."""
 
+import hmac
+import os
+import sqlite3
 from datetime import datetime, timezone
 
 from flask import Blueprint, jsonify, request
@@ -13,6 +16,9 @@ from .rate_limit import rate_limit
 auth_bp = Blueprint("auth", __name__)
 
 # Roles: el primer usuario registrado es coordinador (ve "generar semana").
+# El rol se funda SOLO desde casa (sin túnel) o con el token de bootstrap:
+# si la BD se recrea, un desconocido por la puerta pública no puede reclamar
+# el mando. PLATAFORMA_EDUCATIVA_BOOTSTRAP_TOKEN habilita fundarlo remoto.
 MAX_EMAIL_LEN = 254
 USERNAME_MIN_LEN = 2
 USERNAME_MAX_LEN = 50
@@ -23,6 +29,20 @@ PASSWORD_MAX_LEN = 128
 def _count_users():
     row = get_db().execute("SELECT COUNT(*) AS n FROM users").fetchone()
     return row["n"]
+
+
+def _puede_fundar_coordinador():
+    """True si este registro puede reclamar el rol fundador.
+
+    Por la puerta pública (Cloudflare inyecta `CF-Connecting-IP`) NO se funda:
+    una BD nueva no le entrega el mando al primero que llegue. Desde casa
+    (sin cabecera de túnel) o con el token de bootstrap sí.
+    """
+    bootstrap = os.environ.get("PLATAFORMA_EDUCATIVA_BOOTSTRAP_TOKEN", "")
+    presented = request.headers.get("X-Bootstrap-Token", "")
+    if bootstrap and hmac.compare_digest(presented, bootstrap):
+        return True
+    return not request.headers.get("CF-Connecting-IP")
 
 
 @auth_bp.route("/api/auth/register", methods=["POST"])
@@ -66,26 +86,39 @@ def register():
         return jsonify({"error": "email demasiado largo."}), 400
 
     db = get_db()
-    exists = db.execute(
-        "SELECT id FROM users WHERE username = ?", (username,)
-    ).fetchone()
-    if exists:
-        return jsonify({"error": "El nombre de usuario ya existe."}), 409
+    try:
+        # BEGIN IMMEDIATE serializa el conteo con la inserción: sin esto dos
+        # registros simultáneos en una BD vacía podrían fundar dos coordinadores.
+        db.execute("BEGIN IMMEDIATE")
 
-    is_first = _count_users() == 0
-    cur = db.execute(
-        "INSERT INTO users (username, password_hash, email, is_coordinator, created_at) "
-        "VALUES (?, ?, ?, ?, ?)",
-        (
-            username,
-            generate_password_hash(password),
-            email or None,
-            1 if is_first else 0,
-            datetime.now(timezone.utc).isoformat(),
-        ),
-    )
-    db.commit()
-    user_id = cur.lastrowid
+        exists = db.execute(
+            "SELECT id FROM users WHERE username = ?", (username,)
+        ).fetchone()
+        if exists:
+            db.rollback()
+            return jsonify({"error": "El nombre de usuario ya existe."}), 409
+
+        is_first = _count_users() == 0 and _puede_fundar_coordinador()
+        cur = db.execute(
+            "INSERT INTO users (username, password_hash, email, is_coordinator, created_at) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (
+                username,
+                generate_password_hash(password),
+                email or None,
+                1 if is_first else 0,
+                datetime.now(timezone.utc).isoformat(),
+            ),
+        )
+        db.commit()
+        user_id = cur.lastrowid
+    except sqlite3.IntegrityError:
+        db.rollback()
+        return jsonify({"error": "El nombre de usuario ya existe."}), 409
+    except Exception:
+        db.rollback()
+        raise
+
     token = issue_token(user_id)
 
     return (
