@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
-"""B7 Biblioteca privada: ingiere PDFs PROPIOS al corpus local (solo fragmentos visibles).
+"""B7 Biblioteca privada: ingiere archivos PROPIOS al corpus local (solo fragmentos visibles).
+
+Formatos: .pdf (requiere pypdf) + texto plano (.txt, .md, .markdown, sin
+dependencias). Recursivo por subcarpetas.
 
 Uso (desde la raíz del repo)::
 
     $env:BIBLIOTECA_PDF_DIR = "E:\\libros"
-    .venv\\Scripts\\python.exe plataforma_educativa/ingest_pdfs.py
+    .venv\\Scripts\\python.exe plataforma_educativa/ingest_biblioteca.py
 
 Reglas de la casa (duras):
 
 - Solo archivos propios y SIN DRM: un PDF cifrado se OMITE y se reporta;
   jamás se vulnera (la cerradura ajena no se fuerza).
 - Idempotente por hash de contenido: repetir no duplica; re-ingerir actualiza.
+- Lo no indexable se REPORTA (nada se ignora en silencio).
 - La API solo sirve FRAGMENTOS de estos libros (snippet FTS5 o recorte):
   el texto completo nunca sale del disco del dueño (Verbo Justo + M15).
 - La base del dueño no se commitea (``plataforma_educativa.db`` está en
@@ -63,9 +67,20 @@ def extrae_pdf(ruta):
     return titulo, autor, len(lector.pages), texto
 
 
-def ingest_pdfs(db_path=None, pdf_dir=None, limite_texto=MAX_TEXTO):
-    """Ingiere los .pdf de ``pdf_dir`` a ``buscador_docs`` (capa biblioteca).
-    Devuelve el reporte ``{ingeridos, actualizados, omitidos:[{archivo, motivo}]}``."""
+EXTENSIONES = {".pdf", ".txt", ".md", ".markdown"}
+
+
+def lee_plano(ruta):
+    """Texto plano (utf-8 tolerante): sin dependencias, sin DRM posible."""
+    with open(ruta, encoding="utf-8", errors="replace") as fh:
+        texto = " ".join(fh.read().split())
+    return None, None, None, texto
+
+
+def ingest_biblioteca(db_path=None, pdf_dir=None, limite_texto=MAX_TEXTO):
+    """Ingiere los archivos indexables de ``pdf_dir`` a ``buscador_docs``
+    (capa biblioteca). Recursivo. Devuelve el reporte
+    ``{ingeridos, actualizados, omitidos:[{archivo, motivo}]}``."""
     db_path = db_path or DEFAULT_DB_PATH
     pdf_dir = pdf_dir or os.environ.get("BIBLIOTECA_PDF_DIR", "")
     if not pdf_dir or not os.path.isdir(pdf_dir):
@@ -75,33 +90,37 @@ def ingest_pdfs(db_path=None, pdf_dir=None, limite_texto=MAX_TEXTO):
     reporte = {"ingeridos": 0, "actualizados": 0, "omitidos": []}
     for raiz, _dirs, archivos in os.walk(pdf_dir):
         for nombre in sorted(archivos):
-            if not nombre.lower().endswith(".pdf"):
-                continue
             ruta = os.path.join(raiz, nombre)
+            ext = os.path.splitext(nombre)[1].lower()
             try:
+                if ext not in EXTENSIONES:
+                    raise ValueError(f"formato no indexable ({ext or 'sin extensión'}: pdf/txt/md)")
                 with open(ruta, "rb") as fh:
                     crudo = fh.read()
                 if not crudo:
                     raise ValueError("vacío")
-                titulo, autor, paginas, texto = extrae_pdf(ruta)
+                if ext == ".pdf":
+                    titulo, autor, paginas, texto = extrae_pdf(ruta)
+                    tipo, detalle = "libro", f"{autor or 'autor en el archivo'} — {paginas} pág."
+                else:
+                    titulo, autor, _pags, texto = lee_plano(ruta)
+                    tipo, detalle = "texto", "texto plano"
                 if len(texto) < MIN_TEXTO:
                     raise ValueError("sin texto extraíble (¿escaneo sin OCR?)")
                 url = "biblioteca-privada:" + hashlib.sha256(crudo).hexdigest()[:24]
                 titulo = titulo or os.path.splitext(nombre)[0]
-                resumen = "📚 Biblioteca privada: {} — {} pág.".format(
-                    autor or "autor en el archivo", paginas
-                )
+                resumen = f"📚 Biblioteca privada: {detalle}"
                 existe = conn.execute(
                     "SELECT id FROM buscador_docs WHERE url = ?", (url,)
                 ).fetchone()
                 conn.execute(
                     "INSERT INTO buscador_docs "
                     "(url, capa, titulo, resumen, texto, idioma, tipo, indexed_at) "
-                    "VALUES (?, 'biblioteca', ?, ?, ?, 'es', 'libro', ?) "
+                    "VALUES (?, 'biblioteca', ?, ?, ?, 'es', ?, ?) "
                     "ON CONFLICT(url) DO UPDATE SET "
                     "titulo = excluded.titulo, resumen = excluded.resumen, "
                     "texto = excluded.texto, indexed_at = excluded.indexed_at",
-                    (url, titulo, resumen, texto[:limite_texto], _ahora()),
+                    (url, titulo, resumen, texto[:limite_texto], tipo, _ahora()),
                 )
                 if existe:
                     reporte["actualizados"] += 1
@@ -116,12 +135,15 @@ def ingest_pdfs(db_path=None, pdf_dir=None, limite_texto=MAX_TEXTO):
     return reporte
 
 
+ingest_pdfs = ingest_biblioteca  # alias heredado (B7 inicial)
+
+
 def main(argv):
     pdf_dir = argv[0] if argv else None
     try:
-        reporte = ingest_pdfs(pdf_dir=pdf_dir)
+        reporte = ingest_biblioteca(pdf_dir=pdf_dir)
     except ValueError as exc:
-        print(f"ingest_pdfs: {exc}")
+        print(f"ingest_biblioteca: {exc}")
         return 1
     print(f"ingeridos={reporte['ingeridos']} actualizados={reporte['actualizados']} "
           f"omitidos={len(reporte['omitidos'])}")

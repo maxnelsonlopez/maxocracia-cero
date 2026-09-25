@@ -12,7 +12,7 @@ import sqlite3
 
 import pytest
 
-import ingest_pdfs
+import ingest_biblioteca
 from app import buscador, create_app
 
 
@@ -58,54 +58,74 @@ def biblioteca(tmp_path):
     d = tmp_path / "libros"
     d.mkdir()
     (d / "fotosintesis.pdf").write_bytes(pdf_minimo("La fotosintesis es vida y luz. " * 60))
+    (d / "apuntes.md").write_text("La fotosintesis y la respiracion celular. " * 20, encoding="utf-8")
     (d / "cerrado.pdf").write_bytes(pdf_cifrado())
     (d / "roto.pdf").write_bytes(b"esto no es un pdf")
-    (d / "notas.txt").write_text("no es pdf, se ignora")
+    (d / "notas.txt").write_text("corta", encoding="utf-8")
+    (d / "imagen.png").write_bytes(b"\x89PNG....")
     return str(d)
 
 
-def test_ingiere_valido_omite_resto(app, biblioteca):
-    reporte = ingest_pdfs.ingest_pdfs(db_path=app.config["DATABASE"], pdf_dir=biblioteca)
-    assert reporte["ingeridos"] == 1 and reporte["actualizados"] == 0
+def test_ingiere_validos_omite_resto(app, biblioteca):
+    reporte = ingest_biblioteca.ingest_biblioteca(db_path=app.config["DATABASE"], pdf_dir=biblioteca)
+    assert reporte["ingeridos"] == 2 and reporte["actualizados"] == 0
     motivos = {o["archivo"]: o["motivo"] for o in reporte["omitidos"]}
     assert "cifrado" in motivos["cerrado.pdf"]  # la cerradura no se fuerza
     assert "roto.pdf" in motivos
+    assert "notas.txt" in motivos  # muy corta: se reporta, no se calla
+    assert "no indexable" in motivos["imagen.png"]  # lo no indexable se ve
 
     conn = sqlite3.connect(app.config["DATABASE"])
     conn.row_factory = sqlite3.Row
-    fila = conn.execute("SELECT * FROM buscador_docs WHERE capa = 'biblioteca'").fetchone()
+    filas = conn.execute("SELECT * FROM buscador_docs WHERE capa = 'biblioteca'").fetchall()
     conn.close()
-    assert fila["tipo"] == "libro" and fila["titulo"] == "fotosintesis"
-    assert fila["url"].startswith("biblioteca-privada:")
+    por_tipo = {f["tipo"] for f in filas}
+    assert por_tipo == {"libro", "texto"}  # pdf + md conviven
+    pdf = next(f for f in filas if f["titulo"] == "fotosintesis")
+    assert pdf["url"].startswith("biblioteca-privada:")
 
 
 def test_idempotente_por_contenido(app, biblioteca):
-    ingest_pdfs.ingest_pdfs(db_path=app.config["DATABASE"], pdf_dir=biblioteca)
-    reporte = ingest_pdfs.ingest_pdfs(db_path=app.config["DATABASE"], pdf_dir=biblioteca)
-    assert reporte == {"ingeridos": 0, "actualizados": 1, "omitidos": reporte["omitidos"]}
+    ingest_biblioteca.ingest_biblioteca(db_path=app.config["DATABASE"], pdf_dir=biblioteca)
+    reporte = ingest_biblioteca.ingest_biblioteca(db_path=app.config["DATABASE"], pdf_dir=biblioteca)
+    assert reporte["ingeridos"] == 0 and reporte["actualizados"] == 2
     conn = sqlite3.connect(app.config["DATABASE"])
     conn.row_factory = sqlite3.Row
     n = conn.execute("SELECT COUNT(*) AS n FROM buscador_docs WHERE capa = 'biblioteca'").fetchone()["n"]
     conn.close()
-    assert n == 1
+    assert n == 2
 
 
 def test_sin_carpeta_falla_explicito(app, tmp_path):
     with pytest.raises(ValueError):
-        ingest_pdfs.ingest_pdfs(db_path=app.config["DATABASE"], pdf_dir=str(tmp_path / "noexiste"))
+        ingest_biblioteca.ingest_pdfs(db_path=app.config["DATABASE"], pdf_dir=str(tmp_path / "noexiste"))
 
 
 def test_busqueda_muestra_fragmento_no_el_libro(app, client, biblioteca):
-    ingest_pdfs.ingest_pdfs(db_path=app.config["DATABASE"], pdf_dir=biblioteca)
+    ingest_biblioteca.ingest_biblioteca(db_path=app.config["DATABASE"], pdf_dir=biblioteca)
     data = client.get("/api/buscador/corpus?q=fotosintesis").get_json()
-    doc = next(r for r in data["resultados"] if r["fuente"] == "biblioteca privada")
-    assert "fotosintesis" in doc["resumen"].lower()
-    assert len(doc["resumen"]) < 500  # fragmento, jamás el libro (60 repeticiones)
-    assert doc["banda"] == "desconocida"  # privada = no verificable por otros (honesto)
-    assert any("fragmentos" in z for z in doc["razones"])
+    docs = [r for r in data["resultados"] if r["fuente"] == "biblioteca privada"]
+    assert len(docs) == 2  # pdf + md, ambos hallables
+    for doc in docs:
+        assert "fotosintesis" in doc["resumen"].lower()
+        assert len(doc["resumen"]) < 500  # fragmento, jamás el libro
+        assert doc["banda"] == "desconocida"  # privada = no verificable por otros (honesto)
+        assert any("fragmentos" in z for z in doc["razones"])
 
     conn = sqlite3.connect(app.config["DATABASE"])
     conn.row_factory = sqlite3.Row
-    fila = conn.execute("SELECT * FROM buscador_docs WHERE capa = 'biblioteca'").fetchone()
+    fila = conn.execute(
+        "SELECT * FROM buscador_docs WHERE capa = 'biblioteca' AND titulo = 'fotosintesis'"
+    ).fetchone()
     conn.close()
-    assert len(fila["texto"]) > len(doc["resumen"]) * 5  # el texto vive en casa, no viaja
+    pdf = next(d for d in docs if d["titulo"] == "fotosintesis")
+    assert len(fila["texto"]) > len(pdf["resumen"]) * 5  # el texto vive en casa, no viaja
+
+
+def test_biblioteca_no_se_federa(app, client, biblioteca):
+    """Lo privado no sale de casa ni en fragmentos (Opacidad Sagrada)."""
+    ingest_biblioteca.ingest_biblioteca(db_path=app.config["DATABASE"], pdf_dir=biblioteca)
+    propio = client.get("/api/buscador/corpus?q=fotosintesis").get_json()
+    assert any(r["fuente"] == "biblioteca privada" for r in propio["resultados"])
+    federado = client.get("/api/buscador?q=fotosintesis&format=searx").get_json()
+    assert all("biblioteca-privada:" not in r["url"] for r in federado["results"])

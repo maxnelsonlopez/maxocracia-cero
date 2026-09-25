@@ -1069,11 +1069,15 @@ def buscar(conn, query):
 
 def format_searx(data):
     """Formato compatible con el motor ``json_engine`` de SearXNG: así la
-    lente educativa de cualquier instancia puede federar nuestras semillas."""
+    lente educativa de cualquier instancia puede federar nuestras semillas.
+
+    La biblioteca privada NUNCA se federa: lo privado no sale de casa ni en
+    fragmentos (Opacidad Sagrada, Cap. 16.5)."""
     return {
         "results": [
             {"title": r["titulo"], "url": r["url"], "content": r["resumen"]}
             for r in data.get("resultados", [])
+            if r.get("fuente") != "biblioteca privada"
         ]
     }
 
