@@ -30,6 +30,7 @@ import requests
 from flask import Blueprint, jsonify, request
 
 from .jwt_utils import token_required
+from .limiter import ORACLE_LIMITS, get_user_or_ip_key, limiter
 from .utils import get_db
 from .voting_oracle import (
     _api_key,
@@ -235,6 +236,7 @@ def init_guide_tables(app) -> None:
 
 
 @guide_bp.route("/chat", methods=["POST"])
+@limiter.limit(ORACLE_LIMITS, key_func=get_user_or_ip_key)
 @token_required
 def guide_chat(current_user):
     """Conversación de bienvenida/orientación con el guía (Cap. 15)."""
@@ -265,6 +267,7 @@ def guide_chat(current_user):
 
 
 @guide_bp.route("/trust-assessment", methods=["POST"])
+@limiter.limit(ORACLE_LIMITS, key_func=get_user_or_ip_key)
 @token_required
 def trust_assessment(current_user):
     """Evalúa la escalera de confianza del usuario (ética/actitud/aptitud).
@@ -311,6 +314,7 @@ def trust_assessment(current_user):
 
 
 @guide_bp.route("/director-candidacy", methods=["POST"])
+@limiter.limit(ORACLE_LIMITS, key_func=get_user_or_ip_key)
 @token_required
 def director_candidacy(current_user):
     """Filtra la candidatura a director (ética/actitud/aptitud).

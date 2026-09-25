@@ -1,3 +1,4 @@
+import hashlib
 import os
 
 from flask import jsonify, request
@@ -18,6 +19,18 @@ def get_client_address() -> str:
         if cf and cf.strip():
             return cf.strip()
     return get_remote_address()
+
+
+def get_user_or_ip_key() -> str:
+    """Clave para endpoints autenticados costosos (oráculo LLM): huella del
+    bearer si existe, IP real en caso contrario. No guarda el token."""
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        token = auth.split(" ", 1)[1].strip()
+        if token:
+            digest = hashlib.sha256(token.encode("utf-8")).hexdigest()
+            return "tok:" + digest[:32]
+    return get_client_address()
 
 
 def get_storage_uri() -> str:
@@ -105,12 +118,31 @@ def get_refresh_limits():
     return "20 per hour"
 
 
+def get_oracle_limits():
+    """Cuota de los endpoints que llaman al oráculo (costo real por token).
+
+    Sin cuota, cualquier integrante N0 podía quemar la cuota de DeepSeek/
+    OpenRouter. Configurable con RATELIMIT_ORACLE_LIMIT.
+    """
+    from flask import current_app
+
+    override = current_app.config.get("RATELIMIT_ORACLE_LIMIT") or os.environ.get(
+        "RATELIMIT_ORACLE_LIMIT"
+    )
+    if override:
+        return override
+    if current_app.config.get("TESTING"):
+        return "100 per minute"
+    return "30 per hour"
+
+
 # Usar funciones para obtener límites dinámicamente
 AUTH_LIMITS = get_auth_limits
 API_GENERAL_LIMITS = get_api_limits
 LOGIN_LIMITS = get_login_limits
 REGISTER_LIMITS = get_register_limits
 REFRESH_LIMITS = get_refresh_limits
+ORACLE_LIMITS = get_oracle_limits
 
 
 # Función para manejar excesos de límite

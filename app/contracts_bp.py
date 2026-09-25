@@ -24,6 +24,7 @@ from typing import Any, Dict, List, Optional
 from flask import Blueprint, jsonify, request
 
 from .jwt_utils import token_required
+from .limiter import ORACLE_LIMITS, get_user_or_ip_key, limiter
 from .utils import get_db
 
 # Agregar ruta del proyecto para imports
@@ -1645,6 +1646,7 @@ def _live_oracle_or_503():
 
 
 @contracts_bp.route("/negotiate", methods=["POST"])
+@limiter.limit(ORACLE_LIMITS, key_func=get_user_or_ip_key)
 @token_required
 def negotiate_with_oracle(current_user):
     """
@@ -1686,6 +1688,7 @@ def negotiate_with_oracle(current_user):
 
 
 @contracts_bp.route("/negotiate/feedback", methods=["POST"])
+@limiter.limit(ORACLE_LIMITS, key_func=get_user_or_ip_key)
 @token_required
 def negotiate_oracle_feedback(current_user):
     """

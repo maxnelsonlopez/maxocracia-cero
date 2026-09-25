@@ -28,6 +28,7 @@ from typing import Dict, Optional
 from flask import Blueprint, jsonify, request
 
 from .jwt_utils import admin_required, token_required
+from .limiter import ORACLE_LIMITS, get_user_or_ip_key, limiter
 from .utils import get_db, resolve_user_id
 
 voting_bp = Blueprint("voting", __name__, url_prefix="/voting")
@@ -610,6 +611,7 @@ def close_proposal(current_user, proposal_id: int):
 
 
 @voting_bp.route("/proposals/<int:proposal_id>/analyze", methods=["POST"])
+@limiter.limit(ORACLE_LIMITS, key_func=get_user_or_ip_key)
 @token_required
 def analyze_proposal(current_user, proposal_id: int):
     """

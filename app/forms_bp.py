@@ -15,6 +15,7 @@ from flask import Blueprint, jsonify, request
 
 from .auth import token_required
 from .forms_manager import FormsManager
+from .limiter import ORACLE_LIMITS, get_user_or_ip_key, limiter
 from .matching import MatchingEngine
 from .sdv_analyzer import SDVAnalyzer
 from .utils import get_db
@@ -1586,6 +1587,7 @@ def _simulate_oracle(message: str, participants_list: list) -> dict:
 
 
 @forms_bp.route("/oracle/chat", methods=["POST"])
+@limiter.limit(ORACLE_LIMITS, key_func=get_user_or_ip_key)
 @token_required
 def oracle_chat(current_user):
     """
