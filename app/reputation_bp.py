@@ -7,7 +7,8 @@ bp = Blueprint("reputation", __name__, url_prefix="/reputation")
 
 
 @bp.route("/<int:user_id>", methods=["GET"])
-def get_reputation(user_id):
+@token_required
+def get_reputation(current_user, user_id):
     db = get_db()
     row = db.execute(
         "SELECT score, reviews_count FROM reputation WHERE user_id = ?", (user_id,)

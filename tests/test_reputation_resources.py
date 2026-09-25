@@ -50,7 +50,8 @@ def test_reputation_flow(client):
     seed_user(db_path, "reviewer@example.test", "Reviewer")
     token = _login(client, "reviewer@example.test")
 
-    resp = client.get(f"/reputation/{u}")
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.get(f"/reputation/{u}", headers=headers)
     assert resp.status_code == 200
     data = resp.get_json()
     assert data["score"] == 0.0
@@ -58,13 +59,18 @@ def test_reputation_flow(client):
     resp = client.post(
         "/reputation/review",
         json={"user_id": u, "score": 4.0},
-        headers={"Authorization": f"Bearer {token}"},
+        headers=headers,
     )
     assert resp.status_code == 201
-    resp = client.get(f"/reputation/{u}")
+    resp = client.get(f"/reputation/{u}", headers=headers)
     assert resp.status_code == 200
     data = resp.get_json()
     assert data["score"] == 4.0
+
+
+def test_reputation_get_requires_token(client):
+    """La reputación ya no se expone sin sesión."""
+    assert client.get("/reputation/1").status_code == 401
 
 
 def test_review_requiere_token_y_no_autoresena(client):
@@ -101,7 +107,7 @@ def test_resources_flow(client):
     )
     assert resp.status_code == 201
 
-    resp = client.get("/resources")
+    resp = client.get("/resources", headers=headers)
     assert resp.status_code == 200
     items = resp.get_json()
     assert len(items) == 1
@@ -119,6 +125,7 @@ def test_resources_flow(client):
 def test_resources_requieren_token(client):
     db_path = client.application.config["DATABASE"]
     seed_user(db_path, "anon@example.test", "Anon")
+    assert client.get("/resources").status_code == 401
     resp = client.post("/resources", json={"title": "X"})
     assert resp.status_code == 401
     resp = client.post("/resources/1/claim", json={})

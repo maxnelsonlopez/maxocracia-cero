@@ -25,7 +25,8 @@ def create_resource(current_user):
 
 
 @bp.route("", methods=["GET"])
-def list_resources():
+@token_required
+def list_resources(current_user):
     db = get_db()
     cur = db.execute(
         "SELECT * FROM resources WHERE available = 1 ORDER BY created_at DESC"
