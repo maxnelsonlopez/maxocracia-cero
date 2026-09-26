@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -104,6 +104,76 @@ const entrances = [
     accent: "violet",
   },
 ];
+
+interface CicloFeed {
+  cycle_id: string;
+  fecha: string;
+  consenso: number | null;
+  ejecutable: boolean | null;
+  elegidas: string[];
+  motores: string[];
+}
+
+function ConcilioFeed() {
+  const [ciclo, setCiclo] = useState<CicloFeed | null>(null);
+
+  useEffect(() => {
+    // API_URL en dev (:5001), relativo en producción (Flask sirve el estático).
+    import("./lib/api").then(({ API_URL }) =>
+      fetch(`${API_URL}/verificador/concilio/feed?n=1`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          if (d && d.ciclos && d.ciclos.length > 0) setCiclo(d.ciclos[0]);
+        })
+        .catch(() => {})
+    );
+  }, []);
+
+  if (!ciclo) return null;
+
+  return (
+    <section className="relative border-t border-slate-800/60 bg-slate-950/40 py-16 md:py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl">
+          <p className="font-mono text-xs uppercase tracking-[0.28em] text-violet-300">
+            Los oráculos trabajan · ventana pública
+          </p>
+          <h2 className="mt-4 text-2xl font-bold tracking-tight text-white sm:text-4xl">
+            Esto decidieron los oráculos esta semana
+          </h2>
+          <p className="mt-4 text-slate-400 leading-8">
+            Cinco inteligencias leen el canon, votan qué mejorar y dejan bitácora
+            firmada. Consenso del último ciclo:{" "}
+            <strong className="text-emerald-400">
+              {ciclo.consenso === null ? "—" : `${Math.round(ciclo.consenso * 100)}%`}
+            </strong>
+            . Nada de lo que hacen es secreto: todo queda registrado y cualquiera
+            puede auditarlo.
+          </p>
+          {ciclo.elegidas.length > 0 && (
+            <ul className="mt-6 space-y-3">
+              {ciclo.elegidas.slice(0, 3).map((m, i) => (
+                <li
+                  key={i}
+                  className="rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-3 text-sm text-slate-300"
+                >
+                  <span className="text-emerald-400 font-bold">✓ </span>
+                  {m}
+                </li>
+              ))}
+            </ul>
+          )}
+          <Link
+            href="/verificador"
+            className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-emerald-400 hover:text-emerald-300"
+          >
+            Auditar en la plaza pública <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function HomePage() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -243,6 +313,8 @@ export default function HomePage() {
           </blockquote>
         </div>
       </section>
+
+      <ConcilioFeed />
 
       <section className="relative border-t border-slate-800/60 bg-slate-950/40 py-20 md:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

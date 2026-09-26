@@ -8,14 +8,116 @@ ver el bienestar agregado del barrio y el estado de la economía de la vida.
 Privacidad (Opacidad Sagrada): aquí NO se exponen emails, teléfonos,
 paráfrasis ni fuentes personales de los reportes — solo lo que el acuerdo
 mismo hace público por naturaleza: su texto civil, sus partes, su VHV y su
-huella de integridad.
+huella de integridad. El feed del Concilio publica lo mismo que su bitácora
+ya audita: misiones elegidas y consenso, jamás claves ni directivas privadas.
 """
+
+import json
+import os
+import re
+from datetime import datetime
+from pathlib import Path
 
 from flask import Blueprint, jsonify, request
 
 from .utils import get_db
 
 verifier_bp = Blueprint("verifier", __name__, url_prefix="/verificador")
+
+_CYCLE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
+
+
+def _concilio_cycles_dir() -> Path:
+    """Directorio de ciclos (testeable vía CONCILIO_WORKSPACE)."""
+    from flask import current_app
+
+    base = os.environ.get("CONCILIO_WORKSPACE")
+    root = (
+        Path(base)
+        if base
+        else Path(current_app.root_path).parent / "scratch" / "concilio"
+    )
+    return root / "cycles"
+
+
+def _parse_elegidas(resumen: str) -> list:
+    """Misiones elegidas desde la sección **Elegidas:** del resumen."""
+    elegidas = []
+    en_seccion = False
+    for linea in resumen.splitlines():
+        s = linea.strip()
+        if not en_seccion:
+            if s.strip("*").rstrip(":").strip().lower() == "elegidas":
+                en_seccion = True
+            continue
+        m = re.match(r"^\d+\.\s+(.+)$", s)
+        if m:
+            elegidas.append(m.group(1).strip()[:200])
+        elif elegidas:
+            break
+    return elegidas
+
+
+def _resumen_ciclo(carpeta: Path) -> dict:
+    meta = {}
+    try:
+        meta = json.loads((carpeta / "ciclo.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        pass
+    resumen = ""
+    try:
+        resumen = (carpeta / "resumen.md").read_text(encoding="utf-8")
+    except OSError:
+        pass
+    try:
+        fecha = datetime.fromtimestamp(carpeta.stat().st_mtime).isoformat()
+    except OSError:
+        fecha = ""
+    return {
+        "cycle_id": carpeta.name,
+        "fecha": fecha,
+        "consenso": meta.get("consensus"),
+        "ejecutable": meta.get("ejecutable"),
+        "quorum_ok": meta.get("quorum_ok"),
+        "oraculos": meta.get("oraculos", []),
+        "motores": [
+            f"{m.get('engine')}/{m.get('model')}"
+            for m in meta.get("motores", [])
+            if isinstance(m, dict)
+        ],
+        "elegidas": _parse_elegidas(resumen),
+    }
+
+
+@verifier_bp.route("/concilio/feed", methods=["GET"])
+def concilio_feed():
+    """Últimos ciclos del Concilio: consenso y misiones elegidas (público)."""
+    n = request.args.get("n", default=5, type=int) or 5
+    n = max(1, min(n, 20))
+    base = _concilio_cycles_dir()
+    try:
+        carpetas = sorted((p for p in base.iterdir() if p.is_dir()), reverse=True)[:n]
+    except OSError:
+        carpetas = []
+    ciclos = [_resumen_ciclo(c) for c in carpetas]
+    return jsonify({"ciclos": ciclos, "count": len(ciclos)})
+
+
+@verifier_bp.route("/concilio/cycles/<cycle_id>", methods=["GET"])
+def concilio_cycle(cycle_id: str):
+    """Resumen completo de un ciclo (público; sin bitácora cruda)."""
+    if not _CYCLE_ID_RE.fullmatch(cycle_id):
+        return jsonify({"error": "ciclo no encontrado"}), 404
+    carpeta = _concilio_cycles_dir() / cycle_id
+    try:
+        if not carpeta.is_dir():
+            return jsonify({"error": "ciclo no encontrado"}), 404
+        resumen = (carpeta / "resumen.md").read_text(encoding="utf-8")
+    except OSError:
+        return jsonify({"error": "ciclo no encontrado"}), 404
+    datos = _resumen_ciclo(carpeta)
+    datos["resumen"] = resumen[:20_000]
+    return jsonify(datos)
 
 
 def _public_participant_snapshot(contract_id: str, pid: str, wellness: float) -> dict:
