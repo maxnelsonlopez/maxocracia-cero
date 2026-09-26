@@ -45,7 +45,7 @@ Paquete de lógica pura (sin Flask). Estructura real:
 `condition` (precondición) → `action` (DO + consumo VHV) → `reciprocity` (GIVE equivalente) →
 `gamma_protector` (INV1/INV2/INV2-S/INV4) → opcional `ternura` (perdón modula consecuencia).
 
-## 2. Inventario de blueprints (182 rutas, extraído de `app.url_map`)
+## 2. Inventario de blueprints (184 rutas, extraído de `app.url_map` + 2 del feed Concilio sep-2026)
 
 | Blueprint | Rutas | Ejemplo | Fuente |
 |---|---|---|---|
@@ -60,7 +60,8 @@ Paquete de lógica pura (sin Flask). Estructura real:
 | stripe | 5 | `/stripe/config` | `stripe_integration.py` |
 | tvi | 4 | `/tvi` | `tvi_bp.py` |
 | bridge_b | 3 | `/contracts/from-need` | `bridge_b.py` (matching→borrador) |
-| users/resources/interchanges/reputation/maxo/protection/verifier | 2–3 c/u | — | varios |
+| users/resources/interchanges/reputation/maxo/protection | 2–3 c/u | — | varios |
+| verifier | 5 | `/verificador/concilio/feed` | `verifier_bp.py` (plaza + feed público del Concilio, sep-2026) |
 
 Resumen de contratos (RLM sobre `contracts_bp.py`, resumen de la sesión anterior): ciclo de vida completo
 (crear, términos, accept, activate, retract, finalize), validación de axiomas, blindaje anti-gamificación,

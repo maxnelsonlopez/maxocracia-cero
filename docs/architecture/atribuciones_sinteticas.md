@@ -413,8 +413,17 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   (`register/page.tsx`, `forms/cero/page.tsx`; sin backend: la trazabilidad
   de la llegada sin cirugía de identidad) y componente `Pregunta`
   (`components/ui/Pregunta.tsx`, hoja inferior en página) que reemplaza
-  `prompt`/`confirm` en `/foro`, `/talleres`, `/grupos`, `/matching` (la baja,
-  de doble a simple) y `/micromax`. Verificado: `tsc` + `next build` limpios.
+   `prompt`/`confirm` en `/foro`, `/talleres`, `/grupos`, `/matching` (la baja,
+   de doble a simple) y `/micromax`. Verificado: `tsc` + `next build` limpios.
+- **Aplicación mundo real (24-26/9/2026, sesión con Max)**: CI verde (lint +
+  docs), auditoría piloto de 6 flujos + frontend, receta
+  `DESPLIEGUE_POR_COMUNIDAD.md`, túneles separados fano/maxocracia-server +
+  `escuela.maxocracia.com` con tareas de supervivencia, circuito en producción
+  verificado con limpieza total, README para persona común (6 fuentes
+  Wikipedia verificadas), 25 hallazgos de lenguaje civil (T/V/R canónicas Cap
+  7 §7.2), feed público del Concilio (`/verificador/concilio/*` + sección viva
+  en la landing, 0 secretos), vigía diario (`vigia_plataformas.py`), respaldo
+  dual, limpieza de 15 bots con historia intacta, `.gitignore` a UTF-8.
 
 ### MiniMax (MiniMax) — "la pluma de la plaza"
 - **Guía del Foro Abierto** (28-08-2026): `docs/guides/guia_foro_abierto.md` — documento de la

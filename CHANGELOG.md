@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-09-26 — Fase aplicación mundo real: CI verde, piloto en línea y feed del Concilio
+
+### Añadido
+- **CI verde**: job `lint` (black 44 + isort 11 automáticos; flake8 manual; mypy con `explicit_package_bases`, excludes de `plataforma_educativa` y 3 estrechamientos reales de `None`) y job `docs` (`markdown-it-py==4.2.0` + rangos `sphinx>=8,<10`, `myst-parser>=5.1,<6`).
+- **Alistamiento piloto**: negociación página-vs-API en `GET /tvi/stats` y `GET /vhv/parameters` (`frontend_shell`, `app/utils.py`; `/contracts/*` ya tenía su `before_request`); Form Cero con UNA vía de contacto + guarda en update; `resolve_user_id` (id/alias/correo) en transfer y delegación; UI sin IDs numéricos; receta `docs/guides/DESPLIEGUE_POR_COMUNIDAD.md`; modo facilitador (`/register?referred_by=` → Form Cero vía localStorage); componente `Pregunta` reemplaza `prompt`/`confirm` en foro/talleres/grupos/matching/micromax.
+- **Feed público del Concilio** (`GET /verificador/concilio/feed`, `/cycles/<id>`; sin login, curado, traversal bloqueado) + sección viva en la landing; auditados 0 secretos en ciclos.
+- **Lenguaje civil (25 hallazgos)**: landing, matching, contrato, micromax, foro, votaciones; `T,V,R` canónicas (Tiempo/Vidas/Recursos, Cap 7 §7.2); firma con "sí entiendo".
+- **Operación**: túneles separados fano/maxocracia-server, `escuela.maxocracia.com` (:5050), tareas `MaxocraciaApp/Tunnel/PlataformaEdu/Respaldo/VigiaDiaria`, scripts `respaldo_comun.py` y `vigia_plataformas.py`, links a la escuela, README reescrito para persona común (fuentes Wikipedia verificadas).
+- **Limpieza**: 15 bots `gemini_tester_*` eliminados de producción (0 referencias verificadas); semillas/demos/historia intactas.
+
+### Corregido
+- `.gitignore` en latin-1 (línea externa) que tumbaba black/flake8/isort → UTF-8.
+- Colisiones página-vs-API documentadas y negociadas; `generateStaticParams` + placeholder intactos.
+
+### Notas Técnicas
+- Commits `4c68f9a` (lint), `fc8cb5f` (docs), `d23acde` (piloto), `4e2d6c2` (calle), `dbe4b55` (feed), `0f76aff` (lenguaje), `5c2f027` (readme), `9c39cf9` (vigía). Atribución en `atribuciones_sinteticas.md`.
+- Verificado en producción (`start.maxocracia.com`, `escuela.maxocracia.com`): circuito register→cero→oferta/necesidad→matching→borrado, con limpieza total; búsquedas reales en la escuela.
+
 ## 2026-08-22 — UI canónica completa y auditoría de integridad del libro (delegación a subagente)
 
 ### Añadido

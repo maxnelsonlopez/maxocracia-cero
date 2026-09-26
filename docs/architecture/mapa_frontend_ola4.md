@@ -100,7 +100,7 @@ Get-Content frontend\app\lib\api.ts
 ```
 
 ---
-**Última actualización**: 03-09-2026 · **Método**: RLM + verificación determinista (Patrón Puente)
+**Última actualización**: 26-09-2026 · **Método**: auditoría de jerga en flujo de llegada (25 hallazgos) + verificación `tsc`/`build`
 
 ## 6. Patrón transversal: Plaza Hablable (lenguaje civil + InfoTip)
 
@@ -120,3 +120,19 @@ La UI habla en lenguaje de calle; el concepto complejo vive en la ayuda emergent
 
 Queda pendiente en áreas avanzadas (vista legal `contracts/[id]`, builder con glosario propio): review
 de jerga estructural — el glosario del builder ya cumple su función educativa.
+
+## 7. Ola aplicación (24-26/09/2026): llegada civil y Concilio visible
+
+- **25 hallazgos de jerga** en el flujo de llegada, todos en civil: landing
+  (InfoTips TVI/VHV/SDV, `T,V,R` = Tiempo/Vidas/Recursos según Cap 7 §7.2),
+  `/matching` (cohorte P2P, crimen, AVA, oráculo, UTH), `/contracts/[id]`
+  (estados, check-in "Anotar cómo estoy", firma "sí entiendo", EXECUTED),
+  `/micromax` (ESI, ICE/IDB/IDP con InfoTip), `/foro` (vacuación, tags),
+  `/votaciones` (TruthLedger, quórum con InfoTip).
+- **Componente `Pregunta`** (`components/ui/Pregunta.tsx`): hoja inferior que
+  reemplaza `prompt`/`confirm` en foro/talleres/grupos/matching/micromax.
+- **Sección viva del Concilio** en la landing: consenso + elegidas del último
+  ciclo vía `/verificador/concilio/feed` (se oculta sin datos).
+- **Modo facilitador**: `/register?referred_by=` viaja al Form Cero.
+- **Directorio de calle**: transferir/delegar aceptan alias o correo.
+- **OEV**: botón del nodo apunta a `https://escuela.maxocracia.com`.

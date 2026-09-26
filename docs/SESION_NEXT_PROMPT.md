@@ -252,4 +252,30 @@ c59f608 feat(voting): votacion comunitaria (Cap 14) - categorias, quorum, consen
 ```
 
 ---
+
+## Jornada 22–26/09/2026 — fase aplicación mundo real (Muse Spark + Max)
+
+Del repositorio al territorio: CI verde (`4c68f9a` lint, `fc8cb5f` docs),
+auditoría piloto de 6 flujos + frontend, alistamiento (`d23acde`: shells,
+llegada suave, directorio alias/correo, receta por comunidad; `4e2d6c2`:
+modo facilitador, `Pregunta`, adiós prompt/confirm), README civil
+(`5c2f027`), lenguaje-25 (`0f76aff`), feed del Concilio (`dbe4b55`), vigía
+(`9c39cf9`), túneles separados + escuela en línea + circuito prod verificado,
+15 bots limpiados con historia intacta. Concilio vivo (ciclo 25-09, 100%).
+Sesión paralela de DeepSeek activa en main (coordinar `git pull` frecuente).
+
+**Operación actual (este PC)**: `start.maxocracia.com` (:5001) +
+`escuela.maxocracia.com` (:5050), tareas MaxocraciaApp/Tunnel/PlataformaEdu/
+Respaldo/VigiaDiaria, `MaxocraciaConcilio.cmd` en Inicio. Credenciales en
+`~/.cloudflared/` (túnel `910838ac…`). Servicio `cloudflared` viejo
+deshabilitado (reemplazar por admin cuando se pueda). Conector elevado
+fantasma: matar por admin si reaparece.
+
+**Pendiente**: monitor con aviso al celular (Healthchecks), aflojar
+REGISTER_LIMITS o espaciar el día D, leer terms/privacy, 3 métricas piloto,
+registro sin correo (decidir con rebote medido), `alert()` restantes, email
+@maxocracia.com, vía rápida N1, federación entre instancias (el Futurista ya
+la propuso en ciclo).
+
+---
 **Mantenido por**: Max + el agente de la jornada (harness) · **Próxima actualización**: al cierre de la siguiente sesión
