@@ -220,7 +220,7 @@ export default function ForoPage() {
               <div className="text-emerald-300 font-bold text-xs uppercase tracking-wider">Preguntas →</div>
               <div className="text-white text-sm font-semibold mt-1">Talleres de Aprendizaje</div>
               <p className="text-slate-500 text-[11px] mt-1">
-                La unidad de enseñanza de cualquier skill: 5-12 personas, regla de oro (vacuación).
+                La unidad de enseñanza de cualquier habilidad: 5-12 personas, se aprende enseñando.
               </p>
             </Link>
             <Link
@@ -228,7 +228,7 @@ export default function ForoPage() {
               className="group rounded-xl border border-sky-500/20 bg-sky-950/20 p-4 hover:border-sky-400/50 transition-all"
             >
               <div className="text-sky-300 font-bold text-xs uppercase tracking-wider">Necesidades →</div>
-              <div className="text-white text-sm font-semibold mt-1">Grupos de Solución (ECEs)</div>
+              <div className="text-white text-sm font-semibold mt-1">Grupos que resuelven necesidades</div>
               <p className="text-slate-500 text-[11px] mt-1">
                 La necesidad entra de la comunidad; la solución vuelve. Coordinación sin mandato.
               </p>
@@ -240,7 +240,7 @@ export default function ForoPage() {
               <div className="text-amber-300 font-bold text-xs uppercase tracking-wider">Personas →</div>
               <div className="text-white text-sm font-semibold mt-1">Células Madre</div>
               <p className="text-slate-500 text-[11px] mt-1">
-                El meta-grupo que forma grupos: la máquina fractal del OEV en su tercer nivel.
+                El grupo que ayuda a crear más grupos: enseña a otros a organizarse.
               </p>
             </Link>
           </div>
@@ -283,7 +283,7 @@ export default function ForoPage() {
             <textarea
               value={form.body}
               onChange={(e) => setForm({ ...form, body: e.target.value })}
-              placeholder="Cuerpo: la ignorancia bienvenida, la disidencia con silla"
+              placeholder="Cuenta lo que piensas: aquí quien piensa distinto también es bienvenido"
               rows={4}
               maxLength={5000}
               className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 focus:border-violet-500 outline-none"
@@ -291,7 +291,7 @@ export default function ForoPage() {
             <input
               value={form.tags}
               onChange={(e) => setForm({ ...form, tags: e.target.value })}
-              placeholder="Tags separados por coma (ej: naturaleza, taller)"
+              placeholder="Etiquetas separadas por coma (ej: cocina, taller)"
               className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 focus:border-violet-500 outline-none"
             />
             <button

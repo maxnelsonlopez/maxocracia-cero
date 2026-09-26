@@ -529,7 +529,7 @@ export default function MicroMaxPage() {
             </div>
             <div>
               <h1 className="text-4xl font-extrabold text-white tracking-tight flex items-center gap-2">
-                MicroMaxocracia <span className="text-xs uppercase px-2 py-0.5 rounded bg-indigo-950 border border-indigo-500/30 text-indigo-300 font-semibold">Capa 3</span>
+                MicroMaxocracia <span className="text-xs uppercase px-2 py-0.5 rounded bg-indigo-950 border border-indigo-500/30 text-indigo-300 font-semibold">Acuerdos justos en casa</span>
               </h1>
               <p className="text-slate-400">Equidad Doméstica y Salud Relacional Ética</p>
             </div>
@@ -618,7 +618,7 @@ export default function MicroMaxPage() {
               <div className="flex items-center gap-3 pb-4 border-b border-slate-800">
                 <Shield className="text-amber-500 animate-pulse" size={28} />
                 <div>
-                  <h2 className="text-2xl font-black text-white">Escala de Seguridad (ESI)</h2>
+                  <h2 className="text-2xl font-black text-white">Revisión de seguridad en casa</h2>
                   <p className="text-slate-400 text-sm">Garantizando la salud ética y seguridad en el hogar</p>
                 </div>
               </div>
@@ -628,7 +628,7 @@ export default function MicroMaxPage() {
                   <AlertTriangle size={18} /> IMPORTANTE
                 </div>
                 <p>
-                  De acuerdo a las salvaguardas del sistema (Capítulo 16), es imprescindible verificar que el hogar cuenta con condiciones de respeto mutuo y simetría antes de habilitar el ledger doméstico. Responder con honestidad.
+                  De acuerdo a las salvaguardas del sistema, primero miramos si hay respeto en casa antes de anotar oficios y plata. Responde con honestidad.
                 </p>
               </div>
 
@@ -641,7 +641,7 @@ export default function MicroMaxPage() {
                 >
                   <span className="flex items-center gap-2">
                     <Info size={18} />
-                    {showESIGuide ? "Ocultar Guía de Seguridad ESI" : "Ver Guía de Seguridad ESI (Taylorismo Coercitivo)"}
+                    {showESIGuide ? "Ocultar guía de seguridad" : "Ver guía: señales de control en casa"}
                   </span>
                   <span className="text-xs">{showESIGuide ? "▲" : "▼"}</span>
                 </button>
@@ -783,7 +783,7 @@ export default function MicroMaxPage() {
                   >
                     <AlertTriangle className="text-red-400 shrink-0" size={20} />
                     <span className="text-sm text-red-300 font-semibold">
-                      INV1-Hogar: alguien visible está bajo γ 1.0 — escucha sin juzgar
+                      Alguien de casa no está bien. Escucha sin juzgar, sin regañar.
                     </span>
                   </motion.div>
                 )}
@@ -899,7 +899,7 @@ export default function MicroMaxPage() {
                       {/* ICE */}
                       <div className="p-4 bg-slate-950 border border-slate-900 rounded-2xl flex items-center justify-between">
                         <div>
-                          <h4 className="text-xs uppercase text-slate-500 font-bold tracking-wider mb-1">Conflicto Escalado (ICE)</h4>
+                          <h4 className="text-xs uppercase text-slate-500 font-bold tracking-wider mb-1">Conflicto Escalado (ICE) <InfoTip text="Cuántas peleas y reproches hubo. Si sube mucho, toca parar y conversar." /></h4>
                           <div className="text-2xl font-black text-white">{dashboard.toxicity.ice}</div>
                         </div>
                         <span className={`px-2.5 py-1 text-xs rounded-full font-bold ${
@@ -912,7 +912,7 @@ export default function MicroMaxPage() {
                       {/* IDB */}
                       <div className="p-4 bg-slate-950 border border-slate-900 rounded-2xl flex items-center justify-between">
                         <div>
-                          <h4 className="text-xs uppercase text-slate-500 font-bold tracking-wider mb-1">Deterioro de Bienestar (IDB)</h4>
+                          <h4 className="text-xs uppercase text-slate-500 font-bold tracking-wider mb-1">Deterioro de Bienestar (IDB) <InfoTip text="Qué tanto bajó el bienestar de la casa últimamente." /></h4>
                           <div className="text-2xl font-black text-white">{dashboard.toxicity.idb}</div>
                         </div>
                         <span className={`px-2.5 py-1 text-xs rounded-full font-bold ${
@@ -925,7 +925,7 @@ export default function MicroMaxPage() {
                       {/* IDP */}
                       <div className="p-4 bg-slate-950 border border-slate-900 rounded-2xl flex items-center justify-between">
                         <div>
-                          <h4 className="text-xs uppercase text-slate-500 font-bold tracking-wider mb-1">Desequilibrio Persistente (IDP)</h4>
+                          <h4 className="text-xs uppercase text-slate-500 font-bold tracking-wider mb-1">Desequilibrio Persistente (IDP) <InfoTip text="Si unos cargan siempre con más oficios que otros." /></h4>
                           <div className="text-2xl font-black text-white">{dashboard.toxicity.idp}</div>
                         </div>
                         <span className={`px-2.5 py-1 text-xs rounded-full font-bold ${

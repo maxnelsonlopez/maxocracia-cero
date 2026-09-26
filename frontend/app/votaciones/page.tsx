@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { apiFetch } from "../lib/api";
+import InfoTip from "../components/ui/InfoTip";
 import ParlamentoParams from "./ParlamentoParams";
 import ParlamentoEducativo from "./ParlamentoEducativo";
 
@@ -157,7 +158,7 @@ export default function VotacionesPage() {
               Gobernanza Comunitaria
             </h1>
             <p className="text-sm text-emerald-400/80 font-mono mt-1">
-              Consenso Diverso (Cap. 14) — la Cohorte Cero decide los aspectos operativos
+              Decisiones de la comunidad: se propone, se vota, queda registrado
             </p>
             {stats && (
               <div className="flex flex-wrap gap-4 mt-3 text-xs font-mono text-slate-400">
@@ -188,17 +189,17 @@ export default function VotacionesPage() {
           <div>
             <p className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
               <Users className="w-3.5 h-3.5 text-emerald-400" />
-              Delegación de voto (democracia líquida)
+              Delegar mi voto en alguien de confianza
             </p>
             <p className="text-[10px] text-slate-500 mt-0.5">
-              Si no votas, tu voto sigue la opción de tu delegatario. El voto directo siempre manda. Registro público (T13).
+              Si no votas, vale lo que vote quien elegiste. Si votas tú, vale tu voto. Todo queda a la vista.
             </p>
           </div>
           <div className="flex items-center gap-2">
             {delegations.length > 0 ? (
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-mono text-slate-400">
-                  Delegado: usuario #{delegations[0].delegatee_user_id}
+                  Tu voto sigue a #{delegations[0].delegatee_user_id}
                 </span>
                 <button onClick={revokeDelegation} className="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all">
                   Revocar
@@ -244,7 +245,7 @@ export default function VotacionesPage() {
                   : "text-slate-500 border-slate-800 hover:text-slate-300"
               }`}
             >
-              {t === "abiertas" ? `Abiertas (${open.length})` : `TruthLedger — Cerradas (${closed.length})`}
+              {t === "abiertas" ? `Abiertas (${open.length})` : `Cerradas (${closed.length})`}
             </button>
           ))}
         </div>
@@ -264,7 +265,7 @@ export default function VotacionesPage() {
             </div>
           )
         ) : closed.length === 0 ? (
-          <EmptyState text="El TruthLedger está vacío. Las decisiones aprobadas quedarán registradas aquí (T13)." />
+          <EmptyState text="Aún no hay decisiones cerradas. Las aprobadas quedan registradas aquí." />
         ) : (
           <div className="space-y-4">
             {closed.map((p) => (
@@ -407,9 +408,9 @@ function OpenProposalCard({ proposal: p, myVote, onVote }: { proposal: Proposal;
             }`}
           >
             {analyzing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Cpu className="w-3 h-3" />}
-            {analysis ? "Analizada" : "Analizar con Oráculo"}
+            {analysis ? "Analizada" : "Pedir análisis"}
           </button>
-          Mayoría: {(p.majority_ratio * 100).toFixed(0)}% · Quórum: {(p.quorum_ratio * 100).toFixed(0)}%
+          Mayoría: {(p.majority_ratio * 100).toFixed(0)}% · Quórum: {(p.quorum_ratio * 100).toFixed(0)}% <InfoTip text="Mayoría: cuántos deben estar de acuerdo. Quórum: cuántos deben votar para que valga." />
         </span>
       </div>
 

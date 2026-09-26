@@ -649,7 +649,7 @@ export default function PlazaDeApoyoPage() {
         setTimeout(() => {
           setChatMessages(prev => [...prev, {
             sender: "oracle",
-            text: `✅ ¡Intercambio registrado con éxito! Código: ${interchange_id}. Se han sumado ${prefill.uth_hours} UTH de emisor a receptor.`
+            text: `✅ ¡Ayuda anotada! Quedaron ${prefill.uth_hours} horas de ayuda registradas.`
           }]);
         }, 500);
       } else {
@@ -728,7 +728,7 @@ export default function PlazaDeApoyoPage() {
         setContractMsg({
           needId: need.participant_id,
           kind: "error",
-          text: `El borrador no pasó los invariantes (AVA): ${violations}`,
+          text: `Este acuerdo aún no cuida lo básico. Revisa lo marcado e intenta de nuevo: ${violations}`,
         });
         return;
       }
@@ -769,7 +769,7 @@ export default function PlazaDeApoyoPage() {
           </div>
           <h2 className="text-2xl font-bold text-white mb-3">Formulario CERO Requerido</h2>
           <p className="text-slate-400 text-sm leading-relaxed mb-8">
-            Para entrar a la Plaza de Apoyo Peer-to-Peer, primero debes registrar tus ofertas y necesidades en la Cohorte Cero usando tu correo electrónico.
+            Para entrar a esta ayuda entre vecinos, primero cuenta qué necesitas y qué ofreces.
           </p>
           <Link
             href="/forms/cero"
@@ -820,7 +820,7 @@ export default function PlazaDeApoyoPage() {
           <div>
             <div className="flex items-center gap-2 text-emerald-400 font-semibold text-sm mb-1">
               <Sparkles className="w-4 h-4 animate-pulse" />
-              <span>Cohorte Cero P2P</span>
+              <span>Grupo inicial de apoyo mutuo</span>
             </div>
             <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
               Plaza de Apoyo Comunitario
@@ -1011,11 +1011,11 @@ export default function PlazaDeApoyoPage() {
                               <MapPin className="w-3 h-3 text-slate-500" />
                               {need.neighborhood}, {need.city}
                             </span>
-                            {need.is_coherence_crime && (
-                              <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-rose-500 text-white animate-pulse">
-                                CRIMEN DE COHERENCIA
-                              </span>
-                            )}
+                              {need.is_coherence_crime && (
+                                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-rose-500 text-white animate-pulse">
+                                  Lleva esperando mucho
+                                </span>
+                              )}
                           </div>
                           <p className="text-slate-300 text-sm leading-relaxed mb-4">{need.need_description}</p>
                           
@@ -1330,8 +1330,8 @@ export default function PlazaDeApoyoPage() {
               <Bot className="w-5 h-5 text-emerald-400" />
             </div>
             <div>
-              <h3 className="font-extrabold text-lg text-white">Oráculo Sintético Dinámico</h3>
-              <p className="text-xs text-slate-500">Gestión de datos conversacional asistida por IA</p>
+              <h3 className="font-extrabold text-lg text-white">Ayudante para anotar ayudas</h3>
+              <p className="text-xs text-slate-500">Escríbele lo que pasó y él llena el formulario</p>
             </div>
           </div>
 
@@ -1369,7 +1369,7 @@ export default function PlazaDeApoyoPage() {
                             <span className="font-semibold text-slate-300 italic">"{msg.prefill.description}"</span>
                           </div>
                           <div>
-                            <span className="block text-[10px] text-slate-500">Horas (UTH):</span>
+                            <span className="block text-[10px] text-slate-500">Horas de ayuda:</span>
                             <span className="font-semibold text-emerald-400">{msg.prefill.uth_hours} hrs</span>
                           </div>
                           <div>
@@ -1432,7 +1432,7 @@ export default function PlazaDeApoyoPage() {
                 type="text"
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
-                placeholder="Escribe un mensaje al Oráculo..."
+                placeholder="Cuéntale al ayudante qué ayuda se hizo..."
                 className="flex-1 px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm focus:outline-none focus:border-emerald-500 text-white placeholder-slate-500 transition-colors"
               />
               <button

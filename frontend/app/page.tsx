@@ -21,11 +21,13 @@ import {
   Zap,
 } from "lucide-react";
 import { useAuth } from "./context/AuthContext";
+import InfoTip from "./components/ui/InfoTip";
 
 const principles = [
   {
     icon: Timer,
     eyebrow: "TVI",
+    ayuda: "Tus horas de vida: cuidar, aprender, acompañar. Eso cuidamos primero.",
     title: "Tiempo vital",
     text: "El tiempo de atención, cuidado y aprendizaje no se recupera. La primera pregunta es qué vida estamos sosteniendo.",
     color: "amber",
@@ -33,6 +35,7 @@ const principles = [
   {
     icon: ShieldCheck,
     eyebrow: "VHV [T,V,R]",
+    ayuda: "La huella de lo que das y recibes, contada en horas de vida.",
     title: "Valor verificable",
     text: "Una contribución necesita trazabilidad, verificación y reciprocidad. El valor no desaparece detrás de una cifra.",
     color: "emerald",
@@ -40,6 +43,7 @@ const principles = [
   {
     icon: HeartHandshake,
     eyebrow: "SDV",
+    ayuda: "El piso de dignidad que nadie negocia: techo, comida, cuidado y voz.",
     title: "Reciprocidad",
     text: "Una red coherente no busca extraer. Busca que las personas puedan recibir, aportar y mejorar su línea de base.",
     color: "violet",
@@ -185,8 +189,8 @@ export default function HomePage() {
             <div className="absolute -inset-10 rounded-full bg-emerald-500/10 blur-3xl" />
             <div className="relative overflow-hidden rounded-[2rem] border border-slate-700/70 bg-slate-950/80 p-5 shadow-2xl shadow-emerald-950/50 backdrop-blur-xl sm:p-7">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-4 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
-                <span>VHV / red de reciprocidad</span>
-                <span className="text-emerald-400">● operativo</span>
+                <span>Cómo nos ayudamos aquí</span>
+                <span className="text-emerald-400">● funcionando</span>
               </div>
               <div className="relative mt-6 aspect-square overflow-hidden rounded-2xl border border-emerald-400/10 bg-[#07111b]">
                 <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "radial-gradient(circle at center, rgba(16,185,129,0.25) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
@@ -218,13 +222,13 @@ export default function HomePage() {
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-200/70">Reciprocidad</div>
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
                   <div className="font-mono text-4xl font-bold tracking-[-0.08em] text-white">TVI</div>
-                  <div className="mt-1 text-[10px] uppercase tracking-[0.22em] text-slate-500">tiempo vital irrecuperable</div>
+                  <div className="mt-1 text-[10px] uppercase tracking-[0.22em] text-slate-500">tu tiempo que no vuelve</div>
                 </div>
               </div>
               <div className="mt-5 grid grid-cols-3 gap-2 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
-                <div className="rounded-lg border border-slate-800 bg-slate-900/70 px-2 py-3"><span className="block text-amber-300">T</span>Trazabilidad</div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/70 px-2 py-3"><span className="block text-emerald-300">V</span>Verificación</div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/70 px-2 py-3"><span className="block text-cyan-300">R</span>Reciprocidad</div>
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 px-2 py-3"><span className="block text-amber-300">T</span>Tiempo</div>
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 px-2 py-3"><span className="block text-emerald-300">V</span>Vidas</div>
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 px-2 py-3"><span className="block text-cyan-300">R</span>Recursos</div>
               </div>
             </div>
           </div>
@@ -261,7 +265,7 @@ export default function HomePage() {
                   <div className={`mb-7 flex h-11 w-11 items-center justify-center rounded-xl border ${colorClasses[principle.color as keyof typeof colorClasses]}`}>
                     <Icon className="h-5 w-5" />
                   </div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">{principle.eyebrow}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">{principle.eyebrow} <InfoTip text={principle.ayuda} /></p>
                   <h3 className="mt-2 text-xl font-semibold text-white">{principle.title}</h3>
                   <p className="mt-3 text-sm leading-7 text-slate-400">{principle.text}</p>
                 </article>

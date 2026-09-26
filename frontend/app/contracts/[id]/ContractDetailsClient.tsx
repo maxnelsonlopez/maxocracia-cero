@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { apiFetch } from '../../lib/api';
 import LegalContractView from './LegalContractView';
 import OracleNegotiationPanel from '../../components/OracleNegotiationPanel';
+import InfoTip from '../../components/ui/InfoTip';
 import { 
   FileText, ArrowLeft, ShieldAlert, Award, Info, CheckCircle2, 
   UserCheck, AlertTriangle, Play, RefreshCw, Send, Zap,
@@ -206,7 +207,7 @@ export default function ContractDetailsPage() {
     const raw = checkinValues[pid];
     const value = Number(raw);
     if (!raw || Number.isNaN(value)) {
-      setCheckinMsg((m) => ({ ...m, [pid]: { kind: 'err', text: 'Escribe un γ entre 0.5 y 1.5' } }));
+      setCheckinMsg((m) => ({ ...m, [pid]: { kind: 'err', text: 'Escribe un número entre 0.5 y 1.5 (1 es bien)' } }));
       return;
     }
     setCheckinBusy((b) => ({ ...b, [pid]: true }));
@@ -373,7 +374,7 @@ export default function ContractDetailsPage() {
         alert(`No se puede cerrar: ${err.error}`);
         return;
       }
-      alert('🚀 Contrato EXECUTED: ejecución cerrada con balance final registrado.');
+      alert('🚀 Acuerdo terminado: ejecución cerrada con balance final registrado.');
       loadContractData();
     } catch (err) {
       console.error(err);
@@ -607,10 +608,11 @@ export default function ContractDetailsPage() {
     }
   };
 
-  // Siguiente paso en Firma Rigurosa
+  // Siguiente paso en Firma Rigurosa (pregunta de control en español: "sí entiendo")
   const handleNextRigorousStep = async () => {
-    if (comprehensionAnswer !== 'yes') {
-      alert('⚠️ Para proceder, debes contestar correctamente la pregunta de control indicando que asumes el costo vital.');
+    const entendido = comprehensionAnswer === 'sí entiendo' || comprehensionAnswer === 'si entiendo';
+    if (!entendido) {
+      alert('⚠️ Para seguir, escribe "sí entiendo" confirmando que asumes estas horas de vida.');
       return;
     }
 
@@ -767,7 +769,7 @@ export default function ContractDetailsPage() {
       <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
         <div className="text-center space-y-4">
           <RefreshCw className="w-10 h-10 text-emerald-500 animate-spin mx-auto" />
-          <p className="text-sm font-bold text-slate-400">Rehidratando MaxoContract y consultando oráculos...</p>
+          <p className="text-sm font-bold text-slate-400">Rehidratando tu acuerdo y revisando que esté completo...</p>
         </div>
       </div>
     );
@@ -994,20 +996,20 @@ export default function ContractDetailsPage() {
 
             {/* Explicación Detallada del Estado del Contrato */}
             <div className="bg-slate-950/40 p-4 rounded-2xl border border-slate-900 text-xs text-slate-400 space-y-2 leading-normal">
-              <span className="font-bold text-white uppercase block text-[10px] tracking-wider">Estado actual del MaxoContract:</span>
+              <span className="font-bold text-white uppercase block text-[10px] tracking-wider">Estado de tu acuerdo:</span>
               {isContractDraft && (
                 <p>
-                  <strong>DRAFT (Borrador):</strong> El contrato está en fase de diseño. Los firmantes pueden revisar la traducción a lenguaje civil y alternar identidades para simular cómo se sienten con el acuerdo. Los términos no son vinculantes ni ejecutables aún.
+                  <strong>Borrador:</strong> El contrato está en fase de diseño. Los firmantes pueden revisar la traducción a lenguaje civil y alternar identidades para simular cómo se sienten con el acuerdo. Los términos no son vinculantes ni ejecutables aún.
                 </p>
               )}
               {isContractPending && (
                 <p>
-                  <strong>PENDING (Pendiente de Firma):</strong> Los términos ya están consolidados. El contrato está esperando que ambas partes acepten y firmen modularmente cada cláusula en su respectiva UX de firma (Simple, Media o Rigurosa). No se puede activar hasta que todas las firmas estén registradas.
+                  <strong>Pendiente de firmas:</strong> Los términos ya están consolidados. El contrato está esperando que ambas partes acepten y firmen modularmente cada cláusula en su respectiva UX de firma (Simple, Media o Rigurosa). No se puede activar hasta que todas las firmas estén registradas.
                 </p>
               )}
               {isContractActive && (
                 <p>
-                  <strong>ACTIVE (Ejecución Activa):</strong> El contrato es plenamente vigente. El oráculo sintético vigila axiomáticamente el bienestar relacional (γ) de las partes. El incumplimiento de un término activará penalizaciones automáticas o habilitará retractaciones éticas.
+                  <strong>Activo:</strong> El contrato es plenamente vigente. El oráculo sintético vigila axiomáticamente el bienestar relacional (γ) de las partes. El incumplimiento de un término activará penalizaciones automáticas o habilitará retractaciones éticas.
                 </p>
               )}
               {isContractRetracted && (
@@ -1022,12 +1024,12 @@ export default function ContractDetailsPage() {
           <div className="glass p-6 rounded-3xl border border-slate-900 bg-slate-900/30 space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-bold text-white uppercase tracking-wider">Cláusulas Axiomáticas</h2>
+                <h2 className="text-lg font-bold text-white uppercase tracking-wider">Lo que acordaron</h2>
                 <p className="text-[11px] text-slate-500">Términos modelados y su traducción al lenguaje civil comprensible</p>
               </div>
               <div className="text-right">
                 <span className="text-xs block text-slate-400 font-bold">{contract.terms.length} Cláusulas</span>
-                <span className="text-[10px] text-emerald-400 font-mono">TVI Total: {contract.total_vhv.t.toFixed(2)} Hrs</span>
+                <span className="text-[10px] text-emerald-400 font-mono">Horas de vida en este acuerdo: {contract.total_vhv.t.toFixed(2)} <InfoTip text="Suma de horas de vida que este acuerdo pide a cada parte." /></span>
               </div>
             </div>
 
@@ -1082,11 +1084,11 @@ export default function ContractDetailsPage() {
                     <div className="pt-2 border-t border-slate-900/50 flex flex-wrap gap-x-4 gap-y-2 text-[10px] text-slate-500 font-mono">
                       <span className="flex items-center gap-1">
                         <Zap className="w-3 h-3 text-amber-500" />
-                        T (Tiempo Vital): <strong className="text-slate-300">{term.vhv.t.toFixed(2)} hrs</strong>
+                        T (Tiempo de vida): <strong className="text-slate-300">{term.vhv.t.toFixed(2)} hrs</strong>
                       </span>
                       <span className="flex items-center gap-1">
                         <Info className="w-3 h-3 text-blue-500" />
-                        V (Energía Consciente): <strong className="text-slate-300">{term.vhv.v.toFixed(2)}</strong>
+                        V (Apoyo entre personas): <strong className="text-slate-300">{term.vhv.v.toFixed(2)}</strong>
                       </span>
                       <span className="flex items-center gap-1">
                         <Award className="w-3 h-3 text-emerald-500" />
@@ -1095,7 +1097,7 @@ export default function ContractDetailsPage() {
                       {term.penalty_gamma ? (
                         <span className="flex items-center gap-1 text-rose-400">
                           <ShieldAlert className="w-3 h-3" />
-                          Penalización γ: <strong>-{term.penalty_gamma.toFixed(2)}</strong>
+                          Si no se cumple, tu bienestar baja: <strong>-{term.penalty_gamma.toFixed(2)}</strong>
                         </span>
                       ) : null}
                     </div>
@@ -1206,7 +1208,7 @@ export default function ContractDetailsPage() {
                         step={0.01}
                         value={checkinValues[pid] ?? ''}
                         onChange={(e) => setCheckinValues((v) => ({ ...v, [pid]: e.target.value }))}
-                        placeholder="γ 0.5-1.5"
+                        placeholder="1 es bien (0.5-1.5)"
                         className="w-20 px-2 py-1 bg-slate-950 border border-slate-800 rounded-lg text-[10px] font-mono text-slate-300 focus:outline-none focus:border-emerald-500/40"
                       />
                       <button
@@ -1215,7 +1217,7 @@ export default function ContractDetailsPage() {
                         className="flex-1 py-1 bg-slate-950 hover:bg-slate-900 border border-slate-800 text-slate-300 text-[10px] font-bold rounded-lg flex items-center justify-center gap-1.5 transition-all hover:border-emerald-500/30 disabled:opacity-50"
                       >
                         <HeartPulse className="w-3 h-3 text-emerald-500" />
-                        {checkinBusy[pid] ? 'Registrando...' : 'Check-in semanal'}
+                        {checkinBusy[pid] ? 'Registrando...' : 'Anotar cómo estoy'}
                       </button>
                     </div>
                     {checkinMsg[pid] && (
@@ -1244,13 +1246,13 @@ export default function ContractDetailsPage() {
               <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-900 space-y-2 text-[10px] text-slate-400 leading-normal">
                 <div className="flex items-center gap-1.5 font-bold text-white uppercase text-[9px]">
                   <Info className="w-3.5 h-3.5 text-blue-400" />
-                  Invariante INV1 (Bienestar) e INV2 (Dignidad)
+                  Invariantes de cuidado (bienestar y dignidad)
                 </div>
                 <p>
-                  <strong>INV1:</strong> Si el bienestar (γ) desciende de 0.8 en alguna de las partes, el contrato activa de inmediato una alarma y habilita la retractación ética automática.
+                  <strong>Si alguien se siente mal:</strong> si el bienestar baja de 0.8 en alguna de las partes, el contrato activa de inmediato una alarma y se puede deshacer (retractación).
                 </p>
                 <p>
-                  <strong>INV2:</strong> El contrato evalúa que ningún término mine la capacidad vital de subsistencia garantizada (SDV). Si se detecta violación de SDV, el contrato es suspendido por la red.
+                  <strong>Nadie pierde lo mínimo para vivir:</strong> el contrato revisa que ningún acuerdo quite lo básico para subsistir. Si eso pasa, el acuerdo se suspende.
                 </p>
               </div>
             </div>
@@ -1296,15 +1298,15 @@ export default function ContractDetailsPage() {
                       <div className={`p-3 rounded-xl border ${statusOk ? 'border-emerald-900/30 bg-emerald-950/10' : 'border-rose-900/30 bg-rose-950/10'}`}>
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                            FS_S (Factor de Sufrimiento Sintético)
+                            Sufrimiento que este acuerdo puede causar
+                          
                           </span>
                           <span className={`font-mono font-black text-sm ${statusOk ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {typeof sp.fs_s === 'number' ? sp.fs_s.toFixed(3) : '1.000'}
                           </span>
                         </div>
                         <p className="text-[9px] text-slate-500 mt-1 leading-snug">
-                          FS_S = e<sup>v</sup> · multiplica el costo en Maxos de los servicios que usan esta persona sintética.
-                          La violación del SDV-S encarece exponencialmente el sufrimiento (Cap. 18, γ).
+                          Si este acuerdo hace sufrir a alguien, cuesta más: así evitamos el daño.
                         </p>
                       </div>
 
@@ -1645,13 +1647,13 @@ export default function ContractDetailsPage() {
                               Confirmación de comprensión axiomática:
                             </label>
                             <p className="text-[10px] text-slate-500 leading-snug">
-                              Escribe <strong className="text-rose-400 font-mono">yes</strong> para confirmar que asumes plenamente el costo de tiempo vital de esta cláusula.
+                              Escribe <strong className="text-rose-400 font-mono">sí entiendo</strong> para confirmar que asumes plenamente el costo de tiempo vital de esta cláusula.
                             </p>
                             <input
                               type="text"
                               value={comprehensionAnswer}
                               onChange={(e) => setComprehensionAnswer(e.target.value.toLowerCase())}
-                              placeholder="Escribe 'yes' aquí..."
+                              placeholder="Escribe 'sí entiendo' aquí..."
                               className="w-full bg-slate-950 border border-slate-900 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500/50 text-center font-mono"
                             />
                           </div>
@@ -1669,7 +1671,7 @@ export default function ContractDetailsPage() {
                         )}
                         <button
                           onClick={handleNextRigorousStep}
-                          disabled={isTimerActive || comprehensionAnswer !== 'yes'}
+                          disabled={isTimerActive || !(comprehensionAnswer === 'sí entiendo' || comprehensionAnswer === 'si entiendo')}
                           className="flex-1 py-2.5 bg-emerald-500 disabled:bg-slate-900 disabled:border-slate-900 hover:bg-emerald-400 text-slate-950 disabled:text-slate-600 font-black rounded-xl text-xs uppercase tracking-wider transition-all disabled:opacity-50"
                         >
                           {currentStep === contract.terms.length - 1 ? 'Finalizar Firma' : 'Firmar y Siguiente'}
@@ -1702,7 +1704,7 @@ export default function ContractDetailsPage() {
                 className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                Cerrar Ejecución (EXECUTED)
+                Terminar acuerdo y dejar balance final
               </button>
             </div>
           )}
