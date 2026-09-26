@@ -256,3 +256,4 @@ hr { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
 .hero h1 { margin: 0 0 8px; font-size: 1.6rem; }
 .hero .muted { max-width: 640px; margin: 0 auto; }
 #guest-view .panel.wide { min-height: auto; }
+.nudge { border: 1px dashed var(--brand); border-radius: 8px; padding: 10px 12px; }

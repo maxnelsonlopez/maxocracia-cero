@@ -161,6 +161,8 @@ function showGuest() {
   $("app-view").hidden = true;
   $("welcome").textContent = "";
   $("btn-entrar").hidden = false;
+  $("tree-guest-note").hidden = false;
+  loadPublicTree();
 }
 
 function showAuth() {
@@ -176,6 +178,7 @@ function showApp() {
   $("auth-view").hidden = true;
   $("app-view").hidden = false;
   $("btn-entrar").hidden = true;
+  $("tree-guest-note").hidden = true;
 }
 
 // ------------------------------------------------------------------
@@ -778,7 +781,10 @@ function init() {
   $("btn-celebrate-close").addEventListener("click", function () {
     $("celebrate-modal").hidden = true;
   });
-  $("tree-search").addEventListener("input", function () { loadAll(); });
+  $("tree-search").addEventListener("input", function () {
+    if (getToken()) { loadAll(); }
+    else { renderView(); }
+  });
   $("btn-buscar").addEventListener("click", buscarCiudad);
   $("buscador-q").addEventListener("keydown", function (e) {
     if (e.key === "Enter") { e.preventDefault(); buscarCiudad(); }
@@ -793,8 +799,44 @@ function init() {
   // sola vez, se guarda como token federado y se limpia la URL.
   captureFederatedJwt();
 
+  loadSeeds();
+
   if (getToken()) { showApp(); loadAll(); }
   else { showGuest(); }
+}
+
+// ------------------------------------------------------------------
+// Mapa público + semillas (invitado primero: lectura sin papeles)
+// ------------------------------------------------------------------
+function loadPublicTree() {
+  api("/api/tree/public").then(function (data) {
+    if (getToken()) return; // el login manda: loadAll() trae el árbol personal
+    cityBranches = data.branches || [];
+    renderView();
+  }).catch(function (e) {
+    $("tree").innerHTML = '<p class="error">El mapa no cargó: ' + esc(e.message) + "</p>";
+  });
+}
+
+function loadSeeds() {
+  api("/api/buscador/seeds").then(function (data) {
+    var seeds = data.seeds || [];
+    if (!seeds.length) {
+      $("seeds-list").innerHTML = '<p class="muted">Aún no hay semillas sembradas.</p>';
+      return;
+    }
+    var html = "";
+    seeds.forEach(function (s) {
+      var ok = !!s.verificada;
+      html += '<div class="lib-item"><div class="lib-item-main">' +
+        "<div>" + (ok ? "✅" : "⏳") + " <strong>" + esc(s.titulo || s.url) + "</strong></div>" +
+        '<a class="muted" href="' + esc(safeUrl(s.url)) + '" target="_blank" rel="noopener noreferrer">' + esc(s.url) + "</a>" +
+        "</div></div>";
+    });
+    $("seeds-list").innerHTML = html;
+  }).catch(function (e) {
+    $("seeds-list").innerHTML = '<p class="error">Las semillas no cargaron: ' + esc(e.message) + "</p>";
+  });
 }
 
 // ------------------------------------------------------------------
@@ -861,7 +903,15 @@ function renderBuscador(data) {
         "</div></div>";
     });
   }
-  $("buscador-resultados").innerHTML = html;
+  if (items.length && !getToken() && !localStorage.getItem("escuela_nudge_visto")) {
+    localStorage.setItem("escuela_nudge_visto", "1");
+    $("buscador-resultados").innerHTML =
+      '<div class="lib-item nudge">🌱 La ciudad encontró algo para ti. ' +
+      '<button id="btn-nudge-entrar" class="small primary" type="button">Entra para guardar tu camino</button></div>' + html;
+    $("btn-nudge-entrar").addEventListener("click", showAuth);
+  } else {
+    $("buscador-resultados").innerHTML = html;
+  }
   document.querySelectorAll("[data-lupa-url]").forEach(function (btn) {
     btn.addEventListener("click", function () { abrirLupa(btn.getAttribute("data-lupa-url")); });
   });

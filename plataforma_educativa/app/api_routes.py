@@ -404,6 +404,64 @@ def _triada_state(user_id, topic_id):
     }
 
 
+@api_bp.route("/api/tree/public", methods=["GET"])
+def tree_public():
+    """Árbol público solo-lectura para invitados: ramas y temas sin estado personal.
+
+    El invitado mira la ciudad sin papeles; el progreso (estado, triada,
+    desbloqueos reales) exige cuenta. Los botones de acción llevan al login.
+    """
+    db = get_db()
+    idioma = (request.args.get("lang") or "es").strip()[:2] or "es"
+    branches = db.execute("SELECT * FROM branches ORDER BY orden").fetchall()
+    result = []
+    for branch in branches:
+        topics = db.execute(
+            "SELECT * FROM topics WHERE branch_id = ? ORDER BY orden", (branch["id"],)
+        ).fetchall()
+        topic_list = []
+        for topic in topics:
+            prereq_ids = json.loads(topic["prereq_ids"] or "[]")
+            q_count = db.execute(
+                "SELECT COUNT(*) AS n FROM questions WHERE topic_id = ?", (topic["id"],)
+            ).fetchone()["n"]
+            m_count = db.execute(
+                "SELECT COUNT(*) AS n FROM materials WHERE topic_id = ? AND idioma = ?",
+                (topic["id"], idioma),
+            ).fetchone()["n"]
+            topic_list.append(
+                {
+                    "id": topic["id"],
+                    "slug": topic["slug"],
+                    "titulo": topic["titulo"],
+                    "descripcion": topic["descripcion"],
+                    "dificultad": topic["dificultad"],
+                    "prereq_ids": prereq_ids,
+                    "questions": q_count,
+                    "materials": m_count,
+                    "estado": "not_seen",
+                    "score": None,
+                    "mentor_rounds": 0,
+                    "mentorship_approved": False,
+                    "evidence": None,
+                    "ready_to_teach": False,
+                    "triada": None,
+                    "unlocked": not prereq_ids,
+                    "publico": True,
+                }
+            )
+        result.append(
+            {
+                "id": branch["id"],
+                "slug": branch["slug"],
+                "nombre": branch["nombre"],
+                "descripcion": branch["descripcion"],
+                "topics": topic_list,
+            }
+        )
+    return jsonify({"branches": result, "publico": True}), 200
+
+
 @api_bp.route("/api/tree", methods=["GET"])
 @login_required
 def tree():

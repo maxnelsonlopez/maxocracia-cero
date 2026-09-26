@@ -47,3 +47,20 @@ def test_branches_are_ordered(client):
     # (M16: los valores antes que la técnica), computadores al final.
     assert branches[0]["slug"] == "etica"
     assert branches[-1]["slug"] == "computadores"
+
+
+def test_public_tree_needs_no_login_and_leaks_no_progress(client):
+    # El árbol privado exige token...
+    assert client.get("/api/tree").status_code == 401
+    # ...pero el público se mira sin papeles, sin estado personal.
+    resp = client.get("/api/tree/public")
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["publico"] is True
+    assert len(body["branches"]) == 9
+    for branch in body["branches"]:
+        for topic in branch["topics"]:
+            assert topic["estado"] == "not_seen"
+            assert topic["score"] is None
+            assert topic["triada"] is None
+            assert topic["publico"] is True

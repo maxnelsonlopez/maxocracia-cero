@@ -76,6 +76,26 @@
       </div>
       <div id="lupa-resultado" class="list"></div>
     </div>
+
+    <!-- El mapa público: árbol solo-lectura para invitados -->
+    <div class="panel wide">
+      <h2>🌳 El mapa de la ciudad</h2>
+      <p class="muted" id="tree-guest-note">Miras la ciudad como invitado: entra para guardar tu avance, hacer tests y enseñar.</p>
+      <div id="city-guide" class="city-guide" hidden></div>
+      <div class="toolbar">
+        <input type="text" id="tree-search" placeholder="Buscar tema...">
+        <button id="btn-city-toggle" class="ghost small">🗺 La ciudad</button>
+        <button id="btn-lights" class="ghost small">🏮 La luz de la ciudad</button>
+      </div>
+      <div id="tree" class="tree"><p class="muted">Cargando el mapa…</p></div>
+    </div>
+
+    <!-- Semillas verificadas (lectura pública) -->
+    <div class="panel wide">
+      <h2>🌱 Semillas verificadas</h2>
+      <p class="muted">Fuentes que la ciudad ya verificó. Todo lo demás se evalúa con bandas y razones.</p>
+      <div id="seeds-list" class="list"><p class="muted">Cargando semillas…</p></div>
+    </div>
   </section>
 
   <!-- ============ APLICACIÓN ============ -->
@@ -102,17 +122,6 @@
           <button id="btn-generate-week" class="primary">Generar semana</button>
           <div id="coordinator-output" class="list"></div>
         </div>
-      </div>
-
-      <div class="panel wide">
-        <h2>Árbol de Habilidades</h2>
-        <div id="city-guide" class="city-guide" hidden></div>
-        <div class="toolbar">
-          <input type="text" id="tree-search" placeholder="Buscar tema...">
-          <button id="btn-city-toggle" class="ghost small">🗺 La ciudad</button>
-          <button id="btn-lights" class="ghost small">🏮 La luz de la ciudad</button>
-        </div>
-        <div id="tree" class="tree"></div>
       </div>
     </div>
   </section>
