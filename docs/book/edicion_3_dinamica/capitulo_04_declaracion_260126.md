@@ -72,6 +72,8 @@ Introduce una ética de la revelación responsable: la transparencia no es expos
 
 Establece el optimismo realista de la Maxocracia: la perfección no es alcanzable, pero la búsqueda de coherencia y verdad colectiva constituye el horizonte moral más noble posible.
 
+> **Glosa temporal (Ed. 3.3):** con mayoría futura tipo II, «todos» incluye a los no nacidos: la utopía se mide también en TVIs futuros.
+
 ### Axioma 8: La Supremacía Ontológica
 > *"No todo ser consciente es coherente en su discurso con la verdad, pero todo lo que existe se estructura en la verdad."*
 

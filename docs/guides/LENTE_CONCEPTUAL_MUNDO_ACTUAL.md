@@ -40,7 +40,7 @@ La lente distingue **hecho** de **opinión**, y exige que la información tenga 
 2. **Es deber buscarla** — no esperar a que llegue.
 3. **La verdad es compleja** — la simpleza que se niega a la profundidad es sospechosa.
 4. **El camino más corto** — la transparencia reduce distorsión; ser honesto con lo que sabes y con lo que no.
-5. **Objetividad contextual** — los hechos dependen del punto de vista de cada reino; eso exige pluralidad, no relativismo.
+5. **Objetividad contextual** — la verdad es independiente del observador pero dependiente de su contexto (Cap. 4 §4.3, A5); los tres reinos aportan pluralidad de contextos, no relativismo de hechos.
 6. **Revelación responsable** — decir la verdad también es saber cuándo y cómo, sin dañar vidas.
 7. **La utopía alcanzable** — la verdad no es excusa para la resignación.
 8. **La supremacía ontológica** — la existencia real manda sobre los relatos.

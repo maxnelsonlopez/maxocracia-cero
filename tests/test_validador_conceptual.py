@@ -90,6 +90,17 @@ def test_axiom_definition_consistency():
     assert len(errors_good_v1) == 0
 
 
+def test_axioma_cero_directiva_mayor():
+    """El Axioma 0 está registrado: su formulación canónica pasa, una sin keywords falla."""
+    good_a0 = "Axioma 0: Directiva Mayor, resolver nuestras necesidades de la mejor manera para todos todos."
+    errors_good_a0 = check_context_for_axiom_definition("0", good_a0, "dummy.txt", 10)
+    assert len(errors_good_a0) == 0
+
+    bad_a0 = "Axioma 0: este axioma trata de cualquier otra cosa no relacionada."
+    errors_bad_a0 = check_context_for_axiom_definition("0", bad_a0, "dummy.txt", 11)
+    assert len(errors_bad_a0) == 1
+
+
 def test_repo_validation():
     """Escanea el repositorio real y verifica que esté limpio de violaciones."""
     # Buscar la raíz del proyecto (un directorio arriba de este archivo de pruebas)

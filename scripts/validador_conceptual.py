@@ -6,7 +6,7 @@ Validador Conceptual - Maxocracia Cero
 Este script verifica la coherencia conceptual del código y la documentación del proyecto.
 Valida:
 1. Que no existan frases o citas prohibidas (versiones apócrifas del Axioma 4, etc.).
-2. Que las menciones de los axiomas (1-8, T0-T13, V0-V8) utilicen la terminología oficial
+2. Que las menciones de los axiomas (0-8, T0-T13, V0-V8) utilicen la terminología oficial
    y no distorsionen los fundamentos del libro oficial.
 """
 
@@ -50,6 +50,11 @@ GLOBAL_FORBIDDEN_PHRASES: List[str] = [
 # Definición de Axiomas Oficiales y palabras clave obligatorias para validación de contexto
 # Soporta tanto las definiciones teóricas matemáticas como las de la implementación de MaxoContracts
 AXIOMS_REGISTRY: Dict[str, Dict[str, Any]] = {
+    # === AXIOMA 0 — DIRECTIVA MAYOR (norma suprema, Cap. 4 §4.2, Edición 3.3) ===
+    "0": {
+        "titles": ["Axioma 0 — Directiva Mayor", "Lo mejor para todos todos"],
+        "keywords": ["directiva mayor", "todos todos", "mejor manera", "norma suprema", "función objetivo", "tres reinos", "presentes y futuros"],
+    },
     # === AXIOMAS FUNDAMENTALES (1-8) ===
     "1": {
         "titles": ["La Verdad como Orientación Suprema", "Principio de la Brújula Interna"],
