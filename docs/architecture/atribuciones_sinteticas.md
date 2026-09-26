@@ -360,6 +360,23 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   `POST /corpus/<id>/publicar` (licencia no-closed + nota M15) + federación
   por visibilidad: commits `0083f9e` + `62a8ee5`. Suite **160/160**. Censo de
   muestra: ~92% de los PDF trae texto extraíble (las fotocopias rinden).
+- **Puente start↔escuela verificado en vivo (26/9/2026)**: `scripts/verificar_puente.py`
+  (solo lectura por defecto; escritura solo con `--escribir-prueba`) — 7/7 PASS:
+  DNS, ambos 200, buscador produciendo en escuela, fail-closed (401/403) y egreso
+  sano. Hallazgo: escuela corre código B1 (sin corpus/lupa/biblioteca) y el egreso
+  a Wikipedia falló de forma transitoria. Commit `c650276` (+ `5a17160` estilo CI).
+  La federación completa espera 4 interruptores del hosting (misma SECRET_KEY,
+  mismo EDU_BRIDGE_SERVICE_TOKEN, EDU_BRIDGE_URL, redespliegue).
+- **zvec-grep para la casa (26/9/2026)**: investigado a fondo — hoy SALTA los PDF
+  (lista de skip en su doc de pipeline), así que no sirve para los libros (nació B7);
+  sí instalado como herramienta (0.2.2, shim manual tras npm colgado) con índices
+  locales: `docs/` (693 archivos) y raíz (679) + MCP en OpenCode + `.zvec-grep/`
+  al `.gitignore`. Commit `aa3c8a2`.
+- **Lupa en guerra real — Fotosíntesis (26/9/2026, análisis)**: 100 ediciones
+  (45 revertidas, 46 anónimas): graffiti juvenil (`fototeta`, `luz de barba`) vs
+  bots+patrulla; la corrección válida de Ximena (I/II) cayó en la redada. Lectura:
+  la guerra mide tráfico, no controversia. Scripts en `Temp/opencode`
+  (`guerra_foto.py`, `guerra_diffs.py`) — análisis, no código del repo.
 - **Concilio en cuota free — supervivencia sin ingresos (15/9/2026, sesión con Max)**:
   - **Diagnóstico**: 402 de DeepSeek, timeouts NVIDIA y 404 de tres `:free` (glm-4.5-air,
     deepseek-r1-0528, qwen3.6-plus); cada fallo consumía la cuota free (20 RPM; 50/día sin créditos,

@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-09-26 — Buscador educativo B2–B8: corpus, juez, lupa y biblioteca curada
+
+### Añadido
+- **B2 Corpus verificado** (`buscador_feeds`, `buscador_docs`, FTS5→LIKE; `GET /corpus`, `GET/POST /feeds`, `/verificar`, `/ingerir`, `/seeds/<id>/materializar`; M15).
+- **B3 Score con memoria** (`buscador_scores` con TTL gobernable, `cache: hit|miss`, `enriquecer_corpus`) + UI 🔍 con bandas ✅/🔎/❓, razones y "¿Por qué veo esto?".
+- **B5 Búsqueda general sin docker** (Wikipedia + Wikibooks + Wikiversidad + OpenAlex, fail-open por motor) + orden canónico semillas→corpus→referencia→académica→web con `orden_capas` auditable (P4).
+- **B4 El juez trabaja de noche** (`app/score_engine.py` stdlib: Jan local → OpenRouter `:free` → nada; cola `buscador_score_queue`; `mejor_score`; resoluciones vinculantes con cooldown 14 días; insignia 🤖).
+- **B6 La Lupa** (`app/lupa.py` + `/lupa`, `/lupa/diff`; timeline, guerra de ediciones, diff palabra por palabra; Ojo Claro/Disenso).
+- **B7/B8 Biblioteca curada en 3 niveles** (`ingest_biblioteca.py`: pdf/txt/md, hash-idempotente, cifrado se omite; `catalogo_biblioteca.py`: 478 ítems reales; licencia/visibilidad/curaduría/categoría + `POST /corpus/<id>/publicar`; federación excluye lo privado).
+- **Ops**: `scripts/verificar_puente.py` (7/7 PASS en vivo contra start/escuela; solo lectura por defecto).
+- **Docs**: hitos B2–B8 ✅ en `DISENO_BUSCADOR_EDUCATIVO_GRATUITO.md`; README de la plataforma (B1–B8); atribución Muse Spark.
+
+### Notas Técnicas
+- Suite plataforma **160/160** (buscador 68/68 sin red + 10 lupa + 11 biblioteca); verificado en vivo en `:5050` (corpus, Nivel 2, lupa, fragmentos).
+- Escuela en producción corre código B1 ( redespliegue pendiente con migraciones automáticas); federación completa espera los 4 interruptores del hosting.
+- `pypdf>=4` (única dependencia nueva, solo ingestor); `.zvec-grep/` al `.gitignore`.
+
 ## 2026-09-26 — Fase aplicación mundo real: CI verde, piloto en línea y feed del Concilio
 
 ### Añadido
