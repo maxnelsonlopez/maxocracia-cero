@@ -185,3 +185,5 @@ comun.db
 
 # Scratch directory
 scratch/
+# zg (zvec-grep): índices locales, nunca se commitean
+.zvec-grep/
