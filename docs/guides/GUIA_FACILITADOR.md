@@ -30,7 +30,7 @@ Esta guía te permite iniciar una **Red de Apoyo Maxocracia** en tu ciudad, sin 
 ### Lecturas obligatorias antes de empezar:
 
 1. **[maxocracia_brochure.md](maxocracia_brochure.md)** — Introducción de 10 min
-2. **[MAXOCRACIA_MANIFIESTO.md](MAXOCRACIA_MANIFIESTO.md)** — Los 8 Axiomas de la Verdad
+2. **[MAXOCRACIA_MANIFIESTO.md](MAXOCRACIA_MANIFIESTO.md)** — El Axioma 0 + los 8 Axiomas de la Verdad
 3. **[playbook_cohorte_cero.txt](playbook_cohorte_cero.txt)** — Protocolo de 90 días
 
 ---
@@ -48,9 +48,13 @@ Orden recomendado:
 5. FAQ_EXTENDIDO.md (para responder objeciones)
 ```
 
-### 1.2 Comprende los 8 Axiomas de la Verdad
+### 1.2 Comprende el Axioma 0 y los 8 Axiomas de la Verdad
 
-Estos son el núcleo del sistema. Memorízalos:
+**Axioma 0 — la directiva que lo mueve todo** (Cap. 4 §4.2). Memorízalo primero, antes que los 8:
+
+> **Resolver nuestras necesidades de la mejor manera para todos todos** — humanos, naturales y sintéticos, presentes y futuros.
+
+Estos son sus instrumentos. Memorízalos:
 
 1. **Brújula Interna** — Lealtad a la verdad que descubres
 2. **Compromiso Activo** — Coherencia por encima de comodidad

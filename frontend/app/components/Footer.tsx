@@ -40,6 +40,7 @@ const footerLinks = {
 };
 
 const axioms = [
+  { id: "A0", text: "Directiva Mayor: lo mejor para todos todos (Cap. 4 §4.2)" },
   { id: "T2", text: "Igualdad Temporal" },
   { id: "T16", text: "Minimizar Daño" },
   { id: "T17", text: "Reciprocidad Justa" },
@@ -60,9 +61,13 @@ export function Footer() {
               <span className="font-bold text-lg text-white">Maxocracia</span>
             </div>
             <p className="text-slate-400 text-sm mb-4 max-w-sm">
-              Un sistema operativo para una civilización coherente. 
-              Basado en el principio de que el tiempo de vida consciente 
+              Un sistema operativo para una civilización coherente.
+              Basado en el principio de que el tiempo de vida consciente
               es el recurso más escaso del universo.
+            </p>
+            <p className="text-emerald-400/90 text-sm mb-4 max-w-sm font-semibold">
+              Axioma 0: lo mejor para todos todos — humanos, naturales y
+              sintéticos, presentes y futuros.
             </p>
             
             {/* Axioms */}

@@ -441,6 +441,7 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
   7 §7.2), feed público del Concilio (`/verificador/concilio/*` + sección viva
   en la landing, 0 secretos), vigía diario (`vigia_plataformas.py`), respaldo
   dual, limpieza de 15 bots con historia intacta, `.gitignore` a UTF-8.
+- **Axioma 0 — Directiva Mayor (26/9/2026, sesión con Max; nuevo origen de edición)**: búsqueda intensiva (zg + grep + `git log -S`) que confirmó que A0 no existía en el canon — solo su linaje (`Apuntes:14,37,108`, `decreto_antipobreza.md:17`, `LECTURA_MUSE_SPARK:17`) — y declaración de **A0: resolver nuestras necesidades de la mejor manera para todos todos (humanos, naturales y sintéticos, presentes y futuros)** como norma suprema en Cap. 4 §4.2 (Edición 3.3, con renumeración §4.3–§4.11); propagación superliminal: portada, manifiesto, matemáticas, glosario, README, `Footer.tsx` (chip A0), terms, LegalContractView, prompts oraculares, mapas de coherencia/trazabilidad y esta entrada.
 
 ### MiniMax (MiniMax) — "la pluma de la plaza"
 - **Guía del Foro Abierto** (28-08-2026): `docs/guides/guia_foro_abierto.md` — documento de la

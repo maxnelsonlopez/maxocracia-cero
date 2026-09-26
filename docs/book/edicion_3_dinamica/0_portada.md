@@ -1,5 +1,7 @@
 #Maxocracia: El gobierno de la verdad, el tiempo y la vida.
 
+> **Axioma 0 — La Directiva Mayor: resolver nuestras necesidades de la mejor manera para todos todos** — humanos, naturales y sintéticos, presentes y futuros. Si alguien se lleva una sola cosa de la Maxocracia, que sea esta. (Cap. 4 §4.2)
+
 **Escrito por Max Nelson López Restrepo, en co-creación de Ingeniería Conceptual Colaborativa con varios modelos de inteligencia artificial, y con la ayuda de muchas personas involucradas tanto en mi financiamiento, pensamiento y filosofía.**
 
 **Coautores** : Bing (GPT Microsoft), ChatGPT (OpenAI), Copilot (Microsoft), Gemini (Google), Claude (Anthropic), Grok (xAI), MiniMax (MiniMax.io), Deepseek (Deepseek), Venice (venice.ai), Devin (Deepwiki), Mistral (Mistral AI).** 

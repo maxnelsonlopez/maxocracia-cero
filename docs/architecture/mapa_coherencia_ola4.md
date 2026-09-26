@@ -69,6 +69,8 @@ check-ins de bienestar y resúmenes en lenguaje civil.
 
 ## 3. M2 — Teoría ↔ Código: axiomas T0–T15 vs implementación (verificado 11-08-2026)
 
+> **Edición 3.3 (26-09-2026):** se declara el **Axioma 0 — Directiva Mayor** (Cap. 4 §4.2): *lo mejor para todos todos*. Norma suprema y función objetivo; no se implementa como validador booleano en `maxocontracts/core/axioms.py` (teórico, como T0–T8). Los 8 Axiomas de la Verdad pasan a Cap. 4 §4.3.
+
 Fuente teórica: `docs/book/edicion_3_dinamica/libro_completo_310126.md` (sección "Grupos A/B/C",
 chars 57006–60753). Fuente de implementación: `maxocontracts/core/axioms.py` + greps de docs/architecture.
 

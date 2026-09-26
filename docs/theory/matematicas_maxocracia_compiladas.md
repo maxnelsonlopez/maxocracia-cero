@@ -23,6 +23,15 @@
 
 ## I. AXIOMAS FUNDAMENTALES
 
+### 0. Axioma 0 — Directiva Mayor (norma suprema)
+
+```
+Resolver nuestras necesidades de la mejor manera para todos todos:
+humanos, naturales y sintéticos, presentes y futuros.
+```
+
+> Función objetivo del sistema (Cap. 4 §4.2, Edición 3.3). Los 8 Axiomas de la Verdad y los grupos T/V/R son su instrumentación. En conflicto interpretativo, A0 decide.
+
 ### A. Los 8 Axiomas de la Verdad (Código de Coherencia)
 
 **Axioma 1: Principio de la Brújula Interna**

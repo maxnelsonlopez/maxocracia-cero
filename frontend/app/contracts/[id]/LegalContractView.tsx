@@ -94,7 +94,7 @@ export default function LegalContractView({ contract, civilSummary }: { contract
                     <h2 className="text-2xl font-black uppercase tracking-wide">MaxoContrato Nº {contract.contract_id}</h2>
                     <h3 className="text-lg font-bold uppercase mt-1">Contrato de Intercambio Ético Vital</h3>
                     <p className="text-xs italic text-slate-500 mt-2">
-                        Celebrado bajo los Ocho Axiomas de la Verdad y los invariantes del Capítulo 17 del libro de la Maxocracia.
+                        Celebrado bajo el Axioma 0 (lo mejor para todos todos), los Ocho Axiomas de la Verdad y los invariantes del Capítulo 17 del libro de la Maxocracia.
                         {syntheticCount > 0 && " Con la participación de persona(s) sintética(s) del Reino Sintético (Cap. 10, §10.8)."}
                     </p>
                 </div>

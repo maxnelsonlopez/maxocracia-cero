@@ -44,9 +44,9 @@ las referencias a líneas de archivo no — se citan archivos y símbolos, nunca
 | **T17 Reciprocidad Justa** (ing., antes "T9") | Cap 17 §17.1 + mapa puente | `axioms.py::validate_t17_reciprocidad` (alias `validate_t9_*`); usado por `blocks/reciprocity.py` y `contracts_bp.py` | `test_axioms.py`, `test_blindaje.py`, `test_validate_graph.py` | `2f330e9`, `87caa00` | ✅ |
 
 > 13 de 16 axiomas del libro son teóricos sin traza directa — **piso de futuras Olas**, no deuda técnica
-> (verificado en `mapa_coherencia_ola4.md` §M2). Los 8 Axiomas de la Verdad (Cap 4) son marco epistémico:
+> (verificado en `mapa_coherencia_ola4.md` §M2). El **Axioma 0 — Directiva Mayor** (Cap 4 §4.2, Edición 3.3) es la norma suprema y función objetivo; los 8 Axiomas de la Verdad (Cap 4 §4.3) son su marco epistémico:
 > su única traza normativa es el `scripts/validador_conceptual.py` + `tests/test_validador_conceptual.py`
-> (commit `f9b36a1`).
+> (commit `f9b36a1`). A0 no se valida como booleano en `maxocontracts/core/axioms.py` (teórico, como T0–T8).
 
 ## 2. Familia INV — invariantes operativos
 

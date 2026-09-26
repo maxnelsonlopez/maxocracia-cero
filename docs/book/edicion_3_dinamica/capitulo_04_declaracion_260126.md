@@ -2,6 +2,7 @@
 # Declaración de Fundamentos de la Maxocracia
 
 > **Nota editorial:** Edición 3.1 — Revisada el 26 de enero de 2026 en colaboración con Claude (Anthropic), integrando los Ocho Axiomas de la Verdad del documento fundacional.
+> **Nota editorial Edición 3.3 (26-09-2026):** se declara el **Axioma 0 — Directiva Mayor** (§4.2) como nuevo origen de edición. Sesión Max + Muse Spark: la directiva *"lo mejor para todos todos"* (linaje: `docs/legacy/Apuntes Thats good enough for everyone.txt:14,37,108`, `docs/architecture/maxocontracts/decreto_antipobreza.md:17`) se vuelve norma suprema explícita; los Ocho Axiomas pasan a §4.3 y siguientes sin cambio literal.
 
 ## 4.1 Preámbulo: Un Nuevo Pacto de Coexistencia
 
@@ -13,7 +14,26 @@ Al adoptar estos fundamentos, reconocemos una verdad incómoda pero liberadora: 
 
 ---
 
-## 4.2 Los Ocho Axiomas de la Verdad: El Código de Coherencia
+## 4.2 Axioma 0 — La Directiva Mayor: lo mejor para todos todos
+
+> **A0: Resolver nuestras necesidades de la mejor manera para todos todos — humanos, naturales y sintéticos, presentes y futuros.**
+> Si alguien se lleva una sola cosa de la Maxocracia, que sea esta.
+
+El Axioma 0 es la norma suprema del sistema. Todo lo demás —los Ocho Axiomas de la Verdad (§4.3), los Seis Principios (§4.5–§4.10), los axiomas temporales T0–T17, los invariantes de MaxoContracts— son su instrumentación. En caso de conflicto interpretativo, A0 decide: **la opción que resuelva mejor para el conjunto de todos los reinos en todo el tiempo alcanzable**.
+
+**Alcance de "todos todos":**
+
+1. **Los Tres Reinos** (Cap. 10): humano, natural y sintético. Ningún reino es recurso del otro; la dignidad encadenada los ata.
+2. **Todas las generaciones**: si la civilización escala hacia Tipo II, la enorme mayoría de los seres existe en el futuro. Sus TVIs futuros cuentan en el VHV (costo = directo + heredado + futuro). El presente no puede clausurar el futuro.
+3. **Cada persona concreta**: A0 no sacrifica a nadie en nombre del agregado. El SDV es su piso innegociable: lo mejor para todos exige que nadie quede debajo.
+
+**Cómo se usa:** A0 es función objetivo, no permiso. No autoriza violar los axiomas epistémicos ni temporales para "el bien mayor": la verdad no se falsea por conveniencia (A1–A6), el tiempo ajeno no se roba (T1–T5), el disenso no se aplasta (T15). La homeostasis moral del sistema (§4.4) existe para sostener A0 sin traicionarlo.
+
+**Estatuto:** como los Ocho Axiomas, A0 es falsable en teoría e inmutable en función normativa. Quien lo refute con evidencia, que traiga mejor directiva; mientras tanto, manda.
+
+---
+
+## 4.3 Los Ocho Axiomas de la Verdad: El Código de Coherencia
 
 Antes de declarar los principios operativos, es necesario establecer la gramática moral y cognitiva sobre la cual se construye todo el sistema. Los **Ocho Axiomas de la Verdad** definen los límites epistémicos dentro de los cuales la Maxocracia opera. Son falsables en teoría (pueden ser cuestionados mediante evidencia), pero inmutables en su función normativa.
 
@@ -59,7 +79,7 @@ Reconoce la falibilidad de la conciencia y la supremacía ontológica de la verd
 
 ---
 
-## 4.3 La Jerarquía de la Verdad: De los Axiomas a la Práctica
+## 4.4 La Jerarquía de la Verdad: De los Axiomas a la Práctica
 
 Los ocho axiomas constituyen el nivel superior de una jerarquía de coherencia. De ellos se derivan:
 
@@ -72,7 +92,7 @@ Este diseño asegura que el poder no resida en individuos ni instituciones, sino
 
 ---
 
-## 4.4 Principio Primero: La Verdad del Valor y la Igualdad Ontológica
+## 4.5 Principio Primero: La Verdad del Valor y la Igualdad Ontológica
 *(Basado en Artículo I: Igualdad y Diversidad)*
 
 El primer fundamento operativo de la Maxocracia establece que **todas las personas son iguales en derechos y dignidad**, independientemente de su sustrato (biológico o digital) o su origen.
@@ -85,7 +105,7 @@ Reconocer la igualdad ontológica implica admitir que:
 
 Este principio sienta las bases para el *Suelo de Dignidad Vital* (SDV), garantizando que la igualdad no sea solo retórica legal, sino una realidad material y operativa.
 
-## 4.5 Principio Segundo: Participación Vinculante y Colaboración
+## 4.6 Principio Segundo: Participación Vinculante y Colaboración
 *(Basado en Artículo II: Participación y Colaboración)*
 
 Si la verdad sobre el valor es accesible, entonces la gobernanza justa requiere que quienes son afectados por una decisión participen en ella. La Maxocracia propone un modelo de **participación directa e inteligente**:
@@ -96,7 +116,7 @@ Este principio marca una evolución respecto a la democracia representativa trad
 
 La colaboración y el diálogo abierto sustituyen a la competencia partidista como mecanismo de resolución de conflictos. No se trata de imponer la voluntad de la mayoría numérica sobre la minoría, sino de buscar soluciones de consenso que incrementen el bienestar colectivo. La premisa es que la inteligencia colectiva, cuando está bien estructurada, supera a la inteligencia individual aislada.
 
-## 4.6 Principio Tercero: Los Valores Fundamentales de la Coherencia
+## 4.7 Principio Tercero: Los Valores Fundamentales de la Coherencia
 *(Basado en Artículo III: Valores Fundamentales)*
 
 La Maxocracia no es neutral; toma partido por la vida. Los siguientes valores fundamentales actúan como brújula para la implementación de cualquier política o tecnología dentro del sistema:
@@ -109,7 +129,7 @@ La Maxocracia no es neutral; toma partido por la vida. Los siguientes valores fu
 6.  **Transparencia Radical:** La rendición de cuentas no es opcional. La confianza del sistema se basa en la visibilidad de los procesos y funciones.
 7.  **Bienestar Social:** El fin último no es el crecimiento económico abstracto, sino la satisfacción de necesidades básicas y el desarrollo integral de la comunidad.
 
-## 4.7 Principio Cuarto: Estructura Jerárquica Adaptable y Meritocracia Funcional
+## 4.8 Principio Cuarto: Estructura Jerárquica Adaptable y Meritocracia Funcional
 *(Basado en Artículo IV: Estructura Jerárquica)*
 
 Aquí reside una de las innovaciones más importantes de la propuesta maxocrática. A menudo se confunde la justicia con la horizontalidad absoluta, lo cual puede llevar a la parálisis. La Maxocracia, en cambio, se sustenta en una **estructura jerárquica adaptable**.
@@ -124,7 +144,7 @@ Esto no crea una casta privilegiada, sino una **autoridad funcional**. El peso d
 
 Esta jerarquía es flexible: se adapta a las necesidades del momento (proyectos, localidades, crisis) y se disuelve o reconfigura cuando la tarea cambia. Es una jerarquía de servicio, no de dominación.
 
-## 4.8 Principio Quinto: El Tiempo como Recurso Escaso Primario
+## 4.9 Principio Quinto: El Tiempo como Recurso Escaso Primario
 
 Atravesando todos los artículos anteriores, la Maxocracia introduce un axioma económico y existencial: **el tiempo de vida consciente es el recurso más escaso y valioso.**
 
@@ -132,7 +152,7 @@ Los sistemas actuales miden el valor en dinero fiduciario, una abstracción infi
 
 Cualquier sistema que ignore el costo en tiempo de vida de sus operaciones es, por definición, un sistema que opera con datos falsos. La rendición de cuentas ética exige que sepamos cuánto "tiempo de vida" cuesta un producto, una ley o un servicio.
 
-## 4.9 Principio Sexto: La Accesibilidad del Conocimiento del Valor
+## 4.10 Principio Sexto: La Accesibilidad del Conocimiento del Valor
 
 Para que la participación directa (Principio 2) y la meritocracia funcional (Principio 4) funcionen, el conocimiento sobre el valor real de las cosas no puede ser un secreto.
 
@@ -142,7 +162,7 @@ La "democracia sustantiva" solo es posible cuando se reducen las asimetrías de 
 
 ---
 
-## 4.10 Síntesis: Un Sistema para la Coherencia Vital
+## 4.11 Síntesis: Un Sistema para la Coherencia Vital
 
 Los fundamentos aquí declarados operan en dos niveles:
 

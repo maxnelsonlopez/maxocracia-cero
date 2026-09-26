@@ -21,7 +21,7 @@ const sections = [
     {
         icon: Scale,
         title: "Marco axiomático",
-        body: "Este proyecto se rige por los Ocho Axiomas de la Verdad y los axiomas temporales T0-T15. Toda decisión del sistema se audita contra ellos. Si alguna funcionalidad los viola, el sistema debe corregirse — y si tú encuentras una violación, tienes el derecho y el deber de denunciarla (Protocolo de Disenso, T15).",
+        body: "Este proyecto se rige por el Axioma 0 (lo mejor para todos todos: humanos, naturales y sintéticos, presentes y futuros — Cap. 4 §4.2), los Ocho Axiomas de la Verdad y los axiomas temporales T0-T15. Toda decisión del sistema se audita contra ellos. Si alguna funcionalidad los viola, el sistema debe corregirse — y si tú encuentras una violación, tienes el derecho y el deber de denunciarla (Protocolo de Disenso, T15).",
     },
     {
         icon: BookOpen,

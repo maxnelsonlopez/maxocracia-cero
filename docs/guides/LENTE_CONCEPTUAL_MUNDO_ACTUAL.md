@@ -8,6 +8,8 @@
 
 ## 1. La lente en una frase
 
+> **Axioma 0: resolver nuestras necesidades de la mejor manera para todos todos** — humanos, naturales y sintéticos, presentes y futuros. (Cap. 4 §4.2)
+>
 > **Antes de creer o decidir algo, pregunta: ¿cuánto tiempo de vida cuesta? ¿es verificable? ¿qué vidas toca?**
 
 El mundo actual usa el **dinero** como medida universal. La lente maxocrática usa la **vida**: el tiempo de vida consciente (único, irrepetible), la verdad (lo verificable) y la dignidad (lo que ninguna vida puede quedar por debajo).

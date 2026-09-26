@@ -1,5 +1,7 @@
 # Maxocracia-Cero: una contabilidad de la vida
 
+> **Axioma 0 — La Directiva Mayor: resolver nuestras necesidades de la mejor manera para todos todos** — humanos, naturales y sintéticos, presentes y futuros. Si te llevas una sola cosa de la Maxocracia, que sea esta. ([Cap. 4 §4.2](docs/book/edicion_3_dinamica/capitulo_04_declaracion_260126.md))
+
 **¿Y si el dinero midiera lo que de verdad importa?** Este proyecto construye
 una forma de organizar la economía y las decisiones de una comunidad alrededor
 del tiempo de vida, el cuidado y la reciprocidad — no alrededor de la deuda.

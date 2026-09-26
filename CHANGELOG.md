@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-09-26 — Axioma 0, Directiva Mayor: lo mejor para todos todos (Edición 3.3)
+
+### Añadido
+- **Axioma 0 declarado** (`docs/book/edicion_3_dinamica/capitulo_04_declaracion_260126.md` §4.2, nuevo origen de edición): *"Resolver nuestras necesidades de la mejor manera para todos todos — humanos, naturales y sintéticos, presentes y futuros."* Norma suprema y función objetivo; los 8 Axiomas (§4.3) y T0–T17 son su instrumentación. Renumeración §4.3–§4.11 sin cambio literal. Linaje: `docs/legacy/Apuntes Thats good enough for everyone.txt:14,37,108`, `decreto_antipobreza.md:17`.
+- **Propagación superliminal**: `0_portada.md`, `MAXOCRACIA_MANIFIESTO.md`, `matematicas_maxocracia_compiladas.md` (§0), glosario (`Axioma 0`), `README.md`, `Footer.tsx` (chip A0 + línea), `terms/page.tsx`, `LegalContractView.tsx`, `ORACLE_SYSTEM_PROMPT.md`, `scripts/local_oracle.py`, `mapa_coherencia_ola4.md`, `mapa_trazabilidad_canonica.md`, `atribuciones_sinteticas.md`, `GUIA_FACILITADOR.md`, `LENTE_CONCEPTUAL_MUNDO_ACTUAL.md`, `maxocracia_brochure.md`.
+- **Atribución**: sesión Max + Muse Spark; búsqueda intensiva previa (zg + grep + `git log -S "Axioma 0"`) confirmó campo libre.
+
 ## 2026-09-26 — Buscador educativo B2–B8: corpus, juez, lupa y biblioteca curada
 
 ### Añadido

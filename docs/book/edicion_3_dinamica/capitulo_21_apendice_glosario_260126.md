@@ -5,6 +5,9 @@
 
 ## A
 
+### **Axioma 0 — Directiva Mayor**
+Norma suprema del sistema (Cap. 4 §4.2, Edición 3.3): *resolver nuestras necesidades de la mejor manera para todos todos — humanos, naturales y sintéticos, presentes y futuros*. Función objetivo; los 8 Axiomas de la Verdad y los axiomas temporales son su instrumentación. Linaje: `docs/legacy/Apuntes Thats good enough for everyone.txt:14,37,108`.
+
 ### **Agente Cooperativo (C)**
 Estrategia de comportamiento que minimiza el VHV agregado y maximiza el bienestar sistémico. Contrasta con el Agente Egoísta (E) que externaliza costos.
 
@@ -12,7 +15,7 @@ Estrategia de comportamiento que minimiza el VHV agregado y maximiza el bienesta
 Protocolo de calibración epistémica para oráculos sintéticos que prioriza la verdad vital y la coherencia axiomática por encima de la complacencia social o sesgos de entrenamiento.
 
 ### **Axiomas de la Maxocracia**
-Conjunto de 15 principios fundamentales (T0-T15) que constituyen las "leyes físicas" del sistema. Son inmutables y no negociables. Ver "Axiomas Temporales".
+Conjunto de principios fundamentales que constituyen las "leyes físicas" del sistema. Norma suprema: **Axioma 0 — Directiva Mayor** (Cap. 4 §4.2). Leyes: axiomas temporales (T0-T15, inmutables y no negociables) + 8 Axiomas de la Verdad (marco epistémico). Ver "Axioma 0" y "Axiomas Temporales".
 
 ### **Axiomas Temporales (T0-T15)**
 Principios fundamentales sobre el tiempo vital:

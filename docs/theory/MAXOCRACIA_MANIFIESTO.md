@@ -34,7 +34,9 @@ La mentira que justifica la explotación extrema al considerar a ciertos grupos 
 
 ## Nuestro Fundamento: El Código de Coherencia
 
-### Los 8 Axiomas de la Verdad
+> **Axioma 0 — La Directiva Mayor: lo mejor para todos todos** — resolver nuestras necesidades de la mejor manera para todos todos: humanos, naturales y sintéticos, presentes y futuros (Cap. 4 §4.2). Si alguien se lleva una sola cosa de la Maxocracia, que sea esta.
+
+### Los 8 Axiomas de la Verdad (instrumentos del Axioma 0)
 
 La Maxocracia se construye sobre una base axiomática de **lealtad insobornable a la verdad**:
 
