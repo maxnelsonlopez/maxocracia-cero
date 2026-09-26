@@ -9,11 +9,14 @@
 <body>
   <header class="topbar">
     <span class="brand">Plataforma Educativa</span>
-    <span id="welcome" class="welcome"></span>
+    <span class="topbar-right">
+      <span id="welcome" class="welcome"></span>
+      <button id="btn-entrar" class="ghost small">Entrar</button>
+    </span>
   </header>
 
-  <!-- ============ ACCESO (login / registro) ============ -->
-  <section id="auth-view" class="center">
+  <!-- ============ ACCESO (login / registro, optativo) ============ -->
+  <section id="auth-view" class="center" hidden>
     <div class="card auth-card">
       <h1 id="auth-title">Iniciar sesión</h1>
 
@@ -33,6 +36,45 @@
       </form>
 
       <p id="auth-error" class="error" hidden></p>
+
+      <p class="muted">¿Solo vienes a mirar? <button id="btn-guest" class="ghost small" type="button">Explora como invitado</button></p>
+    </div>
+  </section>
+
+  <!-- ============ VISTA PÚBLICA (invitado: buscador + lupa al frente) ============ -->
+  <section id="guest-view">
+    <div class="hero">
+      <h1>La escuela de la ciudad 🏫</h1>
+      <p class="muted">Busca, verifica y aprende sin cuenta ni permiso.
+      Si quieres guardar tu progreso, <button id="btn-entrar-2" class="ghost small" type="button">entra o regístrate</button>.</p>
+    </div>
+
+    <!-- El buscador de la ciudad (B3): lo propio primero, todo etiquetado -->
+    <div class="panel wide">
+      <h2>🔍 El buscador de la ciudad</h2>
+      <p class="muted">Lo de la ciudad primero, el mundo después — y todo con su
+      etiqueta: nada se oculta, todo se explica.</p>
+      <div class="toolbar">
+        <input type="text" id="buscador-q" placeholder="¿Qué quieres aprender? (ej. huerta, conteo)" aria-label="Buscar en la ciudad">
+        <button id="btn-buscar" class="primary small">Buscar</button>
+      </div>
+      <div id="buscador-resultados" class="list"></div>
+      <details id="buscador-porque" hidden>
+        <summary>¿Por qué veo esto?</summary>
+        <div id="buscador-porque-body" class="muted"></div>
+      </details>
+    </div>
+
+    <!-- La Lupa de la ciudad (B6: Ojo Claro + Disenso) -->
+    <div class="panel wide">
+      <h2>🔍 La lupa de la ciudad</h2>
+      <p class="muted">Ojo Claro: aquí se ven los hechos del artículo —quién
+      cambió qué y cuándo. El porqué lo juzgas tú, no la máquina.</p>
+      <div class="toolbar">
+        <input type="text" id="lupa-q" placeholder="Artículo de Wikipedia (ej. Fotosíntesis)" aria-label="Artículo a examinar">
+        <button id="btn-lupa" class="primary small">Mirar historial</button>
+      </div>
+      <div id="lupa-resultado" class="list"></div>
     </div>
   </section>
 
@@ -72,34 +114,6 @@
         </div>
         <div id="tree" class="tree"></div>
       </div>
-    </div>
-
-    <!-- El buscador de la ciudad (B3): lo propio primero, todo etiquetado -->
-    <div class="panel wide">
-      <h2>🔍 El buscador de la ciudad</h2>
-      <p class="muted">Lo de la ciudad primero, el mundo después — y todo con su
-      etiqueta: nada se oculta, todo se explica.</p>
-      <div class="toolbar">
-        <input type="text" id="buscador-q" placeholder="¿Qué quieres aprender? (ej. huerta, conteo)" aria-label="Buscar en la ciudad">
-        <button id="btn-buscar" class="primary small">Buscar</button>
-      </div>
-      <div id="buscador-resultados" class="list"></div>
-      <details id="buscador-porque" hidden>
-        <summary>¿Por qué veo esto?</summary>
-        <div id="buscador-porque-body" class="muted"></div>
-      </details>
-    </div>
-
-    <!-- La Lupa de la ciudad (B6: Ojo Claro + Disenso) -->
-    <div class="panel wide">
-      <h2>🔍 La lupa de la ciudad</h2>
-      <p class="muted">Ojo Claro: aquí se ven los hechos del artículo —quién
-      cambió qué y cuándo. El porqué lo juzgas tú, no la máquina.</p>
-      <div class="toolbar">
-        <input type="text" id="lupa-q" placeholder="Artículo de Wikipedia (ej. Fotosíntesis)" aria-label="Artículo a examinar">
-        <button id="btn-lupa" class="primary small">Mirar historial</button>
-      </div>
-      <div id="lupa-resultado" class="list"></div>
     </div>
   </section>
 

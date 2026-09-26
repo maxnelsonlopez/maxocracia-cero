@@ -155,16 +155,27 @@ var selectedSlots = {};
 // ------------------------------------------------------------------
 // Vistas
 // ------------------------------------------------------------------
-function showAuth() {
-  $("auth-view").hidden = false;
+function showGuest() {
+  $("guest-view").hidden = false;
+  $("auth-view").hidden = true;
   $("app-view").hidden = true;
   $("welcome").textContent = "";
+  $("btn-entrar").hidden = false;
+}
+
+function showAuth() {
+  $("guest-view").hidden = false;
+  $("auth-view").hidden = false;
+  $("app-view").hidden = true;
   $("auth-error").hidden = true;
+  $("auth-view").scrollIntoView();
 }
 
 function showApp() {
+  $("guest-view").hidden = false;
   $("auth-view").hidden = true;
   $("app-view").hidden = false;
+  $("btn-entrar").hidden = true;
 }
 
 // ------------------------------------------------------------------
@@ -722,7 +733,12 @@ function init() {
     });
   });
 
-  $("btn-logout").addEventListener("click", function () { clearToken(); showAuth(); });
+  $("btn-logout").addEventListener("click", function () { clearToken(); showGuest(); });
+
+  // Invitado primero: el login es optativo, la escuela se mira sin papeles.
+  $("btn-entrar").addEventListener("click", showAuth);
+  $("btn-entrar-2").addEventListener("click", showAuth);
+  $("btn-guest").addEventListener("click", showGuest);
 
   // Sin onclick inline (la CSP no permite scripts inline): el árbol/ciudad
   // se alterna con un listener propio.
@@ -778,7 +794,7 @@ function init() {
   captureFederatedJwt();
 
   if (getToken()) { showApp(); loadAll(); }
-  else { showAuth(); }
+  else { showGuest(); }
 }
 
 // ------------------------------------------------------------------

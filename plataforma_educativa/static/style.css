@@ -249,3 +249,10 @@ hr { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
   15% { opacity: 1; }
   100% { top: 105%; opacity: 0; }
 }
+
+/* Invitado primero: héroe público + entrar optativo */
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.hero { text-align: center; padding: 28px 16px 8px; }
+.hero h1 { margin: 0 0 8px; font-size: 1.6rem; }
+.hero .muted { max-width: 640px; margin: 0 auto; }
+#guest-view .panel.wide { min-height: auto; }

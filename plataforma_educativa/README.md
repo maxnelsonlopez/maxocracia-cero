@@ -11,6 +11,14 @@ de **reuniones semanales** que funcionan como **células de aprendizaje**, donde
 **monitor** que ya domina un tema lo enseña (la idea de la *vacuación*). Es una
 implementación de demostración; no reemplaza la plataforma Maxocracia.
 
+### Invitado primero (sin login)
+
+La escuela se mira sin cuenta: el buscador general, la lupa, las semillas y el
+corpus son lectura pública (el backend lo declara en `app/buscador_routes.py`).
+El login solo guarda lo personal (progreso del árbol, disponibilidad,
+reuniones, mentoría). Si entras como invitado y luego te registras, nada de lo
+visto se pierde: lo público no necesita tu nombre.
+
 ---
 
 ## Requisitos

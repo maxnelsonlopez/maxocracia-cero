@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-09-26 — Escuela invitada primero: buscador al frente, login optativo
+
+### Añadido
+- **Modo invitado** (`plataforma_educativa/templates/index.html`, `static/app.js`, `static/style.css`): la escuela se mira sin cuenta — héroe público + buscador general y lupa al frente (`#guest-view` por defecto); el login es optativo (botón Entrar) y solo guarda progreso (árbol, reuniones, mentoría). Sin cambios de backend: la lectura ya era pública (`buscador_routes.py:4-11`), el muro era solo frontend.
+- **Docs**: nota "Invitado primero" en `plataforma_educativa/README.md`; atribución en `atribuciones_sinteticas.md`.
+
 ## 2026-09-26 — Axioma 0, Directiva Mayor: lo mejor para todos todos (Edición 3.3)
 
 ### Añadido
