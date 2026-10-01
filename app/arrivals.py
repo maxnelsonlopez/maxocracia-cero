@@ -26,7 +26,7 @@ import hmac
 import os
 from typing import Optional
 
-from flask import Blueprint, current_app, jsonify
+from flask import Blueprint, current_app, jsonify, request
 
 from .jwt_utils import admin_required
 from .utils import get_db
@@ -85,6 +85,37 @@ def mask_email(email: str) -> str:
     if len(local) <= 1:
         return f"{local}***@{domain}"
     return f"{local[0]}***{local[-1]}@{domain}"
+
+
+@arrivals_bp.route("/generate", methods=["POST"])
+@admin_required
+def generate_invite(current_user):
+    """Genera una invitación firmada para un email (panel admin).
+
+    No envía correo todavía (Fase 1: copiar/enlazar). Registra la
+    emisión en maxo_arrivals con source='admin_invite' para trazabilidad T13.
+    """
+    data = request.get_json(silent=True) or {}
+    email = str(data.get("email") or "").strip().lower()
+    if not email or "@" not in email or "." not in email:
+        return jsonify({"error": "email válido requerido"}), 400
+
+    token = sign_invite(email)
+    db = get_db()
+    db.execute(
+        "INSERT INTO maxo_arrivals (email, source, honeypot_hit, status) VALUES (?, 'admin_invite', 0, 'invited')",
+        (email,),
+    )
+    db.commit()
+    return jsonify(
+        {
+            "email": email,
+            "token": token,
+            "invite_url": f"/invite?t={token}",
+            "api_url": f"/invite/{token}",
+            "register_url": f"/register?email={email}",
+        }
+    ), 201
 
 
 @arrivals_bp.route("/<token>", methods=["GET"])

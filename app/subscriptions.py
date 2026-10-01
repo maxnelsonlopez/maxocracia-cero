@@ -608,8 +608,9 @@ def admin_list_users(current_user):
     db = get_db()
     users = db.execute(
         """
-        SELECT 
+        SELECT
             u.id, u.email, u.name, u.alias,
+            u.created_at, u.trust_level, u.is_admin,
             s.tier, s.status as sub_status, s.expires_at, s.payment_method
         FROM users u
         LEFT JOIN subscriptions s ON u.id = s.user_id
