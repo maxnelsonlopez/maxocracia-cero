@@ -65,13 +65,14 @@ export default function AdminLayout({
     return (
         <div className="flex min-h-screen bg-slate-950 text-slate-100">
             {/* Sidebar */}
-            <aside className="w-64 border-r border-slate-800 bg-slate-900/50 backdrop-blur-xl fixed h-full z-20">
-                <div className="p-6">
-                    <Link href="/" className="flex items-center gap-2 mb-8 group">
+            <aside className="w-64 border-r border-slate-800 bg-slate-900/50 backdrop-blur-xl fixed inset-y-0 left-0 z-20 flex flex-col">
+                <div className="p-6 pb-2 shrink-0">
+                    <Link href="/" className="flex items-center gap-2 mb-6 group">
                         <ArrowLeft className="w-4 h-4 text-slate-400 group-hover:text-emerald-500 transition-colors" />
                         <span className="font-bold text-lg text-white">Panel Admin</span>
                     </Link>
-
+                </div>
+                <div className="flex-1 overflow-y-auto px-6 pb-4">
                     <nav className="space-y-1">
                         {sidebarLinks.map((link) => {
                             const isActive = pathname === link.href;
@@ -108,7 +109,7 @@ export default function AdminLayout({
                     </nav>
                 </div>
 
-                <div className="absolute bottom-0 left-0 right-0 p-6">
+                <div className="shrink-0 p-6 pt-2 border-t border-slate-800/50">
                     <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
                         <div className="flex items-center gap-3 mb-2">
                             <ShieldCheck className="w-4 h-4 text-emerald-500" />
