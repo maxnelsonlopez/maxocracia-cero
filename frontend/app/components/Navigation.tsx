@@ -38,6 +38,7 @@ import {
   Vote,
   Compass,
   MessagesSquare,
+  Inbox,
   GraduationCap
 } from "lucide-react";
 import { ContributorBadge } from "./ContributorBadge";
@@ -304,6 +305,7 @@ export function Navigation() {
                     Nodo Educativo (plaza viva)
                   </button>
                   <MobileNavLink href="/perfil" label="Perfil Vital" icon={Heart} onClick={() => setIsOpen(false)} />
+                  <MobileNavLink href="/bandeja" label="Bandeja" icon={Inbox} onClick={() => setIsOpen(false)} />
                 </div>
               )}
 

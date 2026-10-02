@@ -18,8 +18,9 @@ import {
     Heart,
     FileCheck2,
     Repeat,
-        ClipboardList,
+    ClipboardList,
     Package,
+    Inbox,
     Sparkles,
 
 } from "lucide-react";
@@ -39,6 +40,7 @@ const sidebarLinks = [
     { href: "/admin/contracts", label: "MaxoContracts", icon: FileCheck2, alertKey: "contracts" },
     { href: "/admin/reports", label: "Informes e Impacto", icon: FileBarChart },
     { href: "/admin/users", label: "Usuarios", icon: Users },
+    { href: "/admin/inbox", label: "Bandeja", icon: Inbox },
     { href: "/admin/subscriptions", label: "Suscripciones", icon: CreditCard },
     { href: "/admin/settings", label: "Configuración", icon: Settings },
 ];

@@ -15,6 +15,7 @@ import {
   Loader2,
   AlertTriangle,
   User,
+  Inbox,
   GraduationCap,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -105,6 +106,7 @@ export default function PerfilPage() {
   const [resources, setResources] = useState<ResourceItem[]>([]);
   const [interchanges, setInterchanges] = useState<Interchange[]>([]);
   const [eduEvents, setEduEvents] = useState<EduEvent[]>([]);
+  const [inboxUnread, setInboxUnread] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -172,6 +174,15 @@ export default function PerfilPage() {
         }
       })
       .catch(() => setEduEvents([]));
+    // Bandeja interna: cuenta los no leídos para el atajo.
+    apiFetch("/inbox")
+      .then(async (res) => {
+        if (res.ok) {
+          const data = await res.json();
+          setInboxUnread(data.filter((m: { status: string }) => m.status === "sent").length);
+        }
+      })
+      .catch(() => setInboxUnread(null));
   }, [load, loadInterchanges]);
 
   const doTransfer = async () => {
@@ -296,10 +307,22 @@ export default function PerfilPage() {
         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-2xl font-black text-white">
           {(user.alias || user.name || "?").charAt(0).toUpperCase()}
         </div>
-        <div>
+        <div className="flex-1">
           <h2 className="text-xl font-bold text-white">{user.alias || user.name}</h2>
           <p className="text-sm text-slate-400">{user.email} · usuario #{user.id}</p>
         </div>
+        <Link
+          href="/bandeja"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-slate-800 text-slate-200 hover:bg-slate-700 transition-all"
+        >
+          <Inbox className="w-4 h-4 text-emerald-400" />
+          Bandeja
+          {inboxUnread !== null && inboxUnread > 0 && (
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500 text-white">
+              {inboxUnread}
+            </span>
+          )}
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
