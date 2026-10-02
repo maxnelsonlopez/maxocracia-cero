@@ -471,7 +471,7 @@ def forgot():
     )
     db.commit()
 
-    from .mailer import build_reset_url, send_reset_email, smtp_configured
+    from .mailer import build_reset_url, mail_enabled, send_reset_email, smtp_configured
 
     reset_url = build_reset_url(raw)
     try:
@@ -481,7 +481,12 @@ def forgot():
     # Relevo en bandeja interna: si el correo no llega, el facilitador
     # lo entrega desde el outbox (el link se redacta al propio dueño).
     # mail_status queda visible en el outbox para diagnosticar el SMTP.
-    mail_status = "sent" if mailed else ("failed" if smtp_configured() else "skipped")
+    if mailed:
+        mail_status = "sent"
+    elif not mail_enabled() or not smtp_configured():
+        mail_status = "skipped"
+    else:
+        mail_status = "failed"
     try:
         from .inbox import deliver
 
