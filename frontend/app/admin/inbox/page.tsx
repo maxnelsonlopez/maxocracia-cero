@@ -12,8 +12,16 @@ interface OutboxMsg {
     body: string;
     link_url: string | null;
     status: string;
+    mail_status?: string | null;
     created_by: number | null;
     created_at: string;
+}
+
+function mailBadge(s?: string | null) {
+    if (s === "sent") return <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">correo ✓</span>;
+    if (s === "failed") return <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">correo ✗</span>;
+    if (s === "skipped") return <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20" title="Sin SMTP configurado: releva el enlace de viva voz">sin SMTP</span>;
+    return <span className="text-xs text-slate-600">—</span>;
 }
 
 const FILTERS = [
@@ -99,14 +107,15 @@ export default function AdminInbox() {
                                 <th className="px-6 py-4">Tipo</th>
                                 <th className="px-6 py-4">Asunto</th>
                                 <th className="px-6 py-4">Estado</th>
+                                <th className="px-6 py-4">Correo</th>
                                 <th className="px-6 py-4 text-right">Enlace</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800">
                             {loading ? (
-                                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-500">Cargando outbox...</td></tr>
+                                <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-500">Cargando outbox...</td></tr>
                             ) : msgs.length === 0 ? (
-                                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-500">Nada por relevar. Genera una invitación desde Usuarios.</td></tr>
+                                <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-500">Nada por relevar. Genera una invitación desde Usuarios.</td></tr>
                             ) : msgs.map((m) => (
                                 <tr key={m.id} className="hover:bg-slate-800/30 transition-colors">
                                     <td className="px-6 py-4">
@@ -122,6 +131,7 @@ export default function AdminInbox() {
                                     </td>
                                     <td className="px-6 py-4 text-xs text-slate-300">{m.subject}</td>
                                     <td className="px-6 py-4 text-xs text-slate-500">{m.status === "read" ? "leído" : "enviado"}</td>
+                                    <td className="px-6 py-4">{mailBadge(m.mail_status)}</td>
                                     <td className="px-6 py-4 text-right">
                                         {m.link_url ? (
                                             <button

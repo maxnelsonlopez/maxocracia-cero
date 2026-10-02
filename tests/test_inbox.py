@@ -94,7 +94,9 @@ def test_invite_llega_a_bandeja_y_outbox(client):
     assert any(m["link_url"] == url for m in outbox.get_json())
 
 
-def test_reset_redacta_link_al_dueno(client):
+def test_reset_redacta_link_al_dueno(client, monkeypatch):
+    for var in ("SMTP_SERVER", "SMTP_USERNAME", "SMTP_PASSWORD", "SMTP_PORT"):
+        monkeypatch.delenv(var, raising=False)
     admin = _login(client, "admin@example.test")
     resp = client.post("/auth/forgot", json={"email": "user@example.test"})
     assert resp.status_code == 200
@@ -106,12 +108,15 @@ def test_reset_redacta_link_al_dueno(client):
     assert len(resets) == 1
     assert resets[0]["link_url"] is None
     assert resets[0]["has_link"] is True
+    # Sin SMTP, el estado visible explica por qué no llegó el correo
+    assert resets[0]["mail_status"] == "skipped"
 
     # El facilitador sí ve el link para relevarlo de viva voz
     outbox = client.get("/inbox/outbox?kind=password_reset", headers=admin)
     assert outbox.status_code == 200
     assert len(outbox.get_json()) == 1
     assert "/reset?token=" in outbox.get_json()[0]["link_url"]
+    assert outbox.get_json()[0]["mail_status"] == "skipped"
 
 
 def test_outbox_solo_admin_y_lectura_ajena_404(client):

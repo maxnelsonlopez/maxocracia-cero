@@ -471,15 +471,17 @@ def forgot():
     )
     db.commit()
 
-    from .mailer import build_reset_url, send_reset_email
+    from .mailer import build_reset_url, send_reset_email, smtp_configured
 
     reset_url = build_reset_url(raw)
     try:
-        send_reset_email(email, reset_url)
+        mailed = send_reset_email(email, reset_url)
     except Exception:
-        pass
+        mailed = False
     # Relevo en bandeja interna: si el correo no llega, el facilitador
     # lo entrega desde el outbox (el link se redacta al propio dueño).
+    # mail_status queda visible en el outbox para diagnosticar el SMTP.
+    mail_status = "sent" if mailed else ("failed" if smtp_configured() else "skipped")
     try:
         from .inbox import deliver
 
@@ -493,6 +495,7 @@ def forgot():
                 "Si no fuiste tú, ignora este aviso."
             ),
             link_url=reset_url,
+            mail_status=mail_status,
         )
     except Exception:
         pass

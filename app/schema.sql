@@ -106,6 +106,7 @@ CREATE TABLE IF NOT EXISTS maxo_inbox (
   body TEXT NOT NULL DEFAULT '',
   link_url TEXT,
   status TEXT NOT NULL DEFAULT 'sent' CHECK(status IN ('sent','read')),
+  mail_status TEXT NOT NULL DEFAULT 'unknown',
   created_by INTEGER,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL

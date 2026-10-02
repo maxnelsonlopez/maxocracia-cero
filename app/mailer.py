@@ -15,8 +15,12 @@ import smtplib
 from email.message import EmailMessage
 
 
-def _smtp_configured() -> bool:
+def smtp_configured() -> bool:
     return bool(os.environ.get("SMTP_SERVER") and os.environ.get("SMTP_USERNAME"))
+
+
+def _smtp_configured() -> bool:
+    return smtp_configured()
 
 
 def build_reset_url(token: str) -> str:
@@ -30,6 +34,10 @@ def send_reset_email(to_email: str, reset_url: str) -> bool:
     Nunca lanza: el llamador no debe romper el flujo por un fallo de correo.
     """
     if not _smtp_configured():
+        print(
+            "Warning: SMTP sin configurar (SMTP_SERVER/SMTP_USERNAME en .env),"
+            " correo omitido. El aviso queda en la bandeja interna."
+        )
         return False
     try:
         server = os.environ.get("SMTP_SERVER", "")

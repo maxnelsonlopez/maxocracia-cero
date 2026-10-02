@@ -19,19 +19,27 @@ from .utils import get_db
 inbox_bp = Blueprint("inbox", __name__, url_prefix="/inbox")
 
 
-def deliver(to_email, kind, subject="", body="", link_url=None, created_by=None):
-    """Guarda un mensaje en la bandeja. Best-effort: nunca lanza."""
+def deliver(
+    to_email, kind, subject="", body="", link_url=None, created_by=None,
+    mail_status="unknown",
+):
+    """Guarda un mensaje en la bandeja. Best-effort: nunca lanza.
+
+    mail_status: 'sent' (el correo salió), 'failed' (SMTP lo rechazó),
+    'skipped' (sin SMTP configurado) o 'unknown' (no aplica, p. ej. invite).
+    """
     try:
         db = get_db()
         db.execute(
-            "INSERT INTO maxo_inbox (to_email, kind, subject, body, link_url, created_by)"
-            " VALUES (?, ?, ?, ?, ?, ?)",
+            "INSERT INTO maxo_inbox (to_email, kind, subject, body, link_url,"
+            " mail_status, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)",
             (
                 str(to_email).strip().lower(),
                 kind,
                 subject,
                 body,
                 link_url,
+                mail_status,
                 created_by,
             ),
         )
@@ -68,7 +76,8 @@ def my_inbox(current_user):
     if email is None:
         return jsonify({"error": "user not found"}), 404
     rows = db.execute(
-        "SELECT id, to_email, kind, subject, body, link_url, status, created_at"
+        "SELECT id, to_email, kind, subject, body, link_url, status,"
+        " mail_status, created_at"
         " FROM maxo_inbox WHERE lower(to_email) = ? ORDER BY id DESC LIMIT 100",
         (email,),
     ).fetchall()
@@ -103,14 +112,14 @@ def outbox(current_user):
     if kind in ("invite", "password_reset", "notice"):
         rows = db.execute(
             "SELECT id, to_email, kind, subject, body, link_url, status,"
-            " created_by, created_at FROM maxo_inbox"
+            " mail_status, created_by, created_at FROM maxo_inbox"
             " WHERE kind = ? ORDER BY id DESC LIMIT 200",
             (kind,),
         ).fetchall()
     else:
         rows = db.execute(
             "SELECT id, to_email, kind, subject, body, link_url, status,"
-            " created_by, created_at FROM maxo_inbox"
+            " mail_status, created_by, created_at FROM maxo_inbox"
             " ORDER BY id DESC LIMIT 200"
         ).fetchall()
     return jsonify([dict(r) for r in rows])

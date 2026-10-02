@@ -36,6 +36,14 @@ def init_db(app=None):
         conn.execute(
             "ALTER TABLE users ADD COLUMN token_version INTEGER NOT NULL DEFAULT 0"
         )
+    # La bandeja registra si el correo salió (diagnóstico visible en outbox).
+    inbox_cols = [
+        row[1] for row in conn.execute("PRAGMA table_info(maxo_inbox)").fetchall()
+    ]
+    if inbox_cols and "mail_status" not in inbox_cols:
+        conn.execute(
+            "ALTER TABLE maxo_inbox ADD COLUMN mail_status TEXT NOT NULL DEFAULT 'unknown'"
+        )
     conn.commit()
     conn.close()
     print("Initialized DB at", db_path)
