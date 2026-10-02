@@ -92,8 +92,9 @@ def mask_email(email: str) -> str:
 def generate_invite(current_user):
     """Genera una invitación firmada para un email (panel admin).
 
-    No envía correo todavía (Fase 1: copiar/enlazar). Registra la
-    emisión en maxo_arrivals con source='admin_invite' para trazabilidad T13.
+    La deja en la bandeja interna del destinatario además de devolver el
+    enlace para copiar/relevar. Registra la emisión en maxo_arrivals con
+    source='admin_invite' para trazabilidad T13.
     """
     data = request.get_json(silent=True) or {}
     email = str(data.get("email") or "").strip().lower()
@@ -107,11 +108,25 @@ def generate_invite(current_user):
         (email,),
     )
     db.commit()
+    from .inbox import deliver
+
+    invite_url = f"/invite?t={token}"
+    deliver(
+        email,
+        "invite",
+        subject="Te invitaron a la Cohorte",
+        body=(
+            "No hay prisa: primero tu pulso, luego tu acuerdo. "
+            "Abre el enlace y crea tu cuenta cuando sea el momento."
+        ),
+        link_url=invite_url,
+        created_by=current_user.get("user_id"),
+    )
     return jsonify(
         {
             "email": email,
             "token": token,
-            "invite_url": f"/invite?t={token}",
+            "invite_url": invite_url,
             "api_url": f"/invite/{token}",
             "register_url": f"/register?email={email}",
         }

@@ -133,6 +133,7 @@ def create_app(db_path=None):
     from .forum_bp import forum_bp, init_forum_tables
     from .groups_bp import groups_bp, init_groups_tables
     from .guide_bp import guide_bp, init_guide_tables
+    from .inbox import inbox_bp
     from .interchanges import bp as interchanges_bp
     from .maxo_bp import bp as maxo_bp
     from .micromax import init_micromax_tables
@@ -176,6 +177,7 @@ def create_app(db_path=None):
     app.register_blueprint(synthetic_sessions_bp)
 
     app.register_blueprint(guide_bp)
+    app.register_blueprint(inbox_bp)
     app.register_blueprint(forum_bp)
     app.register_blueprint(workshops_bp)
     app.register_blueprint(groups_bp)

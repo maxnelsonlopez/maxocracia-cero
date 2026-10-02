@@ -94,6 +94,24 @@ CREATE TABLE IF NOT EXISTS password_resets (
 );
 CREATE INDEX IF NOT EXISTS idx_password_resets_user ON password_resets(user_id);
 
+-- Bandeja interna (fallback al correo): invitaciones y avisos que el
+-- facilitador puede relevar de viva voz. El link de reset se guarda para
+-- relevo admin, pero NUNCA se muestra al propio dueño en /inbox (si una
+-- sesión ajena pudiera leer el token, el correo dejaría de autenticar).
+CREATE TABLE IF NOT EXISTS maxo_inbox (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  to_email TEXT NOT NULL,
+  kind TEXT NOT NULL CHECK(kind IN ('invite','password_reset','notice')),
+  subject TEXT NOT NULL DEFAULT '',
+  body TEXT NOT NULL DEFAULT '',
+  link_url TEXT,
+  status TEXT NOT NULL DEFAULT 'sent' CHECK(status IN ('sent','read')),
+  created_by INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_inbox_to_email ON maxo_inbox(to_email);
+
 CREATE TABLE IF NOT EXISTS resources (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER,

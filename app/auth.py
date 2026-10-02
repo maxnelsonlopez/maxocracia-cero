@@ -471,10 +471,29 @@ def forgot():
     )
     db.commit()
 
-    try:
-        from .mailer import build_reset_url, send_reset_email
+    from .mailer import build_reset_url, send_reset_email
 
-        send_reset_email(email, build_reset_url(raw))
+    reset_url = build_reset_url(raw)
+    try:
+        send_reset_email(email, reset_url)
+    except Exception:
+        pass
+    # Relevo en bandeja interna: si el correo no llega, el facilitador
+    # lo entrega desde el outbox (el link se redacta al propio dueño).
+    try:
+        from .inbox import deliver
+
+        deliver(
+            email,
+            "password_reset",
+            subject="Restablece tu contraseña",
+            body=(
+                "Se pidió restablecer tu contraseña (vale 1 hora, un solo uso). "
+                "Revisa tu correo o pide el enlace a tu facilitador. "
+                "Si no fuiste tú, ignora este aviso."
+            ),
+            link_url=reset_url,
+        )
     except Exception:
         pass
 
