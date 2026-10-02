@@ -114,11 +114,18 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-slate-400">
-            ¿Aún no eres ciudadano?{" "}
-            <Link href="/register" className="text-emerald-400 hover:text-emerald-300 transition-colors font-medium">
-              Regístrate aquí
-            </Link>
+          <div className="mt-6 text-center text-sm text-slate-400 space-y-2">
+            <div>
+              <Link href="/forgot" className="text-slate-400 hover:text-emerald-300 transition-colors font-medium">
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
+            <div>
+              ¿Aún no eres ciudadano?{" "}
+              <Link href="/register" className="text-emerald-400 hover:text-emerald-300 transition-colors font-medium">
+                Regístrate aquí
+              </Link>
+            </div>
           </div>
         </div>
       </motion.div>

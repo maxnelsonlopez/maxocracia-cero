@@ -1,5 +1,8 @@
+import hashlib
 import os
+import secrets
 import sqlite3
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from flask import Blueprint, current_app, jsonify, make_response, request, session
@@ -422,3 +425,104 @@ def refresh():
     )
 
     return resp
+
+
+RESET_TTL_SECONDS = 3600
+
+
+@bp.route("/forgot", methods=["POST"])
+@limiter.limit(REGISTER_LIMITS)
+@limiter.limit(LOGIN_ACCOUNT_LIMITS, key_func=get_account_key)
+def forgot():
+    """Pide un restablecimiento: respuesta siempre genérica (anti-enumeración).
+
+    Si el email existe, crea un token de un solo uso (1h, hash SHA-256 en BD)
+    e intenta enviarlo por SMTP (best-effort). En testing/desarrollo se
+    devuelve además `reset_token` para poder probar sin correo real; en
+    producción jamás se expone.
+    """
+    data = request.get_json(silent=True) or {}
+    email = str(data.get("email") or "").strip().lower()
+    generic = {"message": "Si el correo existe, enviamos instrucciones"}
+
+    if not validate_email(email):
+        return jsonify(generic), 200
+
+    db = get_db()
+    user = db.execute(
+        "SELECT id FROM users WHERE lower(email) = ?", (email,)
+    ).fetchone()
+    if user is None:
+        check_password_hash(_dummy_password_hash(), "tiempo-constante")
+        return jsonify(generic), 200
+
+    raw = secrets.token_urlsafe(32)
+    thash = hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    expires = (
+        datetime.now(timezone.utc) + timedelta(seconds=RESET_TTL_SECONDS)
+    ).strftime("%Y-%m-%d %H:%M:%S")
+    db.execute(
+        "UPDATE password_resets SET used = 1 WHERE user_id = ? AND used = 0",
+        (user["id"],),
+    )
+    db.execute(
+        "INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES (?, ?, ?)",
+        (user["id"], thash, expires),
+    )
+    db.commit()
+
+    try:
+        from .mailer import build_reset_url, send_reset_email
+
+        send_reset_email(email, build_reset_url(raw))
+    except Exception:
+        pass
+
+    if _refresh_in_body():
+        return jsonify({**generic, "reset_token": raw}), 200
+    return jsonify(generic), 200
+
+
+@bp.route("/reset", methods=["POST"])
+@limiter.limit(REGISTER_LIMITS)
+def reset_password():
+    """Consume el token y fija la nueva contraseña (un solo uso).
+
+    Al cambiarla se revocan sesiones: token_version+1 y refresh rotados
+    quedan invalidados (sin zona ciega, T13).
+    """
+    data = request.get_json(silent=True) or {}
+    token = str(data.get("token") or "")
+    password = data.get("password")
+    if not token or not validate_password(password):
+        return jsonify({"error": "token o contraseña inválidos"}), 400
+
+    thash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    db = get_db()
+    row = db.execute(
+        "SELECT user_id, expires_at, used FROM password_resets WHERE token_hash = ?",
+        (thash,),
+    ).fetchone()
+    if row is None or int(row["used"] or 0):
+        return jsonify({"error": "token inválido o expirado"}), 400
+    try:
+        exp = datetime.strptime(
+            row["expires_at"], "%Y-%m-%d %H:%M:%S"
+        ).replace(tzinfo=timezone.utc)
+    except Exception:
+        return jsonify({"error": "token inválido o expirado"}), 400
+    if exp < datetime.now(timezone.utc):
+        return jsonify({"error": "token inválido o expirado"}), 400
+
+    user_id = int(row["user_id"])
+    db.execute(
+        "UPDATE users SET password_hash = ?, token_version = token_version + 1 WHERE id = ?",
+        (generate_password_hash(password), user_id),
+    )
+    db.execute("UPDATE password_resets SET used = 1 WHERE token_hash = ?", (thash,))
+    try:
+        revoke_user_tokens(user_id)
+    except Exception as e:
+        print(f"Warning: no se pudieron revocar tokens en reset: {e}")
+    db.commit()
+    return jsonify({"message": "contraseña actualizada"}), 200

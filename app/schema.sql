@@ -81,6 +81,19 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
   UNIQUE(token_hash)
 );
 
+-- Tokens de restablecimiento de contraseña (un solo uso, 1h, hash SHA-256).
+-- El token crudo solo viaja por correo; en BD vive su hash (T13).
+CREATE TABLE IF NOT EXISTS password_resets (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  token_hash TEXT NOT NULL UNIQUE,
+  expires_at TEXT NOT NULL,
+  used INTEGER DEFAULT 0,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_password_resets_user ON password_resets(user_id);
+
 CREATE TABLE IF NOT EXISTS resources (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER,
