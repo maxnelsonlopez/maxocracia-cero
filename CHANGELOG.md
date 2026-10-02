@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-10-02 — Operación del administrador: usuarios, reset y bandeja interna
+
+### Añadido
+- **Panel admin de usuarios** (`frontend/app/admin/users/page.tsx`): columna Registro (`created_at`) + badge N0/N1 (`trust_level`), menú de 3 puntos funcional (ficha completa, copiar invitación, ascender a N1), modal Invitar. Fuente `GET /subscriptions/admin/users` ahora expone `created_at, trust_level, is_admin` (`app/subscriptions.py:609-620`).
+- **Generación de invitaciones** (`POST /invite/generate`, solo admin): token HMAC por email, bitácora `admin_invite` en `maxo_arrivals` + fila en bandeja (`app/arrivals.py:90-132`).
+- **Reset de contraseña** (`POST /auth/forgot`, `POST /auth/reset` en `app/auth.py`): respuesta genérica anti-enumeración, token de un solo uso 1h (hash SHA-256 en `password_resets`, `app/schema.sql`), al consumir sube `token_version` y revoca refresh (T13). Mailer nuevo (`app/mailer.py`, best-effort, bilingüe `SMTP_*`/`MAIL_*`, respeta `MAIL_ENABLED`, TLS/SSL). Páginas `/forgot`, `/reset` + enlace en `/login`.
+- **Bandeja interna** (`maxo_inbox`, `app/inbox.py`): `GET /inbox` propia (el link de reset se redacta al dueño, las invitaciones sí se muestran), `POST /inbox/<id>/read`, `GET /inbox/outbox` (admin, links completos + `mail_status` sent/failed/skipped para diagnosticar el SMTP). Páginas `/bandeja` y `/admin/inbox`; atajo con contador de no-leídos en `/perfil`; enlace móvil.
+- **Tests**: `tests/test_admin_users_panel.py` (4), `tests/test_auth_password_reset.py` (3: flujo+quema, anti-enumeración, expirado), `tests/test_inbox.py` (4: relevo, redacción, permisos), `tests/test_mailer_config.py` (3: `MAIL_*` Gmail 587, `MAIL_ENABLED=False`, precedencia `SMTP_*` + SSL).
+
+### Corregido
+- **Sidebar admin sin scroll** (`frontend/app/admin/layout.tsx`): `aside` flex-col con `nav overflow-y-auto`; el footer deja de ser `absolute` y de tapar Usuarios/Suscripciones/Configuración.
+- **CRUD usuarios muerto**: botones Invitar/Editar/··· sin handler → todos funcionales; acciones visibles en táctil (antes `opacity-0` solo-hover).
+- **SMTP del admin**: su `.env` en convención `MAIL_*` no era leído + `MAIL_ENABLED=False`; guía ampliada en `config.example.env`.
+
+### Notas Técnicas
+- Commits `03644ce` (sidebar), `340080d` (fecha+invites), `28cd9cd` (menú usuarios), `39070a6` (reset), `f55f743` (bandeja backend), `bd5c8e0` (bandeja frontend), `62d211b` (mail_status), `72512bc` (mailer bilingüe). Migración idempotente de `mail_status` en `app/utils.py::init_db`. `next build` limpio (47+ rutas: `/forgot`, `/reset`, `/bandeja`, `/admin/inbox`). Atribución en `atribuciones_sinteticas.md` (Muse Spark).
+
 ## 2026-09-26 — Escuela invitada primero: buscador al frente, login optativo
 
 ### Añadido
