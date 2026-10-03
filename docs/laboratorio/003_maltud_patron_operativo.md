@@ -60,6 +60,13 @@ G3, trata y desposesión violenta (ver pieza 001 §2–§3).
 Regla de uso: la métrica orienta la mirada, no dicta veredictos. Quien la use para condenar sin
 proceso repite el gesto maltudiano (externalizar el costo del error sobre el acusado).
 
+## 3.6 D, segunda aproximación (vuelta 3, tentativa)
+
+Ponderar componentes: la V (vida, salud) pesa más que la R (recursos); el T directo más que el
+heredado. Umbrales a calibrar con casos reales, no a decretar: D<0.2 fricción normal de convivir;
+0.2–1 zona gris a auditar; >1 extractivo (destruye más de lo que retiene); >1 + coerción = Grado 3.
+La métrica sigue orientando la mirada, nunca dictando veredictos.
+
 ## 4. Preguntas abiertas (para próximas vueltas)
 
 1. Casos históricos por grado: ¿qué episodios canónicos ilustran cada uno sin caer en panfleto?

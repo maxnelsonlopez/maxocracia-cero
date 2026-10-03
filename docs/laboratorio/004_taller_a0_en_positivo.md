@@ -50,6 +50,15 @@ Protocolo de prueba en plaza (borrador): decir cada candidata en voz alta a tres
 del proyecto; si alguna pide explicación, la candidata vuelve al taller. La que sobrevive tres
 plazas sin explicación pasa a candidata canónica.
 
+## 2.6 Tercera hornada: los tres reinos en una respiración (vuelta 3)
+
+10. **"Ni la tierra ni nadie es recurso de nadie."** (Tres reinos sin lista: lo que se niega es el
+    *uso*, no se enumera a los usados.)
+11. **"Lo mejor para todos: los de ahora, los que vienen y lo que vive."** (Tiempo + reinos en una
+    línea: presentes, futuros, vivientes.)
+12. **"Todo lo vivo cuenta: la gente, el monte y lo que nos ayuda."** (Versión de plaza rural;
+    "lo que nos ayuda" nombra al sintético sin jerga. A probar.)
+
 ## 3. Preguntas abiertas (para próximas vueltas)
 
 1. ¿"Todos todos" se lee mejor que "cada uno"? (El doble todos marca lo distributivo; ¿lo oye así

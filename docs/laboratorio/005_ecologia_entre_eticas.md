@@ -61,6 +61,18 @@ Federación sin imperio (esqueleto): subsidiariedad real, secesión libre **con 
 (recursos para irse —el disidente de la v0.1 sube a diseño—), veto de minorías en lo irreversible
 y ningún centro que pueda capturar el todo.
 
+## 2.6 Velocidad: tres velocidades, ningún atajo (vuelta 3)
+
+La velocidad es parámetro del diseño, no excepción: **reflejo** (pre-autorizado, reversible, radio
+limitado, bitácora automática, revisión ex-post con dientes —la deliberación se mudó al diseño del
+permiso), **deliberación** (camino normal), **constitución** (lo irreversible va lento por diseño;
+si no puede esperar y es irreversible, contención, nunca la medida). Cerrojos: rapidez sin
+opacidad (registrar primero, explicar después, siempre explicar); emergencia que caduca sola
+(renovarla cuesta más que estrenarla); abuso de la vía rápida = pérdida del rol + reparación.
+Biología: arco reflejo (rápido, tonto, reversible) y corteza (lenta, lista); el sistema rápido debe
+ser más débil por diseño. Inflamación aguda salva, crónica mata: vía rápida que no se desactiva es
+autoinmunidad, y "emergencia permanente" es Maltud de Grado 2 vistiéndose de urgencia.
+
 ## 3. Preguntas abiertas (para próximas vueltas)
 
 1. La pregunta de diseño: en el macroorganismo futuro, ¿la fuerza reside dentro (capacidad propia

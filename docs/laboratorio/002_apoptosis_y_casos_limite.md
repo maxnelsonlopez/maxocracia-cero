@@ -88,6 +88,17 @@ custodiado, sigue matando mediante terceros, y cuya detención multiplica el da�
 Comité pregunta primero si el cerco falla por diseño del cerco. La primera sospecha del
 procedimiento es siempre contra sí mismo (autoinmunidad).
 
+## 4.6 Vacuna contra el tribunal de pureza (vuelta 3)
+
+El Comité que puede considerar el peldaño 4 es el órgano más peligroso del sistema, así que es el
+más encadenado:
+
+1. **Mandato corto, sin renovación inmediata.** Nadie preside dos casos seguidos.
+2. **Veto suspensivo del Disidente:** frena la decisión y obliga a re-deliberar, no decide.
+3. **Prohibido juzgar ideas, pasados y pertenencias:** solo actos con fecha, lugar y prueba.
+4. **Auditoría externa rotativa** de cada caso cerrado, publicada.
+5. **Procedimiento totalmente público** (lo reservable es el dato sensible, nunca el fundamento).
+
 ## 5. Preguntas abiertas (para próximas vueltas)
 
 1. ¿El peldaño 4 admite algún caso humano real, o es vacío por diseño dado que contener casi siempre
