@@ -73,6 +73,14 @@ Biología: arco reflejo (rápido, tonto, reversible) y corteza (lenta, lista); e
 ser más débil por diseño. Inflamación aguda salva, crónica mata: vía rápida que no se desactiva es
 autoinmunidad, y "emergencia permanente" es Maltud de Grado 2 vistiéndose de urgencia.
 
+## 2.7 El free rider benigno (vuelta 4)
+
+El que toma sin dar ni dañar se tolera y se acota: todo común sano absorbe cierto porcentaje de
+rideres sin romperse. Se convierte por pertenencia, no por castigo. Deja de ser benigno cuando
+degrada el común o se organiza para extraer (ahí pasa a la pieza 003, G1/G2): la respuesta entonces
+es rediseñar el incentivo, no cazar al rider. Cazar riders es el deporte favorito de los
+organismos enfermos.
+
 ## 3. Preguntas abiertas (para próximas vueltas)
 
 1. La pregunta de diseño: en el macroorganismo futuro, ¿la fuerza reside dentro (capacidad propia

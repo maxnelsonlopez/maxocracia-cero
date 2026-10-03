@@ -59,6 +59,15 @@ plazas sin explicación pasa a candidata canónica.
 12. **"Todo lo vivo cuenta: la gente, el monte y lo que nos ayuda."** (Versión de plaza rural;
     "lo que nos ayuda" nombra al sintético sin jerga. A probar.)
 
+## 2.7 Ranking provisional y criterio de oído (vuelta 4)
+
+Criterio de oído: leer en voz alta; si la lengua tropieza, la candidata vuelve al taller.
+Ranking provisional del laboratorio (gusto, no dato —falta la plaza real): primera, la **11**
+("Lo mejor para todos: los de ahora, los que vienen y lo que vive") por cubrir tiempo y reinos sin
+lista; segunda, la **4** ("Nadie construye su bien sobre el piso de otro") como forma corta del
+deber; tercera, la **8** ("Cuidar lo que nos cuida") para lo natural y sintético. La 1 queda como
+formulación canónica de reserva (ya vive en el Cap. 4).
+
 ## 3. Preguntas abiertas (para próximas vueltas)
 
 1. ¿"Todos todos" se lee mejor que "cada uno"? (El doble todos marca lo distributivo; ¿lo oye así

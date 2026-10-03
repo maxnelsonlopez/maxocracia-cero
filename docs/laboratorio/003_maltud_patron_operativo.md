@@ -67,6 +67,14 @@ heredado. Umbrales a calibrar con casos reales, no a decretar: D<0.2 fricción n
 0.2–1 zona gris a auditar; >1 extractivo (destruye más de lo que retiene); >1 + coerción = Grado 3.
 La métrica sigue orientando la mirada, nunca dictando veredictos.
 
+## 3.7 Del decreto a la ley: tres reformas G1 (vuelta 4)
+
+El Decreto Antipobreza ya nombra el Grado 1; falta el camino a exigibilidad: (1) arriendo con
+transferencia automática al cubrir costo + mantenimiento; (2) piso salarial SDV con auditoría
+oracular (el contrato que paga menos no se valida); (3) etiquetado VHV obligatorio (el precio
+miente menos cuando el costo se ve). Camino: del contrato voluntario al estándar municipal, del
+municipio a la federación. Medir cobertura, no promulgar y rezar.
+
 ## 4. Preguntas abiertas (para próximas vueltas)
 
 1. Casos históricos por grado: ¿qué episodios canónicos ilustran cada uno sin caer en panfleto?

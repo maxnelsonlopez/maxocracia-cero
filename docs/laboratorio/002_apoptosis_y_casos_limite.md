@@ -99,6 +99,15 @@ más encadenado:
 4. **Auditoría externa rotativa** de cada caso cerrado, publicada.
 5. **Procedimiento totalmente público** (lo reservable es el dato sensible, nunca el fundamento).
 
+## 4.7 Presunción de vacuidad del peldaño 4 (vuelta 4)
+
+Posición de este laboratorio: el peldaño 4 se presume **vacío**. Quien afirme un caso carga prueba
+extraordinaria: daño demostrado, escalera 1–3 agotada por diseño (no por falta de intento) y
+contención imposible, no solo difícil. Además, la pregunta misma caduca y se re-pregunta cada
+generación: si en una generación no aparece ningún caso, el peldaño sigue existiendo pero el
+procedimiento se encoge. Un sistema que nunca usó su último peldaño está más sano que uno que
+presume de él.
+
 ## 5. Preguntas abiertas (para próximas vueltas)
 
 1. ¿El peldaño 4 admite algún caso humano real, o es vacío por diseño dado que contener casi siempre
