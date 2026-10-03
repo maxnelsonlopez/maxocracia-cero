@@ -61,3 +61,7 @@ rimar con un hecho verificable, citado con su fuente y su nivel de confianza.
 | Pieza | Tema | Estado |
 |---|---|---|
 | `001_palestina_1917_2026_maltud_y_gobernador.md` | Palestina 1917–2026: flujos de acciones y dinero, semejanza con Maltud, ejercicio del gobernador maxocrático de 8 años | Activa (03-10-2026) |
+| `002_apoptosis_y_casos_limite.md` | Apoptosis y casos límite: escalera, disparador, lo que no escala (v0.1) | Activa (03-10-2026, vuelta 1) |
+| `003_maltud_patron_operativo.md` | Maltud como patrón operativo: tipología, detección por flujos, no-imitarla (v0.1) | Activa (03-10-2026, vuelta 1) |
+| `004_taller_a0_en_positivo.md` | Taller de A0 en positivo: primera hornada de formulaciones (v0.1) | Activa (03-10-2026, vuelta 1) |
+| `005_ecologia_entre_eticas.md` | Ecología entre éticas: convivencia, mínimo común, vecino maltudiano (v0.1) | Activa (03-10-2026, vuelta 1) |

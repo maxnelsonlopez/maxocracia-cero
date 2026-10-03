@@ -1,0 +1,62 @@
+# 005 — Ecología entre éticas (v0.1, cimientos)
+
+> **LABORATORIO — no es canon.** Laboratorio creativo de rima y reflexión de la Maxocracia:
+> las rimas van entre el verso y la realidad, no entre verso y verso.
+> Ejercicio de libre expresión con espíritu constructivo y colaborativo.
+> Responsabilidad editorial: Max Nelson López Restrepo (redacción con Claude / Muse Spark).
+> Las conclusiones son premisa de trabajo declarada, no fallo judicial.
+> Versión 0.1 (vuelta 1): cimientos. Profundización en vueltas siguientes.
+
+---
+
+## 0. El cuadro
+
+Macroorganismos humano-natural-sintéticos con ética maxocrática conviviendo con personas libres,
+naturaleza libre, sintéticos libres y agrupaciones de otras éticas. La Maxocracia es **una
+posibilidad** en el camino evolutivo de la vida y las sociedades —posible, no calculada—. Entre
+organismos no rige la inmunología (nadie es patógeno por ser distinto) sino la **ecología**:
+simbiosis, competencia, parasitismo. La frontera la marcan los actos, no la identidad.
+
+## 1. Principios de convivencia (borrador)
+
+1. **Otra ética no es un patógeno.** La diferencia de código no es diagnóstico. Solo la estrategia
+   que se alimenta del daño ajeno (Maltud, pieza 003) activa la defensa —y contra la estrategia,
+   no contra la gente.
+2. **Mínimo común entre éticas:** lo que casi todas ya condenan (trata, esclavitud, tortura,
+   genocidio, exterminio). Nadie tiene que volverse maxocrático para aliarse contra lo peor.
+3. **Derecho de salida en ambas direcciones:** entrar, salir y disentir son sagrados (T12, T15).
+   Un organismo que retiene por la fuerza confiesa que su código no sostiene por sí mismo.
+4. **La fuerza, distribuida:** reside en cada escala, del átomo al universo —y en la comunidad, del
+   hogar al municipio a la federación. El monopolio de la fuerza, si algún día existe, vive bajo
+   caducidad, auditoría y disidencia permanente, o no vive.
+5. **Amable, provocable, indulgente:** cooperar por defecto, responder proporcionalmente a la
+   defección, perdonar rápido cuando cesa (cooperación repetida). Ternura sin firmeza se explota;
+   firmeza sin ternura se vuelve espiral.
+
+## 2. El Vecino Maltudiano (protocolo)
+
+Si una agrupación vecina opera en Grado 3 (pieza 003):
+
+1. Proteger a los propios y acoger a los que huyen (el piso no pregunta pasaporte).
+2. Documentar (T13) y llevar a las instancias que correspondan; si están capturadas, escalar
+   hacia afuera, nunca hacia la justicia propia.
+3. Ofrecer salidas a los coaccionados de adentro: todo cerco necesita una puerta.
+4. No imitar: nada que no pudiera publicarse después.
+
+## 3. Preguntas abiertas (para próximas vueltas)
+
+1. La pregunta de diseño: en el macroorganismo futuro, ¿la fuerza reside dentro (capacidad propia
+   bajo estas reglas) o siempre fuera (instituciones plurales; la Maxocracia protege, documenta y
+   excluye)?
+2. ¿Cómo se federan organismos de éticas distintas sin que la federación se vuelva imperio?
+   (Antídoto: derecho de secesión, subsidiariedad, ningún centro capturable.)
+3. ¿Qué hacer con el free rider benigno —el que toma del común sin dar ni dañar?
+4. Primeros pactos concretos: ¿agua compartida? (cuencas, corredores biológicos, frecuencias,
+   órbitas: los comunes que no admiten dueño).
+
+## 4. Lectura disidente (contra este documento)
+
+- "Ecología entre éticas" suena hermoso hasta que el vecino quema tu casa: la tolerancia con lo
+  intolerable tiene un límite que este documento patea a "protocolo" sin morderlo.
+- El derecho de salida es asimétrico en la práctica: salir cuesta (vínculos, sustento, miedo). Sin
+  piso de salida —recursos para irse—, el derecho es cartel.
