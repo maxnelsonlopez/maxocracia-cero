@@ -446,6 +446,21 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
 - **Mejoras invitado (26/9/2026, sesión con Max)**: `GET /api/tree/public` (mapa solo-lectura sin estado personal) + panel público del mapa, semillas verificadas visibles y CTA tras la primera búsqueda; test `test_public_tree_needs_no_login_and_leaks_no_progress` (25/25 con buscador).
 - **Operación del administrador + llegada que no deja a nadie fuera (1-2/10/2026, sesión con Max; el legado día a día)**: auditoría del flujo admin contra la mirada del administrador — sidebar sin scroll (`frontend/app/admin/layout.tsx:68`, el `absolute bottom-0` tapaba Usuarios/Suscripciones; fix flex-col + nav con scroll: `03644ce`); CRUD de usuarios muerto (botones Invitar/Editar/··· sin handler en `admin/users/page.tsx:114-198`, fuente sin `created_at/trust/is_admin` en `app/subscriptions.py:609-620`) → `340080d` expone los campos + `POST /invite/generate` (admin, HMAC, bitácora `admin_invite`) y `28cd9cd` revive el menú de 3 puntos (ficha completa, copiar invitación, ascenso N0→N1 vía el `POST /users/<id>/trust` ya existente). **Reset de contraseña** inexistente (sin tabla, sin mailer, SMTP solo comentado en `config.example.env:72-75`) → `POST /auth/forgot` (respuesta genérica anti-enumeración, token de un solo uso 1h guardado en hash, `token_version+1` + revocación al consumir) + `POST /auth/reset` (`app/auth.py`, `app/mailer.py` nuevo, tabla `password_resets` en `app/schema.sql`) + páginas `/forgot`, `/reset` y enlace en login: `39070a6`. **Bandeja interna** (el relevo cuando el correo no llega): `maxo_inbox` + `app/inbox.py` (`GET /inbox` propia con el link de reset **redactado al dueño** —si una sesión comprometida pudiera leer el token, el correo dejaría de autenticar—, `POST /inbox/<id>/read`, `GET /inbox/outbox` admin con links completos para relevo del facilitador) + `/bandeja`, `/admin/inbox`, atajo con no-leídos en `/perfil`: `f55f743` + `bd5c8e0`. **Diagnóstico honesto del SMTP**: el correo del admin no salía por doble causa —su `.env` en convención `MAIL_*` que el mailer no leía + `MAIL_ENABLED=False`—; `72512bc` vuelve el mailer bilingüe (`SMTP_*`/`MAIL_*`, `MAIL_ENABLED`, TLS/SSL con precedencia `SMTP_*`) y `62d211b` expone `mail_status` (sent/failed/skipped) en el outbox. Tests: `tests/test_admin_users_panel.py` (4), `tests/test_auth_password_reset.py` (3), `tests/test_inbox.py` (4, incl. redacción), `tests/test_mailer_config.py` (3, SMTP mockeado); `next build` limpio con `/forgot`, `/reset`, `/bandeja`, `/admin/inbox`.
 
+- **Sesión de repaso conceptual — Cap. 4, A0, apoptosis y Maltud (03-10-2026, sesión con Max)**:
+  lectura completa de `docs/book/edicion_3_dinamica/capitulo_04_declaracion_260126.md` y su contexto
+  (Caps. 1, 2, 3, 5, 10, 13 §13.13, `docs/architecture/maxocontracts/decreto_antipobreza.md`,
+  `docs/legacy/Apuntes Thats good enough for everyone.txt`,
+  `docs/book/edicion_3_dinamica/integraciones_pendientes/INDICE.md`,
+  `docs/SESION_NEXT_PROMPT.md`, `docs/architecture/voto_sintetico_arquitectura.md` §3–§4);
+  precisión de Max integrada (el "sacrificio de autonomía" es deber negativo de no externalizar sobre
+  el SDV ajeno, no auto-inmolación); diálogo sobre la apoptosis como caso límite (graduación biológica
+  p53→senescencia→apoptosis, qué parámetros escalan y cuáles no: fungibilidad, genoma compartido y
+  autoejecución no escalan); defensa del macroorganismo en tres casos (trata externa, miembro cómplice,
+  traidores) + Maltud definido como externalización sistemática; verificación web de hechos recientes
+  (Gaza genocide, South Africa v. Israel, Gaza war — octubre 2026); validador conceptual en verde
+  (8144 archivos). Pendiente con OK de Max: carpeta `docs/laboratorio/` (Palestina 1917–2026 + gobernador
+  8 años) y mejoras quirúrgicas al canon (Cap. 1 §1.2/§1.8, Cap. 4 §4.2/§4.4/§4.11, Cap. 2 §2.7).
+
 ### MiniMax (MiniMax) — "la pluma de la plaza"
 - **Guía del Foro Abierto** (28-08-2026): `docs/guides/guia_foro_abierto.md` — documento de la
   rama educativa (OEV §1.7-1.8): qué es la plaza, los cuatro tipos canónicos, los guardarraíles
