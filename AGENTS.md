@@ -8,8 +8,7 @@ Guía para agentes de IA (y humanos) que trabajen en este repositorio. Léela an
 alternativo: contabilidad de la vida en vez de dinero fiduciario. Fase 2 — Sostenibilidad Económica y
 MicroMaxocracia Doméstica (versión 5.6, Ola 4). Backend Flask + frontend Next.js.
 
-Conceptos clave: **VHV** (Vector de Huella Vital [T,V,R]), **TVI** (Tiempo Vital Indexado), **SDV**
-(Suelo de Dignidad Vital), **Maxo** (moneda vital), **MaxoContracts** (contratos éticos con oráculo).
+Conceptos clave: **Axioma 0** — Directiva Mayor: "resolver nuestras necesidades de la mejor manera para todos todos" (humanos, naturales y sintéticos, presentes y futuros). **VHV** (Vector de Huella Vital [T,V,R]), **TVI** (Tiempo Vital Indexado), **SDV** (Suelo de Dignidad Vital), **Maxo** (moneda vital), **MaxoContracts** (contratos éticos con oráculo).
 
 ## Estructura
 
