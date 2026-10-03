@@ -9,7 +9,7 @@ La crisis civilizatoria actual es, en su raíz, una crisis de contabilidad. Los 
 
 La Maxocracia no propone una simple reforma económica, sino una revolución epistemológica. Desplazamos el tiempo desde la periferia de la economía (donde es visto solo como un "costo laboral" o un "recurso") hacia su centro ontológico. La premisa es radical pero evidente: **el tiempo es la sustancia de la que está hecha la existencia.**
 
-Esta revolución temporal se integra directamente con los Ocho Axiomas de Verdad establecidos en el Capítulo 2:
+Esta revolución temporal se integra directamente con los Ocho Axiomas de Verdad establecidos en el Capítulo 4:
 - **Axioma 4 (La verdad es el camino más corto):** La contabilidad basada en TVI es el camino más corto y honesto para entender el costo real de nuestras acciones, eliminando las distorsiones del precio monetario.
 - **Axioma 3 (La verdad es compleja):** El TVI nos permite abrazar la complejidad del valor, reconociendo que un producto no es un objeto estático, sino un nexo de tiempo cristalizado con un pasado (TVIs heredados), un presente (TVIs directos) y un futuro (TVIs de mantenimiento y descarte).
 - **Axioma 8 (Todo lo que existe se estructura en la verdad):** El flujo de TVIs es la estructura subyacente de la realidad existencial. Hacerlo visible es alinear nuestra economía con la verdad ontológica.
@@ -61,7 +61,7 @@ El TVI resolvió los problemas anteriores:
 
 ## 5.3 Los 15 Axiomas Temporales: La Constitución Física del Sistema
 
-Para operar con esta nueva unidad de valor, necesitamos reglas claras que no dependan de la opinión humana, sino de la estructura de la realidad. A través de la ingeniería conceptual, hemos establecido 15 axiomas que actúan como las leyes físicas de la economía maxocrática. Estos axiomas se derivan y son plenamente consistentes con los Ocho Axiomas de la Verdad del Capítulo 2.
+Para operar con esta nueva unidad de valor, necesitamos reglas claras que no dependan de la opinión humana, sino de la estructura de la realidad. A través de la ingeniería conceptual, hemos establecido 15 axiomas que actúan como las leyes físicas de la economía maxocrática. Estos axiomas se derivan y son plenamente consistentes con los Ocho Axiomas de la Verdad del Capítulo 4.
 
 ### Grupo A: Fundamentos de la Existencia
 Estos axiomas definen qué es el tiempo vital.

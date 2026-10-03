@@ -35,6 +35,8 @@ La ética post-celular identifica una jerarquía de cinco niveles donde la coher
 
 **Importante: las personas no son "células sociales".** Cada persona ya es un nivel ético completo —un organismo con consciencia, dignidad y agencia propia. La ética comunitaria no reduce a los individuos a componentes descartables, sino que se construye *sobre* la dignidad y autonomía de seres que ya poseen ética reflexiva plena.
 
+**Precisión (Ed. 3.x, añadidura):** lo que se cede no es el propio SDV, sino la libertad de externalizar costos sobre el piso ajeno. La comunidad no tiene reclamo sobre el SDV de nadie: su buen funcionamiento consiste en que cada quien sostenga el piso de los demás. La imagen de la apoptosis se conserva por honestidad biológica —todo proceso tiene un fin—, pero no es un deber de los sanos ni un destino para el disidente: el disparador nunca es la visión del mundo (T12, T15). Los casos límite donde los axiomas callan no se legislan aquí; pertenecen a los Comités de Dilemas Existenciales (Cap. 13 §13.13), que sostienen la pregunta sin precedente.
+
 La Maxocracia traslada esta lógica a la civilización. Si queremos que emerja una "salud social" sostenible (un nivel superior de organización), los componentes individuales (personas, corporaciones, instituciones) debemos aceptar formar parte de una coherencia mayor. La libertad no desaparece, pero cambia de cualidad: deja de ser la libertad de *hacer cualquier cosa* (como la célula cancerígena) y se convierte en la libertad de *participar conscientemente* en un sistema que garantiza la vida de todos.
 
 ## 1.3 Extensiones Biológicas: Microbiota y Virus
@@ -103,10 +105,12 @@ La vida multicelular funciona porque la autonomía se sacrifica en la base para 
 Los principios fundamentales pueden resumirse así:
 
 - La ética **emerge** en cada nivel donde existe coherencia que puede preservarse o destruirse.
-- La autonomía se sacrifica *abajo* para que pueda existir *arriba*.
+- La autonomía se sacrifica *abajo* para que pueda existir *arriba*: lo que se cede es la libertad de externalizar sobre el piso ajeno, nunca el propio SDV.
 - Cada nivel **hereda y amplía** la ética del nivel inferior, nunca la elimina.
 - La ética es **contextual y reguladora**, no absoluta ni homogénea.
-- La coherencia global vale más que la libertad local en entornos irreversibles.
+- La coherencia global vale más que la libertad local *de externalizar* en entornos irreversibles.
+
+En positivo: con el piso asegurado para todos, cada quien puede dedicarse a sostener el de los demás.
 
 ## 1.9 Conclusión: Una Invitación a Construir
 

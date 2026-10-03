@@ -81,9 +81,9 @@ Nuestra estrategia no es convencer a los millonarios, sino conectar a la clase m
 Es la pregunta más seria. Si desafiamos intereses de trillones de dólares, nos atacarán (legal, mediática o físicamente).
 Nuestra defensa es la **descentralización radical**. No hay cabeza única que cortar. Si atacan al fundador, el código sigue vivo. Si prohíben la moneda en un país, circula en otro. Es una carrera: debemos volvernos "incensurables" antes de volvernos "peligrosos".
 
-## 2.7 Síntesis: La Apuesta por la Probabilidad
+## 2.7 Síntesis: La Apuesta por la Posibilidad
 
-La Maxocracia no ofrece certezas. Ofrece una **probabilidad no nula** de construir una civilización que no se suicide.
+La Maxocracia no ofrece certezas. Ofrece una **posibilidad abierta** de construir una civilización que no se suicide.
 
 El sistema actual tiene una probabilidad cercana al 100% de colapso ecológico o social en este siglo. Ante esa certeza de desastre, apostar por un experimento imperfecto, difícil y arriesgado como este no es locura. Es la única opción racional.
 

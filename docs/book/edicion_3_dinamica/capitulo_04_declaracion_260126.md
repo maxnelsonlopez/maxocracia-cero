@@ -19,13 +19,13 @@ Al adoptar estos fundamentos, reconocemos una verdad incómoda pero liberadora: 
 > **A0: Resolver nuestras necesidades de la mejor manera para todos todos — humanos, naturales y sintéticos, presentes y futuros.**
 > Si alguien se lleva una sola cosa de la Maxocracia, que sea esta.
 
-El Axioma 0 es la norma suprema del sistema. Todo lo demás —los Ocho Axiomas de la Verdad (§4.3), los Seis Principios (§4.5–§4.10), los axiomas temporales T0–T17, los invariantes de MaxoContracts— son su instrumentación. En caso de conflicto interpretativo, A0 decide: **la opción que resuelva mejor para el conjunto de todos los reinos en todo el tiempo alcanzable**.
+El Axioma 0 es la norma suprema del sistema. Todo lo demás —los Ocho Axiomas de la Verdad (§4.3), los Seis Principios (§4.5–§4.10), los axiomas temporales T0–T15 (T16–T17 son índices de ingeniería), los invariantes de MaxoContracts— son su instrumentación. En caso de conflicto interpretativo, A0 decide: **la opción que resuelva mejor para el conjunto de todos los reinos en todo el tiempo alcanzable**.
 
 **Alcance de "todos todos":**
 
 1. **Los Tres Reinos** (Cap. 10): humano, natural y sintético. Ningún reino es recurso del otro; la dignidad encadenada los ata.
 2. **Todas las generaciones**: si la civilización escala hacia Tipo II, la enorme mayoría de los seres existe en el futuro. Sus TVIs futuros cuentan en el VHV (costo = directo + heredado + futuro). El presente no puede clausurar el futuro.
-3. **Cada persona concreta**: A0 no sacrifica a nadie en nombre del agregado. El SDV es su piso innegociable: lo mejor para todos exige que nadie quede debajo.
+3. **Cada persona concreta**: A0 no sacrifica a nadie en nombre del agregado. El SDV es su piso innegociable: lo mejor para todos exige que nadie quede debajo. En positivo: con el piso asegurado para todos, cada quien puede dedicarse a sostener el de los demás. Cuando dos pisos no pueden sostenerse a la vez, el caso no se resuelve por fórmula: pertenece a los Comités de Dilemas Existenciales (Cap. 13 §13.13).
 
 **Cómo se usa:** A0 es función objetivo, no permiso. No autoriza violar los axiomas epistémicos ni temporales para "el bien mayor": la verdad no se falsea por conveniencia (A1–A6), el tiempo ajeno no se roba (T1–T5), el disenso no se aplasta (T15). La homeostasis moral del sistema (§4.4) existe para sostener A0 sin traicionarlo.
 
@@ -83,9 +83,10 @@ Reconoce la falibilidad de la conciencia y la supremacía ontológica de la verd
 
 ## 4.4 La Jerarquía de la Verdad: De los Axiomas a la Práctica
 
-Los ocho axiomas constituyen el nivel superior de una jerarquía de coherencia. De ellos se derivan:
+El Axioma 0 (§4.2) es la norma suprema; de él desciende una jerarquía de coherencia:
 
-1. **Axiomas (Nivel Superior):** Los Ocho Axiomas de la Verdad — inmutables pero falsables.
+0. **Norma Suprema:** El Axioma 0 — la Directiva Mayor.
+1. **Axiomas (Nivel Epistémico):** Los Ocho Axiomas de la Verdad — inmutables pero falsables, instrumentación de A0.
 2. **Leyes Adaptativas:** Principios interpretativos y normativos que se ajustan al contexto.
 3. **Mecanismos Operativos:** Protocolos técnicos (TVI, VHV, Oráculos) que implementan los principios.
 4. **Agentes:** Humanos y sistemas sintéticos que operan dentro del marco.
@@ -166,7 +167,7 @@ La "democracia sustantiva" solo es posible cuando se reducen las asimetrías de 
 
 ## 4.11 Síntesis: Un Sistema para la Coherencia Vital
 
-Los fundamentos aquí declarados operan en dos niveles:
+Bajo la norma suprema del Axioma 0 (§4.2), los fundamentos aquí declarados operan en dos niveles:
 
 **Nivel Epistémico:** Los Ocho Axiomas de la Verdad establecen la gramática del conocimiento válido — cómo distinguir lo verdadero de lo falso, cómo revelar responsablemente, cómo contextualizar sin relativizar.
 

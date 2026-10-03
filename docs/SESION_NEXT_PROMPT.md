@@ -279,4 +279,20 @@ registro sin correo (decidir con rebote medido), `alert()` restantes, email
 la propuso en ciclo).
 
 ---
+## Jornada 03-10-2026 — laboratorio + precisión del sacrificio (Muse Spark + Max)
+
+**Laboratorio creativo de rima y reflexión** (`docs/laboratorio/`, NO canon): README con reglas
+([VERIFICADO]/[REPORTADO]/[HIPÓTESIS], pueblos nunca culpables colectivos, todas las víctimas
+cuentan) + pieza `001_palestina_1917_2026_maltud_y_gobernador.md` (Palestina grande 1917–2026 por
+flujos, semejanza con Maltud por prácticas, gobernador angelical de 8 años en 12 movimientos;
+premisa de genocidio con respaldo CIJ/COI-ONU/CPI y estado judicial real; "tráfico de personas"
+como empresa estatal marcado [HIPÓTESIS], no afirmado). Hechos recientes verificados en línea el
+mismo día (Wikipedia: Gaza genocide, South Africa v. Israel, Gaza war).
+**Canon (quirúrgico, con OK de Max)**: Cap. 1 §1.2 precisión añadida (se cede externalizar, no el
+SDV; apoptosis conservada; casos límite a Comités Cap. 13 §13.13) + §1.8 (bullets matizados y cierre
+en positivo); Cap. 4 §4.2 (T0–T15 + T16–T17 ingeniería; §4.2.3 en positivo + Comités), §4.4 (A0 como
+nivel 0) y §4.11 (bajo A0); Cap. 2 §2.7 (posibilidad, no probabilidad); Cap. 5 (Ocho Axiomas viven en
+Cap. 4, no Cap. 2). Validador verde (8146 archivos) + `test_validador_conceptual.py` 4/4.
+**Créditos**: `atribuciones_sinteticas.md` + commit `bc1a2c2` (Muse Spark).
+
 **Mantenido por**: Max + el agente de la jornada (harness) · **Próxima actualización**: al cierre de la siguiente sesión
