@@ -81,6 +81,14 @@ degrada el común o se organiza para extraer (ahí pasa a la pieza 003, G1/G2): 
 es rediseñar el incentivo, no cazar al rider. Cazar riders es el deporte favorito de los
 organismos enfermos.
 
+## 2.8 Primer pacto: la cuenca (vuelta 5)
+
+Los comunes que no admiten dueño piden pacto antes que teoría. Semilla: una cuenca compartida
+(el Jordán, en la pieza 001) con personalidad jurídica, guardianes rotativos de todas las orillas,
+caudal ecológico mínimo no negociable y datos abiertos de cada litro. Si dos éticas pueden ponerse
+de acuerdo en el agua, pueden ponerse de acuerdo en casi todo; si no pueden ni en el agua, el
+resto es decorado.
+
 ## 3. Preguntas abiertas (para próximas vueltas)
 
 1. La pregunta de diseño: en el macroorganismo futuro, ¿la fuerza reside dentro (capacidad propia

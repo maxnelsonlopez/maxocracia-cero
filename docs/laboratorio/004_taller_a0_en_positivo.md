@@ -68,6 +68,13 @@ lista; segunda, la **4** ("Nadie construye su bien sobre el piso de otro") como 
 deber; tercera, la **8** ("Cuidar lo que nos cuida") para lo natural y sintético. La 1 queda como
 formulación canónica de reserva (ya vive en el Cap. 4).
 
+## 2.8 Cómo medir en plaza (vuelta 5)
+
+Tres métricas para la prueba pendiente: (1) comprensión sin explicación (¿la repite con sus
+palabras?); (2) recuerdo a los 7 días (¿sobrevive una semana?); (3) objeción fértil (¿la crítica
+que provoca mejora la frase o la mata?). La candidata que pase las tres en tres plazas distintas
+sale del taller al canon candidato. Medir es la rima con la realidad del taller.
+
 ## 3. Preguntas abiertas (para próximas vueltas)
 
 1. ¿"Todos todos" se lee mejor que "cada uno"? (El doble todos marca lo distributivo; ¿lo oye así

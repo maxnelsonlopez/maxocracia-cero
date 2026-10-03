@@ -108,6 +108,15 @@ generación: si en una generación no aparece ningún caso, el peldaño sigue ex
 procedimiento se encoge. Un sistema que nunca usó su último peldaño está más sano que uno que
 presume de él.
 
+## 4.8 Protocolo de retorno (vuelta 5)
+
+El error no es motivo de expulsión (Cap. 3, Cap. 8 §8.11): quien daña tiene un camino estructurado
+de vuelta —reconocimiento del daño (hecho, no humillación), reparación verificable a los dañados,
+período de prueba con accesos graduados, reingreso pleno sin marca perpetua (la bitácora recuerda
+el hecho; la comunidad no cobra peaje eterno). Solo la malicia persistente que agota este camino
+llega a contención. El sistema que no ofrece retorno fabrica reincidentes y luego los castiga por
+serlo.
+
 ## 5. Preguntas abiertas (para próximas vueltas)
 
 1. ¿El peldaño 4 admite algún caso humano real, o es vacío por diseño dado que contener casi siempre

@@ -75,6 +75,14 @@ oracular (el contrato que paga menos no se valida); (3) etiquetado VHV obligator
 miente menos cuando el costo se ve). Camino: del contrato voluntario al estándar municipal, del
 municipio a la federación. Medir cobertura, no promulgar y rezar.
 
+## 3.8 Señales tempranas de G2 (vuelta 5)
+
+La captura avisa antes de consumarse: el regulador viene de la industria regulada; las multas cuestan
+menos que el delito (precio de desobediencia); el lenguaje se invierte (el contaminador habla de
+"sostenibilidad"); los denunciantes pagan y los directivos ascienden; los datos se vuelven
+secretos justo donde más importan. Cinco señales encendidas = auditoría externa obligatoria, no
+debate.
+
 ## 4. Preguntas abiertas (para próximas vueltas)
 
 1. Casos históricos por grado: ¿qué episodios canónicos ilustran cada uno sin caer en panfleto?
