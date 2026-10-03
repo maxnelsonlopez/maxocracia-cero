@@ -43,6 +43,24 @@ Si una agrupación vecina opera en Grado 3 (pieza 003):
 3. Ofrecer salidas a los coaccionados de adentro: todo cerco necesita una puerta.
 4. No imitar: nada que no pudiera publicarse después.
 
+## 2.5 La fuerza dentro o fuera (primera mordida, vuelta 2)
+
+La pregunta no admite pureza: un macroorganismo sin capacidad propia de contención depende de
+afuera para lo más grave (hoy: Decreto 4.3); uno con capacidad propia arriesga convertirse en lo
+que contiene. Propuesta intermedia (a discutir):
+
+- **Dentro:** solo contención protectora y exclusión, nunca letalidad, nunca castigo. Fuerza como
+  cerco, no como espada.
+- **Fuera:** lo letal y lo penal, siempre en instituciones plurales y tribunales competentes.
+- **Puente:** documentación total (T13) del dentro hacia el fuera, para que la contención no se
+  vuelva cárcel privada.
+- **Cerco del cerco:** quien opera la contención rota, es auditado y puede ser contenido a su vez.
+  Ningún guardián sin guardián.
+
+Federación sin imperio (esqueleto): subsidiariedad real, secesión libre **con piso de salida**
+(recursos para irse —el disidente de la v0.1 sube a diseño—), veto de minorías en lo irreversible
+y ningún centro que pueda capturar el todo.
+
 ## 3. Preguntas abiertas (para próximas vueltas)
 
 1. La pregunta de diseño: en el macroorganismo futuro, ¿la fuerza reside dentro (capacidad propia

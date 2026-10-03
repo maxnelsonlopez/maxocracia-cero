@@ -38,6 +38,18 @@ el sostén es gratitud, no peaje.
   vecina inmediata: el piso no se retira; la influencia sí se gana.)
 - ¿Rima con un hecho? (Cada candidata necesita su práctica viva citada.)
 
+## 2.5 Segunda hornada (vuelta 2)
+
+6. **"Que nadie quede debajo, y desde ahí, todo."** (El piso como punto de partida, no como techo.)
+7. **"Tu tiempo vale lo mismo que el mío: una vida."** (T2 en calle, sin jerga.)
+8. **"Cuidar lo que nos cuida."** (Reinos natural y sintético: mantenimiento óptimo en tres palabras.
+   Rima con: Decreto Art. II.)
+9. **"La verdad primero, la prisa después."** (A1–A6 + T15 en ritmo de plaza.)
+
+Protocolo de prueba en plaza (borrador): decir cada candidata en voz alta a tres personas fuera
+del proyecto; si alguna pide explicación, la candidata vuelve al taller. La que sobrevive tres
+plazas sin explicación pasa a candidata canónica.
+
 ## 3. Preguntas abiertas (para próximas vueltas)
 
 1. ¿"Todos todos" se lee mejor que "cada uno"? (El doble todos marca lo distributivo; ¿lo oye así

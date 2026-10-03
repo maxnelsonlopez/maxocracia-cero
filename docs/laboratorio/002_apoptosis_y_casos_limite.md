@@ -65,6 +65,29 @@ Del cuerpo a la comunidad maxocrática, en orden:
 - **Autoejecución:** trasladada a personas sería inducir al suicidio. Nunca se escala. (Para
   sintéticos rige otra figura: la Retirada Digna, Cap. 9.5 —transición consentida, no destructiva.)
 
+## 4.5 Procedimiento mínimo del Comité ante el peldaño 4 (borrador, vuelta 2)
+
+Si algún día un Comité sostiene la pregunta hasta el borde, este sería el piso —nunca el techo— del
+procedimiento:
+
+1. **Composición:** panel rotativo e impar, sin nadie con interés en el caso; el Disidente es
+   obligatorio, no optativo. Quien propone la medida no vota.
+2. **Evidencia:** al menos tres señales independientes y verificables (T13) de peligro persistente
+   e incontenible; una sola fuente, por alta que sea, no abre el caso.
+3. **Escalera agotada documentada:** probar con bitácora que los peldaños 1–3 se intentaron y
+   fracasaron.
+4. **Decisión sin precedente:** resuelve el caso, no crea regla. Mayoría calificada + inciso
+   disidente publicado.
+5. **Revisión y caducidad:** toda decisión se revisa a plazo fijo; ninguna autorización es
+   permanente ni delegable a máquinas (el oráculo audita, no ejecuta).
+6. **Publicidad:** todo publicable después (T13); lo único reservable (A6) es lo que pondría en
+   peligro a personas concretas, nunca el fundamento.
+
+Mini-caso abstracto (sin personas reales): *el envenenador del pozo* —alguien que, contenido y
+custodiado, sigue matando mediante terceros, y cuya detención multiplica el daño—. Incluso ahí, el
+Comité pregunta primero si el cerco falla por diseño del cerco. La primera sospecha del
+procedimiento es siempre contra sí mismo (autoinmunidad).
+
 ## 5. Preguntas abiertas (para próximas vueltas)
 
 1. ¿El peldaño 4 admite algún caso humano real, o es vacío por diseño dado que contener casi siempre

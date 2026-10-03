@@ -46,6 +46,20 @@ Si 1–2 no cuadran con 3, hay Maltud en alguna dosis. La dosis la pone 4.
   son los que terminan capturados.
 - Resiliencia (federación, redundancia, sin centro capturable), no erradicación.
 
+## 3.5 Hacia la dosis: costo ajeno / ganancia propia (borrador, vuelta 2)
+
+Propuesta de métrica (a refinar): por actor y período, **D = (T+V+R ajenos consumidos) / (ganancia
+propia retenida)**. D alto + coerción alta = Grado 3; D alto + legalidad = Grado 1 industrializado
+—el más letal por volumen (tabaco, azúcar, aire sucio matan más que muchas guerras; el disidente de
+la v0.1 tenía razón y sube a sección).
+
+Mini-casos por grado (esqueleto, a documentar con fuentes en v3): G1, arriendo infinito urbano y el
+río contaminado que paga el pueblo de abajo; G2, el regulador que viene de la industria que regula;
+G3, trata y desposesión violenta (ver pieza 001 §2–§3).
+
+Regla de uso: la métrica orienta la mirada, no dicta veredictos. Quien la use para condenar sin
+proceso repite el gesto maltudiano (externalizar el costo del error sobre el acusado).
+
 ## 4. Preguntas abiertas (para próximas vueltas)
 
 1. Casos históricos por grado: ¿qué episodios canónicos ilustran cada uno sin caer en panfleto?
