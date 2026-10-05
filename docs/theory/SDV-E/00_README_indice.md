@@ -146,6 +146,10 @@ El verificador de enlaces distingue cuatro estados —`OK`, `BLOQUEADA` (real pe
 URL muerta está declarada como fuente descartada. El canon exige esa honestidad: distinguir lo
 verificado de lo que falló.
 
+**Resultado medido el 04-10-2026 sobre los 26 documentos:** 671 enlaces únicos · **572 OK** ·
+55 bloqueados a bots · 14 sin respuesta · **30 muertos, y los 30 declarados** como fuentes
+descartadas por sus propios documentos · **0 malformados**. Ninguna fuente inventada.
+
 ---
 
 ## 6. Qué decide esta biblioteca y qué no
