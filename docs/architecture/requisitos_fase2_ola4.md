@@ -167,6 +167,29 @@ verificación determinista — Patrón Puente).
 | RF-EDU-18 | **La categoría Ética (fundamentos en lenguaje común)**: rama `etica` (orden 0 — los valores primero) con 12 temas en el orden del libro, SIN jerga propia excepto el puente final *El idioma de la ciudad* (VHV/TVI/SDV/Maxo/MaxoContract/EIR/OEV nombrados ahí); 12 guías + 36 preguntas de situaciones (nunca doctrina) + 12 enlaces verificados; auditoría anti-jerga determinista | Siamesa §3 (hecho, no autoridad) + OEV §1.8 (trama/tejido) + ETICA_LENGUAJE_COMUN_CATEGORIA.md | ✅ (12 tests, 30-08-2026) |
 | RF-EDU-19 | **Estructura para traducciones**: `materials.idioma` + `users.idioma` (default es), `material_key = <slug>#<idioma>g<orden>`, archivos `materials/<slug>.<idioma>.md`, `POST /api/me/idioma`, biblioteca servida por lengua (`?lang=` sobreescribe); regla: comunidad traduce + director verifica; UI i18n (fase 2) y árbol por idioma (fase 3) documentados | ETICA_LENGUAJE_COMUN_CATEGORIA.md §5 | ✅ estructura (30-08-2026); 🔴 traducciones reales |
 
+### O. Reino Natural — SDV-E ✨ (rama abierta oct 2026)
+
+Pilar nuevo. El canon lo convocó en Cap. 16.5 §16.5.14 (*"SDV-E + INV2-E convocados como próxima
+gran ramificación"*) y el inventario de la rama confirmó que **el crédito regenerativo existe y su
+juez no**. Orden canónico: **estándar primero, contabilidad después.**
+
+| ID | Requisito | Fuente | Estado |
+|---|---|---|---|
+| RF-N1 | **Biblioteca del estándar SDV-E**: doctrina, unidad del sujeto, no colonización del TA, Zona Libre, representación, sensores, fórmula con pesos, INV2-E y un estándar por tipo de ecosistema | Cap. 16.5 §16.5.14; `docs/theory/SDV-E/` | ✅ escrita (18 documentos, ~27 000 líneas, oct 2026) · 🟡 sin ratificar |
+| RF-N2 | **`SDV_E` en el motor**: tipo gemelo de `SDV_S` + `Participant.sdv_e_actual` + `is_natural` (hoy una parte `eco-` recibe el SDV humano) | Cap. 10 §10.4; SDV-E 08 | 🔴 no existe |
+| RF-N3 | **INV2-E**: ningún ecosistema bajo su SDV-E; el crédito regenerativo acumulado **no compensa** la violación | Cap. 16.5 §16.5.14 (*"INV2-E será su juez"*) | 🔴 convocado, no implementado |
+| RF-N4 | **Bloque validador ecológico** `SDV_EValidatorBlock` (gemelo de `sdv_s_validator.py`) | SDV-E 08 | 🔴 no existe |
+| RF-N5 | **Contabilidad del crédito regenerativo**: agregado de `r_units` por hogar/territorio y eje de regeneración en el R del sistema general | EVV-1.2 §4.3 | 🔴 se registra y se devuelve, **no pesa** |
+| RF-N6 | **Validación de `r_units`**: cota, guarda de finitud (NaN/∞) y evidencia exigida para el signo negativo | SDV-E 07/08 | 🔴 ninguna validación |
+| RF-N7 | **Identidad de la representación natural**: los 7 campos (entidad, territorio, fuentes, mandato, comunidad de custodia, parámetros SDV-E, disputa) | `continuidad_identidad_autogobierno_federado.md` §8.1 | 🔴 no existe tabla |
+| RF-N8 | **Guardián con datos físicos y anti-suplantación**: fuentes múltiples, mandato territorial y comunidad testigo (cierra R4/R13) | ídem §8.1/§10; `blindaje_anti_gamificacion_equidad.md` | 🔴 abierto |
+| RF-N9 | **Quórum N-de-M de la parte `eco-`**: cablear lo que el libro ya afirma | Cap. 16.5 §16.5.14 | 🔴 **incoherencia teoría↔código** |
+| RF-N10 | **Traducción TA↔TVI ejecutable** (PIU) | Cap. 5 §5.5 | 🔴 `pass` sin implementar |
+| RF-N11 | **Fuentes de datos ecológicos**: ingesta verificada con procedencia y datos abiertos | Cap. 14 §14.9 | 🔴 ninguna integrada |
+| RF-N12 | **ISE en código**, fusionado con los pesos del SDV-E | `metricas_detalle_kpis_oraculos_dinamicos.md` | 🔴 documento sin implementación |
+| RF-N13 | **Auditoría determinista de la biblioteca**: test estructural + verificación HTTP real de cada fuente citada | regla M15 (*"jamás URLs alucinadas"*) | ✅ `tests/test_sdv_e_biblioteca.py` (7) + `scripts/verificar_enlaces_sdv_e.py` |
+| RF-N14 | **Bloques pendientes**: dimensiones transversales, SDV-A (animales), flora/hongos/microorganismos y Procesos (metodología, actualización, gobernanza) | árbol Cap. 9 §9.7 | 🔴 pendientes de redacción |
+
 ---
 
 ## 2. Requisitos no funcionales

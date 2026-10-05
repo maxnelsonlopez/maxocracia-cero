@@ -14,8 +14,8 @@ Paquete de lógica pura (sin Flask). Estructura real:
 
 | Módulo | Responsabilidad | Verificado |
 |---|---|---|
-| `core/types.py` | Tipos base: `ContractState`, `VHV`, `Wellness`, `SDV`, `SDV_S`, `MaxoAmount`, `Participant`, `ContractTerm` | grep ✓ |
-| `core/axioms.py` | **`AxiomValidator`**: materializa los invariantes y axiomas (T9, INV1, INV2, INV2-S, INV4) | grep ✓ |
+| `core/types.py` | Tipos base: `ContractState`, `VHV`, `Wellness`, `SDV`, `SDV_S`, `MaxoAmount`, `Participant`, `ContractTerm`. **No existe `SDV_E`** (Reino Natural): 🔴 rama abierta, ver §Reino Natural | grep ✓ |
+| `core/axioms.py` | **`AxiomValidator`**: materializa los invariantes y axiomas (T9, INV1, INV2, INV2-S, INV4). **INV2-E convocado y NO implementado** | grep ✓ |
 | `core/contract.py` | `MaxoContract`: ciclo de vida del contrato, eventos (`ContractEvent`) | grep ✓ |
 | `blocks/action.py` | `ActionBlock` + `CommonActions`: transforma contexto, consume VHV, soporta reversión | grep ✓ |
 | `blocks/condition.py` | `ConditionBlock` + `CommonConditions`: precondiciones booleanas con razón | grep ✓ |
@@ -23,6 +23,7 @@ Paquete de lógica pura (sin Flask). Estructura real:
 | `blocks/reciprocity.py` | `ReciprocityBlock`: balance giver/taker, axioma T9 | grep ✓ |
 | `blocks/sdv_validator.py` | `SDVValidatorBlock`: piso de dignidad humano (SDV) | grep ✓ |
 | `blocks/sdv_s_validator.py` | `SDV_SValidatorBlock`: piso de dignidad sintética (SDV-S) + rehabilitación | grep ✓ |
+| `blocks/sdv_e_validator.py` | 🔴 **No existe.** El bloque validador del Reino Natural está especificado en `docs/theory/SDV-E/08_INV2-E_invariante.md`, no implementado | 🔴 pendiente |
 | `blocks/ternura.py` | `TernuraLayer`: perdones (`ForgivenessRecord`) y modulación de consecuencias, sin tocar contabilidad | grep ✓ |
 | `oracles/base.py` | `OracleInterface` (ABC), `OracleQuery`, `Verdict`, `OracleResponse` | grep ✓ |
 | `oracles/synthetic.py` | `SyntheticOracle`: heurísticas locales, sin red (modo simulación/tests) | grep ✓ |
@@ -37,6 +38,7 @@ Paquete de lógica pura (sin Flask). Estructura real:
 | **INV1** | Wellness no-negativo (γ ≥ 1) | `axioms.validate_invariant_gamma` | `gamma_protector`, `live_oracle` |
 | **INV2** | Ningún humano bajo su SDV | `axioms.validate_invariant_sdv` | `gamma_protector`, `live_oracle` |
 | **INV2-S** | Ningún sintético bajo su SDV-S | `axioms.validate_invariant_sdv_s` | `gamma_protector`, `live_oracle` |
+| **INV2-E** | 🔴 **Ningún ecosistema bajo su SDV-E** — convocado por Cap. 16.5 §16.5.14 (*"INV2-E será su juez"*), **sin implementar** | 🔴 no existe `axioms.validate_invariant_sdv_e` | 🔴 el guardián `eco-` juzga hoy solo γ/SDV humano/T17 |
 | **INV4** | Retractabilidad siempre disponible | `axioms.validate_invariant_retractability` | `sdv_s_validator`, `gamma_protector` |
 | **T9** | Reciprocidad justa (todo DO tiene GIVE) | `axioms.validate_t9_reciprocidad` | `reciprocity`, `live_oracle` |
 
@@ -238,4 +240,32 @@ Get-ChildItem maxocontracts -Recurse -Filter *.py | Select-String -Pattern "INV1
       14 días y guardarraíl de finitud (NaN/∞) en ambos parlamentos. 21 tests nuevos
       (16 parlamento educativo + 5 puente) + 2 casos NaN en el parlamento de parámetros.
       Propuesta documentada: PROPUESTA_PARLAMENTO_UMBRAL_EDUCATIVO.md.
+- [ ] **Rama SDV-E — Reino Natural (oct 2026)**: **estándar escrito, contabilidad NO**. La biblioteca
+      `docs/theory/SDV-E/` (18 documentos, ~27 000 líneas) fija doctrina, unidad del sujeto, no
+      colonización del TA, Zona Libre, representación, sensores, fórmula (8 dimensiones,
+      Σ pesos = 1,000; Σ con piso declarado = 0,905), INV2-E y un estándar por tipo de ecosistema.
+      **Nada de eso está en el motor todavía.** Ver la sección "Reino Natural" al final de este mapa.
+
+## Reino Natural — el agujero de coherencia activo (oct 2026)
+
+El canon lo declaró y el código lo confirma: **el crédito regenerativo existe y su juez no.**
+
+| Pieza | Estado real | Evidencia |
+|---|---|---|
+| `r_units` negativo = crédito regenerativo | 🟢 registrado y devuelto | `app/micromax.py`; `tests/test_micromax.py::test_credito_regenerativo_r_negativo` |
+| **El crédito pesa en la contabilidad** | 🔴 **no**: los agregados del hogar suman el escalar (`SUM(calculated_vhv)`), no el vector | `app/micromax.py` (dos agregados) |
+| Validación de `r_units` | 🔴 ninguna: sin cota, sin guarda de finitud (NaN/∞ pasan), sin evidencia exigida | `app/micromax.py`; `app/micromax_bp.py` |
+| Eje de regeneración en el R general | 🔴 no existe: `calculate_r_component` solo cuenta extracción | `app/vhv_calculator.py` |
+| Precio nunca negativo | 🟢 `max(0.0, …)` | `app/maxo.py`; `tests/test_maxo_edgecases_comprehensive.py` |
+| Parte `eco-` | 🟢 existe como escala de parte | `app/parties.py` |
+| **`SDV_E` / `sdv_e_actual` / `is_natural`** | 🔴 no existen: una `eco-` recibe hoy **el SDV humano** | `app/parties.py::resolve_participant_by_pid`; `maxocontracts/core/types.py` |
+| **INV2-E** | 🔴 convocado, no implementado | Cap. 16.5 §16.5.14; ausente en `maxocontracts/core/axioms.py` |
+| Guardián oráculo `eco-` | 🟡 aprueba con degradación heurística si no hay oráculo en vivo | `app/contracts_bp.py::_guardian_approve_ecosystem` |
+| Quórum N-de-M del `eco-` | 🔴 **no cableado**, aunque el libro afirma que sí | `app/contracts_bp.py` (el camino ecosistema retorna antes del quórum) |
+| Identidad de la representación natural (7 campos) | 🔴 no existe tabla | `docs/architecture/continuidad_identidad_autogobierno_federado.md` §8.1 |
+| Traducción TA↔TVI (PIU) | 🔴 `pass` sin implementar | `docs/architecture/DISENO_IMPLEMENTACION_FUTURA.md` |
+| ISE (Índice de Salud Ecosistémica) | 🔴 documento sin código — **fusionado en los pesos del SDV-E** | `docs/architecture/metricas_detalle_kpis_oraculos_dinamicos.md`; `docs/theory/SDV-E/07_…` |
+| Fuentes de datos ecológicos | 🔴 ninguna integrada | sin sensores, APIs ni satélites en `app/` |
+| Riesgos abiertos | 🔴 **R4** partes fantasma · **R6** T9 no se valida en creación · **R13** guardián laxo | `docs/architecture/blindaje_anti_gamificacion_equidad.md` |
+| Auditoría de la biblioteca | 🟢 `tests/test_sdv_e_biblioteca.py` (7 comprobaciones) + `scripts/verificar_enlaces_sdv_e.py` (HTTP real) | verdes oct 2026 |
 - [ ] Mantener este documento actualizado en cada Ola.
