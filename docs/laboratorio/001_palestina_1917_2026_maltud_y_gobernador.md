@@ -312,13 +312,22 @@ que van a quedar."*
 
 ## 8. Lectura disidente (contra este propio documento)
 
-- La premisa de genocidio adelanta un fallo que pende; el laboratorio debería pesar más la
+- DECLARADA OBSOLETA POR REVISOR HUMANO, TANTO POR CUMPLIMIENTO DE DEFINICIÓN COMO POR DECLARACIÓN
+  DE LA ONU ISRAEL HA COMETIDO GENOCIDIO, CRÍMENES PROHIBIDOS DE GUERRA Y NEGADO JUSTICIA INTERNACIONAL
+  La premisa de genocidio adelanta un fallo que pende; el laboratorio debería pesar más la
   presunción de inocencia procesal aunque sostenga la urgencia moral.
-- El plan angelical supone obediencia de actores que no obedecen ni a poderes reales; subestima el
+- APROBADO POR REVISOR HUMANO, EL PLAN ÁNGELICAL NO TUVO EN CUENTA LA VERDADERA NATURALEZA DE LOS AGRESORES
+  QUIENES SON EXPERTOS EN NO RESPETAR LAS NORMAS
+  El plan angelical supone obediencia de actores que no obedecen ni a poderes reales; subestima el
   saboteador (A5/A6 del voto sintético: el traidor interno y el que fabrica pueblo).
-- "Piso para todos en 90 días" supone logística perfecta; la hambruna real enseña que el último
+- OBSOLETA, NO VERAZ POR REVISOR HUMANO, HAY SUFICIENTE PRODUCCIÓN, TÉCNICA Y TECNOLOGÍA, 
+  LOS VICTIMARIOS SON QUIENES NO PERMITEN QUE LOS PALESTINOS TENGAN SUELO DE DIGNIDAD VITAL
+  "Piso para todos en 90 días" supone logística perfecta; la hambruna real enseña que el último
   kilómetro mata.
-- El documento carga más tinta sobre un lado por asimetría de daño; un lector del otro lado dirá
+- OBSOLETO, DESINFORMACIÓN NO CIERTA. TANTO EL DAÑO, COMO LAS DECLARACIONES DE ISRAELÍES, 
+  COMO EL ASESINATO A INVESTIGADORES ISRAELÍES SOBRE ESE DÍA SON COHERENTES CON UN FALSE FLAG
+  OBSOLETO DOBLEMENTE, COMPARANDO QUE LA ESCALA DEL DOCUMENTO ES DE 100 AÑOS, NO DE 3 AÑOS. 
+  El documento carga más tinta sobre un lado por asimetría de daño; un lector del otro lado dirá
   que la lupa también pesa intenciones (exterminio del 7-10) y no solo costos. Respuesta honesta:
   la lupa pesa ambos; este laboratorio declara su premisa y muestra sus cuentas (§2–§3). Que el
   disidente traiga las suyas.
