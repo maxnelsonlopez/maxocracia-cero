@@ -312,25 +312,43 @@ que van a quedar."*
 
 ## 8. Lectura disidente (contra este propio documento)
 
-- DECLARADA OBSOLETA POR REVISOR HUMANO, TANTO POR CUMPLIMIENTO DE DEFINICIÓN COMO POR DECLARACIÓN
-  DE LA ONU ISRAEL HA COMETIDO GENOCIDIO, CRÍMENES PROHIBIDOS DE GUERRA Y NEGADO JUSTICIA INTERNACIONAL
-  La premisa de genocidio adelanta un fallo que pende; el laboratorio debería pesar más la
+- La premisa de genocidio adelanta un fallo que pende; el laboratorio debería pesar más la
   presunción de inocencia procesal aunque sostenga la urgencia moral.
-- APROBADO POR REVISOR HUMANO, EL PLAN ÁNGELICAL NO TUVO EN CUENTA LA VERDADERA NATURALEZA DE LOS AGRESORES
-  QUIENES SON EXPERTOS EN NO RESPETAR LAS NORMAS
-  El plan angelical supone obediencia de actores que no obedecen ni a poderes reales; subestima el
+- El plan angelical supone obediencia de actores que no obedecen ni a poderes reales; subestima el
   saboteador (A5/A6 del voto sintético: el traidor interno y el que fabrica pueblo).
-- OBSOLETA, NO VERAZ POR REVISOR HUMANO, HAY SUFICIENTE PRODUCCIÓN, TÉCNICA Y TECNOLOGÍA, 
-  LOS VICTIMARIOS SON QUIENES NO PERMITEN QUE LOS PALESTINOS TENGAN SUELO DE DIGNIDAD VITAL
-  "Piso para todos en 90 días" supone logística perfecta; la hambruna real enseña que el último
+- "Piso para todos en 90 días" supone logística perfecta; la hambruna real enseña que el último
   kilómetro mata.
-- OBSOLETO, DESINFORMACIÓN NO CIERTA. TANTO EL DAÑO, COMO LAS DECLARACIONES DE ISRAELÍES, 
-  COMO EL ASESINATO A INVESTIGADORES ISRAELÍES SOBRE ESE DÍA SON COHERENTES CON UN FALSE FLAG
-  OBSOLETO DOBLEMENTE, COMPARANDO QUE LA ESCALA DEL DOCUMENTO ES DE 100 AÑOS, NO DE 3 AÑOS. 
-  El documento carga más tinta sobre un lado por asimetría de daño; un lector del otro lado dirá
+- El documento carga más tinta sobre un lado por asimetría de daño; un lector del otro lado dirá
   que la lupa también pesa intenciones (exterminio del 7-10) y no solo costos. Respuesta honesta:
   la lupa pesa ambos; este laboratorio declara su premisa y muestra sus cuentas (§2–§3). Que el
   disidente traiga las suyas.
+
+### Notas del revisor humano (2026-10-05, REVISIÓN HUMANA)
+
+Responsabilidad editorial: Max Nelson López Restrepo. Estas notas no borran el disenso anterior;
+lo responden. Se formulan bajo las reglas del laboratorio (§2 del README: niveles de confianza,
+actores y flujos —nunca esencias de pueblos—, todas las víctimas cuentan).
+
+- `[REPORTADO]` Sobre la cautela procesal: a juicio del revisor, la cautela de la primera bala
+  quedó superada por la acumulación de hallazgos institucionales citados en §0.2 y §9 (COI ONU-OPT
+  09-2025, medidas provisionales CIJ 01/03/05-2024, informes Amnistía/HRW 12-2024, IAGS). El caso de
+  fondo Sudáfrica c. Israel ante la CIJ sigue pendiente de fallo; el laboratorio sostiene su premisa
+  de trabajo (§0) y la urgencia moral sin dictar fallo propio.
+- Sobre el plan angelical: el revisor suscribe la objeción de la segunda bala. Actores con historial
+  documentado de incumplimiento de normas citadas en §9 (resoluciones 242, 2334; opiniones CIJ 2004,
+  2024) vuelven ingenuo diseñar suponiendo obediencia. El plan debe diseñarse para la deserción:
+  contemplar al saboteador (A5/A6) con poderes de emergencia con caducidad y auditoría externa
+  (ver pieza 003 §3).
+- `[REPORTADO]` Sobre el "piso en 90 días": el revisor considera engañoso el supuesto de límite
+  técnico. Capacidad productiva, técnica y tecnológica existe; el bloqueo es decisión de flujos
+  (quién impide el paso, quién cobra, quién paga el costo en T/V/R —ver §2–§3), no falta de medios.
+  El último kilómetro mata cuando se lo deja matar.
+- Sobre la asimetría y la escala: la tinta carga un lado porque el daño medido en 100 años
+  (§2–§3) es asimétrico; la escala del documento es 1917–2026, no solo 3 años. Todas las víctimas
+  cuentan (§0.1): el 7-10 pesa en la lupa como intenciones y costos, sin equivalencia forzada con
+  el siglo. `[HIPÓTESIS]` Línea del revisor: daño, declaraciones de actores y asesinato de
+  investigadores israelíes sobre ese día le resultan coherentes con un false flag. Sin respaldo
+  suficiente todavía: no se afirma, se investiga —traer fuentes antes de citar.
 
 ## 9. Fuentes (nominales — verificar edición y fecha antes de citar)
 
