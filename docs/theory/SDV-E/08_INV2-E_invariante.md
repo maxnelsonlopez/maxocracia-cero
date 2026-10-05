@@ -1701,7 +1701,7 @@ Ninguna de ellas sostiene un umbral de este documento: los umbrales asociados es
 | Fuente | Aporte | URL (403) |
 |---|---|---|
 | Convención de Ramsar | "Carácter ecológico" y "límites de cambio aceptable" (Resoluciones VI.1 / IX.1): **no se pudieron leer** | https://www.ramsar.org/ · https://www.ramsar.org/sites/default/files/documents/library/handbook18_5ed_managingchange_e.pdf |
-| IUCN Red List of Ecosystems (criterios, herramienta) | Página oficial del marco de riesgo de colapso | https://www.iucnredlist.org/resources/ecosystem-categories-criteria |
+| IUCN Red List of Ecosystems (criterios, herramienta) | Página oficial del marco de riesgo de colapso | https://www.iucn.org/resources/publication/iucn-red-list-ecosystems-categories-and-criteria-version-20 *(la ruta antigua `iucnredlist.org/resources/ecosystem-categories-criteria` da **404**: el marco se mudó al dominio `iucn.org`; comprobado el 04-10-2026)* |
 | GBIF | Infraestructura Mundial de Información en Biodiversidad | https://gbif.org/ |
 | UNEP (recursos) | GEO-6 y materiales de calidad del aire | https://www.unep.org/resources/global-environment-outlook-6 |
 
