@@ -58,8 +58,12 @@ CANON_FILES: List[Tuple[str, int]] = [
 # Concilio llevaba semanas deliberando sin leer el final del handoff ni las
 # últimas entradas del registro de atribuciones (justo las más recientes).
 # Se suben los dos topes por encima de su tamaño real y el presupuesto global
-# para conservar el invariante de margen (≥2.000 chars). Cifras medidas:
-# 203.855 chars de fuentes + 5.886 de cabeceras = 209.741 de corpus ensamblado.
+# para conservar el invariante de margen (≥2.000 chars).
+#
+# SEGUNDA SUBIDA EL MISMO DÍA (04-10-2026): registrar la rama SDV-E en el handoff
+# volvió a apretar el margen (204.205 chars de fuentes + 5.886 de cabeceras =
+# 210.091, con 1.909 de holgura sobre 212.000). Dos subidas en una sola sesión
+# son la prueba de que esto no escala: el arreglo es destilar, no ampliar.
 #
 # ADVERTENCIA ESTRUCTURAL (heredada del 16-09-2026 y ahora confirmada): subir el
 # presupuesto NO es el arreglo de fondo. El registro de atribuciones y el handoff
@@ -71,7 +75,7 @@ CANON_FILES: List[Tuple[str, int]] = [
 # vez de un solo bloque. Mientras no se haga, `auditar_corpus()` sigue siendo la
 # defensa: detecta el recorte en vez de confiar. Esta subida es una reparación,
 # no una solución, y es reversible.
-DEFAULT_MAX_CHARS = 212_000
+DEFAULT_MAX_CHARS = 213_000
 
 
 def _read_head(path: Path, max_chars: int) -> str:
