@@ -241,9 +241,10 @@ Get-ChildItem maxocontracts -Recurse -Filter *.py | Select-String -Pattern "INV1
       (16 parlamento educativo + 5 puente) + 2 casos NaN en el parlamento de parámetros.
       Propuesta documentada: PROPUESTA_PARLAMENTO_UMBRAL_EDUCATIVO.md.
 - [ ] **Rama SDV-E — Reino Natural (oct 2026)**: **estándar escrito, contabilidad NO**. La biblioteca
-      `docs/theory/SDV-E/` (18 documentos, ~27 000 líneas) fija doctrina, unidad del sujeto, no
+      `docs/theory/SDV-E/` (26 documentos, ~38 000 líneas) fija doctrina, unidad del sujeto, no
       colonización del TA, Zona Libre, representación, sensores, fórmula (8 dimensiones,
-      Σ pesos = 1,000; Σ con piso declarado = 0,905), INV2-E y un estándar por tipo de ecosistema.
+      Σ pesos = 1,000; Σ con piso declarado = 0,905), INV2-E, un estándar por tipo de ecosistema
+      (9), las dimensiones transversales, el SDV-A y el bloque de Procesos.
       **Nada de eso está en el motor todavía.** Ver la sección "Reino Natural" al final de este mapa.
 
 ## Reino Natural — el agujero de coherencia activo (oct 2026)

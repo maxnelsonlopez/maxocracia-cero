@@ -2,6 +2,7 @@
 
 **Estado:** 🟡 **Propuesta de estándar. NO es canon hasta su ratificación.**
 **Rama:** SDV-E, Ola 4 — abierta en octubre de 2026.
+**Alcance:** 26 documentos · ~38.000 líneas · 534 fuentes citadas, verificadas por HTTP real.
 **Autoría:** oráculos sintéticos de la rama & Max Nelson López Restrepo.
 **Licencia:** Creative Commons BY-SA 4.0.
 **Nada de lo que describe esta biblioteca está implementado en el motor todavía** (ver §7).
@@ -68,11 +69,15 @@ La contabilidad viene después.
 
 ### Bloque C — Dimensiones transversales, SDV-A y procesos
 
-🔴 **Pendientes de redacción.** El canon los exige y esta biblioteca todavía no los tiene:
-las dimensiones transversales (biodiversidad, conectividad, ciclos naturales, agua y aire como
-métricas de conjunto), el estándar hermano **SDV-A** (animales), el hueco doctrinal de flora, hongos
-y microorganismos, y el bloque **Procesos** que el árbol del Cap. 9 §9.7 pide
-(`Metodología_Creación`, `Protocolo_Actualización`, `Gobernanza_Validación`).
+| Documento | Qué fija |
+|---|---|
+| [20 — Biodiversidad](20_Transversal_Biodiversidad.md) | La dimensión de mayor peso (0,300) como métrica de conjunto: integridad biótica, tasa de extinción, Lista Roja de Ecosistemas, 30x30. |
+| [21 — Conectividad](21_Transversal_Conectividad.md) | **La dimensión sin umbral.** Recoge lo que sí existe (probabilidad de conectividad, malla efectiva, fragmentación, corredores) y dice exactamente qué haría falta para cerrar el vacío. |
+| [22 — Ciclos naturales](22_Transversal_Ciclos_naturales.md) | Fuego, inundación, sequía, sucesión y fenología — y el problema doctrinal de fondo: **un ciclo que destruye es salud, no daño**. |
+| [23 — Agua y aire](23_Transversal_Agua_y_Aire.md) | Las calidades que cruzan todos los ecosistemas, y la resolución de la disputa sobre el oxígeno disuelto entre los documentos 07 y 08. |
+| [30 — SDV-A: animales](30_SDV-A_Animales_sintientes.md) | El estándar hermano: las 8 dimensiones del Cap. 9, el factor de consciencia y el Principio Precautorio. Un animal vive dentro de un ecosistema: su suelo no puede ser mayor que el que lo sostiene. |
+| [31 — Flora, hongos y microorganismos](31_Seres_vivos_no_animales.md) | **El hueco declarado**: el canon no ha decidido si estos seres tienen estándar propio. El documento expone las opciones y recomienda, marcado como propuesta no ratificada. |
+| [40 — Procesos](40_Procesos_creacion_actualizacion_gobernanza.md) | Creación, actualización cada 3-5 años y gobernanza del estándar: quién propone un umbral, quién lo verifica y cómo se retira uno que envejece. |
 
 ---
 
@@ -91,14 +96,23 @@ dimensiones que el canon nombra y **el ISE omitía** (caudal ecológico y conect
 | Salud del suelo | 0,150 | 0,150 | 🟢 sí |
 | Especies clave | 0,150 | 0,150 | 🟢 sí |
 | **Caudal ecológico** | 0,075 | 0,075 | 🟢 sí |
-| **Conectividad** | 0,075 | 0,000 | 🔴 **no** |
-| Oxígeno disuelto | 0,020 | 0,000 | 🟡 en disputa |
+| **Conectividad** | 0,075 | 0,000 | 🔴 **no**: fluvial tiene umbral de *clasificación* (CSI ≥ 95 %, Grill et al. 2019), paisaje **sin norma publicada** |
+| Oxígeno disuelto | 0,020 | 0,000 | 🟡 en disputa entre los documentos 07 y 08 |
 | **Total** | **1,000** | **Σ PESOS_PISO = 0,905** | |
 
-**Léase con honestidad:** el piso del SDV-E se ejecuta hoy sobre el **90,5 % del peso**, y una
-dimensión que el canon nombra explícitamente —la conectividad— **todavía no tiene umbral
-verificado**. Eso no es un defecto del documento: es el resultado de negarse a inventar cifras.
-Una dimensión sin fuente no pesa; se declara.
+**Léase con honestidad.** Tres cosas que este cuadro no esconde:
+
+1. **Una dimensión que el canon nombra —la conectividad— no tiene piso numérico.** No es un olvido: los
+   instrumentos de medida existen (probabilidad de conectividad, malla efectiva, fragmentación) y
+   **la norma publicada no**. El [documento 21](21_Transversal_Conectividad.md) lo demuestra y se niega
+   a inventarla. Una dimensión sin fuente no pesa; se declara.
+2. **La cifra del piso está en disputa dentro de la propia biblioteca**: el
+   [documento 07](07_Formula_de_violacion_y_pesos.md) calcula **0,905** y el
+   [documento 08](08_INV2-E_invariante.md) opera con **0,680**. Ambos lo dicen. El
+   [documento 23](23_Transversal_Agua_y_Aire.md) descartó la corrección a 0,925 por doble conteo del
+   oxígeno disuelto, pero **la conciliación entre 07 y 08 sigue pendiente**.
+3. **El Óptimo está casi siempre vacío** y eso es deliberado: el piso es LEY y la plenitud es POLÍTICA,
+   así que la plenitud no se fija por decreto técnico — se vota.
 
 ---
 
@@ -141,12 +155,17 @@ ecosistema, la fórmula y sus pesos, el elenco de sensores, el estándar de la v
 de INV2-E.
 
 **No decide**, y lo dice: quién tiene autoridad sobre un territorio concreto (los riesgos R4, R6 y
-R13 siguen abiertos), qué umbral tiene la conectividad, cómo se compone el quórum de una parte
-`eco-`, ni qué pasa con la flora, los hongos y los microorganismos.
+R13 siguen abiertos), cómo se compone el quórum de una parte `eco-`, ni el piso numérico de la
+conectividad de paisaje.
 
-**Discrepancias internas declaradas** (no ocultas): el documento 07 y el documento 08 no coinciden
-en la cifra de cobertura del piso (0,905 frente a 0,680). Está marcado como **cifra en disputa** en
-ambos.
+**Dos preguntas que sí quedaron trabajadas, como propuesta y no como decisión**: la
+[21](21_Transversal_Conectividad.md) demuestra que el instrumento de medida existe y la norma
+publicada no, y la [31](31_Seres_vivos_no_animales.md) expone las opciones para flora, hongos y
+microorganismos en vez de fingir que el canon ya decidió.
+
+**Discrepancias internas declaradas** (no ocultas): los documentos 07 y 08 no coinciden en la cifra
+de cobertura del piso (**0,905** frente a **0,680**), y lo dicen ambos. Conciliarlas es trabajo
+pendiente, no un descuido escondido.
 
 ---
 
@@ -170,15 +189,20 @@ ambos.
 
 ---
 
-## 8. Cómo entra al canon
+## 8. Cómo entra al Concilio (y por qué no entera)
 
-El índice del canon (`scripts/canon_index.py`) recorre `docs/theory` de forma recursiva, así que
-esta biblioteca **ya entra al corpus que el Concilio absorbe en F1**. Los oráculos podrán razonar
-sobre el SDV-E en el próximo ciclo.
+El índice navegable del canon (`scripts/canon_index.py`) recorre `docs/theory` de forma recursiva, así
+que **los 26 documentos ya están listados** con sus títulos y tamaños: los oráculos se orientan por
+ahí antes de leer.
 
-Pero entrar al corpus **no es ser canon**. El camino es el que el propio canon fija: propuesta,
-deliberación, auditoría axiomática y validador conceptual. Mientras tanto, esta biblioteca se declara
-por lo que es: **el estándar primero, para que la contabilidad pueda venir después.**
+Pero conviene ser exacto: **esta biblioteca no cabe en el corpus de F1.** Mide ~1,5 millones de
+caracteres y el presupuesto del corpus es de 212.000. El Concilio recibirá **el mapa, no el
+territorio** — que es exactamente lo que el propio diseño de F1 proponía (el índice entra al corpus,
+el corpus completo se lee aparte).
+
+Entrar al índice **no es ser canon**. El camino es el que el canon fija: propuesta, deliberación,
+auditoría axiomática y validador conceptual. Mientras tanto, esta biblioteca se declara por lo que es:
+**el estándar primero, para que la contabilidad pueda venir después.**
 
 ---
 

@@ -175,7 +175,7 @@ juez no**. Orden canónico: **estándar primero, contabilidad después.**
 
 | ID | Requisito | Fuente | Estado |
 |---|---|---|---|
-| RF-N1 | **Biblioteca del estándar SDV-E**: doctrina, unidad del sujeto, no colonización del TA, Zona Libre, representación, sensores, fórmula con pesos, INV2-E y un estándar por tipo de ecosistema | Cap. 16.5 §16.5.14; `docs/theory/SDV-E/` | ✅ escrita (18 documentos, ~27 000 líneas, oct 2026) · 🟡 sin ratificar |
+| RF-N1 | **Biblioteca del estándar SDV-E**: doctrina, unidad del sujeto, no colonización del TA, Zona Libre, representación, sensores, fórmula con pesos, INV2-E, un estándar por tipo de ecosistema, las dimensiones transversales, el SDV-A y el bloque de Procesos | Cap. 16.5 §16.5.14; `docs/theory/SDV-E/` | ✅ escrita (26 documentos, ~38 000 líneas, oct 2026) · 🟡 sin ratificar |
 | RF-N2 | **`SDV_E` en el motor**: tipo gemelo de `SDV_S` + `Participant.sdv_e_actual` + `is_natural` (hoy una parte `eco-` recibe el SDV humano) | Cap. 10 §10.4; SDV-E 08 | 🔴 no existe |
 | RF-N3 | **INV2-E**: ningún ecosistema bajo su SDV-E; el crédito regenerativo acumulado **no compensa** la violación | Cap. 16.5 §16.5.14 (*"INV2-E será su juez"*) | 🔴 convocado, no implementado |
 | RF-N4 | **Bloque validador ecológico** `SDV_EValidatorBlock` (gemelo de `sdv_s_validator.py`) | SDV-E 08 | 🔴 no existe |
@@ -188,7 +188,7 @@ juez no**. Orden canónico: **estándar primero, contabilidad después.**
 | RF-N11 | **Fuentes de datos ecológicos**: ingesta verificada con procedencia y datos abiertos | Cap. 14 §14.9 | 🔴 ninguna integrada |
 | RF-N12 | **ISE en código**, fusionado con los pesos del SDV-E | `metricas_detalle_kpis_oraculos_dinamicos.md` | 🔴 documento sin implementación |
 | RF-N13 | **Auditoría determinista de la biblioteca**: test estructural + verificación HTTP real de cada fuente citada | regla M15 (*"jamás URLs alucinadas"*) | ✅ `tests/test_sdv_e_biblioteca.py` (7) + `scripts/verificar_enlaces_sdv_e.py` |
-| RF-N14 | **Bloques pendientes**: dimensiones transversales, SDV-A (animales), flora/hongos/microorganismos y Procesos (metodología, actualización, gobernanza) | árbol Cap. 9 §9.7 | 🔴 pendientes de redacción |
+| RF-N14 | **Bloques transversales, SDV-A y Procesos**: dimensiones transversales (biodiversidad, conectividad, ciclos naturales, agua y aire), SDV-A (animales), flora/hongos/microorganismos y Procesos (metodología, actualización, gobernanza) | árbol Cap. 9 §9.7 | ✅ redactados (documentos 20-23, 30-31, 40) · 🔴 sin implementar |
 
 ---
 
