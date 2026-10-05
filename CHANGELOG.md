@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 Dates are ISO 8601 (YYYY-MM-DD). This changelog focuses on developer-facing changes: API, schema, DB seeds, and important operational notes.
 
+## 2026-10-04 — Rama SDV-E: el estándar del Reino Natural, y el Concilio deja de leer recortado
+
+### Añadido
+- **Biblioteca de referencia del SDV-E** (`docs/theory/SDV-E/`, 18 documentos, ~27.000 líneas): abre la rama que el canon convocó en Cap. 16.5 §16.5.14. Fija doctrina y epistemología (dato objetivo / umbral por consenso / violación como dato), la **unidad y el sujeto** del SDV-E, la **no colonización del Tiempo Absoluto** con mecanismo verificable, la **Zona Libre** del Reino Natural, la **representación** (partes `eco-`, guardián, los 7 campos de identidad, quórum y disputa), el **elenco de sensores** (teledetección, in situ, bioindicadores, ciencia ciudadana, comunidad testigo), la **fórmula** con pesos —8 dimensiones, Σ = 1,000; Σ con piso declarado = 0,905, fusionando el ISE con las dos dimensiones que el ISE omitía: caudal ecológico y conectividad—, la especificación de **INV2-E** y un estándar por tipo de ecosistema (bosques, humedales, ríos y cuencas, océanos y costas, suelos vivos, praderas y sabanas, montañas y criósfera, zonas áridas, agroecosistemas).
+- **Auditoría determinista de la biblioteca**: `tests/test_sdv_e_biblioteca.py` (7 comprobaciones: plantilla canónica, **Mínimo Absoluto separado del Óptimo**, LEY vs POLÍTICA declaradas, frases vetadas leídas del propio validador, cero anclas de línea y cero `file:///`, sustento documental mínimo) + `scripts/verificar_enlaces_sdv_e.py` (estado HTTP real de cada fuente, con cuatro estados: OK, BLOQUEADA a bots, SIN RESPUESTA y MUERTA — y una URL muerta **no falla** si el documento la declara en «Fuentes descartadas»).
+- **Integración en mapas**: sección «Reino Natural — el agujero de coherencia activo» en `mapa_coherencia_ola4.md` (16 piezas con su estado real) y pilar **O** con `RF-N1`…`RF-N14` en `requisitos_fase2_ola4.md`.
+
+### Corregido
+- **El corpus del Concilio leía dos fuentes recortadas** (`maxocontracts/concilio/canon.py`): `docs/SESION_NEXT_PROMPT.md` (32.154 > 32.000) y `docs/architecture/atribuciones_sinteticas.md` (60.141 > 56.000). El Concilio llevaba semanas deliberando **sin leer el final del handoff ni las últimas entradas del registro de atribuciones** — justo las más recientes. Suben los dos topes y el presupuesto global de 195.000 a 211.000 chars (medido: corpus ensamblado 208.586). **Es una reparación, no una solución**: el registro crece por diseño en cada sesión, así que el arreglo de fondo sigue siendo destilarlo o dar al Concilio un corpus por capas.
+
+### Notas Técnicas
+- Commit de la biblioteca: `0fbaef4`. **Ninguna pieza del estándar está en el motor todavía**: `SDV_E`, `Participant.sdv_e_actual`, `is_natural`, `INV2-E`, el bloque validador ecológico, la identidad de la representación natural, la contabilidad del crédito regenerativo, el eje de regeneración en R, el PIU ejecutable y las fuentes de datos ecológicos siguen 🔴 — la biblioteca es el *estándar primero*; la contabilidad viene después.
+- **La biblioteca entra al Concilio por el índice, no por el corpus**: `scripts/canon_index.py` recorre `docs/theory` de forma recursiva y ya lista los 18 documentos con sus títulos y tamaños (32 menciones); el corpus de F1 tiene 211.000 chars de presupuesto y la biblioteca mide ~1,5 M, así que el Concilio recibirá el mapa, no el territorio completo.
+- Riesgos abiertos del pilar, sin cambios: **R4** (partes fantasma: cualquiera crea un `eco-*` y queda como su dueño), **R6** (T9 no se valida en la creación) y **R13** (guardián eco con heurística laxa sin `DEEPSEEK_API_KEY`).
+- Deuda preexistente detectada y **no** tocada aquí: `tests/test_inbox.py::test_reset_redacta_link_al_dueno` falla por `SMTPServerDisconnected` (depende del entorno, no del código).
+
 ## 2026-10-02 — Operación del administrador: usuarios, reset y bandeja interna
 
 ### Añadido

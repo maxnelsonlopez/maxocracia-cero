@@ -29,7 +29,7 @@ CANON_FILES: List[Tuple[str, int]] = [
     ("maxocontracts/core/axioms.py", 30_000),
     ("docs/architecture/maxocontracts/FUNDAMENTOS_CONCEPTUALES.md", 40_000),
     ("docs/architecture/requisitos_fase2_ola4.md", 40_000),
-    ("docs/SESION_NEXT_PROMPT.md", 32_000),
+    ("docs/SESION_NEXT_PROMPT.md", 34_000),
     # El registro de atribuciones CRECE por diseño: su propio §3 obliga a cada
     # sesión con obra verificable a añadir su entrada. Su tope sube de 45k a 56k
     # el 16-09-2026 — medía 46.920 chars y `_read_head` recortaba 1.920 POR LA
@@ -47,15 +47,31 @@ CANON_FILES: List[Tuple[str, int]] = [
     # este número — o subir DEFAULT_MAX_CHARS, que es una decisión de coste del
     # Concilio y por eso no se toma aquí. Ver
     # tests/test_canon_audit.py::test_el_peor_caso_del_corpus_cabe_en_el_presupuesto_global
-    ("docs/architecture/atribuciones_sinteticas.md", 56_000),
+    ("docs/architecture/atribuciones_sinteticas.md", 63_000),
 ]
 
 # Tope del corpus completo: cabe en cualquier motor de >=128K con margen.
-# El corpus real mide ~183k chars con atribuciones incluida; 195k deja ~12k de
-# holgura para que ningún archivo quede recortado (medido el 15-09-2026).
-# Nota: el tope de SESION_NEXT_PROMPT sube de 25k a 32k porque el handoff crecio
-# hasta 29.5k y se venia recortando en silencio (degradacion previa, no nueva).
-DEFAULT_MAX_CHARS = 195_000
+#
+# MEDICION (04-10-2026, rama SDV-E): el corpus medía 200.916 chars y DOS fuentes
+# se leían recortadas — `docs/SESION_NEXT_PROMPT.md` (32.154 > 32.000) y
+# `docs/architecture/atribuciones_sinteticas.md` (60.141 > 56.000). Es decir: el
+# Concilio llevaba semanas deliberando sin leer el final del handoff ni las
+# últimas entradas del registro de atribuciones (justo las más recientes).
+# Se suben los dos topes por encima de su tamaño real y el presupuesto global
+# para conservar el invariante de margen (≥2.000 chars). Cifras medidas:
+# 203.855 chars de fuentes + 5.886 de cabeceras = 209.741 de corpus ensamblado.
+#
+# ADVERTENCIA ESTRUCTURAL (heredada del 16-09-2026 y ahora confirmada): subir el
+# presupuesto NO es el arreglo de fondo. El registro de atribuciones y el handoff
+# crecen por diseño en cada sesión, así que estos números volverán a apretarse
+# (el 04-10-2026, tras registrar la rama SDV-E, el handoff volvió a tocar techo:
+# 33.309 sobre un tope de 33.000). El arreglo real es DESTILAR los documentos que
+# crecen —comprimir lo antiguo conservando la memoria, o quitar del handoff la
+# copia de `git log`, que git ya guarda— o dar al Concilio un corpus por capas en
+# vez de un solo bloque. Mientras no se haga, `auditar_corpus()` sigue siendo la
+# defensa: detecta el recorte en vez de confiar. Esta subida es una reparación,
+# no una solución, y es reversible.
+DEFAULT_MAX_CHARS = 212_000
 
 
 def _read_head(path: Path, max_chars: int) -> str:
