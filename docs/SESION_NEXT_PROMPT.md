@@ -260,4 +260,12 @@ sustituido por puntero (`git log --oneline -20` en vivo) — 33.271→29.798
 son del registro (`atribuciones` 65.147 > 63.000) — siguiente hito: ledger.
 Ciclo/agenda verdes (27/27).
 
+**Hito 2 — ledger del registro (misma jornada)**: sección DeepSeek 10.881→~3.500
+(fichas fecha+obra+huella, Capa 1; prosa íntegra en tag
+`corpus/registro-pre-ledger-20261009`). Registro 65.426→58.549 (holgura 4.451),
+corpus 205.361 (margen 7.639). Guardianes: huellas ≥20 + 5 obras testigo + tag
+que resuelve. **Audit 17/17 verde** (4 fallos→0); vecinas 31/31. Rutina: commit
+por hito (`f1e5c57` hito 1). Candidatos a destilar después: Muse Spark-antiguo
+(17.4k), Hilo (5.8k), Concilio (5.4k), ox-alpha (6.4k).
+
 **Mantenido por**: Max + el agente de la jornada (harness) · **Próxima actualización**: al cierre de la siguiente sesión

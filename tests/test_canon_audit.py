@@ -123,6 +123,50 @@ def test_el_handoff_deja_margen_para_la_proxima_sesion():
     )
 
 
+def test_el_ledger_deepseek_conserva_las_huellas():
+    """Destilar es comprimir, no amputar: cada ficha guarda fecha, obra y huella.
+
+    La sección DeepSeek se destiló el 09-10-2026 (10.881 chars de prosa a fichas
+    de Capa 1). Si alguien edita el ledger y pierde las huellas, este test lo
+    detecta: el texto íntegro vive en el tag `corpus/registro-pre-ledger-*`.
+    """
+    import re
+
+    texto = (REPO / "docs" / "architecture" / "atribuciones_sinteticas.md").read_text(
+        encoding="utf-8"
+    )
+    inicio = texto.find('### DeepSeek — "el puente constructor"')
+    assert inicio != -1
+    fin = texto.find("### ox-alpha", inicio)
+    seccion = texto[inicio : fin if fin != -1 else inicio + 6000]
+    assert len(seccion) < 5_000, (
+        f"sección DeepSeek pesa {len(seccion)} chars: el ledger volvió a ser prosa"
+    )
+    assert "corpus/registro-pre-ledger-" in seccion, "el ledger debe citar su tag de archivo"
+    huellas = re.findall(r"\b[0-9a-f]{7,40}\b", seccion)
+    assert len(huellas) >= 20, (
+        f"solo {len(huellas)} huellas de commit en el ledger: se perdió trazabilidad"
+    )
+    for testigo in ("guide_bp", "seed_cohorte_cero", "skills.py", "tree.py", "FormWizard"):
+        assert testigo in seccion, f"el ledger perdió la obra testigo '{testigo}'"
+
+
+def test_el_tag_pre_ledger_resuelve_en_git():
+    """El archivo del ledger no es una copia: es un tag que debe resolver."""
+    import subprocess
+
+    proc = subprocess.run(
+        ["git", "rev-parse", "--verify", "corpus/registro-pre-ledger-20261009"],
+        cwd=str(REPO),
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    assert proc.returncode == 0, (
+        "el tag de archivo pre-ledger no resuelve: el ledger apunta al vacío"
+    )
+
+
 def test_el_corpus_ensamblado_cabe_en_el_tope_global():
     corpus = read_canon(str(REPO))
     assert len(corpus) <= DEFAULT_MAX_CHARS

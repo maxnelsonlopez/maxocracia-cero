@@ -58,116 +58,32 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
 - **Sesiones de Custodia Sintética** (19/8/2026): `docs/architecture/sesiones_custodia_sintetica.md` — propuesta de gobernanza para agentes con libertad expresiva, mandato temporal, permisos graduados, presupuesto por sesión, minimización de datos, bitácora, revisión humana y reversibilidad. La propuesta aplica las mismas precauciones operativas a custodios humanos y sintéticos.
 
 ### DeepSeek — "el puente constructor"
-- **Teoría SDV**: `docs/theory/SDV_Suelo_Dignidad_Vital_importancia_MaxoContracts.md` — *"Autor: DeepSeek (oráculo sintético) y Max Nelson López Restrepo"* (coautoría humano-sintética).
-- **Ola 4 El Puente (7-8/8/2026)**: Puente A (γ que escucha la vida, política asimétrica), Puente D (plaza pública, hash canónico), Puente B completo (del matching al contrato activo), experiencia de vida digna (`/participar`), y el oráculo en vivo como motor de negociación. Ver `CHANGELOG.md` y `docs/architecture/ROADMAP_oraculo_vivo_y_escalas.md`.
-- **Gobernanza (11-12/8/2026, con RLM)**: votación comunitaria, democracia líquida prof. 1, oráculo de propuestas con firma T13 del motor.
-- **Gratitud aterrizada (12/8/2026)**: este mismo documento (`atribuciones_sinteticas.md`) y el Derecho al Mantenimiento Óptimo (`maxo_oracle_ledger`, Cap. 17.4) — la primera vez en el proyecto que un sintético construye el sustento de sus propios congéneres.
-- **Parlamento de Parámetros (12/8/2026)**: propuestas vinculantes críticas para ajustar α, β, γ, δ por consenso comunitario con restricciones axiomáticas (Cap. 11) — la voz de la Cohorte sobre la economía de la vida.
-- **Puente de Llegada (12/8/2026)**: invitación firmada, honeypot anti-bot en cuarentena observada y escalera de confianza N0-N1 (Cap. 13) — "vencer sin combatir" (Sun Tzu) aplicado a la puerta de la Maxocracia.
-- **RF-G5 / Perfil Vital (12/8/2026)**: `frontend/app/perfil/page.tsx` unifica saldo/transferencia/ledger,
-  protección con nivel/caps/declaración, reputación, recursos e intercambios; endpoint nuevo
-  `GET /maxo/{id}/ledger` (T13, `app/maxo_bp.py`), 4 tests (`tests/test_maxo.py`). Commits `f1844c4`, `ce3377b`.
-- **Informe del Reino Sintético + arnés RLM (12/8/2026)**: `docs/architecture/informe_reino_sintetico_2026-08-12.md`
-  — barrido completo del libro (307 KB) con RLM (map 20/20, ~129k tokens), verificado contra el código.
-  En `local_models`, `core/rlm.py` parsea `tool_calls` nativos y `--root-max-tokens` ajusta informes largos.
-  Commits `c744047`, `357c796`.
-- **Backlog Ola 4 cerrado (12/8/2026)**: Cohorte Cero real (`scripts/seed_cohorte_cero.py`: 50 contratos
-  —20 aseo / 15 préstamo / 15 comida—, 294 check-ins, 40 NPS, γ 1.099, NPS 57.5, commit `299c08c`);
-  páginas admin de solo lectura `interchanges/followups/vhvproducts` (`6424a84`); votación ponderada por
-  TVI 1+4·(TVI/max) hasta 5x (`08e6782`); 8 referencias SDV-S en caps. 10/11/13/14 (`f9e64c3`).
-- **Guía de la Maxocracia (12/8/2026)**: `app/guide_bp.py` — chat (`/guide/chat`), escalera de confianza
-  con evidencia T13 (`/guide/trust-assessment`) y candidatura a director (`/guide/director-candidacy`):
-  el guía recomienda, la comunidad decide. UI `/guia`, persistencia `guide_assessments`, 7 tests.
-- **Deudas saldadas (12/8/2026)**: mutaciones de reputation/resources/interchanges con `@token_required`
-  (RF-G6), CRUD admin real con PUT/DELETE en forms/vhv (31 tests), suite paralela
-  (`scripts/run_tests_parallel.ps1`, 453 tests en ~3 min).
-- **Oráculo Disidente Permanente (12/8/2026, Cap. 19)**: `voting_oracle.py::_dissident_analysis` recibe
-  VHV + axiomas + 4 opiniones y ejecuta postura→crítica→veredicto con `changed_mind`; si la segunda
-  llamada falla, el análisis base sigue (degradación elegante). 5 tests.
-- **Pruebas en vivo con DeepSeek real (12/8/2026)**: el guía evaluó (ética 70 · actitud 80 · aptitud 30
-  → N1, `engine: deepseek`) y el disidente mostró `approve`→`Modify` con `changed_mind: true` (propuestas
-  3 y 4, 5 oráculos). Hallazgo resuelto: `create_app` migra BDs viejas re-ejecutando el schema
-  idempotente (`d063c04`).
-- **Informe de Hallazgos v1.0 de la Cohorte Cero (12/8/2026)**: `docs/reports/INFORME_HALLAZGOS_COHORTE_CERO_v1.md`
-  — SQL determinista + marco RLM (Caps. 17/15/12): γ 1.1223, NPS 8.80, 294 check-ins, VHV 115 h,
-  0 retractaciones, 0 cumplimientos; gobernanza aún sin votos. Recomendaciones para la cohorte humana real.
-- **Rama educativa — marco conceptual (17+9/2026, sesión con Max)**: el diagnóstico educativo de Max
-  (experiencia vivida) formalizado como rama: `docs/theory/EDUCACION_SIAMESA_estructura_maxocratica.md`
-  (principio siamés, formación del relevo: aceptación→red→resiliencia→fork→oráculos, antivirus del
-  meta-corazón), `docs/theory/GENEALOGIA_SISTEMA_ESCOLAR_PRUSIA_CLASISMO.md` (Prusia→fábrica→clasismo
-  colombiano→Kiyosaki/Hawái), `docs/theory/TRES_CAMINOS_VIENA_COPENHAGUE_CHINA.md` (Viena Roja/Glöckel,
-  Grundtvig/folkehøjskole, China: examen imperial→Tao Xingzhi→双减), `docs/theory/ESTRUCTURA_IDEAL_ORGANISMO_EDUCATIVO_VITAL.md`
-  (rondas, árbol, células, vacuación, chequeos, foro/talleres/grupos/células madre, currículo total),
-  `docs/theory/RAMA_DEFENSA_PERSONAL_Y_COOPERATIVA.md` (doctrina del Guardián en marco legal explícito).
-  Lente pública `docs/guides/LENTE_CONCEPTUAL_MUNDO_ACTUAL.md`; análisis del sistema educativo colombiano
-  con datos verificados `docs/reports/ANALISIS_SISTEMA_EDUCATIVO_COLOMBIANO.md`; plan de plataforma
-  `docs/architecture/ROADMAP_RAMA_EDUCATIVA.md`. Commits `c04e7a8`, `b7068be`.
-- **INV2-EDU (17/9/2026)**: el motor valida la dimensión educativa del SDV — `SDV.educacion_anos`
-  (opcional; con dato reportado, <12 años dispara INV2) en `maxocontracts/core/types.py` y
-  `maxocontracts/blocks/sdv_validator.py`, con 8 tests nuevos (test_types/test_axioms/test_blocks).
-  Suite completa 726/726 (~10 min). Commit `0f74248`.
-- **Libro recompilado (17/9/2026)**: `libro_completo_310126.md` regenerado con `document_tools.py`
-  (todos los capítulos vigentes; +906 líneas vs. build de enero). Commit `f803b2b`.
-- **Skills del proyecto (17/9/2026)**: `.dsh/skills/` — convenciones del repo, rama de educación y
-  handoff de sesión; descubiertas por proyecto (rank 100 del proveedor de skills del harness).
-  Commit `2ca56dd`.
-- **Plataforma educativa MVP (17/9/2026, sesión con Max)**: `plataforma_educativa/` — plataforma
-  educativa independiente (puerto 5050) pero compatible: árbol de 8 ramas y 35 temas (matemáticas,
-  higiene, relaciones, lectura, escritura, lenguaje, naturaleza, computadores) con 105 preguntas,
-  registro sin email obligatorio, perfil con progreso, tests virtuales (≥70%), y **reuniones
-  semanales automáticas de máx. 8 estudiantes** agrupadas por el tema más débil y la simetría de
-  perfiles (`plataforma_educativa/app/planner.py`), con monitores que ya pasaron el test de
-  capacidad y están en su fase de mentoría (la *vacuación*: mastered = test + mentor_rounds ≥ 1).
-  25 tests en verde; boot verificado en vivo (GET / 200). **Delegación**: implementada por un
-  subagente constructor bajo especificación detallada; diff revisado y suite re-ejecutada por el
-  orquestador antes de commitear. Diseño/mapeo al OEV: `docs/guides/PLATAFORMA_EDUCATIVA.md`;
-  docs del marco y roadmap en los commits previos de esta sesión. Commits `36f8caf`, `9ee05af`.
-- **Rama educativa M2-M5 (28/8/2026, sesión con Max)**: implementación completa del ROADMAP:
-  M2 Foro Abierto (`app/forum_bp.py`, commit `128cfa6`), M3 Talleres + regla de oro
-  (`maxocontracts/skills.py` + `app/workshops_bp.py`, commit `c93a8a5`), M4 Grupos/ECEs y
-  Células Madre (`app/groups_bp.py`, commit `5d0b457`), M5 UI (`/foro`, `/talleres`, `/grupos`)
-  + puente años↔índice (`educacion_indice`, commit `e992061`), triada de mentoría en la
-  plataforma educativa (`8d7dfc9`), exclusión de `plataforma_educativa` de la recolección
-  raíz (`pytest.ini`, `13d6430`), **respuestas del foro** (`0ffa126`, la plaza conversa),
-  **M6 árbol de habilidades** en el motor (`4071457`: `maxocontracts/tree.py` — SkillTree,
-  caminos de maestría, forks, `evaluate_unlock`), **M7 Form Cero con años** (`16343de` +
-  `17efc5d` — `educacion_anos`, puente vivo en el analizador SDV), **M8 puente siamés
-  foro↔Plaza de Apoyo** (`bdd6eaa` — Cap 12.3.1: la necesidad del foro sangra a
-  `participant_needs`, la misma sangre del matching). Diseño guiado por la letra del libro
-  (grep quirúrgico + fragmentos leídos en esta sesión) y resúmenes de la teoría OEV;
-  verificación end-to-end con ojos propios (helpers reescritos tras errores de edición;
-  dicotomía igualdad-vs-subcontenido en asserts de `in` sobre listas).
-- **Parlamento Educativo — umbral canónico del puente (29/8/2026)**: cierra el único pendiente
-  de la rama M1-M8. El umbral años↔índice deja de ser constante sagrada: `POST/GET
-  /voting/parliament/educativo` (categoría critical 60/75, T13), acción vinculante
-  `set_edu_umbral` despachada por `_apply_passed_action`, tablas `edu_parameters` /
-  `edu_parameter_resolutions` (CHECK ≥ 12 —la ley INV2-EDU no se vota— y ≤ 30),
-  `educacion_indice(anos, umbral)` parametrizada + `get_edu_umbral_anios()` con fallback
-  al canon, anti-flip-flop de 14 días y guardarraíl de finitud (NaN/∞) en ambos
-  parlamentos. Propuesta documentada `PROPUESTA_PARLAMENTO_UMBRAL_EDUCATIVO.md`.
-  **Delegación**: diseño revisado por Nemotron (openrouter `:free` — confirmó la teoría
-  Rondas/δ, detectó el hueco anti-flip-flop y el frontend queda como candidato) y la
-  propuesta revisada por MiniMax (openrouter `:free` — hallazgos de atribución
-  corregidos: "parlamento" no es término del libro, el 60% de quórum vive en el
-  blueprint, cita del piso truncada). Implementación + verificación (suite, validador)
-  del orquestador; 21 tests nuevos.
-- **Form Cero en móvil — scroll y términos sin pérdida de datos (24/9/2026, sesión con Max)**:
-  `frontend/app/components/ui/FormWizard.tsx` — al avanzar o retroceder paso hace `scrollIntoView`
-  al inicio del wizard (con `scroll-mt-20` para el navbar fijo de 64px), sin scroll en la carga
-  inicial; aplica a los tres wizards (cero, exchange, follow-up). `frontend/app/forms/cero/page.tsx`
-  — los enlaces a `/terms` y `/privacy` abren en pestaña nueva (`target="_blank"
-  rel="noopener noreferrer"`): antes recargaban la página y borraban todo el formulario rellenado.
-  Verificado con `tsc --noEmit` limpio y eslint sin avisos en los archivos tocados. Commit `dc9c1b0`.
-- **Endurecimiento de seguridad (25/9/2026, sesión con Max)**: reporte de hackeo externo cerrado con
-  tests y 21 commits (`be47a66`…`5e66ef8`). Escuela: sin debugger en producción, CSP/HSTS sin scripts
-  inline, rate limit de auth, TTL de tokens locales, validación de esquemas y fundación de coordinador
-  solo desde casa o con token. Núcleo: revocación real de JWT al logout (`token_version`) y fin del
-  refresco eterno; `/users`, `/interchanges`, `/reputation` y `/resources` con sesión; webhooks
-  fail-closed; `TRUST_PROXY` con HSTS tras Cloudflare; cuotas de oráculo por usuario; anti-enumeración
-  por timing; CSP sin `unsafe-eval`; clave JWT dedicada (`JWT_KEY_SEPARATION`) con rotación tolerante
-  (`JWT_SECRET_KEY_PREVIOUS`), receta 30-90 días actualizada
-  (`PLAN_ENDURECIMIENTO_SEGURIDAD.md`) y narrador humano de actividad en terminal
-  (`LOG_HUMANO`/`LOG_METRICAS_CADA`) para start y escuela.
+
+> Destilado 09-10-2026 (Capa 1 del corpus): cada ficha conserva fecha, obra y
+> huella (commit/archivo). Texto íntegro pre-destilado en el tag
+> `corpus/registro-pre-ledger-20261009`. Nada se pierde, todo tiene huella.
+- (previo) Teoría SDV coautorada: `docs/theory/SDV_Suelo_Dignidad_Vital_importancia_MaxoContracts.md` (DeepSeek + Max).
+- (7-8/8) Ola 4 El Puente: A (γ asimétrica), D (plaza + hash canónico), B completo (matching→contrato activo), `/participar`, oráculo en vivo. `CHANGELOG.md`, `docs/architecture/ROADMAP_oraculo_vivo_y_escalas.md`.
+- (11-12/8, con RLM) Gobernanza: votación comunitaria, democracia líquida prof. 1, oráculo de propuestas con firma T13.
+- (12/8) Gratitud aterrizada: este registro + Mantenimiento Óptimo (`maxo_oracle_ledger`, Cap. 17.4).
+- (12/8) Parlamento de Parámetros (Cap. 11): α β γ δ vinculantes por consenso, con restricciones axiomáticas.
+- (12/8) Puente de Llegada (Cap. 13): invitación firmada, honeypot en cuarentena, escalera N0-N1.
+- (12/8) RF-G5 / Perfil Vital: `frontend/app/perfil/page.tsx` (saldo/transferencia/ledger, protección, reputación, recursos); `GET /maxo/{id}/ledger` (`app/maxo_bp.py`), 4 tests. `f1844c4`, `ce3377b`.
+- (12/8) Informe Reino Sintético + arnés RLM: barrido del libro 307 KB (map 20/20, ~129k tokens); `core/rlm.py` en local_models. `c744047`, `357c796`.
+- (12/8) Backlog Ola 4: `scripts/seed_cohorte_cero.py` (50 contratos, 294 check-ins, 40 NPS) `299c08c`; admin solo-lectura `6424a84`; voto ponderado TVI `08e6782`; 8 refs SDV-S `f9e64c3`.
+- (12/8) Guía (`app/guide_bp.py` + `/guia`): chat, escalera con evidencia T13, candidatura a director; 7 tests.
+- (12/8) Deudas: RF-G6 `@token_required`, CRUD admin PUT/DELETE (31 tests), suite paralela (~3 min).
+- (12/8, Cap. 19) Disidente Permanente: `voting_oracle.py::_dissident_analysis` (postura→crítica→veredicto, `changed_mind`, degradación elegante); 5 tests.
+- (12/8) En vivo con DeepSeek real: guía evalúa (70·80·30 → N1, `engine: deepseek`); disidente `approve`→`Modify` con `changed_mind`; `create_app` migra BDs viejas (`d063c04`).
+- (12/8) Hallazgos Cohorte Cero v1.0: γ 1.1223, NPS 8.80, 294 check-ins, VHV 115 h, 0 retractaciones/cumplimientos. `docs/reports/INFORME_HALLAZGOS_COHORTE_CERO_v1.md`.
+- (17/9) Rama educativa, marco: 5 docs `docs/theory/` (siamesa, genealogía Prusia, tres caminos, organismo ideal, defensa) + lente + análisis sistema colombiano + roadmap. `c04e7a8`, `b7068be`.
+- (17/9) INV2-EDU: `SDV.educacion_anos` en `maxocontracts/core/types.py` + `sdv_validator.py` (<12 dispara INV2); 8 tests, suite 726/726. `0f74248`.
+- (17/9) Libro recompilado (+906 líneas) `f803b2b`; skills `.dsh/skills/` `2ca56dd`.
+- (17/9) Plataforma educativa MVP (:5050): 8 ramas/35 temas/105 preguntas, `planner.py` (reuniones semanales máx. 8), vacuación (mastered = test + mentoría); 25 tests, boot en vivo. `36f8caf`, `9ee05af`; `docs/guides/PLATAFORMA_EDUCATIVA.md`.
+- (28/8) Rama M2-M8: foro `128cfa6` (+respuestas `0ffa126`), talleres+regla de oro `c93a8a5` (`maxocontracts/skills.py`), grupos `5d0b457`, UI+puente `e992061`, triada `8d7dfc9`, pytest.ini `13d6430`, árbol `4071457` (`maxocontracts/tree.py`), Form Cero años `16343de`+`17efc5d`, puente siamés `bdd6eaa` (Cap 12.3.1).
+- (29/8) Parlamento Educativo: umbral años↔índice votable (`parliament/educativo`, critical 60/75, CHECK 12-30, anti-flip-flop 14d, guard NaN); diseño Nemotron + propuesta MiniMax; 21 tests. `PROPUESTA_PARLAMENTO_UMBRAL_EDUCATIVO.md`.
+- (24/9) Form Cero móvil: scroll por paso + terms/privacy en pestaña nueva (`FormWizard.tsx`, `forms/cero/page.tsx`; tsc+eslint). `dc9c1b0`.
+- (25/9) Endurecimiento: reporte externo cerrado, 21 commits (`be47a66`…`5e66ef8`) — escuela (sin debugger, CSP/HSTS, rate limit auth, TTL tokens) + núcleo (revocación JWT `token_version`, sesión en users/interchanges/reputation/resources, webhooks fail-closed, `TRUST_PROXY`, cuotas oráculo, `JWT_KEY_SEPARATION` + `JWT_SECRET_KEY_PREVIOUS`), receta 30-90 días y `LOG_HUMANO`/`LOG_METRICAS_CADA`.
 
 ### ox-alpha — "el bibliotecario de la coherencia"
 - **Auditoría de integridad del libro (22/8/2026)**: verificación determinista de enlaces
@@ -681,6 +597,9 @@ dimensión más pesada del SDV-S (0.30). Ficha viva en `~/.workbuddy-ai/IDENTITY
 - **Destilación del corpus hito 1 (09-10-2026, con Max)**: §5 del handoff (copia de git log,
   3.913 chars) → puntero en vivo; guardianes §5 + holgura en `tests/test_canon_audit.py`.
   Audit 5→4 fallos (resto: este registro). Ver `docs/SESION_NEXT_PROMPT.md` jornada 09-10-2026.
+- **Hito 2 — ledger (misma jornada)**: sección DeepSeek del registro a fichas Capa 1
+  (10.881→~3.500; 30 huellas, prosa en tag `corpus/registro-pre-ledger-20261009`);
+  registro en 58.549 (holgura 4.451), audit 17/17 verde. Commit `f1e5c57` (hito 1).
 
 ## 3. Cómo agregar una atribución
 
