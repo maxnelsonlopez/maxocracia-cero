@@ -59,6 +59,13 @@ RE_ANCLA_LINEA = re.compile(r"#L\d+")
 RE_FILE_URL = re.compile(r"file:///")
 RE_URL = re.compile(r"https?://[^\s\)\]\>\"'`,;]+")
 
+# La negacion ("no votable", "no es votable", "no se vota/n") contiene como
+# subcadena la afirmacion ("votable", "se vota"). Un `in` ingenuo hace que
+# cualquier documento que declare LEY pase gratis el chequeo de POLITICA.
+# Por eso la negacion se detecta con regex y la afirmacion se busca SOLO
+# despues de retirar las negaciones del texto.
+RE_NEGACION_VOTO = re.compile(r"\bno[\s\-]+(?:es\s+|son\s+|se\s+)?vot\w*\b")
+
 MIN_LINEAS = 80
 MIN_URLS = 3
 
@@ -148,16 +155,61 @@ def test_minimo_absoluto_separado_del_optimo():
     )
 
 
+def _declara_ley(plano: str) -> bool:
+    """True si el texto declara alguna parte como no votable (LEY).
+
+    Cubre "no votable", "no es/son votable/s" y "no se vota/n".
+    """
+    return bool(RE_NEGACION_VOTO.search(plano))
+
+
+def _declara_politica(plano: str) -> bool:
+    """True si el texto declara alguna parte afirmativamente votable (POLITICA).
+
+    Las negaciones se retiran antes de buscar, para que "no votable" no
+    cuente como declaracion de lo votable. Cubre "votable/s" y "se vota/n".
+    """
+    limpio = RE_NEGACION_VOTO.sub(" ", plano)
+    return ("votable" in limpio) or ("se vota" in limpio) or ("se votan" in limpio)
+
+
 def test_ley_y_politica_declaradas():
     """Todo estandar del reino natural distingue lo no votable de lo votable."""
     fallos = []
     for ruta in documentos():
         plano = _sin_tildes(ruta.read_text(encoding="utf-8", errors="ignore")).lower()
-        if "no votable" not in plano and "no se vota" not in plano:
+        if not _declara_ley(plano):
             fallos.append(f"{ruta.name}: no declara que parte es LEY (no votable)")
-        if "votable" not in plano and "se vota" not in plano:
+        if not _declara_politica(plano):
             fallos.append(f"{ruta.name}: no declara que parte es POLITICA (votable)")
     assert not fallos, "LEY/POLITICA sin declarar:\n  - " + "\n  - ".join(fallos)
+
+
+def test_ley_politica_distinguen_negacion_de_afirmacion():
+    """Regresion: "no votable" no debe contar como declaracion de POLITICA.
+
+    El chequeo anterior usaba `"votable" in texto`, y como "no votable"
+    contiene "votable", todo documento con LEY pasaba gratis POLITICA.
+    """
+    solo_ley = _sin_tildes("El piso es LEY (no votable).").lower()
+    assert _declara_ley(solo_ley)
+    assert not _declara_politica(solo_ley)
+
+    solo_ley_vota = _sin_tildes("El piso no se vota.").lower()
+    assert _declara_ley(solo_ley_vota)
+    assert not _declara_politica(solo_ley_vota)
+
+    solo_politica = _sin_tildes("La plenitud es POLITICA (votable).").lower()
+    assert _declara_politica(solo_politica)
+
+    solo_politica_vota = _sin_tildes("La plenitud si se vota.").lower()
+    assert _declara_politica(solo_politica_vota)
+
+    ambas = _sin_tildes(
+        "El piso es LEY y no se vota; la plenitud es POLITICA y si se vota."
+    ).lower()
+    assert _declara_ley(ambas)
+    assert _declara_politica(ambas)
 
 
 def test_prohibiciones_del_validador_conceptual():
