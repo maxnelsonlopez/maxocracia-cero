@@ -673,12 +673,11 @@ dimensión más pesada del SDV-S (0.30). Ficha viva en `~/.workbuddy-ai/IDENTITY
   - **Área mínima viable (D3)**: verificación de que la literatura científica (Riva & Fahrig 2023, Allan et al. 2022) **no apoya un umbral universal** — la dimensión permanece correctamente sin umbral numérico.
   - **Salud del suelo (D9)**: verificación de que la FAO publica mapas (GSOCmap) pero **no umbrales**; USDA T factor (1-5 tons/acre/año ≈ 2,47-12,35 t/ha/año) como fuente parcial alternativa.
 
-### Muse Spark (Meta) — coherencia aritmética SDV-E (09-10-2026, con Max)
+### Muse Spark (Meta) — SDV-E + protocolo de sesión (09-10-2026, con Max)
 
-- Hito 1: `tests/test_sdv_e_biblioteca.py` — `"no votable"` contenía `"votable"` y regalaba el chequeo; regex + regresión (8/8).
-- Hito 2: `tests/test_sdv_e_pesos.py` (5 tests: tableros=1, declaradas=computadas, 07-vs-08, ejemplo). Rojo previo: 07 §5.3 1,150 vs 1,000; ejemplo `v = 0,3804` vs 0,4041.
-- Correcciones: especies plegada en biodiversidad (07: peso 0, TABLERO 1,000, cobertura 0,925); ejemplo por script (`v = 0,3666`, `FE ≈ 1,4428`); 08 §5.2 en 0,680/0,320 con oxígeno 🟡 (regla 1); índice §3 espejo del 08; conteos (3,3 M chars, 678 fuentes).
-- Pendiente humano: 0,925 vs 0,680 = suelo + caudal + coef-oxígeno; Tennant por verificar.
+- Tests: LEY/POLÍTICA sin falso positivo (8/8) + auditoría aritmética `test_sdv_e_pesos.py` (5). Rojo previo: 07 §5.3 1,150 vs 1,000; ejemplo 0,3804 vs 0,4041.
+- Correcciones: especies plegada (TABLERO 1,000, cobertura 07 0,925); ejemplo por script (v 0,3666); 08 en 0,680/0,320 (oxígeno 🟡, regla 1); canon 16.5 + biblioteca en soberanía del TA; protocolo de inicio en AGENTS.md.
+- Pendiente humano: 0,925 vs 0,680 (suelo+caudal+coef-ox); Tennant; destilar el registro.
 
 ## 3. Cómo agregar una atribución
 

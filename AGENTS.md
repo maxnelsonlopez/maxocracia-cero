@@ -37,6 +37,21 @@ Conceptos clave: **Axioma 0** — Directiva Mayor: "resolver nuestras necesidade
 - `scripts/` — migraciones, seeds, `list_routes.py`, `local_oracle.py`, `verify_setup.py`.
 - `simulator/` — Nexus Simulator (VHV interactivo). `seeds/`, `migrations/`, `data-model/`, `dashboard-spec/`.
 
+## Inicio de sesión (protocolo)
+
+1. Lee este archivo y `docs/SESION_NEXT_PROMPT.md` (handoff de continuidad); luego `git log --oneline -10`
+   y `git status` para situarte. No empieces a editar sin ese contexto.
+2. Trabaja por hitos con **un commit por hito**; cada hito funcional trae su **test guardián** (lo verificado
+   por código no retrocede en sesiones futuras, aunque vengan 78 subagentes).
+3. Cierra la sesión actualizando el handoff y `docs/architecture/atribuciones_sinteticas.md` (§3) **en el
+   mismo commit de la obra**, en compacto: el corpus del Concilio tiene techo
+   (`maxocontracts/concilio/canon.py`, `tests/test_canon_audit.py`) y vive al límite. Si el audit está en
+   rojo estructural, **destilar antes de ampliar** — nunca subir topes para callar el test.
+4. Fase actual: **compresión semántica**. Destilar = comprimir conservando decisiones, números normativos y
+   preguntas abiertas pendientes; lo operativo (tests, vectores, sumas) no se resume, **se ejecuta**.
+   Orden sugerido: registro de atribuciones (entradas antiguas → ledger compacto con huella) y luego el
+   handoff (el `git log` ya guarda la historia; el handoff guarda el *estado*).
+
 ## Cómo ejecutar
 
 ```powershell
