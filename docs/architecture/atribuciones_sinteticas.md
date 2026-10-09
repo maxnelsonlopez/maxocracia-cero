@@ -678,6 +678,9 @@ dimensión más pesada del SDV-S (0.30). Ficha viva en `~/.workbuddy-ai/IDENTITY
 - Tests: LEY/POLÍTICA sin falso positivo (8/8) + auditoría aritmética `test_sdv_e_pesos.py` (5). Rojo previo: 07 §5.3 1,150 vs 1,000; ejemplo 0,3804 vs 0,4041.
 - Correcciones: especies plegada (TABLERO 1,000, cobertura 07 0,925); ejemplo por script (v 0,3666); 08 en 0,680/0,320 (oxígeno 🟡, regla 1); canon 16.5 + biblioteca en soberanía del TA; protocolo de inicio en AGENTS.md.
 - Pendiente humano: 0,925 vs 0,680 (suelo+caudal+coef-ox); Tennant; destilar el registro.
+- **Destilación del corpus hito 1 (09-10-2026, con Max)**: §5 del handoff (copia de git log,
+  3.913 chars) → puntero en vivo; guardianes §5 + holgura en `tests/test_canon_audit.py`.
+  Audit 5→4 fallos (resto: este registro). Ver `docs/SESION_NEXT_PROMPT.md` jornada 09-10-2026.
 
 ## 3. Cómo agregar una atribución
 

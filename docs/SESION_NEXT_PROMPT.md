@@ -200,57 +200,13 @@ VHV 115 h. **Hallazgos que definen la siguiente cohorte**: 0 retractaciones (INV
 0 cumplimientos/intercambios, oráculo sin sustento (ledger 0), gobernanza sin votos (4 propuestas
 open), 3 violaciones INV1 sin alerta. TODO.md actualizado (Semana 9-12 parcial).
 
-## 5. Historia reciente (git log, maxocracia)
+## 5. Historia reciente (git la guarda; aquí solo el puntero)
 
-```
-f7a9f26 fix(deps): sube dependencias python con vulnerabilidades + auditoria recurrente
-4def0dc fix(security): SECRET_KEY fail-closed en produccion, FORCE_HTTPS y CSP sin websocket de dev
-c8f3a4d fix(deps): next 16.3.4 cierra las vulnerabilidades high del frontend
-3433829 docs(agents): corrige la ruta del handoff de sesion en AGENTS.md
-2591288 docs(security): plan canonico de endurecimiento y atribucion de GLM
-9e26d5e docs(handoff): M16 la categoria Etica y el barrio de la casa
-7c82cbe docs(educacion): la categoria Etica en lenguaje comun - diseno canonico (M16)
-a7f4192 feat(edu-ux): el barrio de la casa - lore de la categoria Etica en la ciudad
-1b31803 feat(edu-plataforma): la categoria Etica - fundamentos en lenguaje comun (M16)
-567ee8c docs(educacion): biblioteca de la ciudad y la luz - diseno canonico (M15)
-1cdc8e7 feat(edu-ux): biblioteca, celebracion y luz de la ciudad en la UI (M15)
-28d41ff feat(edu-plataforma): 35 guias propias del saber - la ciudad ya tiene material (M15)
-4351acb feat(edu-plataforma): la biblioteca de la ciudad - material educativo por tema (M15)
-5c9c37f fix(plataforma-educativa): el companero no repite la obra en curso (inicio M14)
-ed3f16f docs(educacion): diseno de la ciudad del saber y handoff M14
-ecd82dc feat(plataforma-educativa): la ciudad del saber - mapa, niebla, lore y companero (M14)
-5d8086e docs(handoff): M13 vacuacion sin muros y hallazgos de prueba en vivo
-63d3f5e feat(nav): la puerta del nodo educativo aparece en el menu Aprendizaje
-6378243 docs(educacion): auditoria de mejora de la plataforma (MiniMax) y handoff M13
-b1c678e feat(plataforma-educativa): vacuacion sin muros - material de ensenanza propio (M13)
-70f5eae fix(plataforma-educativa): el modal de test ya no se cuela en el login
-217c0f0 docs(handoff): M12.1-12.3 - puerta, sincronizacion automatica y evidencia visible
-b6639ed feat(edu-ux): arbol visible y concesion por triada en UI (sin prompt())
-d4c5a24 feat(workshops): tejido visible y triada con la lista del taller
-93543d3 docs(maps): RF-EDU-12/13/14 y mapa frontend de la plaza hablable
-c447c9d feat(edu-ux): plaza hablable - lenguaje sencillo con InfoTip, hub, guia<->foro y parlamento educativo en UI
-f2fc7f5 feat(forum): busqueda textual en la plaza - la plaza se habla
-fbb8da7 docs(educacion): propuesta al parlamento del umbral canonico del puente (M9)
-cf85973 feat(voting): parlamento educativo vota el umbral canonico del puente (M9)
-60b4e9f docs(maps): RF-EDU-11, coherencia y atribuciones del parlamento educativo
-a1f10d5 docs(book): sincroniza indice y mapas de integraciones con el estado real
-12e5f74 docs(book): integra capa de ternura en capitulo 15 y corrige referencias
-0316279 docs(book): integra oraculo disidente permanente en capitulo 14
-4c548db docs(book): integra capa de ternura en capitulos 7, 8 y 13
-c08db22 docs(identity): propone continuidad y autogobierno federado
-d12adb8 docs(governance): registra marco humano-sintetico y custodia
-aede3d6 feat(admin): incorpora panel de custodia sintetica
-e966e66 feat(governance): prototipa sesiones de custodia manuales
-aa62239 docs(governance): propone sesiones de custodia sintética
-fc59eae feat(home): crea portada explicativa y registra cocreación sintética
-0aebedd feat(arrivals): Puente de Llegada - invitacion firmada, honeypot anti-bot, escalera N0-N1
-cc676d4 feat(voting): parlamento de parametros (Cap 11) - propuestas vinculantes criticas
-0b5c8ac feat(oracle): gratitud aterrizada - atribuciones sinteticas y Mantenimiento Optimo (Cap 17.4)
-46fe993 feat(voting): delegacion de voto (democracia liquida) + INV2-S formalizado + M4 corregido
-0832fb6 feat(voting-oracle): DeepSeek principal + fallback local, firma T13 del motor
-342fa0c feat(frontend): /votaciones - gobernanza comunitaria (demo Gemini portado)
-c59f608 feat(voting): votacion comunitaria (Cap 14) - categorias, quorum, consenso 75%
-```
+> Regla de destilación (09-10-2026): la historia completa vive en git y NO se
+> copia en el handoff — `git log --oneline -20` la reproduce en vivo. Último
+> hito consolidado previo: M16 la categoría Ética + endurecimiento de seguridad
+> (02-09-2026, suite 885/885). El estado vivo está en §2 (tabla por área) y en
+> las jornadas al pie; lo operativo se ejecuta, no se resume.
 
 ---
 
@@ -294,5 +250,14 @@ en positivo); Cap. 4 §4.2 (T0–T15 + T16–T17 ingeniería; §4.2.3 en positiv
 nivel 0) y §4.11 (bajo A0); Cap. 2 §2.7 (posibilidad, no probabilidad); Cap. 5 (Ocho Axiomas viven en
 Cap. 4, no Cap. 2). Validador verde (8146 archivos) + `test_validador_conceptual.py` 4/4.
 **Créditos**: `atribuciones_sinteticas.md` + commit `bc1a2c2` (Muse Spark).
+
+## Jornada 09-10-2026 — destilación del corpus, hito 1 (Muse Spark + Max)
+
+**Handoff aliviado**: §5 (copia de `git log`, 3.913 chars obsoletos desde agosto)
+sustituido por puntero (`git log --oneline -20` en vivo) — 33.271→29.798
+(−3.473), holgura 729→4.202. Guardianes nuevos en `test_canon_audit.py`:
+§5 < 1.200 chars + holgura handoff ≥ 2.000. Audit: 5→4 fallos; los 4 restantes
+son del registro (`atribuciones` 65.147 > 63.000) — siguiente hito: ledger.
+Ciclo/agenda verdes (27/27).
 
 **Mantenido por**: Max + el agente de la jornada (harness) · **Próxima actualización**: al cierre de la siguiente sesión

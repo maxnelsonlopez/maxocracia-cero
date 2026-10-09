@@ -90,6 +90,39 @@ def test_el_registro_tiene_margen_para_la_proxima_entrada():
     )
 
 
+def test_el_handoff_no_contiene_copia_de_git_log():
+    """Regla de destilación (09-10-2026): git guarda la historia, el handoff apunta.
+
+    El §5 llegó a pesar 3.913 chars como copia de `git log --oneline` (obsoleta
+    desde agosto). Si alguien vuelve a pegar el log aquí, este test lo detecta
+    el mismo día en vez de descubrirse cuando el tope apriete.
+    """
+    texto = (REPO / "docs" / "SESION_NEXT_PROMPT.md").read_text(encoding="utf-8")
+    marker = "## 5. Historia"
+    idx = texto.find(marker)
+    assert idx != -1, "el handoff debe conservar su §5 como puntero a git"
+    siguiente = texto.find("\n## ", idx + len(marker))
+    seccion = texto[idx : siguiente if siguiente != -1 else idx + 3000]
+    assert len(seccion) < 1_200, (
+        f"§5 pesa {len(seccion)} chars: vuelve a ser una copia del log, no un puntero"
+    )
+    assert "git log --oneline" in seccion, "el §5 debe decir cómo reproducir la historia en vivo"
+    entradas = seccion.count("fix(deps):") + seccion.count("feat(edu-ux):")
+    assert entradas <= 2, f"§5 contiene {entradas} líneas de log copiado"
+
+
+def test_el_handoff_deja_margen_para_la_proxima_sesion():
+    """El handoff crece por diseño (jornadas al pie): debe quedar sitio."""
+    handoff = next(
+        e for e in auditar_corpus(str(REPO)) if e.ruta.endswith("SESION_NEXT_PROMPT.md")
+    )
+    assert handoff.existe
+    assert handoff.holgura >= 2_000, (
+        f"holgura {handoff.holgura} sobre tope {handoff.tope}: "
+        "el handoff está a punto de recortarse — destilar, no ampliar"
+    )
+
+
 def test_el_corpus_ensamblado_cabe_en_el_tope_global():
     corpus = read_canon(str(REPO))
     assert len(corpus) <= DEFAULT_MAX_CHARS
