@@ -270,8 +270,9 @@ dejan de ser una ontología lejana para sentarse a la mesa del hogar:
   **R negativo = crédito regenerativo** (EVV-1.2 §4.3): devolver más de lo que se toma.
   Implementado (ago 2026).
 - **El territorio sostiene al humano**: agua, sombra, aire, regulación climática. Su tiempo es
-  **Tiempo Absoluto (TA)** — aquí manda el límite honesto: *la contabilidad doméstica no coloniza
-  el tiempo ajeno*. El PIU (Cap. 5 §5.5) es quien traduce entre TA y TVI; nosotros registramos
+  **Tiempo Absoluto (TA)** — aquí manda el límite honesto: *respetamos la soberanía del reino
+  natural sobre su propio TA, independiente del progreso humano e invulnerable en los axiomas
+  de la Maxocracia*. El PIU (Cap. 5 §5.5) es quien traduce entre TA y TVI; nosotros registramos
   la interacción, no la vida interna del ecosistema.
 
 ### Representación: los representantes de ecosistemas ya tienen asiento
