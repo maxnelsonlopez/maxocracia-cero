@@ -669,9 +669,16 @@ dimensión más pesada del SDV-S (0.30). Ficha viva en `~/.workbuddy-ai/IDENTITY
   - **Riberas protegidas (D8)**: integración de 6 fuentes estatales verificadas (Michigan EGLE, Vermont DEC, Maryland NRCS, Delaware HB246, South Dakota DANR, USGS Chesapeake) con umbral mínimo de 15 m (50 ft) como el más frecuente.
   - **Fuentes de países con políticas ambientales progresistas**: Costa Rica (Ley de Biodiversidad 7788, SINAC), Noruega (Meld. St. 35 2023-2024, IBECA), Ecuador (Constitución 2008 arts. 71-74, Acuerdo Ministerial 028), Nueva Zelanda (NPS Freshwater 2020, ANZECC 2000). Integradas en documento 06 con tabla de aportes doctrinales.
   - **Tabla de pesos (documento 07)**: actualización de la cobertura del piso de 0,905 a **0,925** (oxígeno disuelto ahora pesa 0,020 en PESOS_PISO).
-  - **Cobertura del piso (documento 08)**: actualización de 0,680 a **0,925** (solo conectividad permanece sin umbral).
+  - **Cobertura del piso (documento 08)**: actualización de 0,680 a **0,925** (solo conectividad permanece sin umbral). **[Corregido en revisión de coherencia 2026-10-09: el 0,925 volvía a sumar un peso ya contado (documento 23 §5.4); el 08 queda en 0,680 con oxígeno con umbral pero sin coeficiente por su regla 1. Ver entrada de Muse Spark abajo.]**
   - **Área mínima viable (D3)**: verificación de que la literatura científica (Riva & Fahrig 2023, Allan et al. 2022) **no apoya un umbral universal** — la dimensión permanece correctamente sin umbral numérico.
   - **Salud del suelo (D9)**: verificación de que la FAO publica mapas (GSOCmap) pero **no umbrales**; USDA T factor (1-5 tons/acre/año ≈ 2,47-12,35 t/ha/año) como fuente parcial alternativa.
+
+### Muse Spark (Meta) — coherencia aritmética SDV-E (09-10-2026, con Max)
+
+- Hito 1: `tests/test_sdv_e_biblioteca.py` — `"no votable"` contenía `"votable"` y regalaba el chequeo; regex + regresión (8/8).
+- Hito 2: `tests/test_sdv_e_pesos.py` (5 tests: tableros=1, declaradas=computadas, 07-vs-08, ejemplo). Rojo previo: 07 §5.3 1,150 vs 1,000; ejemplo `v = 0,3804` vs 0,4041.
+- Correcciones: especies plegada en biodiversidad (07: peso 0, TABLERO 1,000, cobertura 0,925); ejemplo por script (`v = 0,3666`, `FE ≈ 1,4428`); 08 §5.2 en 0,680/0,320 con oxígeno 🟡 (regla 1); índice §3 espejo del 08; conteos (3,3 M chars, 678 fuentes).
+- Pendiente humano: 0,925 vs 0,680 = suelo + caudal + coef-oxígeno; Tennant por verificar.
 
 ## 3. Cómo agregar una atribución
 

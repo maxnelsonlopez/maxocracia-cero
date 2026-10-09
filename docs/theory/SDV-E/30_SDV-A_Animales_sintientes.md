@@ -980,7 +980,7 @@ que se proponen, y son cuatro:
 ### 5.6 La cobertura del piso del SDV-A: el número incómodo
 
 El documento 07 §5.3 publicó, para el ecosistema, una cifra que debe doler: **el SDV-E ejecuta hoy su piso
-sobre 0,905 del peso que declara querer proteger** (y el documento 08 §5.2 publica 0,680 sobre su propio
+sobre 0,925 del peso que declara querer proteger** (y el documento 08 §5.2 publica 0,680 sobre su propio
 catálogo, con la disputa declarada). El SDV-A tiene el mismo problema, **en una forma distinta y peor**:
 
 | Categoría del piso | Peso | Qué significa |
@@ -1556,7 +1556,7 @@ con la variable de ajuste en la actividad humana (§4.14, §8.4). El hallazgo na
 invariantes.
 
 **I7 — La cobertura del piso del SDV-A es la imagen especular de la del SDV-E, por una razón distinta.**
-El SDV-E ejecuta hoy su piso sobre **0,905** del peso que declara proteger (documento 07 §5.3; 0,680 en el
+El SDV-E ejecuta hoy su piso sobre **0,925** del peso que declara proteger (documento 07 §5.3; 0,680 en el
 catálogo del documento 08) y **le falta instrumento**: sensores, caudal, conectividad. El SDV-A ejecuta
 **0,05 exacto, 0,45 parcial y 0,50 sin fuente** (§5.6) y **le falta número publicado**: no necesita más
 sensores que un luxómetro y una cinta métrica; necesita **que la ciencia publique los pisos de los
@@ -1882,7 +1882,7 @@ documento**.
    (Cap. 10 §10.3) es el operador del estado intermedio.
 4. **La cobertura del piso del SDV-A, medida y publicada**: **0,05 exacto · 0,45 parcial · 0,50 sin
    fuente** (§5.6), con el criterio de clasificación explícito. Es la cifra que debe doler, en el mismo
-   sentido que el 0,905 del documento 07.
+   sentido que el 0,925 del documento 07.
 5. **La tabla de sustitución de parameterización, con sus tres reglas** (§5.6): mide hoy con el parámetro
    que la ley sí publica, **y no certifica cumplimiento del canon** mientras el parámetro del canon siga
    sin medir.

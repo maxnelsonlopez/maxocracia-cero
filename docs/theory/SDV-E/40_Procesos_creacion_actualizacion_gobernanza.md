@@ -745,7 +745,7 @@ verificable:
 | El **`max_consecutive_cycles`** como POLÍTICA sin default | §4-P2, §5.2 | 🔴 no existe; es votable y hoy no hay circuito `eco-` donde votarlo |
 | El **objeto de la retractación** (contrato o actividad, nunca la unidad) | §5.2 | 🟡 especificado en el documento 08 §8.7 |
 | Las **dos vías de bloqueo** (piso medido y precautoria T14) | §4-P3, §5.3 | 🟡 especificado; la precautoria es la única defensa de las dimensiones sin umbral |
-| La **cobertura declarada** del piso | §5.3 | 🔴 cifra **en disputa** entre los documentos 07 (0,905) y 08 (0,680): este documento **no la elige** (§13) |
+| La **cobertura declarada** del piso | §5.3 | 🔴 cifra **en disputa** entre los documentos 07 (0,925) y 08 (0,680): este documento **no la elige** (§13) |
 | La **Zona Libre** como dimensión binaria sin peso, con su catálogo votable | §5.2 | 🟡 especificado; el perímetro del catálogo es decisión no ratificada |
 
 **Lo que el proceso no puede entregar, y no entrega:** no decide el bloqueo —eso es `is_valid`—, no
@@ -957,16 +957,18 @@ Lo que **no** sé, y no finjo cerrar.
     Verificado en esta sesión: los únicos dos circuitos vinculantes del parlamento son los parámetros del
     VHV y el umbral educativo. **Cablear un tercero es una decisión, no una tarea de implementación** — y
     es la precondición de que la columna POLÍTICA de §5.2 sea algo más que una intención.
-12. **La cifra de cobertura del piso está en disputa entre dos documentos de esta misma biblioteca**: 0,905
-    (documento 07 §5.3) frente a 0,680 (documento 08 §5.2), y el propio índice de la biblioteca la declara
-    «cifra en disputa». **Este documento no la elige, no la usa y no la corrige**: la declara, porque la
-    discrepancia es real y está localizada. Propongo —sin decidirlo— que el documento 08 sea la fuente
-    única y que la revisión de coherencia de la biblioteca lo ratifique.
-13. **El umbral de oxígeno disuelto está clasificado de dos maneras distintas** en esta biblioteca: el
-    documento 07 §13 (pregunta 14) **usa** el umbral recuperado de la hoja informativa viva de la agencia
-    ambiental, mientras el documento 08 §4.2 y §5.2 lo marcan **sin umbral** porque la ruta específica devuelve
-    404. Las dos cosas son ciertas a la vez. **No lo resuelvo desde aquí**: afecta a la cobertura del piso
-    y a la tabla de pesos, no al procedimiento.
+12. **La cifra de cobertura del piso está en disputa entre dos documentos de esta misma biblioteca**: 0,925
+    (documento 07 §5.3: suelo y caudal con piso, oxígeno con coeficiente) frente a 0,680 (documento 08 §5.2),
+    y el propio índice de la biblioteca la declara «cifra en disputa». **Este documento no la elige, no la
+    usa y no la corrige**: la declara, porque la discrepancia es real y está localizada. Propongo —sin
+    decidirlo— que el documento 08 sea la fuente única y que la revisión de coherencia de la biblioteca lo
+    ratifique.
+13. **El umbral de oxígeno disuelto estuvo clasificado de dos maneras distintas** en esta biblioteca y
+    quedó resuelto en la revisión de coherencia (2026-10-09): el documento 07 §13 (pregunta 14) **usa** el
+    umbral recuperado de la hoja informativa viva de la agencia ambiental (EPA/NIWA, documento 06 D2),
+    y el documento 08 §5.2 lo acepta **con umbral pero sin coeficiente**, por su regla 1 (produce violación
+    sin dimensionar `v`; su cobertura queda en 0,680). La ruta específica muerta (404) se registra como
+    fuente descartada, no como ausencia de umbral.
 14. **Dos rangos de pH conviven en la biblioteca sin citarse entre sí**: el del agua de riego (6,5-8,4)
     que usan los documentos 07 y 08, y el de aguas dulces (6,5-9) que publica el documento 09 §11.3. No
     son contradictorios en su lógica —uno es proxy declarado y el otro es criterio de vida acuática— pero

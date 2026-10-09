@@ -676,7 +676,8 @@ en una sola vara, la respuesta no es promediar más, es bloquear.**
 porque un déficit idénticamente cero **diluye** el de las dimensiones que sí se miden. La cobertura real
 del SDV-E se publica como cifra, aunque sea incómoda, y la diferencia entre cobertura declarada y
 cobertura ejecutable **se escribe, no se esconde**. `[REPORTADO: los documentos 07 y 08 de esta
-biblioteca publican cifras de cobertura que no coinciden entre sí (0,905 frente a 0,680) y localizan la
+biblioteca publican cifras de cobertura que no coinciden entre sí (0,925 frente a 0,680: suelo, caudal
+y coeficiente del oxígeno) y localizan la
 diferencia en su clasificación del catálogo; este documento no re-verifica esos pesos y remite la
 discrepancia a la pregunta 6 de §16]`
 

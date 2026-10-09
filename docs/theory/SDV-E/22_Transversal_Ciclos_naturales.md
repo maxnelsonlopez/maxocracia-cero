@@ -786,10 +786,11 @@ ni un decimal de esa tabla** y declara, para que no se lea como omisión:
   RLE 0,08+0,05+0,06+0,07+0,04) y `PESOS_TABLERO` por dominio (0,20 aire · 0,18+0,02 agua · 0,30
   biodiversidad · 0,15 suelo · 0,075+0,075)—, y **las dos granularidades no se cruzan**: este documento
   no elige entre ellas y remite a la revisión de coherencia de la biblioteca.
-- La **discrepancia declarada entre esos dos documentos** —0,905 frente a 0,680 de cobertura del piso—
+- La **discrepancia declarada entre esos dos documentos** —0,925 frente a 0,680 de cobertura del piso
+  (suelo, caudal y coeficiente del oxígeno)—
   **no se reabre aquí, y además ya tiene una resolución escrita**: el
   [documento 07](07_Formula_de_violacion_y_pesos.md) §5.3 **adopta el 0,680 del documento 08 como la
-  cifra canónica** y publica el 0,905 como su propio subtotal de catálogo. Como el peso de los ciclos es
+  cifra canónica** y publica el 0,925 como su propio subtotal de catálogo. Como el peso de los ciclos es
   cero en ambos vectores, ninguna de las dos cifras cambia por lo que aquí se escriba.
 - La razón de fondo la dio el [documento 07](07_Formula_de_violacion_y_pesos.md) §2, Regla 2, y es
   aritmética: una dimensión **sin umbral numérico** tiene déficit idénticamente cero, de modo que
@@ -1446,7 +1447,7 @@ Lo que **no** sé, y no finjo cerrar. En esta dimensión las preguntas son el re
     —anclaje a referencia externa cuando existe, versionado con hash e impugnación abierta— son
     `[HIPÓTESIS]` y **ninguna es un sensor**. Es el punto por el que un atacante entraría a esta
     dimensión, y lo entrego escrito antes de que lo busque.
-17. **La discrepancia 0,905 / 0,680 sigue abierta y no la toco.** Como el peso de los ciclos es **cero en
+17. **La discrepancia 0,925 / 0,680 sigue abierta y no la toco.** Como el peso de los ciclos es **cero en
     los dos vectores**, ninguna de las dos cifras cambia por lo que aquí se escriba
     ([documento 07](07_Formula_de_violacion_y_pesos.md) §13, pregunta 2; [documento 08](08_INV2-E_invariante.md) §5.2).
     Lo digo para que nadie lea la tabla de §4.8 como una tercera postura.

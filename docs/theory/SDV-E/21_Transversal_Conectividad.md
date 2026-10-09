@@ -736,18 +736,18 @@ peso.** Los valores vigentes, citados de sus fuentes:
 | Vector | Conectividad | Suma del vector | Fuente |
 |---|---|---|---|
 | `PESOS_TABLERO` | **0,075** | **1,000** | [documento 07](07_Formula_de_violacion_y_pesos.md) §5.3 · [documento 08](08_INV2-E_invariante.md) §5.2 |
-| `PESOS_PISO` | **0,000** | **1,000** — la suma de las dimensiones que **sí** tienen piso ([documento 08](08_INV2-E_invariante.md) §5.2); la cifra de cobertura es otra: **0,680** en el catálogo canónico del [documento 08](08_INV2-E_invariante.md) §5.2 · **0,905** en el catálogo propio del [documento 07](07_Formula_de_violacion_y_pesos.md) §5.3 | ídem |
+| `PESOS_PISO` | **0,000** | **1,000** — la suma del tablero del que este vector cuelga ([documento 08](08_INV2-E_invariante.md) §5.2); la cifra de cobertura es otra: **0,680** en el catálogo canónico del [documento 08](08_INV2-E_invariante.md) §5.2 · **0,925** en el catálogo propio del [documento 07](07_Formula_de_violacion_y_pesos.md) §5.3 | ídem |
 
 **La disputa de la cifra de cobertura ya está declarada** ([documento 07](07_Formula_de_violacion_y_pesos.md)
 §13, pregunta 2) y **este documento no la reabre**: publica su aritmética **contra las dos** y adopta
 **0,680 como la cifra canónica**, tal como el [documento 07](07_Formula_de_violacion_y_pesos.md) §5.3
 decidió al adoptar el criterio del [documento 08](08_INV2-E_invariante.md). El agujero que la
 conectividad representa dentro de ese 0,320 no cubierto es **0,075: el 23,4 % del hueco entero**
-(0,075 / 0,320). Es la porción más grande del hueco: el otro componente del 0,320 es el oxígeno disuelto
-(0,020), que es menor. **Nota:** en el catálogo del [documento 07](07_Formula_de_violacion_y_pesos.md) §5.3
-el hueco es **0,095** (oxígeno 0,020 + conectividad 0,075) sobre una cobertura de 0,905, porque allí el
-suelo y el caudal **sí** cuentan como con piso; la proporción de la conectividad dentro de ese hueco es
-entonces **0,075 / 0,095 = 78,9 %**. Las dos aritméticas se publican porque las dos están declaradas.
+(0,075 / 0,320). Es la porción más grande del hueco de peso sin piso: los otros componentes del 0,320
+son suelo (0,150), caudal (0,075) y oxígeno sin coeficiente (0,020). **Nota:** en el catálogo del
+[documento 07](07_Formula_de_violacion_y_pesos.md) §5.3 el hueco es **0,075** (solo conectividad) sobre
+una cobertura de 0,925, porque allí el suelo, el caudal y el oxígeno **sí** cuentan como con piso.
+Las dos aritméticas se publican porque las dos están declaradas.
 
 ### 5.2 El operador, y por qué la fila tiene que desdoblarse
 
@@ -792,11 +792,11 @@ porcentaje o hectáreas.** Propuesta `[HIPÓTESIS]`, no ratificada, de desdoblam
 Adoptar el piso del CSI tiene una consecuencia contable y **hay que publicarla con números**. Las tres
 salidas son legítimas y **solo la revisión de coherencia de la biblioteca puede elegir**:
 
-| Opción | Qué hace | `PESOS_PISO` conectividad | Cobertura declarada (catálogo del **doc. 08**, canónico **0,680**) | Cobertura declarada (catálogo del **doc. 07**, **0,905**) | Efecto sobre el ejemplo canónico del doc. 07 §5.8 (`v = 0,3804`) |
+| Opción | Qué hace | `PESOS_PISO` conectividad | Cobertura declarada (catálogo del **doc. 08**, canónico **0,680**) | Cobertura declarada (catálogo del **doc. 07**, **0,925**) | Efecto sobre el ejemplo canónico del doc. 07 §5.8 (`v = 0,3666`) |
 |---|---|---|---|---|---|
-| **A** — **piso sin mover el peso** | El CSI y la anchura entran como parámetros **con piso y sin coeficiente**, apoyados en la regla 1 del [documento 08](08_INV2-E_invariante.md) §5.2 (*«un parámetro con umbral produce `violacion` aunque su peso sea cero»*), con el precedente operativo de `arrecife_dhw` | **0,000** | **0,680** (no cambia) | **0,905** (no cambia) | **La unidad bloquea; `v` y `FE` no cambian** |
-| **B** — **mover los 0,075 al piso** | La fila de conectividad pasa entera a `PESOS_PISO` | **0,075** | **0,755** | **0,980** | `v = 0,4250`; `FE ≈ 1,5296` |
-| **C** — **desdoblar la fila en dos mitades simétricas** | El piso se queda con la mitad fluvial/estructural y el índice de paisaje conserva la otra mitad | **0,0375** | **0,7175** | **0,9425** | `v = 0,4027`; `FE ≈ 1,4959` |
+| **A** — **piso sin mover el peso** | El CSI y la anchura entran como parámetros **con piso y sin coeficiente**, apoyados en la regla 1 del [documento 08](08_INV2-E_invariante.md) §5.2 (*«un parámetro con umbral produce `violacion` aunque su peso sea cero»*), con el precedente operativo de `arrecife_dhw` | **0,000** | **0,680** (no cambia) | **0,925** (no cambia) | **La unidad bloquea; `v` y `FE` no cambian** |
+| **B** — **mover los 0,075 al piso** | La fila de conectividad pasa entera a `PESOS_PISO` | **0,075** | **0,755** | **1,000** | `v = 0,4112`; `FE ≈ 1,5086` |
+| **C** — **desdoblar la fila en dos mitades simétricas** | El piso se queda con la mitad fluvial/estructural y el índice de paisaje conserva la otra mitad | **0,0375** | **0,7175** | **0,9625** | `v = 0,3889`; `FE ≈ 1,4754` |
 
 **Por qué este documento propone la opción A y no las otras dos.** No por prudencia aritmética, sino
 porque es **la única que no inventa un número**: la opción B mueve un peso que el
@@ -858,13 +858,13 @@ is_valid = False   →   VIOLACIÓN DECLARADA Y BLOQUEO
 **Las cuatro lecturas de este resultado, y la cuarta es la tesis del documento.**
 
 1. **El compuesto no se mueve**: sobre el ejemplo canónico del [documento 07](07_Formula_de_violacion_y_pesos.md)
-   §5.8 (`v = 0,3804`), la conectividad aporta **0,0000** y `FE` sigue siendo **≈ 1,4630**. *Una cuenca con
+   §5.8 (`v = 0,3666`), la conectividad aporta **0,0000** y `FE` sigue siendo **≈ 1,4428**. *Una cuenca con
    una barrera nueva, un corredor de 41 m y el CSI al 72 % no recarga un solo punto porcentual más.*
 2. **Y sin embargo bloquea.** `is_valid = False` por P1: el piso **decide**, el peso solo **dimensiona**.
    Es la Regla 6 funcionando, y es lo que hace que la opción A sea suficiente para dejar de ser impotente.
-3. **Si se ratificara la opción B**, el mismo hecho pasaría a costar: `v = 0,3804 + 0,0446 = 0,4250` y
-   `FE = e^0,4250 ≈ 1,5296` —es decir, la recarga pasaría de **+46,3 % a +53,0 %**—. Con la opción C
-   (mitad simétrica): `v = 0,4027`, `FE ≈ 1,4959`. **La diferencia entre las tres opciones no es
+3. **Si se ratificara la opción B**, el mismo hecho pasaría a costar: `v = 0,3666 + 0,0446 = 0,4112` y
+   `FE = e^0,4112 ≈ 1,5086` —es decir, la recarga pasaría de **+44,3 % a +50,9 %**—. Con la opción C
+   (mitad simétrica): `v = 0,3889`, `FE ≈ 1,4754`. **La diferencia entre las tres opciones no es
    cosmética: es la diferencia entre bloquear gratis y bloquear cargando.**
 4. **El crédito regenerativo no aparece en ninguna de las cuatro líneas del cálculo.** La cuenca puede
    haber restaurado riberas, plantado un bosque de galería y registrado el crédito como R negativo
@@ -1450,8 +1450,8 @@ alto**. Es decir: **el índice de paisaje puede seguir «bien» después de que 
 existir como sujeto**. El piso de una unidad inexistente no está definido, y este documento **no lo
 define**.
 
-**18. La cifra de cobertura del piso sigue en disputa entre los documentos 07 y 08 (0,905 frente a
-0,680), y este documento no la reabre.** Publica su aritmética contra las dos (§5.3) y **adopta 0,680
+**18. La cifra de cobertura del piso sigue en disputa entre los documentos 07 y 08 (0,925 frente a
+0,680: suelo, caudal y coeficiente del oxígeno), y este documento no la reabre.** Publica su aritmética contra las dos (§5.3) y **adopta 0,680
 como canónica**, siguiendo la decisión del [documento 07](07_Formula_de_violacion_y_pesos.md) §5.3 de
 adoptar el criterio del [documento 08](08_INV2-E_invariante.md).
 

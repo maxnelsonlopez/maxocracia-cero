@@ -659,7 +659,7 @@ biodiversidad conservan la jerarquía que el ISE ya declaraba: **el doble del su
 `[SIN FUENTE VERIFICADA — pendiente de consenso científico]` **para el peso**: **ningún organismo
 publica pesos porcentuales para biodiversidad, agua, aire, suelo, especies clave, caudal y conectividad**.
 Ratificarlos es **POLÍTICA (votable)**, no investigación. Y se recuerda la discrepancia declarada de la
-biblioteca: el [documento 07](07_Formula_de_violacion_y_pesos.md) §5.3 publica **0,905** de cobertura del
+biblioteca: el [documento 07](07_Formula_de_violacion_y_pesos.md) §5.3 publica **0,925** de cobertura del
 piso sobre su catálogo y el [documento 08](08_INV2-E_invariante.md) §5.2 publica **0,680** sobre el suyo;
 **este documento no resuelve esa disputa y no la usa**: la fila de biodiversidad vale **0,300 en los dos**,
 y es lo único que esta dimensión necesita de esa tabla (§13, pregunta 14).
@@ -1245,15 +1245,16 @@ Lo que **no** sé, y no finjo cerrar. Dieciséis preguntas, ordenadas por lo que
     [documento 08](08_INV2-E_invariante.md) §6.3). ¿Cuál de las dos?
 
 14. **La cifra de cobertura del piso está en disputa entre el [documento 07](07_Formula_de_violacion_y_pesos.md)
-    §5.3 (0,905) y el [documento 08](08_INV2-E_invariante.md) §5.2 (0,680).** Este documento **no la usa**
+    §5.3 (0,925) y el [documento 08](08_INV2-E_invariante.md) §5.2 (0,680).** Este documento **no la usa**
     —la fila de biodiversidad vale 0,300 en los dos— y **no la resuelve**. Repito la propuesta del
     [documento 07](07_Formula_de_violacion_y_pesos.md) §13: que el [documento 08](08_INV2-E_invariante.md)
     sea la fuente única de la cifra en la revisión de coherencia.
 
 15. **¿Quién decide qué especies son «clave» en una unidad?** El [documento 07](07_Formula_de_violacion_y_pesos.md)
     §5.8 usa una lista de doce especies sin fuente para la selección, y esta dimensión **no la necesita
-    para nada** (mide el conjunto, no la lista). Si el estándar va a tener una fila de «especies clave»
-    con 0,150 de peso, **la regla de selección es una decisión pendiente** y hoy no existe. ¿LEY (criterio
+    para nada** (mide el conjunto, no la lista). Tras el pliegue de la fila en biodiversidad (revisión de
+    coherencia 2026-10-09: peso 0,000, declara sin dimensionar), la lista sigue alimentando el grupo RLE:
+    **la regla de selección es una decisión pendiente** y hoy no existe. ¿LEY (criterio
     científico) o POLÍTICA (deliberación de la comunidad de custodia)?
 
 16. **No sé si la Zona Libre puede exigir algo.** Las métricas no ven microorganismos, hongos ni la mayor

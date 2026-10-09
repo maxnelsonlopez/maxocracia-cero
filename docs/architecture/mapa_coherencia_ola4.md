@@ -242,8 +242,8 @@ Get-ChildItem maxocontracts -Recurse -Filter *.py | Select-String -Pattern "INV1
       Propuesta documentada: PROPUESTA_PARLAMENTO_UMBRAL_EDUCATIVO.md.
 - [ ] **Rama SDV-E — Reino Natural (oct 2026)**: **estándar escrito, contabilidad NO**. La biblioteca
       `docs/theory/SDV-E/` (26 documentos, ~38 000 líneas) fija doctrina, unidad del sujeto, no
-      colonización del TA, Zona Libre, representación, sensores, fórmula (8 dimensiones,
-      Σ pesos = 1,000; Σ con piso declarado = 0,905), INV2-E, un estándar por tipo de ecosistema
+       colonización del TA, Zona Libre, representación, sensores, fórmula (Σ = 1,000; piso 0,925/0,680
+       en 07/08), INV2-E, un estándar por tipo de ecosistema
       (9), las dimensiones transversales, el SDV-A y el bloque de Procesos.
       **Nada de eso está en el motor todavía.** Ver la sección "Reino Natural" al final de este mapa.
 

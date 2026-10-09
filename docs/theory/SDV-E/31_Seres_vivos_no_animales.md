@@ -644,7 +644,7 @@ existen.**
 | `PESOS_TABLERO` (suma declarada 1,000; **sus ocho filas suman 1,150**, §5.3) | 8 filas, [documento 07](07_Formula_de_violacion_y_pesos.md) §5.3 | **No se toca.** La vida no animal **no recibe fila con peso** |
 | `PESOS_PISO` (suma 1,000 en 07; 0,680 en el [documento 08](08_INV2-E_invariante.md) §5.2) | El vector que produce violación | **No se toca.** Aporte de peso de este dominio: **0,000** |
 | Dimensión binaria «Presencia de vida no animal» (§4.6) | No existe | **Peso 0** (precedente Cap. 8 §8.11; propiedad P12 de INV2-E) |
-| **Cobertura declarada del piso** | Cifra **en disputa**: 0,905 (documento 07) frente a 0,680 (documento 08) | **No se resuelve desde aquí**, y la disputa **no cambia** por este documento: el dominio no animal **no aparece en ninguno de los dos catálogos** — y ése es, en sí mismo, un dato de cobertura (§13, pregunta 2) |
+| **Cobertura declarada del piso** | Cifra **en disputa**: 0,925 (documento 07) frente a 0,680 (documento 08) | **No se resuelve desde aquí**, y la disputa **no cambia** por este documento: el dominio no animal **no aparece en ninguno de los dos catálogos** — y ése es, en sí mismo, un dato de cobertura (§13, pregunta 2) |
 
 **Nota de aritmética obligatoria, porque la simulación de §5.2 se apoya en estas cifras y ellas no cierran.**
 Sumadas una por una, las **ocho filas** de `PESOS_TABLERO` del [documento 07](07_Formula_de_violacion_y_pesos.md)

@@ -309,14 +309,19 @@ nueva, se generaliza una existente.
 |---|---|---|---|
 | Calidad del aire (9 parámetros OMS) | **0,20** | 🟢 sí (proxy) | pesos internos del ISE (aire 20 %) + canon §10.4 |
 | Calidad del agua (pH, NO₃-N, HCO₃) | **0,18** | 🟢 sí (proxy de riego) | pesos internos del ISE (agua 20 %) + canon §10.4 |
-| Calidad del agua (oxígeno disuelto) | **0,02** | 🔴 no | canon §10.4, sin fuente |
+| Calidad del agua (oxígeno disuelto) | **0,02** | 🟡 con umbral verificado (EPA 1986/2021, NIWA 2024), **sin coeficiente en PISO** (regla 1, como `arrecife_dhw`) | canon §10.4 |
 | Biodiversidad · riesgo de colapso (5 criterios RLE) | **0,30** | 🟢 sí (proxy) | pesos internos del ISE (biodiversidad 30 %) + canon §10.4 (área viable, fauna acuática) |
 | Salud del suelo | **0,15** | 🔴 no | pesos internos del ISE (suelo 15 %); el canon no la nombra |
 | Caudal ecológico | **0,075** | 🔴 no | canon §10.4 (lugar); **ausente del ISE** |
 | Conectividad | **0,075** | 🔴 no | canon §10.4 (ecosistema); **ausente del ISE** |
 | **Suma** | **1,000** | — | **`PESOS_TABLERO`** |
-| **Suma de los que tienen piso** | **0,925** | — | **`PESOS_PISO`** (actualizado 2026-10-09: oxígeno disuelto con umbral EPA/NIWA verificado) |
-| **Fracción declarada sin piso** | **0,075** | — | el agujero, medido y publicado (solo conectividad) |
+| **Suma de los que tienen piso** | **0,680** | — | **`PESOS_PISO`** (revisión de coherencia 2026-10-09: el 0,925 volvía a sumar un peso ya contado, documento 23 §5.4; el oxígeno, con umbral verificado, produce violación por la regla 1 sin coeficiente) |
+| **Fracción declarada sin piso** | **0,320** | — | el agujero, medido y publicado (suelo, caudal y conectividad sin piso; oxígeno con umbral sin coeficiente) |
+
+🟡 = con umbral verificado pero **sin coeficiente** en `PESOS_PISO`: produce `violacion` por la regla 1
+sin dimensionar `v` (precedente: `arrecife_dhw`). El documento 07 publica **0,925** sobre su catálogo
+(suelo y caudal con piso, y oxígeno con coeficiente): la diferencia con este 0,680 es de catálogo y
+queda pendiente de conciliación humana; este documento no la corrige desde aquí.
 
 **De dónde sale cada número de esta tabla (y de dónde no).** Los cinco pesos del ISE son un índice
 **interno del proyecto**, no un estándar externo: `docs/architecture/metricas_detalle_kpis_oraculos_dinamicos.md`

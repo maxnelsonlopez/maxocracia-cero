@@ -2,8 +2,9 @@
 
 **Estado:** 🟡 **Propuesta de estándar. NO es canon hasta su ratificación.**
 **Rama:** SDV-E, Ola 4 — abierta en octubre de 2026.
-**Alcance:** 26 documentos · ~38.000 líneas · 534 fuentes citadas, verificadas por HTTP real.
-**Autoría:** oráculos sintéticos de la rama & Max Nelson López Restrepo.
+**Alcance:** 26 documentos · ~38.000 líneas · 678 fuentes citadas (último veredicto HTTP: 671 el 04-10-2026, §5).
+**Autoría:** 78 subagentes DeepSeek bajo dirección humana & Max Nelson López Restrepo. Lo verificado por
+máquina lo dicen los tests; lo verificado por humano, cada documento en su informe de fuentes.
 **Licencia:** Creative Commons BY-SA 4.0.
 **Nada de lo que describe esta biblioteca está implementado en el motor todavía** (ver §7).
 
@@ -81,24 +82,25 @@ La contabilidad viene después.
 
 ---
 
-## 3. La espina dorsal: ocho dimensiones
+## 3. La espina dorsal: siete dimensiones con peso
 
 Los pesos **fusionan** el Índice de Salud Ecosistémica que el repo ya tenía definido y sin
 implementar (biodiversidad 30 %, agua 20 %, aire 20 %, suelo 15 %, especies clave 15 %) con las dos
-dimensiones que el canon nombra y **el ISE omitía** (caudal ecológico y conectividad). Fijados en el
-[documento 07](07_Formula_de_violacion_y_pesos.md):
+dimensiones que el canon nombra y **el ISE omitía** (caudal ecológico y conectividad), plegando
+especies clave en biodiversidad para no contarla dos veces. Tablero del
+[documento 07](07_Formula_de_violacion_y_pesos.md), piso canónico del
+[documento 08](08_INV2-E_invariante.md):
 
 | Dimensión | Peso (catálogo) | Peso con piso declarado | ¿Tiene umbral verificado? |
 |---|---|---|---|
-| Biodiversidad | 0,300 | 0,300 | 🟢 sí |
+| Biodiversidad (incl. especies/RLE) | 0,300 | 0,300 | 🟢 sí |
 | Calidad del aire | 0,200 | 0,200 | 🟢 sí (OMS, 2021) |
 | Calidad del agua | 0,180 | 0,180 | 🟡 parcial (solo el pH) |
-| Salud del suelo | 0,150 | 0,150 | 🟢 sí |
-| Especies clave | 0,150 | 0,150 | 🟢 sí |
-| **Caudal ecológico** | 0,075 | 0,075 | 🟢 sí |
+| Salud del suelo | 0,150 | 0,000 | 🔴 no en el catálogo canónico (el 07 lo da con piso: horquilla abierta) |
+| Oxígeno disuelto | 0,020 | 0,000 | 🟡 umbral verificado (EPA/NIWA), sin coeficiente por la regla 1 del 08 |
+| **Caudal ecológico** | 0,075 | 0,000 | 🔴 no en el catálogo canónico (el 07 lo da con piso: horquilla abierta) |
 | **Conectividad** | 0,075 | 0,000 | 🔴 **no**: fluvial tiene umbral de *clasificación* (CSI ≥ 95 %, Grill et al. 2019), paisaje **sin norma publicada** |
-| Oxígeno disuelto | 0,020 | 0,000 | 🟡 en disputa entre los documentos 07 y 08 |
-| **Total** | **1,000** | **Σ PESOS_PISO = 0,905** | |
+| **Total** | **1,000** | **Σ PESOS_PISO = 0,680** | |
 
 **Léase con honestidad.** Tres cosas que este cuadro no esconde:
 
@@ -107,10 +109,10 @@ dimensiones que el canon nombra y **el ISE omitía** (caudal ecológico y conect
    **la norma publicada no**. El [documento 21](21_Transversal_Conectividad.md) lo demuestra y se niega
    a inventarla. Una dimensión sin fuente no pesa; se declara.
 2. **La cifra del piso está en disputa dentro de la propia biblioteca**: el
-   [documento 07](07_Formula_de_violacion_y_pesos.md) calcula **0,905** y el
-   [documento 08](08_INV2-E_invariante.md) opera con **0,680**. Ambos lo dicen. El
-   [documento 23](23_Transversal_Agua_y_Aire.md) descartó la corrección a 0,925 por doble conteo del
-   oxígeno disuelto, pero **la conciliación entre 07 y 08 sigue pendiente**.
+   [documento 07](07_Formula_de_violacion_y_pesos.md) calcula **0,925** (suelo y caudal con piso, oxígeno
+   con coeficiente) y el [documento 08](08_INV2-E_invariante.md) opera con **0,680**. Ambos lo dicen. El
+   [documento 23](23_Transversal_Agua_y_Aire.md) descartó el 0,925 como suma del 08 por doble conteo del
+   oxígeno, pero **la conciliación entre 07 y 08 sigue pendiente** (suelo + caudal + coeficiente del oxígeno).
 3. **El Óptimo está casi siempre vacío** y eso es deliberado: el piso es LEY y la plenitud es POLÍTICA,
    así que la plenitud no se fija por decreto técnico — se vota.
 
@@ -131,13 +133,16 @@ dimensiones que el canon nombra y **el ISE omitía** (caudal ecológico y conect
 
 ## 5. Cómo se verifica esta biblioteca
 
-Dos puertas deterministas, no opiniones:
+Tres puertas deterministas, no opiniones:
 
 ```powershell
 # 1. Auditoria estructural: plantilla, minimo/optimo, LEY/POLITICA, anclas, frases vetadas
 .venv\Scripts\python.exe -m pytest tests/test_sdv_e_biblioteca.py -q
 
-# 2. Estado HTTP real de cada fuente citada (regla M15: jamas URLs alucinadas)
+# 2. Auditoria aritmetica: tableros que suman 1, sumas declaradas = computadas, 07-vs-08, ejemplo
+.venv\Scripts\python.exe -m pytest tests/test_sdv_e_pesos.py -q
+
+# 3. Estado HTTP real de cada fuente citada (regla M15: jamas URLs alucinadas)
 .venv\Scripts\python.exe scripts\verificar_enlaces_sdv_e.py
 ```
 
@@ -168,8 +173,8 @@ publicada no, y la [31](31_Seres_vivos_no_animales.md) expone las opciones para 
 microorganismos en vez de fingir que el canon ya decidió.
 
 **Discrepancias internas declaradas** (no ocultas): los documentos 07 y 08 no coinciden en la cifra
-de cobertura del piso (**0,905** frente a **0,680**), y lo dicen ambos. Conciliarlas es trabajo
-pendiente, no un descuido escondido.
+de cobertura del piso (**0,925** frente a **0,680** —suelo, caudal y coeficiente del oxígeno—), y lo dicen
+ambos. Conciliarlas es trabajo pendiente, no un descuido escondido.
 
 ---
 
@@ -199,8 +204,8 @@ El índice navegable del canon (`scripts/canon_index.py`) recorre `docs/theory` 
 que **los 26 documentos ya están listados** con sus títulos y tamaños: los oráculos se orientan por
 ahí antes de leer.
 
-Pero conviene ser exacto: **esta biblioteca no cabe en el corpus de F1.** Mide ~1,5 millones de
-caracteres y el presupuesto del corpus es de 212.000. El Concilio recibirá **el mapa, no el
+Pero conviene ser exacto: **esta biblioteca no cabe en el corpus de F1.** Mide ~3,3 millones de
+caracteres (3.270.827 medidos) y el presupuesto del corpus es de 212.000. El Concilio recibirá **el mapa, no el
 territorio** — que es exactamente lo que el propio diseño de F1 proponía (el índice entra al corpus,
 el corpus completo se lee aparte).
 

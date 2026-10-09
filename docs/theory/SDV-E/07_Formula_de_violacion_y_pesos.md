@@ -76,8 +76,9 @@ no publica un valor, la dimensión entra en el catálogo **sin peso en la fórmu
 razón es aritmética, no pudor: una dimensión sin piso tiene déficit idénticamente cero, de modo que
 asignarle peso **no la mide, la diluye** —reduce el déficit de las dimensiones que sí se miden—. El
 documento 08 §4.2 fijó este principio; aquí se convierte en dos vectores de pesos (§5.3) y en una cifra
-publicada: **el SDV-E puede ejecutar hoy su piso sobre 0,905 del peso que declara querer proteger**
-(§5.3), cifra que **difiere del 0,680 del documento 08** porque su catálogo clasifica de otro modo, y la
+publicada: **el SDV-E puede ejecutar hoy su piso sobre 0,925 del peso que declara querer proteger**
+(§5.3), cifra que **difiere del 0,680 del documento 08** porque su catálogo deja suelo y caudal sin piso
+(y al oxígeno sin coeficiente), y la
 diferencia queda localizada (§5.3 y §13, pregunta 2).
 
 **Regla 3 — Mínimo Absoluto y Óptimo son dos columnas y dos regímenes jurídicos.** El piso es **LEY** y
@@ -207,8 +208,10 @@ alcanzar una aspiración.
 
 Los cinco vienen del **ISE** —que las tiene ponderadas desde antes de que existiera el SDV-E—, dos vienen
 del **canon** y están **ausentes del ISE**. La fusión es de doble sentido y se declara entera. La tabla
-tiene **ocho filas y ocho pesos**, pero **solo siete dimensiones pesan en el vector del piso**: lo que
-falta en ese vector no es una fila, es el peso —cero— de las dos filas sin piso (§5.3).
+tiene **ocho parámetros y siete filas con peso**: las especies clave conservan parámetro y piso
+(escalonado) pero con peso **cero**, porque su riesgo ya se tasa en biodiversidad/RLE y una fila propia
+lo contaría dos veces (§5.3). En el vector del piso pesa cada fila con umbral; la única fila sin piso
+es la conectividad.
 
 | # | Dimensión | Origen | Parámetro de entrada (ejemplo por unidad) | Operador | Mínimo Absoluto (LEY) | Óptimo (POLÍTICA) | Fuente |
 |---|---|---|---|---|---|---|---|
@@ -221,15 +224,16 @@ falta en ese vector no es una fila, es el peso —cero— de las dos filas sin p
 | 7 | **Caudal ecológico** | canon §10.4 (lugar), **ausente del ISE** | Caudal como % del flujo promedio original | `min` | **< 10 % ⇒ violación** (régimen «pobre o mínimo»; < 10 % es «degradación severa») | 60-100 % («escala óptima») | Tennant, 1976 (método Montana), vía FAO · WWF |
 | 8 | **Conectividad** | canon §10.4 (ecosistema), **ausente del ISE** | Índice de conectividad del paisaje de la unidad | `min` | `[SIN FUENTE VERIFICADA — pendiente de consenso científico]` | red «bien conectada» (condición, sin cifra) | IUCN, 2020 (Guías de conectividad) · CBD, 2022 (Meta 3) |
 
-**Nota de numeración honesta.** La tabla tiene **ocho filas** y **ocho pesos**; el SDV-E tiene **siete
-dimensiones que pesan** en el vector del piso, porque el oxígeno disuelto recibe peso propio en el tablero
-y **cero peso en el vector del piso** (§5.3). El canon lo nombra —*«Calidad del agua (oxígeno, pH,
-contaminantes)»*, Cap. 10 §10.4— y por eso está en el catálogo. Su clasificación **está en disputa dentro
-de esta misma biblioteca**: el documento 08 §5.2 lo marca 🔴 **sin umbral** porque su ruta específica de
-la EPA devolvió 404, mientras que el informe de fuentes de esta rama **sí verificó el umbral** en la hoja
-informativa de la EPA (200). Este documento **no resuelve la disputa desde aquí**: publica la discrepancia
-como pregunta abierta (§13, pregunta 14), conserva el peso conservador —0,02 en el tablero, 0,000 en el
-piso— y deja la cifra de cobertura declarada como la publica el documento 08 (0,680).
+**Nota de numeración honesta.** La tabla tiene **ocho parámetros** y **siete filas con peso**; el SDV-E
+tiene **siete dimensiones que pesan** en el vector del piso, porque las especies clave reciben peso
+**cero** por el pliegue en biodiversidad/RLE (§5.3). El canon nombra el oxígeno —*«Calidad del agua
+(oxígeno, pH, contaminantes)»*, Cap. 10 §10.4— y por eso está en el catálogo. Su clasificación **quedó
+resuelta en la revisión de coherencia (2026-10-09)**: la ruta específica de la EPA que el documento 08
+§5.2 marcó como 404 sigue muerta, **y** el umbral es legible en la hoja informativa viva del mismo
+organismo (Factsheet 841F21007B, 200) más NIWA 2024 —tres fuentes verificadas (documento 06, D2)—.
+Este documento cuenta el oxígeno en el piso (0,020); el documento 08 acepta el umbral pero **sin
+coeficiente**, por su regla 1 (produce violación sin dimensionar `v`, como `arrecife_dhw`). La
+horquilla que queda entre los dos catálogos es suelo y caudal (§13, pregunta 2).
 
 ### 4.2 La coincidencia numérica del aire, y por qué no es un error
 
@@ -355,27 +359,33 @@ producir una violación.
 | Calidad del agua (pH, nitrato, bicarbonato) | ISE 20 % + canon | **0,180** | 🟢 parcial: **solo el pH** tiene umbral (FAO, 1994); nitrato y bicarbonato, no | **0,180** |
 | Oxígeno disuelto | canon §10.4, **ausente del ISE** | **0,020** | 🟢 sí (EPA 1986/2021, NIWA 2024) | **0,020** |
 | Salud del suelo | ISE 15 % (**el canon no la nombra**) | **0,150** | 🟢 sí (erosión tolerable, JRC 2010) | **0,150** |
-| Especies clave | ISE 15 % + canon (fauna viable) | **0,150** | 🟢 sí (categorías IUCN) | **0,150** |
+| Especies clave | ISE 15 % + canon (fauna viable), **plegada en biodiversidad** | **0,000** | 🟢 sí (categorías IUCN; el riesgo se tasa en el grupo de biodiversidad/RLE, doc 08 §5.2) | **0,000** |
 | **Caudal ecológico** | canon §10.4 (lugar), **ausente del ISE** | **0,075** | 🟢 sí (Tennant 1976: < 10 % ⇒ violación) | **0,075** |
 | **Conectividad** | canon §10.4 (ecosistema), **ausente del ISE** | **0,075** | 🔴 no | **0,000** |
-| **Suma** | — | **1,000** | — | **1,000** |
+| **Suma** | — | **1,000** | — | **0,925** |
 | **Cobertura del piso declarada** | — | — | — | **`Σ PESOS_PISO` sobre las dimensiones con piso = 1,000 − 0,075 (conectividad) = 0,925** |
 
 **Cómo se lee esa última fila, y por qué no coincide con la cifra del documento 08.** Sobre **el
-catálogo de ocho filas con peso de este documento**, las dimensiones con piso suman **0,925**; el agujero
-declarado es **0,075** (conectividad). El documento 08 §5.2 publica
-**0,680** porque allí el catálogo incluye además suelo (0,15), caudal (0,075) y oxígeno (0,02) como
-**sin piso**, según su propio criterio de catalogación. **La diferencia no es un error de aritmética: es
-una diferencia de catálogo**, y este documento no la oculta ni la «corrige» desde aquí: **adopta la cifra
-del documento 08 como la canónica** —su §5.2 es el vector normativo— y publica **0,905** como su propio
+catálogo de ocho parámetros y siete filas con peso de este documento** (especies clave con peso cero por
+el pliegue), las dimensiones con piso suman **0,925**; el agujero
+declarado es **0,075** (conectividad, la única fila sin piso). El documento 08 §5.2 publica
+**0,680** porque allí el catálogo deja además suelo (0,15) y caudal (0,075) **sin piso**, según su propio
+criterio de catalogación, y al oxígeno (con umbral verificado) **sin coeficiente** por su regla 1.
+**La diferencia no es un error de aritmética: es
+una diferencia de catálogo** —suelo (0,15), caudal (0,075) y coeficiente del oxígeno (0,02), que suman
+0,245—, y este documento no la oculta ni la «corrige» desde aquí: **adopta la cifra
+del documento 08 como la canónica** —su §5.2 es el vector normativo— y publica **0,925** como su propio
 subtotal, con el agujero ya contado. Queda registrada como pregunta abierta (§13, pregunta 2) con una
 propuesta explícita: que el documento 08 sea la fuente única de la cifra de cobertura y que esta tabla
 adopte su criterio, en la revisión de coherencia de la biblioteca.
 
 **De dónde sale cada peso, sin adornos.**
 
-- Los cinco pesos del ISE (**30 / 20 / 20 / 15 / 15**) se **conservan tal cual**
-  [VERIFICADO en `docs/architecture/metricas_detalle_kpis_oraculos_dinamicos.md` IN-01]. No son pesos
+- Los cinco bloques del ISE (**30 / 20 / 20 / 15 / 15**) se **conservan como bloques**
+  [VERIFICADO en `docs/architecture/metricas_detalle_kpis_oraculos_dinamicos.md` IN-01], con una
+  fusión declarada: el bloque de especies clave (15) **no va como fila propia sino plegado en
+  biodiversidad** (el riesgo de extinción se tasa con los 5 criterios RLE dentro del 0,300, como el
+  documento 08 §5.2): una fila propia lo contaría dos veces. No son pesos
   científicos: son pesos **del proyecto**, y presentarlos como respaldo externo sería el error que el
   informe de fuentes de esta rama advierte.
 - Los **0,075 + 0,075 de caudal y conectividad** no salen del ISE: son las dos dimensiones que el canon
@@ -383,14 +393,16 @@ adopte su criterio, en la revisión de coherencia de la biblioteca.
   del proyecto y no un dato: el canon las menciona al mismo nivel —caudal en la definición de **lugar**,
   conectividad en la de **ecosistema** (Cap. 10 §10.4)— y **no hay fuente que justifique dar más a una
   que a otra**. `[HIPÓTESIS]`.
-- El **0,02 del oxígeno disuelto** y el **0,075 de la conectividad** quedan **en el tablero y fuera del
-  piso** hasta que exista umbral con fuente.
+- El **0,075 de la conectividad** queda **en el tablero y fuera del piso** hasta que exista
+  umbral con fuente. El oxígeno disuelto (0,020) **sí entró al piso** con el umbral verificado
+  (EPA 1986/2021, NIWA 2024; ver §4, nota de numeración).
 - **Lo que la fusión NO toca es la jerarquía que el ISE declara**, y esto se puede comprobar fila por
   fila: la biodiversidad sigue pesando el doble que el suelo (0,300 frente a 0,150), el aire y el agua
-  siguen empatados en el bloque hídrico-atmosférico (0,200 cada uno) y las especies clave conservan su
-  0,150. Lo que se **subdivide** es el bloque del agua —pH 0,180 y oxígeno disuelto 0,020, porque el ISE
+  siguen empatados en el bloque hídrico-atmosférico (0,200 cada uno) y el riesgo de especies se tasa
+  dentro del 0,300 de biodiversidad (criterios RLE) en vez de en fila propia. Lo que se **subdivide**
+  es el bloque del agua —pH 0,180 y oxígeno disuelto 0,020, porque el ISE
   no distinguía un parámetro que cumple de los que no— y lo que se **añade** son las dos dimensiones
-  ausentes. Ninguna de las cinco dimensiones del ISE pierde peso relativo frente a otra.
+  ausentes. Ningún bloque del ISE pierde peso relativo frente a otro.
 - **La suma es exactamente 1,000 y se comprueba por código**: `abs(sum(PESOS_TABLERO) - 1) < 1e-9` es
   una precondición del tipo, no una promesa del texto.
 
@@ -600,10 +612,10 @@ que la suite del repositorio ya usa para el caso de crédito negativo [VERIFICAD
 | Calidad del agua | pH | 6,5 – 8,4 (FAO, 1994) | **6,2** | `range` | `(6,5−6,2)/6,5 = 0,0462` | 0,180 | 0,0083 |
 | Oxígeno disuelto | OD, media 30 días | 5,5 mg/L (US EPA, 1986 vía hoja informativa 2021) | **7,4 mg/L** | `min` | `0` (cumple) | 0,020 | 0,0000 |
 | Salud del suelo | Pérdida de suelo | 1 t·ha⁻¹·año⁻¹ (JRC, 2010) | **2,5 t·ha⁻¹·año⁻¹** | `max` | `(2,5−1)/1 = 1,5000` | 0,150 | 0,2250 |
-| Especies clave | Categorías IUCN de 12 especies clave | ninguna EX ni EW | **9 LC/NT · 3 EN** | `escalonado` | `3/12 = 0,2500` | 0,150 | 0,0375 |
+| Especies clave | Categorías IUCN de 12 especies clave | ninguna EX ni EW | **9 LC/NT · 3 EN** | `escalonado` | `3/12 = 0,2500` | 0,000 (plegada en biodiversidad: declara, no dimensiona) | 0,0000 |
 | Caudal ecológico | % del flujo promedio original | < 10 % ⇒ violación (Tennant, 1976, vía FAO) | **12 %** | `min` | `(10−12)/10 = −0,2 → 0` | 0,075 | 0,0000 |
-| Conectividad | Sin umbral verificado | `[SIN FUENTE VERIFICADA]` | **0,42** | `min` | **declarada, no calculada** | 0,000 | 0,0000 |
-| **Total** | | | | | | **1,000** | **`v_tablero = 0,3804`** |
+| Conectividad | Sin umbral verificado | `[SIN FUENTE VERIFICADA]` | **0,42** | `min` | **declarada, no calculada** | 0,075 | 0,0000 |
+| **Total** | | | | | | **1,000** | **`v_tablero = 0,3666`** |
 
 **El cálculo, paso a paso, sin pasos ocultos.**
 
@@ -616,20 +628,23 @@ que la suite del repositorio ya usa para el caso de crédito negativo [VERIFICAD
 5. **Suelo.** `(2,5 − 1)/1 = 1,5000`; × 0,150 = **0,2250**. Es el aporte dominante, y el déficit supera
    1 porque la pérdida de suelo es **2,5 veces** el umbral tolerable.
 6. **Especies clave.** No hay especies EX ni EW, así que el piso de «extinción en la unidad» no se
-   cruzó; el `escalonado` toma el nivel alcanzado: `3/12 = 0,2500`; × 0,150 = **0,0375**.
+   cruzó; el `escalonado` toma el nivel alcanzado: `3/12 = 0,2500`; × 0,000 = **0,0000**. El escalón
+   cruzado **se declara en el veredicto del piso** (regla 1 del documento 08 §5.2: un parámetro con
+   piso y sin coeficiente produce violación sin dimensionar `v`, como `arrecife_dhw`); no entra en `v`.
 7. **Caudal ecológico.** `12 % > 10 %` ⇒ **no hay violación**; y el déficit se **satura en 0**, no en
    −0,2. Es la aplicación literal de la regla de §3.2: un ecosistema no acumula des-daño.
-8. **Conectividad.** Sin umbral con fuente: **no se calcula y no pesa**. Se **declara** la medición
+8. **Conectividad.** Sin umbral con fuente: **no se calcula y aporta 0** al compuesto, aunque
+   conserva su 0,075 en el tablero (§5.3). Se **declara** la medición
    (0,42) y se declara el agujero.
 
 ```
-v_tablero = 0,0133 + 0,1200 + 0,0083 + 0,0000 + 0,2250 + 0,0375 + 0,0000 + 0,0000
-          = 0,3804
+v_tablero = 0,0133 + 0,1200 + 0,0083 + 0,0000 + 0,2250 + 0,0000 + 0,0000 + 0,0000
+          = 0,3666
 
 FE  = e^(FI × v × Δt)  con FI = 1,0 (ciclo sin agravantes) y Δt = 1 ciclo TA
-    = e^0,3804 ≈ 1,4630                       (verificado a mano: e^0,38 ≈ 1,4623, e^0,0004 ≈ 1,0004)
+    = e^0,3666 ≈ 1,4428                       (verificado por script: e^0,3666 ≈ 1,4428)
 
-ISE_derivado (equivalencia declarada, §5.6) = (1 − 0,3804) × 100 = 61,96
+ISE_derivado (equivalencia declarada, §5.6) = (1 − 0,3666) × 100 = 63,34
 ```
 
 **El veredicto, con las tres capas del resultado:**
@@ -637,8 +652,8 @@ ISE_derivado (equivalencia declarada, §5.6) = (1 − 0,3804) × 100 = 61,96
 | Capa | Resultado | Cómo se lee |
 |---|---|---|
 | **Veredicto del piso** | 🔴 **VIOLACIÓN DECLARADA** | tres parámetros medidos con déficit positivo (aire 0,60 · suelo 1,50 · pH 0,046) **y una dimensión escalonada cruzada en su propio escalón** (especies clave, 3/12); el cruce de `EX`/`EW` del piso **no** ocurrió, pero el `escalonado` de §3.3 sí imputa. `is_valid = False`; **hay bloqueo** |
-| **Banda del compuesto** | **Severa** (`0,30 < 0,3804 ≤ 0,50`) · ISE derivado ≈ 62 («Declinando») | la degradación compromete la función ecosistémica |
-| **Factor** | `FE ≈ 1,4630` | el costo de la actividad **se recarga un 46,3 %**; no es neutro |
+| **Banda del compuesto** | **Severa** (`0,30 < 0,3666 ≤ 0,50`) · ISE derivado ≈ 63 («Declinando») | la degradación compromete la función ecosistémica |
+| **Factor** | `FE ≈ 1,4428` | el costo de la actividad **se recarga un 44,3 %**; no es neutro |
 
 Y el dato que cierra el caso canónico: **el crédito regenerativo acumulado del conjunto (−12,0 R) no
 aparece en ninguna de las tres capas.** El conjunto puede haber plantado árboles, haber limpiado el
@@ -660,14 +675,15 @@ v_ISE = 0,0444×0,300 + 0,6000×0,200 + 0,0462×0,200 + 0,0000×0,000 + 1,5000×
       = 0,0133 + 0,1200 + 0,0092 + 0,0000 + 0,2250 + 0,0375
       = 0,4050          →   ISE derivado = (1 − 0,4050) × 100 = 59,5   («Declinando»)
 
-v_fusión (tabla de §5.3) = 0,3804   →   ISE derivado = 61,96   («Declinando»)
+v_fusión (tabla de §5.3) = 0,3666   →   ISE derivado = 63,34   («Declinando»)
 ```
 
 **Dos cosas distintas salen de este par de números, y las dos importan.**
 
 **(a) La fusión mejora la medida, pero no cambia el veredicto.** Repartir el 20 % del agua entre pH
-(0,18) y oxígeno disuelto (0,02) baja el compuesto de 0,4050 a 0,3804 porque el oxígeno **cumple** y su
-déficit es 0: es la parte del bloque hídrico que el ISE no distinguía. Las dos versiones caen en la
+(0,18) y oxígeno disuelto (0,02) y plegar especies en biodiversidad baja el compuesto de 0,4050 a 0,3666
+porque el oxígeno **cumple** y su déficit es 0 y las especies **declaran sin dimensionar**: son las dos
+partes que el ISE no distinguía. Las dos versiones caen en la
 misma banda. **La fusión no rescata al humedal ni lo condena: lo mide mejor.**
 
 **(b) Y ninguna de las dos bandas describe lo que pasa.** El humedal tiene **tres especies en peligro**,
@@ -812,7 +828,7 @@ esta fórmula**, para que la interfaz entre los dos documentos sea verificable:
 | Duración en TA, con `unidad_de_ciclo_ta` obligatoria | §5.4(b) | 🔴 **la unidad no está decidida** |
 | `FE = e^(min(Σ…, V_max))` | §5.4(c) | 🟡 especificado, **`V_max` sin número** |
 | Bandas y prelación del piso | §5.7, §5.9 | 🟡 especificado |
-| Cobertura del piso declarada | §5.3 | 🔴 cifra en disputa entre este documento (0,905) y el documento 08 (0,680) |
+| Cobertura del piso declarada | §5.3 | 🔴 cifra en disputa entre este documento (0,925) y el documento 08 (0,680): horquilla suelo + caudal + coeficiente del oxígeno |
 
 **Lo que INV2-E no puede heredar de aquí, y no hereda:** la fórmula **no** decide el bloqueo —eso es
 `is_valid`—, **no** decide la retractación —eso es el contador de ciclos consecutivos, que el documento
@@ -924,11 +940,12 @@ Lo que **no** sé, y no finjo cerrar.
    los dos que este documento añade (0,075 + 0,075) son un reparto simétrico sin respaldo empírico.
    `[SIN FUENTE VERIFICADA — pendiente de consenso científico]`. Ratificarlos es POLÍTICA.
 2. **La cifra de cobertura del piso está en disputa entre dos documentos de esta misma biblioteca.**
-   Este publica **0,905** sobre su catálogo de ocho filas (§5.3); el documento 08 §5.2 publica **0,680**
-   sobre el suyo. **No sé cuál debe ser la cifra canónica** y no la elijo desde aquí: propongo que el
-   documento 08 sea la fuente única y que esta tabla adopte su criterio en la revisión de coherencia.
-   Mientras no se resuelva, **cualquier lector que lea las dos cifras debe saber que la discrepancia es
-   real y está localizada**. El §2 de este documento ya usa **0,905** —su propio catálogo— y no el 0,680,
+   Este publica **0,925** sobre su catálogo de ocho parámetros y siete filas con peso (§5.3); el documento
+   08 §5.2 publica **0,680** sobre el suyo. **No sé cuál debe ser la cifra canónica** y no la elijo desde
+   aquí: propongo que el documento 08 sea la fuente única y que esta tabla adopte su criterio en la
+   revisión de coherencia. Mientras no se resuelva, **cualquier lector que lea las dos cifras debe saber
+   que la discrepancia es real y está localizada**: suelo (0,15), caudal (0,075) y coeficiente del
+   oxígeno (0,02). El §2 de este documento ya usa **0,925** —su propio catálogo— y no el 0,680,
    porque el 0,680 describe el catálogo del documento 08 y no el de esta tabla.
 3. **La unidad del ciclo TA no está decidida.** Año hidrológico, año calendario, estación de crecimiento
    y ciclo de sucesión son candidatos legítimos y ninguno tiene fuente verificada. Elegirla es una
@@ -968,16 +985,16 @@ Lo que **no** sé, y no finjo cerrar.
     para no colonizarlo (§5.4b) y esa intención **no tiene test, ni invariante, ni umbral** que la
     compruebe desde fuera. El documento 03 de esta biblioteca debe proponerlo; aquí solo queda
     registrado como el hueco que la fórmula **no puede cerrar sola**.
-14. **La dimensión de oxígeno disuelto está clasificada de dos maneras distintas en esta biblioteca, y no
-    sé cuál es la correcta.** El informe de fuentes de esta rama (`scratch/sdv_e/fuentes/07_formula.md`,
-    sección B) **verificó el umbral** —5,5 / 6,5 mg/L de media de 30 días— en la hoja informativa de la
-    EPA, que responde 200; el documento 08 §5.2 lo marca 🔴 **sin umbral** porque la ruta específica de la
-    EPA devuelve **404** (re-comprobado con `curl`: sigue 404). Las dos cosas son ciertas a la vez: la ruta
-    está muerta **y** el umbral es legible en otra ruta viva del mismo organismo. Este documento mantiene
-    el peso conservador (0,000 en el piso, 0,02 en el tablero) y publica la disputa en lugar de resolverla
-    desde aquí: **si el documento 08 acepta el umbral, la cobertura del piso sube a 0,925 en su catálogo y
-    a 0,905 en el de este documento** —donde ya está contada—. Decidirlo es de la revisión de coherencia
-    de la biblioteca, no de este documento.
+14. **La dimensión de oxígeno disuelto estuvo clasificada de dos maneras distintas en esta
+    biblioteca, y quedó resuelta en la revisión de coherencia (2026-10-09).** El informe de fuentes de
+    esta rama (`scratch/sdv_e/fuentes/07_formula.md`, sección B) **verificó el umbral** —5,5 / 6,5 mg/L
+    de media de 30 días— en la hoja informativa de la EPA, que responde 200, y NIWA 2024 dio el segundo
+    marco (documento 06, D2); la ruta específica que el documento 08 marcó como 404 **sigue muerta**.
+    Las dos cosas son ciertas a la vez: la ruta está muerta **y** el umbral es legible en otra ruta viva
+    del mismo organismo. Este documento cuenta el oxígeno en el piso (0,020); el documento 08 acepta el
+    umbral **sin coeficiente**, por su regla 1 (produce violación sin dimensionar `v`). La cifra 0,925
+    queda **descartada como suma del documento 08** (volvería a sumar un peso ya contado, documento 23
+    §5.4): es la cobertura de **este** catálogo. Lo que sigue abierto es suelo y caudal (pregunta 2).
 15. **El documento 06 (elenco de sensores) y el documento 03 (no colonización del TA) todavía no existen.**
     Este documento los cita como destino de sus huecos —el protocolo de medición y el test de no
     colonización— y §6.1 lo declara: **un hueco que se delega a un documento no escrito sigue siendo un
@@ -1181,8 +1198,8 @@ en particular **no se cita cifra alguna de GBIF ni de la Lista Roja**.
 1. **La fórmula normalizada con operador y saturación en 0**, que convierte el esqueleto del SDV-S en
    algo aplicable a un catálogo heterogéneo sin producir déficits negativos (§3.3).
 2. **La tabla de pesos que suma 1,000 en dos vectores** y que fusiona el ISE con las dos dimensiones que
-   el ISE omite —caudal ecológico y conectividad, 0,075 cada una— y con el oxígeno disuelto del canon
-   (§5.3).
+   el ISE omite —caudal ecológico y conectividad, 0,075 cada una—, con el oxígeno disuelto del canon
+   y con las especies clave plegadas en biodiversidad para no contarlas dos veces (§5.3).
 3. **La separación de regímenes del tiempo**: intensidad exponencial dentro del ciclo, duración lineal
    entre ciclos, exponente acotado, y `FI = 1,0` / `FE = 1,0` exactos sin violación (§5.4).
 4. **La prelación del piso sobre la banda**, descubierta al calcular el ejemplo y ver que una media
