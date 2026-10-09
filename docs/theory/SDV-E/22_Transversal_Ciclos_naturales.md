@@ -188,7 +188,7 @@ importa.** El único aparato numérico completo que esta sesión pudo verificar 
 cubre los Estados Unidos continentales, Alaska, Hawái y áreas insulares, y su **período de referencia es
 «previo al asentamiento euroamericano»** [VERIFICADO]. Aplicarlo como piso universal sería **colonizar
 el TA de un ecosistema con la línea base de otro**, que es exactamente lo que el [documento 03](03_No_colonizacion_del_TA.md)
-prohíbe citando el canon: *"El tiempo del territorio es TA y no se coloniza (el PIU traduce)"*
+protege citando el canon: *«Respetamos la soberanía del reino natural sobre su propio TA» (el PIU traduce)*
 (Cap. 16.5 §16.5.14). Regla adoptada, y es una regla y no una comodidad: **la violación se declara sobre
 desviación medible contra una referencia propia o declarada; la falta de línea base se registra como
 `indeterminado` con bandera de opacidad ecológica ([documento 08](08_INV2-E_invariante.md) §6.3), nunca
@@ -248,8 +248,7 @@ del TA, y el documento lo declara en lugar de resolverlo.
     (presencia/ausencia del derecho), no mediante pesos en la fórmula — medir la rehabilitación o la
     opacidad con la misma vara cuantitativa que el agua o la vivienda las destruiría"*. **Un régimen no
     se promedia**, y promediarlo con la calidad del agua sería exactamente lo que el canon prohíbe.
-11. **No colonización del TA** ([documento 03](03_No_colonizacion_del_TA.md)): *"El tiempo del territorio
-    es TA y no se coloniza (el PIU traduce)"*. Aquí está **su caso más duro**, declarado en la Regla 8.
+11. **Soberanía del TA** ([documento 03](03_No_colonizacion_del_TA.md)): *«Respetamos la soberanía del reino natural sobre su propio TA» (el PIU traduce)*. Aquí está **su caso más duro**, declarado en la Regla 8.
 
 ### 3.1 El ciclo como sujeto: lo que el canon dice y lo que no dice
 

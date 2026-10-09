@@ -1615,7 +1615,7 @@ esas consta su estado.**
 - Cap. 10 §10.3-§10.7 — Principio Precautorio de Consciencia, SDV de ecosistemas y de lugares
   (§10.4), dignidad encadenada (§10.6) y gobernanza operacionalmente finita (§10.7):
   [capitulo_10_tres_reinos_260126.md](../../book/edicion_3_dinamica/capitulo_10_tres_reinos_260126.md)
-- Cap. 16.5 §16.5.14 — El Reino Natural: SDV-E, TA no colonizado, representación `eco-`, Zona Libre,
+- Cap. 16.5 §16.5.14 — El Reino Natural: SDV-E, TA soberano, representación `eco-`, Zona Libre,
   *"el suelo antes que el saldo"*, *"cuidado ≠ extracción estética"*, «un símbolo, un significado»:
   [capitulo_16_5_micromaxocracia_canonica_220826.md](../../book/edicion_3_dinamica/capitulo_16_5_micromaxocracia_canonica_220826.md)
 - Cap. 17 — INV2 e invariantes de MaxoContracts:

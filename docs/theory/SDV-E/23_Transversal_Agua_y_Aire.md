@@ -201,8 +201,7 @@ sujetos de esta dimensión, y ninguno es un río.
 produce un certificado de cumplimiento**; produce cobertura faltante, que se publica. Y *«mientras no
 haya resolución, el canon manda»*.
 
-**Regla 8 — El tiempo del territorio manda.** *«El tiempo del territorio es TA y no se coloniza (el PIU
-traduce)»* (Cap. 16.5 §16.5.14). Toda magnitud temporal de este documento está en **TA** (Tiempo
+**Regla 8 — El tiempo del territorio manda.** *«Respetamos la soberanía del reino natural sobre su propio TA» (el PIU traduce)* (Cap. 16.5 §16.5.14). Toda magnitud temporal de este documento está en **TA** (Tiempo
 Absoluto) o en la unidad física de la ventana de la fuente (días, horas, ciclos hidrológicos); **ninguna
 en TVI ni en TPI**. La conversión TA↔TVI ocurre **fuera** de esta dimensión y su único traductor es el
 **PIU** (Protocolo de Intercambio Universal, Cap. 5 §5.5).
@@ -934,7 +933,7 @@ que cambia el peso de esta dimensión entera (§13, pregunta 4).
 
 ### 5.7 Duración en TA, y por qué aquí la fuente casi la da
 
-*«El tiempo del territorio es TA y no se coloniza (el PIU traduce)»* (Cap. 16.5 §16.5.14). La fórmula
+*«Respetamos la soberanía del reino natural sobre su propio TA» (el PIU traduce)* (Cap. 16.5 §16.5.14). La fórmula
 acumula en **ciclos de TA** y **jamás en TVI ni TPI**; la conversión TA↔TVI es un paso posterior,
 auditable, con el **PIU** (Cap. 5 §5.5) como único instrumento.
 

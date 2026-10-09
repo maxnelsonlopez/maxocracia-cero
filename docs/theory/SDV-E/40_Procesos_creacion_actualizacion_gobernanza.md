@@ -107,8 +107,7 @@ pueden ejecutar: la auditoría estructural (`tests/test_sdv_e_biblioteca.py`) y 
 HTTP real de cada fuente citada (`scripts/verificar_enlaces_sdv_e.py`) `[VERIFICADO]`. Lo que este
 documento proponga debe poder caer en una de las dos, o en el registro T13.
 
-**Regla 6 — El tiempo del ecosistema es TA, y el PIU es el único traductor.** *«El tiempo del territorio
-es TA y no se coloniza (el PIU traduce)»* (Cap. 16.5 §16.5.14). Consecuencia dura para un documento de
+**Regla 6 — El tiempo del ecosistema es TA soberano, y el PIU es el único traductor.** *«Respetamos la soberanía del reino natural sobre su propio TA» (el PIU traduce)* (Cap. 16.5 §16.5.14). Consecuencia dura para un documento de
 ciclos: **el ciclo de revisión no es un calendario humano aplicado al ecosistema**; la unidad de ciclo
 (`unidad_de_ciclo_ta`) es configuración obligatoria y **sin valor por defecto** (documento 07 §5.4b,
 documento 08 §8.6), y ninguna magnitud de este bloque se expresa en TVI ni en TPI. Si un contrato

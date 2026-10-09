@@ -56,7 +56,7 @@ documento.
 
 **Qué no es.**
 
-- **No es el estándar del SDV-E.** El estándar (unidad y sujeto, TA no colonizado, Zona Libre, guardián,
+- **No es el estándar del SDV-E.** El estándar (unidad y sujeto, TA soberano, Zona Libre, guardián,
   fórmula, INV2-E) vive en los documentos 00-09 de esta biblioteca. Este documento es la **instancia de tipo
   de ecosistema**, y en este caso también la instancia de un **problema de unidad que ningún otro documento
   de la biblioteca tiene que resolver**: qué es exactamente "un río".
@@ -147,8 +147,7 @@ Messager *et al.*, 2024, registrado `[REPORTADO]` en el inventario de fuentes de
 en esta sesión** porque el editor bloquea a los agentes automáticos]. Conclusión operativa que este
 documento adopta: **la LEY es el método y el piso; la POLÍTICA es el régimen concreto de cada cuenca.**
 
-**Regla 5 — El tiempo del río es TA y no se coloniza.** *"El tiempo del territorio es TA y no se coloniza (el
-PIU traduce)"* (Cap. 16.5 §16.5.14). Ninguna métrica de este documento se expresa en TVI ni en TPI. Ríos y
+**Regla 5 — El tiempo del río es TA soberano.** *«Respetamos la soberanía del reino natural sobre su propio TA» (el PIU traduce)* (Cap. 16.5 §16.5.14). Ninguna métrica de este documento se expresa en TVI ni en TPI. Ríos y
 bosques son **el mismo caso aquí**: el **PIU** (Protocolo de Intercambio Universal, Cap. 5 §5.5) es el
 **único** traductor autorizado entre el TA del río y el TVI humano, y **este documento no traduce nada**.
 Hay un matiz que sí es propio de los ríos y que se declara en §3: el caudal **no es** una medida de tiempo

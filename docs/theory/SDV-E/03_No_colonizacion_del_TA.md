@@ -16,12 +16,13 @@
 
 **La regla que este documento convierte en ingeniería.** El canon fija dos frases y ninguna tiene prueba:
 
-> *"la contabilidad doméstica no coloniza el tiempo ajeno. El PIU (Cap. 5 §5.5) es quien traduce entre
+> *"Respetamos la soberanía del reino natural sobre su propio TA, independiente del progreso humano
+> e invulnerable en los axiomas de la Maxocracia. El PIU (Cap. 5 §5.5) es quien traduce entre
 > TA y TVI; nosotros registramos la interacción, no la vida interna del ecosistema."*
-> — Cap. 16.5 §16.5.14 `[VERIFICADO]`
+> — Cap. 16.5 §16.5.14 `[VERIFICADO]` (enmienda canónica 2026-10-09: antes usaba el verbo colonizar)
 
 La familia de la biblioteca condensa esa regla en una fórmula que se repite en los documentos 09, 10,
-13, 16 y 18: *"el tiempo del territorio es TA y no se coloniza (el PIU traduce)"*. Es una regla
+13, 16 y 18: *«respetamos la soberanía del reino natural sobre su propio TA» (el PIU traduce)*. Es una regla
 correcta y es, hoy, **una intención sin test**. El brief de esta rama lo registra como hueco abierto:
 *"No hay forma de verificar que la contabilidad NO colonizó el TA: no hay test, ni invariante, ni
 umbral. La biblioteca debe proponerlo."* Este documento lo propone, y lo propone **como clase de acto
@@ -104,7 +105,7 @@ Es decir: **la frontera entre «hay bosque» y «no hay bosque» es una decisió
 del ecosistema.** Un estándar que herede ese umbral sin declararlo está dejando que el contador
 nombre al sujeto. Este documento no cambia el umbral: exige que esté **declarado como decisión**.
 
-### 1.2 Qué significa exactamente «el TA no se coloniza»
+### 1.2 Qué significa exactamente «el TA es soberano»
 
 La frase admite tres lecturas, y solo dos son correctas. Se separan aquí porque de esta separación
 depende todo el mecanismo de §4 y §5.
@@ -1233,8 +1234,8 @@ que uno que aparenta cerrar todo.
 - **Cap. 9.5 §9.5.7-§9.5.11** — `FS_S = e^v`, base neutra (precedente que este documento no repite como error): [capitulo_09_5_sdv_sinteticos_260126.md](../../book/edicion_3_dinamica/capitulo_09_5_sdv_sinteticos_260126.md)
 - **Cap. 10 §10.3, §10.4, §10.6, §10.7, §10.8** — Principio Precautorio de Consciencia; SDV para
   ecosistemas y lugares; dignidad encadenada; gobernanza operacionalmente finita; Persona Sintética: [capitulo_10_tres_reinos_260126.md](../../book/edicion_3_dinamica/capitulo_10_tres_reinos_260126.md)
-- **Cap. 16.5 §16.5.14** — el hogar extendido: *"la contabilidad doméstica no coloniza el tiempo
-  ajeno"*, PIU, registro de la interacción, representación `eco-`, Zona Libre, el suelo antes que el
+- **Cap. 16.5 §16.5.14** — el hogar extendido: *«respetamos la soberanía del reino natural sobre su
+  propio TA»*, PIU, registro de la interacción, representación `eco-`, Zona Libre, el suelo antes que el
   saldo, cuidado ≠ extracción estética: [capitulo_16_5_micromaxocracia_canonica_220826.md](../../book/edicion_3_dinamica/capitulo_16_5_micromaxocracia_canonica_220826.md)
 - **EVV-1.2 §3.1, §3.2, §3.6, §4.1, §4.2, §4.3, §4.4** — anti-fiat y consenso comunitario como
   evidencia; separación hecho/valor; el mapa y el territorio; T en hora-persona; NC y FS (nivel 0 = 0,0,

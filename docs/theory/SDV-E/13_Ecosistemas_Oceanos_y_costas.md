@@ -118,9 +118,9 @@ de la misma unidad pueden diferir solo por el diseño de muestreo. Por eso el pr
 (§6) es aquí **condición de posibilidad del estándar** y no anexo técnico: sin diseño declarado no
 hay dato comparable, y sin dato comparable no hay violación demostrable.
 
-**Regla 7 — El tiempo del mar es TA.** El tiempo del arrecife, del manglar y del estero es
-**Tiempo Absoluto (TA)** y **no se coloniza**: *"El tiempo del territorio es TA y no se coloniza
-(el PIU traduce)"*. No se mide en TVI ni en TPI. El **PIU** (Protocolo de Intercambio Universal,
+**Regla 7 — El tiempo del mar es TA soberano.** El tiempo del arrecife, del manglar y del estero es
+**Tiempo Absoluto (TA)** **soberano**: *«respetamos la soberanía del reino natural sobre su propio TA»
+(el PIU traduce)*. No se mide en TVI ni en TPI. El **PIU** (Protocolo de Intercambio Universal,
 Cap. 5 §5.5) es el **único** traductor TA↔TVI, y hoy es un `pass` con comentario `[VERIFICADO]`:
 la traducción existe como doctrina, no como ejecución. Consecuencia práctica: la duración de una
 violación marina se acumula en **temporadas térmicas, ciclos hidrológicos y ciclos de sucesión**,
@@ -945,7 +945,7 @@ tanto:
 
 - **La unidad de duración de la violación térmica de un arrecife es su temporada térmica.** Es un
   ciclo natural del ecosistema, no una unidad administrativa humana.
-- Es **TA (Tiempo Absoluto)**: el tiempo del territorio, que **no se coloniza**. No se mide en TVI
+- Es **TA (Tiempo Absoluto)**: el tiempo del territorio, que **es soberano**. No se mide en TVI
   ni en TPI, y **no se convierte dentro de la fórmula**.
 - **El PIU es el único traductor** TA↔TVI (Cap. 5 §5.5), y hoy es un `pass` con comentario
   `[VERIFICADO]`: la traducción existe como doctrina, no como ejecución. Mientras no exista, **el
@@ -1080,7 +1080,7 @@ protege lo que no sabemos medir; protege lo que **decidimos no convertir en mét
    la biblioteca donde las dos columnas del brief tienen una **única fuente oficial**.
 2. **La primera unidad de duración derivada de un ciclo natural publicado.** Los meses del SDV-H y
    las horas TPI del SDV-S son unidades humanas. La **temporada térmica del arrecife** es un ciclo
-   del ecosistema con calendario regional publicado: TA puro, no colonizado.
+   del ecosistema con calendario regional publicado: TA puro y soberano.
 3. **La corrección piso/techo de la fórmula.** El mar obliga a introducirla porque la mitad de sus
    parámetros son techos. Sin ella, un DHW de 20 daría déficit negativo.
 4. **La separación explícita entre piso biológico y mínimo de gobernanza.** El 30×30 entra como

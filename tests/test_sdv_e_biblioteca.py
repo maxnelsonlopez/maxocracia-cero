@@ -185,6 +185,36 @@ def test_ley_y_politica_declaradas():
     assert not fallos, "LEY/POLITICA sin declarar:\n  - " + "\n  - ".join(fallos)
 
 
+def test_redaccion_soberana_del_ta():
+    """El canon manda en soberano y la redacción previa no sobrevive en docs/.
+
+    Enmienda canónica 2026-10-09 (Cap. 16.5 §16.5.14): la soberanía del reino
+    natural sobre su propio TA sustituye al verbo colonizar. Si la cita previa
+    ("no coloniza el tiempo ajeno") reaparece en algún documento, la
+    propagación retrocedió.
+    """
+
+    def _plano(ruta: Path) -> str:
+        """Texto con blancos colapsados: la frase puede partirse en dos líneas."""
+        return " ".join(ruta.read_text(encoding="utf-8", errors="ignore").split())
+
+    canon = _plano(
+        REPO
+        / "docs"
+        / "book"
+        / "edicion_3_dinamica"
+        / "capitulo_16_5_micromaxocracia_canonica_220826.md"
+    )
+    assert "soberanía del reino natural sobre su propio TA" in canon
+    con_cita_previa = []
+    for ruta in sorted((REPO / "docs").rglob("*.md")):
+        if "no coloniza el tiempo ajeno" in _plano(ruta):
+            con_cita_previa.append(ruta.relative_to(REPO).as_posix())
+    assert not con_cita_previa, "cita previa del canon:\n  - " + "\n  - ".join(
+        con_cita_previa
+    )
+
+
 def test_ley_politica_distinguen_negacion_de_afirmacion():
     """Regresion: "no votable" no debe contar como declaracion de POLITICA.
 

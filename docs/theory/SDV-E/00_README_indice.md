@@ -46,7 +46,7 @@ La contabilidad viene después.
 |---|---|
 | [01 — Doctrina del SDV-E](01_Doctrina_SDV-E.md) | Qué es un SDV del reino natural y qué no es. Los tres pasos epistémicos (dato objetivo / umbral por consenso / violación como dato). LEY frente a POLÍTICA. |
 | [02 — Unidad y sujeto](02_Unidad_y_sujeto_del_SDV-E.md) | La pregunta anterior a toda cifra: **¿de qué hablamos** cuando decimos que un ecosistema está bajo su suelo? Criterios de persona natural, escala mínima, continuidad de identidad, qué pasa si el río se seca. |
-| [03 — No colonización del TA](03_No_colonizacion_del_TA.md) | El Tiempo Absoluto no se coloniza, y **cómo se comprueba** que no lo hicimos. Hoy el canon afirma la regla sin prueba; este documento la vuelve auditable. |
+| [03 — No colonización del TA](03_No_colonizacion_del_TA.md) | La soberanía del TA sobre su propio tiempo, y **cómo se comprueba** que la respetamos. Hoy el canon afirma la regla sin prueba; este documento la vuelve auditable. |
 | [04 — Zona Libre del Reino Natural](04_Zona_Libre_del_Reino_Natural.md) | Lo que **no** se mide: el estado en que el interior de una unidad ecológica queda fuera de la contabilidad sin quedar fuera del Derecho. |
 | [05 — Representación, guardián y mandato](05_Representacion_guardian_y_mandato.md) | El estándar de la voz: quién puede afirmar, en nombre de la unidad, que el mínimo se respetó. Los 7 campos de identidad, el quórum, la disputa y los riesgos abiertos. |
 | [06 — Medición y verificación (T13)](06_Medicion_y_verificacion_T13.md) | El elenco de sensores que el documento 09 declaró inexistente: teledetección, sensores in situ, bioindicadores, ciencia ciudadana y comunidad testigo. |

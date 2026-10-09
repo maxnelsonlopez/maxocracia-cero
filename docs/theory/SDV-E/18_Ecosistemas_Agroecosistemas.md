@@ -111,8 +111,9 @@ definido **desde el cultivo**. Este documento marca las cuatro por separado, por
 más se comete en este dominio.
 
 **Regla 5 — El tiempo del campo no es el calendario de la cosecha.** El agroecosistema tiene **tiempo
-propio: TA (Tiempo Absoluto)**. Nunca TVI, nunca TPI. *"El tiempo del territorio es TA y no se coloniza
-(el PIU traduce)"* (Cap. 16.5 §16.5.14); el **PIU** (Cap. 5 §5.5) es el **único** traductor TA↔TVI.
+propio: TA (Tiempo Absoluto) soberano**. Nunca TVI, nunca TPI. *«Respetamos la soberanía del reino
+natural sobre su propio TA» (el PIU traduce)* (Cap. 16.5 §16.5.14); el **PIU** (Cap. 5 §5.5) es el
+**único** traductor TA↔TVI.
 Consecuencia metodológica que recorre todo el documento: **la campaña agrícola, que es la unidad natural
 de la producción, está prohibida como unidad de la violación.** El test que lo hace verificable está en
 §6.4.

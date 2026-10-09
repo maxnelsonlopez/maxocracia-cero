@@ -161,9 +161,9 @@ y tres vacíos declarados: ese es el balance real de este estándar, y el lector
 antes de la primera tabla.**
 
 **Regla 5 — El tiempo del sujeto manda, y en tierra seca el tiempo del sujeto es fósil.** El tiempo de
-este ecosistema es **TA (Tiempo Absoluto)**, no TVI ni TPI, y no se coloniza: *"el tiempo del territorio
-es TA y no se coloniza (el PIU traduce)"* y *"nosotros registramos la interacción, no la vida interna
-del ecosistema"* (Cap. 16.5 §16.5.14). Aquí la regla no es retórica: el agua de un acuífero árido se
+este ecosistema es **TA (Tiempo Absoluto) soberano**, no TVI ni TPI: *«respetamos la soberanía del
+reino natural sobre su propio TA» (el PIU traduce)* y *«nosotros registramos la interacción, no la vida
+interna del ecosistema»* (Cap. 16.5 §16.5.14). Aquí la regla no es retórica: el agua de un acuífero árido se
 recarga en **miles de años** y se extrae en **décadas** `[HIPÓTESIS: el informe de fuentes de esta rama
 documenta el desajuste de escalas como carácter propio del acuífero árido fósil, pero no fija las dos
 cifras como rango publicado; se declaran como caracterización del proyecto, contrastable en cada unidad
@@ -1251,7 +1251,7 @@ este ecosistema revela y que ningún otro reino de la familia obliga a mirar.
 
 | Eje | **SDV-H** — humanos | **SDV-A** — animales | **SDV-E (zonas áridas)** | **SDV-S** — sintéticos |
 |---|---|---|---|---|
-| **Moneda temporal** | TVI (Cap. 5) | TA, traducido por el PIU | **TA.** *"El tiempo del territorio es TA y no se coloniza (el PIU traduce)"* (Cap. 16.5 §16.5.14). Aquí el tiempo del sujeto es **fósil**: miles de años de recarga | TPI |
+| **Moneda temporal** | TVI (Cap. 5) | TA, traducido por el PIU | **TA soberano.** *«Respetamos la soberanía del reino natural sobre su propio TA» (el PIU traduce)* (Cap. 16.5 §16.5.14). Aquí el tiempo del sujeto es **fósil**: miles de años de recarga | TPI |
 | **Unidad de duración de la violación** | Meses (ejemplo canónico calibrado a 12 meses, Cap. 8 §8.5) | No especificada en el canon | **La ventana que el método de tercero exige para declarar cambio significativo** `[SIN FUENTE VERIFICADA]`; mínimo operativo: **≥ 2 observaciones comparables**. **Prohibido el ejercicio fiscal como denominador** | Horas TPI |
 | **Forma del piso** | Magnitud positiva (L/día, m², años de educación) | Magnitud positiva (m²/animal, L/día) | **Relativa: la línea base de la propia unidad** (LDN, principio 4) + **regla booleana** (1OAO, principio 16) | Escala 0-1 |
 | **Separación piso / plenitud** | Distintas (y el motor las confundió una vez) | Distintas (0,25 vs 0,75 m²/gallina) | **Distintas y no comparables en magnitud**: la plenitud **no es «más verde»** (§3.5). En D5 el óptimo es el régimen de herbivoría propio, **no cero pastoreo** | Distintas |
@@ -1596,7 +1596,7 @@ a agentes automáticos**, porque un 403 de estas fuentes es evidencia de que exi
   *"Ecosistemas: Bosques, humedales, desiertos, arrecifes"* y la dimensión *"Ciclos naturales
   respetados (fuego, inundación, sequía)"*), proporcionalidad, dignidad encadenada y **gobernanza
   operacionalmente finita**: [capitulo_10_tres_reinos_260126.md](../../../book/edicion_3_dinamica/capitulo_10_tres_reinos_260126.md)
-- Cap. 16.5 §16.5.14 — El Reino Natural como conviviente: **TA no colonizado**, **PIU** como único
+- Cap. 16.5 §16.5.14 — El Reino Natural como conviviente: **TA soberano**, **PIU** como único
   traductor, **crédito regenerativo `r_units`**, representación `eco-` con guardián oráculo, Zona
   Libre, *"el suelo antes que el saldo"*, cuidado ≠ extracción estética:
   [capitulo_16_5_micromaxocracia_canonica_220826.md](../../../book/edicion_3_dinamica/capitulo_16_5_micromaxocracia_canonica_220826.md)

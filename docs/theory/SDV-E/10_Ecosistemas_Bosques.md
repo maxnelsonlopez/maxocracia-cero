@@ -42,7 +42,7 @@ con fuente propia; el documento declara en cada caso de dónde salen y con qué 
 
 **Qué no es.**
 
-- **No es el estándar del SDV-E.** El estándar (unidad y sujeto, TA no colonizado, Zona Libre, guardián,
+- **No es el estándar del SDV-E.** El estándar (unidad y sujeto, TA soberano, Zona Libre, guardián,
   fórmula, INV2-E) vive en los documentos 00-09 de esta biblioteca. Este documento es la **instancia de
   tipo de ecosistema**: aplica ese estándar al bosque y sólo al bosque.
 - **No es un catálogo de buenas prácticas forestales.** Un catálogo no es un estándar: lo que sigue son
@@ -116,8 +116,7 @@ publica —134 países que reportaron ambas variables, 76 % de la superficie ter
 Ambas coexisten en la fuente; **solo la segunda es un estadístico emparejado**. Este documento prohíbe
 derivar cocientes entre agregados de base distinta.
 
-**Regla 5 — El tiempo del bosque es TA y no se coloniza.** *"El tiempo del territorio es TA y no se
-coloniza (el PIU traduce)"* (Cap. 16.5 §16.5.14). Ninguna métrica de este documento se expresa en TVI
+**Regla 5 — El tiempo del bosque es TA soberano.** *«Respetamos la soberanía del reino natural sobre su propio TA» (el PIU traduce)* (Cap. 16.5 §16.5.14). Ninguna métrica de este documento se expresa en TVI
 ni en TPI. El **PIU** (Protocolo de Intercambio Universal, Cap. 5 §5.5) es el **único** traductor
 autorizado entre el TA del bosque y el TVI humano, y **este documento no traduce nada**: fija el piso y
 declara que la traducción es un acto aparte, con su propio registro.

@@ -170,8 +170,9 @@ jurídico: la unidad puede **bloquear**. Eso sí: la propuesta exige revisar la 
 08, que hoy lista la conectividad entre los **seis dominios que no pueden activar INV2-E**. **Este
 documento no la cambia por su cuenta** (§5.3 y §13, pregunta 2).
 
-**Regla 7 — El tiempo del territorio manda.** La duración se acumula en **TA (Tiempo Absoluto)** y
-*«el tiempo del territorio es TA y no se coloniza (el PIU traduce)»* (Cap. 16.5 §16.5.14). El único
+**Regla 7 — El tiempo del territorio manda.** La duración se acumula en **TA (Tiempo Absoluto)
+soberano** y *«respetamos la soberanía del reino natural sobre su propio TA» (el PIU traduce)* (Cap. 16.5
+§16.5.14). El único
 traductor TA↔TVI es el **PIU** (Protocolo de Intercambio Universal, Cap. 5 §5.5). En esta dimensión la
 regla tiene un filo propio: **una barrera hidráulica y un corredor fragmentado operan en ciclos
 generacionales, no anuales** —el continuo fluvial y la maduración de un corredor de bosque son procesos de
@@ -1236,7 +1237,7 @@ hallazgo que ninguna otra dimensión del catálogo produce.
 | 3 | **¿Quién puede declarar su conectividad?** | **La persona** (y es auditable) | El tenedor o tutor, con responsabilidad jurídica | 🔴 **Nadie**: el sujeto no reporta (Cap. 16.5 §16.5.14) y quien reporta suele ser quien fragmentó | — |
 | 4 | **Instrumento** | Instrumentos estandarizados por dimensión (Cap. 8 §8.6) | Observación etológica (Cap. 9 §9.9) | CSI fluvial + métricas de grafo + inventario de barreras y corredores | — |
 | 5 | **¿Piso numérico?** | Sí, por necesidad | Sí, **por especie** | 🟡 **Parcial**: fluvial **sí** (CSI ≥ 95 %); paisaje **no** (`[SIN FUENTE VERIFICADA]`) | — |
-| 6 | **Moneda temporal** | **TVI** (Cap. 5) | **TA**, traducido por el PIU | **TA**; *«el tiempo del territorio es TA y no se coloniza»* (Cap. 16.5 §16.5.14) | **TPI** |
+| 6 | **Moneda temporal** | **TVI** (Cap. 5) | **TA**, traducido por el PIU | **TA soberano**; *«respetamos la soberanía del reino natural sobre su propio TA»* (Cap. 16.5 §16.5.14) | **TPI** |
 | 7 | **Representación** | La persona misma | Tutor legal | Parte `eco-` + guardián oráculo; **quórum N-de-M sin N ni M** | La propia instancia, con auditoría cruzada AOS |
 | 8 | **Quién audita** | Auditoría independiente | Certificación sin conflicto de interés | 🔴 **Sin par del propio reino**: ciencia, teledetección, comunidad testigo | AOS |
 | 9 | **Remedio tras la violación** | Rehabilitación (Dim. VIII) y reintegración | Prohibición de mercado si es sistemática | 🔴 **Ninguno que devuelva lo perdido en el mismo TA** | Retractación + Capa de Ternura |

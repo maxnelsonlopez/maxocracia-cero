@@ -127,8 +127,8 @@ disfrazado de dato. El informe de fuentes declaró **16 parámetros sin fuente**
 cinco suyos que no aparecen aquí (Lista Roja, Aarhus, Ramsar, GEF y umbral de asimetría) quedan fuera del
 alcance de este documento.
 
-**Regla 8 — Tiempo = TA; el PIU es el único traductor.** El tiempo del territorio es **Tiempo Absoluto** y
-no se coloniza (Cap. 16.5 §16.5.14). La representación **no** crea un TVI del ecosistema: registra
+**Regla 8 — Tiempo = TA; el PIU es el único traductor.** El tiempo del territorio es **Tiempo Absoluto**
+soberano (Cap. 16.5 §16.5.14). La representación **no** crea un TVI del ecosistema: registra
 interacción. Ningún plazo de este documento (auditorías, mandatos, disputas) es tiempo vital del
 ecosistema; son plazos institucionales humanos.
 

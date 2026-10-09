@@ -62,7 +62,7 @@ la hace útil; y *calidad del aire* **no entra**: pertenece al documento 23 de e
 
 **Qué no es.**
 
-- **No es el estándar del SDV-E.** El estándar —unidad y sujeto, TA no colonizado, Zona Libre, guardián,
+- **No es el estándar del SDV-E.** El estándar —unidad y sujeto, TA soberano, Zona Libre, guardián,
   fórmula, INV2-E— vive en los documentos 00-09 de esta biblioteca. Este documento es la **instancia de
   tipo de ecosistema**: aplica ese estándar al humedal y sólo al humedal.
 - **No es el manual de Ramsar.** La Convención de Ramsar designa humedales de importancia internacional;
@@ -161,8 +161,7 @@ señal de salud del humedal, y la abundancia total de aves acuáticas no es un i
 Es la versión limnológica de *"jardín podado para la foto no es cuidado; se registra lo que regenera, no
 lo que adorna"* (Cap. 16.5 §16.5.14).
 
-**Regla 5 — El tiempo del humedal es TA y no se coloniza.** *"El tiempo del territorio es TA y no se
-coloniza (el PIU traduce)"* (Cap. 16.5 §16.5.14). Ninguna métrica de este documento se expresa en TVI ni
+**Regla 5 — El tiempo del humedal es TA soberano.** *«Respetamos la soberanía del reino natural sobre su propio TA» (el PIU traduce)* (Cap. 16.5 §16.5.14). Ninguna métrica de este documento se expresa en TVI ni
 en TPI. El **PIU** (Protocolo de Intercambio Universal, Cap. 5 §5.5) es el **único** traductor autorizado
 entre el TA del humedal y el TVI humano, y **este documento no traduce nada**: fija el piso y declara que
 la traducción es un acto aparte, con su propio registro. Dos consecuencias formales propias del humedal:
@@ -1920,7 +1919,7 @@ sólo como comodidad de lectura, y se comprobó en esta sesión que **cada archi
   criterios de Persona Sintética:
   [capitulo_10_tres_reinos_260126.md](../../book/edicion_3_dinamica/capitulo_10_tres_reinos_260126.md)
 - Cap. 16.5 §16.5.14 — **El Reino Natural como conviviente**: el caso canónico del humedal del conjunto,
-  crédito regenerativo `r_units`, **TA no colonizado**, representación `eco-` y guardián oráculo, Zona
+   crédito regenerativo `r_units`, **TA soberano**, representación `eco-` y guardián oráculo, Zona
   Libre, *"el suelo antes que el saldo"*, *"cuidado ≠ extracción estética"* y *"medir todo sería la forma
   técnica de dejar de escucharlo"*:
   [capitulo_16_5_micromaxocracia_canonica_220826.md](../../book/edicion_3_dinamica/capitulo_16_5_micromaxocracia_canonica_220826.md)

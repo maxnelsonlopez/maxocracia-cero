@@ -621,7 +621,7 @@ ZONA MEDIDA es **materialmente irreversible**: una vez que el interior se mide y
 existe y T13 no lo borra. La vuelta a ZONA LIBRE puede declararse después, pero **el dato ya producido
 permanece**: la unidad no recupera su estado anterior, recupera una etiqueta. Es la primera dimensión
 del SDV-E en la que **medir tiene un costo que no se deshace**, y es coherente con la naturaleza del
-reino: *"el tiempo del territorio es TA y no se coloniza"* (Cap. 16.5 §16.5.14) — y una lectura
+reino: *«respetamos la soberanía del reino natural sobre su propio TA»* (Cap. 16.5 §16.5.14) — y una lectura
 producida tampoco se desproduce.
 
 **Lo que INV2-E no puede hacer, dicho aquí para que el documento 08 no lo prometa.** No puede
@@ -1037,7 +1037,7 @@ URL. Todo enlace se re-comprueba con `scripts/verificar_enlaces_sdv_e.py`.
 - Cap. 10 §10.3, §10.4, §10.5, §10.6, §10.7 — Principio Precautorio de Consciencia; SDV para
   ecosistemas y para lugares; proporcionalidad; dignidad encadenada; gobernanza operacionalmente
   finita: [capitulo_10_tres_reinos_260126.md](../../book/edicion_3_dinamica/capitulo_10_tres_reinos_260126.md)
-- Cap. 16.5 §16.5.14 — El hogar extendido: crédito regenerativo, TA no colonizado, representación
+- Cap. 16.5 §16.5.14 — El hogar extendido: crédito regenerativo, TA soberano, representación
   `eco-`, Zona Libre, *«el suelo antes que el saldo»*, cuidado ≠ extracción estética:
   [capitulo_16_5_micromaxocracia_canonica_220826.md](../../book/edicion_3_dinamica/capitulo_16_5_micromaxocracia_canonica_220826.md)
 - EVV-1.2 §4.3 — R negativo = regeneración:

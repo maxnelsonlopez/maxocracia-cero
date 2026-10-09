@@ -101,8 +101,8 @@ operador y la saturación en cero son parte de la fórmula, no notas al pie (§3
 nombrado. Una propiedad sin test es una intención, y en esta fórmula las intenciones caras son dos: la
 **base neutra** y la **no doble contabilidad**.
 
-**Regla 6 — El tiempo del territorio manda.** La duración se acumula en **TA** y *«el tiempo del
-territorio es TA y no se coloniza»* (Cap. 16.5 §16.5.14). El único traductor TA↔TVI es el **PIU**
+**Regla 6 — El tiempo del territorio manda.** La duración se acumula en **TA** y *«respetamos la
+soberanía del reino natural sobre su propio TA»* (Cap. 16.5 §16.5.14). El único traductor TA↔TVI es el **PIU**
 (Protocolo de Intercambio Universal, Cap. 5 §5.5), y **la traducción ocurre fuera de esta fórmula**:
 un factor de violación expresado en TVI sería exactamente la colonización que el canon prohíbe.
 
@@ -448,7 +448,7 @@ porque es aritmética y no semántica, es la **restricción de forma**:
 > `FI = 1/(1 − v)` para `v < 1`. Formas **incompatibles**: `1 + e^v` y cualquier `1 + v + c` con
 > `c ≠ 0`. `[HIPÓTESIS]` — deducción del invariante de base neutra, no dato de fuente externa.
 
-**(b) Duración en TA.** *«El tiempo del territorio es TA y no se coloniza (el PIU traduce)»*
+**(b) Duración en TA.** *«Respetamos la soberanía del reino natural sobre su propio TA, independiente del progreso humano e invulnerable en los axiomas de la Maxocracia» (el PIU traduce)*
 (Cap. 16.5 §16.5.14). Consecuencias formales, y son duras:
 
 - **La duración se acumula en TA** —el tiempo del territorio, unidad física— y **jamás en TVI ni TPI**.

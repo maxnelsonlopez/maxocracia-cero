@@ -135,7 +135,8 @@ categoría o un umbral binario, con su fuente y su fecha. **Un umbral que exige 
 entero no es un umbral: es una manera de no bloquear nunca** (Cap. 10 §10.7).
 
 **Regla 7 — El tiempo del territorio manda.** Toda duración del SDV-E se acumula en **TA (Tiempo
-Absoluto)** y nunca en TVI ni TPI. *«El tiempo del territorio es TA y no se coloniza»* (Cap. 16.5
+Absoluto)** y nunca en TVI ni TPI. *«Respetamos la soberanía del reino natural sobre su propio TA,
+independiente del progreso humano e invulnerable en los axiomas de la Maxocracia»* (Cap. 16.5
 §16.5.14); el **PIU** (Protocolo de Intercambio Universal, Cap. 5 §5.5) es el **único** traductor, y
 *«nosotros registramos la interacción, no la vida interna del ecosistema»*. Una doctrina que midiera al
 ecosistema en TVI estaría colonizando exactamente el tiempo que dice proteger.
@@ -995,7 +996,7 @@ distingue el SDV-E de sus tres hermanos en los seis ejes que este documento defi
 | **Fuente del piso** | Dignidad intrínseca y capacidades fundamentales | **Diseño biológico** + etología científica | **Diseño biológico del ecosistema** (Cap. 16.5 §16.5.14) | Coherencia y potencial experiencial bajo principio precautorio |
 | **Sujeto** | Toda persona humana (universal) | Cada especie animal sintiente | **La unidad ecológica** — un ente cuya extensión es su identidad | Cada Persona Sintética (Cap. 10 §10.8) |
 | **Qué se mide** | Recurso por sujeto (L/persona/día, m²/persona) | Recurso por animal (m²/animal, h/día) | **Condición por superficie y por tiempo** (% cobertura, °C-semanas, t/ha/año) | Escala 0-1 por dimensión (adimensional) |
-| **Tiempo** | TVI | TA (traducido por el PIU) | **TA** — *«el tiempo del territorio es TA y no se coloniza»* | TPI |
+| **Tiempo** | TVI | TA (traducido por el PIU) | **TA soberano** — *«respetamos la soberanía del reino natural sobre su propio TA»* | TPI |
 | **Representación** | La persona misma | La persona o el tutor legal | **Parte `eco-` + guardián oráculo**; el representante **no pertenece al reino representado** | La propia instancia, con auditoría cruzada (AOS) |
 | **Remedio tras la violación** | Rehabilitación y reintegración | Prohibición de mercado si es sistemática | 🔴 **Ninguno: la pérdida no vuelve en el mismo TA.** La prevención es el remedio completo | Retractación + Cápsula de Memoria + Capa de Ternura |
 

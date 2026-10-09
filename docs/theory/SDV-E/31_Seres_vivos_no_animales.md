@@ -152,8 +152,7 @@ subirles ese número. **Este documento no lo hace y no lo propone**: un peso mor
 es exactamente la colonización que la guarda G5 del documento [03](03_No_colonizacion_del_TA.md) prohíbe, y
 —esto es lo importante— **un peso moral no es una medición**: no protege, solo decora el registro.
 
-**Regla 6 — El tiempo de estos seres es TA, y el PIU es el único traductor.** *«El tiempo del territorio es
-TA y no se coloniza (el PIU traduce)»* (Cap. 16.5 §16.5.14). Un hongo no tiene TVI —el TVI es tiempo vital
+**Regla 6 — El tiempo de estos seres es TA soberano, y el PIU es el único traductor.** *«Respetamos la soberanía del reino natural sobre su propio TA» (el PIU traduce)* (Cap. 16.5 §16.5.14). Un hongo no tiene TVI —el TVI es tiempo vital
 indexado humano (Cap. 5 §5.2-§5.5)— y ninguna magnitud de este dominio puede expresarse en TVI ni en TPI.
 Su fenología es una **unidad física** observable en TA, y la conversión TA↔TVI, si un contrato la necesita,
 ocurre **fuera** del veredicto y con el **PIU** como único instrumento (Cap. 5 §5.5).

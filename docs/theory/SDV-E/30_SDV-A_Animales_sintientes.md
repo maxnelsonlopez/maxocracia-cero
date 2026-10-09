@@ -162,7 +162,7 @@ puede medir ni auditar. Este documento lo corrige **proponiendo**, no reescribie
 nombrado. Una propiedad sin test es una intención, y en un estándar que hoy **no tiene ni una línea de
 código** (§12) la diferencia entre propiedad y promesa es todo el documento.
 
-**Regla 6 — El tiempo del animal es TA y no se coloniza.** Los dos estándares biológicos —animal y
+**Regla 6 — El tiempo del animal es TA soberano.** Los dos estándares biológicos —animal y
 ecosistema— viven en **Tiempo Absoluto**; el **PIU** (Protocolo de Intercambio Universal, Cap. 5 §5.5) es
 el **único** traductor TA↔TVI, y **la traducción ocurre fuera de la fórmula**: una violación del SDV-A
 expresada en TVI describiría el tiempo del animal con la unidad del tiempo humano, que es la forma exacta
@@ -1820,7 +1820,7 @@ documento**.
 - **Cap. 10 §10.6 · §10.7 · §10.8** — Dignidad encadenada; gobernanza operacionalmente finita; los cuatro
   criterios de Persona Sintética (contra los que se mide la ausencia de criterios equivalentes para el
   sujeto animal y ecológico).
-- **Cap. 16.5 §16.5.14** — El Reino Natural como conviviente: TA no colonizado, PIU como traductor,
+- **Cap. 16.5 §16.5.14** — El Reino Natural como conviviente: TA soberano, PIU como traductor,
   crédito regenerativo `r_units`, partes `eco-`, Zona Libre, *«el suelo antes que el saldo»* y
   *«cuidado ≠ extracción estética»*.
 - **Cap. 5 §5.5** — Los tres tiempos (TVI, TA, TPI), el **PIU** como único traductor TA↔TVI y el costo en

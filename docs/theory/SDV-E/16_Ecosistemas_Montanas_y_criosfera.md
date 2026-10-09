@@ -119,10 +119,11 @@ alpino viable y del equivalente en agua de la nieve; (b) no aplica, no se cita n
 ≥ 2 años consecutivos, IPA). El lector debe saber que **la criosfera entra al SDV-E con una sola
 norma publicada y cinco pisos construidos**.
 
-**Regla 5 — El tiempo del sujeto manda.** El tiempo de este ecosistema es **TA (Tiempo Absoluto)**, no
-TVI ni TPI, y no se coloniza: *"la contabilidad doméstica no coloniza el tiempo ajeno. El PIU (Cap. 5
+**Regla 5 — El tiempo del sujeto manda.** El tiempo de este ecosistema es **TA (Tiempo Absoluto)
+soberano**, no TVI ni TPI: *«respetamos la soberanía del reino natural sobre su propio TA,
+independiente del progreso humano e invulnerable en los axiomas de la Maxocracia. El PIU (Cap. 5
 §5.5) es quien traduce entre TA y TVI; nosotros registramos la interacción, no la vida interna del
-ecosistema"* (Cap. 16.5 §16.5.14). Aquí la regla es literal y no retórica: el intervalo de remedición
+ecosistema»* (Cap. 16.5 §16.5.14). Aquí la regla es literal y no retórica: el intervalo de remedición
 de una cumbre es de **5 a 10 años**, una serie glaciar no constituye sujeto medible antes de
 **30 años** y el permafrost rico en hielo tarda **siglos a milenios** en desaparecer. **Ninguna de
 esas tres cifras fue fijada pensando en un ejercicio contable humano**, y ese es precisamente el
@@ -1059,7 +1060,7 @@ familia.
 
 | Eje | **SDV-H** — humanos | **SDV-A** — animales | **SDV-E (montaña/criosfera)** | **SDV-S** — sintéticos |
 |---|---|---|---|---|
-| **Moneda temporal** | TVI (Cap. 5) | TA, traducido por el PIU | **TA.** *"El tiempo del territorio es TA y no se coloniza (el PIU traduce)"* (Cap. 16.5 §16.5.14) | TPI |
+| **Moneda temporal** | TVI (Cap. 5) | TA, traducido por el PIU | **TA soberano.** *«Respetamos la soberanía del reino natural sobre su propio TA» (el PIU traduce)* (Cap. 16.5 §16.5.14) | TPI |
 | **Unidad de duración de la violación** | Meses (ejemplo canónico calibrado a 12 meses, Cap. 8 §8.5) | No especificada en el canon | **Década de TA** `[HIPÓTESIS]` — el año es indistinguible del ruido: la dispersión interanual de la serie de referencia es de **262 mm w.e., ≈ 18 % de la media** | Horas TPI |
 | **Ventana de reparación** | El tiempo del sujeto (TVI) | No aplica (prohibición de mercado si es sistemática) | **≥ 30 años** `[HIPÓTESIS]`, coincidiendo con el criterio WGMS del sujeto. **Una violación no se repara en el ejercicio siguiente** | 7 ciclos consecutivos → retractación |
 | **Forma del piso** | Magnitud positiva (L/día, m², años de educación) | Magnitud positiva (m²/animal, L/día) | **Cero, en cuatro de siete dimensiones** (equilibrio, pico, 0 % de pérdida, 0 extinciones) → **el cero no normaliza** (§5.2) | Escala 0-1 |
@@ -1327,7 +1328,7 @@ de que no.
 - Cap. 10 §10.3-§10.7 — Principio Precautorio de Consciencia, **SDV Universal** (ecosistemas,
   lugares y objetos; *"Área mínima para biodiversidad viable"*), proporcionalidad, dignidad
   encadenada y **gobernanza operacionalmente finita**: [capitulo_10_tres_reinos_260126.md](../../../book/edicion_3_dinamica/capitulo_10_tres_reinos_260126.md)
-- Cap. 16.5 §16.5.14 — El Reino Natural como conviviente: **TA no colonizado**, **PIU** como único
+- Cap. 16.5 §16.5.14 — El Reino Natural como conviviente: **TA soberano**, **PIU** como único
   traductor, **crédito regenerativo `r_units`**, representación `eco-` con guardián oráculo, Zona
   Libre, *"el suelo antes que el saldo"*, cuidado ≠ extracción estética:
   [capitulo_16_5_micromaxocracia_canonica_220826.md](../../../book/edicion_3_dinamica/capitulo_16_5_micromaxocracia_canonica_220826.md)

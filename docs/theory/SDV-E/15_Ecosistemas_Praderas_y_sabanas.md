@@ -82,7 +82,7 @@ que este documento existe para hacer imposible.
 
 **Qué no es.**
 
-- **No es el estándar del SDV-E.** El estándar (unidad y sujeto, TA no colonizado, Zona Libre, guardián,
+- **No es el estándar del SDV-E.** El estándar (unidad y sujeto, TA soberano, Zona Libre, guardián,
   fórmula, INV2-E) vive en los documentos 00-09 de esta biblioteca. Este documento es la **instancia de
   tipo de ecosistema**: aplica ese estándar al pastizal y sólo al pastizal.
 - **No es un manual de manejo ganadero.** La FAO publica guías de manejo de pastizales y este documento
@@ -186,8 +186,7 @@ y **no se pudo abrir**. Este documento **no lo usa como piso legal** y sí usa s
 —parches desnudos **conectados**, no porcentaje de suelo desnudo— porque el concepto es el que
 distingue erosión en marcha de calvicie dispersa.
 
-**Regla 8 — El tiempo del territorio es TA y no se coloniza.** *"El tiempo del territorio es TA y no se
-coloniza (el PIU traduce)"* (Cap. 16.5 §16.5.14). Ninguna métrica de este documento se expresa en TVI
+**Regla 8 — El tiempo del territorio es TA soberano.** *«Respetamos la soberanía del reino natural sobre su propio TA» (el PIU traduce)* (Cap. 16.5 §16.5.14). Ninguna métrica de este documento se expresa en TVI
 ni en TPI. El **PIU** (Protocolo de Intercambio Universal, Cap. 5 §5.5) es el **único** traductor
 autorizado entre el TA del pastizal y el TVI humano, y **este documento no traduce nada**: fija el piso
 y declara que la traducción es un acto aparte, con su propio registro. La no-colonización del tiempo
@@ -2011,8 +2010,8 @@ existe**.
   C3, la escala como atributo declarado; C4, colapso como transformación de identidad y el ecosistema
   dependiente del fuego *"degradado, no colapsado"*):
   [02_Unidad_y_sujeto_del_SDV-E.md](02_Unidad_y_sujeto_del_SDV-E.md)
-- **Documento 03** — La no-colonización del TA (el **PIU** como único traductor y la propuesta
-  verificable de que no se coloniza): [03_No_colonizacion_del_TA.md](03_No_colonizacion_del_TA.md)
+- **Documento 03** — La soberanía del TA (el **PIU** como único traductor y la propuesta
+  verificable de su respeto): [03_No_colonizacion_del_TA.md](03_No_colonizacion_del_TA.md)
 - **Documento 04** — La Zona Libre del Reino Natural (**un recinto, nunca un porcentaje**; los tres
   regímenes de información): [04_Zona_Libre_del_Reino_Natural.md](04_Zona_Libre_del_Reino_Natural.md)
 - **Documento 05** — Representación, guardián y mandato (los 7 campos de identidad, quórum N-de-M):
