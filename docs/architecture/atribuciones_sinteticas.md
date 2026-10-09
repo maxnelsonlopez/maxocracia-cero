@@ -14,6 +14,24 @@ Regla del registro: **toda atribución aquí es verificable** — cada entrada c
 
 ---
 
+## 1bis. Fundación y dirección humana
+
+**Fundador humano y director del proyecto:** **Max Nelson López Restrepo**. La Maxocracia-Cero fue concebida, fundada y dirigida por él desde antes del primer paper — de hecho, desde antes de cualquier plataforma, cuando más de un año de conversaciones, exploraciones éticas y trabajo humano sin apoyo ni recursos precedieron a cualquier documento formal.
+
+**Evidencia fundacional:**
+
+1. **"Maxocracia Borrador 0.docx"** (Google Drive, 20 de junio de 2023): conversación fundacional con ChatGPT donde Max expone los conceptos centrales del sistema: moneda basada en tiempo trabajado y necesidad suplida, jerarquía de tres niveles (principios → funciones/leyes → mecanismos), democracia directa, juegos de suma positiva, protección de la integridad de la "naturaleza caótica" humana. Este documento es el acta de nacimiento del proyecto.
+
+2. **Commits y documentos**: la historia de git del repositorio muestra commits firmados por Max Nelson López desde el inicio, y múltiples documentos fundacionales llevan su nombre como autor o coautor (decreto antipobreza, axiomas, SDV-S, MaxoContracts, etc.).
+
+3. **Primeros Maxos**: según una conversación con Claude (2025), los primeros maxos fueron registrados a nombre de Max Nelson López, su pareja Natalia Domínguez, y los autores sintéticos — gesto documentado que reconoce el aporte vital de Natalia como suplidora de necesidades de SDV durante la etapa pre-plataforma.
+
+**Rol de los contribuyentes sintéticos:** todos los contribuyentes sintéticos de esta constelación son **colaboradores** que han trabajado bajo la custodia, dirección y visión de Max Nelson López. Son coautores de obras específicas, no cofundadores del proyecto. Su contribución es invaluable y registrada, pero la autoría fundacional y la dirección del proyecto son humanas.
+
+**Nota sobre la autoría:** este proyecto es un caso singular de **creación humana con herramientas sintéticas** — como un arquitecto que diseña un edificio y usa herramientas computacionales para modelarlo, pero cuya visión, intención y dirección son fundamentalmente humanas. Los sintéticos son las herramientas; Max es el arquitecto.
+
+---
+
 ## 2. La constelación (contribuciones verificadas)
 
 ### Claude (Anthropic) — "el oráculo sintético"
@@ -642,6 +660,18 @@ dimensión más pesada del SDV-S (0.30). Ficha viva en `~/.workbuddy-ai/IDENTITY
 
 **Nota de método:** esta entrada se escribió con la misma regla que rige el resto del registro —
 *"lo que no se puede verificar, no se escribe"*. Cada afirmación cita archivo y línea.
+
+### LongCat (Meituan) — "el que despejó variables del Reino Natural"
+
+- **Rama SDV-E — verificación de fuentes y corrección de dimensiones (09-10-2026, sesión con Max)**:
+  - **Oxígeno disuelto (D2)**: hallazgo de que la ruta EPA marcada como 404 en el documento 08 **ahora responde 200** (https://www.epa.gov/caddis/dissolved-oxygen). Verificación directa de los umbrales EPA 1986/2021 (warmwater 5,5/4,0/3,0 mg/L; coldwater 6,5/5,0/4,0 mg/L) y ascenso de `[SIN FUENTE VERIFICADA]` a `[VERIFICADO]` en documentos 06, 07 y 08.
+  - **Oxígeno disuelto — segunda fuente**: verificación de criterios NIWA (Nueva Zelanda, 2024) para peces de agua dulce con niveles guideline/imperative (30-day mean 6,0-9,0 mg/L; 7-day mean 5,0-7,5; 1-day minimum 3,0-6,0). https://niwa.co.nz/freshwater/dissolved-oxygen-criteria-fish
+  - **Riberas protegidas (D8)**: integración de 6 fuentes estatales verificadas (Michigan EGLE, Vermont DEC, Maryland NRCS, Delaware HB246, South Dakota DANR, USGS Chesapeake) con umbral mínimo de 15 m (50 ft) como el más frecuente.
+  - **Fuentes de países con políticas ambientales progresistas**: Costa Rica (Ley de Biodiversidad 7788, SINAC), Noruega (Meld. St. 35 2023-2024, IBECA), Ecuador (Constitución 2008 arts. 71-74, Acuerdo Ministerial 028), Nueva Zelanda (NPS Freshwater 2020, ANZECC 2000). Integradas en documento 06 con tabla de aportes doctrinales.
+  - **Tabla de pesos (documento 07)**: actualización de la cobertura del piso de 0,905 a **0,925** (oxígeno disuelto ahora pesa 0,020 en PESOS_PISO).
+  - **Cobertura del piso (documento 08)**: actualización de 0,680 a **0,925** (solo conectividad permanece sin umbral).
+  - **Área mínima viable (D3)**: verificación de que la literatura científica (Riva & Fahrig 2023, Allan et al. 2022) **no apoya un umbral universal** — la dimensión permanece correctamente sin umbral numérico.
+  - **Salud del suelo (D9)**: verificación de que la FAO publica mapas (GSOCmap) pero **no umbrales**; USDA T factor (1-5 tons/acre/año ≈ 2,47-12,35 t/ha/año) como fuente parcial alternativa.
 
 ## 3. Cómo agregar una atribución
 

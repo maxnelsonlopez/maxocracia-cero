@@ -109,14 +109,30 @@ def recolectar(biblioteca: Path):
 # que lo declare (secciones "Fuentes descartadas" / "Vacios"). El canon lo exige:
 # distinguir lo verificado de lo inferido, y no ocultar lo que fallo.
 MARCAS_DESCARTE = (
-    "muert", "descartad", "404", "410", "403", "no se pudo leer", "binario",
-    "no responde", "sin respuesta", "no cita", "bloquean", "bloquea",
-    "no verific", "ilegible",
+    "muert",
+    "descartad",
+    "404",
+    "410",
+    "403",
+    "no se pudo leer",
+    "binario",
+    "no responde",
+    "sin respuesta",
+    "no cita",
+    "bloquean",
+    "bloquea",
+    "no verific",
+    "ilegible",
 )
 
 # Titulos de seccion que declaran un bloque entero de fuentes no citables.
 MARCAS_SECCION = (
-    "descartad", "vac\u00edo", "vacio", "no citab", "no citable", "ilegible",
+    "descartad",
+    "vac\u00edo",
+    "vacio",
+    "no citab",
+    "no citable",
+    "ilegible",
 )
 
 
@@ -243,7 +259,9 @@ def ejecutar(listar: bool) -> int:
 
     if muertas:
         print("\n>> ENLACES MUERTOS SIN DECLARAR (404/410/451 citados como si")
-        print("   estuvieran vivos: corregir la URL o declararla en 'Fuentes descartadas'):")
+        print(
+            "   estuvieran vivos: corregir la URL o declararla en 'Fuentes descartadas'):"
+        )
         for url, codigo, pendientes in muertas:
             print(f"  [{codigo}] {url}")
             for archivo, numero in pendientes:

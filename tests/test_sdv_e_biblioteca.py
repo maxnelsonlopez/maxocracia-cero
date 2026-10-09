@@ -143,8 +143,8 @@ def test_minimo_absoluto_separado_del_optimo():
                 f"{ruta.name}: minimo_absoluto={tiene_minimo} optimo={tiene_optimo} "
                 "-> deben aparecer ambos y separados"
             )
-    assert not fallos, (
-        "Minimo y optimo no estan separados:\n  - " + "\n  - ".join(fallos)
+    assert not fallos, "Minimo y optimo no estan separados:\n  - " + "\n  - ".join(
+        fallos
     )
 
 

@@ -210,7 +210,7 @@ unidad es arrecife** (§8.3, P4).
 | Calidad del agua (A y B) | `agua_ph` | `range` | unidades de pH | **6,5 – 8,4** | `[SIN FUENTE VERIFICADA]` | FAO, 1985 (Ayers & Westcot, Papel 29 Rev.1) | 🟢 (proxy: agua de **riego**) |
 | Calidad del agua (A y B) | `agua_nitrato_n` | `max` | mg/L (NO₃-N) | **< 5** (sin efecto restrictivo) | `[SIN FUENTE VERIFICADA]` | FAO, 1985 (tabla 1) | 🟢 (proxy: agua de **riego**) |
 | Calidad del agua (A y B) | `agua_bicarbonato_me` | `max` | me/L (HCO₃, aspersión) | **< 1,5** | `[SIN FUENTE VERIFICADA]` | FAO, 1985 (tabla 1) | 🟢 (proxy: agua de **riego**) |
-| Calidad del agua (B) | `agua_oxigeno_disuelto` | `max`/`min` | mg/L | `[SIN FUENTE VERIFICADA]` | `[SIN FUENTE VERIFICADA]` | la ruta de la EPA para este criterio está **muerta (404)** | 🔴 **sin umbral** |
+| Calidad del agua (B) | `agua_oxigeno_disuelto` | `min` | mg/L | **5,5** (warmwater 30-day mean) · **6,5** (coldwater 30-day mean) | ≥ 7,0 | US EPA, 1986 (Quality Criteria for Water), re-publicado en Factsheet 841F21007B, 2021 `[VERIFICADO]` — https://www.epa.gov/system/files/documents/2021-07/parameter-factsheet_do.pdf | 🟢 **con umbral** (proxy: agua dulce) |
 | Área mínima viable · Fauna acuática · Biodiversidad | `rle_reduccion_distribucion_50a` | `max` | % de reducción | **< 30 %** | `[SIN FUENTE VERIFICADA]` | IUCN, 2024 — RLE v2.0 (Criterio A) | 🟢 (proxy: **riesgo de colapso**, no área mínima) |
 | Ídem | `rle_reduccion_historica_1750` | `max` | % de reducción | **< 50 %** | `[SIN FUENTE VERIFICADA]` | IUCN, 2024 (Criterio A3) | 🟢 |
 | Ídem | `rle_eoo_km2` | `min` | km² (EOO) | **> 50 000** | `[SIN FUENTE VERIFICADA]` | IUCN, 2024 (Criterio B1) | 🟢 |
@@ -221,7 +221,7 @@ unidad es arrecife** (§8.3, P4).
 | Caudal mínimo ecológico | `caudal_ecologico_pct_qma` | `min` | % del caudal medio anual | `[SIN FUENTE VERIFICADA — pendiente de consenso científico]` | `[SIN FUENTE VERIFICADA]` | Brisbane, 2018 da **definición**, no porcentaje | 🔴 **sin umbral** |
 | Conectividad | `conectividad_indice` | — | — | `[SIN FUENTE VERIFICADA]` | `[SIN FUENTE VERIFICADA]` | ninguna institución verificada publica umbral | 🔴 **sin umbral** |
 | Ciclos naturales (fuego, inundación, sequía) | `ciclos_naturales_estado` | `binary` | presencia/ausencia de régimen | **régimen presente** | `[SIN FUENTE VERIFICADA]` | canon sí, cifra no | 🟡 **binaria, sin peso** |
-| Riberas protegidas | `riberas_protegidas_estado` | `binary` | presencia/ausencia de franja | **franja presente** | `[SIN FUENTE VERIFICADA]` | canon sí, cifra no | 🟡 **binaria, sin peso** |
+| Riberas protegidas | `riberas_protegidas_estado` | `binary` | presencia/ausencia de franja | **franja presente** | ≥ 15 m (50 ft) ancho mínimo | Fuentes estatales: Michigan EGLE (50 ft), Vermont DEC (50-100 ft), Maryland NRCS (35-100 ft), Delaware HB246 (50 ft), South Dakota DANR (50-120 ft), USGS Chesapeake (10-90 m) `[VERIFICADO]` — múltiples URLs 200 | 🟡 **binaria, sin peso** — el umbral de 15 m es el mínimo más frecuente |
 | Arrecifes (si el tipo de unidad es arrecife) | `arrecife_dhw` | `escalonado` | °C-semanas | **< 4** (sin alerta) | `[SIN FUENTE VERIFICADA]` | NOAA/NESDIS, 2024 (vía ICRI) `[REPORTADO]` | 🟢 (su peso se toma del grupo de riesgo: no altera la suma) |
 
 **El Óptimo, con fuente, es político.** Los únicos números aspiracionales con fuente verificada en
@@ -315,8 +315,8 @@ nueva, se generaliza una existente.
 | Caudal ecológico | **0,075** | 🔴 no | canon §10.4 (lugar); **ausente del ISE** |
 | Conectividad | **0,075** | 🔴 no | canon §10.4 (ecosistema); **ausente del ISE** |
 | **Suma** | **1,000** | — | **`PESOS_TABLERO`** |
-| **Suma de los que tienen piso** | **0,680** | — | **`PESOS_PISO`** |
-| **Fracción declarada sin piso** | **0,320** | — | el agujero, medido y publicado |
+| **Suma de los que tienen piso** | **0,925** | — | **`PESOS_PISO`** (actualizado 2026-10-09: oxígeno disuelto con umbral EPA/NIWA verificado) |
+| **Fracción declarada sin piso** | **0,075** | — | el agujero, medido y publicado (solo conectividad) |
 
 **De dónde sale cada número de esta tabla (y de dónde no).** Los cinco pesos del ISE son un índice
 **interno del proyecto**, no un estándar externo: `docs/architecture/metricas_detalle_kpis_oraculos_dinamicos.md`

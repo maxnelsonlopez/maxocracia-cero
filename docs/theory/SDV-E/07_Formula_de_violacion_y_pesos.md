@@ -215,7 +215,7 @@ falta en ese vector no es una fila, es el peso —cero— de las dos filas sin p
 | 1 | **Biodiversidad** | ISE 30 % + canon | Índice de Integridad Biótica (BII) de la unidad | `min` | **90 %** de integridad respecto al estado de referencia | 100 % (integridad prístina: valor del proyecto) | Steffen et al., 2015 (límite planetario propuesto), vía Richardson et al., 2023 |
 | 2 | **Calidad del aire** | ISE 20 % + canon | PM2.5 anual (y los demás contaminantes OMS como parámetros del mismo bloque) | `max` | **5 µg/m³** anual · **15 µg/m³** a 24 h | `< 5` (toda reducción adicional es beneficio) | OMS, 2021 |
 | 3 | **Calidad del agua** | ISE 20 % + canon | pH del agua (nitrato y bicarbonato quedan **sin umbral**: §13, pregunta 11) | `range` / `max` | **6,5 – 8,4** unidades de pH (rango normal del agua de riego) | `[SIN FUENTE VERIFICADA]` | FAO, 1994 (Ayers & Westcot, Riego y Drenaje 29 Rev.1) |
-| 4 | **Oxígeno disuelto** | canon §10.4, **ausente del ISE** | OD medio de 30 días | `min` | **5,5 mg/L** (agua cálida) · **6,5 mg/L** (agua fría) | ≥ 7,0 mg/L (franja «supportive») | US EPA, 1986 (umbral en la hoja informativa de la EPA, 2021 — **en disputa con el documento 08 §5.2, que lo da por 404**: §13, pregunta 14) |
+| 4 | **Oxígeno disuelto** | canon §10.4, **ausente del ISE** | OD medio de 30 días | `min` | **5,5 mg/L** (agua cálida) · **6,5 mg/L** (agua fría) | ≥ 7,0 mg/L (franja «supportive») | US EPA, 1986 (Quality Criteria for Water), re-publicado en Factsheet 841F21007B, 2021 `[VERIFICADO]` — https://www.epa.gov/system/files/documents/2021-07/parameter-factsheet_do.pdf |
 | 5 | **Salud del suelo** | ISE 15 % (**el canon no la nombra**) | Pérdida de suelo por erosión | `max` | **1 t·ha⁻¹·año⁻¹** (umbral tolerable; rango reportado 0,3-1,4) | ⩽ 1 (erosión ≤ formación de suelo) | JRC / Comisión Europea, 2010 |
 | 6 | **Especies clave** | ISE 15 % + canon | Categorías de la Lista Roja de las especies clave de la unidad | `escalonado` | **ninguna especie EX ni EW**; a partir de ahí, proporción de especies CR y EN | 0 especies amenazadas | IUCN, 2000/2012 (v3.1) · CBD (RLI como indicador de la Meta 4) |
 | 7 | **Caudal ecológico** | canon §10.4 (lugar), **ausente del ISE** | Caudal como % del flujo promedio original | `min` | **< 10 % ⇒ violación** (régimen «pobre o mínimo»; < 10 % es «degradación severa») | 60-100 % («escala óptima») | Tennant, 1976 (método Montana), vía FAO · WWF |
@@ -353,17 +353,17 @@ producir una violación.
 | Biodiversidad | ISE 30 % + canon (área mínima viable) | **0,300** | 🟢 sí (BII 90 %) | **0,300** |
 | Calidad del aire | ISE 20 % + canon | **0,200** | 🟢 sí (OMS 2021) | **0,200** |
 | Calidad del agua (pH, nitrato, bicarbonato) | ISE 20 % + canon | **0,180** | 🟢 parcial: **solo el pH** tiene umbral (FAO, 1994); nitrato y bicarbonato, no | **0,180** |
-| Oxígeno disuelto | canon §10.4, **ausente del ISE** | **0,020** | 🟡 en disputa (umbral EPA verificado en las fuentes de la rama; el documento 08 lo da por 404) | **0,000** |
+| Oxígeno disuelto | canon §10.4, **ausente del ISE** | **0,020** | 🟢 sí (EPA 1986/2021, NIWA 2024) | **0,020** |
 | Salud del suelo | ISE 15 % (**el canon no la nombra**) | **0,150** | 🟢 sí (erosión tolerable, JRC 2010) | **0,150** |
 | Especies clave | ISE 15 % + canon (fauna viable) | **0,150** | 🟢 sí (categorías IUCN) | **0,150** |
 | **Caudal ecológico** | canon §10.4 (lugar), **ausente del ISE** | **0,075** | 🟢 sí (Tennant 1976: < 10 % ⇒ violación) | **0,075** |
 | **Conectividad** | canon §10.4 (ecosistema), **ausente del ISE** | **0,075** | 🔴 no | **0,000** |
 | **Suma** | — | **1,000** | — | **1,000** |
-| **Cobertura del piso declarada** | — | — | — | **`Σ PESOS_PISO` sobre las dimensiones con piso = 1,000 − 0,020 (OD) − 0,075 (conectividad) = 0,905** |
+| **Cobertura del piso declarada** | — | — | — | **`Σ PESOS_PISO` sobre las dimensiones con piso = 1,000 − 0,075 (conectividad) = 0,925** |
 
 **Cómo se lee esa última fila, y por qué no coincide con la cifra del documento 08.** Sobre **el
-catálogo de ocho filas con peso de este documento**, las dimensiones con piso suman **0,905**; el agujero
-declarado es **0,095** (oxígeno disuelto 0,020 + conectividad 0,075). El documento 08 §5.2 publica
+catálogo de ocho filas con peso de este documento**, las dimensiones con piso suman **0,925**; el agujero
+declarado es **0,075** (conectividad). El documento 08 §5.2 publica
 **0,680** porque allí el catálogo incluye además suelo (0,15), caudal (0,075) y oxígeno (0,02) como
 **sin piso**, según su propio criterio de catalogación. **La diferencia no es un error de aritmética: es
 una diferencia de catálogo**, y este documento no la oculta ni la «corrige» desde aquí: **adopta la cifra

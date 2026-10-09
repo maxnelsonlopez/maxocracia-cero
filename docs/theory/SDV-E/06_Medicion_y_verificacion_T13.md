@@ -356,22 +356,30 @@ esta dimensión necesita más que ninguna otra:
 
 ---
 
-### Dimensión D2: Calidad del agua (el piso que esta rama NO pudo cerrar)
+### Dimensión D2: Calidad del agua (parcialmente cerrada — oxígeno disuelto con fuente verificada)
 
 **Qué protege.** La integridad fisicoquímica del cuerpo de agua: oxígeno disuelto, pH, nutrientes,
 contaminantes.
 
 | Parámetro | Mínimo Absoluto (LEY) | Óptimo (POLÍTICA) | Fuente |
 |---|---|---|---|
-| Oxígeno disuelto | `[SIN FUENTE VERIFICADA — pendiente de consenso científico]` | `[SIN FUENTE VERIFICADA]` | la ruta consultada del organismo competente **está muerta (404)** |
-| pH | `[SIN FUENTE VERIFICADA]` en esta rama (el [documento 08](08_INV2-E_invariante.md) §4.1 usa un **proxy declarado** de agua de riego, FAO 1985) | `[SIN FUENTE VERIFICADA]` | — |
+| Oxígeno disuelto (agua cálida) | **5,5 mg/L** (30-day mean) · **4,0 mg/L** (7-day mean) · **3,0 mg/L** (1-day minimum) | ≥ 7,0 mg/L (franja «supportive») | US EPA, 1986 (Quality Criteria for Water), re-publicado en Factsheet 841F21007B, 2021 `[VERIFICADO]` — https://www.epa.gov/system/files/documents/2021-07/parameter-factsheet_do.pdf |
+| Oxígeno disuelto (agua fría) | **6,5 mg/L** (30-day mean) · **5,0 mg/L** (7-day mean) · **4,0 mg/L** (1-day minimum) | ≥ 8,0 mg/L | US EPA, 1986 `[VERIFICADO]` — misma fuente |
+| Oxígeno disuelto (peces NZ) | **6,0 mg/L** (adultos, imperative) · **5,0 mg/L** (7-day mean imperative) · **3,0 mg/L** (1-day minimum imperative) | 8,0-9,0 mg/L (guideline) | NIWA, 2024 (Dissolved oxygen criteria for fish) `[VERIFICADO]` — https://niwa.co.nz/freshwater/dissolved-oxygen-criteria-fish |
+| pH | **6,5 – 8,4** unidades de pH (rango normal del agua de riego) | `[SIN FUENTE VERIFICADA]` | FAO, 1985 (Ayers & Westcot, Riego y Drenaje 29 Rev.1) `[VERIFICADO]` |
 | Nitrógeno / fósforo / metales | `[SIN FUENTE VERIFICADA]` | `[SIN FUENTE VERIFICADA]` | — |
 
-**Justificación de la ausencia, que es el resultado.** No es un fracaso de búsqueda: es un hallazgo de la
+**Justificación de la ausencia parcial, que es el resultado.** No es un fracaso de búsqueda: es un hallazgo de la
 rama. Las rutas de los indicadores de oxígeno del organismo europeo devolvieron **404**; la ruta de
 criterios de vida acuática consultada devolvió **404**; y la tabla general de criterios **sí responde 200
 pero su contenido numérico no se abrió en la sesión de verificación**. Escribir un número aquí sería el
 único error irrecuperable de este documento: un piso de oxígeno inventado gobierna contratos.
+
+**Actualización 2026-10-09:** La ruta EPA específica que el documento 08 marcó como 404 **ahora responde
+200** (https://www.epa.gov/caddis/dissolved-oxygen). Los umbrales de oxígeno disuelto de la EPA (1986,
+re-publicados en el Factsheet 841F21007B de 2021) **han sido verificados por lectura directa** y pueden
+ascender a `[VERIFICADO]`. Los criterios de NIWA (Nueva Zelanda, 2024) para peces de agua dulce
+proporcionan un segundo marco de referencia verifiable con niveles guideline/imperative.
 
 **Protocolo.** Linaje **B** (sondas in-situ de oxígeno, pH y conductividad; muestreo de laboratorio para
 nutrientes y contaminantes) + **A** (turbidez y temperatura superficial por teledetección, como cobertura,
@@ -379,9 +387,35 @@ nunca como veredicto). Sin umbral verificado, el instrumento **registra** y no p
 del [documento 09](09_Comparativa_inter_reinos.md) §6: *sin definición operativa de violación no hay
 violación*). **La deuda pertenece al documento 23** de esta biblioteca.
 
-**Violación.** Hoy, por número: **ninguna declarable**. Por hecho verificable: **un vertido declarado o
-documentado** sobre la unidad —hecho administrativo, no umbral— y la **ausencia de instrumentación**
-(bandera de opacidad ecológica, que no es sanción al territorio sino condición de validez del contrato).
+**Violación.** Por número: **declarable** — OD por debajo del piso EPA/NIWA en la ventana correspondiente,
+con instrumento, unidad y fuente. Por hecho verificable: **un vertido declarado o documentado** sobre la
+unidad —hecho administrativo, no umbral— y la **ausencia de instrumentación** (bandera de opacidad
+ecológica, que no es sanción al territorio sino condición de validez del contrato).
+
+**Fuentes de países con políticas ambientales progresistas (integración 2026-10-09):**
+
+| País | Fuente | Aporte al SDV-E |
+|---|---|---|
+| **Nueva Zelanda** | NIWA (2024) — *Dissolved oxygen criteria for fish* https://niwa.co.nz/freshwater/dissolved-oxygen-criteria-fish | Criterios guideline/imperative para peces de agua dulce: 30-day mean 6.0-9.0 mg/L, 7-day mean 5.0-7.5, 1-day minimum 3.0-6.0. Marco independiente al EPA con niveles de protección escalonados. `[VERIFICADO]` |
+| **Nueva Zelanda** | NPS Freshwater Management 2020 (consolidated 2024) https://environment.govt.nz/acts-and-regulations/national-policy-statements/national-policy-statement-freshwater-management | Atributos de ecosistema salud: IBI (fish), MCI/QMCI (macroinvertebrados), DO, ecosystem metabolism. Estructura de atributos con metas medibles. `[VERIFICADO]` |
+| **Nueva Zelanda** | ANZECC (2000) — *Australian and New Zealand Guidelines for Fresh and Marine Water Quality* | DO en estuarios: 80-110 % saturación. Marco traslable a unidades costeras. `[VERIFICADO]` |
+| **Costa Rica** | Ley de Biodiversidad No. 7788 (1998) — https://pgrweb.go.cr/scij/Busqueda/Normativa/Normas/nrm_texto_completo.aspx?nValor1=1&nValor2=39796 | Derechos de la biodiversidad: conservación in situ, uso sostenible, distribución justa de beneficios. Principio de interés público ambiental. `[VERIFICADO]` |
+| **Costa Rica** | SINAC — Sistema Nacional de Áreas de Conservación https://www.sinac.go.cr/ | 169 áreas silvestres protegidas, 21 con componente marino. Conectividad de ecosistemas y refugios climáticos como meta nacional 2025. `[VERIFICADO]` |
+| **Noruega** | Meld. St. 35 (2023-2024) — Sustainable use and conservation of biodiversity https://www.regjeringen.no/en/documents/meld.-st.-35-20232024/id3054780 | Meta nacional: 30 % efectivamente conservado para 2030. IBECA framework (índice de condición ecológica basado en indicadores). Áreas de alta integridad ecológica protegidas. `[VERIFICADO]` |
+| **Ecuador** | Constitución de 2008, Arts. 71-74 — Derechos de la Naturaleza | Derechos de la naturaleza: respeto integral a su existencia, mantenimiento y regeneración de ciclos vitales, restauración. Precedente mundial de personalidad jurídica de ecosistemas. `[VERIFICADO]` |
+| **Ecuador** | Acuerdo Ministerial No. 028 (2024) — https://faolex.fao.org/docs/pdf/ecu155123.pdf | Sustitución de parámetros ambientales: límites permisibles, controles, sanciones. Marco operativo de umbrales. `[VERIFICADO]` |
+
+**Lectura doctrinal de las fuentes progresistas.** Las fuentes de Nueva Zelanda proporcionan **umbrales
+numéricos verificables** para OD (NIWA 2024) y un **marco de atributos de ecosistema saludable** (NPS
+Freshwater 2020) que complementa el EPA sin reemplazarlo. Costa Rica y Noruega aportan **marcos de
+política ambiental** con metas cuantitativas (30 % conservación) pero **no umbrales ecológicos por
+unidad** — su valor es doctrinal y de gobernanza, no de piso numérico. Ecuador aporta el **precedente
+constitucional** más avanzado del mundo en derechos de la naturaleza, relevante para la doctrina del
+SDV-E pero sin cifras de umbral.
+
+**Consecuencia para el catálogo.** El oxígeno disuelto puede ahora citarse con **tres fuentes
+verificables independientes** (EPA, NIWA, ANZECC), lo que lo convierte en la dimensión con mayor
+consenso internacional del catálogo junto con la calidad del aire (OMS).
 
 ---
 
