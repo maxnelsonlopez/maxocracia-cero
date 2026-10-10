@@ -111,6 +111,113 @@ def leer_desacuerdos(workspace: str, n: int = 5) -> List[Dict[str, Any]]:
     return registros[-n:]
 
 
+# --- Destilado de memoria (Capa 1, 09-10-2026, hito 4) ---
+# La ventana deslizante (últimos 5) olvida por edad, no por digestión: una
+# civilización pierde lo aprendido en el ciclo 6 aunque siga valiendo en el
+# 60. El destilado comprime TODOS los registros en reglas por veredicto con
+# cobertura declarada; `read_agenda` lo prefiere cuando está fresco y solo
+# entonces jubila la ventana.
+
+DESTILADO = Path("memoria_destilada.md")
+
+
+def _corta(valor: object, n: int) -> str:
+    return str(valor or "").strip().replace("\n", " ")[:n]
+
+
+def sintetizar_memoria(workspace: str, max_chars: int = 3_000) -> Path:
+    """Digiere todos los registros en un destilado acotado y determinista.
+
+    Sin relojes ni muestreos: la misma memoria siempre produce el mismo
+    destilado (la frescura se decide por cobertura, no por fecha).
+    """
+    apr = leer_aprendizajes(workspace, n=10_000)
+    des = leer_desacuerdos(workspace, n=10_000)
+    por_decision = {"ratify": 0, "revoke": 0, "queue": 0}
+    for r in apr:
+        d = str(r.get("decision", ""))
+        por_decision[d] = por_decision.get(d, 0) + 1
+    lineas = [
+        "# Memoria destilada del Concilio (C1: digestión, no ventana)",
+        f"- cobertura: {len(apr)} aprendizajes · {len(des)} desacuerdos",
+        "- veredictos: "
+        f"ratify={por_decision.get('ratify', 0)} "
+        f"revoke={por_decision.get('revoke', 0)} "
+        f"queue={por_decision.get('queue', 0)}",
+        "",
+        "## Reglas ratificadas (constrúyelas, no las repitas)",
+    ]
+    ratificadas = [
+        f"- ({_corta(r.get('cycle_id'), 40)}) {_corta(r.get('hypothesis'), 160)}"
+        f" → {_corta(r.get('outcome'), 160)}"
+        for r in apr
+        if r.get("decision") == "ratify" and r.get("outcome")
+    ]
+    lineas += ratificadas or ["- (ninguna todavía)"]
+    lineas.append("")
+    lineas.append("## Revocadas (no reintentar sin evidencia nueva)")
+    revocadas = [
+        f"- ({_corta(r.get('cycle_id'), 40)}) {_corta(r.get('hypothesis'), 160)}"
+        f" ✗ {_corta(r.get('outcome'), 160)}"
+        for r in apr
+        if r.get("decision") == "revoke"
+    ]
+    lineas += revocadas or ["- (ninguna)"]
+    lineas.append("")
+    lineas.append("## Abiertas (QUEUE: lo que aún no sabemos)")
+    abiertas = [
+        f"- ({_corta(r.get('cycle_id'), 40)}) {_corta(r.get('next_hypothesis'), 180)}"
+        for r in apr
+        if r.get("decision") == "queue" and r.get("next_hypothesis")
+    ]
+    lineas += abiertas or ["- (ninguna)"]
+    lineas.append("")
+    lineas.append("## Objeciones vigentes (no re-proponer sin evidencia nueva)")
+    objeciones = [
+        f"- {_corta(r.get('question'), 120)}: descartada "
+        f"«{_corta(r.get('discarded_alternative'), 120)}» "
+        f"({_corta(r.get('defended_by'), 40)}: {_corta(r.get('reason'), 120)})"
+        for r in des
+    ]
+    lineas += objeciones or ["- (ninguna)"]
+    cuerpo = "\n".join(lineas) + "\n"
+    if len(cuerpo) > max_chars:
+        cuerpo = cuerpo[:max_chars] + "\n… [destilado recortado; regenerar tras podar]"
+    path = Path(workspace) / DESTILADO
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(cuerpo, encoding="utf-8")
+    return path
+
+
+def leer_memoria_destilada(workspace: str, max_chars: int = 3_000) -> str:
+    """El destilado solo si está fresco: debe cubrir todo lo registrado.
+
+    Frescura por cobertura, no por fecha: si se registró algo después de
+    sintetizar, el destilado está rancio y se devuelve vacío (la agenda cae
+    a la ventana heredada en vez de citar memoria amputada).
+    """
+    import re
+
+    path = Path(workspace) / DESTILADO
+    if not path.exists():
+        return ""
+    try:
+        texto = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return ""
+    marca = re.search(r"cobertura: (\d+) aprendizajes · (\d+) desacuerdos", texto)
+    if not marca:
+        return ""
+    frescos = int(marca.group(1)) == len(
+        leer_aprendizajes(workspace, n=10_000)
+    ) and int(marca.group(2)) == len(leer_desacuerdos(workspace, n=10_000))
+    if not frescos:
+        return ""
+    if len(texto) > max_chars:
+        texto = texto[:max_chars] + "\n… [destilado recortado]"
+    return texto
+
+
 # --- Métricas de aprendizaje (Aster §8, con la defensa anti-gamificación) ---
 # Regla: un aprendizaje necesita SOBREVIVIR al ciclo que lo produjo
 # (latencia epistemológica). Estas métricas son SEÑALES de observación,

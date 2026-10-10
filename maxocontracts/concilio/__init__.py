@@ -22,9 +22,11 @@ from .memoria import (
     RegistroAprendizajeError,
     leer_aprendizajes,
     leer_desacuerdos,
+    leer_memoria_destilada,
     metricas_aprendizaje,
     registrar_aprendizaje,
     registrar_desacuerdo,
+    sintetizar_memoria,
 )
 from .verificacion import evidencia_determinista
 
@@ -39,6 +41,8 @@ __all__ = [
     "GuardDeniedError",
     "guard_git_command",
     "registrar_aprendizaje",
+    "sintetizar_memoria",
+    "leer_memoria_destilada",
     "leer_aprendizajes",
     "VALID_DECISIONS",
     "evidencia_determinista",

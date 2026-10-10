@@ -272,6 +272,12 @@ por hito (`f1e5c57` hito 1). Candidatos a destilar después: Muse Spark-antiguo
 (C0 índice + C1 axiomas/handoff/registro primero + C2 resto; `ManifiestoCorpus`
 con omitidas/recortadas) + perfil `esencial` (C0+C1 en 40k) + `ledger` derivado
 del registro + manifiesto en bitácora F1. Guardianes: `test_capas_corpus.py`
-(5) + F1-manifiesto en ciclo. 50/50 verdes. Calidad del corpus: 37→**52%**.
+ (5) + F1-manifiesto en ciclo. 50/50 verdes. Calidad del corpus: 37→**52%**.
+
+**Hito 4 — memoria destilada**: `sintetizar_memoria()` + `leer_memoria_destilada()`
+en `memoria.py` (cobertura declarada, frescura por conteo, determinista);
+`read_agenda` prefiere destilado fresco y jubila la ventana solo entonces.
+Guardianes: cobertura total + determinismo + preferencia + rancio→ventana.
+53/53 verdes. Calidad: 52→**67%**.
 
 **Mantenido por**: Max + el agente de la jornada (harness) · **Próxima actualización**: al cierre de la siguiente sesión

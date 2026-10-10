@@ -602,6 +602,8 @@ dimensión más pesada del SDV-S (0.30). Ficha viva en `~/.workbuddy-ai/IDENTITY
   registro en 58.549 (holgura 4.451), audit 17/17 verde. Commit `f1e5c57` (hito 1).
 - **Hito 3 — capas (misma jornada)**: `ensamblar_capas()` + perfil esencial +
   manifiesto en F1 (`canon.py`, `cycle.py`; `tests/test_capas_corpus.py`).
+- **Hito 4 — memoria destilada**: digestión total con cobertura
+  (`memoria.py`; la agenda jubila la ventana solo ante destilado fresco).
 
 ## 3. Cómo agregar una atribución
 

@@ -204,3 +204,81 @@ def test_evidencia_determinista_sobrevive_a_errores(monkeypatch, tmp_path):
 
 def test_validador_de_decisiones_tiene_tres_estados():
     assert VALID_DECISIONS == {"ratify", "revoke", "queue"}
+
+
+def _handoff_minimo(repo):
+    (repo / "docs").mkdir(parents=True, exist_ok=True)
+    (repo / "docs" / "SESION_NEXT_PROMPT.md").write_text(
+        "## 4. Pendientes priorizados\n\n0. Tarea A\n", encoding="utf-8"
+    )
+
+
+def test_destilado_cubre_toda_la_memoria_y_es_determinista(tmp_path):
+    """El destilado digiere TODO (no los últimos 5) y es reproducible."""
+    from maxocontracts.concilio.memoria import (
+        leer_memoria_destilada,
+        sintetizar_memoria,
+    )
+
+    ws = str(tmp_path)
+    for i in range(7):
+        _registro(ws, outcome=f"hallazgo número {i}")
+    _registro(ws, decision="revoke", outcome="A empeoró el flujo")
+    _registro(ws, decision="queue", outcome="sin evidencia aún")
+    registrar_desacuerdo(
+        ws,
+        {
+            "question": "¿Optimizar A o B?",
+            "discarded_alternative": "Optimizar A",
+            "defended_by": "Aster",
+            "reason": "A no produjo mejora",
+        },
+    )
+    ruta = sintetizar_memoria(ws)
+    assert ruta.exists()
+    destilado = leer_memoria_destilada(ws)
+    assert "cobertura: 9 aprendizajes · 1 desacuerdos" in destilado
+    assert "hallazgo número 0" in destilado  # lo viejo no se cae por edad
+    assert "hallazgo número 6" in destilado
+    assert "Revocadas" in destilado and "Abiertas" in destilado
+    assert "Optimizar A" in destilado
+    assert len(destilado) <= 3_000
+    # determinista: dos síntesis, mismo texto
+    sintetizar_memoria(ws)
+    assert leer_memoria_destilada(ws) == destilado
+
+
+def test_agenda_prefiere_el_destilado_fresco(tmp_path):
+    """Con destilado fresco, la ventana queda jubilada."""
+    from maxocontracts.concilio.memoria import sintetizar_memoria
+
+    repo = tmp_path / "repo"
+    _handoff_minimo(repo)
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    _registro(str(ws), outcome="A no produjo mejora medible")
+    sintetizar_memoria(str(ws))
+    agenda = canon_mod.read_agenda(str(repo), workspace=str(ws))
+    assert "Memoria destilada del Concilio" in agenda
+    assert "A no produjo mejora medible" in agenda
+    assert "APRENDIZAJE 1" not in agenda  # la ventana queda jubilada
+
+
+def test_destilado_rancio_devuelve_la_ventana(tmp_path):
+    """Si se registró algo tras sintetizar, el destilado no se cita."""
+    from maxocontracts.concilio.memoria import (
+        leer_memoria_destilada,
+        sintetizar_memoria,
+    )
+
+    repo = tmp_path / "repo"
+    _handoff_minimo(repo)
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    _registro(str(ws), outcome="viejo pero vigente")
+    sintetizar_memoria(str(ws))
+    _registro(str(ws), outcome="recién llegado")
+    assert leer_memoria_destilada(str(ws)) == ""
+    agenda = canon_mod.read_agenda(str(repo), workspace=str(ws))
+    assert "Memoria del Concilio" in agenda  # ventana heredada
+    assert "recién llegado" in agenda

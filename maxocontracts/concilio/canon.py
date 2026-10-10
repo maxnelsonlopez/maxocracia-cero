@@ -401,9 +401,23 @@ def read_agenda(
         if len(section) > max_chars:
             section = section[:max_chars] + "\n… [recortado]"
 
-    # Memoria causal: lo aprendido en ciclos anteriores (hipótesis → resultado).
-    from .memoria import leer_aprendizajes
+    # Memoria causal: destilado fresco primero (digestión completa); la ventana
+    # heredada (últimos 5) solo cuando no hay destilado o está rancio.
+    from .memoria import (
+        leer_aprendizajes,
+        leer_desacuerdos,
+        leer_memoria_destilada,
+    )
 
+    destilado = leer_memoria_destilada(workspace)
+    if destilado:
+        section += (
+            "\n\n## Memoria destilada del Concilio (digestión completa; "
+            "la ventana queda jubilada):\n" + destilado
+        )
+        return section
+
+    # Ventana heredada: lo aprendido en ciclos anteriores (hipótesis → resultado).
     aprendizajes = leer_aprendizajes(workspace, n=5)
     bloque = "".join(
         (
@@ -433,8 +447,6 @@ def read_agenda(
     # Cuarta dimensión (Aster): memoria de desacuerdos — "esto ya se intentó
     # y se descartó porque…". Contra la amnesia institucional: una civilización
     # puede cometer dos veces el mismo error si solo guarda la decisión final.
-    from .memoria import leer_desacuerdos
-
     desacuerdos = leer_desacuerdos(workspace, n=5)
     bloque_d = "".join(
         (
