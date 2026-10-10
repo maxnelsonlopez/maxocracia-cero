@@ -268,4 +268,10 @@ que resuelve. **Audit 17/17 verde** (4 fallos→0); vecinas 31/31. Rutina: commi
 por hito (`f1e5c57` hito 1). Candidatos a destilar después: Muse Spark-antiguo
 (17.4k), Hilo (5.8k), Concilio (5.4k), ox-alpha (6.4k).
 
+**Hito 3 — capas en código (misma jornada)**: `ensamblar_capas()` en `canon.py`
+(C0 índice + C1 axiomas/handoff/registro primero + C2 resto; `ManifiestoCorpus`
+con omitidas/recortadas) + perfil `esencial` (C0+C1 en 40k) + `ledger` derivado
+del registro + manifiesto en bitácora F1. Guardianes: `test_capas_corpus.py`
+(5) + F1-manifiesto en ciclo. 50/50 verdes. Calidad del corpus: 37→**52%**.
+
 **Mantenido por**: Max + el agente de la jornada (harness) · **Próxima actualización**: al cierre de la siguiente sesión

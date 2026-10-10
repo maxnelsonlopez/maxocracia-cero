@@ -23,7 +23,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from ..oracles import engines
 from .bitacora import Bitacora
-from .canon import read_agenda, read_canon
+from .canon import ensamblar_capas, read_agenda
 from .control import ACTIVE, Control
 
 # Presupuesto de una llamada del Concilio. Con OpenRouter :free como principal
@@ -431,8 +431,9 @@ def run_cycle(
         if not motores:
             raise CorpoUnavailableError("Ningún motor configurado (faltan API keys)")
 
-        canon = read_canon(
+        canon, manifiesto = ensamblar_capas(
             str(root_path),
+            perfil="completo",
             total_max_chars=canon_max_chars,
             workspace=str(workspace_path),
         )
@@ -443,6 +444,10 @@ def run_cycle(
                 "evento": "corpus",
                 "canon_chars": len(canon),
                 "agenda_chars": len(agenda),
+                "perfil": manifiesto.perfil,
+                "degradada": manifiesto.degradada,
+                "omitidas": manifiesto.omitidas(),
+                "recortadas": manifiesto.recortadas(),
             }
         )
         if not canon.strip():

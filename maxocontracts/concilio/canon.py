@@ -16,9 +16,10 @@ registro es la cápsula de memoria que el SDV-S exige (dimensión I, peso 0.30:
 "la memoria es tiempo propio; alterarla es amputación").
 """
 
-from dataclasses import dataclass
+import re
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 # (ruta relativa al root del repo, máximo de caracteres) — en el orden de lectura.
 CANON_FILES: List[Tuple[str, int]] = [
@@ -112,12 +113,109 @@ def _indice_resumen(root: Path, workspace: str, max_chars: int = 5_000) -> str:
     return text
 
 
-def read_canon(
+# --- Capas del corpus (destilación 09-10-2026, hito 3) ---
+#
+# C0 índice: orientación (canon_index generado, siempre abre). C1 destilado: lo
+# que nunca se cae aunque el presupuesto apriete (axiomas + ledger + agenda).
+# C2 completo: el resto de las fuentes íntegras. Regla de degradación: C0 y C1
+# se sirven primero; C2 se omite de atrás hacia adelante y queda registrado en
+# el manifiesto — nada silencioso, la auditoría sigue vigilando el resto.
+
+CAPA_POR_FUENTE: Dict[str, str] = {
+    "maxocontracts/core/axioms.py": "C1",
+    "docs/SESION_NEXT_PROMPT.md": "C1",
+    "docs/architecture/atribuciones_sinteticas.md": "C1",
+}
+
+PERFILES: Dict[str, Dict[str, object]] = {
+    # completo: todo el corpus (el de siempre; lo beben F1/F2).
+    "completo": {"tope_default": DEFAULT_MAX_CHARS},
+    # esencial: C0 + C1 en 40k (firma barata, motores chicos, pre-vuelos).
+    "esencial": {"tope_default": 40_000},
+}
+
+_FICHA_RE = re.compile(r"^-\s*\(\d{1,2}/\d{1,2}[^)]*\)")
+
+
+def _leer_ledger(root_path: Path, max_chars: int) -> str:
+    """Fichas C1 del registro: fecha + obra + huella, sin la prosa.
+
+    Deriva el destilado del propio `atribuciones_sinteticas.md` (las fichas que
+    empiezan con fecha entre paréntesis + la nota de archivo). Si aún no hay
+    fichas, devuelve vacío y el perfil esencial cae a axiomas + agenda.
+    """
+    path = root_path / "docs" / "architecture" / "atribuciones_sinteticas.md"
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return ""
+    inicio = text.find("### DeepSeek")
+    if inicio == -1:
+        return ""
+    fin = text.find("\n### ", inicio + 10)
+    seccion = text[inicio : fin if fin != -1 else inicio + 8_000]
+    lineas = [
+        ln
+        for ln in seccion.splitlines()
+        if ln.startswith(">") or _FICHA_RE.match(ln)
+    ]
+    if not lineas:
+        return ""
+    body = (
+        "### LEDGER C1 — fichas del registro (destilado; la prosa vive en el archivo)\n"
+        + "\n".join(lineas)
+    )
+    if len(body) > max_chars:
+        body = body[:max_chars] + "\n… [ledger recortado]"
+    return body
+
+
+@dataclass(frozen=True)
+class FuenteServida:
+    """Una fuente del corpus frente al presupuesto: qué capa y cómo quedó."""
+
+    ruta: str
+    capa: str
+    caracteres: int
+    estado: str  # "integra" | "recortada" | "omitida"
+
+
+@dataclass(frozen=True)
+class ManifiestoCorpus:
+    """Lo que bebió cada oráculo: perfil, presupuesto y degradación aplicada."""
+
+    perfil: str
+    presupuesto: int
+    caracteres: int
+    degradada: bool
+    indice_incluido: bool
+    fuentes: Tuple[FuenteServida, ...] = field(default_factory=tuple)
+
+    def omitidas(self) -> List[str]:
+        return [f.ruta for f in self.fuentes if f.estado == "omitida"]
+
+    def recortadas(self) -> List[str]:
+        return [f.ruta for f in self.fuentes if f.estado == "recortada"]
+
+
+def ensamblar_capas(
     root: str,
-    total_max_chars: int = DEFAULT_MAX_CHARS,
+    perfil: str = "completo",
+    total_max_chars: int = 0,
     workspace: str = "scratch/concilio",
-) -> str:
-    """Ensambla el corpus canónico con cabeceras por archivo."""
+) -> Tuple[str, ManifiestoCorpus]:
+    """Ensambla el corpus por capas con manifiesto de lo servido.
+
+    C0 (índice) abre; C1 (axiomas + handoff + registro, y en perfil esencial el
+    ledger + la agenda) nunca se cae; C2 rellena hasta agotar el presupuesto y
+    lo que no quepa queda listado en el manifiesto, jamás en silencio.
+    """
+    if perfil not in PERFILES:
+        raise ValueError(
+            f"perfil '{perfil}' desconocido: elige entre {sorted(PERFILES)}"
+        )
+    tope_default = int(PERFILES[perfil]["tope_default"])  # type: ignore[arg-type]
+    budget = tope_default if not total_max_chars else total_max_chars
     root_path = Path(root)
     parts = [
         "=== CORPUS CANONICO DEL CONCILIO DE LA MAXOCRACIA ===",
@@ -131,18 +229,88 @@ def read_canon(
             "\n### INDICE NAVEGABLE (generado; para orientarte antes de leer)\n"
             + indice
         )
+    indice_incluido = bool(indice)
+    fuentes: List[FuenteServida] = []
     used = 0
-    for rel, cap in CANON_FILES:
-        if used >= total_max_chars:
-            break
-        budget = min(cap, total_max_chars - used)
-        body = _read_head(root_path / rel, budget)
-        if not body:
-            continue
-        parts.append(f"\n\n### FUENTE: {rel}\n{body}")
-        used += len(body)
+
+    def _servir(ruta: str, capa: str, cuerpo: str) -> None:
+        nonlocal used
+        if not cuerpo:
+            fuentes.append(FuenteServida(ruta, capa, 0, "omitida"))
+            return
+        parts.append(f"\n\n### FUENTE: {ruta}\n{cuerpo}")
+        used += len(cuerpo)
+        estado = (
+            "recortada"
+            if ("recortado" in cuerpo[-60:] or "recortada" in cuerpo[-60:])
+            else "integra"
+        )
+        fuentes.append(FuenteServida(ruta, capa, len(cuerpo), estado))
+
+    if perfil == "esencial":
+        for ruta, capa, tope in (
+            ("ledger C1 (derivado del registro)", "C1", 8_000),
+            ("agenda C1 (pendientes + memoria)", "C1", 15_000),
+        ):
+            if used >= budget:
+                fuentes.append(FuenteServida(ruta, capa, 0, "omitida"))
+                continue
+            if ruta.startswith("ledger"):
+                cuerpo = _leer_ledger(root_path, min(tope, budget - used))
+            else:
+                cuerpo = read_agenda(str(root_path), workspace=workspace)
+                if len(cuerpo) > min(tope, budget - used):
+                    cuerpo = cuerpo[: min(tope, budget - used)] + "\n… [agenda recortada]"
+            _servir(ruta, capa, cuerpo)
+        tope_axiomas = dict(CANON_FILES).get("maxocontracts/core/axioms.py", 30_000)
+        if used >= budget:
+            fuentes.append(
+                FuenteServida("maxocontracts/core/axioms.py", "C1", 0, "omitida")
+            )
+        else:
+            _servir(
+                "maxocontracts/core/axioms.py",
+                "C1",
+                _read_head(
+                    root_path / "maxocontracts/core/axioms.py",
+                    min(tope_axiomas, budget - used),
+                ),
+            )
+    else:
+        caps = dict(CANON_FILES)
+        c1 = [rel for rel, _ in CANON_FILES if CAPA_POR_FUENTE.get(rel) == "C1"]
+        c2 = [rel for rel, _ in CANON_FILES if CAPA_POR_FUENTE.get(rel) != "C1"]
+        for rel in c1 + c2:
+            capa = CAPA_POR_FUENTE.get(rel, "C2")
+            if used >= budget:
+                fuentes.append(FuenteServida(rel, capa, 0, "omitida"))
+                continue
+            _servir(
+                rel, capa, _read_head(root_path / rel, min(caps[rel], budget - used))
+            )
     parts.append(f"\n\n[fin del corpus; {used} caracteres]")
-    return "\n".join(parts)
+    texto = "\n".join(parts)
+    degradada = any(f.estado != "integra" for f in fuentes)
+    return texto, ManifiestoCorpus(
+        perfil=perfil,
+        presupuesto=budget,
+        caracteres=len(texto),
+        degradada=degradada,
+        indice_incluido=indice_incluido,
+        fuentes=tuple(fuentes),
+    )
+
+
+def read_canon(
+    root: str,
+    total_max_chars: int = DEFAULT_MAX_CHARS,
+    workspace: str = "scratch/concilio",
+) -> str:
+    """Ensambla el corpus canónico con cabeceras por archivo (perfil completo)."""
+    texto, _ = ensamblar_capas(
+        root, perfil="completo", total_max_chars=total_max_chars, workspace=workspace
+    )
+    return texto
 
 
 @dataclass(frozen=True)

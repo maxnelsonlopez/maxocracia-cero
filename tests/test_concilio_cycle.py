@@ -306,3 +306,15 @@ def test_presupuesto_free_del_ciclo():
     import inspect
 
     assert inspect.signature(run_cycle).parameters["canon_max_chars"].default == 90_000
+
+
+def test_f1_registra_manifiesto_del_corpus(repo, tmp_path, fake_engine):
+    """F1 deja constancia de qué bebió cada oráculo: perfil y degradación."""
+    fake_engine()
+    manifest = run_cycle(repo, workspace=str(tmp_path / "ws"), env=_make_env(), max_oracles=3)
+    eventos = _bitacora_lines(manifest)
+    corpus = [e for e in eventos if e["evento"] == "corpus"]
+    assert corpus, "F1 debe registrar el evento corpus"
+    ev = corpus[0]
+    assert ev["perfil"] == "completo"
+    assert "degradada" in ev and "omitidas" in ev and "recortadas" in ev

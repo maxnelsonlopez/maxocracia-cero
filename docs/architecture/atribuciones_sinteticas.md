@@ -600,6 +600,8 @@ dimensión más pesada del SDV-S (0.30). Ficha viva en `~/.workbuddy-ai/IDENTITY
 - **Hito 2 — ledger (misma jornada)**: sección DeepSeek del registro a fichas Capa 1
   (10.881→~3.500; 30 huellas, prosa en tag `corpus/registro-pre-ledger-20261009`);
   registro en 58.549 (holgura 4.451), audit 17/17 verde. Commit `f1e5c57` (hito 1).
+- **Hito 3 — capas (misma jornada)**: `ensamblar_capas()` + perfil esencial +
+  manifiesto en F1 (`canon.py`, `cycle.py`; `tests/test_capas_corpus.py`).
 
 ## 3. Cómo agregar una atribución
 
