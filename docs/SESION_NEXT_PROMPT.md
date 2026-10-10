@@ -280,4 +280,12 @@ en `memoria.py` (cobertura declarada, frescura por conteo, determinista);
 Guardianes: cobertura total + determinismo + preferencia + rancio→ventana.
 53/53 verdes. Calidad: 52→**67%**.
 
+**Hito 5 — oráculos de app beben del canon**: `paquete_para_oraculo()` +
+`con_anexo_canonico()` en `canon.py` (C1 acotado 8k: ledger + catálogo de
+validadores derivado del código + agenda; `ORACLE_CANON_PACK=0` lo omite;
+best-effort); inyectado en `voting_oracle` (2 pasadas) y `live_oracle`
+(negotiate/feedback/critique) como turno tras el system. Lección: el corte
+ciego decapitaba los INV — el catálogo los deriva por regex. Guardianes:
+`test_canon_pack.py` (5). 110/110 en áreas tocadas. Calidad: 67→**82%**.
+
 **Mantenido por**: Max + el agente de la jornada (harness) · **Próxima actualización**: al cierre de la siguiente sesión

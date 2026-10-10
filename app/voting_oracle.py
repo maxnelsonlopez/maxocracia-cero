@@ -34,6 +34,8 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
+from maxocontracts.concilio.canon import con_anexo_canonico
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_BASE_URL = "https://api.deepseek.com"
@@ -232,10 +234,12 @@ def analyze_proposal(title: str, description: str) -> Dict[str, Any]:
         f"DESCRIPCIÓN: {description}\n\n"
         "Analiza esta propuesta ahora. Devuelve el JSON estructurado."
     )
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": prompt},
-    ]
+    messages = con_anexo_canonico(
+        [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": prompt},
+        ]
+    )
 
     errors = []
     if _api_key():
@@ -347,10 +351,12 @@ def _dissident_analysis(
         "(postura inicial -> crítica racional -> veredicto final). "
         "Devuelve el JSON estricto."
     )
-    messages = [
-        {"role": "system", "content": DISSIDENT_SYSTEM_PROMPT},
-        {"role": "user", "content": prompt},
-    ]
+    messages = con_anexo_canonico(
+        [
+            {"role": "system", "content": DISSIDENT_SYSTEM_PROMPT},
+            {"role": "user", "content": prompt},
+        ]
+    )
     errors = []
     if _api_key():
         try:

@@ -604,6 +604,8 @@ dimensión más pesada del SDV-S (0.30). Ficha viva en `~/.workbuddy-ai/IDENTITY
   manifiesto en F1 (`canon.py`, `cycle.py`; `tests/test_capas_corpus.py`).
 - **Hito 4 — memoria destilada**: digestión total con cobertura
   (`memoria.py`; la agenda jubila la ventana solo ante destilado fresco).
+- **Hito 5 — oráculos de app al canon**: paquete C1 8k + anexo tras el system
+  (`voting_oracle`, `live_oracle`; catálogo de validadores, no corte ciego).
 
 ## 3. Cómo agregar una atribución
 

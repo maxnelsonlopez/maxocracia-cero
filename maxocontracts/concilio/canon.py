@@ -313,6 +313,128 @@ def read_canon(
     return texto
 
 
+# --- Paquete para oráculos de app (hito 5) ---
+#
+# Los oráculos de app (`voting_oracle`, `live_oracle`) analizaban con prompts
+# hardcodeados sin beber del canon: citaban axiomas que ningún contexto les
+# había servido (G1 rota por omisión). Este paquete les sirve C0+C1 acotado
+# como anexo tras el system — el system queda intacto y los tests de
+# enrutamiento (messages[0]) siguen pasando.
+
+ANEXO_CABECERA = (
+    "ANEXO CANÓNICO (C0+C1 del corpus vivo; Regla G1: cita solo lo que aquí aparece)"
+)
+
+
+def _leer_axiomas_resumen(root_path: Path, max_chars: int) -> str:
+    """Catálogo C1 de validadores derivado del código (nunca un corte ciego).
+
+    Un corte por caracteres podía decapitar justo los INV (viven pasando el
+    6.000); el catálogo nombra cada `validate_*` con su primera línea de
+    docstring y apunta al archivo para el detalle (C3).
+    """
+    path = root_path / "maxocontracts" / "core" / "axioms.py"
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return ""
+    hallados = []
+    for m in re.finditer(r"def (validate_\w+)\(", text):
+        doc = ""
+        dm = re.match(r'\s*"""([^\n"]{0,200})', text[m.end() : m.end() + 300])
+        if dm:
+            doc = dm.group(1).strip()
+        hallados.append((m.group(1), doc))
+    if not hallados:
+        return ""
+    lineas = [
+        "### AXIOMAS C1 — catálogo de validadores "
+        "(detalle en maxocontracts/core/axioms.py)"
+    ]
+    for nombre, doc in hallados:
+        lineas.append(f"- {nombre}" + (f": {doc[:120]}" if doc else ""))
+    body = "\n".join(lineas)
+    if len(body) > max_chars:
+        body = body[:max_chars] + "\n… [catálogo recortado]"
+    return body
+
+
+def paquete_para_oraculo(
+    root: str = "", max_chars: int = 8_000
+) -> Dict[str, object]:
+    """C0+C1 acotado para oráculos de app, con manifiesto. Best-effort.
+
+    Orden de prioridad real: ledger (linaje) → catálogo de axiomas (reglas)
+    → agenda (estado). Lo que no quepa queda marcado, jamás en silencio.
+    """
+    base = root or str(Path(__file__).resolve().parents[2])
+    try:
+        root_path = Path(base)
+        piezas = [
+            ("ledger C1", _leer_ledger(root_path, 3_500)),
+            ("axiomas C1", _leer_axiomas_resumen(root_path, 2_500)),
+        ]
+        usado = sum(len(t) for _, t in piezas if t)
+        agenda = read_agenda(str(root_path))
+        resto = max(0, max_chars - usado)
+        if agenda and resto:
+            if len(agenda) > resto:
+                agenda = agenda[:resto] + "\n… [agenda del paquete recortada]"
+            piezas.append(("agenda C1", agenda))
+        cuerpo = "\n\n".join(t for _, t in piezas if t)
+        marca = "\n… [paquete recortado]"
+        if len(cuerpo) > max_chars:
+            cuerpo = cuerpo[: max(0, max_chars - len(marca))] + marca
+        degradada = (
+            not cuerpo
+            or "[ledger recortado]" in cuerpo
+            or "[catálogo recortado]" in cuerpo
+            or "[agenda del paquete recortada]" in cuerpo
+            or "[paquete recortado]" in cuerpo
+            or len(piezas) < 3
+        )
+        return {
+            "texto": cuerpo,
+            "caracteres": len(cuerpo),
+            "degradada": degradada,
+            "fuente": "canon C0+C1",
+        }
+    except Exception:
+        return {
+            "texto": "",
+            "caracteres": 0,
+            "degradada": True,
+            "fuente": "canon C0+C1",
+            "error": True,
+        }
+
+
+def con_anexo_canonico(messages: List[Dict[str, str]], root: str = "") -> List[Dict[str, str]]:
+    """Inserta el anexo tras el system inicial. Respeta ORACLE_CANON_PACK=0.
+
+    Best-effort: si el paquete falla, devuelve los mensajes intactos (el
+    oráculo analiza como antes, sin canon pero sin reventar).
+    """
+    import os
+
+    try:
+        if os.environ.get("ORACLE_CANON_PACK", "1") == "0":
+            return messages
+        texto = str(paquete_para_oraculo(root).get("texto") or "")
+        if not texto:
+            return messages
+        anexo = {"role": "user", "content": ANEXO_CABECERA + ":\n" + texto}
+        idx = 0
+        for m in messages:
+            if isinstance(m, dict) and m.get("role") == "system":
+                idx += 1
+            else:
+                break
+        return list(messages[:idx]) + [anexo] + list(messages[idx:])
+    except Exception:
+        return messages
+
+
 @dataclass(frozen=True)
 class EstadoArchivo:
     """Estado de una fuente del canon frente a su tope.

@@ -29,6 +29,8 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
+from maxocontracts.concilio.canon import con_anexo_canonico
+
 
 class OracleUnavailableError(RuntimeError):
     """El oráculo en vivo no está disponible (falta API key o está deshabilitado)."""
@@ -500,7 +502,9 @@ class LiveOracle:
             sess, "user", f"Instrucción del fundador: {instruction}{context}"
         )
         content = self._chat(
-            [{"role": "system", "content": SYSTEM_PROMPT}] + sess["messages"]
+            con_anexo_canonico(
+                [{"role": "system", "content": SYSTEM_PROMPT}] + sess["messages"]
+            )
         )
         self._append_message(sess, "assistant", content)
 
@@ -526,7 +530,9 @@ class LiveOracle:
             sess, "user", f"Retroalimentación de las partes: {feedback}"
         )
         content = self._chat(
-            [{"role": "system", "content": SYSTEM_PROMPT}] + sess["messages"]
+            con_anexo_canonico(
+                [{"role": "system", "content": SYSTEM_PROMPT}] + sess["messages"]
+            )
         )
         self._append_message(sess, "assistant", content)
 
@@ -561,10 +567,12 @@ class LiveOracle:
             f"CONTRATO ({contract_id}):\n{summary}"
         )
         content = self._chat(
-            [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": prompt},
-            ]
+            con_anexo_canonico(
+                [
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": prompt},
+                ]
+            )
         )
         payload = _extract_json(content)
         issues = [
