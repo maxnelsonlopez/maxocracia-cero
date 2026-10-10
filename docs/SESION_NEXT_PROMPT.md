@@ -251,41 +251,18 @@ nivel 0) y §4.11 (bajo A0); Cap. 2 §2.7 (posibilidad, no probabilidad); Cap. 5
 Cap. 4, no Cap. 2). Validador verde (8146 archivos) + `test_validador_conceptual.py` 4/4.
 **Créditos**: `atribuciones_sinteticas.md` + commit `bc1a2c2` (Muse Spark).
 
-## Jornada 09-10-2026 — destilación del corpus, hito 1 (Muse Spark + Max)
+## Jornada 09-10-2026 — destilación del corpus, hitos 1-6 (Muse Spark + Max)
 
-**Handoff aliviado**: §5 (copia de `git log`, 3.913 chars obsoletos desde agosto)
-sustituido por puntero (`git log --oneline -20` en vivo) — 33.271→29.798
-(−3.473), holgura 729→4.202. Guardianes nuevos en `test_canon_audit.py`:
-§5 < 1.200 chars + holgura handoff ≥ 2.000. Audit: 5→4 fallos; los 4 restantes
-son del registro (`atribuciones` 65.147 > 63.000) — siguiente hito: ledger.
-Ciclo/agenda verdes (27/27).
-
-**Hito 2 — ledger del registro (misma jornada)**: sección DeepSeek 10.881→~3.500
-(fichas fecha+obra+huella, Capa 1; prosa íntegra en tag
-`corpus/registro-pre-ledger-20261009`). Registro 65.426→58.549 (holgura 4.451),
-corpus 205.361 (margen 7.639). Guardianes: huellas ≥20 + 5 obras testigo + tag
-que resuelve. **Audit 17/17 verde** (4 fallos→0); vecinas 31/31. Rutina: commit
-por hito (`f1e5c57` hito 1). Candidatos a destilar después: Muse Spark-antiguo
-(17.4k), Hilo (5.8k), Concilio (5.4k), ox-alpha (6.4k).
-
-**Hito 3 — capas en código (misma jornada)**: `ensamblar_capas()` en `canon.py`
-(C0 índice + C1 axiomas/handoff/registro primero + C2 resto; `ManifiestoCorpus`
-con omitidas/recortadas) + perfil `esencial` (C0+C1 en 40k) + `ledger` derivado
-del registro + manifiesto en bitácora F1. Guardianes: `test_capas_corpus.py`
- (5) + F1-manifiesto en ciclo. 50/50 verdes. Calidad del corpus: 37→**52%**.
-
-**Hito 4 — memoria destilada**: `sintetizar_memoria()` + `leer_memoria_destilada()`
-en `memoria.py` (cobertura declarada, frescura por conteo, determinista);
-`read_agenda` prefiere destilado fresco y jubila la ventana solo entonces.
-Guardianes: cobertura total + determinismo + preferencia + rancio→ventana.
-53/53 verdes. Calidad: 52→**67%**.
-
-**Hito 5 — oráculos de app beben del canon**: `paquete_para_oraculo()` +
-`con_anexo_canonico()` en `canon.py` (C1 acotado 8k: ledger + catálogo de
-validadores derivado del código + agenda; `ORACLE_CANON_PACK=0` lo omite;
-best-effort); inyectado en `voting_oracle` (2 pasadas) y `live_oracle`
-(negotiate/feedback/critique) como turno tras el system. Lección: el corte
-ciego decapitaba los INV — el catálogo los deriva por regex. Guardianes:
-`test_canon_pack.py` (5). 110/110 en áreas tocadas. Calidad: 67→**82%**.
+Rutina: commit por hito. Ledger de la jornada (detalle en `git log` + tests):
+H1 §5 a puntero (`f1e5c57`, audit 5→4); H2 DeepSeek a fichas, tag
+`corpus/registro-pre-ledger-20261009` (`a256c44`, audit 17/17 verde);
+H3 `ensamblar_capas()` + perfil esencial + manifiesto F1 (`a13e813`, 50/50);
+H4 memoria destilada con cobertura (`abcc266`, 53/53);
+H5 paquete C1 8k a oráculos de app (`1137cda`, 110/110 — lección: el corte
+ciego decapitaba los INV, el catálogo los deriva); H6 `expandir_huella.py`
+(C3: el tag devuelve la prosa). Calidad: 37→**92%** (rúbrica en el handoff).
+Candidatos después: Muse Spark-antiguo (17.4k), Hilo (5.8k), ox-alpha (6.4k).
+Rúbrica/100: audit verde 30 + C1 10 + capas/F1 15 + memoria 15 + app 15 + C3 15.
+Base 37 (30+2+0+0+0+5); hoy 92 (30+2+15+15+15+15). Recalcularla si cambia el peso.
 
 **Mantenido por**: Max + el agente de la jornada (harness) · **Próxima actualización**: al cierre de la siguiente sesión

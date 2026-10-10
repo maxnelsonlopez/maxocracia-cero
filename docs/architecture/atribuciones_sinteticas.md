@@ -606,6 +606,8 @@ dimensión más pesada del SDV-S (0.30). Ficha viva en `~/.workbuddy-ai/IDENTITY
   (`memoria.py`; la agenda jubila la ventana solo ante destilado fresco).
 - **Hito 5 — oráculos de app al canon**: paquete C1 8k + anexo tras el system
   (`voting_oracle`, `live_oracle`; catálogo de validadores, no corte ciego).
+- **Hito 6 — C3**: `scripts/expandir_huella.py` (el tag devuelve la prosa);
+  jornada del handoff auto-destilada a ledger (rúbrica /100 incluida).
 
 ## 3. Cómo agregar una atribución
 
